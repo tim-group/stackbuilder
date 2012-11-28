@@ -1,0 +1,31 @@
+require 'stacks/namespace'
+require 'stacks/load_balancer_definition'
+require 'stacks/virtual_service_definition'
+
+class Stacks::Stack
+  attr_reader :name
+  def initialize(name)
+    @name = name
+    @loadbalancers = []
+    @definitions = []
+  end
+
+  def virtualservice(name, options={:type=>:appserver}, &block)
+    @definitions << virtualservicedefinition = Stacks::VirtualServiceDefinition.new(name,options)
+    virtualservicedefinition.instance_eval(&block) if block != nil
+    return virtualservicedefinition
+  end
+
+  def loadbalancer(name, &block)
+    @definitions << loadbalancerdefinition = Stacks::LoadBalancerDefinition.new(name)
+    loadbalancerdefinition.instance_eval(&block) if block != nil
+    return loadbalancerdefinition
+  end
+
+  def generate(env)
+    @definitions.each do |definition|
+      definition.generate(env)
+    end
+  end
+end
+
