@@ -11,8 +11,8 @@ class Stacks::LoadBalancer < Stacks::MachineDef
     return {
       :enc=>{
         :classes=>{
-          :base=>nil,
-          :loadbalancer=>nil
+          "base"=>nil,
+          "loadbalancer"=>nil
         }
       }
     }

@@ -7,6 +7,7 @@ class Stacks::Server  < Stacks::MachineDef
   attr_reader :application_name
   attr_reader :environment_name
   attr_accessor :dependencies
+
   def initialize(name, application_name,environment_name, type)
     @name = name
     @application_name = application_name
@@ -22,14 +23,14 @@ class Stacks::Server  < Stacks::MachineDef
 
     return {
       :enc=>{
-        :classes=>{
-        :base=>nil,
-          self.server_type=>{
-            :environment=>self.environment_name,
-            :application=>self.application_name,
-            :dependencies=>flattened_dependencies
+      :classes=>{
+        "base"=>nil,
+          self.server_type.to_s=>{
+            "environment"=>self.environment_name,
+            "application"=>self.application_name,
+            "dependencies"=>flattened_dependencies
           }
-        }
+      }
       }
     }
   end
