@@ -2,19 +2,18 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::LoadBalancer < Stacks::MachineDef
-  attr_reader :name
-  def initialize(name)
-    @name = name
+  def initialize(hostname, environment)
+    super(hostname,environment)
   end
 
-  def to_enc
-    return {
-      :enc=>{
-        :classes=>{
-          "base"=>nil,
-          "loadbalancer"=>nil
-        }
+  def to_spec
+    spec = super
+    spec[:enc]={
+      :classes=>{
+        "base"=>nil,
+        "loadbalancer"=>nil
       }
     }
+    return spec
   end
 end

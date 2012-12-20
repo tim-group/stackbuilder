@@ -104,25 +104,37 @@ describe "ENC::DSL" do
     end
     env.generate()
 
-    env.collapse_registries["a-lb-001"].to_enc.should eql({
+    env.collapse_registries["a-lb-001"].to_spec.should eql({
+      :hostname=>"a-lb-001",
+      :domain=>"dev.net.local",
+      :env=>"dev",
+      :template=>"seedapply",
       :enc=>{
       :classes=>{
       "base"=>nil,
       "loadbalancer"=>nil
     }}})
 
-    env.collapse_registries["b-appx-001"].to_enc.should eql({
+    env.collapse_registries["b-appx-001"].to_spec.should eql({
+      :hostname=>"b-appx-001",
+      :domain=>"dev.net.local",
+      :env=>"dev",
+      :template=>"seedapply",
       :enc=>{
       :classes=>{
-      "base"=>nil,
-      "appserver"=>{
-      "environment"=>"b",
-      "application"=>"appx",
-      "dependencies"=>{}
+        "base"=>nil,
+        "appserver"=>{
+        "environment"=>"b",
+        "application"=>"appx",
+        "dependencies"=>{}
     }
     }}})
 
-    env.collapse_registries["b-dbx-001"].to_enc.should eql({
+    env.collapse_registries["b-dbx-001"].to_spec.should eql({
+      :hostname=>"b-dbx-001",
+      :domain=>"dev.net.local",
+      :env=>"dev",
+      :template=>"seedapply",
       :enc=>{
       :classes=>{
       "base"=>nil,
@@ -184,7 +196,7 @@ describe "ENC::DSL" do
     end
 
     env.generate()
-    env.collapse_registries["a-appx-001"].to_enc[:enc][:classes]["appserver"]["dependencies"].should eql({"dbx"=>"a-dbx-vip.dev.net.local"})
+    env.collapse_registries["a-appx-001"].to_spec[:enc][:classes]["appserver"]["dependencies"].should eql({"dbx"=>"a-dbx-vip.dev.net.local"})
   end
 
   it 'puts domain names in as fqdn'
@@ -198,8 +210,8 @@ describe "ENC::DSL" do
       end
     end
     env.generate()
-    env.collapse_registries["a-lb-001"].to_enc[:enc][:zone].should eql("primary.a")
-    env.collapse_registries["a-lb-002"].to_enc[:enc][:zone].should eql("primary.b")
+    env.collapse_registries["a-lb-001"].to_spec[:enc][:zone].should eql("primary.a")
+    env.collapse_registries["a-lb-002"].to_spec[:enc][:zone].should eql("primary.b")
   end
 
   it 'crosssite db slaves should be marked with correct zone' do
