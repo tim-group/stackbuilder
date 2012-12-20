@@ -110,7 +110,16 @@ describe "ENC::DSL" do
       :env=>"dev",
       :template=>"seedapply",
       :enc=>{
-      :classes=>{
+        "classes"=>{
+          "base"=>nil,
+          "mcollective"=>nil,
+          "puppetagent"=>{
+            "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
+          },
+        },
+      },
+      :master_enc=>{
+      "classes"=>{
       "base"=>nil,
       "loadbalancer"=>nil
     }}})
@@ -121,7 +130,16 @@ describe "ENC::DSL" do
       :env=>"dev",
       :template=>"seedapply",
       :enc=>{
-      :classes=>{
+        "classes"=>{
+          "base"=>nil,
+          "mcollective"=>nil,
+          "puppetagent"=>{
+            "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
+          },
+        },
+      },
+      :master_enc=>{
+      "classes"=>{
         "base"=>nil,
         "appserver"=>{
         "environment"=>"b",
@@ -136,8 +154,17 @@ describe "ENC::DSL" do
       :env=>"dev",
       :template=>"seedapply",
       :enc=>{
-      :classes=>{
-      "base"=>nil,
+        "classes"=>{
+          "base"=>nil,
+          "mcollective"=>nil,
+          "puppetagent"=>{
+            "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
+          },
+        },
+      },
+      :master_enc=>{
+      "classes"=>{
+        "base"=>nil,
         "dbserver"=>{
           "environment"=>"b",
           "application"=>"dbx",
@@ -196,7 +223,7 @@ describe "ENC::DSL" do
     end
 
     env.generate()
-    env.collapse_registries["a-appx-001"].to_spec[:enc][:classes]["appserver"]["dependencies"].should eql({"dbx"=>"a-dbx-vip.dev.net.local"})
+    env.collapse_registries["a-appx-001"].to_spec[:master_enc]["classes"]["appserver"]["dependencies"].should eql({"dbx"=>"a-dbx-vip.dev.net.local"})
   end
 
   it 'puts domain names in as fqdn'

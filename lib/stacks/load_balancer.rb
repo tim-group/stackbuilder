@@ -8,8 +8,8 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:enc]={
-      :classes=>{
+    spec[:master_enc]={
+      "classes"=>{
         "base"=>nil,
         "loadbalancer"=>nil
       }

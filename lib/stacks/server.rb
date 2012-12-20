@@ -20,8 +20,8 @@ class Stacks::Server  < Stacks::MachineDef
       flattened_dependencies[dependency.name] = dependency.url
     end if not dependencies.nil?
 
-    spec[:enc] = {
-      :classes=>{
+    spec[:master_enc] = {
+      "classes"=>{
         "base"=>nil,
           self.server_type.to_s=>{
             "environment"=>self.environment.name,

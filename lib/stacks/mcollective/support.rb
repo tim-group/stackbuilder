@@ -8,10 +8,8 @@ module Stacks
       class MCollectiveFabricRunner
         include ::MCollective::RPC
         def provision_vms(specs)
-          require 'yaml'
-          yml = YAML.load IO.read('/store/stackbuilder/cas/vms.yaml')
           mc = rpcclient("provisionvm")
-          return mc.provision_vms(:specs=>yml)
+          return mc.provision_vms(:specs=>specs)
         end
       end
 

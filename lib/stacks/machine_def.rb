@@ -14,7 +14,15 @@ class Stacks::MachineDef
       :hostname=>hostname,
       :domain=>"dev.net.local",
       :template=>"seedapply",
-      :env=>"dev"
+      :env=>"dev",
+      :enc=>{
+        "classes"=>{
+          "base"=>nil,
+          "mcollective"=>nil,
+          "puppetagent"=>{
+            "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
+          }}
+      }
     }
   end
 end

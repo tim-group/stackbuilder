@@ -1,4 +1,5 @@
 require 'pp'
+require 'yaml'
 require 'rubygems'
 require 'stacks/environment'
 require 'stacks/mcollective/support'
@@ -17,10 +18,15 @@ namespace :sb do
     namespace :machine do
       env.collapse_registries.each do |machine_name,machine_object|
         namespace machine_name.to_sym do
+         desc "provision"
+          task :spec do
+            puts machine_object.to_spec.to_yaml
+          end
+
           desc "provision"
           task :provision do
             mcollective_fabric do
-              result = provision_vms machine_object.to_enc
+              result = provision_vms [machine_object.to_spec]
               pp result[0][:data]
             end
           end
