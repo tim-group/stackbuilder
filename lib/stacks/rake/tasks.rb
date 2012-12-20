@@ -1,26 +1,7 @@
 require 'pp'
 require 'rubygems'
 require 'stacks/environment'
-
-module Stacks
-  module MCollective
-    module Support
-      attr_accessor :scope
- 
-      class MCollectiveRunner
-        def run_puppet
-        end
-      end
-
-      def mcollective_local(&block)
-        return MCollectiveRunner.new
-      end
-
-      def mcollective_fabric(&block)
-      end
-    end
-  end
-end
+require 'stacks/mcollective/support'
 
 include Rake::DSL
 extend Stacks
@@ -39,7 +20,8 @@ namespace :sb do
           desc "provision"
           task :provision do
             mcollective_fabric do
-              provision_vm machine_object.to_enc
+              result = provision_vms machine_object.to_enc
+              pp result[0][:data]
             end
           end
 
@@ -56,7 +38,7 @@ namespace :sb do
  #           config.instance_variable_set(:@reporter, reporter)
 
             4.times do
-              pids << fork do 
+              pids << fork do
                 RSpec::Core::Runner.run(['spec.rb'], $stderr, $stdout)
               end
             end
@@ -90,16 +72,16 @@ namespace :sb do
     end
 
     namespace :list do
-      desc "list stacks" 
+      desc "list stacks"
       task :stacks do
         pp env.stacks
       end
-  
-      desc "list stacks" 
+
+      desc "list stacks"
       task :virtualservices do
       end
 
-      desc "list stacks" 
+      desc "list stacks"
       task :machines do
         pp env.collapse_registries
       end
@@ -111,5 +93,5 @@ namespace :sb do
   task :environments do
     pp environments.keys
   end
- 
+
 end
