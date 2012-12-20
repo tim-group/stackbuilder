@@ -12,7 +12,7 @@ describe Stacks::MCollective::Support do
   it 'sets an mcollective agent with appropriate params' do
     @runner.stub(:provision_vms).and_return([])
     mcollective_fabric(:broker=>"dev-puppet", :timeout=>4) do
-      provision_vms([]) 
+      provision_vms([])
     end
   end
 
@@ -32,5 +32,4 @@ describe Stacks::MCollective::Support do
       end
     end.should raise_error
   end
-
 end

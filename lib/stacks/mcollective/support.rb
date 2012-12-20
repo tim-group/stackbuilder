@@ -7,27 +7,57 @@ module Stacks
 
       class MCollectiveFabricRunner
         include ::MCollective::RPC
+	def initialize(options)
+          broker = options[:broker]
+          timeout = options[:timeout]
+	  config_file = options[:config_file] || "/etc/mcollective/client.cfg"
+          ENV.delete('MCOLLECTIVE_SSL_PRIVATE')
+          ENV.delete('MCOLLECTIVE_SSL_PUBLIC')
+          @config = ::MCollective::Config.instance()
+          @config.loadconfig(config_file)
+          @config.pluginconf["ssl_server_public"] = "#{File.dirname(__FILE__)}/client/server-public.pem"
+          @config.pluginconf["ssl_client_public"] = "#{File.dirname(__FILE__)}/client/seed.pem"
+          @config.pluginconf["ssl_client_private"] = "#{File.dirname(__FILE__)}/client/seed-private.pem"
+          @config.pluginconf["stomp.pool.host1"] = broker unless broker.nil?
+          @config.pluginconf["timeout"] = timeout unless timeout.nil?
+        end
+
+	def new_client(name)
+	  client = rpcclient(name, :options=>@options)
+          client
+	end
+	
         def provision_vms(specs)
-          mc = rpcclient("provisionvm")
+          mc = new_client("provisionvm")
           return mc.provision_vms(:specs=>specs)
+        end
+
+        def run_nrpe(nodes=nil)
+          mc = new_client("provisionvm", :nodes=>nodes)
+          mc.runallcommands.each do |resp|
+            nrpe_results[resp[:sender]] = resp  
+          end
+        end
+
+        def run_puppetroll(nodes=nil)
+	  mc = new_client("puppetd", nodes=> nodes)
+          engine = PuppetRoll::Engine.new({:concurrency=>5}, [], nodes, PuppetRoll::Client.new(nodes, mc))
+	  engine.execute()
+          return engine.get_report()
         end
       end
  
-      def create_fabric_runner
-	return MCollectiveFabricRunner.new
-      end
-
-      def mcollective_local(options={}, &block)
-        block.call()
+      def create_fabric_runner(options)
+	return MCollectiveFabricRunner.new(options)
       end
 
       def mcollective_fabric(options={}, &block)
         read,write = IO.pipe
         pid = fork do
-          runner = create_fabric_runner(options)
-          result = nil
-	  exception = nil
           begin
+            runner = create_fabric_runner(options)
+            result = nil
+  	    exception = nil
             result = runner.instance_eval(&block)
           rescue Exception=>e
             exception = e
@@ -38,7 +68,6 @@ module Stacks
         serialized_result = read.read
         result = Marshal.load(serialized_result)
         Process.waitpid(pid)
-
 	raise result[:exception] unless result[:exception]==nil
         result[:result]
       end
