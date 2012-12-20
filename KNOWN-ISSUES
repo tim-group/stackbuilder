@@ -1,0 +1,10 @@
+- make sure overriding works
+- give useful error if the same machine is defined twice
+
+- standard rake tasks - read stacks_config.rb from somewhere
+
+
+- example mcollective tasks for:
+	A. Connecting to fabric broker
+	B. Connecting to the newly prov'd broker
+

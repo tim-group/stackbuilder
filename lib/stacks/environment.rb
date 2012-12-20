@@ -6,6 +6,8 @@ class Stacks::Environment
   attr_reader :name
   attr_accessor :stack_templates
   attr_accessor :domain
+  attr_reader :stacks
+
   def initialize(name, parent=nil)
     @name = name
     @parent = parent
