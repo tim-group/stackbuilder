@@ -12,24 +12,35 @@ module Stacks
           return mc.provision_vms(:specs=>specs)
         end
       end
-
-      def mcollective_local(&block)
-        block.call()
-#        return MCollectiveRunner.new
+ 
+      def create_fabric_runner
+	return MCollectiveFabricRunner.new
       end
 
-      def mcollective_fabric(&block)
+      def mcollective_local(options={}, &block)
+        block.call()
+      end
+
+      def mcollective_fabric(options={}, &block)
         read,write = IO.pipe
         pid = fork do
-          runner = MCollectiveFabricRunner.new
-          result = runner.instance_eval(&block)
-          Marshal.dump(result,write)
+          runner = create_fabric_runner(options)
+          result = nil
+	  exception = nil
+          begin
+            result = runner.instance_eval(&block)
+          rescue Exception=>e
+            exception = e
+          end
+          Marshal.dump({:result=>result, :exception=>exception}, write)
         end
         write.close
-        result = Marshal.load(read.read)
+        serialized_result = read.read
+        result = Marshal.load(serialized_result)
         Process.waitpid(pid)
-        raise "@@@" unless  $?.exitstatus == 0
-        result
+
+	raise result[:exception] unless result[:exception]==nil
+        result[:result]
       end
     end
   end
