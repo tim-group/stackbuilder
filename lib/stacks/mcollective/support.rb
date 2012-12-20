@@ -14,7 +14,8 @@ module Stacks
       end
 
       def mcollective_local(&block)
-        return MCollectiveRunner.new
+        block.call()
+#        return MCollectiveRunner.new
       end
 
       def mcollective_fabric(&block)
