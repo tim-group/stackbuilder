@@ -18,16 +18,31 @@ namespace :sb do
       namespace :machine do
         env.collapse_registries.each do |machine_name,machine_object|
           namespace machine_name.to_sym do
-            desc "provision"
+            desc "show the spec yaml to send the compute controller"
             task :spec do
-              puts machine_object.to_spec.to_yaml
+              puts [machine_object.to_spec].to_yaml
             end
 
-            desc "provision"
-            task :provision do
+            desc "build_vm"
+            task :build do
               mcollective_fabric do
-                result = provision_vms [machine_object.to_spec]
+                result = provision_vms([machine_object.to_spec])
                 pp result[0][:data]
+              end
+            end
+
+            desc "ping"
+            task :ping do
+               mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
+                 pp ping([machine_object.hostname])
+               end
+            end
+
+            desc "puppet"
+            task :puppet do
+              mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
+                puppetd()
+                run_puppetroll([machine_object.fqdn])
               end
             end
 
@@ -45,10 +60,8 @@ namespace :sb do
               pids.each do |pid| waitpid(pid) end
               puts "\n\n"
             end
-            desc "run_puppet"
-            task :run_puppet do
-              mcollective_local.run_puppet
-            end
+
+
           end
         end
       end

@@ -7,7 +7,7 @@ stack "ref" do
   virtualservice "refapp"
 end
 
-env "devx" do
+env "dev" do
   stack "infra"
   stack "ref"
 end

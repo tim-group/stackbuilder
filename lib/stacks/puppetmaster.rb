@@ -19,7 +19,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     spec[:master_enc]={
     }
 
-    spec[:networks] = ['mgmt', 'prod', 'front']
+    spec[:networks] = ['mgmt', 'prod']
 
     spec[:image_size] = '10G'
 

@@ -9,6 +9,10 @@ class Stacks::MachineDef
     @environment = environment
   end
 
+  def fqdn
+    return "#{hostname}.#{environment.domain}"
+  end
+
   def to_spec
     return {
       :hostname=>hostname,

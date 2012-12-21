@@ -1,4 +1,8 @@
+$LOAD_PATH.unshift('/opt/puppetroll/lib/')
+
 require 'mcollective'
+require 'puppetroll'
+require 'puppetroll/client'
 
 module Stacks
   module MCollective
@@ -20,9 +24,9 @@ module Stacks
           @config.loadconfig(config_file)
 
           unless key.nil?
-            @config.pluginconf["ssl_server_public"] = "#{File.dirname(__FILE__)}/client/server-public.pem"
-            @config.pluginconf["ssl_client_public"] = "#{File.dirname(__FILE__)}/client/seed.pem"
-            @config.pluginconf["ssl_client_private"] = "#{File.dirname(__FILE__)}/client/seed-private.pem"
+            @config.pluginconf["ssl_server_public"] = "/store/stackbuilder/framework/client/server-public.pem"
+            @config.pluginconf["ssl_client_public"] = "/store/stackbuilder/framework/client/seed.pem"
+            @config.pluginconf["ssl_client_private"] = "/store/stackbuilder/framework/client/seed-private.pem"
           end
           @config.pluginconf["stomp.pool.host1"] = broker unless broker.nil?
           @config.pluginconf["timeout"] = timeout unless timeout.nil?
@@ -57,6 +61,12 @@ module Stacks
           mc.runallcommands.each do |resp|
             nrpe_results[resp[:sender]] = resp
           end
+        end
+
+        def puppetd(nodes=nil)
+          mc = new_client("puppetd", nodes=> nodes)
+
+          pp mc.status()
         end
 
         def run_puppetroll(nodes=nil)
