@@ -110,15 +110,15 @@ describe "ENC::DSL" do
       :env=>"dev",
       :template=>"seedapply",
       :enc=>{
-        "classes"=>{
-          "base"=>nil,
-          "mcollective"=>nil,
-          "puppetagent"=>{
-            "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
-          },
-        },
-      },
-      :master_enc=>{
+      "classes"=>{
+      "base"=>nil,
+      "mcollective"=>nil,
+      "puppetagent"=>{
+      "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
+    },
+    },
+    },
+    :master_enc=>{
       "classes"=>{
       "base"=>nil,
       "loadbalancer"=>nil
@@ -130,21 +130,21 @@ describe "ENC::DSL" do
       :env=>"dev",
       :template=>"seedapply",
       :enc=>{
-        "classes"=>{
-          "base"=>nil,
-          "mcollective"=>nil,
-          "puppetagent"=>{
-            "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
-          },
-        },
-      },
-      :master_enc=>{
       "classes"=>{
-        "base"=>nil,
-        "appserver"=>{
-        "environment"=>"b",
-        "application"=>"appx",
-        "dependencies"=>{}
+      "base"=>nil,
+      "mcollective"=>nil,
+      "puppetagent"=>{
+      "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
+    },
+    },
+    },
+    :master_enc=>{
+      "classes"=>{
+      "base"=>nil,
+      "appserver"=>{
+      "environment"=>"b",
+      "application"=>"appx",
+      "dependencies"=>{}
     }
     }}})
 
@@ -154,22 +154,22 @@ describe "ENC::DSL" do
       :env=>"dev",
       :template=>"seedapply",
       :enc=>{
-        "classes"=>{
-          "base"=>nil,
-          "mcollective"=>nil,
-          "puppetagent"=>{
-            "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
-          },
-        },
-      },
-      :master_enc=>{
       "classes"=>{
-        "base"=>nil,
-        "dbserver"=>{
-          "environment"=>"b",
-          "application"=>"dbx",
-          "dependencies"=>{}
-        }
+      "base"=>nil,
+      "mcollective"=>nil,
+      "puppetagent"=>{
+      "puppetmaster"=>"dev-puppetmaster-001.dev.net.local"
+    },
+    },
+    },
+    :master_enc=>{
+      "classes"=>{
+      "base"=>nil,
+      "dbserver"=>{
+      "environment"=>"b",
+      "application"=>"dbx",
+      "dependencies"=>{}
+    }
     }}})
   end
 
@@ -227,6 +227,42 @@ describe "ENC::DSL" do
   end
 
   it 'puts domain names in as fqdn'
+
+  it 'produces a puppetmaster' do
+    extend Stacks
+    env = env "a" do
+      stack "infra" do
+        puppetmaster
+      end
+    end
+    env.generate()
+
+    puppetmaster_object = env.collapse_registries["a-puppetmaster-001"]
+
+    puppetmaster_object.to_spec[:enc].should eql({
+      "classes"=>{
+      "rabbitmq" =>nil,
+      "mcollective"=> nil,
+      "puppetmaster"=>nil
+    }})
+
+    puppetmaster_object.to_spec[:networks].should eql(
+      [
+        "mgmt",
+        "prod",
+        "front"])
+
+    puppetmaster_object.to_spec[:aliases].should eql(
+      [
+        "puppet",
+        "broker"])
+
+
+    puppetmaster_object.to_spec[:hostname].should eql("a-puppetmaster-001")
+
+    puppetmaster_object.to_spec[:image_size].should eql '10G'
+
+  end
 
   it 'HA pairs are assigned to different zones'
   def ignore

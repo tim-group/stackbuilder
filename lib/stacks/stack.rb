@@ -1,6 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/load_balancer_definition'
 require 'stacks/virtual_service_definition'
+require 'stacks/puppetmaster_definition'
 
 class Stacks::Stack
   attr_reader :name
@@ -8,6 +9,11 @@ class Stacks::Stack
     @name = name
     @loadbalancers = []
     @definitions = []
+  end
+
+  def puppetmaster(name="puppetmaster", &block)
+    @definitions << puppetmasterdefinition = Stacks::PuppetMasterDefinition.new(name)
+    return puppetmasterdefinition
   end
 
   def virtualservice(name, options={:type=>:appserver}, &block)

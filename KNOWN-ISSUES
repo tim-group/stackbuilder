@@ -3,8 +3,13 @@
 
 - standard rake tasks - read stacks_config.rb from somewhere
 
-
 - example mcollective tasks for:
 	A. Connecting to fabric broker
 	B. Connecting to the newly prov'd broker
 
+
+-
+pm:provision:
+  pm:build_vm
+  pm:run_puppet
+  pm:test

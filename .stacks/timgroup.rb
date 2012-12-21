@@ -1,12 +1,13 @@
 stack "infra" do
-  loadbalancer "lb"
+ puppetmaster
+ loadbalancer "lb"
 end
 
 stack "ref" do
   virtualservice "refapp"
 end
 
-env "dev" do
+env "devx" do
   stack "infra"
   stack "ref"
 end

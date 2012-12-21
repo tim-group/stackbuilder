@@ -7,48 +7,68 @@ module Stacks
 
       class MCollectiveFabricRunner
         include ::MCollective::RPC
-	def initialize(options)
+        def initialize(options)
           broker = options[:broker]
           timeout = options[:timeout]
-	  config_file = options[:config_file] || "/etc/mcollective/client.cfg"
-          ENV.delete('MCOLLECTIVE_SSL_PRIVATE')
-          ENV.delete('MCOLLECTIVE_SSL_PUBLIC')
+          config_file = options[:config_file] || "/etc/mcollective/client.cfg"
+          key = options[:key] || nil
+
+          ENV.delete('MCOLLECTIVE_SSL_PRIVATE') unless key.nil?
+          ENV.delete('MCOLLECTIVE_SSL_PUBLIC') unless key.nil?
+
           @config = ::MCollective::Config.instance()
           @config.loadconfig(config_file)
-          @config.pluginconf["ssl_server_public"] = "#{File.dirname(__FILE__)}/client/server-public.pem"
-          @config.pluginconf["ssl_client_public"] = "#{File.dirname(__FILE__)}/client/seed.pem"
-          @config.pluginconf["ssl_client_private"] = "#{File.dirname(__FILE__)}/client/seed-private.pem"
+
+          unless key.nil?
+            @config.pluginconf["ssl_server_public"] = "#{File.dirname(__FILE__)}/client/server-public.pem"
+            @config.pluginconf["ssl_client_public"] = "#{File.dirname(__FILE__)}/client/seed.pem"
+            @config.pluginconf["ssl_client_private"] = "#{File.dirname(__FILE__)}/client/seed-private.pem"
+          end
           @config.pluginconf["stomp.pool.host1"] = broker unless broker.nil?
           @config.pluginconf["timeout"] = timeout unless timeout.nil?
+
+          @options = ::MCollective::Util.default_options
         end
 
-	def new_client(name)
-	  client = rpcclient(name, :options=>@options)
+        def new_client(name, nodes=nil)
+
+          client = rpcclient(name, :options=>@options)
           client
-	end
-	
+        end
+
         def provision_vms(specs)
           mc = new_client("provisionvm")
           return mc.provision_vms(:specs=>specs)
         end
 
+        def ping(nodes=nil)
+          client = ::MCollective::Client.new(@options[:config])
+          client.options = @options
+
+          responses = []
+          client.req("ping", "discovery") do |resp|
+            responses << resp[:senderid]
+          end
+          return responses
+        end
+
         def run_nrpe(nodes=nil)
-          mc = new_client("provisionvm", :nodes=>nodes)
+          mc = new_client("discovery", :nodes=>nodes)
           mc.runallcommands.each do |resp|
-            nrpe_results[resp[:sender]] = resp  
+            nrpe_results[resp[:sender]] = resp
           end
         end
 
         def run_puppetroll(nodes=nil)
-	  mc = new_client("puppetd", nodes=> nodes)
+          mc = new_client("puppetd", nodes=> nodes)
           engine = PuppetRoll::Engine.new({:concurrency=>5}, [], nodes, PuppetRoll::Client.new(nodes, mc))
-	  engine.execute()
+          engine.execute()
           return engine.get_report()
         end
       end
- 
+
       def create_fabric_runner(options)
-	return MCollectiveFabricRunner.new(options)
+        return MCollectiveFabricRunner.new(options)
       end
 
       def mcollective_fabric(options={}, &block)
@@ -57,7 +77,7 @@ module Stacks
           begin
             runner = create_fabric_runner(options)
             result = nil
-  	    exception = nil
+            exception = nil
             result = runner.instance_eval(&block)
           rescue Exception=>e
             exception = e
@@ -68,7 +88,7 @@ module Stacks
         serialized_result = read.read
         result = Marshal.load(serialized_result)
         Process.waitpid(pid)
-	raise result[:exception] unless result[:exception]==nil
+        raise result[:exception] unless result[:exception]==nil
         result[:result]
       end
     end
