@@ -31,10 +31,20 @@ namespace :sb do
               end
             end
 
-            desc "ping"
-            task :ping do
+            desc "wait for ping"
+            task :wait_for_ping do
                mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
-                 pp ping([machine_object.hostname])
+                 found = false
+                 retries = 60
+                 retries.times do |i|
+                   result = ping([machine_object.fqdn])
+                   if result == [machine_object.fqdn]
+                     pp result
+                     found = true
+                     break
+                   end
+                 end
+                 raise "timeout out waiting for hosts to be available" unless found
                end
             end
 
@@ -45,6 +55,9 @@ namespace :sb do
                 run_puppetroll([machine_object.fqdn])
               end
             end
+
+            desc "provision"
+            task :provision => ['wait_for_ping','puppet']
 
             desc "test"
             task :test do
