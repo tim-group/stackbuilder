@@ -35,7 +35,6 @@ module Stacks
         end
 
         def new_client(name, nodes=nil)
-
           client = rpcclient(name, :options=>@options)
           client
         end
@@ -45,15 +44,33 @@ module Stacks
           return mc.provision_vms(:specs=>specs)
         end
 
-        def ping(nodes=nil)
+        def ping()
           client = ::MCollective::Client.new(@options[:config])
           client.options = @options
-
           responses = []
           client.req("ping", "discovery") do |resp|
             responses << resp[:senderid]
           end
           return responses
+        end
+
+        def wait_for_ping(nodes)
+          found = false
+          result = nil
+          retries = 60
+
+          pp nodes
+
+          retries.times do |i|
+            result = ping()
+            pp result
+            if nodes.to_set.subset?(result.to_set)
+              found = true
+              break
+            end
+          end
+          raise "timeout out waiting for hosts to be available" unless found
+          return result
         end
 
         def run_nrpe(nodes=nil)
@@ -75,6 +92,12 @@ module Stacks
           engine.execute()
           return engine.get_report()
         end
+
+        def puppetca_sign(hostname)
+          mc = new_client("puppetca")
+          return mc.sign(:certname => hostname)[0]
+        end
+
       end
 
       def create_fabric_runner(options)

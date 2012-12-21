@@ -228,6 +228,21 @@ describe "ENC::DSL" do
 
   it 'puts domain names in as fqdn'
 
+  it 'allows us to list all the machines in a stack' do
+    extend Stacks
+    env "a" do
+      stack "infra" do
+        puppetmaster
+      end
+    end
+
+    env.stacks['infra'].machines.keys.should eql(
+      "a-puppetmaster-001"
+    )
+
+    env.generate()
+  end
+
   it 'produces a puppetmaster' do
     extend Stacks
     env = env "a" do
@@ -257,11 +272,8 @@ describe "ENC::DSL" do
         "puppet",
         "broker"])
 
-
     puppetmaster_object.to_spec[:hostname].should eql("a-puppetmaster-001")
-
     puppetmaster_object.to_spec[:image_size].should eql '10G'
-
   end
 
   it 'HA pairs are assigned to different zones'

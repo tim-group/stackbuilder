@@ -21,7 +21,7 @@ namespace :sb do
         env.collapse_registries.each do |machine_name,machine_object|
           namespace machine_name.to_sym do
             desc "show the spec yaml to send the compute controller"
-            task :spec do
+            task :show_spec do
               puts [machine_object.to_spec].to_yaml
             end
 
@@ -36,24 +36,22 @@ namespace :sb do
             desc "wait for ping"
             task :wait_for_ping do
                mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
-                 found = false
-                 retries = 60
-                 retries.times do |i|
-                   result = ping([machine_object.fqdn])
-                   if [machine_object.fqdn].to_set.subset?(result.to_set)
-                     pp result
-                     found = true
-                     break
-                   end
-                 end
-                 raise "timeout out waiting for hosts to be available" unless found
-               end
+                 result = wait_for_ping([machine_object.fqdn])
+                 pp result
+              end
             end
 
             desc "puppet"
             task :puppet do
               mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
-                puppetd()
+                run_puppetroll([machine_object.fqdn])
+              end
+
+              mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
+                puppetca_sign(machine_object.fqdn)
+              end
+
+              mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
                 run_puppetroll([machine_object.fqdn])
               end
             end
@@ -75,8 +73,6 @@ namespace :sb do
               pids.each do |pid| waitpid(pid) end
               puts "\n\n"
             end
-
-
           end
         end
       end
