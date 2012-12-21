@@ -4,6 +4,8 @@ require 'rubygems'
 require 'stacks/environment'
 require 'stacks/mcollective/support'
 require 'ci/reporter/rspec'
+require 'set'
+
 include Rake::DSL
 extend Stacks
 include Stacks::MCollective::Support
@@ -38,7 +40,7 @@ namespace :sb do
                  retries = 60
                  retries.times do |i|
                    result = ping([machine_object.fqdn])
-                   if result == [machine_object.fqdn]
+                   if [machine_object.fqdn].to_set.subset?(result.to_set)
                      pp result
                      found = true
                      break

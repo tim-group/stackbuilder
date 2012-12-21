@@ -57,7 +57,7 @@ module Stacks
         end
 
         def run_nrpe(nodes=nil)
-          mc = new_client("discovery", :nodes=>nodes)
+          mc = new_client("nrpe", :nodes=>nodes)
           mc.runallcommands.each do |resp|
             nrpe_results[resp[:sender]] = resp
           end
