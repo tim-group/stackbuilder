@@ -29,9 +29,12 @@ class Stacks::Stack
   end
 
   def generate(env)
+    stack_registry = {}
     @definitions.each do |definition|
-      definition.generate(env)
+      stack_registry = stack_registry.merge(definition.generate(env))
     end
+
+    return stack_registry
   end
 end
 

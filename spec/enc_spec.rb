@@ -236,7 +236,9 @@ describe "ENC::DSL" do
       end
     end
 
-    env.stacks['infra'].machines.keys.should eql(
+    model = env.generate()
+
+    model.stacks['infra'].machines.keys.should eql(
       "a-puppetmaster-001"
     )
 
@@ -253,7 +255,6 @@ describe "ENC::DSL" do
     env.generate()
 
     puppetmaster_object = env.collapse_registries["a-puppetmaster-001"]
-
     puppetmaster_object.to_spec[:enc].should eql({
       "classes"=>{
       "rabbitmq" =>nil,

@@ -9,9 +9,12 @@ class Stacks::LoadBalancerDefinition
   end
 
   def generate(env)
+    registry = {}
     @times.times do |i|
       name = sprintf("%s-%s-%03d", env.name, self.name, i+1)
-      env.registry[name] = Stacks::LoadBalancer.new(name, env)
+      registry[name] = Stacks::LoadBalancer.new(name, env)
     end
+
+    return registry
   end
 end
