@@ -11,6 +11,10 @@ extend Stacks
 include Stacks::MCollective::Support
 Dir[".stacks/*.rb"].each {|file| require file}
 
+def nslookup(host)
+  return `dig #{host} @192.168.5.1 +short`.chomp
+end
+
 namespace :sb do
   environments.each  do |env_name, env|
     namespace env_name.to_sym do
@@ -35,23 +39,23 @@ namespace :sb do
 
             desc "wait for ping"
             task :wait_for_ping do
-               mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
-                 result = wait_for_ping([machine_object.fqdn])
-                 pp result
+              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
+                result = wait_for_ping([machine_object.fqdn])
+                pp result
               end
             end
 
             desc "puppet"
             task :puppet do
-              mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
+              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
                 run_puppetroll([machine_object.fqdn])
               end
 
-              mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
+              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
                 puppetca_sign(machine_object.fqdn)
               end
 
-              mcollective_fabric(:broker=>"dev-puppetmaster-001.dev.net.local",:key=>"seed") do
+              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
                 run_puppetroll([machine_object.fqdn])
               end
             end
@@ -67,11 +71,11 @@ namespace :sb do
               config = RSpec.configuration
               config.color_enabled = true
               RSpec::Core::Runner.run(
-                  ['--format','CI::Reporter::RSpec', 'spec.rb'],
-                  $stderr,
-                  $stdout)
-              pids.each do |pid| waitpid(pid) end
-              puts "\n\n"
+                ['--format','CI::Reporter::RSpec', 'spec.rb'],
+                $stderr,
+                $stdout)
+                pids.each do |pid| waitpid(pid) end
+                puts "\n\n"
             end
           end
         end
