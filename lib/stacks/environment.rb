@@ -29,19 +29,12 @@ class Stacks::Environment
   end
 
   def generate()
-    registry = {}
     @stacks.values.each do |stack|
-      stack_registry = stack.generate(self)
-      registry = registry.merge(stack_registry)
+      stack.generate(self)
     end
-
     @sub_environments.values.each do |env|
-      env_registry = env.generate()
-      registry = registry.merge(env_registry)
+      env.generate()
     end
-
-    self.registry = registry
-    return registry
   end
 
   def collapse_registries
