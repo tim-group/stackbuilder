@@ -10,7 +10,9 @@ class Stacks::PuppetMasterDefinition
   end
 
   def generate(env)
+    registry = {}
     name = "#{env.name}-#{self.name}-001"
-    env.registry[name] = Stacks::PuppetMaster.new(name, env)
+    registry[name] = Stacks::PuppetMaster.new(name, env)
+    return registry
   end
 end

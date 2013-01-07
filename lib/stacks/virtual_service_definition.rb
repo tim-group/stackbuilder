@@ -6,25 +6,19 @@ class Stacks::VirtualServiceDefinition
   attr_reader :name
   attr_accessor :times
   attr_reader :options
-  attr_accessor :dependencies
+  attr_reader :machines
 
   def initialize(name, options)
     @name = name
     @options = options
     @times = 2
+    @machines = {}
   end
 
   def generate(env)
-    env.registry[self.name] = Stacks::VirtualService.new(self.name, env.name)
-    env.registry[self.name].domain=env.domain
     @times.times do |i|
       appservername = sprintf("%s-%s-%03d", env.name, self.name, i+1)
-      appserver = env.registry[appservername] = Stacks::Server.new(appservername, self.name, env, self.options[:type])
-
-      if (not dependencies.nil?)
-        resolved_dependencies = dependencies.map do |dependency| env.lookup(dependency) end
-        appserver.dependencies = resolved_dependencies
-      end
+      appserver = machines[appservername] = Stacks::Server.new(appservername, self.name, env, self.options[:type])
     end
   end
 end

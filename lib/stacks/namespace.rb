@@ -1,4 +1,4 @@
-module Stacks 
+module Stacks
   attr_accessor :stack_templates
   attr_accessor :environments
 
@@ -8,19 +8,16 @@ module Stacks
   end
 
   def env(name,&block)
-    env =  Stacks::Environment.new(name) 
-    env.stack_templates = self.stack_templates
+    env =  Stacks::Environment.new(name)
     env.instance_eval(&block)
     environments[name] = env
     return env
   end
 
-  def stack(name, &block)
-    stack_templates[name] = lambda {
-      stack = Stacks::Stack.new(name)
-      stack.instance_eval(&block)
-      stack 
-    }
+  def generate_machines
+    environments.each do |env_name,env|
+      env.generate()
+    end
   end
 
 end

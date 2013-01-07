@@ -5,10 +5,13 @@ require 'stacks/puppetmaster_definition'
 
 class Stacks::Stack
   attr_reader :name
-  def initialize(name)
+  attr_reader :env
+
+  def initialize(name, env)
     @name = name
     @loadbalancers = []
     @definitions = []
+    @env = env
   end
 
   def puppetmaster(name="puppetmaster", &block)
@@ -23,9 +26,10 @@ class Stacks::Stack
   end
 
   def loadbalancer(name, &block)
-    @definitions << loadbalancerdefinition = Stacks::LoadBalancerDefinition.new(name)
-    loadbalancerdefinition.instance_eval(&block) if block != nil
-    return loadbalancerdefinition
+    2.times do |i|
+      name = sprintf("%s-%s-%03d", env.name, self.name, i+1)
+      @definitions << Stacks::LoadBalancer.new(name,self)
+    end
   end
 
   def generate(env)
@@ -33,5 +37,14 @@ class Stacks::Stack
       definition.generate(env)
     end
   end
-end
 
+  def machines
+    machines = {}
+    @definitions.each do |definition|
+      machines = machines.merge definition.machines
+    end
+
+    return machines
+  end
+
+end
