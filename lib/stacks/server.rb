@@ -11,6 +11,11 @@ class Stacks::Server  < Stacks::MachineDef
     @application_name = application_name
   end
 
+
+  def to_tree
+    {}
+  end
+
   def to_spec
     spec = super
 

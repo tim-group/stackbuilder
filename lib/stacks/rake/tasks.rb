@@ -15,6 +15,20 @@ def nslookup(host)
   return `dig #{host} @192.168.5.1 +short`.chomp
 end
 
+
+namespace :sbx
+  environments.each do |env_name, env|
+    env.visit do |machine_def|
+      namespace machine_def.to_sym do
+        machine_def.children.each do |child|
+          child.visit(
+        end
+      end
+    end
+  end
+end
+
+
 namespace :sb do
   environments.each  do |env_name, env|
     namespace env_name.to_sym do

@@ -1,16 +1,18 @@
 require 'stacks/namespace'
+require 'stacks/machine_def_container'
 
 class Stacks::VirtualService
-  attr_accessor :domain
-  attr_reader :env
   attr_reader :name
 
   def initialize(name, env)
+    extend Stacks::MachineDefContainer
     @name = name
-    @env = env
+    @definitions = {}
+
+    2.times do |i|
+      app_server_name = sprintf("%s-%s-%03d", env.name, name, i+1)
+      @definitions[app_server_name] = Stacks::Server.new(app_server_name, name)
+    end
   end
 
-  def url()
-    return "#{env}-#{name}-vip.#{domain}"
-  end
 end

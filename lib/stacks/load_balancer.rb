@@ -6,6 +6,10 @@ class Stacks::LoadBalancer < Stacks::MachineDef
     super(hostname)
   end
 
+  def to_tree
+    {}
+  end
+
   def to_spec
     spec = super
     return spec

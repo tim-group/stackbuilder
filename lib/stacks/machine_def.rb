@@ -7,8 +7,16 @@ class Stacks::MachineDef
     @hostname = hostname
   end
 
-  def fqdn
-    return "#{hostname}.#{environment.domain}"
+  def name
+    return @hostname
+  end
+
+  def children
+    return []
+  end
+
+  def visit(arg, &block)
+    block.call(arg, self)
   end
 
   def to_spec

@@ -1,11 +1,13 @@
 require 'stacks/namespace'
 require 'stacks/stack'
-
+require 'stacks/machine_def_container'
 class Stacks::Environment
   attr_reader :name
 
   def initialize(name)
-    @name = name
+   extend Stacks::MachineDefContainer
+
+   @name = name
     @domain = "dev.net.local"
     @definitions = {}
   end
@@ -18,17 +20,7 @@ class Stacks::Environment
   end
 
   def virtualservice(name)
-    2.times do |i|
-      app_server_name = sprintf("%s-%s-%03d", self.name, name, i+1)
-      @definitions[app_server_name] = Stacks::Server.new(app_server_name, name)
-    end
+    @definitions[name] = Stacks::VirtualService.new(name, self)
   end
 
-  def generate
-
-  end
-
-  def machines
-    return @definitions.values
-  end
 end
