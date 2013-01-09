@@ -15,8 +15,12 @@ class Stacks::MachineDef
     return []
   end
 
+  def machines
+    return [self]
+  end
+
   def visit(arg, &block)
-    block.call(arg, self)
+    block.call(arg, self, block)
   end
 
   def to_spec

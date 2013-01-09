@@ -16,12 +16,18 @@ def nslookup(host)
 end
 
 
-namespace :sbx
+namespace :sbx do
   environments.each do |env_name, env|
-    env.visit do |machine_def|
-      namespace machine_def.to_sym do
+    env.visit({}) do |arg, machine_def, block|
+      namespace machine_def.name.to_sym do
+
+        desc "launch the machines in this bucket"
+        task :launch do
+          pp machine_def.machines
+        end
+
         machine_def.children.each do |child|
-          child.visit(
+          child.visit(arg, &block)
         end
       end
     end
@@ -29,111 +35,114 @@ namespace :sbx
 end
 
 
-namespace :sb do
-  environments.each  do |env_name, env|
-    namespace env_name.to_sym do
-      env.generate
-      scope=env
+if false
 
-      namespace :machine do
-        env.collapse_registries.each do |machine_name,machine_object|
-          namespace machine_name.to_sym do
-            desc "show the spec yaml to send the compute controller"
-            task :show_spec do
-              puts [machine_object.to_spec].to_yaml
-            end
+  namespace :sb do
+    environments.each  do |env_name, env|
+      namespace env_name.to_sym do
+        env.generate
+        scope=env
 
-            desc "build_vm"
-            task :build do
-              mcollective_fabric do
-                result = provision_vms([machine_object.to_spec])
-                pp result[0][:data]
-              end
-            end
-
-            desc "wait for ping"
-            task :wait_for_ping do
-              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
-                result = wait_for_ping([machine_object.fqdn])
-                pp result
-              end
-            end
-
-            desc "puppet"
-            task :puppet do
-              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
-                run_puppetroll([machine_object.fqdn])
+        namespace :machine do
+          env.collapse_registries.each do |machine_name,machine_object|
+            namespace machine_name.to_sym do
+              desc "show the spec yaml to send the compute controller"
+              task :show_spec do
+                puts [machine_object.to_spec].to_yaml
               end
 
-              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
-                puppetca_sign(machine_object.fqdn)
+              desc "build_vm"
+              task :build do
+                mcollective_fabric do
+                  result = provision_vms([machine_object.to_spec])
+                  pp result[0][:data]
+                end
               end
 
-              mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
-                run_puppetroll([machine_object.fqdn])
+              desc "wait for ping"
+              task :wait_for_ping do
+                mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
+                  result = wait_for_ping([machine_object.fqdn])
+                  pp result
+                end
               end
-            end
 
-            desc "provision"
-            task :provision => ['wait_for_ping','puppet']
+              desc "puppet"
+              task :puppet do
+                mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
+                  run_puppetroll([machine_object.fqdn])
+                end
 
-            desc "test"
-            task :test do
-              require 'rspec'
-              pids = []
-              RSpec::Core::Runner.disable_autorun!
-              config = RSpec.configuration
-              config.color_enabled = true
-              RSpec::Core::Runner.run(
-                ['--format','CI::Reporter::RSpec', 'spec.rb'],
-                $stderr,
-                $stdout)
-                pids.each do |pid| waitpid(pid) end
-                puts "\n\n"
+                mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
+                  puppetca_sign(machine_object.fqdn)
+                end
+
+                mcollective_fabric(:broker=>nslookup("dev-puppetmaster-001.dev.net.local"),:key=>"seed") do
+                  run_puppetroll([machine_object.fqdn])
+                end
+              end
+
+              desc "provision"
+              task :provision => ['wait_for_ping','puppet']
+
+              desc "test"
+              task :test do
+                require 'rspec'
+                pids = []
+                RSpec::Core::Runner.disable_autorun!
+                config = RSpec.configuration
+                config.color_enabled = true
+                RSpec::Core::Runner.run(
+                  ['--format','CI::Reporter::RSpec', 'spec.rb'],
+                  $stderr,
+                  $stdout)
+                  pids.each do |pid| waitpid(pid) end
+                  puts "\n\n"
+              end
             end
           end
         end
-      end
 
-      namespace :stack do
-        env.stacks.each do |stack,stack_object|
-          namespace stack.to_sym do
-            desc "provision"
-            task :provision do
-            end
+        namespace :stack do
+          env.stacks.each do |stack,stack_object|
+            namespace stack.to_sym do
+              desc "provision"
+              task :provision do
+              end
 
-            desc "test"
-            task :test do
-            end
+              desc "test"
+              task :test do
+              end
 
-            desc "run_puppet"
-            task :run_puppet do
+              desc "run_puppet"
+              task :run_puppet do
+              end
             end
           end
         end
-      end
 
-      namespace :list do
-        desc "list stacks"
-        task :stacks do
-          pp env.stacks
-        end
+        namespace :list do
+          desc "list stacks"
+          task :stacks do
+            pp env.stacks
+          end
 
-        desc "list stacks"
-        task :virtualservices do
-        end
+          desc "list stacks"
+          task :virtualservices do
+          end
 
-        desc "list stacks"
-        task :machines do
-          pp env.collapse_registries
+          desc "list stacks"
+          task :machines do
+            pp env.collapse_registries
+          end
         end
       end
     end
-  end
 
-  desc "list environments"
-  task :environments do
-    pp environments.keys
-  end
+    desc "list environments"
+    task :environments do
+      pp environments.keys
+    end
 
+  end
 end

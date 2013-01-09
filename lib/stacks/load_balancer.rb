@@ -6,6 +6,12 @@ class Stacks::LoadBalancer < Stacks::MachineDef
     super(hostname)
   end
 
+  def configure(env)
+    env.find_all(VirtualServer.class).each do |virtualserver|
+      vip_name = virtualserver.vip_name
+    end
+  end
+
   def to_tree
     {}
   end
