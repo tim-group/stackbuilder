@@ -2,17 +2,20 @@ require 'set'
 require 'stacks/environment'
 require 'pp'
 
+module TestMethods
+  def tree
+    tree = {}
+    children.each do |child|
+      tree[child.name] = child.tree
+    end
+    return tree
+  end
+end
+
 RSpec::Matchers.define :produce_a_tree_like do |expected_tree|
   match do |environment|
-    result = environment.visit({}) do |tree, machine_def, block|
-      new_tree = tree[machine_def.name] = {}
-      machine_def.children.each do |child|
-        child.visit(new_tree, &block)
-      end
-      tree
-    end
-    pp result
-    result == expected_tree
+    environment.recursive_extend(TestMethods)
+    environment.tree == expected_tree
   end
   failure_message_for_should do |environment|
     "expected #{environment} to match #{expected_tree}"
@@ -49,8 +52,7 @@ describe "ENC::DSL" do
   end
 
   it 'I can traverse a tree of machine definitions' do
-    environments["blah"].should produce_a_tree_like(
-      "blah"=>{
+    environments["blah"].should produce_a_tree_like({
       "blah-lb-001"=>{},
       "blah-lb-002"=>{},
       "appx"=>{

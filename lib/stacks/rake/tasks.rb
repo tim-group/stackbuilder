@@ -15,25 +15,29 @@ def nslookup(host)
   return `dig #{host} @192.168.5.1 +short`.chomp
 end
 
+module RakeTasks
 
-namespace :sbx do
-  environments.each do |env_name, env|
-    env.visit({}) do |arg, machine_def, block|
-      namespace machine_def.name.to_sym do
+  def rake
+    namespace self.name.to_sym do
+      desc "launch the machines in this bucket"
+      task :launch do
+        pp self.machines
+      end
 
-        desc "launch the machines in this bucket"
-        task :launch do
-          pp machine_def.machines
-        end
-
-        machine_def.children.each do |child|
-          child.visit(arg, &block)
-        end
+      self.children.each do |child|
+        child.rake
       end
     end
   end
+
 end
 
+namespace :sbx do
+  environments.each do |env_name, env|
+    env.recursive_extend(RakeTasks)
+    env.rake
+  end
+end
 
 if false
 

@@ -19,8 +19,8 @@ class Stacks::MachineDef
     return [self]
   end
 
-  def visit(arg, &block)
-    block.call(arg, self, block)
+  def recursive_extend(extended_module)
+    self.extend(extended_module)
   end
 
   def to_spec
