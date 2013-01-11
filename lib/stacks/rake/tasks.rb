@@ -30,6 +30,7 @@ module RSpecTests
       desc "launch the machines in this bucket"
       task :test do
         define_rspec()
+        ENV['CI_REPORTS'] = 'build/spec/reports/'
         RSpec::Core::Runner.run(
           ['--format','CI::Reporter::RSpec'],
           $stderr,
