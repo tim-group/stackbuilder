@@ -1,5 +1,5 @@
 shared_examples_for "nrpe" do |machine|
-  context "nrpe #{machine.name}" do
+  context "#{machine.name}.nrpe." do
     it "nrpe work" do
     end
 
