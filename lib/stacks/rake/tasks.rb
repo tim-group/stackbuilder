@@ -29,6 +29,7 @@ module RSpecTests
     namespace self.name.to_sym do
       desc "launch the machines in this bucket"
       task :test do
+        directory 'build'
         define_rspec()
         ENV['CI_REPORTS'] = 'build/spec/reports/'
         RSpec::Core::Runner.run(
