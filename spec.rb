@@ -3,11 +3,7 @@ pp environments
 
 describe 'bah' do
  it "doed " do
-    mcollective_fabric do
-      pp ping()
-    end
-
-    machine.should be_able_to_connect_to(virtualservice)
+   machine.should be_able_to_connect_to(virtualservice)
 
     ## nrpe
     ## connectivity

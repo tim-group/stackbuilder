@@ -15,8 +15,47 @@ def nslookup(host)
   return `dig #{host} @192.168.5.1 +short`.chomp
 end
 
-module RakeTasks
+require 'rspec'
+load 'system/machine/nrpe_spec.rb'
 
+module RSpecTests
+  def self.extended(object)
+    RSpec::Core::Runner.disable_autorun!
+    config = RSpec.configuration
+    config.color_enabled = true
+  end
+
+  def rspec
+    namespace self.name.to_sym do
+      desc "launch the machines in this bucket"
+      task :test do
+        define_rspec()
+        RSpec::Core::Runner.run(
+          ['--format','CI::Reporter::RSpec'],
+          $stderr,
+          $stdout)
+      end
+
+      self.children.each do |child|
+        child.rspec
+      end
+    end
+  end
+
+  def define_rspec
+    describe self.name do
+      ['nrpe'].each do |test|
+        it_behaves_like test, self
+      end
+    end
+
+    self.children.each do |child|
+      child.define_rspec
+    end
+  end
+end
+
+module RakeTasks
   def rake
     namespace self.name.to_sym do
       desc "launch the machines in this bucket"
@@ -35,7 +74,9 @@ end
 namespace :sbx do
   environments.each do |env_name, env|
     env.recursive_extend(RakeTasks)
+    env.recursive_extend(RSpecTests)
     env.rake
+    env.rspec
   end
 end
 

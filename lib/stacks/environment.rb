@@ -5,9 +5,8 @@ class Stacks::Environment
   attr_reader :name
 
   def initialize(name)
-   extend Stacks::MachineDefContainer
-
-   @name = name
+    extend Stacks::MachineDefContainer
+    @name = name
     @domain = "dev.net.local"
     @definitions = {}
   end
