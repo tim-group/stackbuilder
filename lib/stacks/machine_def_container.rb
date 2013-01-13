@@ -1,10 +1,10 @@
 require 'stacks/namespace'
 
-module Stacks::MachineDefContainer
-  attr_accessor :definitions
+class Stacks::MachineDefContainer
+  attr_reader :definitions
 
-  def self.extended(object)
-    object.definitions = {}
+  def initialize()
+    @definitions = {}
   end
 
   def children
@@ -30,6 +30,10 @@ module Stacks::MachineDefContainer
 
   def clazz
     return "container"
+  end
+
+  def rspecs
+    return []
   end
 
 end

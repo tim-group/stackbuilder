@@ -30,4 +30,8 @@ class Stacks::MachineDef
   def clazz
     return "machine"
   end
+
+  def rspecs
+    return ['nrpe']
+  end
 end

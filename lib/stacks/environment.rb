@@ -1,11 +1,10 @@
 require 'stacks/namespace'
 require 'stacks/stack'
 require 'stacks/machine_def_container'
-class Stacks::Environment
+class Stacks::Environment < Stacks::MachineDefContainer
   attr_reader :name
 
   def initialize(name)
-    extend Stacks::MachineDefContainer
     @name = name
     @domain = "dev.net.local"
     @definitions = {}

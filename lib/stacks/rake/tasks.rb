@@ -9,6 +9,8 @@ require 'set'
 include Rake::DSL
 extend Stacks
 include Stacks::MCollective::Support
+
+
 Dir[".stacks/*.rb"].each {|file| require file}
 
 def nslookup(host)
@@ -17,6 +19,8 @@ end
 
 require 'rspec'
 load 'system/machine/nrpe_spec.rb'
+load 'system/virtualservice/end2end.rb'
+
 module RSpecTests
   def self.extended(object)
     RSpec::Core::Runner.disable_autorun!
@@ -51,13 +55,16 @@ module RSpecTests
     self.children.each do |child|
       child.define_rspec
     end
+    tests = self.rspecs
     describe "#{self.clazz}.#{self.name}." do
-      ['nrpe'].each do |test|
+      tests.each do |test|
         hasbehavior test, self
       end
     end
   end
 end
+
+
 
 module RakeTasks
   def rake
@@ -72,8 +79,8 @@ module RakeTasks
       end
     end
   end
-
 end
+
 
 namespace :sbx do
   environments.each do |env_name, env|
