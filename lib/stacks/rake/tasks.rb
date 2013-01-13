@@ -23,6 +23,10 @@ module RSpecTests
     RSpec::Core::Runner.disable_autorun!
     config = RSpec.configuration
     config.color_enabled = true
+
+    RSpec.configure do |c|
+      c.alias_it_should_behave_like_to :hasbehavior, ''
+    end
   end
 
   def rspec
@@ -45,9 +49,9 @@ module RSpecTests
   end
 
   def define_rspec
-    describe self.name do
+    describe "machine.#{self.name}." do
       ['nrpe'].each do |test|
-        it_behaves_like test, self
+        hasbehavior test, self
       end
     end
 

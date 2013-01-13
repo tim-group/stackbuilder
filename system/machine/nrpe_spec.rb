@@ -1,11 +1,8 @@
 shared_examples_for "nrpe" do |machine|
-  context "#{machine.name}.nrpe." do
-    it "nrpe work" do
+    it "does" do
     end
 
-    it "nrpe doesnt work" do
+    it "doesnt" do
       fail
     end
-
-  end
 end
