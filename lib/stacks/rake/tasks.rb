@@ -17,7 +17,6 @@ end
 
 require 'rspec'
 load 'system/machine/nrpe_spec.rb'
-
 module RSpecTests
   def self.extended(object)
     RSpec::Core::Runner.disable_autorun!
@@ -49,14 +48,13 @@ module RSpecTests
   end
 
   def define_rspec
-    describe "machine.#{self.name}." do
+    self.children.each do |child|
+      child.define_rspec
+    end
+    describe "#{self.clazz}.#{self.name}." do
       ['nrpe'].each do |test|
         hasbehavior test, self
       end
-    end
-
-    self.children.each do |child|
-      child.define_rspec
     end
   end
 end

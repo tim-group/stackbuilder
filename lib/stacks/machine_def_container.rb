@@ -28,4 +28,8 @@ module Stacks::MachineDefContainer
     end
   end
 
+  def clazz
+    return "container"
+  end
+
 end

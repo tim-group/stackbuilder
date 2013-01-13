@@ -26,4 +26,8 @@ class Stacks::MachineDef
   def to_spec
     return {}
   end
+
+  def clazz
+    return "machine"
+  end
 end
