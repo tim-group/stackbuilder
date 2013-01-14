@@ -1,4 +1,5 @@
 require 'set'
+require 'stacks/stack'
 require 'stacks/environment'
 require 'pp'
 
@@ -39,34 +40,45 @@ RSpec::Matchers.define :have_machines_named do |expected_machine_names|
 
 end
 
+RSpec::Matchers.define :contain_machines do |expected_specs|
+  match do |container|
 
-describe "ENC::DSL" do
+    pp container
+
+
+    true
+  end
+end
+
+
+describe Stacks::DSL do
 
   before do
-    extend Stacks
-    env "blah" do
-      loadbalancer "lb"
+    extend Stacks::DSL
+    stack "blah" do
       virtualservice "appx"
       virtualservice "dbx"
     end
+    env "ci", :primary=>"st", :secondary=>"bs"
   end
 
-  it 'I can traverse a tree of machine definitions' do
-    environments["blah"].should produce_a_tree_like({
-      "blah-lb-001"=>{},
-      "blah-lb-002"=>{},
-      "appx"=>{
-      "blah-appx-001"=>{},
-      "blah-appx-002"=>{}
+  it 'binds to configuration from the environment' do
+    bind_to('ci')
+    appx = stacks["blah"]["appx"]
+    appx.to_specs.should eql([{
+      :hostname => "ci-appx-001",
+      :domain => "mgmt.st.net.local",
+      :fabric => "st",
+      :group => "ci-appx",
+      :template => "copyboot"
     },
-      "dbx"=>{
-      "blah-dbx-001"=>{},
-      "blah-dbx-002"=>{}
-    }})
+      {
+      :hostname => "ci-appx-002",
+      :domain => "mgmt.st.net.local",
+      :fabric => "st",
+      :group => "ci-appx",
+      :template => "copyboot"
+    }])
   end
 
-  it 'produces a list of machines under any level' do
-    environments["blah"].machines.size.should eql(6)
-    environments["blah"].children[0].machines.size.should eql(2)
-  end
 end

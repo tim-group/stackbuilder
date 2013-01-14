@@ -8,16 +8,21 @@ class Stacks::MachineDefContainer
   end
 
   def children
-    return @definitions.values
+    # pretend we have a sorted dictionary
+    return @definitions.sort.map do |k, v| v end
+  end
+
+  def bind_to(environment)
+    children.each do |child|
+      child.bind_to(environment)
+    end
   end
 
   def machines
     return_machines = []
-
     @definitions.each do |name, machine_def|
       return_machines |= machine_def.machines
     end
-
     return return_machines
   end
 
@@ -32,8 +37,10 @@ class Stacks::MachineDefContainer
     return "container"
   end
 
-  def rspecs
-    return []
+  def to_specs
+    return self.children.map do |child|
+      child.to_specs
+    end.flatten
   end
 
 end

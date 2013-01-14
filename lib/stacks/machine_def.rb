@@ -15,6 +15,9 @@ class Stacks::MachineDef
     return []
   end
 
+  def bind_to(environment)
+  end
+
   def machines
     return [self]
   end
@@ -23,8 +26,8 @@ class Stacks::MachineDef
     self.extend(extended_module)
   end
 
-  def to_spec
-    return {}
+  def to_specs
+    return []
   end
 
   def clazz

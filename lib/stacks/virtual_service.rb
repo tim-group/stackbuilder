@@ -1,5 +1,6 @@
 require 'stacks/namespace'
 require 'stacks/machine_def_container'
+require 'stacks/server'
 
 class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
@@ -9,8 +10,8 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @definitions = {}
 
     2.times do |i|
-      app_server_name = sprintf("%s-%s-%03d", env.name, name, i+1)
-      @definitions[app_server_name] = Stacks::Server.new(app_server_name, name)
+      index = sprintf("%03d",i+1)
+      @definitions["#{name}-#{index}"] =  Stacks::Server.new(name, index, :primary)
     end
   end
 

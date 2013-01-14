@@ -3,8 +3,6 @@ require 'rake/dsl_definition'
 require 'rake'
 require 'rspec/core/rake_task'
 
-import 'lib/stacks/rake/tasks.rb'
-
 desc "Run specs"
 RSpec::Core::RakeTask.new() do |t|
     t.rspec_opts = %w[--color]
