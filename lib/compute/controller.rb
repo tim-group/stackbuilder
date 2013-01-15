@@ -7,12 +7,24 @@ class Compute::Controller
 
   def allocate(specs)
     puts "allocating virtual machines to hosts"
-    hosts = @compute_node_client.find_hosts()
 
-    raise "unable to find any suitable compute nodes" if hosts.empty?
+    fabrics = specs.group_by { |spec| spec[:fabric] }
 
-    host = hosts[0]
-    return Hash[specs.map { |spec| [spec[:hostname], host] }]
+    allocation = {}
+
+    fabrics.each do |fabric, specs|
+      if fabric == "local"
+        localhost = `hostname --fqdn`.chomp
+        allocation[localhost] = specs
+      else
+        hosts = @compute_node_client.find_hosts(fabric)
+        raise "unable to find any suitable compute nodes" if hosts.empty?
+        host = hosts[0]
+        allocation[host] = specs
+      end
+    end
+
+    return allocation
   end
 
   def launch(specs)
@@ -25,7 +37,7 @@ require 'mcollective'
 class ComputeNodeClient
   include MCollective::RPC
 
-  def find_hosts()
+  def find_hosts(fabric)
     mco = rpcclient("computenode")
     hosts = mco.discover()
     mco.disconnect
