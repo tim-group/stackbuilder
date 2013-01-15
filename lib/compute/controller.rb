@@ -39,6 +39,7 @@ class ComputeNodeClient
 
   def find_hosts(fabric)
     mco = rpcclient("computenode")
+    mco.fact_filter "domain", "mgmt.#{fabric}.net.local"
     hosts = mco.discover()
     mco.disconnect
     return hosts
