@@ -46,8 +46,6 @@ describe Compute::Controller do
     compute_node_client.stub(:find_hosts).with("st").and_return(["st-kvm-001.mgmt.st.net.local"])
 
     compute_node_client.stub(:find_hosts).with("bs").and_return(["bs-kvm-001.mgmt.bs.net.local"])
-    # obj.stub(:message).with('an argument') { ... }
-
 
     compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
 
@@ -75,5 +73,22 @@ describe Compute::Controller do
 
   end
 
+  it 'launches the vms on the allocated hosts' do
+    compute_node_client = double
+    compute_node_client.stub(:find_hosts).and_return(["myhost"])
+
+    compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
+
+    specs = [{
+        :hostname=>"vm1",
+        :fabric=>"st"
+      }]
+
+
+    compute_node_client.should_receive(:launch).with("myhost", specs)
+
+    compute_controller.launch(specs)
+
+  end
 
 end

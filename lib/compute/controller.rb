@@ -28,20 +28,45 @@ class Compute::Controller
   end
 
   def launch(specs)
-    puts "launching some stuff"
-    pp specs
+    allocation = allocate(specs)
+
+    allocation.each do |host, specs|
+      @compute_node_client.launch(host, specs)
+    end
   end
 end
 
 require 'mcollective'
+require 'stacks/mcollective/support'
+
 class ComputeNodeClient
+  include Stacks::MCollective::Support
   include MCollective::RPC
 
   def find_hosts(fabric)
-    mco = rpcclient("computenode")
-    mco.identity_filter /\.mgmt\.#{fabric}\.net\.local$/
-    hosts = mco.discover()
-    mco.disconnect
-    return hosts
+    return mcollective_fabric do
+      mco = rpcclient("computenode")
+#      mco.identity_filter /\.mgmt\.#{fabric}\.net\.local$/
+      mco.fact_filter "domain","mgmt.#{fabric}.net.local"
+      hosts = mco.discover()
+      mco.disconnect
+      hosts.sort
+    end
+  end
+
+  def launch(host, specs)
+    result = mcollective_fabric do
+      options = MCollective::Util.default_options
+      options[:timeout] = 120
+      mco = rpcclient("computenode", :options=>options)
+      mco.discover(:hosts => [host])
+
+      pp host
+      results = mco.launch(:specs=>specs)
+      mco.disconnect
+      results
+    end
+
+    pp result
   end
 end
