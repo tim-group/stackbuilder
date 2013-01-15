@@ -6,6 +6,7 @@ require 'stacks/mcollective/support'
 require 'ci/reporter/rspec'
 require 'set'
 require 'rspec'
+require 'compute/controller'
 
 include Rake::DSL
 extend Stacks::DSL
@@ -23,10 +24,24 @@ namespace :sbx do
   accept do |machine_def|
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
+
+      desc "outputs the spec format to feed to the compute controller"
+      task :to_specs do
+        puts machine_def.to_specs.to_yaml
+      end
+
+      desc "allocate machines to hosts"
+      task :allocate do
+        computecontroller = Compute::Controller.new
+        computecontroller.allocate(machine_def.to_specs)
+      end
+
       desc "launch the machines in this bucket"
       task :launch do
-        pp machine_def.machines
+        computecontroller = Compute::Controller.new
+        computecontroller.launch(machine_def.to_specs)
       end
+
 
       desc "test"
       task :test do

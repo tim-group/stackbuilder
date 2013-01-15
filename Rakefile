@@ -12,7 +12,7 @@ end
 desc "Create a debian package"
 task :package do
   sh "mkdir -p pkg"
-  sh "gem build stack_enc.gemspec"
-  sh "mv stack_enc*.gem pkg"
-  sh "cd pkg; fpm stack_enc-0.0.0.gem -s gem -t deb"
+  sh "gem build stacks.gemspec"
+  sh "mv stacks*.gem pkg"
+  sh "cd pkg; fpm stacks-0.0.0.gem -s gem -t deb"
 end
