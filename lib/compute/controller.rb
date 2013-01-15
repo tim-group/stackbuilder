@@ -42,7 +42,6 @@ class ComputeNodeClient
     mco.identity_filter /\.mgmt\.#{fabric}\.net\.local$/
     hosts = mco.discover()
     mco.disconnect
-    puts "**** FOUND #{hosts.size} HOSTS"
     return hosts
   end
 end
