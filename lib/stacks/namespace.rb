@@ -33,15 +33,7 @@ module Stacks
 
     def accept(&block)
       stacks.values.each do |stack|
-        visit(stack, &block)
-      end
-    end
-
-    private
-    def visit(machine_def, &block)
-      block.call(machine_def)
-      machine_def.children.each do |child|
-        visit(child, &block)
+        stack.accept(&block)
       end
     end
 

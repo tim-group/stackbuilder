@@ -12,6 +12,13 @@ class Stacks::MachineDefContainer
     return @definitions.sort.map do |k, v| v end
   end
 
+  def accept(&block)
+    block.call(self)
+    children.each do |child|
+      child.accept(&block)
+    end
+  end
+
   def bind_to(environment)
     children.each do |child|
       child.bind_to(environment)

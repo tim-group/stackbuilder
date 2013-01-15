@@ -15,6 +15,10 @@ class Stacks::MachineDef
     return []
   end
 
+  def accept(&block)
+    block.call(self)
+  end
+
   def bind_to(environment)
   end
 

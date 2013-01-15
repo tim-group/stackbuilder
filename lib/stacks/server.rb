@@ -12,14 +12,19 @@ class Stacks::Server  < Stacks::MachineDef
 
   def bind_to(environment)
     @hostname = environment.name + "-" + @virtual_group + "-" + @index
-    @availability_group = environment.name + "-" + @virtual_group
     @fabric = environment.options[@location]
+    @domain = "mgmt.#{@fabric}.net.local"
+    @availability_group = environment.name + "-" + @virtual_group
+  end
+
+  def fqdn
+    return "#{@hostname}.#{@domain}"
   end
 
   def to_specs
     return [{
       :hostname => @hostname,
-      :domain => "mgmt.#{@fabric}.net.local",
+      :domain => @domain,
       :fabric => @fabric,
       :group => @availability_group,
       :template => 'copyboot'
