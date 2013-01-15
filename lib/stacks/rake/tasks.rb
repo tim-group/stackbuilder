@@ -33,7 +33,7 @@ namespace :sbx do
       desc "allocate machines to hosts"
       task :allocate do
         computecontroller = Compute::Controller.new
-        computecontroller.allocate(machine_def.to_specs)
+        pp computecontroller.allocate(machine_def.to_specs)
       end
 
       desc "launch the machines in this bucket"
