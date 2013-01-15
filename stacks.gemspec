@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = "stack_enc"
+  s.name = "stacks"
   s.version = "0.0.0"
   s.authors = ["TIMGroup Infrastructure Team"]
   s.default_executable = %q{}
