@@ -67,14 +67,14 @@ describe Stacks::DSL do
     appx = stacks["blah"]["appx"]
     appx.to_specs.should eql([{
       :hostname => "ci-appx-001",
-      :domain => "mgmt.st.net.local",
+      :domain => "st.net.local",
       :fabric => "st",
       :group => "ci-appx",
       :template => "copyboot"
     },
       {
       :hostname => "ci-appx-002",
-      :domain => "mgmt.st.net.local",
+      :domain => "st.net.local",
       :fabric => "st",
       :group => "ci-appx",
       :template => "copyboot"

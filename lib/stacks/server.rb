@@ -13,7 +13,7 @@ class Stacks::Server  < Stacks::MachineDef
   def bind_to(environment)
     @hostname = environment.name + "-" + @virtual_group + "-" + @index
     @fabric = environment.options[@location]
-    @domain = "mgmt.#{@fabric}.net.local"
+    @domain = "#{@fabric}.net.local"
     @availability_group = environment.name + "-" + @virtual_group
   end
 
