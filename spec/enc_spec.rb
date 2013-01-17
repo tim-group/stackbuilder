@@ -70,14 +70,16 @@ describe Stacks::DSL do
       :domain => "st.net.local",
       :fabric => "st",
       :group => "ci-appx",
-      :template => "copyboot"
+      :template => "copyboot",
+      :networks => ["mgmt"]
     },
       {
       :hostname => "ci-appx-002",
       :domain => "st.net.local",
       :fabric => "st",
       :group => "ci-appx",
-      :template => "copyboot"
+      :template => "copyboot",
+      :networks => ["mgmt"]
     }])
   end
 

@@ -27,7 +27,8 @@ class Stacks::Server  < Stacks::MachineDef
       :domain => @domain,
       :fabric => @fabric,
       :group => @availability_group,
-      :template => 'copyboot'
+      :template => 'copyboot',
+      :networks => ["mgmt"] # we can't current assign IPs on the prod network with DDNS, so only do mgmt
     }]
   end
 end
