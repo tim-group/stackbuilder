@@ -73,6 +73,40 @@ describe Compute::Controller do
 
   end
 
+  it 'allocates by slicing specs' do
+    compute_node_client = double
+    compute_node_client.stub(:find_hosts).with("st").and_return(
+      ["st-kvm-001.mgmt.st.net.local","st-kvm-002.mgmt.st.net.local","st-kvm-003.mgmt.st.net.local"]
+    )
+    compute_node_client.stub(:find_hosts).with("bs").and_return(
+      ["bs-kvm-001.mgmt.bs.net.local", "bs-kvm-002.mgmt.bs.net.local"]
+    )
+
+    compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
+
+    specs = [
+      {:hostname=>"vm0",:fabric=>"st"},
+      {:hostname=>"vm1",:fabric=>"st"},
+      {:hostname=>"vm2",:fabric=>"st"},
+      {:hostname=>"vm3",:fabric=>"st"},
+      {:hostname=>"vm4",:fabric=>"st"},
+      {:hostname=>"vm5",:fabric=>"bs"},
+      {:hostname=>"vm6",:fabric=>"bs"},
+      {:hostname=>"vm7",:fabric=>"bs"},
+    ]
+
+    allocations = compute_controller.allocate(specs)
+
+    allocations.should eql({
+      "st-kvm-001.mgmt.st.net.local"=> [specs[0],specs[3]],
+      "st-kvm-002.mgmt.st.net.local"=> [specs[1],specs[4]],
+      "st-kvm-003.mgmt.st.net.local"=> [specs[2]],
+      "bs-kvm-001.mgmt.bs.net.local"=> [specs[5],specs[7]],
+      "bs-kvm-002.mgmt.bs.net.local"=> [specs[6]],
+    })
+
+  end
+
   it 'launches the vms on the allocated hosts' do
     compute_node_client = double
     compute_node_client.stub(:find_hosts).and_return(["myhost"])

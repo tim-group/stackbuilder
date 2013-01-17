@@ -5,6 +5,16 @@ class Compute::Controller
     @compute_node_client = args[:compute_node_client] || ComputeNodeClient.new
   end
 
+  def allocate_specs_by_rr(hosts, specs, allocation)
+    h = 0
+    specs.each do |s|
+      host = hosts[h.modulo(hosts.size)]
+      allocation[host].nil? ? allocation[host] = []: false
+      allocation[host] << s
+      h += 1
+    end
+  end
+
   def allocate(specs)
     puts "allocating virtual machines to hosts"
 
@@ -23,8 +33,7 @@ class Compute::Controller
       else
         hosts = @compute_node_client.find_hosts(fabric)
         raise "unable to find any suitable compute nodes" if hosts.empty?
-        host = hosts[0]
-        allocation[host] = specs
+        allocate_specs_by_rr(hosts, specs, allocation)
       end
     end
 
@@ -54,6 +63,7 @@ class ComputeNodeClient
       mco.fact_filter "domain","mgmt.#{fabric}.net.local"
       hosts = mco.discover()
       mco.disconnect
+      pp hosts
       hosts.sort
     end
   end
