@@ -1,7 +1,9 @@
 require 'rubygems'
-require 'rake/dsl_definition'
 require 'rake'
+require 'rake/testtask'
+require 'fileutils'
 require 'rspec/core/rake_task'
+require 'fpm'
 
 desc "Run specs"
 RSpec::Core::RakeTask.new() do |t|
