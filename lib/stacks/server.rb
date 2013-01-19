@@ -27,8 +27,19 @@ class Stacks::Server  < Stacks::MachineDef
       :domain => @domain,
       :fabric => @fabric,
       :group => @availability_group,
-      :template => 'copyboot',
-      :networks => ["mgmt"] # we can't current assign IPs on the prod network with DDNS, so only do mgmt
+      :template => 'seedapply',
+      :enc => {
+        'classes'=>{
+          'base'=>nil,
+          'mcollective'=> {
+            'broker' => 'st-puppetmaster-001.mgmt.st.net.local'
+          },
+          'puppetagent'=>{
+            'puppetmaster'=>'st-puppetmaster-001.mgmt.st.net.local'
+          }
+        }
+      },
+      :networks => ["mgmt","prod"]
     }]
   end
 end

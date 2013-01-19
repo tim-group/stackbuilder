@@ -1,7 +1,7 @@
 require 'stacks/namespace'
 
 class Stacks::MachineDef
-  attr_reader :hostname
+  attr_reader :hostname, :domain
 
   def initialize(hostname)
     @hostname = hostname

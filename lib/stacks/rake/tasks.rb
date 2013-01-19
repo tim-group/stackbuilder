@@ -12,6 +12,8 @@ include Rake::DSL
 extend Stacks::DSL
 require 'stack.rb'
 
+include Stacks::MCollective::Support
+
 environment_name = ENV.fetch('env', 'dev')
 bind_to(environment_name)
 
@@ -42,6 +44,23 @@ namespace :sbx do
         computecontroller.launch(machine_def.to_specs)
       end
 
+      desc "mping"
+      task :mping do
+        machine_def.accept do |machine_def|
+          mcollective_fabric :key=>'seed', :broker=> "st-puppetmaster-001.mgmt.st.net.local" do
+           pp ping()
+          end
+        end
+      end
+
+      desc "puppet"
+      task :puppet do
+        machine_def.accept do |machine_def|
+          mcollective_fabric :key=>'seed', :broker=> "st-puppetmaster-001.mgmt.st.net.local" do
+            puppetroll ("#{machine_def.hostname}.mgmt.#{machine_def.domain}")
+          end
+        end
+      end
 
       desc "test"
       task :test do

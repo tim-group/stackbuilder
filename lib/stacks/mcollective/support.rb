@@ -86,7 +86,7 @@ module Stacks
           pp mc.status()
         end
 
-        def run_puppetroll(nodes=nil)
+        def puppetroll(nodes=nil)
           mc = new_client("puppetd", nodes=> nodes)
           engine = PuppetRoll::Engine.new({:concurrency=>5}, [], nodes, PuppetRoll::Client.new(nodes, mc))
           engine.execute()
