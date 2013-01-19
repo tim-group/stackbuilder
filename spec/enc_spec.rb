@@ -71,7 +71,7 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :template => "copyboot",
-      :networks => ["mgmt"]
+      :networks => ["mgmt","prod"]
     },
       {
       :hostname => "ci-appx-002",
@@ -79,7 +79,7 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :template => "copyboot",
-      :networks => ["mgmt"]
+      :networks => ["mgmt","prod"]
     }])
   end
 

@@ -27,18 +27,7 @@ class Stacks::Server  < Stacks::MachineDef
       :domain => @domain,
       :fabric => @fabric,
       :group => @availability_group,
-      :template => 'seedapply',
-      :enc => {
-        'classes'=>{
-          'base'=>nil,
-          'mcollective'=> {
-            'broker' => 'st-puppetmaster-001.mgmt.st.net.local'
-          },
-          'puppetagent'=>{
-            'puppetmaster'=>'st-puppetmaster-001.mgmt.st.net.local'
-          }
-        }
-      },
+      :template => 'copyboot',
       :networks => ["mgmt","prod"]
     }]
   end
