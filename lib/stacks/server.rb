@@ -17,8 +17,8 @@ class Stacks::Server  < Stacks::MachineDef
     @availability_group = environment.name + "-" + @virtual_group
   end
 
-  def fqdn
-    return "#{@hostname}.#{@domain}"
+  def mgmt_fqdn
+    return "#{@hostname}.mgmt.#{@domain}"
   end
 
   def to_specs

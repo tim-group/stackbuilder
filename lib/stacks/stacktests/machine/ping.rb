@@ -1,23 +1,9 @@
 shared_examples_for "ping" do |machine|
   it "responds to ping on its management network" do
-    dnsserver = '172.16.16.5'
-    ip = `dig #{machine.hostname}.mgmt.#{machine.domain} @#{dnsserver} +short`.chomp
-
-    raise "cant resolve machine #{machine.fqdn}" if ip.nil? or ip==""
-
-    exitcode = -1
-    output = ""
-    10.times do
-      output = `/bin/ping -c 1 -W 1 -n #{ip} 2>&1`
-      unless $?.to_i==0
-        sleep 4
-        next
-      end
-      exitcode = $?
-      break
-    end
-
-    exitcode.to_i.should eql(0), output
-
+    interval = 0.25 # seconds; can't go <0.2 unless root
+    deadline = 10 # seconds; with this set, count is the count of successful responses required, not requests to send
+    required_count = 3 # seconds
+    output = `/bin/ping -i #{interval} -w #{deadline} -c #{required_count} -n #{machine.mgmt_fqdn} 2>&1`
+    $?.exitstatus.should eql(0), "exitstatus = #{$?.exitstatus}\n#{output}"
   end
 end
