@@ -114,15 +114,14 @@ describe Compute::Controller do
     compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
 
     specs = [{
-        :hostname=>"vm1",
-        :fabric=>"st"
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => "vm1.mgmt.st.net.local"
       }]
-
 
     compute_node_client.should_receive(:launch).with("myhost", specs)
 
     compute_controller.launch(specs)
-
   end
 
 end

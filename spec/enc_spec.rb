@@ -71,7 +71,8 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :template => "copyboot",
-      :networks => ["mgmt","prod"]
+      :networks => ["mgmt","prod"],
+      :qualified_hostnames => {"mgmt"=>"ci-appx-001.mgmt.st.net.local", "prod"=>"ci-appx-001.st.net.local"}
     },
       {
       :hostname => "ci-appx-002",
@@ -79,7 +80,8 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :template => "copyboot",
-      :networks => ["mgmt","prod"]
+      :networks => ["mgmt","prod"],
+      :qualified_hostnames => {"mgmt"=>"ci-appx-002.mgmt.st.net.local", "prod"=>"ci-appx-002.st.net.local"}
     }])
   end
 

@@ -57,7 +57,7 @@ namespace :sbx do
       task :puppet do
         machine_def.accept do |machine_def|
           mcollective_fabric :key=>'seed', :broker=> "st-puppetmaster-001.mgmt.st.net.local" do
-            puppetroll ("#{machine_def.hostname}.mgmt.#{machine_def.domain}")
+            puppetroll(machine_def.mgmt_fqdn)
           end
         end
       end
