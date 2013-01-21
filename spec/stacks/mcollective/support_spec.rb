@@ -2,7 +2,7 @@ require 'stacks/mcollective/support'
 
 describe Stacks::MCollective::Support do
   before do
-    extend Stacks::MCollective::Support 
+    extend Stacks::MCollective::Support
     @runner = double()
     def create_fabric_runner(options)
       return @runner
@@ -17,19 +17,19 @@ describe Stacks::MCollective::Support do
   end
 
   it 'throws an exception it a mistake was made' do
-    expect do 
+    expect do
       mcollective_fabric(:broker=>"dev-puppet", :timeout=>4) do
-        provisio 
+        provisio
       end
-    end.should raise_error
+    end.to raise_error
   end
 
   it 'throws an exception it a mistake was made' do
     @runner.stub(:provision_vms).and_return([])
-    expect do 
+    expect do
       mcollective_fabric(:broker=>"dev-puppet", :timeout=>4) do
-        provisio 
+        provisio
       end
-    end.should raise_error
+    end.to raise_error
   end
 end
