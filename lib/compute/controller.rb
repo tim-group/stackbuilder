@@ -16,8 +16,6 @@ class Compute::Controller
   end
 
   def allocate(specs)
-    puts "allocating virtual machines to hosts"
-
     specs.each do |spec|
         spec[:spindle] = "/var/local/images/"
     end
