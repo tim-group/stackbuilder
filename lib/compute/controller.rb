@@ -3,6 +3,7 @@ require 'compute/namespace'
 class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || ComputeNodeClient.new
+    @dns_client = args[:dns_client] || DNSClient.new
   end
 
   def allocate_specs_by_rr(hosts, specs, allocation)
@@ -38,7 +39,17 @@ class Compute::Controller
     return allocation
   end
 
+  def resolve(specs)
+    Hash[specs.map do |spec|
+      qualified_hostname = spec[:qualified_hostnames]['mgmt']
+      [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
+    end]
+  end
+  
   def launch(specs)
+    current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
+    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
+
     allocation = allocate(specs)
 
     allocation.each do |host, specs|
@@ -80,5 +91,20 @@ class ComputeNodeClient
     end
 
     pp result
+  end
+end
+
+require 'socket'
+require 'ipaddr'
+
+class DNSClient
+  # returns nil if lookup fails, but propagates any errors in formatting
+  def gethostbyname(hostname)
+    begin
+      addrinfo = Socket.gethostbyname(hostname)
+    rescue
+      return nil
+    end
+    return IPAddr.ntop(addrinfo[3])
   end
 end

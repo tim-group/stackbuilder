@@ -38,6 +38,12 @@ namespace :sbx do
         pp computecontroller.allocate(machine_def.to_specs)
       end
 
+      desc "resolve IP numbers of launched machines"
+      task :resolve do
+        computecontroller = Compute::Controller.new
+        pp computecontroller.resolve(machine_def.to_specs)
+      end
+
       desc "launch the machines in this bucket"
       task :launch do
         computecontroller = Compute::Controller.new

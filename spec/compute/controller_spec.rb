@@ -5,7 +5,10 @@ describe Compute::Controller do
   before :each do
     @compute_node_client = double
 
-    @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client
+    @dns_client = double
+    @dns_client.stub(:gethostbyname).and_return(nil)
+
+    @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client, :dns_client => @dns_client
   end
   
   it 'no hosts found' do
@@ -111,6 +114,29 @@ describe Compute::Controller do
     @compute_node_client.should_receive(:launch).with("myhost", specs)
 
     @compute_controller.launch(specs)
+  end
+
+  it 'will not launch if any machine already exists' do
+    @dns_client.rspec_reset
+    @dns_client.stub(:gethostbyname).with("vm1.mgmt.st.net.local").and_return(nil)
+    @dns_client.stub(:gethostbyname).with("vm2.mgmt.st.net.local").and_return("1.2.3.4")
+
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+    },{
+      :hostname => "vm2",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+    }]
+
+    expect {
+      @compute_controller.launch(specs)
+    }.to raise_error
+
+    @compute_node_client.should_not_receive(:find_hosts)
+    @compute_node_client.should_not_receive(:launch)
   end
 
 end
