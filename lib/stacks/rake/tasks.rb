@@ -54,7 +54,7 @@ namespace :sbx do
       task :mping do
         machine_def.accept do |machine_def|
           mcollective_fabric :key=>'seed', :broker=> "st-puppetmaster-001.mgmt.st.net.local" do
-           pp ping()
+            pp ping()
           end
         end
       end

@@ -26,7 +26,7 @@ class Stacks::Server  < Stacks::MachineDef
       return "#{@hostname}.#{network}.#{@domain}"
     end
   end
-  
+
   def mgmt_fqdn
     return qualified_hostname("mgmt")
   end

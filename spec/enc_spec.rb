@@ -45,11 +45,9 @@ RSpec::Matchers.define :contain_machines do |expected_specs|
 
     pp container
 
-
     true
   end
 end
-
 
 describe Stacks::DSL do
 
@@ -73,7 +71,7 @@ describe Stacks::DSL do
       :template => "copyboot",
       :networks => ["mgmt","prod"],
       :qualified_hostnames => {"mgmt"=>"ci-appx-001.mgmt.st.net.local", "prod"=>"ci-appx-001.st.net.local"}
-    },
+      },
       {
       :hostname => "ci-appx-002",
       :domain => "st.net.local",
@@ -82,7 +80,7 @@ describe Stacks::DSL do
       :template => "copyboot",
       :networks => ["mgmt","prod"],
       :qualified_hostnames => {"mgmt"=>"ci-appx-002.mgmt.st.net.local", "prod"=>"ci-appx-002.st.net.local"}
-    }])
+      }])
   end
 
 end

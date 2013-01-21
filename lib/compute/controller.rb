@@ -18,7 +18,7 @@ class Compute::Controller
 
   def allocate(specs)
     specs.each do |spec|
-        spec[:spindle] = "/var/local/images/"
+      spec[:spindle] = "/var/local/images/"
     end
 
     fabrics = specs.group_by { |spec| spec[:fabric] }
@@ -45,7 +45,7 @@ class Compute::Controller
       [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
     end]
   end
-  
+
   def launch(specs)
     current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
     raise "some specified machines already exist: #{current.inspect}" unless current.empty?
@@ -68,7 +68,7 @@ class ComputeNodeClient
   def find_hosts(fabric)
     return mcollective_fabric do
       mco = rpcclient("computenode")
-#      mco.identity_filter /\.mgmt\.#{fabric}\.net\.local$/
+      #  mco.identity_filter /\.mgmt\.#{fabric}\.net\.local$/
       mco.fact_filter "domain","mgmt.#{fabric}.net.local"
       hosts = mco.discover()
       mco.disconnect
