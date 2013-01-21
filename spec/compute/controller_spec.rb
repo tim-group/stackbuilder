@@ -1,12 +1,15 @@
-
 require 'compute/controller'
 
 describe Compute::Controller do
 
+  before :each do
+    @compute_node_client = double
+
+    @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client
+  end
+  
   it 'no hosts found' do
-    compute_node_client = double
-    compute_node_client.stub(:find_hosts).and_return([])
-    compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
+    @compute_node_client.stub(:find_hosts).and_return([])
 
     specs = [
       {:hostname=>"vm1"},
@@ -14,15 +17,12 @@ describe Compute::Controller do
     ]
 
     expect {
-      compute_controller.allocate(specs)
+      @compute_controller.allocate(specs)
     }.to raise_error("unable to find any suitable compute nodes")
   end
 
   it 'allocates to the local fabric' do
-
-    compute_node_client = double
-    compute_node_client.stub(:find_hosts).and_return([])
-    compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
+    @compute_node_client.stub(:find_hosts).and_return([])
 
     specs = [
       {
@@ -37,17 +37,13 @@ describe Compute::Controller do
 
     localhost = `hostname --fqdn`.chomp
 
-    compute_controller.allocate(specs).should eql(
+    @compute_controller.allocate(specs).should eql(
       {localhost=>specs})
   end
 
   it 'allocates to a remote fabric' do
-    compute_node_client = double
-    compute_node_client.stub(:find_hosts).with("st").and_return(["st-kvm-001.mgmt.st.net.local"])
-
-    compute_node_client.stub(:find_hosts).with("bs").and_return(["bs-kvm-001.mgmt.bs.net.local"])
-
-    compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
+    @compute_node_client.stub(:find_hosts).with("st").and_return(["st-kvm-001.mgmt.st.net.local"])
+    @compute_node_client.stub(:find_hosts).with("bs").and_return(["bs-kvm-001.mgmt.bs.net.local"])
 
     specs = [
       {
@@ -64,7 +60,7 @@ describe Compute::Controller do
       },
     ]
 
-    allocations = compute_controller.allocate(specs)
+    allocations = @compute_controller.allocate(specs)
 
     allocations.should eql({
       "st-kvm-001.mgmt.st.net.local"=> [specs[0], specs[1]],
@@ -74,15 +70,12 @@ describe Compute::Controller do
   end
 
   it 'allocates by slicing specs' do
-    compute_node_client = double
-    compute_node_client.stub(:find_hosts).with("st").and_return(
+    @compute_node_client.stub(:find_hosts).with("st").and_return(
       ["st-kvm-001.mgmt.st.net.local","st-kvm-002.mgmt.st.net.local","st-kvm-003.mgmt.st.net.local"]
     )
-    compute_node_client.stub(:find_hosts).with("bs").and_return(
+    @compute_node_client.stub(:find_hosts).with("bs").and_return(
       ["bs-kvm-001.mgmt.bs.net.local", "bs-kvm-002.mgmt.bs.net.local"]
     )
-
-    compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
 
     specs = [
       {:hostname=>"vm0",:fabric=>"st"},
@@ -95,7 +88,7 @@ describe Compute::Controller do
       {:hostname=>"vm7",:fabric=>"bs"},
     ]
 
-    allocations = compute_controller.allocate(specs)
+    allocations = @compute_controller.allocate(specs)
 
     allocations.should eql({
       "st-kvm-001.mgmt.st.net.local"=> [specs[0],specs[3]],
@@ -104,14 +97,10 @@ describe Compute::Controller do
       "bs-kvm-001.mgmt.bs.net.local"=> [specs[5],specs[7]],
       "bs-kvm-002.mgmt.bs.net.local"=> [specs[6]],
     })
-
   end
 
   it 'launches the vms on the allocated hosts' do
-    compute_node_client = double
-    compute_node_client.stub(:find_hosts).and_return(["myhost"])
-
-    compute_controller = Compute::Controller.new :compute_node_client=>compute_node_client
+    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
 
     specs = [{
       :hostname => "vm1",
@@ -119,9 +108,9 @@ describe Compute::Controller do
       :qualified_hostnames => "vm1.mgmt.st.net.local"
       }]
 
-    compute_node_client.should_receive(:launch).with("myhost", specs)
+    @compute_node_client.should_receive(:launch).with("myhost", specs)
 
-    compute_controller.launch(specs)
+    @compute_controller.launch(specs)
   end
 
 end
