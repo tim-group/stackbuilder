@@ -60,11 +60,11 @@ describe Stacks::MCollective::Support do
       class Stacks::MCollective::Support::MCollectiveFabricRunner
         def self.rpcclient=(rpcclient)
          @@rpcclient = rpcclient
-       end
+        end
 
-       def rpcclient(name,options)
-        @@rpcclient
-       end
+        def rpcclient(name,options)
+          @@rpcclient
+        end
       end
 
       Stacks::MCollective::Support::MCollectiveFabricRunner.rpcclient=mock_rpcclient
@@ -92,6 +92,7 @@ describe Stacks::MCollective::Support do
       mock_rpcclient.should_receive(:identity_filter).with(`hostname --fqdn`.chomp)
       runner = Stacks::MCollective::Support::MCollectiveFabricRunner.new({:fabric=>"local"})
       runner.new_client("blah") do |mco|
+        mco.should eql(mock_rpcclient)
       end
     end
   end

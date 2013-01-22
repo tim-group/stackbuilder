@@ -9,26 +9,9 @@ module Stacks
     module Support
       class MCollectiveFabricRunner
         include ::MCollective::RPC
+
         def initialize(options)
           @options = options
-          broker = options[:broker]
-          timeout = options[:timeout]
-          config_file = options[:config_file] || "/etc/mcollective/client.cfg"
-          key = options[:key] || nil
-
-          ENV.delete('MCOLLECTIVE_SSL_PRIVATE') unless key.nil?
-          ENV.delete('MCOLLECTIVE_SSL_PUBLIC') unless key.nil?
-
-          @config = ::MCollective::Config.instance()
-          @config.loadconfig(config_file)
-
-          unless key.nil?
-            @config.pluginconf["ssl_server_public"] = "/store/stackbuilder/framework/client/server-public.pem"
-            @config.pluginconf["ssl_client_public"] = "/store/stackbuilder/framework/client/seed.pem"
-            @config.pluginconf["ssl_client_private"] = "/store/stackbuilder/framework/client/seed-private.pem"
-          end
-          @config.pluginconf["stomp.pool.host1"] = broker unless broker.nil?
-          @config.pluginconf["timeout"] = timeout unless timeout.nil?
           @mco_options = ::MCollective::Util.default_options
         end
 
@@ -47,12 +30,36 @@ module Stacks
             mco.fact_filter "domain","mgmt.#{fabric}.net.local"
           end
         end
+
+        def configure_mco
+          # dump hard earnt knowledge about how to configure mcollective programmatically, TODO: test and tidy
+          broker = options[:broker]
+          timeout = options[:timeout]
+          config_file = options[:config_file] || "/etc/mcollective/client.cfg"
+          key = options[:key] || nil
+
+          ENV.delete('MCOLLECTIVE_SSL_PRIVATE') unless key.nil?
+          ENV.delete('MCOLLECTIVE_SSL_PUBLIC') unless key.nil?
+
+          @config = ::MCollective::Config.instance()
+          @config.loadconfig(config_file)
+
+          unless key.nil?
+            @config.pluginconf["ssl_server_public"] = "/store/stackbuilder/framework/client/server-public.pem"
+            @config.pluginconf["ssl_client_public"] = "/store/stackbuilder/framework/client/seed.pem"
+            @config.pluginconf["ssl_client_private"] = "/store/stackbuilder/framework/client/seed-private.pem"
+          end
+          @config.pluginconf["stomp.pool.host1"] = broker unless broker.nil?
+          @config.pluginconf["timeout"] = timeout unless timeout.nil?
+        end
       end
 
       def create_fabric_runner(options)
         return MCollectiveFabricRunner.new(options)
       end
 
+      ## TODO: factor this out this is nothing to do with mco
+      ## just forking and future foo
       class Future
         def initialize(&block)
           @block = block
