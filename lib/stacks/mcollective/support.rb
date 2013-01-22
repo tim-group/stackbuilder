@@ -7,11 +7,10 @@ require 'puppetroll/client'
 module Stacks
   module MCollective
     module Support
-      attr_accessor :scope
-
       class MCollectiveFabricRunner
         include ::MCollective::RPC
         def initialize(options)
+          @options = options
           broker = options[:broker]
           timeout = options[:timeout]
           config_file = options[:config_file] || "/etc/mcollective/client.cfg"
@@ -30,99 +29,66 @@ module Stacks
           end
           @config.pluginconf["stomp.pool.host1"] = broker unless broker.nil?
           @config.pluginconf["timeout"] = timeout unless timeout.nil?
-
-          @options = ::MCollective::Util.default_options
+          @mco_options = ::MCollective::Util.default_options
         end
 
         def new_client(name, nodes=nil)
-          client = rpcclient(name, :options=>@options)
-          client
-        end
-
-        def provision_vms(specs)
-          mc = new_client("provisionvm")
-          return mc.provision_vms(:specs=>specs)
-        end
-
-        def ping()
-          client = ::MCollective::Client.new(@options[:config])
-          client.options = @options
-          responses = []
-          client.req("ping", "discovery") do |resp|
-            responses << resp[:senderid]
+          client = rpcclient(name, :options=>@mco_options)
+          if @options.has_key?(:fabric)
+            apply_fabric_filter client, @options[:fabric]
           end
-          return responses
+          yield client
         end
 
-        def wait_for_ping(nodes)
-          found = false
-          result = nil
-          retries = 60
-
-          pp nodes
-
-          retries.times do |i|
-            result = ping()
-            pp result
-            if nodes.to_set.subset?(result.to_set)
-              found = true
-              break
-            end
-          end
-          raise "timeout out waiting for hosts to be available" unless found
-          return result
-        end
-
-        def run_nrpe(nodes=nil)
-          mc = new_client("nrpe", :nodes=>nodes)
-          mc.runallcommands.each do |resp|
-            nrpe_results[resp[:sender]] = resp
+        def apply_fabric_filter(mco, fabric)
+          if fabric == "local"
+            mco.identity_filter `hostname --fqdn`.chomp
+          else
+            mco.fact_filter "domain","mgmt.#{fabric}.net.local"
           end
         end
-
-        def puppetd(nodes=nil)
-          mc = new_client("puppetd", nodes=> nodes)
-
-          pp mc.status()
-        end
-
-        def puppetroll(nodes=nil)
-          mc = new_client("puppetd", nodes=> nodes)
-          engine = PuppetRoll::Engine.new({:concurrency=>5}, [], nodes, PuppetRoll::Client.new(nodes, mc))
-          engine.execute()
-          return engine.get_report()
-        end
-
-        def puppetca_sign(hostname)
-          mc = new_client("puppetca")
-          return mc.sign(:certname => hostname)[0]
-        end
-
       end
 
       def create_fabric_runner(options)
         return MCollectiveFabricRunner.new(options)
       end
 
+      class Future
+        def initialize(&block)
+          @block = block
+        end
+
+        def value
+          return @block.call
+        end
+      end
+
       def mcollective_fabric(options={}, &block)
+        async_mcollective_fabric(options, &block).value
+      end
+
+      def async_mcollective_fabric(options={}, &block)
         read,write = IO.pipe
         pid = fork do
           begin
             runner = create_fabric_runner(options)
             result = nil
             exception = nil
-            result = runner.instance_eval(&block)
+            result = block.call(runner)
           rescue Exception=>e
             exception = e
           end
           Marshal.dump({:result=>result, :exception=>exception}, write)
         end
         write.close
-        serialized_result = read.read
-        result = Marshal.load(serialized_result)
-        Process.waitpid(pid)
-        raise result[:exception] unless result[:exception]==nil
-        result[:result]
+
+        Future.new do
+          serialized_result = read.read
+          Process.waitpid(pid)
+          result = Marshal.load(serialized_result)
+          raise result[:exception] unless result[:exception]==nil
+          result[:result]
+        end
       end
     end
   end

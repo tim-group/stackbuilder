@@ -102,9 +102,9 @@ class ComputeNodeClient
   end
 
   def clean(fabric, specs)
-    result = mcollective_fabric do
+    result = mcollective_fabric do |runner|
       # common code to be refactored out here!
-      mco = rpcclient("computenode")
+      mco = runner.rpcclient("computenode")
       #apply_fabric_filter(mco, fabric)
       # don't seem to be able to call method, so copypasta
       if fabric == "local"
