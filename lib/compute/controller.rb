@@ -57,6 +57,14 @@ class Compute::Controller
       @compute_node_client.launch(host, specs)
     end
   end
+
+  def clean(specs)
+    fabrics = specs.group_by { |spec| spec[:fabric] }
+    fabrics.each do |fabric, specs|
+      @compute_node_client.clean(fabric, specs)
+    end
+  end
+
 end
 
 require 'mcollective'
@@ -69,8 +77,7 @@ class ComputeNodeClient
   def find_hosts(fabric)
     return mcollective_fabric do
       mco = rpcclient("computenode")
-      #  mco.identity_filter /\.mgmt\.#{fabric}\.net\.local$/
-      mco.fact_filter "domain","mgmt.#{fabric}.net.local"
+      apply_fabric_filter(mco, fabric)
       hosts = mco.discover()
       mco.disconnect
       pp hosts
@@ -93,6 +100,36 @@ class ComputeNodeClient
 
     pp result
   end
+
+  def clean(fabric, specs)
+    result = mcollective_fabric do
+      # common code to be refactored out here!
+      mco = rpcclient("computenode")
+      #apply_fabric_filter(mco, fabric)
+      # don't seem to be able to call method, so copypasta
+      if fabric == "local"
+        mco.identity_filter `hostname --fqdn`.chomp
+      else
+        mco.fact_filter "domain","mgmt.#{fabric}.net.local"
+      end
+
+      hosts = mco.discover()
+      pp hosts
+      results = mco.clean(:specs => specs)
+      mco.disconnect
+      results
+    end
+    pp result
+  end
+
+  def apply_fabric_filter(mco, fabric)
+    if fabric == "local"
+      mco.identity_filter `hostname --fqdn`.chomp
+    else
+      mco.fact_filter "domain","mgmt.#{fabric}.net.local"
+    end
+  end
+
 end
 
 require 'socket'

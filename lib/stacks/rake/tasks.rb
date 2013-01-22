@@ -68,6 +68,12 @@ namespace :sbx do
         end
       end
 
+      desc "clean the machines in this bucket"
+      task :clean do
+        computecontroller = Compute::Controller.new
+        computecontroller.clean(machine_def.to_specs)
+      end
+
       desc "test"
       task :test do
         machine_def.accept do |machine_def|
