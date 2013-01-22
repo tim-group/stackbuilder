@@ -1,4 +1,5 @@
 require 'compute/namespace'
+require 'socket'
 
 class Compute::Controller
   def initialize(args = {})
@@ -27,7 +28,7 @@ class Compute::Controller
 
     fabrics.each do |fabric, specs|
       if fabric == "local"
-        localhost = `hostname --fqdn`.chomp
+        localhost =  Socket.gethostbyname(Socket.gethostname).first
         allocation[localhost] = specs
       else
         hosts = @compute_node_client.find_hosts(fabric)
