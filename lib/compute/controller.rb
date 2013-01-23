@@ -102,22 +102,14 @@ class ComputeNodeClient
   end
 
   def clean(fabric, specs)
-    result = mcollective_fabric do |runner|
-      # common code to be refactored out here!
-      mco = runner.rpcclient("computenode")
-      #apply_fabric_filter(mco, fabric)
-      # don't seem to be able to call method, so copypasta
-      if fabric == "local"
-        mco.identity_filter `hostname --fqdn`.chomp
-      else
-        mco.fact_filter "domain","mgmt.#{fabric}.net.local"
+    result = mcollective_fabric(:fabric => fabric) do |runner|
+      runner.new_client("computenode") do |mco|
+        hosts = mco.discover()
+        pp hosts
+        results = mco.clean(:specs => specs)
+        mco.disconnect
+        results
       end
-
-      hosts = mco.discover()
-      pp hosts
-      results = mco.clean(:specs => specs)
-      mco.disconnect
-      results
     end
     pp result
   end
