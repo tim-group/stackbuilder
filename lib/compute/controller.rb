@@ -77,11 +77,12 @@ class ComputeNodeClient
   include MCollective::RPC
 
   def find_hosts(fabric)
-    return mcollective_fabric(:fabric => fabric) do
-      mco = rpcclient("computenode")
-      hosts = mco.discover()
-      mco.disconnect()
-      hosts.sort()
+    return mcollective_fabric(:fabric => fabric) do |runner|
+      runner.new_client("computenode") do |mco|
+        hosts = mco.discover()
+        mco.disconnect()
+        hosts.sort()
+      end
     end
   end
 

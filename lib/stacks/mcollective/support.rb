@@ -26,7 +26,7 @@ module Stacks
           if fabric == "local"
             mco.identity_filter `hostname --fqdn`.chomp
           else
-            mco.fact_filter "domain","mgmt.#{fabric}.net.local"
+            mco.fact_filter "domain", "mgmt.#{fabric}.net.local"
           end
         end
 
@@ -56,7 +56,7 @@ module Stacks
       class MCollectiveRPC
         include ::MCollective::RPC
       end
-      
+
       def create_fabric_runner(options)
         return MCollectiveFabricRunner.new(options)
       end
@@ -78,17 +78,17 @@ module Stacks
       end
 
       def async_mcollective_fabric(options={}, &block)
-        read,write = IO.pipe
+        read, write = IO.pipe
         pid = fork do
           begin
             runner = create_fabric_runner(options)
             result = nil
             exception = nil
             result = block.call(runner)
-          rescue Exception=>e
+          rescue Exception => e
             exception = e
           end
-          Marshal.dump({:result=>result, :exception=>exception}, write)
+          Marshal.dump({:result => result, :exception => exception}, write)
         end
         write.close
 
