@@ -41,7 +41,7 @@ class Compute::Controller
   end
 
   def resolve(specs)
-    Hash[specs.map do |spec|
+    return Hash[specs.map do |spec|
       qualified_hostname = spec[:qualified_hostnames]['mgmt']
       [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
     end]
@@ -53,16 +53,18 @@ class Compute::Controller
 
     allocation = allocate(specs)
 
-    allocation.each do |host, specs|
+    results = allocation.map do |host, specs|
       @compute_node_client.launch(host, specs)
     end
+    return results.flatten
   end
 
   def clean(specs)
     fabrics = specs.group_by { |spec| spec[:fabric] }
-    fabrics.each do |fabric, specs|
+    results = fabrics.map do |fabric, specs|
       @compute_node_client.clean(fabric, specs)
     end
+    return results.flatten
   end
 
 end
@@ -78,39 +80,32 @@ class ComputeNodeClient
     return mcollective_fabric(:fabric => fabric) do
       mco = rpcclient("computenode")
       hosts = mco.discover()
-      mco.disconnect
-      pp hosts
-      hosts.sort
+      mco.disconnect()
+      hosts.sort()
     end
   end
 
   def launch(host, specs)
-    result = mcollective_fabric do
+    return mcollective_fabric do
       options = MCollective::Util.default_options
       options[:timeout] = 120
       mco = rpcclient("computenode", :options=>options)
       mco.discover(:hosts => [host])
-
-      pp host
       results = mco.launch(:specs=>specs)
-      mco.disconnect
+      mco.disconnect()
       results
     end
-
-    pp result
   end
 
   def clean(fabric, specs)
-    result = mcollective_fabric(:fabric => fabric) do |runner|
+    return mcollective_fabric(:fabric => fabric) do |runner|
       runner.new_client("computenode") do |mco|
-        hosts = mco.discover()
-        pp hosts
+        mco.discover()
         results = mco.clean(:specs => specs)
-        mco.disconnect
+        mco.disconnect()
         results
       end
     end
-    pp result
   end
 
 end

@@ -47,7 +47,7 @@ namespace :sbx do
       desc "launch the machines in this bucket"
       task :launch do
         computecontroller = Compute::Controller.new
-        computecontroller.launch(machine_def.to_specs)
+        pp computecontroller.launch(machine_def.to_specs)
       end
 
       desc "mping"
@@ -71,7 +71,7 @@ namespace :sbx do
       desc "clean the machines in this bucket"
       task :clean do
         computecontroller = Compute::Controller.new
-        computecontroller.clean(machine_def.to_specs)
+        pp computecontroller.clean(machine_def.to_specs)
       end
 
       desc "test"
