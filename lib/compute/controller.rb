@@ -75,9 +75,8 @@ class ComputeNodeClient
   include MCollective::RPC
 
   def find_hosts(fabric)
-    return mcollective_fabric do
+    return mcollective_fabric(:fabric => fabric) do
       mco = rpcclient("computenode")
-      apply_fabric_filter(mco, fabric)
       hosts = mco.discover()
       mco.disconnect
       pp hosts
@@ -112,14 +111,6 @@ class ComputeNodeClient
       end
     end
     pp result
-  end
-
-  def apply_fabric_filter(mco, fabric)
-    if fabric == "local"
-      mco.identity_filter `hostname --fqdn`.chomp
-    else
-      mco.fact_filter "domain","mgmt.#{fabric}.net.local"
-    end
   end
 
 end
