@@ -9,6 +9,17 @@ describe Stacks::MCollective::Support do
     end
   end
 
+  it 'shortcuts a nested new_client' do
+    mock_client = double
+    mock_client.stub(:do_cool_stuff).and_return("yehah")
+    @runner.stub(:new_client).and_return(mock_client)
+    result = new_client(:fabric=>"st",
+                           :timeout=>5) do |mco|
+      mco.do_cool_stuff.should eql("yehah")
+      []
+    end.value.should eql([])
+  end
+
   it 'sets an mcollective agent with appropriate params' do
     @runner.stub(:provision_vms).and_return([])
     result = mcollective_fabric(:fabric=>"st",

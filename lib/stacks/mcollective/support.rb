@@ -73,18 +73,31 @@ module Stacks
         end
       end
 
+      def new_client(name, options={}, &block)
+        async_fork_and_return(options) do
+          runner = create_fabric_runner(options)
+          block.call(runner.new_client(name))
+        end
+      end
+
       def mcollective_fabric(options={}, &block)
         async_mcollective_fabric(options, &block).value
       end
 
       def async_mcollective_fabric(options={}, &block)
+        async_fork_and_return(options) do
+          runner = create_fabric_runner(options)
+          block.call(runner)
+        end
+      end
+
+      def async_fork_and_return(options={}, &block)
         read, write = IO.pipe
         pid = fork do
           begin
-            runner = create_fabric_runner(options)
             result = nil
             exception = nil
-            result = block.call(runner)
+            result = block.call()
           rescue Exception => e
             exception = e
           end
