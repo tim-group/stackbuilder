@@ -8,15 +8,14 @@ module Stacks
   module MCollective
     module Support
       class MCollectiveFabricRunner
-        include ::MCollective::RPC
-
         def initialize(options)
+          @rpc = MCollectiveRPC.new
           @options = options
           @mco_options = ::MCollective::Util.default_options
         end
 
         def new_client(name, nodes=nil)
-          client = rpcclient(name, :options=>@mco_options)
+          client = @rpc.rpcclient(name, :options => @mco_options)
           if @options.has_key?(:fabric)
             apply_fabric_filter client, @options[:fabric]
           end
@@ -54,6 +53,10 @@ module Stacks
         end
       end
 
+      class MCollectiveRPC
+        include ::MCollective::RPC
+      end
+      
       def create_fabric_runner(options)
         return MCollectiveFabricRunner.new(options)
       end

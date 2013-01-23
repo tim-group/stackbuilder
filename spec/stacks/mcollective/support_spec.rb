@@ -57,7 +57,7 @@ describe Stacks::MCollective::Support do
   it 'applies a filter so that only machines in the fabric are addressed' do
     fork do
       mock_rpcclient = double()
-      class Stacks::MCollective::Support::MCollectiveFabricRunner
+      class Stacks::MCollective::Support::MCollectiveRPC
         def self.rpcclient=(rpcclient)
          @@rpcclient = rpcclient
         end
@@ -67,7 +67,7 @@ describe Stacks::MCollective::Support do
         end
       end
 
-      Stacks::MCollective::Support::MCollectiveFabricRunner.rpcclient=mock_rpcclient
+      Stacks::MCollective::Support::MCollectiveRPC.rpcclient=mock_rpcclient
       mock_rpcclient.should_receive(:fact_filter).with("domain", "mgmt.st.net.local")
       runner = Stacks::MCollective::Support::MCollectiveFabricRunner.new({:fabric=>"st"})
       runner.new_client("blah") do |mco|
@@ -78,9 +78,9 @@ describe Stacks::MCollective::Support do
   it 'applies a filter so that only local machines are addressed' do
     fork do
       mock_rpcclient = double()
-      class Stacks::MCollective::Support::MCollectiveFabricRunner
+      class Stacks::MCollective::Support::MCollectiveRPC
         def self.rpcclient=(rpcclient)
-          @@rpcclient = rpcclient
+         @@rpcclient = rpcclient
         end
 
         def rpcclient(name,options)
@@ -88,7 +88,7 @@ describe Stacks::MCollective::Support do
         end
       end
 
-      Stacks::MCollective::Support::MCollectiveFabricRunner.rpcclient=mock_rpcclient
+      Stacks::MCollective::Support::MCollectiveRPC.rpcclient=mock_rpcclient
       mock_rpcclient.should_receive(:identity_filter).with(`hostname --fqdn`.chomp)
       runner = Stacks::MCollective::Support::MCollectiveFabricRunner.new({:fabric=>"local"})
       runner.new_client("blah") do |mco|
