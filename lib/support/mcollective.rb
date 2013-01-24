@@ -2,6 +2,7 @@ $LOAD_PATH.unshift('/opt/puppetroll/lib/')
 
 require 'support/forking'
 require 'mcollective'
+require 'mcollective/pluginmanager'
 require 'puppetroll'
 require 'puppetroll/client'
 
@@ -11,6 +12,17 @@ module Support
 
     class MCollectiveFabricRunner
       def initialize(options)
+
+        if options.has_key? :key
+          ::MCollective::PluginManager.clear()
+          @config = ::MCollective::Config.instance()
+          config_file = options[:config_file] || "/etc/mcollective/client.cfg"
+          @config.loadconfig(config_file)
+          ENV.delete('MCOLLECTIVE_SSL_PRIVATE')
+          ENV.delete('MCOLLECTIVE_SSL_PUBLIC')
+          @config.pluginconf["ssl_client_public"] = "~/.mc/#{options[:key]}-public.pem"
+          @config.pluginconf["ssl_client_private"] = "~/.mc/#{options[:key]}-private.pem"
+        end
         @rpc = MCollectiveRPC.new
         @options = options
         @mco_options = ::MCollective::Util.default_options

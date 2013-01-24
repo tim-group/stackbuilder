@@ -59,7 +59,14 @@ describe Support::MCollective do
   it 'can be pre-injected with a list of hosts to discover' do
     my_nodes = ["1","2","3"]
     @mock_rpcclient.should_receive(:discover).with({:nodes => my_nodes})
-    mco_client("blah", :nodes => my_nodes) do |fabric, mco|
+    mco_client("blah", :nodes => my_nodes) do |mco|
     end
+  end
+
+  it 'switch the mco key to use' do
+    @mock_rpcclient.should_receive(:discover).with(no_args).ordered
+    mco_client("blah", :key => 'seed') do
+    end
+    ::MCollective::Config.instance().pluginconf["ssl_client_public"].should eql("~/.mc/seed-public.pem")
   end
 end
