@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift('/opt/puppetroll/lib/')
 
+require 'support/forking'
 require 'mcollective'
 require 'puppetroll'
 require 'puppetroll/client'
@@ -7,6 +8,8 @@ require 'puppetroll/client'
 module Stacks
   module MCollective
     module Support
+      include ::Support::Forking
+
       class MCollectiveFabricRunner
         def initialize(options)
           @rpc = MCollectiveRPC.new
@@ -61,18 +64,6 @@ module Stacks
         return MCollectiveFabricRunner.new(options)
       end
 
-      ## TODO: factor this out this is nothing to do with mco
-      ## just forking and future foo
-      class Future
-        def initialize(&block)
-          @block = block
-        end
-
-        def value
-          return @block.call
-        end
-      end
-
       def new_client(name, options={}, &block)
         async_fork_and_return(options) do
           runner = create_fabric_runner(options)
@@ -90,29 +81,7 @@ module Stacks
           block.call(runner)
         end
       end
-
-      def async_fork_and_return(options={}, &block)
-        read, write = IO.pipe
-        pid = fork do
-          begin
-            result = nil
-            exception = nil
-            result = block.call()
-          rescue Exception => e
-            exception = e
-          end
-          Marshal.dump({:result => result, :exception => exception}, write)
-        end
-        write.close
-
-        Future.new do
-          serialized_result = read.read
-          Process.waitpid(pid)
-          result = Marshal.load(serialized_result)
-          raise result[:exception] unless result[:exception]==nil
-          result[:result]
-        end
-      end
     end
   end
 end
+

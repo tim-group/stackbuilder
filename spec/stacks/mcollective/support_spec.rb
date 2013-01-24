@@ -29,42 +29,6 @@ describe Stacks::MCollective::Support do
     end.should eql([])
   end
 
-  it 'returns multiple futures for async execs' do
-    future1 = async_mcollective_fabric do |runner|
-      4.times do
-        puts "A"
-      end
-      1
-    end
-
-    future2 = async_mcollective_fabric do |runner|
-      4.times do
-        puts "B"
-      end
-      2
-    end
-
-    future1.value.should eql(1)
-    future2.value.should eql(2)
-  end
-
-  it 'throws an exception it a mistake was made' do
-    expect do
-      mcollective_fabric(:broker=>"dev-puppet", :timeout=>4).value do
-        provisio
-      end
-    end.to raise_error
-  end
-
-  it 'throws an exception it a mistake was made' do
-    @runner.stub(:provision_vms).and_return([])
-    expect do
-      mcollective_fabric(:broker=>"dev-puppet", :timeout=>4) do
-        provisio
-      end
-    end.to raise_error
-  end
-
   it 'applies a filter so that only machines in the fabric are addressed' do
     fork do
       mock_rpcclient = double()
