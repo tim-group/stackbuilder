@@ -17,12 +17,13 @@ module Stacks
           @mco_options = ::MCollective::Util.default_options
         end
 
-        def new_client(name, nodes=nil)
+        def new_client(name)
           client = @rpc.rpcclient(name, :options => @mco_options)
           if @options.has_key?(:fabric)
             apply_fabric_filter client, @options[:fabric]
           end
-          yield client
+
+          client
         end
 
         def apply_fabric_filter(mco, fabric)
@@ -65,18 +66,17 @@ module Stacks
       end
 
       def new_client(name, options={}, &block)
-        async_fork_and_return(options) do
+        async_fork_and_return do
           runner = create_fabric_runner(options)
-          block.call(runner.new_client(name))
+          client = runner.new_client(name)
+          raise "BAAAAAAH" if client.nil?
+          block.call(client)
+          client
         end
       end
 
-      def mcollective_fabric(options={}, &block)
-        async_mcollective_fabric(options, &block).value
-      end
-
       def async_mcollective_fabric(options={}, &block)
-        async_fork_and_return(options) do
+        async_fork_and_return do
           runner = create_fabric_runner(options)
           block.call(runner)
         end

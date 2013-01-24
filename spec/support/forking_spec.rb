@@ -2,14 +2,14 @@ describe Support::Forking do
   include Support::Forking
 
   it 'returns multiple futures for async execs' do
-    future1 = async_fork_and_return do |runner|
+    future1 = async_fork_and_return do
       4.times do
         puts "A"
       end
       1
     end
 
-    future2 = async_fork_and_return do |runner|
+    future2 = async_fork_and_return do
       4.times do
         puts "B"
       end
