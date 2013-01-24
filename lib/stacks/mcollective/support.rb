@@ -60,27 +60,23 @@ module Stacks
         include ::MCollective::RPC
       end
 
+      private
       def create_fabric_runner(options)
         return MCollectiveFabricRunner.new(options)
       end
 
       def new_client(name, options={}, &block)
+        return async_new_client(name, options, &block).value
+      end
+
+      def async_new_client(name, options={}, &block)
         async_fork_and_return do
           runner = create_fabric_runner(options)
           client = runner.new_client(name)
           nodes = options[:nodes] || []
-
-          pp :nodes => nodes
           nodes.empty? ? client.discover(): client.discover(:nodes => nodes)
           block.call(client)
           client.disconnect
-        end
-      end
-
-      def async_mcollective_fabric(options={}, &block)
-        async_fork_and_return do
-          runner = create_fabric_runner(options)
-          block.call(runner)
         end
       end
     end
