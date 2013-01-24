@@ -14,6 +14,8 @@ module Support
         @rpc = MCollectiveRPC.new
         @options = options
         @mco_options = ::MCollective::Util.default_options
+
+        @mco_options[:timeout] = options[:timeout] if options.has_key?(:timeout)
       end
 
       def new_client(name)

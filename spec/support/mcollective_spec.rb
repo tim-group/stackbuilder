@@ -5,10 +5,17 @@ describe Support::MCollective do
     extend Support::MCollective
     @mock_rpcclient = double
     class Support::MCollective::MCollectiveRPC
+
+      def self.mco_options
+        return @@mco_options
+      end
+
+
       def self.rpcclient=(rpcclient)
         @@rpcclient = rpcclient
       end
       def rpcclient(name, options)
+        @@mco_options = options
         return @@rpcclient
       end
     end
@@ -40,6 +47,14 @@ describe Support::MCollective do
     @mock_rpcclient.should_receive(:identity_filter).with(`hostname --fqdn`.chomp)
     new_client("blah", :fabric => "local") do |mco|
     end
+  end
+
+  it 'uses a timeout if supplied' do
+    @mock_rpcclient.should_receive(:discover).with(no_args).ordered
+    @mock_rpcclient.should_receive(:identity_filter).with(`hostname --fqdn`.chomp)
+    new_client("blah", :fabric => "local", :timeout=>44) do |mco|
+    end
+    Support::MCollective::MCollectiveRPC.mco_options[:options][:timeout].should eql(44)
   end
 
   it 'can be pre-injected with a list of hosts to discover' do
