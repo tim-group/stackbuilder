@@ -4,11 +4,12 @@ require 'stacks/machine_def'
 class Stacks::Server  < Stacks::MachineDef
   attr_reader :server_type
 
-  def initialize(virtual_group, index, location)
+  def initialize(virtual_group, index, location, template='copyboot')
     @virtual_group = virtual_group
     @index = index
     @location = location
     @networks = ["mgmt", "prod"]
+    @template = template
   end
 
   def bind_to(environment)
@@ -37,7 +38,7 @@ class Stacks::Server  < Stacks::MachineDef
       :domain => @domain,
       :fabric => @fabric,
       :group => @availability_group,
-      :template => 'copyboot',
+      :template => @template,
       :networks => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }]
