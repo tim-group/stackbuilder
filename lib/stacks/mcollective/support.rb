@@ -22,7 +22,6 @@ module Stacks
           if @options.has_key?(:fabric)
             apply_fabric_filter client, @options[:fabric]
           end
-
           client
         end
 
@@ -69,9 +68,12 @@ module Stacks
         async_fork_and_return do
           runner = create_fabric_runner(options)
           client = runner.new_client(name)
-          raise "BAAAAAAH" if client.nil?
+          nodes = options[:nodes] || []
+
+          pp :nodes => nodes
+          nodes.empty? ? client.discover(): client.discover(:nodes => nodes)
           block.call(client)
-          client
+          client.disconnect
         end
       end
 
