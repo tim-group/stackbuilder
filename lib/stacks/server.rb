@@ -21,6 +21,7 @@ class Stacks::Server  < Stacks::MachineDef
 
   def qualified_hostname(network)
     raise "no such network '#{network}'" unless @networks.include?(network)
+    raise "domain must not contain mgmt" if @domain =~ /mgmt\./
     if network == 'prod'
       return "#{@hostname}.#{@domain}"
     else
