@@ -1,10 +1,10 @@
-require 'stacks/mcollective/support'
+require 'support/mcollective'
 
-describe Stacks::MCollective::Support do
+describe Support::MCollective do
   before do
-    extend Stacks::MCollective::Support
+    extend Support::MCollective
     @mock_rpcclient = double
-    class Stacks::MCollective::Support::MCollectiveRPC
+    class Support::MCollective::MCollectiveRPC
       def self.rpcclient=(rpcclient)
         @@rpcclient = rpcclient
       end
@@ -12,13 +12,13 @@ describe Stacks::MCollective::Support do
         return @@rpcclient
       end
     end
-    Stacks::MCollective::Support::MCollectiveRPC.rpcclient=@mock_rpcclient
+    Support::MCollective::MCollectiveRPC.rpcclient=@mock_rpcclient
 
     def async_fork_and_return(&block)
       return Support::Forking::Future.new(&block)
     end
 
-   @mock_rpcclient.should_receive(:disconnect)
+    @mock_rpcclient.should_receive(:disconnect)
   end
 
   it 'shortcuts a nested new_client' do
@@ -45,7 +45,7 @@ describe Stacks::MCollective::Support do
   it 'can be pre-injected with a list of hosts to discover' do
     my_nodes = ["1","2","3"]
     @mock_rpcclient.should_receive(:discover).with({:nodes => my_nodes})
-    new_client("blah", :nodes => my_nodes) do |mco|
+    new_client("blah", :nodes => my_nodes) do |fabric, mco|
     end
   end
 end
