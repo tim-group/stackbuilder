@@ -1,6 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def_container'
 require 'stacks/virtual_service'
+require 'stacks/fabric_service'
 
 class Stacks::Stack < Stacks::MachineDefContainer
   attr_reader :name
