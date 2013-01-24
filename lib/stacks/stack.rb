@@ -14,6 +14,10 @@ class Stacks::Stack < Stacks::MachineDefContainer
     @definitions[name] = Stacks::VirtualService.new(name, self)
   end
 
+  def fabricservice(name)
+    @definitions[name] = Stacks::FabricService.new(name, self)
+  end
+
   def [](key)
     return @definitions[key]
   end
