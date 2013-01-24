@@ -66,7 +66,7 @@ module Support
       return MCollectiveFabricRunner.new(options)
     end
 
-    def new_client(name, options={}, &block)
+    def mco_client(name, options={}, &block)
       return async_new_client(name, options, &block).value
     end
 

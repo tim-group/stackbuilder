@@ -3,8 +3,8 @@ require 'socket'
 
 class Compute::Controller
   def initialize(args = {})
-    @compute_node_client = args[:compute_node_client] || ComputeNodeClient.new
-    @dns_client = args[:dns_client] || DNSClient.new
+    @compute_node_client = args[:compute_node_client] || Compute::Client.new
+    @dns_client = args[:dns_client] || Support::DNS.new
   end
 
   def allocate_specs_by_rr(hosts, specs, allocation)
@@ -70,51 +70,34 @@ class Compute::Controller
 end
 
 require 'mcollective'
-require 'stacks/mcollective/support'
+require 'support/mcollective'
 
-class ComputeNodeClient
-  include Stacks::MCollective::Support
-  include MCollective::RPC
+class Compute::Client
+  include Support::MCollective
 
   def find_hosts(fabric)
-    return mcollective_fabric(:fabric => fabric) do |runner|
-      runner.new_client("computenode") do |mco|
-        hosts = mco.discover()
-        mco.disconnect()
-        hosts.sort()
-      end
+    mco_client("computenode", :fabric=>fabric) do |mco|
+      mco.discover.sort()
     end
   end
 
   def launch(host, specs)
-    return mcollective_fabric do
-      options = MCollective::Util.default_options
-      options[:timeout] = 120
-      mco = rpcclient("computenode", :options=>options)
-      mco.discover(:hosts => [host])
-      results = mco.launch(:specs=>specs)
-      mco.disconnect()
-      results
+    mco_client("computenode", :timeout=>120, :hosts=>[host]) do |mco|
+      mco.launch(:specs=>specs)
     end
   end
 
   def clean(fabric, specs)
-    return mcollective_fabric(:fabric => fabric) do |runner|
-      runner.new_client("computenode") do |mco|
-        mco.discover()
-        results = mco.clean(:specs => specs)
-        mco.disconnect()
-        results
-      end
+    mco_client("computenode", :fabric=>fabric) do |mco|
+      mco.clean(:specs => specs)
     end
   end
-
 end
 
 require 'socket'
 require 'ipaddr'
 
-class DNSClient
+class Support::DNS
   # returns nil if lookup fails, but propagates any errors in formatting
   def gethostbyname(hostname)
     begin
