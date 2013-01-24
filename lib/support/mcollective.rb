@@ -67,10 +67,10 @@ module Support
     end
 
     def mco_client(name, options={}, &block)
-      return async_new_client(name, options, &block).value
+      return async_mco_client(name, options, &block).value
     end
 
-    def async_new_client(name, options={}, &block)
+    def async_mco_client(name, options={}, &block)
       async_fork_and_return do
         runner = create_fabric_runner(options)
         client = runner.new_client(name)

@@ -10,7 +10,6 @@ describe Support::MCollective do
         return @@mco_options
       end
 
-
       def self.rpcclient=(rpcclient)
         @@rpcclient = rpcclient
       end
