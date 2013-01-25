@@ -1,3 +1,4 @@
+require 'rake'
 require 'pp'
 require 'yaml'
 require 'rubygems'
@@ -9,10 +10,16 @@ require 'rspec'
 require 'compute/controller'
 
 include Rake::DSL
-extend Stacks::DSL
-require 'stack.rb'
 
-include Stacks::MCollective::Support
+include Support::MCollective
+
+extend Stacks::DSL
+begin
+  require 'stack.rb'
+rescue Exception
+  puts "Cannot find stack.rb in the local directory, giving up"
+  exit 1
+end
 
 environment_name = ENV.fetch('env', 'dev')
 bind_to(environment_name)
