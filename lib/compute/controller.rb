@@ -49,7 +49,7 @@ class Compute::Controller
 
   def launch(specs)
     current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
-    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
+#    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
     allocation = allocate(specs)
 
