@@ -88,8 +88,9 @@ module Support
         client = runner.new_client(name)
         nodes = options[:nodes] || []
         nodes.empty? ? client.discover(): client.discover(:nodes => nodes)
-        block.call(client)
+        retval = block.call(client)
         client.disconnect
+        retval
       end
     end
   end
