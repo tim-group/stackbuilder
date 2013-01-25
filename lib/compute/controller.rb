@@ -82,7 +82,7 @@ class Compute::Client
   end
 
   def launch(host, specs)
-    mco_client("computenode", :timeout=>120, :hosts=>[host]) do |mco|
+    mco_client("computenode", :timeout=>120, :nodes=>[host]) do |mco|
       mco.launch(:specs=>specs)
     end
   end
