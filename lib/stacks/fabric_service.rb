@@ -23,4 +23,19 @@ class Stacks::FabricService < Stacks::MachineDefContainer
     return ['end2end']
   end
 
+  def to_specs
+    return super.each do |spec|
+
+      spec[:template] = 'seedapply'
+      spec[:enc] = {
+        'classes'=> {
+        'rabbitmq'=>nil,
+        'mcollective'=>nil,
+        'puppetmaster' => nil
+      }
+      }
+    end
+  end
 end
+
+
