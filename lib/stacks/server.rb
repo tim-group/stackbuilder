@@ -2,14 +2,15 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::Server  < Stacks::MachineDef
-  attr_reader :server_type
 
-  def initialize(virtual_group, index, location, template='copyboot')
+  def initialize(virtual_group, index, location, template='copyboot', &block)
     @virtual_group = virtual_group
     @index = index
     @location = location
     @networks = ["mgmt", "prod"]
     @template = template
+
+    block.call unless block.nil?
   end
 
   def bind_to(environment)

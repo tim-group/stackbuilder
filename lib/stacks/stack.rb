@@ -15,8 +15,8 @@ class Stacks::Stack < Stacks::MachineDefContainer
     @definitions[name] = Stacks::VirtualService.new(name, self)
   end
 
-  def fabricservice(name)
-    @definitions[name] = Stacks::FabricService.new(name, self)
+  def machine(name)
+    @definitions[name] = Stacks::Server.new(name, self)
   end
 
   def [](key)

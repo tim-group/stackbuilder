@@ -3,52 +3,6 @@ require 'stacks/stack'
 require 'stacks/environment'
 require 'pp'
 
-module TestMethods
-  def tree
-    tree = {}
-    children.each do |child|
-      tree[child.name] = child.tree
-    end
-    return tree
-  end
-end
-
-RSpec::Matchers.define :produce_a_tree_like do |expected_tree|
-  match do |environment|
-    environment.recursive_extend(TestMethods)
-    environment.tree == expected_tree
-  end
-  failure_message_for_should do |environment|
-    "expected #{environment} to match #{expected_tree}"
-  end
-end
-
-RSpec::Matchers.define :have_machines_named do |expected_machine_names|
-  match do |environment|
-    actual_machines = environment.machines.map {|machine|machine.hostname}
-    actual_machines.to_set.eql?(expected_machine_names.to_set)
-  end
-
-  failure_message_for_should do |environment|
-    actual_machines = environment.machines.map {|machine|machine.hostname}
-    "expected environment to contain #{expected_machine_names} but got #{actual_machines.to_set.to_a}"
-  end
-
-  description do
-    "expecting #{actual_machines.to_set} to be the same as #{expected_machines_names}"
-  end
-
-end
-
-RSpec::Matchers.define :contain_machines do |expected_specs|
-  match do |container|
-
-    pp container
-
-    true
-  end
-end
-
 describe Stacks::DSL do
 
   before do
@@ -81,6 +35,34 @@ describe Stacks::DSL do
       :networks => ["mgmt","prod"],
       :qualified_hostnames => {"mgmt"=>"ci-appx-002.mgmt.st.net.local", "prod"=>"ci-appx-002.st.net.local"}
       }])
+  end
+
+  it 'can make an arbitrary specd machine' do
+    stack "fabric" do
+      @definitions["puppetmaster"] = Stacks::Server.new("puppetmaster","001", :primary) do
+        def to_specs
+          specs = super
+          specs.each do |spec|
+            spec[:bling] = true
+          end
+          return specs
+        end
+      end
+    end
+    bind_to('ci')
+    pp stacks["fabric"].to_specs
+    stacks["fabric"].to_specs.should eql([{
+      :hostname => "ci-puppetmaster-001",
+      :bling => true,
+      :group => "ci-puppetmaster",
+      :domain => "st.net.local",
+      :qualified_hostnames => {
+          "prod" => "ci-puppetmaster-001.st.net.local",
+          "mgmt" => "ci-puppetmaster-001.mgmt.st.net.local"},
+      :template => "copyboot",
+      :networks => ["mgmt", "prod"],
+      :fabric => "st"
+    }])
   end
 
 end
