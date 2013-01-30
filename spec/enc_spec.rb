@@ -22,7 +22,6 @@ describe Stacks::DSL do
       :domain => "st.net.local",
       :fabric => "st",
       :group => "ci-appx",
-      :template => "copyboot",
       :networks => ["mgmt","prod"],
       :qualified_hostnames => {"mgmt"=>"ci-appx-001.mgmt.st.net.local", "prod"=>"ci-appx-001.st.net.local"}
       },
@@ -31,7 +30,6 @@ describe Stacks::DSL do
       :domain => "st.net.local",
       :fabric => "st",
       :group => "ci-appx",
-      :template => "copyboot",
       :networks => ["mgmt","prod"],
       :qualified_hostnames => {"mgmt"=>"ci-appx-002.mgmt.st.net.local", "prod"=>"ci-appx-002.st.net.local"}
       }])
@@ -59,7 +57,6 @@ describe Stacks::DSL do
       :qualified_hostnames => {
           "prod" => "ci-puppetmaster-001.st.net.local",
           "mgmt" => "ci-puppetmaster-001.mgmt.st.net.local"},
-      :template => "copyboot",
       :networks => ["mgmt", "prod"],
       :fabric => "st"
     }])

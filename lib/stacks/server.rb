@@ -3,13 +3,11 @@ require 'stacks/machine_def'
 
 class Stacks::Server  < Stacks::MachineDef
 
-  def initialize(virtual_group, index, location, template='copyboot', &block)
+  def initialize(virtual_group, index, location, &block)
     @virtual_group = virtual_group
     @index = index
     @location = location
     @networks = ["mgmt", "prod"]
-    @template = template
-
     block.call unless block.nil?
   end
 
@@ -40,7 +38,6 @@ class Stacks::Server  < Stacks::MachineDef
       :domain => @domain,
       :fabric => @fabric,
       :group => @availability_group,
-      :template => @template,
       :networks => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }]

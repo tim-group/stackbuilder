@@ -60,18 +60,21 @@ namespace :sbx do
       desc "mping"
       task :mping do
         machine_def.accept do |machine_def|
-          mcollective_fabric :key=>'seed', :broker=> "st-puppetmaster-001.mgmt.st.net.local" do
-            pp ping()
-          end
+          ### mco.ping
         end
       end
 
       desc "puppet"
       task :puppet do
+        hosts = []
         machine_def.accept do |machine_def|
-          mcollective_fabric :key=>'seed', :broker=> "st-puppetmaster-001.mgmt.st.net.local" do
-            puppetroll(machine_def.mgmt_fqdn)
-          end
+          hosts << machine_def.mgmt_fqdn
+        end
+        pp hosts
+        mco_client("puppetd") do |mco|
+          engine = PuppetRoll::Engine.new({:concurrency=>5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
+          engine.execute()
+          pp engine.get_report()
         end
       end
 
@@ -79,6 +82,13 @@ namespace :sbx do
       task :clean do
         computecontroller = Compute::Controller.new
         pp computecontroller.clean(machine_def.to_specs)
+
+        include Support::MCollective
+        machine_def.accept do |machine_def|
+          mco_client("puppetca") do |mco|
+            pp mco.clean(:certname => machine_def.mgmt_fqdn)
+          end
+        end
       end
 
       desc "test"
