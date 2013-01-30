@@ -59,8 +59,36 @@ namespace :sbx do
 
       desc "mping"
       task :mping do
+        hosts = []
+        machine_def.accept do |machine_def| hosts << machine_def.mgmt_fqdn end
+        found = false
+        5.times do
+          found = mco_client("rpcutil", :key=>"seed") do |mco|
+            hosts.to_set.subset?(mco.discover.to_set)
+          end
+
+          break if found
+        end
+
+        fail("nodes #{hosts} not checked in to mcollective") unless found
+        pp "all nodes found in mcollective #{found}"
+      end
+
+      desc "clean"
+      task :puppet_clean do
         machine_def.accept do |machine_def|
-          ### mco.ping
+          mco_client("puppetca") do |mco|
+          pp  mco.clean(:certname => machine_def.mgmt_fqdn)
+          end
+        end
+      end
+
+      desc "sign"
+      task :puppet_sign do
+        machine_def.accept do |machine_def|
+          mco_client("puppetca") do |mco|
+           pp mco.sign(:certname => machine_def.mgmt_fqdn)
+          end
         end
       end
 
@@ -71,7 +99,7 @@ namespace :sbx do
           hosts << machine_def.mgmt_fqdn
         end
         pp hosts
-        mco_client("puppetd") do |mco|
+        mco_client("puppetd", :key=> "seed") do |mco|
           engine = PuppetRoll::Engine.new({:concurrency=>5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
           engine.execute()
           pp engine.get_report()
