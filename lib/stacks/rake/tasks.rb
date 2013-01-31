@@ -29,6 +29,45 @@ config = RSpec.configuration
 config.color_enabled = true
 ENV['CI_REPORTS'] = 'build/spec/reports/'
 
+####
+# TODO:
+# general:
+#         use logging
+#         push stuff back out of here
+#         does it complain well when keys aren't to be found anywhere?
+#         puppet out seed key to ci and infra
+#           probably want to have a different key in each dc?
+#
+# possibly:
+#         implement visitor pattern to traverse tree
+#
+# allocate: tidy up output
+#
+# launch: tidy up output
+#         clearly indicate success or failure to launnch
+#         launch in parallel
+#
+# clean machines:
+#         clean needs to show what it actually cleaned, currently dumps results
+#         need to account for which host each machine was cleaned from
+#
+# mping:
+#         tidy, test and
+#
+# puppetclean:
+#       warn if cert clean did not occur
+#       show positive clean action clearly in log
+#
+# puppetsign:
+#       warn if signing did not occur
+#       use output more wisely
+#       show positive sign action clearly in log
+#
+# need workflow tasks to tie builds together.
+#   ie provision dependson [launch, mping, puppet, test]
+#      clean     dependson [destroy_vms, clean_certs]
+#
+
 namespace :sbx do
   accept do |machine_def|
     namespace machine_def.name.to_sym do
