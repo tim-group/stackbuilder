@@ -63,7 +63,7 @@ namespace :sbx do
         machine_def.accept do |machine_def| hosts << machine_def.mgmt_fqdn end
         found = false
         5.times do
-          found = mco_client("rpcutil", :key=>"seed") do |mco|
+          found = mco_client("rpcutil", :key => "seed") do |mco|
             hosts.to_set.subset?(mco.discover.to_set)
           end
 
@@ -78,7 +78,7 @@ namespace :sbx do
       task :puppet_clean do
         machine_def.accept do |machine_def|
           mco_client("puppetca") do |mco|
-          pp  mco.clean(:certname => machine_def.mgmt_fqdn)
+            pp  mco.clean(:certname => machine_def.mgmt_fqdn)
           end
         end
       end
@@ -87,7 +87,7 @@ namespace :sbx do
       task :puppet_sign do
         machine_def.accept do |machine_def|
           mco_client("puppetca") do |mco|
-           pp mco.sign(:certname => machine_def.mgmt_fqdn)
+            pp mco.sign(:certname => machine_def.mgmt_fqdn)
           end
         end
       end
@@ -99,8 +99,8 @@ namespace :sbx do
           hosts << machine_def.mgmt_fqdn
         end
         pp hosts
-        mco_client("puppetd", :key=> "seed") do |mco|
-          engine = PuppetRoll::Engine.new({:concurrency=>5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
+        mco_client("puppetd", :key => "seed") do |mco|
+          engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
           engine.execute()
           pp engine.get_report()
         end
@@ -113,8 +113,10 @@ namespace :sbx do
 
         include Support::MCollective
         machine_def.accept do |machine_def|
-          mco_client("puppetca") do |mco|
-            pp mco.clean(:certname => machine_def.mgmt_fqdn)
+          if machine_def.respond_to?(:mgmt_fqdn) # only clean things with names, ie servers
+            mco_client("puppetca") do |mco|
+              pp mco.clean(:certname => machine_def.mgmt_fqdn)
+            end
           end
         end
       end
@@ -131,7 +133,7 @@ namespace :sbx do
             end
           end
         end
-        RSpec::Core::Runner.run(['--format','CI::Reporter::RSpec'],$stderr,$stdout)
+        RSpec::Core::Runner.run(['--format', 'CI::Reporter::RSpec'], $stderr, $stdout)
       end
     end
   end

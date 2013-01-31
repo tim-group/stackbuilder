@@ -1,8 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
 
-class Stacks::Server  < Stacks::MachineDef
-
+class Stacks::Server < Stacks::MachineDef
   def initialize(virtual_group, index, location, &block)
     @virtual_group = virtual_group
     @index = index
@@ -15,12 +14,12 @@ class Stacks::Server  < Stacks::MachineDef
     @hostname = environment.name + "-" + @virtual_group + "-" + @index
     @fabric = environment.options[@location]
     @domain = "#{@fabric}.net.local"
+    raise "domain must not contain mgmt" if @domain =~ /mgmt\./
     @availability_group = environment.name + "-" + @virtual_group
   end
 
   def qualified_hostname(network)
     raise "no such network '#{network}'" unless @networks.include?(network)
-    raise "domain must not contain mgmt" if @domain =~ /mgmt\./
     if network == 'prod'
       return "#{@hostname}.#{@domain}"
     else
