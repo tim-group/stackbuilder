@@ -34,30 +34,30 @@ namespace :sbx do
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
 
-      desc "outputs the spec format to feed to the compute controller"
+      desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_specs do
         puts machine_def.to_specs.to_yaml
       end
 
-      desc "allocate machines to hosts"
+      desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       task :allocate do
         computecontroller = Compute::Controller.new
         pp computecontroller.allocate(machine_def.to_specs)
       end
 
-      desc "resolve IP numbers of launched machines"
+      desc "resolve the IP numbers of these machines"
       task :resolve do
         computecontroller = Compute::Controller.new
         pp computecontroller.resolve(machine_def.to_specs)
       end
 
-      desc "launch the machines in this bucket"
+      desc "launch these machines"
       task :launch do
         computecontroller = Compute::Controller.new
         pp computecontroller.launch(machine_def.to_specs)
       end
 
-      desc "mping"
+      desc "perform an MCollective ping against these machines"
       task :mping do
         hosts = []
         machine_def.accept do |machine_def| hosts << machine_def.mgmt_fqdn end
@@ -74,16 +74,16 @@ namespace :sbx do
         pp "all nodes found in mcollective #{found}"
       end
 
-      desc "clean"
+      desc "clean Puppet certificates for these machines"
       task :puppet_clean do
         machine_def.accept do |machine_def|
           mco_client("puppetca") do |mco|
-            pp  mco.clean(:certname => machine_def.mgmt_fqdn)
+            pp mco.clean(:certname => machine_def.mgmt_fqdn)
           end
         end
       end
 
-      desc "sign"
+      desc "sign outstanding Puppet certificate signing requests for these machines"
       task :puppet_sign do
         machine_def.accept do |machine_def|
           mco_client("puppetca") do |mco|
@@ -92,7 +92,7 @@ namespace :sbx do
         end
       end
 
-      desc "puppet"
+      desc "run Puppet on these machines"
       task :puppet do
         hosts = []
         machine_def.accept do |machine_def|
@@ -106,7 +106,7 @@ namespace :sbx do
         end
       end
 
-      desc "clean the machines in this bucket"
+      desc "clean away all traces of these machines"
       task :clean do
         computecontroller = Compute::Controller.new
         pp computecontroller.clean(machine_def.to_specs)
@@ -121,7 +121,7 @@ namespace :sbx do
         end
       end
 
-      desc "test"
+      desc "carry out all appropriate tests on these machines"
       task :test do
         machine_def.accept do |machine_def|
           specpath = File.dirname(__FILE__) + "/../stacktests/#{machine_def.clazz}/*.rb"
