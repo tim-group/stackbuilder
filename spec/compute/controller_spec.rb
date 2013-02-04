@@ -6,9 +6,10 @@ describe Compute::Controller do
     @compute_node_client = double
 
     @dns_client = double
+    @logger = double
     @dns_client.stub(:gethostbyname).and_return(nil)
 
-    @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client, :dns_client => @dns_client
+    @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client, :dns_client => @dns_client, :logger=>@logger
   end
 
   it 'no hosts found' do
@@ -105,9 +106,66 @@ describe Compute::Controller do
       :qualified_hostnames => "vm1.mgmt.st.net.local"
     }]
 
-    @compute_node_client.should_receive(:launch).with("myhost", specs)
+    result = {
+      "myhost" => {
+        "vm1" => "success"
+      }
+    }
 
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return(result)
+
+    @compute_node_client.should_receive(:launch).with("myhost", specs)
     @compute_controller.launch(specs)
+  end
+
+  it 'throws an exception if any launch command failed' do
+    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
+
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => "vm1.mgmt.st.net.local"
+    }]
+
+    result = {
+      "myhost" => {
+        "vm1" => "failed"
+      }
+    }
+
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return(result)
+    expect {
+        @compute_controller.launch(specs)
+    }.to raise_error
+  end
+
+  it 'unaccounted for vms raise an error when launching' do
+    @dns_client.rspec_reset
+    @dns_client.stub(:gethostbyname).with("vm1.mgmt.st.net.local").and_return("1.2.3.4")
+    @dns_client.stub(:gethostbyname).with("vm2.mgmt.st.net.local").and_return("1.2.3.4")
+
+    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
+
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+    },{
+      :hostname => "vm2",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+    }]
+
+    results = {
+      "host1" => {
+        "vm1" => "success"
+      }
+    }
+    @compute_node_client.stub(:launch).and_return(results)
+
+    expect {
+      @compute_controller.launch(specs).should eql(results)
+    }.to raise_error
   end
 
   it 'will not launch if any machine already exists' do
@@ -158,8 +216,31 @@ describe Compute::Controller do
     @compute_controller.clean(specs).should eql(results)
   end
 
+  it 'unaccounted for vms (when clean is called) will cause a warning message' do
+    @dns_client.rspec_reset
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+    },{
+      :hostname => "vm2",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+    }]
+
+    results = {
+      "host1" => {
+        "vm1" => "success"
+      }
+    }
+    @logger.should_receive(:warn)
+    @compute_node_client.stub(:clean).and_return(results)
+    @compute_controller.clean(specs).should eql(results)
+  end
+
   it 'will throw an exception if any nodes failed in the clean action ' do
     @dns_client.rspec_reset
+
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
@@ -185,6 +266,5 @@ describe Compute::Controller do
       @compute_controller.clean(specs).should eql(results)
     }.to raise_error
   end
-
 
 end

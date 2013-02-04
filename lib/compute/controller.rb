@@ -11,6 +11,7 @@ class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || Compute::Client.new
     @dns_client = args[:dns_client] || Support::DNS.new
+    @logger = args[:logger] || Logger.new(STDOUT)
   end
 
   def allocate_specs_by_rr(hosts, specs, allocation)
@@ -49,20 +50,43 @@ class Compute::Controller
   def resolve(specs)
     return Hash[specs.map do |spec|
       qualified_hostname = spec[:qualified_hostnames]['mgmt']
+      pp qualified_hostname
       [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
     end]
   end
 
   def launch(specs)
     current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
-#    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
+    #    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
     allocation = allocate(specs)
 
     results = allocation.map do |host, specs|
       @compute_node_client.launch(host, specs)
+    end.flatten_hashes
+
+    array_failures = results.map do |host, vms|
+      vms.map do |node, result|
+        result
+      end
+    end.flatten
+
+    vms_accounted_for = results.map do |host, vms|
+      vms.map do |vm, result|
+        vm
+      end
+    end.flatten
+
+    vms_asked_for = specs.map do |spec|
+      spec[:hostname]
     end
-    return results.flatten
+
+    unaccounted_vms = vms_asked_for.to_set - vms_accounted_for.to_set
+    raise "some machines were unaccounted for during launch #{unaccounted_vms.inspect}" if unaccounted_vms.size >0
+
+    raise "there were failures destroying vms #{results.inspect}" if array_failures.reject {|result| result=="success"}.size>0
+
+    return results
   end
 
   def clean(specs)
@@ -73,10 +97,25 @@ class Compute::Controller
     end.flatten_hashes
 
     array_failures = results.map do |host, vms|
-        vms.map do |node, result|
-          result
-        end
+      vms.map do |node, result|
+        result
+      end
     end.flatten
+
+    vms_accounted_for = results.map do |host, vms|
+      vms.map do |vm, result|
+        vm
+      end
+    end.flatten
+
+    vms_asked_for = specs.map do |spec|
+      spec[:hostname]
+    end
+
+    unaccounted_vms = vms_asked_for.to_set - vms_accounted_for.to_set
+    if unaccounted_vms.size >0
+      @logger.warn("some vms were unaccounted for #{unaccounted_vms.inspect}")
+    end
 
     raise "there were failures destroying vms #{results.inspect}" if array_failures.reject {|result| result=="success"}.size>0
 
@@ -99,13 +138,21 @@ class Compute::Client
 
   def launch(host, specs)
     mco_client("computenode", :timeout=>120, :nodes=>[host]) do |mco|
-      mco.launch(:specs=>specs)
+      mco.launch(:specs=>specs).map do |node|
+        if node[:statuscode]!=0
+          raise node[:statusmsg]
+        end
+        [node.results[:sender], node.results[:data]]
+      end
     end
   end
 
   def clean(fabric, specs)
-    results = mco_client("computenode", :fabric=>fabric) do |mco|
+    results = mco_client("computenode", :fabric=>fabric, :timeout=>1) do |mco|
       mco.clean(:specs => specs).map do |node|
+        if node[:statuscode]!=0
+          raise node[:statusmsg]
+        end
         [node.results[:sender], node.results[:data]]
       end
     end

@@ -16,7 +16,8 @@ include Support::MCollective
 extend Stacks::DSL
 begin
   require 'stack.rb'
-rescue Exception
+rescue Exception => e
+  puts e
   puts "Cannot find stack.rb in the local directory, giving up"
   exit 1
 end
