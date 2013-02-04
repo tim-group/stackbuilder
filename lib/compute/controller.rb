@@ -148,7 +148,7 @@ class Compute::Client
   end
 
   def clean(fabric, specs)
-    results = mco_client("computenode", :fabric=>fabric, :timeout=>1) do |mco|
+    results = mco_client("computenode", :fabric=>fabric) do |mco|
       mco.clean(:specs => specs).map do |node|
         if node[:statuscode]!=0
           raise node[:statusmsg]
