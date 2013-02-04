@@ -133,4 +133,58 @@ describe Compute::Controller do
     @compute_node_client.should_not_receive(:launch)
   end
 
+  it 'will account foreach machine that is destroyed' do
+    @dns_client.rspec_reset
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+    },{
+      :hostname => "vm2",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+    }]
+
+    results = {
+      "host1" => {
+        "vm1" => "success"
+      },
+      "host2" => {
+        "vm2" => "success"
+      },
+    }
+
+    @compute_node_client.stub(:clean).and_return(results)
+    @compute_controller.clean(specs).should eql(results)
+  end
+
+  it 'will throw an exception if any nodes failed in the clean action ' do
+    @dns_client.rspec_reset
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+    },{
+      :hostname => "vm2",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+    }]
+
+    results = {
+      "host1" => {
+        "vm1" => "failed"
+      },
+      "host2" => {
+        "vm2" => "success"
+      },
+    }
+
+    @compute_node_client.stub(:clean).and_return(results)
+
+    expect {
+      @compute_controller.clean(specs).should eql(results)
+    }.to raise_error
+  end
+
+
 end

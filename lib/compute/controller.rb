@@ -1,6 +1,12 @@
 require 'compute/namespace'
 require 'socket'
 
+class Array
+  def flatten_hashes
+    Hash[*self.map(&:to_a).flatten]
+  end
+end
+
 class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || Compute::Client.new
@@ -61,10 +67,20 @@ class Compute::Controller
 
   def clean(specs)
     fabrics = specs.group_by { |spec| spec[:fabric] }
+    vm_counts = {}
     results = fabrics.map do |fabric, specs|
       @compute_node_client.clean(fabric, specs)
-    end
-    return results.flatten
+    end.flatten_hashes
+
+    array_failures = results.map do |host, vms|
+        vms.map do |node, result|
+          result
+        end
+    end.flatten
+
+    raise "bad" if array_failures.reject {|result| result=="success"}.size>0
+
+    results
   end
 
 end
@@ -88,9 +104,12 @@ class Compute::Client
   end
 
   def clean(fabric, specs)
-    mco_client("computenode", :fabric=>fabric) do |mco|
-      mco.clean(:specs => specs)
+    results = mco_client("computenode", :fabric=>fabric) do |mco|
+      mco.clean(:specs => specs).map do |node|
+        [node.results[:sender], node.results[:data]]
+      end
     end
+    Hash[*results.flatten]
   end
 end
 

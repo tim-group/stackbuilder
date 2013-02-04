@@ -145,11 +145,8 @@ namespace :sbx do
         end
       end
 
-      desc "clean away all traces of these machines"
-      task :clean do
-        computecontroller = Compute::Controller.new
-        pp computecontroller.clean(machine_def.to_specs)
-
+      desc ""
+      task :puppet_clean do
         include Support::MCollective
         machine_def.accept do |machine_def|
           if machine_def.respond_to?(:mgmt_fqdn) # only clean things with names, ie servers
@@ -158,6 +155,12 @@ namespace :sbx do
             end
           end
         end
+      end
+
+      desc "clean away all traces of these machines"
+      task :clean do
+        computecontroller = Compute::Controller.new
+        pp computecontroller.clean(machine_def.to_specs)
       end
 
       desc "carry out all appropriate tests on these machines"
