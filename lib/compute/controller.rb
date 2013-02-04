@@ -78,7 +78,7 @@ class Compute::Controller
         end
     end.flatten
 
-    raise "bad" if array_failures.reject {|result| result=="success"}.size>0
+    raise "there were failures destroying vms #{results.inspect}" if array_failures.reject {|result| result=="success"}.size>0
 
     results
   end
