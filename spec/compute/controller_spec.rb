@@ -115,10 +115,13 @@ describe Compute::Controller do
     @compute_node_client.stub(:launch).with("myhost", specs).and_return(result)
 
     @compute_node_client.should_receive(:launch).with("myhost", specs)
-    @compute_controller.launch(specs)
+    @compute_controller.launch(specs) do
+      on :success do
+      end
+    end
   end
 
-  it 'throws an exception if any launch command failed' do
+  it 'calls back if any launch command failed' do
     @compute_node_client.stub(:find_hosts).and_return(["myhost"])
 
     specs = [{
@@ -134,9 +137,17 @@ describe Compute::Controller do
     }
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return(result)
-    expect {
-        @compute_controller.launch(specs)
-    }.to raise_error
+
+    failure = false
+    @compute_controller.launch(specs) do
+      on :success do |vm|
+      end
+      on :failure do |vm|
+        failure = true
+     end
+    end
+
+    failure.should eql(true)
   end
 
   it 'unaccounted for vms raise an error when launching' do
@@ -163,9 +174,16 @@ describe Compute::Controller do
     }
     @compute_node_client.stub(:launch).and_return(results)
 
-    expect {
-      @compute_controller.launch(specs).should eql(results)
-    }.to raise_error
+    unaccounted = []
+    @compute_controller.launch(specs) do
+      on :success do
+      end
+      on :unaccounted do |vm|
+        unaccounted << vm
+      end
+    end
+
+    unaccounted.should eql ["vm2"]
   end
 
   it 'will not launch if any machine already exists' do
@@ -260,11 +278,17 @@ describe Compute::Controller do
       },
     }
 
+    failures = []
     @compute_node_client.stub(:clean).and_return(results)
+    @compute_controller.clean(specs) do
+      on :failure do |vm|
+        failures << vm
+      end
+      on :success do |vm|
+      end
+    end
 
-    expect {
-      @compute_controller.clean(specs).should eql(results)
-    }.to raise_error
+    failures.should eql ["vm1"]
   end
 
 end

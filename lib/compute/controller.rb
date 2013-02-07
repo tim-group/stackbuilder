@@ -1,5 +1,7 @@
+require 'support/callback'
 require 'compute/namespace'
 require 'socket'
+require 'set'
 
 class Array
   def flatten_hashes
@@ -55,47 +57,70 @@ class Compute::Controller
     end]
   end
 
-  def launch(specs)
+  def launch(specs, &block)
     current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
     #    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
+    callback = Support::Callback.new
+    callback.instance_eval(&block)
     allocation = allocate(specs)
 
     results = allocation.map do |host, specs|
       @compute_node_client.launch(host, specs)
     end.flatten_hashes
 
-    array_failures = results.map do |host, vms|
-      vms.map do |node, result|
-        result
-      end
-    end.flatten
-
-    vms_accounted_for = results.map do |host, vms|
+    flattened_results = results.map do |host, vms|
       vms.map do |vm, result|
-        vm
+        [vm, {:result=>result, :host=>host}]
       end
-    end.flatten
+    end.flatten_hashes
 
-    vms_asked_for = specs.map do |spec|
-      spec[:hostname]
+    vms_asked_for = specs.each do |spec|
+      vm = spec[:hostname]
+      result = flattened_results[vm]
+      if result.nil?
+        callback.invoke :unaccounted, vm
+        next
+      end
+      if result[:result] == "success"
+        callback.invoke :success, vm
+      else
+        callback.invoke :failure, vm
+      end
     end
-
-    unaccounted_vms = vms_asked_for.to_set - vms_accounted_for.to_set
-    raise "some machines were unaccounted for during launch #{unaccounted_vms.inspect}" if unaccounted_vms.size >0
-
-    raise "there were failures destroying vms #{results.inspect}" if array_failures.reject {|result| result=="success"}.size>0
-
-    return results
   end
 
-  def clean(specs)
+  def clean(specs, &block)
+    callback = Support::Callback.new
+    unless block.nil?
+      callback.instance_eval(&block)
+    end
+
     fabrics = specs.group_by { |spec| spec[:fabric] }
     vm_counts = {}
     results = fabrics.map do |fabric, specs|
       @compute_node_client.clean(fabric, specs)
     end.flatten_hashes
 
+    flattened_results = results.map do |host, vms|
+      vms.map do |vm, result|
+        [vm, {:result=>result, :host=>host}]
+      end
+    end.flatten_hashes
+
+    vms_asked_for = specs.each do |spec|
+      vm = spec[:hostname]
+      result = flattened_results[vm]
+      if result.nil?
+        callback.invoke :unaccounted, vm
+        next
+      end
+      if result[:result] == "success"
+        callback.invoke :success, vm
+      else
+        callback.invoke :failure, vm
+      end
+    end
     array_failures = results.map do |host, vms|
       vms.map do |node, result|
         result
@@ -116,9 +141,6 @@ class Compute::Controller
     if unaccounted_vms.size >0
       @logger.warn("some vms were unaccounted for #{unaccounted_vms.inspect}")
     end
-
-    raise "there were failures destroying vms #{results.inspect}" if array_failures.reject {|result| result=="success"}.size>0
-
     results
   end
 
