@@ -20,6 +20,37 @@ describe Support::Callback do
     callback = Support::Callback.new
     callback.invoke(:event, mock)
   end
+
+  it 'allows us to invoke a summary event' do
+    callback = Support::Callback.new
+    summary = false
+    callback.instance_eval do
+      on :event do |arg|
+      end
+      on :summary do |arg|
+        summary = true
+      end
+    end
+    callback.invoke(:event, "hello")
+    callback.invoke(:summary, :if=>[:event])
+    summary.should eql(true)
+  end
+
+  it 'doesnt invoke a summary invent if the other event is not invoked' do
+    callback = Support::Callback.new
+    summary = false
+    callback.instance_eval do
+      on :event do |arg|
+      end
+      on :summary do |arg|
+        summary = true
+      end
+    end
+    callback.invoke(:summary, "hello", :if=>[:event])
+    summary.should eql(false)
+  end
+
+
 end
 
 

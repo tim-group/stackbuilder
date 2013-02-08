@@ -88,6 +88,7 @@ class Compute::Controller
         callback.invoke :failure, vm
       end
     end
+
   end
 
   def clean(specs, &block)
