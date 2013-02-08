@@ -6,7 +6,7 @@ class Stacks::Server < Stacks::MachineDef
     @virtual_group = virtual_group
     @index = index
     @location = location
-    @networks = ["mgmt", "prod"]
+    @networks = [:mgmt, :prod]
     block.call unless block.nil?
   end
 
@@ -28,7 +28,7 @@ class Stacks::Server < Stacks::MachineDef
   end
 
   def mgmt_fqdn
-    return qualified_hostname("mgmt")
+    return qualified_hostname(:mgmt)
   end
 
   def to_specs
