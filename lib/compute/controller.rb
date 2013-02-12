@@ -52,18 +52,17 @@ class Compute::Controller
   def resolve(specs)
     return Hash[specs.map do |spec|
       qualified_hostname = spec[:qualified_hostnames]['mgmt']
-      pp qualified_hostname
       [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
     end]
   end
 
-  def launch(specs, &block)
-    current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
+  def launch(all_specs, &block)
+    #current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
     #    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
     callback = Support::Callback.new
     callback.instance_eval(&block)
-    allocation = allocate(specs)
+    allocation = allocate(all_specs)
 
     results = allocation.map do |host, specs|
       @compute_node_client.launch(host, specs)
@@ -75,7 +74,7 @@ class Compute::Controller
       end
     end.flatten_hashes
 
-    vms_asked_for = specs.each do |spec|
+    all_specs.each do |spec|
       vm = spec[:hostname]
       result = flattened_results[vm]
       if result.nil?

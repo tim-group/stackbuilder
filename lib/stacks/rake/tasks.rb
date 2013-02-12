@@ -78,6 +78,8 @@ namespace :sbx do
         puts machine_def.to_specs.to_yaml
       end
 
+      task :provision=> [:launch, :puppet_clean, :mping, :puppet_sign, :puppet]
+
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       task :allocate do
         computecontroller = Compute::Controller.new
@@ -93,19 +95,34 @@ namespace :sbx do
       desc "launch these machines"
       task :launch do
         computecontroller = Compute::Controller.new
-        pp computecontroller.launch(machine_def.to_specs)
+        computecontroller.launch(machine_def.to_specs) do
+          on :success do |vm|
+            puts "#{vm} success \n"
+          end
+          on :failure do |vm|
+            puts "#{vm} failure \n"
+          end
+          on :unaccounted do |vm|
+            puts "#{vm} unaccounted \n"
+          end
+        end
       end
 
       desc "perform an MCollective ping against these machines"
       task :mping do
         hosts = []
-        machine_def.accept do |machine_def| hosts << machine_def.mgmt_fqdn end
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+            hosts << child_machine_def.mgmt_fqdn
+          end
+        end
         found = false
-        5.times do
+        50.times do
           found = mco_client("rpcutil", :key => "seed") do |mco|
             hosts.to_set.subset?(mco.discover.to_set)
           end
 
+          sleep 1
           break if found
         end
 
@@ -115,18 +132,23 @@ namespace :sbx do
 
       desc "clean Puppet certificates for these machines"
       task :puppet_clean do
-        machine_def.accept do |machine_def|
-          mco_client("puppetca") do |mco|
-            pp mco.clean(:certname => machine_def.mgmt_fqdn)
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+            mco_client("puppetca") do |mco|
+              pp mco.clean(:certname => child_machine_def.mgmt_fqdn)
+            end
           end
         end
       end
 
       desc "sign outstanding Puppet certificate signing requests for these machines"
       task :puppet_sign do
-        machine_def.accept do |machine_def|
-          mco_client("puppetca") do |mco|
-            pp mco.sign(:certname => machine_def.mgmt_fqdn)
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+
+            mco_client("puppetca") do |mco|
+              pp mco.sign(:certname => child_machine_def.mgmt_fqdn)
+            end
           end
         end
       end
@@ -134,8 +156,10 @@ namespace :sbx do
       desc "run Puppet on these machines"
       task :puppet do
         hosts = []
-        machine_def.accept do |machine_def|
-          hosts << machine_def.mgmt_fqdn
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+            hosts << child_machine_def.mgmt_fqdn
+          end
         end
         pp hosts
         mco_client("puppetd", :key => "seed") do |mco|
@@ -148,10 +172,10 @@ namespace :sbx do
       desc ""
       task :puppet_clean do
         include Support::MCollective
-        machine_def.accept do |machine_def|
-          if machine_def.respond_to?(:mgmt_fqdn) # only clean things with names, ie servers
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
             mco_client("puppetca") do |mco|
-              pp mco.clean(:certname => machine_def.mgmt_fqdn)
+              pp mco.clean(:certname => child_machine_def.mgmt_fqdn)
             end
           end
         end
@@ -165,9 +189,9 @@ namespace :sbx do
 
       desc "carry out all appropriate tests on these machines"
       task :test do
-        machine_def.accept do |machine_def|
-          specpath = File.dirname(__FILE__) + "/../stacktests/#{machine_def.clazz}/*.rb"
-          describe "#{machine_def.clazz}.#{machine_def.name}" do
+        machine_def.accept do |child_machine_def|
+          specpath = File.dirname(__FILE__) + "/../stacktests/#{child_machine_def.clazz}/*.rb"
+          describe "#{child_machine_def.clazz}.#{child_machine_def.name}" do
             Dir[specpath].each do |file|
               require file
               test = File.basename(file, '.rb')
