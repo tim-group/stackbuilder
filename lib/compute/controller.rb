@@ -159,7 +159,7 @@ class Compute::Client
   end
 
   def launch(host, specs)
-    mco_client("computenode", :timeout=>120, :nodes=>[host]) do |mco|
+    mco_client("computenode", :timeout=>1000, :nodes=>[host]) do |mco|
       mco.launch(:specs=>specs).map do |node|
         if node[:statuscode]!=0
           raise node[:statusmsg]
