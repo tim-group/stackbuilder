@@ -67,6 +67,6 @@ describe Support::MCollective do
     @mock_rpcclient.should_receive(:discover).with(no_args).ordered
     mco_client("blah", :key => 'seed') do
     end
-    ::MCollective::Config.instance().pluginconf["ssl_client_public"].should eql(File.expand_path("~/.mc/seed.pem"))
+    ::MCollective::Config.instance().pluginconf["ssl_client_public"].should eql("/etc/mcollective/ssl/seed.pem")
   end
 end

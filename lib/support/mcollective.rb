@@ -20,7 +20,7 @@ module Support
           @config.loadconfig(config_file)
           ENV.delete('MCOLLECTIVE_SSL_PRIVATE')
           ENV.delete('MCOLLECTIVE_SSL_PUBLIC')
-          @config.pluginconf["ssl_client_public"] = File.expand_path "~/.mc/#{options[:key]}.pem"
+          @config.pluginconf["ssl_client_public"] = "/etc/mcollective/ssl/#{options[:key]}.pem"
           @config.pluginconf["ssl_client_private"] = File.expand_path "~/.mc/#{options[:key]}-private.pem"
         end
         @rpc = MCollectiveRPC.new
