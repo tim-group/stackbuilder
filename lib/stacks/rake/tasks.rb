@@ -16,8 +16,7 @@ include Support::MCollective
 extend Stacks::DSL
 begin
   require 'stack.rb'
-rescue Exception => e
-  puts e
+rescue Exception
   puts "Cannot find stack.rb in the local directory, giving up"
   exit 1
 end
@@ -64,78 +63,41 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #       use output more wisely
 #       show positive sign action clearly in log
 #
-# rspec tests:
-#       tidy up output??
-#
 # need workflow tasks to tie builds together.
 #   ie provision dependson [launch, mping, puppet, test]
 #      clean     dependson [destroy_vms, clean_certs]
 #
-
-def sbtask(name, &block)
-  task name do
-    block.call()
-  end
-end
 
 namespace :sbx do
   accept do |machine_def|
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
 
-      desc "provision this machine (launch and complete puppet run)"
-      task :provision => ["sbx:#{machine_def.name}:launch".to_sym]
-
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
-      sbtask :to_specs do
+      task :to_specs do
         puts machine_def.to_specs.to_yaml
       end
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       task :allocate do
         computecontroller = Compute::Controller.new
-        computecontroller.allocate(machine_def.to_specs) do |vm, host|
-        end
+        pp computecontroller.allocate(machine_def.to_specs)
       end
 
       desc "resolve the IP numbers of these machines"
       task :resolve do
         computecontroller = Compute::Controller.new
-        computecontroller.resolve(machine_def.to_specs) do |vm, ip|
-
-        end
+        pp computecontroller.resolve(machine_def.to_specs)
       end
 
       desc "launch these machines"
       task :launch do
         computecontroller = Compute::Controller.new
-        computecontroller.launch(machine_def.to_specs) do
-          on :unaccounted_vm do |vm|
-            #log.error(vm was unaccounted for)
-          end
-
-          on :failure do |vm|
-            #log.error(vm failed to launch)
-          end
-
-          on :success do |vm|
-            #log.info(vm passed launch)
-          end
-
-          on :failures do
-            #fail
-          end
-        end
+        pp computecontroller.launch(machine_def.to_specs)
       end
 
       desc "perform an MCollective ping against these machines"
       task :mping do
-        computecontroller.mco_ping(machine_def) do
-          on :found do
-          end
-          on :missing_nodes do
-          end
-        end
         hosts = []
         machine_def.accept do |machine_def| hosts << machine_def.mgmt_fqdn end
         found = false
@@ -143,6 +105,7 @@ namespace :sbx do
           found = mco_client("rpcutil", :key => "seed") do |mco|
             hosts.to_set.subset?(mco.discover.to_set)
           end
+
           break if found
         end
 
@@ -150,57 +113,45 @@ namespace :sbx do
         pp "all nodes found in mcollective #{found}"
       end
 
-      namespace :puppet do
-        desc "sign outstanding Puppet certificate signing requests for these machines"
-        task :sign do
-          puppetstuff.sign(machine_def) do
-            on :success do
-            end
-            on :failure do
-            end
+      desc "clean Puppet certificates for these machines"
+      task :puppet_clean do
+        machine_def.accept do |machine_def|
+          mco_client("puppetca") do |mco|
+            pp mco.clean(:certname => machine_def.mgmt_fqdn)
           end
+        end
+      end
 
-          machine_def.accept do |machine_def|
+      desc "sign outstanding Puppet certificate signing requests for these machines"
+      task :puppet_sign do
+        machine_def.accept do |machine_def|
+          mco_client("puppetca") do |mco|
+            pp mco.sign(:certname => machine_def.mgmt_fqdn)
+          end
+        end
+      end
+
+      desc "run Puppet on these machines"
+      task :puppet do
+        hosts = []
+        machine_def.accept do |machine_def|
+          hosts << machine_def.mgmt_fqdn
+        end
+        pp hosts
+        mco_client("puppetd", :key => "seed") do |mco|
+          engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
+          engine.execute()
+          pp engine.get_report()
+        end
+      end
+
+      desc ""
+      task :puppet_clean do
+        include Support::MCollective
+        machine_def.accept do |machine_def|
+          if machine_def.respond_to?(:mgmt_fqdn) # only clean things with names, ie servers
             mco_client("puppetca") do |mco|
-              pp mco.sign(:certname => machine_def.mgmt_fqdn)
-            end
-          end
-        end
-
-        desc "run Puppet on these machines"
-        task :run do
-          puppet.run do
-            on :success do |machine|
-            end
-            on :failure do |machine|
-            end
-            on :failures do
-              fail
-            end
-          end
-
-          hosts = []
-          machine_def.accept do |machine_def|
-            hosts << machine_def.mgmt_fqdn
-          end
-          mco_client("puppetd", :key => "seed") do |mco|
-            engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
-            engine.execute()
-            pp engine.get_report()
-          end
-        end
-
-        desc "remove Puppet cert for these machines"
-        task :clean do
-          pupp.clean do
-          end
-
-          include Support::MCollective
-          machine_def.accept do |machine_def|
-            if machine_def.respond_to?(:mgmt_fqdn) # only clean things with names, ie servers
-              mco_client("puppetca") do |mco|
-                pp mco.clean(:certname => machine_def.mgmt_fqdn)
-              end
+              pp mco.clean(:certname => machine_def.mgmt_fqdn)
             end
           end
         end
