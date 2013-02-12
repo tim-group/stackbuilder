@@ -25,12 +25,9 @@ def logger
 
     def failed()
       puts "\n\e[1m\e[31mBUILD FAILED\e[0m\n"
-      puts "\e[1m\e[31mCompleted in XX.XXs\e[0m\n"
     end
 
     def passed()
-      puts "\n\e[1m\e[32mBUILD SUCCESSFUL\e[0m\n"
-      puts "\e[1m\e[32mCompleted in XX.XXs\e[0m\n"
     end
   end
   log
