@@ -94,7 +94,7 @@ namespace :sbx do
         puts machine_def.to_specs.to_yaml
       end
 
-      task :provision=> [:launch, :puppet_clean, :mping, :puppet_sign, :puppet]
+      task :provision=> [:puppet_clean, :launch, :mping, :puppet_sign, :puppet]
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
