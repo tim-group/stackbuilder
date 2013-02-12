@@ -68,6 +68,14 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #      clean     dependson [destroy_vms, clean_certs]
 #
 
+sbtask(name, &block)
+  puts "running #{name}@@@@\n"
+  task name do
+    block.call()
+  end
+  puts "complete #{name}$%%\n"
+end
+
 namespace :sbx do
   accept do |machine_def|
     namespace machine_def.name.to_sym do
@@ -93,7 +101,7 @@ namespace :sbx do
       end
 
       desc "launch these machines"
-      task :launch do
+      sbtask :launch do
         computecontroller = Compute::Controller.new
         computecontroller.launch(machine_def.to_specs) do
           on :success do |vm|
@@ -109,7 +117,7 @@ namespace :sbx do
       end
 
       desc "perform an MCollective ping against these machines"
-      task :mping do
+      sbtask :mping do
         hosts = []
         machine_def.accept do |child_machine_def|
           if child_machine_def.respond_to?(:mgmt_fqdn)
@@ -131,7 +139,7 @@ namespace :sbx do
       end
 
       desc "clean Puppet certificates for these machines"
-      task :puppet_clean do
+      sbtask :puppet_clean do
         machine_def.accept do |child_machine_def|
           if child_machine_def.respond_to?(:mgmt_fqdn)
             mco_client("puppetca") do |mco|
@@ -142,7 +150,7 @@ namespace :sbx do
       end
 
       desc "sign outstanding Puppet certificate signing requests for these machines"
-      task :puppet_sign do
+      sbtask :puppet_sign do
         machine_def.accept do |child_machine_def|
           if child_machine_def.respond_to?(:mgmt_fqdn)
 
@@ -154,7 +162,7 @@ namespace :sbx do
       end
 
       desc "run Puppet on these machines"
-      task :puppet do
+      sbtask :puppet do
         hosts = []
         machine_def.accept do |child_machine_def|
           if child_machine_def.respond_to?(:mgmt_fqdn)
