@@ -136,7 +136,7 @@ namespace :sbx do
           end
         end
         found = false
-        10.times do
+        50.times do
           found = mco_client("rpcutil", :key => "seed") do |mco|
             hosts.to_set.subset?(mco.discover.to_set)
           end
