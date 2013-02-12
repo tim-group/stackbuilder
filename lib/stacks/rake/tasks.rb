@@ -204,7 +204,7 @@ namespace :sbx do
               Dir[specpath].each do |file|
                 require file
                 test = File.basename(file, '.rb')
-                it_behaves_like test, machine_def
+                it_behaves_like test, child_machine_def
               end
             end
           end
