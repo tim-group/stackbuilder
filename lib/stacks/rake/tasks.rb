@@ -69,11 +69,11 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #
 
 def sbtask(name, &block)
- task name do
+  task name do
     puts "running #{name}@@@@\n"
     block.call()
-   puts "complete #{name}$%%\n"
- end
+    puts "complete #{name}$%%\n"
+  end
 end
 
 namespace :sbx do
@@ -198,12 +198,14 @@ namespace :sbx do
       desc "carry out all appropriate tests on these machines"
       task :test do
         machine_def.accept do |child_machine_def|
-          specpath = File.dirname(__FILE__) + "/../stacktests/#{child_machine_def.clazz}/*.rb"
-          describe "#{child_machine_def.clazz}.#{child_machine_def.name}" do
-            Dir[specpath].each do |file|
-              require file
-              test = File.basename(file, '.rb')
-              it_behaves_like test, machine_def
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+            specpath = File.dirname(__FILE__) + "/../stacktests/#{child_machine_def.clazz}/*.rb"
+            describe "#{child_machine_def.clazz}.#{child_machine_def.name}" do
+              Dir[specpath].each do |file|
+                require file
+                test = File.basename(file, '.rb')
+                it_behaves_like test, machine_def
+              end
             end
           end
         end
