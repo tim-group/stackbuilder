@@ -68,12 +68,12 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #      clean     dependson [destroy_vms, clean_certs]
 #
 
-sbtask(name, &block)
-  puts "running #{name}@@@@\n"
-  task name do
+def sbtask(name, &block)
+ task name do
+    puts "running #{name}@@@@\n"
     block.call()
-  end
-  puts "complete #{name}$%%\n"
+   puts "complete #{name}$%%\n"
+ end
 end
 
 namespace :sbx do
