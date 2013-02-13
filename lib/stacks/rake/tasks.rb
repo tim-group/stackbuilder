@@ -22,8 +22,6 @@ rescue Exception
   exit 1
 end
 
-logger = logger()
-
 environment_name = ENV.fetch('env', 'dev')
 bind_to(environment_name)
 
@@ -77,10 +75,10 @@ def sbtask(name, &block)
     begin
       block.call()
     rescue Exception => e
-      logger.failed
+      logger.failed(name)
       raise e
     end
-    logger.passed
+    logger.passed(name)
   end
 end
 

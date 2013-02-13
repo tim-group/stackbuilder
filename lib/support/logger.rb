@@ -16,19 +16,25 @@ class Support::RakeFormatter
 end
 
 def logger
-  log = Logger.new STDOUT
-  log.instance_eval do
+  return @log unless @log.nil?
+
+  @log = Logger.new STDOUT
+  @log.instance_eval do
     @formatter = Support::RakeFormatter.new
     def start(task)
+      @start_time = Time.now
       puts "\e[1m\e[34m:#{task}\e[0m"
     end
 
-    def failed()
-      puts "\n\e[1m\e[31mBUILD FAILED\e[0m\n"
+    def failed(task)
+      @elapsed = Time.now - @start_time
+      puts "\n\e[1m\e[31m:#{task} failed in #{@elapsed}\e[0m\n"
     end
 
-    def passed()
+    def passed(task)
+      @elapsed = Time.now - @start_time
+      puts "\n\e[1m\e[32m:#{task} passed in #{@elapsed}s\e[0m\n"
     end
   end
-  log
+  @log
 end
