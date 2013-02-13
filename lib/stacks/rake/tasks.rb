@@ -159,7 +159,7 @@ namespace :sbx do
         end
 
         include Support::MCollectivePuppet
-        ca_clean(hosts) do
+        ca_sign(hosts) do
           on :success do |vm|
             logger.info "successfully signed cert for #{vm}"
           end
