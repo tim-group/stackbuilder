@@ -11,7 +11,6 @@ module Support::MCollectivePuppet
     machines_fqdns.each do |machine_fqdn|
       mco_client("puppetca") do |mco|
         cleaned = mco.sign(:certname => machine_fqdn).select do |response|
-          pp response
           response[:statuscode]==0
         end.size > 0
         if cleaned
