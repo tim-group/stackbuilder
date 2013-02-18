@@ -176,11 +176,14 @@ namespace :sbx do
           end
         end
         pp hosts
-        mco_client("puppetd", :key => "seed") do |mco|
+        success = mco_client("puppetd", :key => "seed") do |mco|
           engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
           engine.execute()
           pp engine.get_report()
+          engine.successful?
         end
+
+        fail("some nodes have failed their puppet runs") unless success
       end
 
       desc ""
