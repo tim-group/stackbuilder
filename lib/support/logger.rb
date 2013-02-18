@@ -3,7 +3,7 @@ module Support
 end
 
 class Support::RakeFormatter
-  @@interactive = $stdin.tty?
+  @@interactive = $stdout.tty?
   @@format = @@interactive ? "\t\e[1m[%s]\e[0m %s\n" : "\t[%s] %s\n"
   attr_accessor :datetime_format
 
