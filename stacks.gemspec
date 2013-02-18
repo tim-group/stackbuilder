@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.description = %q{}
   s.email = %q{}
   s.executables = Dir.glob("bin/**/*")
-  s.extra_rdoc_files = ["README.rdoc", "KNOWN-ISSUES"]
+  s.extra_rdoc_files = ["KNOWN-ISSUES"]
   s.files = Dir.glob("lib/**/*")
   s.require_paths = ["lib"]
   s.summary = %q{a tool for generating "stacks" that form software services}
