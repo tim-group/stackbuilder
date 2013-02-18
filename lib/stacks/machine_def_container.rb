@@ -33,13 +33,6 @@ class Stacks::MachineDefContainer
     return return_machines
   end
 
-  def recursive_extend(extended_module)
-    self.extend(extended_module)
-    self.children.each do |child|
-      child.recursive_extend(extended_module)
-    end
-  end
-
   def clazz
     return "container"
   end

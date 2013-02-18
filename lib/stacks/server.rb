@@ -2,8 +2,11 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::Server < Stacks::MachineDef
-  def initialize(virtual_group, index, location, &block)
-    @virtual_group = virtual_group
+  attr_reader :environment, :virtual_group
+
+  def initialize(virtual_service, index, location, &block)
+    @virtual_service = virtual_service
+    @virtual_group = virtual_service.name
     @index = index
     @location = location
     @networks = [:mgmt, :prod]
@@ -11,6 +14,7 @@ class Stacks::Server < Stacks::MachineDef
   end
 
   def bind_to(environment)
+    @environment = environment
     @hostname = environment.name + "-" + @virtual_group + "-" + @index
     @fabric = environment.options[@location]
     @domain = "#{@fabric}.net.local"
@@ -29,6 +33,14 @@ class Stacks::Server < Stacks::MachineDef
 
   def mgmt_fqdn
     return qualified_hostname(:mgmt)
+  end
+
+  def vip_fqdn
+    return @virtual_service.vip_fqdn
+  end
+
+  def groups
+    return ['blue']
   end
 
   def to_specs

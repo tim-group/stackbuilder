@@ -31,6 +31,26 @@ module Stacks
       end
     end
 
+    def enc_for(fqdn)
+      node = nil
+      accept do |machine_def|
+        if machine_def.respond_to? :mgmt_fqdn and machine_def.mgmt_fqdn == fqdn
+          node = machine_def
+        end
+      end
+
+      raise "unable to locate machine called #{fqdn}" if node.nil?
+
+      {
+        'role::http_app' => {
+           'application' => node.virtual_group,
+           'groups' => node.groups,
+           'vip' => node.vip_fqdn,
+           'environment' => node.environment.name
+        }
+      }
+    end
+
     def accept(&block)
       stacks.values.each do |stack|
         stack.accept(&block)
