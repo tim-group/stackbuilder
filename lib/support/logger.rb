@@ -20,6 +20,7 @@ class Support::RakeFormatter
       msg = msg.gsub(/successful/, "\e[32msuccessful\e[0m")
       msg.gsub(/failed/, "\e[31mfailed\e[0m")
     end
+    msg
   end
 end
 
