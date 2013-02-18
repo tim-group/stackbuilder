@@ -114,7 +114,7 @@ namespace :sbx do
             logger.info "#{vm} launched successfully"
           end
           on :failure do |vm|
-            logger.error "#{vm} failured to launch"
+            logger.error "#{vm} failed to launch"
           end
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
