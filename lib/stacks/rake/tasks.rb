@@ -164,9 +164,26 @@ namespace :sbx do
           on :failed do |vm|
             logger.warn "failed to signed cert for #{vm}"
           end
+          on :unaccounted do |vm|
+            logger.warn "cert not signed for #{vm} (unaccounted for)"
+          end
         end
       end
 
+      desc "sign outstanding Puppet certificate signing requests for these machines"
+      sbtask :puppet_wait do
+        hosts = []
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+            hosts << child_machine_def.mgmt_fqdn
+          end
+        end
+
+        include Support::MCollectivePuppet
+        wait_for_complete(hosts) do
+
+        end
+      end
       desc "run Puppet on these machines"
       sbtask :puppet do
         hosts = []
