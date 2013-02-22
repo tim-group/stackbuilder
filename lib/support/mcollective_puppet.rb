@@ -46,15 +46,21 @@ module Support::MCollectivePuppet
 
 
   def puppet_run_passed?(data)
-    return data[:resources]["failed"]==0 && data[:resources]["failed_to_restart"]==0? "passed" : "failed"
+    return data != nil &&
+      data.has_key?(:resources) &&
+      data[:resources] != nil &&
+      data[:resources]["failed"]==0 &&
+      data[:resources]["failed_to_restart"]==0? "passed" : "failed"
   end
 
+
+  ## todo refactor this - tis aweful
   def wait_for_complete(machine_fqdns, &block)
-    timeout = 5
+    timeout = 600
     callback = Support::Callback.new
     callback.instance_eval(&block)
-
     unknown_machines = machine_fqdns.clone.to_set
+    machines_that_failed_puppet = {}
     all_stopped = false
     start_time = Time.new
 
@@ -69,26 +75,31 @@ module Support::MCollectivePuppet
         status=="stopped"
       end].keys.to_set
 
-      unknown_machines -= completed_machines
+      if (completed_machines.size >0)
+        unknown_machines -= completed_machines
 
-      last_run_summary = Hash[mco_client("puppetd", :nodes=> completed_machines.to_a) do |mco|
-        mco.last_run_summary(:timeout=>30).map do |response|
-          [response[:sender], puppet_run_passed?(response[:data])]
+        last_run_summary = Hash[mco_client("puppetd", :nodes=> completed_machines.to_a) do |mco|
+          mco.last_run_summary(:timeout=>30).map do |response|
+            [response[:sender], puppet_run_passed?(response[:data])]
+          end
+        end]
+
+        last_run_summary_results = last_run_summary.merge Hash[unknown_machines.map do |machine|
+          [machine, "unaccounted_for"]
+        end]
+
+
+        failed = last_run_summary.reject do |machine, result|
+          result == "passed"
         end
-      end]
+        machines_that_failed_puppet.merge(failed)
 
-      last_run_summary = last_run_summary.merge Hash[unknown_machines.map do |machine|
-        [machine, "unaccounted_for"]
-      end]
-
-      machines_that_failed_puppet = last_run_summary.reject do |machine, result|
-        result == "passed"
+        pp machines_that_failed_puppet
       end
-
-      pp last_run_summary
-
-      raise "some machines failed puppet runs " if machines_that_failed_puppet.size>0
     end
+
+    raise "some machines failed puppet runs #{machines_that_failed_puppet.inspect}" if machines_that_failed_puppet.size>0
+    raise "some machines puppet runs were unaccounted for" if unknown_machines.size>0
   end
 
   def ca_clean(machines_fqdns, &block)
