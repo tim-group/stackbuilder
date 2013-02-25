@@ -27,6 +27,7 @@ module Support::MCollectivePuppet
       ready_to_sign.each do |machine_fqdn|
         signed = mco_client("puppetca") do |mco|
           mco.sign(:certname => machine_fqdn).select do |response|
+            pp response
             response[:statuscode]==0
           end.size > 0
         end
