@@ -92,7 +92,7 @@ namespace :sbx do
         puts machine_def.to_specs.to_yaml
       end
 
-      task :provision=> [:puppet_clean, :launch, :mping, :puppet_sign, :puppet]
+      task :provision=> ['puppet:clean', 'launch', 'puppet:sign', 'puppet:wait']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -135,7 +135,7 @@ namespace :sbx do
         end
         found = false
         50.times do
-          found = mco_client("rpcutil", :key => "seed") do |mco|
+          found = mco_client("rpcutil") do |mco|
             hosts.to_set.subset?(mco.discover.to_set)
           end
 
@@ -147,80 +147,84 @@ namespace :sbx do
         logger.info "all nodes found in mcollective #{hosts.size}"
       end
 
-      desc "sign outstanding Puppet certificate signing requests for these machines"
-      sbtask :puppet_sign do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:mgmt_fqdn)
-            hosts << child_machine_def.mgmt_fqdn
+      namespace :puppet do
+        desc "sign outstanding Puppet certificate signing requests for these machines"
+        sbtask :sign do
+          hosts = []
+          machine_def.accept do |child_machine_def|
+            if child_machine_def.respond_to?(:mgmt_fqdn)
+              hosts << child_machine_def.mgmt_fqdn
+            end
+          end
+
+          include Support::MCollectivePuppet
+          ca_sign(hosts) do
+            on :success do |vm|
+              logger.info "successfully signed cert for #{vm}"
+            end
+            on :failed do |vm|
+              logger.warn "failed to signed cert for #{vm}"
+            end
+            on :unaccounted do |vm|
+              logger.warn "cert not signed for #{vm} (unaccounted for)"
+            end
           end
         end
 
-        include Support::MCollectivePuppet
-        ca_sign(hosts) do
-          on :success do |vm|
-            logger.info "successfully signed cert for #{vm}"
+        desc "wait for puppet to complete its run on these machines"
+        sbtask :wait do
+          hosts = []
+          machine_def.accept do |child_machine_def|
+            if child_machine_def.respond_to?(:mgmt_fqdn)
+              hosts << child_machine_def.mgmt_fqdn
+            end
           end
-          on :failed do |vm|
-            logger.warn "failed to signed cert for #{vm}"
-          end
-          on :unaccounted do |vm|
-            logger.warn "cert not signed for #{vm} (unaccounted for)"
-          end
-        end
-      end
 
-      desc "sign outstanding Puppet certificate signing requests for these machines"
-      sbtask :puppet_wait do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:mgmt_fqdn)
-            hosts << child_machine_def.mgmt_fqdn
+          include Support::MCollectivePuppet
+          wait_for_complete(hosts) do
+
           end
         end
 
-        include Support::MCollectivePuppet
-        wait_for_complete(hosts) do
-
-        end
-      end
-      desc "run Puppet on these machines"
-      sbtask :puppet do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:mgmt_fqdn)
-            hosts << child_machine_def.mgmt_fqdn
+        desc "run Puppet on these machines"
+        sbtask :run do
+          hosts = []
+          machine_def.accept do |child_machine_def|
+            if child_machine_def.respond_to?(:mgmt_fqdn)
+              hosts << child_machine_def.mgmt_fqdn
+            end
           end
-        end
-        pp hosts
-        success = mco_client("puppetd", :key => "seed") do |mco|
-          engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
-          engine.execute()
-          pp engine.get_report()
-          engine.successful?
+          pp hosts
+          success = mco_client("puppetd", :key => "seed") do |mco|
+            engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
+            engine.execute()
+            pp engine.get_report()
+            engine.successful?
+          end
+
+          fail("some nodes have failed their puppet runs") unless success
         end
 
-        fail("some nodes have failed their puppet runs") unless success
-      end
+        desc ""
+        sbtask :clean do
+          hosts = []
+          machine_def.accept do |child_machine_def|
+            if child_machine_def.respond_to?(:mgmt_fqdn)
+              hosts << child_machine_def.mgmt_fqdn
+            end
+          end
 
-      desc ""
-      sbtask :puppet_clean do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:mgmt_fqdn)
-            hosts << child_machine_def.mgmt_fqdn
+          include Support::MCollectivePuppet
+          ca_clean(hosts) do
+            on :success do |vm|
+              logger.info "successfully removed cert for #{vm}"
+            end
+            on :failed do |vm|
+              logger.warn "failed to remove cert for #{vm}"
+            end
           end
         end
 
-        include Support::MCollectivePuppet
-        ca_clean(hosts) do
-          on :success do |vm|
-            logger.info "successfully removed cert for #{vm}"
-          end
-          on :failed do |vm|
-            logger.warn "failed to remove cert for #{vm}"
-          end
-        end
       end
 
       desc "clean away all traces of these machines"
