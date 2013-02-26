@@ -1,6 +1,7 @@
 require 'set'
 require 'stacks/stack'
 require 'stacks/environment'
+require 'stacks/standalone_server'
 require 'pp'
 
 describe Stacks::DSL do
@@ -37,7 +38,7 @@ describe Stacks::DSL do
 
   it 'can make an arbitrary specd machine' do
     stack "fabric" do
-      @definitions["puppetmaster"] = Stacks::Server.new("puppetmaster","001", :primary) do
+      @definitions["puppetmaster"] = Stacks::StandaloneServer.new("puppetmaster-001", :primary) do
         def to_specs
           specs = super
           specs.each do |spec|
@@ -52,7 +53,6 @@ describe Stacks::DSL do
     stacks["fabric"].to_specs.should eql([{
       :hostname => "ci-puppetmaster-001",
       :bling => true,
-      :group => "ci-puppetmaster",
       :domain => "st.net.local",
       :qualified_hostnames => {
           :prod => "ci-puppetmaster-001.st.net.local",

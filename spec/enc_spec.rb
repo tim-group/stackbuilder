@@ -17,7 +17,6 @@ describe Stacks::DSL do
 
   it 'binds to configuration from the environment' do
     stacks = bind_to('ci')
-    pp stacks
 
     enc_for("ci-appx-001.mgmt.st.net.local").should eql(
       {
