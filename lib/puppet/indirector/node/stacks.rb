@@ -20,7 +20,7 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
   def find(request)
     node = super
     node.fact_merge
-    node.classes = enc_for node.name + ".mgmt.st.net.local"
+    node.classes = enc_for node.parameters[:fqdn]
     node
   end
 end
