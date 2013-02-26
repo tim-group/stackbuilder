@@ -88,13 +88,10 @@ module Support::MCollectivePuppet
           [machine, "unaccounted_for"]
         end]
 
-
         failed = last_run_summary.reject do |machine, result|
           result == "passed"
         end
         machines_that_failed_puppet.merge(failed)
-
-        pp machines_that_failed_puppet
       end
     end
 

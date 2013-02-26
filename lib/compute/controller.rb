@@ -88,6 +88,7 @@ class Compute::Controller
       end
     end
 
+    callback.invoke :hasfailures, all_specs, :if=>[:failure]
   end
 
   def clean(specs, &block)

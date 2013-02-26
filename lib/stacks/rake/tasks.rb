@@ -70,8 +70,8 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #
 
 def sbtask(name, &block)
-  task name do
-    logger.start name
+  task name do |task|
+    logger.start task.name
     begin
       block.call()
     rescue Exception => e
@@ -119,7 +119,7 @@ namespace :sbx do
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
           end
-          on :has_errors do
+          on :hasfailures do
             fail "some machines failed to launch"
           end
         end
