@@ -1,29 +1,26 @@
 require 'stacks/environment'
 require 'puppet/node'
 require 'puppet/indirector/plain'
-
 class Puppet::Node::Stacks < Puppet::Indirector::Plain
   desc "generates the necessary wiring for all nodes in a stack."
 
-  def find(request)
-    extend Stacks
-    node = super
-    node.fact_merge
-
-    env = env "dev" do
-      stack "ref" do
-        loadbalancer "lb"
-        virtualservice "refapp"
+  def initialize
+    extend Stacks::DSL
+    dirs = ['.','/etc/stacks/']
+    dirs.each do |dir|
+      file = "#{dir}/stack.rb"
+      if File.exist? file
+        config = IO.read '/home/dellis/workspace/refstack/stack.rb'
+        instance_eval(config, '/home/dellis/workspace/refstack/stack.rb')
       end
     end
+    bind
+  end
 
-    env.generate()
-    member = env.collapse_registries[node.parameters['hostname']]
-
-    unless  member.nil?
-      node.classes = member.to_enc[:enc][:classes]
-    end
-
+  def find(request)
+    node = super
+    node.fact_merge
+    node.classes = enc_for node.name + ".mgmt.st.net.local"
     node
   end
 end

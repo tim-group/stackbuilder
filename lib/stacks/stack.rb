@@ -14,10 +14,6 @@ class Stacks::Stack < Stacks::MachineDefContainer
     @definitions[name] = Stacks::VirtualService.new(name, self)
   end
 
-  def machine(name)
-    @definitions[name] = Stacks::Server.new(name, self)
-  end
-
   def [](key)
     return @definitions[key]
   end

@@ -17,6 +17,8 @@ describe Stacks::DSL do
 
   it 'binds to configuration from the environment' do
     bind_to('ci')
+    blah = stacks["blah"].bind_to('ci')
+
     appx = stacks["blah"]["appx"]
     appx.to_specs.should eql([{
       :hostname => "ci-appx-001",

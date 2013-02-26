@@ -6,29 +6,39 @@ module Stacks
 
   module DSL
     attr_accessor :stacks
+    attr_accessor :stack_procs
     attr_accessor :environments
 
     def self.extended(object)
       object.stacks = {}
+      object.stack_procs = {}
       object.environments = {}
     end
 
     def stack(name,&block)
-      stack =  Stacks::Stack.new(name)
-      stack.instance_eval(&block)
-      stacks[name] = stack
-      return stack
+      @stack_procs[name] = Proc.new do |environment|
+        stack =  Stacks::Stack.new(name)
+        stack.instance_eval(&block)
+        stack.bind_to(environment)
+        stack
+      end
     end
 
     def env(name, options)
       environments[name] = Stacks::Environment.new(name, options)
     end
 
+    def bind()
+      environments.each do |name,env|
+        bind_to(name)
+      end
+    end
+
     def bind_to(environment_name)
       environment = environments[environment_name]
       raise "no environment called #{environment_name}" if environment.nil?
-      stacks.values.each do |stack|
-        stack.bind_to(environment)
+      stack_procs.each do |name, stack_proc|
+        stacks[environment_name + "-" + name] = stack_proc.call(environment)
       end
     end
 
