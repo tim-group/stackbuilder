@@ -19,8 +19,4 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     return 'virtualservice'
   end
 
-  def rspecs
-    return ['end2end']
-  end
-
 end

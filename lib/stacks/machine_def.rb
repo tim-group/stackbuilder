@@ -38,7 +38,4 @@ class Stacks::MachineDef
     return "machine"
   end
 
-  def rspecs
-    return ['nrpe']
-  end
 end
