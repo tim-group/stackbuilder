@@ -2,6 +2,7 @@ module Stacks
 
   require 'stacks/stack'
   require 'stacks/environment'
+  require 'stacks/standalone_server'
 
   module DSL
     attr_accessor :stacks
