@@ -11,9 +11,9 @@ describe Puppet::Node::Stacks do
       end
     end
 
-    enc = Puppet::Node::Stacks.new
-    request = Puppet::Indirector::Request.new('xxx','xxx','srs-refapp-001')
-    pp enc.find(request)
+#    enc = Puppet::Node::Stacks.new
+ #   request = Puppet::Indirector::Request.new('xxx','xxx','xxx','srs-refapp-001')
+  #  pp enc.find(request)
   end
 
 end

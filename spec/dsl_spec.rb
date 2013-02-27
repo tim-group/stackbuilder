@@ -17,9 +17,7 @@ describe Stacks::DSL do
 
   it 'binds to configuration from the environment' do
     bind_to('ci')
-    blah = stacks["blah"].bind_to('ci')
-
-    appx = stacks["blah"]["appx"]
+    appx = stacks["ci-blah"]["appx"]
     appx.to_specs.should eql([{
       :hostname => "ci-appx-001",
       :domain => "st.net.local",
@@ -51,8 +49,7 @@ describe Stacks::DSL do
       end
     end
     bind_to('ci')
-    pp stacks["fabric"].to_specs
-    stacks["fabric"].to_specs.should eql([{
+    stacks["ci-fabric"].to_specs.should eql([{
       :hostname => "ci-puppetmaster-001",
       :bling => true,
       :domain => "st.net.local",
