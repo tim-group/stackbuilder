@@ -25,14 +25,6 @@ class Stacks::MachineDefContainer
     end
   end
 
-  def machines
-    return_machines = []
-    @definitions.each do |name, machine_def|
-      return_machines |= machine_def.machines
-    end
-    return return_machines
-  end
-
   def clazz
     return "container"
   end

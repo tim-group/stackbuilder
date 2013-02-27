@@ -1,6 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def_container'
 require 'stacks/virtual_service'
+require 'stacks/loadbalancer'
 
 class Stacks::Stack < Stacks::MachineDefContainer
   attr_reader :name
@@ -12,6 +13,10 @@ class Stacks::Stack < Stacks::MachineDefContainer
 
   def virtualservice(name)
     @definitions[name] = Stacks::VirtualService.new(name, self)
+  end
+
+  def loadbalancer
+    @definitions["lb-001"] = Stacks::LoadBalancer.new("lb-001")
   end
 
   def [](key)

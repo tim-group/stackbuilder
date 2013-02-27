@@ -25,8 +25,9 @@ module Stacks
       end
     end
 
-    def env(name, options)
-      environments[name] = Stacks::Environment.new(name, options)
+    def env(name, options, &block)
+      environments[name] = Stacks::Environment.new(name, options, stack_procs)
+      environments[name].instance_eval(&block) unless block.nil?
     end
 
     def bind()
@@ -43,15 +44,20 @@ module Stacks
       end
     end
 
-    def enc_for(fqdn)
+    def find(fqdn)
       node = nil
-      accept do |machine_def|
+      acceptx do |machine_def|
+        pp machine_def.mgmt_fqdn if machine_def.respond_to? :mgmt_fqdn
         if machine_def.respond_to? :mgmt_fqdn and machine_def.mgmt_fqdn == fqdn
           node = machine_def
         end
       end
-
       raise "unable to locate machine called #{fqdn}" if node.nil?
+      node
+    end
+
+    def enc_for(fqdn)
+      node = find(fqdn)
 
       resolver = Resolv::DNS.new
       {
@@ -69,6 +75,13 @@ module Stacks
         stack.accept(&block)
       end
     end
+
+    def acceptx(&block)
+      environments.values.each do |env|
+        env.accept(&block)
+      end
+    end
+
 
   end
 end

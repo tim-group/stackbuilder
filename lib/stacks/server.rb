@@ -22,19 +22,6 @@ class Stacks::Server < Stacks::MachineDef
     @availability_group = environment.name + "-" + @virtual_group
   end
 
-  def qualified_hostname(network)
-    raise "no such network '#{network}'" unless @networks.include?(network)
-    if network == 'prod'
-      return "#{@hostname}.#{@domain}"
-    else
-      return "#{@hostname}.#{network}.#{@domain}"
-    end
-  end
-
-  def mgmt_fqdn
-    return qualified_hostname(:mgmt)
-  end
-
   def vip_fqdn
     return @virtual_service.vip_fqdn
   end

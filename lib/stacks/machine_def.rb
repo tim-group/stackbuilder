@@ -5,6 +5,7 @@ class Stacks::MachineDef
 
   def initialize(hostname)
     @hostname = hostname
+    @networks = [:mgmt, :prod]
   end
 
   def name
@@ -22,20 +23,20 @@ class Stacks::MachineDef
   def bind_to(environment)
   end
 
-  def machines
-    return [self]
-  end
-
-  def recursive_extend(extended_module)
-    self.extend(extended_module)
-  end
-
   def to_specs
     return []
   end
 
-  def clazz
-    return "machine"
+  def qualified_hostname(network)
+    raise "no such network '#{network}'" unless @networks.include?(network)
+    if network == 'prod'
+      return "#{@hostname}.#{@domain}"
+    else
+      return "#{@hostname}.#{network}.#{@domain}"
+    end
   end
 
+  def mgmt_fqdn
+    return qualified_hostname(:mgmt)
+  end
 end
