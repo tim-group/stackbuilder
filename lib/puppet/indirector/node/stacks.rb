@@ -20,7 +20,11 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
   def find(request)
     node = super
     node.fact_merge
-    node.classes = enc_for node.parameters['fqdn']
+
+    begin
+      node.classes = enc_for node.parameters['fqdn']
+    rescue Exception=>e
+    end
     node
   end
 end
