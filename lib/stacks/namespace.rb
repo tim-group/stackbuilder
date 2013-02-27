@@ -3,6 +3,7 @@ module Stacks
   require 'stacks/stack'
   require 'stacks/environment'
   require 'stacks/standalone_server'
+  require 'resolv'
 
   module DSL
     attr_accessor :stacks
@@ -52,11 +53,12 @@ module Stacks
 
       raise "unable to locate machine called #{fqdn}" if node.nil?
 
+      resolver = Resolv::DNS.new
       {
         'role::http_app' => {
            'application' => node.virtual_group,
            'groups' => node.groups,
-           'vip' => node.vip_fqdn,
+           'vip' => resolver.getaddress(node.vip_fqdn).to_s,
            'environment' => node.environment.name
         }
       }

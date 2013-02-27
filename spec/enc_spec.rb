@@ -18,21 +18,24 @@ describe Stacks::DSL do
   it 'binds to configuration from the environment' do
     stacks = bind_to('ci')
 
+    class Resolv::DNS
+      def getaddress(url)
+        return "1.1.1.1"
+      end
+    end
+
     enc_for("ci-appx-001.mgmt.st.net.local").should eql(
       {
         'role::http_app'=> {
           'application' => 'appx',
           'groups' => ['blue'],
-          'vip' => 'ci-appx-vip.st.net.local',
+          'vip' => '1.1.1.1',
           'environment' => 'ci'
         }
       }
     )
 
     stacks = bind_to('bla')
-    pp stacks
-
-
   end
 
 end

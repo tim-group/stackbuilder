@@ -10,8 +10,8 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
     dirs.each do |dir|
       file = "#{dir}/stack.rb"
       if File.exist? file
-        config = IO.read '/home/dellis/workspace/refstack/stack.rb'
-        instance_eval(config, '/home/dellis/workspace/refstack/stack.rb')
+        config = IO.read file
+        instance_eval(config, file)
       end
     end
     bind
@@ -20,7 +20,7 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
   def find(request)
     node = super
     node.fact_merge
-    node.classes = enc_for node.parameters[:fqdn]
+    node.classes = enc_for node.parameters['fqdn']
     node
   end
 end
