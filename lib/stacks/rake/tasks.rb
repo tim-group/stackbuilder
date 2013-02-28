@@ -5,6 +5,7 @@ require 'rubygems'
 require 'stacks/environment'
 require 'support/mcollective'
 require 'support/mcollective_puppet'
+require 'set' # ci/reporter/rspec should require this but doesn't
 require 'ci/reporter/rspec'
 require 'set'
 require 'rspec'
@@ -122,6 +123,33 @@ namespace :sbx do
           end
           on :hasfailures do
             fail "some machines failed to launch"
+          end
+        end
+      end
+
+      desc "allocate IPs for these virtual services"
+      sbtask :allocate_vips do
+
+        vip_specs = []
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:to_vip_spec)
+            vip_specs << child_machine_def.to_vip_spec
+          end
+        end
+
+        computecontroller = Compute::Controller.new
+        computecontroller.allocate_ips(vip_specs) do
+          on :success do |vm|
+            logger.info "#{vm} allocated VIP successfully"
+          end
+          on :failure do |vm|
+            logger.error "#{vm} failed to allocate VIP"
+          end
+          on :unaccounted do |vm|
+            logger.error "#{vm} was unaccounted for"
+          end
+          on :hasfailures do
+            fail "some machines failed to allocate_ips"
           end
         end
       end
