@@ -91,6 +91,38 @@ class Compute::Controller
     callback.invoke :hasfailures, all_specs, :if=>[:failure]
   end
 
+  def allocate_ips(all_specs, &block)
+    callback = Support::Callback.new
+    callback.instance_eval(&block)
+    allocation = allocate(all_specs)
+
+    results = allocation.map do |host, specs|
+      @compute_node_client.allocate_ips(host, specs)
+    end.flatten_hashes
+
+    flattened_results = results.map do |host, vms|
+      vms.map do |vm, result|
+        [vm, {:result=>result, :host=>host}]
+      end
+    end.flatten_hashes
+
+    all_specs.each do |spec|
+      vm = spec[:hostname]
+      result = flattened_results[vm]
+      if result.nil?
+        callback.invoke :unaccounted, vm
+        next
+      end
+      if result[:result] == "success"
+        callback.invoke :success, vm
+      else
+        callback.invoke :failure, vm
+      end
+    end
+
+    callback.invoke :hasfailures, all_specs, :if=>[:failure]
+  end
+
   def clean(specs, &block)
     callback = Support::Callback.new
     unless block.nil?
@@ -162,6 +194,17 @@ class Compute::Client
   def launch(host, specs)
     mco_client("computenode", :timeout=>1000, :nodes=>[host]) do |mco|
       mco.launch(:specs=>specs).map do |node|
+        if node[:statuscode]!=0
+          raise node[:statusmsg]
+        end
+        [node.results[:sender], node.results[:data]]
+      end
+    end
+  end
+
+  def allocate_ips(host, specs)
+    mco_client("computenode", :timeout=>1000, :nodes=>[host]) do |mco|
+      mco.allocate_ips(:specs=>specs).map do |node|
         if node[:statuscode]!=0
           raise node[:statusmsg]
         end

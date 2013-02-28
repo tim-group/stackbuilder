@@ -7,6 +7,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
 
   def initialize(name, env)
     @name = name
+    @network = :prod
     @definitions = {}
   end
 
@@ -16,7 +17,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @domain = "#{@fabric}.net.local"
     2.times do |i|
       index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] =  Stacks::Server.new(self, index, :primary)
+      @definitions["#{name}-#{index}"] = Stacks::Server.new(self, index, :primary)
     end
     super(environment)
   end
@@ -27,6 +28,14 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
 
   def vip_fqdn
     "#{@environment.name}-#{name}-vip.#{@domain}"
+  end
+
+  def to_vip_spec
+    {
+      :fabric => @fabric,
+      :networks => [@network],
+      :qualified_hostnames => {@network => vip_fqdn}
+    }
   end
 
 end
