@@ -136,7 +136,7 @@ namespace :sbx do
             vip_specs << child_machine_def.to_vip_spec
           end
         end
-        
+
         computecontroller = Compute::Controller.new
         computecontroller.allocate_ips(vip_specs) do
           on :success do |vm|
@@ -149,7 +149,36 @@ namespace :sbx do
             logger.error "#{vm} was unaccounted for"
           end
           on :hasfailures do
-            fail "some machines failed to allocate_ips"
+            fail "some machines failed to allocate  VIPs"
+          end
+        end
+      end
+
+      desc "free IPs for these virtual services"
+      sbtask :free_vips do
+
+        vip_specs = []
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:to_vip_spec)
+            vip_specs << child_machine_def.to_vip_spec
+          end
+        end
+        
+        pp vip_specs
+
+        computecontroller = Compute::Controller.new
+        computecontroller.free_ips(vip_specs) do
+          on :success do |vm|
+            logger.info "#{vm} freed VIP successfully"
+          end
+          on :failure do |vm|
+            logger.error "#{vm} failed to free VIP"
+          end
+          on :unaccounted do |vm|
+            logger.error "#{vm} was unaccounted for"
+          end
+          on :hasfailures do
+            fail "some machines failed to free VIPs"
           end
         end
       end
