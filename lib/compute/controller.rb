@@ -27,10 +27,6 @@ class Compute::Controller
   end
 
   def allocate(specs)
-    specs.each do |spec|
-      spec[:spindle] = "/var/local/images/"
-    end
-
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
     allocation = {}
