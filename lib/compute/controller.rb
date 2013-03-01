@@ -52,103 +52,49 @@ class Compute::Controller
     end]
   end
 
+  def allocate_and_send(selector, all_specs, &block)
+    callback = Support::Callback.new
+    callback.instance_eval(&block)
+    allocation = allocate(all_specs)
+
+    results = allocation.map do |host, specs|
+      @compute_node_client.send(selector, host, specs)
+    end.flatten_hashes
+
+    flattened_results = results.map do |host, vms|
+      vms.map do |vm, result|
+        [vm, {:result=>result, :host=>host}]
+      end
+    end.flatten_hashes
+
+    all_specs.each do |spec|
+      vm = spec[:hostname]
+      result = flattened_results[vm]
+      if result.nil?
+        callback.invoke :unaccounted, vm
+      elsif result[:result] == "success"
+        callback.invoke :success, vm
+      else
+        callback.invoke :failure, vm
+      end
+    end
+
+    callback.invoke :hasfailures, all_specs, :if=>[:failure]
+  end
+
   def launch(all_specs, &block)
     #current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
     #    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
-    callback = Support::Callback.new
-    callback.instance_eval(&block)
-    allocation = allocate(all_specs)
-
-    results = allocation.map do |host, specs|
-      @compute_node_client.launch(host, specs)
-    end.flatten_hashes
-
-    flattened_results = results.map do |host, vms|
-      vms.map do |vm, result|
-        [vm, {:result=>result, :host=>host}]
-      end
-    end.flatten_hashes
-
-    all_specs.each do |spec|
-      vm = spec[:hostname]
-      result = flattened_results[vm]
-      if result.nil?
-        callback.invoke :unaccounted, vm
-        next
-      end
-      if result[:result] == "success"
-        callback.invoke :success, vm
-      else
-        callback.invoke :failure, vm
-      end
-    end
-
-    callback.invoke :hasfailures, all_specs, :if=>[:failure]
+    allocate_and_send(:launch, all_specs, &block)
   end
 
   def allocate_ips(all_specs, &block)
-    callback = Support::Callback.new
-    callback.instance_eval(&block)
-    allocation = allocate(all_specs)
-
-    results = allocation.map do |host, specs|
-      @compute_node_client.allocate_ips(host, specs)
-    end.flatten_hashes
-
-    flattened_results = results.map do |host, vms|
-      vms.map do |vm, result|
-        [vm, {:result=>result, :host=>host}]
-      end
-    end.flatten_hashes
-
-    all_specs.each do |spec|
-      vm = spec[:hostname]
-      result = flattened_results[vm]
-      if result.nil?
-        callback.invoke :unaccounted, vm
-        next
-      end
-      if result[:result] == "success"
-        callback.invoke :success, vm
-      else
-        callback.invoke :failure, vm
-      end
-    end
-
-    callback.invoke :hasfailures, all_specs, :if=>[:failure]
+    allocate_and_send(:allocate_ips, all_specs, &block)
   end
 
   def free_ips(all_specs, &block)
-    callback = Support::Callback.new
-    callback.instance_eval(&block)
-    allocation = allocate(all_specs)
-
-    results = allocation.map do |host, specs|
-      @compute_node_client.free_ips(host, specs)
-    end.flatten_hashes
-
-    flattened_results = results.map do |host, vms|
-      vms.map do |vm, result|
-        [vm, {:result=>result, :host=>host}]
-      end
-    end.flatten_hashes
-
-    all_specs.each do |spec|
-      vm = spec[:hostname]
-      result = flattened_results[vm]
-      if result.nil?
-        callback.invoke :unaccounted, vm
-        next
-      end
-      if result[:result] == "success"
-        callback.invoke :success, vm
-      else
-        callback.invoke :failure, vm
-      end
-    end
-
-    callback.invoke :hasfailures, all_specs, :if=>[:failure]
+    allocate_and_send(:free_ips, all_specs, &block)
   end
 
   def clean(specs, &block)
