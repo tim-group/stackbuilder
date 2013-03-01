@@ -33,7 +33,7 @@ class Compute::Controller
 
     fabrics.each do |fabric, specs|
       if fabric == "local"
-        localhost =  Socket.gethostbyname(Socket.gethostname).first
+        localhost = Socket.gethostbyname(Socket.gethostname).first
         allocation[localhost] = specs
       else
         hosts = @compute_node_client.find_hosts(fabric)
@@ -63,7 +63,7 @@ class Compute::Controller
 
     flattened_results = results.map do |host, vms|
       vms.map do |vm, result|
-        [vm, {:result=>result, :host=>host}]
+        [vm, {:result => result, :host => host}]
       end
     end.flatten_hashes
 
@@ -79,12 +79,12 @@ class Compute::Controller
       end
     end
 
-    callback.invoke :hasfailures, all_specs, :if=>[:failure]
+    callback.invoke :hasfailures, all_specs, :if => [:failure]
   end
 
   def launch(all_specs, &block)
     #current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
-    #    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
+    # raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
     allocate_and_send(:launch, all_specs, &block)
   end
@@ -111,7 +111,7 @@ class Compute::Controller
 
     flattened_results = results.map do |host, vms|
       vms.map do |vm, result|
-        [vm, {:result=>result, :host=>host}]
+        [vm, {:result => result, :host => host}]
       end
     end.flatten_hashes
 
@@ -120,9 +120,7 @@ class Compute::Controller
       result = flattened_results[vm]
       if result.nil?
         callback.invoke :unaccounted, vm
-        next
-      end
-      if result[:result] == "success"
+      elsif result[:result] == "success"
         callback.invoke :success, vm
       else
         callback.invoke :failure, vm
@@ -145,7 +143,7 @@ class Compute::Controller
     end
 
     unaccounted_vms = vms_asked_for.to_set - vms_accounted_for.to_set
-    if unaccounted_vms.size >0
+    if unaccounted_vms.size > 0
       @logger.warn("some vms were unaccounted for #{unaccounted_vms.inspect}")
     end
     results
@@ -160,15 +158,15 @@ class Compute::Client
   include Support::MCollective
 
   def find_hosts(fabric)
-    mco_client("computenode", :fabric=>fabric) do |mco|
+    mco_client("computenode", :fabric => fabric) do |mco|
       mco.discover.sort()
     end
   end
 
   def launch(host, specs)
-    mco_client("computenode", :timeout=>1000, :nodes=>[host]) do |mco|
-      mco.launch(:specs=>specs).map do |node|
-        if node[:statuscode]!=0
+    mco_client("computenode", :timeout => 1000, :nodes => [host]) do |mco|
+      mco.launch(:specs => specs).map do |node|
+        if node[:statuscode] != 0
           raise node[:statusmsg]
         end
         [node.results[:sender], node.results[:data]]
@@ -177,9 +175,9 @@ class Compute::Client
   end
 
   def allocate_ips(host, specs)
-    mco_client("computenode", :timeout=>1000, :nodes=>[host]) do |mco|
-      mco.allocate_ips(:specs=>specs).map do |node|
-        if node[:statuscode]!=0
+    mco_client("computenode", :timeout => 1000, :nodes => [host]) do |mco|
+      mco.allocate_ips(:specs => specs).map do |node|
+        if node[:statuscode] != 0
           raise node[:statusmsg]
         end
         [node.results[:sender], node.results[:data]]
@@ -188,9 +186,9 @@ class Compute::Client
   end
 
   def free_ips(host, specs)
-    mco_client("computenode", :timeout=>1000, :nodes=>[host]) do |mco|
-      mco.free_ips(:specs=>specs).map do |node|
-        if node[:statuscode]!=0
+    mco_client("computenode", :timeout => 1000, :nodes => [host]) do |mco|
+      mco.free_ips(:specs => specs).map do |node|
+        if node[:statuscode] != 0
           raise node[:statusmsg]
         end
         [node.results[:sender], node.results[:data]]
@@ -199,9 +197,9 @@ class Compute::Client
   end
 
   def clean(fabric, specs)
-    results = mco_client("computenode", :fabric=>fabric) do |mco|
+    results = mco_client("computenode", :fabric => fabric) do |mco|
       mco.clean(:specs => specs).map do |node|
-        if node[:statuscode]!=0
+        if node[:statuscode] != 0
           raise node[:statusmsg]
         end
         [node.results[:sender], node.results[:data]]
