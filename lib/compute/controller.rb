@@ -128,48 +128,31 @@ class Compute::Client
     end
   end
 
-  def launch(host, specs)
-    mco_client("computenode", :timeout => 1000, :nodes => [host]) do |mco|
-      mco.launch(:specs => specs).map do |node|
+  def invoke(selector, specs, client_options)
+    mco_client("computenode", client_options) do |mco|
+      mco.send(selector, :specs => specs).map do |node|
         if node[:statuscode] != 0
           raise node[:statusmsg]
         end
         [node.results[:sender], node.results[:data]]
       end
     end
+  end
+
+  def launch(host, specs)
+    invoke :launch, specs, :timeout => 1000, :nodes => [host]
   end
 
   def allocate_ips(host, specs)
-    mco_client("computenode", :timeout => 1000, :nodes => [host]) do |mco|
-      mco.allocate_ips(:specs => specs).map do |node|
-        if node[:statuscode] != 0
-          raise node[:statusmsg]
-        end
-        [node.results[:sender], node.results[:data]]
-      end
-    end
+    invoke :allocate_ips, specs, :nodes => [host]
   end
 
   def free_ips(host, specs)
-    mco_client("computenode", :timeout => 1000, :nodes => [host]) do |mco|
-      mco.free_ips(:specs => specs).map do |node|
-        if node[:statuscode] != 0
-          raise node[:statusmsg]
-        end
-        [node.results[:sender], node.results[:data]]
-      end
-    end
+    invoke :free_ips, specs, :nodes => [host]
   end
 
   def clean(fabric, specs)
-    mco_client("computenode", :fabric => fabric) do |mco|
-      mco.clean(:specs => specs).map do |node|
-        if node[:statuscode] != 0
-          raise node[:statusmsg]
-        end
-        [node.results[:sender], node.results[:data]]
-      end
-    end
+    invoke :clean, specs, :fabric => fabric
   end
 end
 
