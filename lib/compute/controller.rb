@@ -52,11 +52,18 @@ class Compute::Controller
     end]
   end
 
-  def allocate_and_send(selector, all_specs, &block)
+  def prepare_callback(&block)
     callback = Support::Callback.new
-    callback.instance_eval(&block)
-    allocation = allocate(all_specs)
+    unless block.nil?
+      callback.instance_eval(&block)
+    end
+    callback
+  end
 
+  def allocate_and_send(selector, all_specs, &block)
+    callback = prepare_callback(&block)
+    
+    allocation = allocate(all_specs)
     results = allocation.map do |host, specs|
       @compute_node_client.send(selector, host, specs)
     end.flatten_hashes
@@ -98,10 +105,7 @@ class Compute::Controller
   end
 
   def clean(specs, &block)
-    callback = Support::Callback.new
-    unless block.nil?
-      callback.instance_eval(&block)
-    end
+    callback = prepare_callback(&block)
 
     fabrics = specs.group_by { |spec| spec[:fabric] }
     vm_counts = {}
