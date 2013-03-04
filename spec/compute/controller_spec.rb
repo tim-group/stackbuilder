@@ -106,15 +106,9 @@ describe Compute::Controller do
       :qualified_hostnames => "vm1.mgmt.st.net.local"
     }]
 
-    result = {
-      "myhost" => {
-        "vm1" => "success"
-      }
-    }
-
-    @compute_node_client.stub(:launch).with("myhost", specs).and_return(result)
-
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => "success"}]])
     @compute_node_client.should_receive(:launch).with("myhost", specs)
+
     @compute_controller.launch(specs) do
       on :success do
       end
@@ -130,13 +124,7 @@ describe Compute::Controller do
       :qualified_hostnames => "vm1.mgmt.st.net.local"
     }]
 
-    result = {
-      "myhost" => {
-        "vm1" => "failed"
-      }
-    }
-
-    @compute_node_client.stub(:launch).with("myhost", specs).and_return(result)
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => "failed"}]])
 
     failure = false
     @compute_controller.launch(specs) do
@@ -163,12 +151,7 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    results = {
-      "host1" => {
-        "vm1" => "success"
-      }
-    }
-    @compute_node_client.stub(:launch).and_return(results)
+    @compute_node_client.stub(:launch).and_return([["myhost", {"vm1" => "success"}]])
 
     unaccounted = []
     @compute_controller.launch(specs) do
@@ -217,14 +200,7 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    @compute_node_client.stub(:clean).and_return({
-      "host1" => {
-        "vm1" => "success"
-      },
-      "host2" => {
-        "vm2" => "success"
-      },
-    })
+    @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => "success"}], ["host2", {"vm2" => "success"}]])
 
     successful = []
     @compute_controller.clean(specs) do
@@ -248,11 +224,7 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    @compute_node_client.stub(:clean).and_return({
-      "host1" => {
-        "vm1" => "success"
-      }
-    })
+    @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => "success"}]])
     
     unaccounted = []
     @compute_controller.clean(specs) do
@@ -277,17 +249,8 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    results = {
-      "host1" => {
-        "vm1" => "failed"
-      },
-      "host2" => {
-        "vm2" => "success"
-      },
-    }
-
     failures = []
-    @compute_node_client.stub(:clean).and_return(results)
+    @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => "failed"}], ["host2", {"vm2" => "success"}]])
     @compute_controller.clean(specs) do
       on :failure do |vm|
         failures << vm
