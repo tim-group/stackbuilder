@@ -162,7 +162,7 @@ class Compute::Client
   end
 
   def clean(fabric, specs)
-    results = mco_client("computenode", :fabric => fabric) do |mco|
+    mco_client("computenode", :fabric => fabric) do |mco|
       mco.clean(:specs => specs).map do |node|
         if node[:statuscode] != 0
           raise node[:statusmsg]
@@ -170,7 +170,6 @@ class Compute::Client
         [node.results[:sender], node.results[:data]]
       end
     end
-    Hash[*results.flatten]
   end
 end
 
