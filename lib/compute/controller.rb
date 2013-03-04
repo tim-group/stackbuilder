@@ -60,14 +60,7 @@ class Compute::Controller
     callback
   end
 
-  def allocate_and_send(selector, all_specs, &block)
-    callback = prepare_callback(&block)
-
-    allocation = allocate(all_specs)
-    grouped_results = allocation.map do |host, specs|
-      @compute_node_client.send(selector, host, specs)
-    end
-
+  def dispatch_callback(all_specs, grouped_results, callback)
     results = grouped_results.flatten_hashes
 
     flattened_results = results.map do |host, vms|
@@ -89,6 +82,17 @@ class Compute::Controller
     end
 
     callback.invoke :hasfailures, all_specs, :if => [:failure]
+  end
+
+  def allocate_and_send(selector, all_specs, &block)
+    callback = prepare_callback(&block)
+
+    allocation = allocate(all_specs)
+    grouped_results = allocation.map do |host, specs|
+      @compute_node_client.send(selector, host, specs)
+    end
+
+    dispatch_callback(all_specs, grouped_results, callback)
   end
 
   def launch(all_specs, &block)
@@ -114,25 +118,7 @@ class Compute::Controller
       @compute_node_client.clean(fabric, specs)
     end
 
-    results = grouped_results.flatten_hashes
-
-    flattened_results = results.map do |host, vms|
-      vms.map do |vm, result|
-        [vm, {:result => result, :host => host}]
-      end
-    end.flatten_hashes
-
-    all_specs.each do |spec|
-      vm = spec[:hostname]
-      result = flattened_results[vm]
-      if result.nil?
-        callback.invoke :unaccounted, vm
-      elsif result[:result] == "success"
-        callback.invoke :success, vm
-      else
-        callback.invoke :failure, vm
-      end
-    end
+    dispatch_callback(all_specs, grouped_results, callback)
   end
 
 end
