@@ -26,7 +26,7 @@ module Support::MCollectivePuppet
       ready_to_sign.each do |machine_fqdn|
         signed = mco_client("puppetca") do |mco|
           mco.sign(:certname => machine_fqdn).select do |response|
-            response[:statuscode]==0
+            response[:statuscode] == 0
           end.size > 0
         end
         if signed
@@ -43,15 +43,13 @@ module Support::MCollectivePuppet
     end
   end
 
-
   def puppet_run_passed?(data)
-    return data != nil &&
-      data.has_key?(:resources) &&
-      data[:resources] != nil &&
-      data[:resources]["failed"]==0 &&
-      data[:resources]["failed_to_restart"]==0? "passed" : "failed"
+    return data !=nil &&
+    data.has_key?(:resources) &&
+    data[:resources] !=nil &&
+    data[:resources]["failed"] == 0 &&
+    data[:resources]["failed_to_restart"] == 0? "passed" : "failed"
   end
-
 
   ## todo refactor this - tis aweful
   def wait_for_complete(machine_fqdns, &block)
@@ -63,21 +61,21 @@ module Support::MCollectivePuppet
     start_time = Time.new
 
     while not unknown_machines.empty? and not timed_out(start_time, timeout)
-      current_status = Hash[mco_client("puppetd", :nodes=> machine_fqdns) do |mco|
-        mco.status(:timeout=>30).map do |response|
+      current_status = Hash[mco_client("puppetd", :nodes => machine_fqdns) do |mco|
+        mco.status(:timeout => 30).map do |response|
           [response[:sender], response[:data][:status]]
         end
       end]
 
       completed_machines = Hash[current_status.select do |machine, status|
-        status=="stopped"
+        status == "stopped"
       end].keys.to_set
 
       if (completed_machines.size >0)
         unknown_machines -= completed_machines
 
-        last_run_summary = Hash[mco_client("puppetd", :nodes=> completed_machines.to_a) do |mco|
-          mco.last_run_summary(:timeout=>30).map do |response|
+        last_run_summary = Hash[mco_client("puppetd", :nodes => completed_machines.to_a) do |mco|
+          mco.last_run_summary(:timeout => 30).map do |response|
             [response[:sender], puppet_run_passed?(response[:data])]
           end
         end]
@@ -102,7 +100,7 @@ module Support::MCollectivePuppet
     machines_fqdns.each do |machine_fqdn|
       mco_client("puppetca") do |mco|
         cleaned = mco.clean(:certname => machine_fqdn).select do |response|
-          response[:statuscode]==0
+          response[:statuscode] == 0
         end.size > 0
         if cleaned
           callback.invoke :success, machine_fqdn
