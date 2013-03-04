@@ -109,10 +109,7 @@ describe Compute::Controller do
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => "success"}]])
     @compute_node_client.should_receive(:launch).with("myhost", specs)
 
-    @compute_controller.launch(specs) do
-      on :success do
-      end
-    end
+    @compute_controller.launch(specs)
   end
 
   it 'calls back if any launch command failed' do
@@ -128,8 +125,6 @@ describe Compute::Controller do
 
     failure = false
     @compute_controller.launch(specs) do
-      on :success do |vm|
-      end
       on :failure do |vm|
         failure = true
      end
@@ -155,8 +150,6 @@ describe Compute::Controller do
 
     unaccounted = []
     @compute_controller.launch(specs) do
-      on :success do
-      end
       on :unaccounted do |vm|
         unaccounted << vm
       end
@@ -254,8 +247,6 @@ describe Compute::Controller do
     @compute_controller.clean(specs) do
       on :failure do |vm|
         failures << vm
-      end
-      on :success do |vm|
       end
     end
 
