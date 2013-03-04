@@ -119,7 +119,7 @@ class Compute::Controller
       end
     end.flatten_hashes
 
-    vms_asked_for = specs.each do |spec|
+    specs.each do |spec|
       vm = spec[:hostname]
       result = flattened_results[vm]
       if result.nil?
@@ -130,11 +130,6 @@ class Compute::Controller
         callback.invoke :failure, vm
       end
     end
-    array_failures = results.map do |host, vms|
-      vms.map do |node, result|
-        result
-      end
-    end.flatten
 
     vms_accounted_for = results.map do |host, vms|
       vms.map do |vm, result|
@@ -150,6 +145,7 @@ class Compute::Controller
     if unaccounted_vms.size > 0
       @logger.warn("some vms were unaccounted for #{unaccounted_vms.inspect}")
     end
+
     results
   end
 
