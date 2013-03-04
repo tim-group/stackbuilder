@@ -217,17 +217,23 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    results = {
+    @compute_node_client.stub(:clean).and_return({
       "host1" => {
         "vm1" => "success"
       },
       "host2" => {
         "vm2" => "success"
       },
-    }
+    })
 
-    @compute_node_client.stub(:clean).and_return(results)
-    @compute_controller.clean(specs).should eql(results)
+    successful = []
+    @compute_controller.clean(specs) do
+      on :success do |vm|
+        successful << vm
+      end
+    end
+    
+    successful.should eql(["vm1", "vm2"])
   end
 
   it 'unaccounted for vms (when clean is called) will be reported' do
@@ -242,22 +248,20 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    client_result = {
+    @compute_node_client.stub(:clean).and_return({
       "host1" => {
         "vm1" => "success"
       }
-    }
-    @compute_node_client.stub(:clean).and_return(client_result)
+    })
     
     unaccounted = []
-    result = @compute_controller.clean(specs) do
+    @compute_controller.clean(specs) do
       on :unaccounted do |vm|
         unaccounted << vm
       end
     end
     
     unaccounted.should eql(["vm2"])
-    result.should eql(client_result)
   end
 
   it 'will throw an exception if any nodes failed in the clean action ' do

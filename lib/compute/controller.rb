@@ -133,8 +133,6 @@ class Compute::Controller
         callback.invoke :failure, vm
       end
     end
-
-    results
   end
 
 end
