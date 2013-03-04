@@ -62,11 +62,13 @@ class Compute::Controller
 
   def allocate_and_send(selector, all_specs, &block)
     callback = prepare_callback(&block)
-    
+
     allocation = allocate(all_specs)
-    results = allocation.map do |host, specs|
+    grouped_results = allocation.map do |host, specs|
       @compute_node_client.send(selector, host, specs)
-    end.flatten_hashes
+    end
+
+    results = grouped_results.flatten_hashes
 
     flattened_results = results.map do |host, vms|
       vms.map do |vm, result|
@@ -109,9 +111,11 @@ class Compute::Controller
 
     fabrics = all_specs.group_by { |spec| spec[:fabric] }
     vm_counts = {}
-    results = fabrics.map do |fabric, specs|
+    grouped_results = fabrics.map do |fabric, specs|
       @compute_node_client.clean(fabric, specs)
-    end.flatten_hashes
+    end
+
+    results = grouped_results.flatten_hashes
 
     flattened_results = results.map do |host, vms|
       vms.map do |vm, result|
