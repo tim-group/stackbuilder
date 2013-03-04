@@ -2,9 +2,8 @@ require 'support/callback'
 
 describe Support::Callback do
   it 'allows callbacks to be passed in and executed by the subject code' do
-    callback = Support::Callback.new
     event_called = false
-    callback.instance_eval do
+    callback = Support::Callback.new do
       on :event do |arg|
         arg.blah()
         event_called = true
@@ -22,9 +21,8 @@ describe Support::Callback do
   end
 
   it 'allows us to invoke a summary event' do
-    callback = Support::Callback.new
     summary = false
-    callback.instance_eval do
+    callback = Support::Callback.new do
       on :event do |arg|
       end
       on :summary do |arg|
@@ -37,9 +35,8 @@ describe Support::Callback do
   end
 
   it 'doesnt invoke a summary invent if the other event is not invoked' do
-    callback = Support::Callback.new
     summary = false
-    callback.instance_eval do
+    callback = Support::Callback.new do
       on :event do |arg|
       end
       on :summary do |arg|
@@ -50,7 +47,4 @@ describe Support::Callback do
     summary.should eql(false)
   end
 
-
 end
-
-

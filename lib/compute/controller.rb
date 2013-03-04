@@ -61,10 +61,7 @@ class Compute::Controller
       end
     end.flatten_hashes
 
-    callback = Support::Callback.new
-    unless block.nil?
-      callback.instance_eval(&block)
-    end
+    callback = Support::Callback.new(&block)
 
     all_specs.each do |spec|
       vm = spec[:hostname]

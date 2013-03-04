@@ -2,9 +2,12 @@ module Support
 end
 
 class Support::Callback
-  def initialize
+  def initialize(&block)
     @blocks = {}
     @invoked = {}
+    if block:
+      instance_eval(&block)
+    end
   end
 
   private

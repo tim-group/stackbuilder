@@ -10,8 +10,7 @@ module Support::MCollectivePuppet
 
   def ca_sign(machines_fqdns, &block)
     timeout = 60
-    callback = Support::Callback.new
-    callback.instance_eval(&block)
+    callback = Support::Callback.new(&block)
     needs_signing = machines_fqdns.clone.to_set
 
     start_time = Time.new
@@ -57,8 +56,7 @@ module Support::MCollectivePuppet
   ## todo refactor this - tis aweful
   def wait_for_complete(machine_fqdns, &block)
     timeout = 900
-    callback = Support::Callback.new
-    callback.instance_eval(&block)
+    callback = Support::Callback.new(&block)
     unknown_machines = machine_fqdns.clone.to_set
     machines_that_failed_puppet = {}
     all_stopped = false
@@ -100,8 +98,7 @@ module Support::MCollectivePuppet
   end
 
   def ca_clean(machines_fqdns, &block)
-    callback = Support::Callback.new
-    callback.instance_eval(&block)
+    callback = Support::Callback.new(&block)
     machines_fqdns.each do |machine_fqdn|
       mco_client("puppetca") do |mco|
         cleaned = mco.clean(:certname => machine_fqdn).select do |response|
