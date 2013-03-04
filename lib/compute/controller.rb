@@ -90,8 +90,8 @@ class Compute::Controller
   end
 
   def launch(all_specs, &block)
-    #current = Hash[resolve(specs).to_a.select { |hostname, address| !address.nil? }]
-    # raise "some specified machines already exist: #{current.inspect}" unless current.empty?
+    current = Hash[resolve(all_specs).to_a.select { |hostname, address| !address.nil? }]
+      raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
     allocate_and_send(:launch, all_specs, &block)
   end

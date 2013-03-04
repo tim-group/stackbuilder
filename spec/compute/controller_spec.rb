@@ -151,10 +151,6 @@ describe Compute::Controller do
   end
 
   it 'unaccounted for vms raise an error when launching' do
-    @dns_client.rspec_reset
-    @dns_client.stub(:gethostbyname).with("vm1.mgmt.st.net.local").and_return("1.2.3.4")
-    @dns_client.stub(:gethostbyname).with("vm2.mgmt.st.net.local").and_return("1.2.3.4")
-
     @compute_node_client.stub(:find_hosts).and_return(["myhost"])
 
     specs = [{
@@ -203,7 +199,7 @@ describe Compute::Controller do
 
     expect {
       @compute_controller.launch(specs)
-    }.to raise_error
+    }.to raise_error('some specified machines already exist: {"vm2.mgmt.st.net.local"=>"1.2.3.4"}')
 
     @compute_node_client.should_not_receive(:find_hosts)
     @compute_node_client.should_not_receive(:launch)
