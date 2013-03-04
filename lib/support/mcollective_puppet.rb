@@ -56,7 +56,7 @@ module Support::MCollectivePuppet
 
   ## todo refactor this - tis aweful
   def wait_for_complete(machine_fqdns, &block)
-    timeout = 600
+    timeout = 900
     callback = Support::Callback.new
     callback.instance_eval(&block)
     unknown_machines = machine_fqdns.clone.to_set
