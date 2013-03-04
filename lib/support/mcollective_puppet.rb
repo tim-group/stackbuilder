@@ -96,7 +96,7 @@ module Support::MCollectivePuppet
     end
 
     raise "some machines failed puppet runs #{machines_that_failed_puppet.inspect}" if machines_that_failed_puppet.size>0
-    raise "some machines puppet runs were unaccounted for" if unknown_machines.size>0
+    raise "some machines puppet runs were unaccounted for after #{Time.now - start_time} sec" if unknown_machines.size>0
   end
 
   def ca_clean(machines_fqdns, &block)
