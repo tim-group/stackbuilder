@@ -19,7 +19,7 @@ class Stacks::Server < Stacks::MachineDef
     @fabric = environment.options[@location]
     @domain = "#{@fabric}.net.local"
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
-    @availability_group = environment.name + "-" + @virtual_group
+      @availability_group = environment.name + "-" + @virtual_group
   end
 
   def vip_fqdn
@@ -40,4 +40,17 @@ class Stacks::Server < Stacks::MachineDef
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }]
   end
+
+  def to_enc()
+    resolver = Resolv::DNS.new
+    {
+      'role::http_app' => {
+      'application' => virtual_group,
+      'groups' => groups,
+      'vip' => resolver.getaddress(vip_fqdn).to_s,
+      'environment' => environment.name
+    }}
+  end
+
+
 end

@@ -52,22 +52,7 @@ module Stacks
           node = machine_def
         end
       end
-      raise "unable to locate machine called #{fqdn}" if node.nil?
       node
-    end
-
-    def enc_for(fqdn)
-      node = find(fqdn)
-
-      resolver = Resolv::DNS.new
-      {
-        'role::http_app' => {
-           'application' => node.virtual_group,
-           'groups' => node.groups,
-           'vip' => resolver.getaddress(node.vip_fqdn).to_s,
-           'environment' => node.environment.name
-        }
-      }
     end
 
     def accept(&block)

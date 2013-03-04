@@ -74,26 +74,33 @@ describe Stacks::DSL do
   end
 
   it 'binds to configuration from the environment' do
-    #    stacks = bind_to('ci')
-
     class Resolv::DNS
       def getaddress(url)
         return "1.1.1.1"
       end
     end
 
-    enc_for("ci-appx-001.mgmt.st.net.local").should eql(
+    server = find("ci-appx-001.mgmt.st.net.local")
+
+    server.to_enc.should eql(
       {
       'role::http_app'=> {
       'application' => 'appx',
       'groups' => ['blue'],
       'vip' => '1.1.1.1',
       'environment' => 'ci'
-    }
-    }
-    )
-
-    stacks = bind_to('bla')
+    }})
   end
+
+  it 'throws an exception if the ' do
+    class Resolv::DNS
+      def getaddress(url)
+        return "1.1.1.1"
+      end
+    end
+
+    find("no-exist").should eql(nil)
+  end
+
 
 end

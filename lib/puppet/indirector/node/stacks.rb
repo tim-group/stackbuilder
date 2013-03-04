@@ -20,10 +20,9 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
   def find(request)
     node = super
     node.fact_merge
-
-    begin
-      node.classes = enc_for node.parameters['fqdn']
-    rescue Exception=>e
+    machine = find node.parameters['fqdn']
+    unless machine.nil?
+      node.classes = machine.to_enc
     end
     node
   end

@@ -11,9 +11,11 @@ describe Puppet::Node::Stacks do
       end
     end
 
-#    enc = Puppet::Node::Stacks.new
- #   request = Puppet::Indirector::Request.new('xxx','xxx','xxx','srs-refapp-001')
-  #  pp enc.find(request)
+
+    enc = Puppet::Node::Stacks.new
+    request = Puppet::Indirector::Request.new('xxx','xxx','xxx','srs-refapp-001')
+
+    enc.find(request).should eql(nil)
   end
 
 end
