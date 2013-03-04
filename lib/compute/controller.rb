@@ -104,10 +104,10 @@ class Compute::Controller
     allocate_and_send(:free_ips, all_specs, &block)
   end
 
-  def clean(specs, &block)
+  def clean(all_specs, &block)
     callback = prepare_callback(&block)
 
-    fabrics = specs.group_by { |spec| spec[:fabric] }
+    fabrics = all_specs.group_by { |spec| spec[:fabric] }
     vm_counts = {}
     results = fabrics.map do |fabric, specs|
       @compute_node_client.clean(fabric, specs)
@@ -119,7 +119,7 @@ class Compute::Controller
       end
     end.flatten_hashes
 
-    specs.each do |spec|
+    all_specs.each do |spec|
       vm = spec[:hostname]
       result = flattened_results[vm]
       if result.nil?
@@ -137,7 +137,7 @@ class Compute::Controller
       end
     end.flatten
 
-    vms_asked_for = specs.map do |spec|
+    vms_asked_for = all_specs.map do |spec|
       spec[:hostname]
     end
 
