@@ -288,7 +288,14 @@ namespace :sbx do
       desc "clean away all traces of these machines"
       task :clean do
         computecontroller = Compute::Controller.new
-        pp computecontroller.clean(machine_def.to_specs)
+        computecontroller.clean(machine_def.to_specs) do
+          on :success do |vm|
+            logger.info "cleaned #{vm}"
+          end
+          on :unaccounted do |vm|
+            logger.warn "VM was unaccounted for: #{vm}"
+          end
+        end
       end
 
       desc "carry out all appropriate tests on these machines"

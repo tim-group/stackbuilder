@@ -135,21 +135,6 @@ class Compute::Controller
       end
     end
 
-    vms_accounted_for = results.map do |host, vms|
-      vms.map do |vm, result|
-        vm
-      end
-    end.flatten
-
-    vms_asked_for = all_specs.map do |spec|
-      spec[:hostname]
-    end
-
-    unaccounted_vms = vms_asked_for.to_set - vms_accounted_for.to_set
-    if unaccounted_vms.size > 0
-      @logger.warn("some vms were unaccounted for #{unaccounted_vms.inspect}")
-    end
-
     results
   end
 
