@@ -11,7 +11,7 @@ module Support::MCollectivePuppet
 
     start_time = now
     while not needs_signing.empty? and not timed_out(start_time, timeout)
-      all_requests = mco_client("puppetca") do |mco|
+      all_requests = puppetca() do |mco|
         mco.list.map do |response|
           response[:data][:requests]
         end
@@ -20,7 +20,7 @@ module Support::MCollectivePuppet
       ready_to_sign = all_requests.intersection(needs_signing)
 
       ready_to_sign.each do |machine_fqdn|
-        signed = mco_client("puppetca") do |mco|
+        signed = puppetca() do |mco|
           mco.sign(:certname => machine_fqdn).select do |response|
             response[:statuscode] == 0
           end.size > 0
@@ -57,7 +57,7 @@ module Support::MCollectivePuppet
     start_time = now
 
     while not unknown_machines.empty? and not timed_out(start_time, timeout)
-      current_status = Hash[mco_client("puppetd", :nodes => machine_fqdns) do |mco|
+      current_status = Hash[puppetd(machine_fqdns) do |mco|
         mco.status(:timeout => 30).map do |response|
           [response[:sender], response[:data][:status]]
         end
@@ -70,7 +70,7 @@ module Support::MCollectivePuppet
       if (completed_machines.size >0)
         unknown_machines -= completed_machines
 
-        last_run_summary = Hash[mco_client("puppetd", :nodes => completed_machines.to_a) do |mco|
+        last_run_summary = Hash[puppetd(completed_machines.to_a) do |mco|
           mco.last_run_summary(:timeout => 30).map do |response|
             [response[:sender], puppet_run_passed?(response[:data])]
           end
@@ -94,7 +94,7 @@ module Support::MCollectivePuppet
   def ca_clean(machines_fqdns, &block)
     callback = Support::Callback.new(&block)
     machines_fqdns.each do |machine_fqdn|
-      mco_client("puppetca") do |mco|
+      puppetca() do |mco|
         cleaned = mco.clean(:certname => machine_fqdn).select do |response|
           response[:statuscode] == 0
         end.size > 0
@@ -105,6 +105,14 @@ module Support::MCollectivePuppet
         end
       end
     end
+  end
+
+  def puppetca(&block)
+    mco_client("puppetca", &block)
+  end
+
+  def puppetd(nodes, &block)
+    mco_client("puppetd", :nodes => nodes, &block)
   end
 
   def timed_out(start_time, timeout)
