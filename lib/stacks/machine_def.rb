@@ -36,6 +36,10 @@ class Stacks::MachineDef
     end
   end
 
+  def prod_fqdn
+    return qualified_hostname(:prod)
+  end
+
   def mgmt_fqdn
     return qualified_hostname(:mgmt)
   end

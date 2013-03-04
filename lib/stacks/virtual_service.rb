@@ -4,6 +4,7 @@ require 'stacks/server'
 
 class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
+  attr_reader :environment
 
   def initialize(name, env)
     @name = name
@@ -24,6 +25,10 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
 
   def clazz
     return 'virtualservice'
+  end
+
+  def realservers
+    return @definitions.values
   end
 
   def vip_fqdn

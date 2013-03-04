@@ -14,7 +14,7 @@ describe Stacks::DSL do
 
     stack "blah" do
       virtualservice "appx"
-      virtualservice "dbx"
+      virtualservice "app2x"
     end
 
     env "ci", :primary=>"st", :secondary=>"bs"
@@ -26,18 +26,55 @@ describe Stacks::DSL do
       end
       env "ci2" do
         instantiate_stack "blah"
-     end
+      end
     end
     env "bla", :primary=>"st", :secondary=>"bs"
   end
 
 
   it 'can generate the load balancer spec' do
-    find("st-lb-001.mgmt.st.net.local").virtual_services.size.should eql(2)
+    loadbalancer = find("st-lb-001.mgmt.st.net.local")
+    loadbalancer.virtual_services.size.should eql(4)
+
+    loadbalancer.to_enc.should eql(
+      {
+      'ci-appx-vip.st.net.local' => {
+        'env' => 'ci',
+        'app' => 'JavaHttpRef',
+        'realservers' => {
+          'blue' => [
+            'ci-appx-001.st.net.local',
+            'ci-appx-002.st.net.local'
+           ]}},
+       'ci-app2x-vip.st.net.local' => {
+        'env' => 'ci',
+        'app' => 'JavaHttpRef',
+        'realservers' => {
+          'blue' => [
+            'ci-app2x-001.st.net.local',
+            'ci-app2x-002.st.net.local'
+           ]}},
+      'ci2-appx-vip.st.net.local' => {
+        'env' => 'ci2',
+        'app' => 'JavaHttpRef',
+        'realservers' => {
+          'blue' => [
+            'ci2-appx-001.st.net.local',
+            'ci2-appx-002.st.net.local'
+           ]}},
+       'ci2-app2x-vip.st.net.local' => {
+        'env' => 'ci2',
+        'app' => 'JavaHttpRef',
+        'realservers' => {
+          'blue' => [
+            'ci2-app2x-001.st.net.local',
+            'ci2-app2x-002.st.net.local'
+           ]}}}
+    )
   end
 
   it 'binds to configuration from the environment' do
-#    stacks = bind_to('ci')
+    #    stacks = bind_to('ci')
 
     class Resolv::DNS
       def getaddress(url)
