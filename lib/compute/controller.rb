@@ -110,7 +110,6 @@ class Compute::Controller
     callback = prepare_callback(&block)
 
     fabrics = all_specs.group_by { |spec| spec[:fabric] }
-    vm_counts = {}
     grouped_results = fabrics.map do |fabric, specs|
       @compute_node_client.clean(fabric, specs)
     end
