@@ -94,6 +94,13 @@ namespace :sbx do
         puts machine_def.to_specs.to_yaml
       end
 
+      if machine_def.respond_to? :to_enc
+        desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
+        task :to_enc do
+          puts machine_def.to_enc.to_yaml
+        end
+      end
+
       task :provision=> ['puppet:clean', 'launch', 'puppet:sign', 'puppet:wait']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
@@ -163,7 +170,7 @@ namespace :sbx do
             vip_specs << child_machine_def.to_vip_spec
           end
         end
-        
+
         pp vip_specs
 
         computecontroller = Compute::Controller.new
