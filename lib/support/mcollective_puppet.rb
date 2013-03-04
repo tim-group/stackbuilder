@@ -4,16 +4,12 @@ end
 module Support::MCollectivePuppet
   include Support::MCollective
 
-  def timed_out(start_time, timeout)
-    return (Time.now() - start_time) > timeout
-  end
-
   def ca_sign(machines_fqdns, &block)
     timeout = 60
     callback = Support::Callback.new(&block)
     needs_signing = machines_fqdns.clone.to_set
 
-    start_time = Time.new
+    start_time = now
     while not needs_signing.empty? and not timed_out(start_time, timeout)
       all_requests = mco_client("puppetca") do |mco|
         mco.list.map do |response|
@@ -58,7 +54,7 @@ module Support::MCollectivePuppet
     unknown_machines = machine_fqdns.clone.to_set
     machines_that_failed_puppet = {}
     all_stopped = false
-    start_time = Time.new
+    start_time = now
 
     while not unknown_machines.empty? and not timed_out(start_time, timeout)
       current_status = Hash[mco_client("puppetd", :nodes => machine_fqdns) do |mco|
@@ -92,7 +88,7 @@ module Support::MCollectivePuppet
     end
 
     raise "some machines failed puppet runs #{machines_that_failed_puppet.inspect}" if machines_that_failed_puppet.size>0
-    raise "some machines puppet runs were unaccounted for after #{Time.now - start_time} sec" if unknown_machines.size>0
+    raise "some machines puppet runs were unaccounted for after #{now - start_time} sec" if unknown_machines.size>0
   end
 
   def ca_clean(machines_fqdns, &block)
@@ -110,4 +106,14 @@ module Support::MCollectivePuppet
       end
     end
   end
+
+  def timed_out(start_time, timeout)
+    return (now - start_time) > timeout
+  end
+
+  # factor out the clock so it's mockable in tests
+  def now
+    return Time.now
+  end
+
 end
