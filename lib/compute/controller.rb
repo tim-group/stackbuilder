@@ -52,15 +52,7 @@ class Compute::Controller
     end]
   end
 
-  def prepare_callback(&block)
-    callback = Support::Callback.new
-    unless block.nil?
-      callback.instance_eval(&block)
-    end
-    callback
-  end
-
-  def dispatch_callback(all_specs, grouped_results, callback)
+  def dispatch_results(all_specs, grouped_results, &block)
     results = grouped_results.flatten_hashes
 
     flattened_results = results.map do |host, vms|
@@ -68,6 +60,11 @@ class Compute::Controller
         [vm, {:result => result, :host => host}]
       end
     end.flatten_hashes
+
+    callback = Support::Callback.new
+    unless block.nil?
+      callback.instance_eval(&block)
+    end
 
     all_specs.each do |spec|
       vm = spec[:hostname]
@@ -85,14 +82,12 @@ class Compute::Controller
   end
 
   def allocate_and_send(selector, all_specs, &block)
-    callback = prepare_callback(&block)
-
     allocation = allocate(all_specs)
     grouped_results = allocation.map do |host, specs|
       @compute_node_client.send(selector, host, specs)
     end
 
-    dispatch_callback(all_specs, grouped_results, callback)
+    dispatch_results(all_specs, grouped_results, &block)
   end
 
   def launch(all_specs, &block)
@@ -111,14 +106,12 @@ class Compute::Controller
   end
 
   def clean(all_specs, &block)
-    callback = prepare_callback(&block)
-
     fabrics = all_specs.group_by { |spec| spec[:fabric] }
     grouped_results = fabrics.map do |fabric, specs|
       @compute_node_client.clean(fabric, specs)
     end
 
-    dispatch_callback(all_specs, grouped_results, callback)
+    dispatch_results(all_specs, grouped_results, &block)
   end
 
 end
