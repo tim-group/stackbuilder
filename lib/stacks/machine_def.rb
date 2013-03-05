@@ -2,6 +2,7 @@ require 'stacks/namespace'
 
 class Stacks::MachineDef
   attr_reader :hostname, :domain
+  attr_reader :environment
 
   def initialize(hostname)
     @hostname = hostname
@@ -21,6 +22,7 @@ class Stacks::MachineDef
   end
 
   def bind_to(environment)
+    raise "not implemented - please implement in sub-class"
   end
 
   def to_specs

@@ -22,6 +22,14 @@ class Stacks::Environment
     stacks[stack.name] = stack
   end
 
+  def contains_node_of_type?(clazz)
+    found = false
+    accept do |node|
+      found = true if node.kind_of?(clazz)
+    end
+    return found
+  end
+
   def accept(&block)
     stacks.values.each do |stack|
       stack.accept(&block)

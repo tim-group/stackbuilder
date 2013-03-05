@@ -2,8 +2,6 @@
 require 'stacks/namespace'
 
 class Stacks::LoadBalancer < Stacks::MachineDef
-  attr_reader :environment
-
   def bind_to(environment)
     @environment = environment
     @hostname = environment.name + "-" + @hostname
@@ -16,7 +14,9 @@ class Stacks::LoadBalancer < Stacks::MachineDef
   def virtual_services
     virtual_services = []
     environment.accept do |node|
-      virtual_services << node if node.kind_of? ::Stacks::VirtualService
+      unless node.environment.contains_node_of_type?(Stacks::LoadBalancer) && environment != node.environment
+        virtual_services << node if node.kind_of? ::Stacks::VirtualService
+      end
     end
     virtual_services
   end

@@ -2,6 +2,7 @@ require 'stacks/namespace'
 
 class Stacks::MachineDefContainer
   attr_reader :definitions
+  attr_reader :environment
 
   def initialize()
     @definitions = {}
@@ -20,6 +21,7 @@ class Stacks::MachineDefContainer
   end
 
   def bind_to(environment)
+    @environment = environment
     children.each do |child|
       child.bind_to(environment)
     end

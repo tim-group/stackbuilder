@@ -7,7 +7,6 @@ describe Stacks::DSL do
 
   before do
     extend Stacks::DSL
-
     stack "fabric" do
       loadbalancer
     end
@@ -22,8 +21,8 @@ describe Stacks::DSL do
     env "st", :primary=>"st", :secondary=>"bs" do
       instantiate_stack "fabric"
       env "ci" do
-       instantiate_stack "fabric"
-       instantiate_stack "blah"
+        instantiate_stack "fabric"
+        instantiate_stack "blah"
       end
       env "ci2" do
         instantiate_stack "blah"
@@ -39,48 +38,32 @@ describe Stacks::DSL do
 
   it 'can generate the load balancer spec' do
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    loadbalancer.virtual_services.size.should eql(4)
+    loadbalancer.virtual_services.size.should eql(2)
     loadbalancer.to_enc.should eql(
       {
       'role::loadbalancer' =>
-        {
+      {
         'virtual_servers' => {
-          'ci-appx-vip.st.net.local' => {
-            'env' => 'ci',
-            'app' => 'JavaHttpRef',
-              'realservers' => {
-            'blue' => [
-              'ci-appx-001.st.net.local',
-              'ci-appx-002.st.net.local'
-            ]}},
-          'ci-app2x-vip.st.net.local' => {
-            'env' => 'ci',
-            'app' => 'JavaHttpRef',
-            'realservers' => {
-            'blue' => [
-              'ci-app2x-001.st.net.local',
-              'ci-app2x-002.st.net.local'
-          ]}},
-          'ci2-appx-vip.st.net.local' => {
-            'env' => 'ci2',
-            'app' => 'JavaHttpRef',
-            'realservers' => {
-            'blue' => [
-              'ci2-appx-001.st.net.local',
-              'ci2-appx-002.st.net.local'
-            ]}},
-          'ci2-app2x-vip.st.net.local' => {
-            'env' => 'ci2',
-            'app' => 'JavaHttpRef',
-            'realservers' => {
-            'blue' => [
-              'ci2-app2x-001.st.net.local',
-              'ci2-app2x-002.st.net.local'
-          ]}}}}}
+        'ci2-appx-vip.st.net.local' => {
+        'env' => 'ci2',
+        'app' => 'JavaHttpRef',
+        'realservers' => {
+        'blue' => [
+          'ci2-appx-001.st.net.local',
+          'ci2-appx-002.st.net.local'
+      ]}},
+        'ci2-app2x-vip.st.net.local' => {
+        'env' => 'ci2',
+        'app' => 'JavaHttpRef',
+        'realservers' => {
+        'blue' => [
+          'ci2-app2x-001.st.net.local',
+          'ci2-app2x-002.st.net.local'
+      ]}}}}}
     )
   end
 
-  it 'binds to configuration from the environment' do
+  it 'generates app server configuration appropriately' do
     class Resolv::DNS
       def getaddress(url)
         return "1.1.1.1"
@@ -89,8 +72,7 @@ describe Stacks::DSL do
 
     server = find("ci-appx-001.mgmt.st.net.local")
 
-    server.to_enc.should eql(
-      {
+    server.to_enc.should eql({
       'role::http_app'=> {
       'application' => 'appx',
       'groups' => ['blue'],
@@ -99,7 +81,7 @@ describe Stacks::DSL do
     }})
   end
 
-  it 'throws an exception if the ' do
+  it 'returns nil if asked for a machine that does not exist' do
     class Resolv::DNS
       def getaddress(url)
         return "1.1.1.1"
@@ -108,6 +90,5 @@ describe Stacks::DSL do
 
     find("no-exist").should eql(nil)
   end
-
 
 end
