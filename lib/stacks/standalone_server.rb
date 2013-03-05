@@ -4,10 +4,10 @@ require 'stacks/machine_def'
 class Stacks::StandaloneServer < Stacks::MachineDef
   attr_reader :environment
 
-  def initialize(base_hostname, location, networks=[:mgmt, :prod], &block)
+  def initialize(base_hostname, location, &block)
     @base_hostname = base_hostname
     @location = location
-    @networks = networks
+    @networks = [:mgmt, :prod]
     block.call unless block.nil?
   end
 
