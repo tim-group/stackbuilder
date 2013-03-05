@@ -1,16 +1,19 @@
 require 'stacks/namespace'
 require 'stacks/machine_def_container'
 require 'stacks/server'
+require 'stacks/nat'
 
 class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
   attr_reader :environment
+  attr_reader :nat_rules
 
   def initialize(name, env)
     @name = name
     @network = :prod
     @definitions = {}
-  end
+    @nat_rules = []
+ end
 
   def bind_to(environment)
     @environment = environment
@@ -32,7 +35,11 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   end
 
   def vip_fqdn
-    "#{@environment.name}-#{name}-vip.#{@domain}"
+    "#{environment.name}-#{name}-vip.#{@domain}"
+  end
+
+  def vip_front_fqdn
+    "#{environment.name}-#{name}-vip.front.#{@domain}"
   end
 
   def to_vip_spec
@@ -43,4 +50,11 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     }
   end
 
+  def nat_to
+    print "HELLO WORLD"
+  end
+
+  def nat_rules
+    [Stacks::Nat.new(vip_front_fqdn, vip_fqdn)]
+  end
 end

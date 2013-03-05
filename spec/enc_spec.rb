@@ -16,7 +16,16 @@ describe Stacks::DSL do
       virtualservice "app2x"
     end
 
-    env "ci", :primary=>"st", :secondary=>"bs"
+    stack "frontexample" do
+      natserver
+      virtualservice 'refapp' do
+        nat_to
+      end
+    end
+
+    env "eg", :primary=>"st", :secondary=>"bs" do
+      instantiate_stack "frontexample"
+    end
 
     env "st", :primary=>"st", :secondary=>"bs" do
       instantiate_stack "fabric"
@@ -91,4 +100,16 @@ describe Stacks::DSL do
     find("no-exist").should eql(nil)
   end
 
+  it 'configures NAT boxes to NAT incoming public IPs' do
+    nat = find("eg-nat-001.mgmt.st.net.local")
+    nat.to_enc.should eql(
+      {
+      'role::natserver' => {
+        'rules' => [
+          {
+            'from' => 'eg-refapp-vip.front.st.net.local',
+            'to'  => 'eg-refapp-vip.st.net.local'
+          }]
+      }})
+  end
 end

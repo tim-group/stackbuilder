@@ -22,7 +22,12 @@ class Stacks::MachineDef
   end
 
   def bind_to(environment)
-    raise "not implemented - please implement in sub-class"
+    @environment = environment
+    @hostname = environment.name + "-" + @hostname
+    @fabric = environment.options[:primary]
+    @domain = "#{@fabric}.net.local"
+    @networks = [:mgmt, :prod]
+    raise "domain must not contain mgmt" if @domain =~ /mgmt\./
   end
 
   def to_specs

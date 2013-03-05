@@ -1,4 +1,3 @@
-
 require 'stacks/namespace'
 
 class Stacks::LoadBalancer < Stacks::MachineDef
