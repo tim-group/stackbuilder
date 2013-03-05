@@ -15,11 +15,9 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
   def virtual_services
     virtual_services = []
-
     environment.accept do |node|
       virtual_services << node if node.kind_of? ::Stacks::VirtualService
     end
-
     virtual_services
   end
 
@@ -40,6 +38,10 @@ class Stacks::LoadBalancer < Stacks::MachineDef
       }]
     end
 
-    Hash[virtual_services_array]
+    {
+      'role::loadbalancer'=> {
+        'virtual_servers' => Hash[virtual_services_array]
+      }
+    }
   end
 end
