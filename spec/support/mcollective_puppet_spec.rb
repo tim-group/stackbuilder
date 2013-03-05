@@ -52,4 +52,35 @@ describe Support::MCollectivePuppet do
     @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
   end
 
+  it 'checks again if one machine\'s puppet agent is not stopped' do
+    # queries status for all machines
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'not yet stopped, but cannot remember what the code for that is'}}
+    ])
+
+    # then goes on to get the results from the machine which did stop
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    # then checks the status again for all machines (not just the machine which didn't stop)
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}}
+    ])
+
+    # then gets the results from both machines
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+  end
+
 end
