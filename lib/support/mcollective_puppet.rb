@@ -57,7 +57,7 @@ module Support::MCollectivePuppet
     start_time = now
 
     while not unknown_machines.empty? and not timed_out(start_time, timeout)
-      current_status = Hash[puppetd(machine_fqdns) do |mco|
+      current_status = Hash[puppetd(machine_fqdns.sort) do |mco|
         mco.status(:timeout => 30).map do |response|
           [response[:sender], response[:data][:status]]
         end
@@ -70,7 +70,7 @@ module Support::MCollectivePuppet
       if (completed_machines.size >0)
         unknown_machines -= completed_machines
 
-        last_run_summary = Hash[puppetd(completed_machines.to_a) do |mco|
+        last_run_summary = Hash[puppetd(completed_machines.to_a.sort) do |mco|
           mco.last_run_summary(:timeout => 30).map do |response|
             [response[:sender], puppet_run_passed?(response[:data])]
           end
