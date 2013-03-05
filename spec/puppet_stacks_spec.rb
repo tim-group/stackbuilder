@@ -15,7 +15,7 @@ describe Puppet::Node::Stacks do
     enc = Puppet::Node::Stacks.new
     request = Puppet::Indirector::Request.new('xxx','xxx','xxx','srs-refapp-001')
 
-    enc.find(request).should eql(nil)
+    enc.find(request).should_not eql(nil)
   end
 
 end
