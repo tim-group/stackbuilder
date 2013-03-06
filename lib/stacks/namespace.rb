@@ -47,7 +47,6 @@ module Stacks
     def find(fqdn)
       node = nil
       acceptx do |machine_def|
-        pp machine_def.mgmt_fqdn if machine_def.respond_to? :mgmt_fqdn
         if machine_def.respond_to? :mgmt_fqdn and machine_def.mgmt_fqdn == fqdn
           node = machine_def
         end
