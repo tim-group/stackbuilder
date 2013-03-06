@@ -129,4 +129,28 @@ describe Support::MCollectivePuppet do
     @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
   end
 
+  it 'throws an exception if machines are still unaccounted for when the time runs out' do
+    @callouts.rspec_reset
+    
+    @callouts.should_receive(:now).ordered.and_return(0) # start_time
+
+    @callouts.should_receive(:now).ordered.and_return(1) # timed_out
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
+    @callouts.should_receive(:now).ordered.and_return(1000000) # error messasge
+
+    expect {
+      @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+    }.to raise_error("some machines puppet runs were unaccounted for after 1000000 sec")
+  end
+
 end
