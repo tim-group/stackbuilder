@@ -103,4 +103,30 @@ describe Support::MCollectivePuppet do
     }.to raise_error("some machines failed puppet runs: vm1.test.net.local, vm2.test.net.local")
   end
 
+  it 'accounts for machines even if they do not appear at first' do
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+  end
+
 end
