@@ -6,14 +6,14 @@ require 'stacks/nat'
 class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
   attr_reader :environment
-  attr_reader :nat_rules
+  attr_reader :nat
 
   def initialize(name, env)
     @name = name
     @network = :prod
     @definitions = {}
-    @nat_rules = []
- end
+    @nat=false
+  end
 
   def bind_to(environment)
     @environment = environment
@@ -50,11 +50,11 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     }
   end
 
-  def nat_to
-    print "HELLO WORLD"
+  def enable_nat
+    @nat = true
   end
 
-  def nat_rules
-    [Stacks::Nat.new(vip_front_fqdn, vip_fqdn)]
+  def nat_rule
+    return Stacks::Nat.new(vip_front_fqdn, vip_fqdn)
   end
 end

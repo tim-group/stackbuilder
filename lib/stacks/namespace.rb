@@ -66,6 +66,5 @@ module Stacks
       end
     end
 
-
   end
 end

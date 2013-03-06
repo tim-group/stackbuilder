@@ -17,9 +17,11 @@ class Stacks::Environment
     environments[name].instance_eval(&block) unless block.nil?
   end
 
-  def instantiate_stack(stack)
-    stack = stack_procs[stack].call(self)
-    stacks[stack.name] = stack
+  def instantiate_stack(stack_name)
+    factory = stack_procs[stack_name]
+    raise "no stack found '#{stack_name}'" if factory.nil?
+    instantiated_stack = factory.call(self)
+    stacks[instantiated_stack.name] = instantiated_stack
   end
 
   def contains_node_of_type?(clazz)
