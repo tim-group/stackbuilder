@@ -30,7 +30,7 @@ module Stacks
 
     def find(fqdn)
       node = nil
-      acceptx do |machine_def|
+      accept do |machine_def|
         if machine_def.respond_to? :mgmt_fqdn and machine_def.mgmt_fqdn == fqdn
           node = machine_def
         end
@@ -39,12 +39,6 @@ module Stacks
     end
 
     def accept(&block)
-      stacks.values.each do |stack|
-        stack.accept(&block)
-      end
-    end
-
-    def acceptx(&block)
       environments.values.each do |env|
         env.accept(&block)
       end
