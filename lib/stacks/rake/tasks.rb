@@ -245,9 +245,7 @@ namespace :sbx do
           end
 
           include Support::MCollectivePuppet
-          wait_for_complete(hosts) do
-
-          end
+          wait_for_complete(hosts)
         end
 
         desc "run Puppet on these machines"

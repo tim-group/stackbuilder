@@ -48,9 +48,8 @@ module Support::MCollectivePuppet
   end
 
   ## todo refactor this - tis aweful
-  def wait_for_complete(machine_fqdns, &block)
+  def wait_for_complete(machine_fqdns)
     timeout = 900
-    callback = Support::Callback.new(&block)
     unknown_machines = machine_fqdns.to_set
     machines_that_failed_puppet = {}
     all_stopped = false
