@@ -12,9 +12,7 @@ require 'rspec'
 require 'compute/controller'
 require 'support/logger'
 include Rake::DSL
-
 include Support::MCollective
-
 extend Stacks::DSL
 begin
   require 'stack.rb'
@@ -25,7 +23,8 @@ rescue Exception=>e
 end
 
 environment_name = ENV.fetch('env', 'dev')
-bind_to(environment_name)
+
+environment = environments[environment_name]
 
 RSpec::Core::Runner.disable_autorun!
 config = RSpec.configuration
@@ -85,7 +84,7 @@ def sbtask(name, &block)
 end
 
 namespace :sbx do
-  accept do |machine_def|
+  environment.accept do |machine_def|
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
 
