@@ -43,4 +43,8 @@ class Stacks::MachineDef
   def mgmt_fqdn
     return qualified_hostname(:mgmt)
   end
+
+  def clazz
+    return "machine"
+  end
 end
