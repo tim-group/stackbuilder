@@ -40,41 +40,33 @@ module Support::MCollectivePuppet
   end
 
   def puppet_run_passed?(data)
-    return data !=nil &&
-    data.has_key?(:resources) &&
-    data[:resources] !=nil &&
-    data[:resources]["failed"] == 0 &&
-    data[:resources]["failed_to_restart"] == 0? "passed" : "failed"
+    return data != nil &&
+      data.has_key?(:resources) &&
+      data[:resources] != nil &&
+      data[:resources]["failed"] == 0 &&
+      data[:resources]["failed_to_restart"] == 0 ? "passed" : "failed"
   end
 
   ## todo refactor this - tis aweful
   def wait_for_complete(machine_fqdns, &block)
     timeout = 900
     callback = Support::Callback.new(&block)
-    unknown_machines = machine_fqdns.clone.to_set
+    unknown_machines = machine_fqdns.to_set
     machines_that_failed_puppet = {}
     all_stopped = false
     start_time = now
 
     while not unknown_machines.empty? and not timed_out(start_time, timeout)
-      current_status = Hash[puppetd(machine_fqdns.sort) do |mco|
-        mco.status(:timeout => 30).map do |response|
-          [response[:sender], response[:data][:status]]
-        end
-      end]
+      current_status = puppetd_status(machine_fqdns.sort)
 
-      completed_machines = Hash[current_status.select do |machine, status|
+      completed_machines = current_status.select do |machine, status|
         status == "stopped"
-      end].keys.to_set
+      end.map { |kv| kv[0] }.to_set
 
-      if (completed_machines.size >0)
+      if (completed_machines.size > 0)
         unknown_machines -= completed_machines
 
-        last_run_summary = Hash[puppetd(completed_machines.to_a.sort) do |mco|
-          mco.last_run_summary(:timeout => 30).map do |response|
-            [response[:sender], puppet_run_passed?(response[:data])]
-          end
-        end]
+        last_run_summary = puppetd_last_run_summary_processed(completed_machines.to_a)
 
         last_run_summary_results = last_run_summary.merge Hash[unknown_machines.map do |machine|
           [machine, "unaccounted_for"]
@@ -87,8 +79,24 @@ module Support::MCollectivePuppet
       end
     end
 
-    raise "some machines failed puppet runs: #{machines_that_failed_puppet.keys.sort.join(', ')}" if machines_that_failed_puppet.size>0
-    raise "some machines puppet runs were unaccounted for after #{now - start_time} sec" if unknown_machines.size>0
+    raise "some machines failed puppet runs: #{machines_that_failed_puppet.keys.sort.join(', ')}" if machines_that_failed_puppet.size > 0
+    raise "some machines puppet runs were unaccounted for after #{now - start_time} sec" if unknown_machines.size > 0
+  end
+
+  def puppetd_status(fqdns)
+    Hash[puppetd(fqdns.sort) do |mco|
+      mco.status(:timeout => 30).map do |response|
+        [response[:sender], response[:data][:status]]
+      end
+    end]
+  end
+
+  def puppetd_last_run_summary_processed(fqdns)
+    Hash[puppetd(fqdns.sort) do |mco|
+      mco.last_run_summary(:timeout => 30).map do |response|
+        [response[:sender], puppet_run_passed?(response[:data])]
+      end
+    end]
   end
 
   def ca_clean(machines_fqdns, &block)
