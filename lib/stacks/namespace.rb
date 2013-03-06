@@ -6,12 +6,10 @@ module Stacks
   require 'resolv'
 
   module DSL
-    attr_accessor :stacks
     attr_accessor :stack_procs
     attr_accessor :environments
 
     def self.extended(object)
-      object.stacks = {}
       object.stack_procs = {}
       object.environments = {}
     end
@@ -28,20 +26,6 @@ module Stacks
     def env(name, options, &block)
       environments[name] = Stacks::Environment.new(name, options, stack_procs)
       environments[name].instance_eval(&block) unless block.nil?
-    end
-
-    def bind()
-      environments.each do |name,env|
-        bind_to(name)
-      end
-    end
-
-    def bind_to(environment_name)
-      environment = environments[environment_name]
-      raise "no environment called #{environment_name}" if environment.nil?
-      stack_procs.each do |name, stack_proc|
-        stacks[environment_name + "-" + name] = stack_proc.call(environment)
-      end
     end
 
     def find(fqdn)

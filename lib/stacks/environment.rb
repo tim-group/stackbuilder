@@ -10,6 +10,10 @@ class Stacks::Environment
     @machine_def_containers = {}
   end
 
+  def [](key)
+    return @machine_def_containers[key]
+  end
+
   def env(name, &block)
     @machine_def_containers[name] = Stacks::Environment.new(name, self.options, @stack_procs)
     @machine_def_containers[name].instance_eval(&block) unless block.nil?

@@ -15,7 +15,6 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
         @stacks_inventory.instance_eval(config, file)
       end
     end
-    @stacks_inventory.bind
   end
 
   def find(request)

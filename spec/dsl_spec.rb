@@ -12,12 +12,13 @@ describe Stacks::DSL do
       virtualservice "appx"
       virtualservice "dbx"
     end
-    env "ci", :primary=>"st", :secondary=>"bs"
+    env "ci", :primary=>"st", :secondary=>"bs" do
+      instantiate_stack "blah"
+    end
   end
 
   it 'binds to configuration from the environment' do
-    bind_to('ci')
-    appx = stacks["ci-blah"]["appx"]
+    appx = environments["ci"]["blah"]["appx"]
     appx.to_specs.should eql([{
       :hostname => "ci-appx-001",
       :domain => "st.net.local",
@@ -48,8 +49,12 @@ describe Stacks::DSL do
         end
       end
     end
-    bind_to('ci')
-    stacks["ci-fabric"].to_specs.should eql([{
+
+    env "ci", :primary=>"st", :secondary=>"bs" do
+      instantiate_stack "fabric"
+    end
+
+    environments["ci"]["fabric"].to_specs.should eql([{
       :hostname => "ci-puppetmaster-001",
       :bling => true,
       :domain => "st.net.local",
