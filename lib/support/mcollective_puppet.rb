@@ -83,20 +83,24 @@ module Support::MCollectivePuppet
     raise "some machines puppet runs were unaccounted for after #{now - start_time} sec" if unknown_machines.size > 0
   end
 
-  def puppetd_status(fqdns)
+  def puppetd_query(selector, fqdns, &block)
     Hash[puppetd(fqdns.sort) do |mco|
-      mco.status(:timeout => 30).map do |response|
-        [response[:sender], response[:data][:status]]
+      mco.send(selector, :timeout => 30).map do |response|
+        [response[:sender], block.call(response[:data])]
       end
     end]
   end
+  
+  def puppetd_status(fqdns)
+    puppetd_query(:status, fqdns) do |data|
+      data[:status]
+    end
+  end
 
   def puppetd_last_run_summary_processed(fqdns)
-    Hash[puppetd(fqdns.sort) do |mco|
-      mco.last_run_summary(:timeout => 30).map do |response|
-        [response[:sender], puppet_run_passed?(response[:data])]
-      end
-    end]
+    puppetd_query(:last_run_summary, fqdns) do |data|
+      puppet_run_passed?(data)
+    end
   end
 
   def ca_clean(machines_fqdns, &block)
