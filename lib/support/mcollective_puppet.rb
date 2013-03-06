@@ -83,11 +83,11 @@ module Support::MCollectivePuppet
         failed = last_run_summary.reject do |machine, result|
           result == "passed"
         end
-        machines_that_failed_puppet.merge(failed)
+        machines_that_failed_puppet.merge!(failed)
       end
     end
 
-    raise "some machines failed puppet runs #{machines_that_failed_puppet.inspect}" if machines_that_failed_puppet.size>0
+    raise "some machines failed puppet runs: #{machines_that_failed_puppet.keys.sort.join(', ')}" if machines_that_failed_puppet.size>0
     raise "some machines puppet runs were unaccounted for after #{now - start_time} sec" if unknown_machines.size>0
   end
 

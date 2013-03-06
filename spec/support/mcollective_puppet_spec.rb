@@ -83,4 +83,24 @@ describe Support::MCollectivePuppet do
     @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
   end
 
+  it 'throws an exception if any machines fail' do
+    @callouts.should_receive(:puppetd).with(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm0.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm0.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 1, 'failed_to_restart' => 0}}},
+      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 1}}}
+    ])
+
+    expect {
+      @mcollective_puppet.wait_for_complete(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"])
+    }.to raise_error("some machines failed puppet runs: vm1.test.net.local, vm2.test.net.local")
+  end
+
 end
