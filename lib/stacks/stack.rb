@@ -13,7 +13,7 @@ class Stacks::Stack < Stacks::MachineDefContainer
   end
 
   def virtualservice(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualService.new(name, self)
+    @definitions[name] = virtualservice = Stacks::VirtualService.new(name)
     virtualservice.instance_eval(&block) unless block.nil?
   end
 

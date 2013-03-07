@@ -10,9 +10,8 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :domain
   attr_reader :fabric
 
-  def initialize(name, env)
+  def initialize(name)
     @name = name
-    @network = :prod
     @definitions = {}
     @nat=false
   end
@@ -45,10 +44,22 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   end
 
   def to_vip_spec
+    networks = (nat==true)? [:prod, :front]: [:prod]
+    qualified_hostnames = Hash[networks.map do |network|
+      pair = nil
+      if network==:prod
+        pair = [network,vip_fqdn]
+      end
+      if network==:front
+        pair = [network, vip_front_fqdn]
+      end
+      pair
+    end]
+
     {
       :fabric => @fabric,
-      :networks => [@network],
-      :qualified_hostnames => {@network => vip_fqdn}
+      :networks => networks,
+      :qualified_hostnames => qualified_hostnames
     }
   end
 
