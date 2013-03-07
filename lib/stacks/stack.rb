@@ -2,7 +2,7 @@ require 'stacks/namespace'
 require 'stacks/machine_def_container'
 require 'stacks/virtual_service'
 require 'stacks/loadbalancer'
-require 'stacks/natserver'
+require 'stacks/nat_server'
 
 class Stacks::Stack < Stacks::MachineDefContainer
   attr_reader :name
