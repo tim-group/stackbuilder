@@ -45,12 +45,20 @@ module Support::MCollectivePuppet
     end
   end
 
-  def puppet_run_passed?(data)
-    return data != nil &&
-      data.has_key?(:resources) &&
-      data[:resources] != nil &&
-      data[:resources]["failed"] == 0 &&
-      data[:resources]["failed_to_restart"] == 0 ? "passed" : "failed"
+  def ca_clean(machines_fqdns, &block)
+    callback = Support::Callback.new(&block)
+    machines_fqdns.each do |machine_fqdn|
+      puppetca() do |mco|
+        cleaned = mco.clean(:certname => machine_fqdn).select do |response|
+          response[:statuscode] == 0
+        end.size > 0
+        if cleaned
+          callback.invoke :success, machine_fqdn
+        else
+          callback.invoke :failed, machine_fqdn
+        end
+      end
+    end
   end
 
   def wait_for_complete(machine_fqdns, timeout=900)
@@ -69,15 +77,6 @@ module Support::MCollectivePuppet
     raise "some machines did not successfully complete puppet runs within #{now - start_time} sec: #{unsuccessful.to_a.sort.map { |kv| "#{kv[0]} (#{kv[1]})" }.join(', ')}" unless unsuccessful.empty?
   end
 
-  def puppetd_query(selector, fqdns, &block)
-    return [] if fqdns.empty?
-    Hash[puppetd(fqdns.sort) do |mco|
-      mco.send(selector, :timeout => 30).map do |response|
-        [response[:sender], block.call(response[:data])]
-      end
-    end]
-  end
-  
   def puppetd_status(fqdns)
     puppetd_query(:status, fqdns) do |data|
       data[:status]
@@ -86,24 +85,21 @@ module Support::MCollectivePuppet
 
   def puppetd_last_run_summary_processed(fqdns)
     puppetd_query(:last_run_summary, fqdns) do |data|
-      puppet_run_passed?(data)
+      data != nil &&
+        data.has_key?(:resources) &&
+        data[:resources] != nil &&
+        data[:resources]["failed"] == 0 &&
+        data[:resources]["failed_to_restart"] == 0 ? "passed" : "failed"
     end
   end
 
-  def ca_clean(machines_fqdns, &block)
-    callback = Support::Callback.new(&block)
-    machines_fqdns.each do |machine_fqdn|
-      puppetca() do |mco|
-        cleaned = mco.clean(:certname => machine_fqdn).select do |response|
-          response[:statuscode] == 0
-        end.size > 0
-        if cleaned
-          callback.invoke :success, machine_fqdn
-        else
-          callback.invoke :failed, machine_fqdn
-        end
+  def puppetd_query(selector, fqdns, &block)
+    return [] if fqdns.empty?
+    Hash[puppetd(fqdns.sort) do |mco|
+      mco.send(selector, :timeout => 30).map do |response|
+        [response[:sender], block.call(response[:data])]
       end
-    end
+    end]
   end
 
   def puppetca(&block)
