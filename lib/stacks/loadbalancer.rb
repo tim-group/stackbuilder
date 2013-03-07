@@ -20,6 +20,16 @@ class Stacks::LoadBalancer < Stacks::MachineDef
     virtual_services
   end
 
+  def to_specs
+    return [{
+      :hostname => @hostname,
+      :domain => @domain,
+      :fabric => @fabric,
+      :networks => @networks,
+      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
+    }]
+  end
+
   def to_enc
     virtual_services_array = virtual_services.map do |virtual_service|
       realservers = virtual_service.realservers.map do |realserver|

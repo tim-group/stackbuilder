@@ -36,7 +36,7 @@ class Stacks::MachineDef
 
   def qualified_hostname(network)
     raise "no such network '#{network}'" unless @networks.include?(network)
-    if network == 'prod'
+    if network.eql?(:prod)
       return "#{@hostname}.#{@domain}"
     else
       return "#{@hostname}.#{network}.#{@domain}"
