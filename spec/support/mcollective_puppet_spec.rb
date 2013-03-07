@@ -81,6 +81,30 @@ describe Support::MCollectivePuppet do
     @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
   end
 
+  it 'does not query results if no machines are stopped' do
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'running'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'running'}}
+    ])
+
+    # note that there is no call to last_run_summary here!
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+  end
+
   it 'throws an exception if any machines fail' do
     @callouts.should_receive(:puppetd).with(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([

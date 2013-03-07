@@ -94,7 +94,7 @@ module Support::MCollectivePuppet
   end
 
   def puppetd_query(selector, fqdns, &block)
-    return [] if fqdns.empty?
+    return {} if fqdns.empty?
     Hash[puppetd(fqdns.sort) do |mco|
       mco.send(selector, :timeout => 30).map do |response|
         [response[:sender], block.call(response[:data])]
