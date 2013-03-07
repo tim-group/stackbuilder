@@ -47,42 +47,28 @@ module Support::MCollectivePuppet
       data[:resources]["failed_to_restart"] == 0 ? "passed" : "failed"
   end
 
-  ## todo refactor this - tis aweful
-  def wait_for_complete(machine_fqdns)
-    timeout = 900
-    unknown_machines = machine_fqdns.to_set
-    machines_that_failed_puppet = {}
-    all_stopped = false
+  def wait_for_complete(machine_fqdns, timeout=900)
     start_time = now
 
-    while not unknown_machines.empty? and not timed_out(start_time, timeout)
-      current_status = puppetd_status(machine_fqdns.sort)
-
-      completed_machines = current_status.select do |machine, status|
-        status == "stopped"
-      end.map { |kv| kv[0] }.to_set
-
-      if (completed_machines.size > 0)
-        unknown_machines -= completed_machines
-
-        last_run_summary = puppetd_last_run_summary_processed(completed_machines.to_a)
-
-        last_run_summary_results = last_run_summary.merge Hash[unknown_machines.map do |machine|
-          [machine, "unaccounted_for"]
-        end]
-
-        failed = last_run_summary.reject do |machine, result|
-          result == "passed"
-        end
-        machines_that_failed_puppet.merge!(failed)
-      end
+    fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
+    while not (undecided = winnow(fates, "passed", "failed")).empty? and not timed_out(start_time, timeout)
+      undecided_statuses = puppetd_status(undecided.keys)
+      fates.merge!(undecided_statuses)
+      stopped_statuses = Hash[undecided_statuses.select { |k, v| v == "stopped" }]
+      stopped_results = puppetd_last_run_summary_processed(stopped_statuses.keys)
+      fates.merge!(stopped_results)
     end
 
-    raise "some machines failed puppet runs: #{machines_that_failed_puppet.keys.sort.join(', ')}" if machines_that_failed_puppet.size > 0
-    raise "some machines puppet runs were unaccounted for after #{now - start_time} sec" if unknown_machines.size > 0
+    unsuccessful = winnow(fates, "passed")
+    raise "some machines did not successfully complete puppet runs within #{timeout} sec: #{unsuccessful.to_a.sort.map { |kv| "#{kv[0]} (#{kv[1]})" }.join(', ')}" unless unsuccessful.empty?
+  end
+
+  def winnow(hsh, *rejected_values)
+    return Hash[hsh.reject { |k, v| rejected_values.include?(v) }]
   end
 
   def puppetd_query(selector, fqdns, &block)
+    return [] if fqdns.empty?
     Hash[puppetd(fqdns.sort) do |mco|
       mco.send(selector, :timeout => 30).map do |response|
         [response[:sender], block.call(response[:data])]
