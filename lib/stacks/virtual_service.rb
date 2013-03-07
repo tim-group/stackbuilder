@@ -7,6 +7,8 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
   attr_reader :environment
   attr_reader :nat
+  attr_reader :domain
+  attr_reader :fabric
 
   def initialize(name, env)
     @name = name
