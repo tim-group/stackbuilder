@@ -66,7 +66,7 @@ module Support::MCollectivePuppet
     end
 
     unsuccessful = fates.hash_select { |k, v| v != "passed" }
-    raise "some machines did not successfully complete puppet runs within #{timeout} sec: #{unsuccessful.to_a.sort.map { |kv| "#{kv[0]} (#{kv[1]})" }.join(', ')}" unless unsuccessful.empty?
+    raise "some machines did not successfully complete puppet runs within #{now - start_time} sec: #{unsuccessful.to_a.sort.map { |kv| "#{kv[0]} (#{kv[1]})" }.join(', ')}" unless unsuccessful.empty?
   end
 
   def puppetd_query(selector, fqdns, &block)

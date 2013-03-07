@@ -32,7 +32,7 @@ describe Support::MCollectivePuppet do
     @mcollective_puppet = Support::MCollectivePuppet_Test.new(@callouts, @mco)
     
     @callouts.should_receive(:now).any_number_of_times do
-      Time.now
+      0
     end
   end
 
@@ -98,7 +98,7 @@ describe Support::MCollectivePuppet do
 
     expect {
       @mcollective_puppet.wait_for_complete(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"])
-    }.to raise_error("some machines did not successfully complete puppet runs within 900 sec: vm1.test.net.local (failed), vm2.test.net.local (failed)")
+    }.to raise_error("some machines did not successfully complete puppet runs within 0 sec: vm1.test.net.local (failed), vm2.test.net.local (failed)")
   end
 
   it 'throws an exception if machines are still running when the time runs out' do
@@ -119,10 +119,11 @@ describe Support::MCollectivePuppet do
     ])
 
     @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
+    @callouts.should_receive(:now).ordered.and_return(1000001) # error message
 
     expect {
       @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
-    }.to raise_error("some machines did not successfully complete puppet runs within 900 sec: vm2.test.net.local (running)")
+    }.to raise_error("some machines did not successfully complete puppet runs within 1000001 sec: vm2.test.net.local (running)")
   end
 
   it 'accounts for machines even if they do not appear at first' do
@@ -166,10 +167,11 @@ describe Support::MCollectivePuppet do
     ])
 
     @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
+    @callouts.should_receive(:now).ordered.and_return(1000001) # error message
 
     expect {
       @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
-    }.to raise_error("some machines did not successfully complete puppet runs within 900 sec: vm2.test.net.local (unaccounted for)")
+    }.to raise_error("some machines did not successfully complete puppet runs within 1000001 sec: vm2.test.net.local (unaccounted for)")
   end
 
 end
