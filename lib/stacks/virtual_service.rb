@@ -23,7 +23,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @domain = "#{@fabric}.net.local"
     2.times do |i|
       index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] = Stacks::Server.new(self, index, :primary)
+      @definitions["#{name}-#{index}"] = Stacks::Server.new(self, index)
     end
     super(environment)
   end

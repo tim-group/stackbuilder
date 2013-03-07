@@ -4,13 +4,10 @@ class Stacks::MachineDef
   attr_reader :hostname, :domain
   attr_reader :environment
 
-  def initialize(hostname)
-    @hostname = hostname
+  def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary)
+    @base_hostname = base_hostname
     @networks = [:mgmt, :prod]
-  end
-
-  def name
-    return @hostname
+    @location = location
   end
 
   def children
@@ -19,10 +16,9 @@ class Stacks::MachineDef
 
   def bind_to(environment)
     @environment = environment
-    @hostname = environment.name + "-" + @hostname
-    @fabric = environment.options[:primary]
+    @hostname = environment.name + "-" + @base_hostname
+    @fabric = environment.options[@location]
     @domain = "#{@fabric}.net.local"
-    @networks = [:mgmt, :prod]
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
   end
 

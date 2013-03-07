@@ -2,12 +2,7 @@ require 'stacks/namespace'
 
 class Stacks::LoadBalancer < Stacks::MachineDef
   def bind_to(environment)
-    @environment = environment
-    @hostname = environment.name + "-" + @hostname
-    @fabric = environment.options[:primary]
-    @domain = "#{@fabric}.net.local"
-    @networks = [:mgmt, :prod]
-    raise "domain must not contain mgmt" if @domain =~ /mgmt\./
+    super(environment)
   end
 
   def virtual_services

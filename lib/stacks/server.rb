@@ -2,25 +2,17 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::Server < Stacks::MachineDef
-  attr_reader :environment, :virtual_group
+  attr_reader :environment, :virtual_service
 
-  def initialize(virtual_service, index, location, &block)
+  def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
-    @virtual_group = virtual_service.name
-    @index = index
-    @location = location
-    @networks = [:mgmt, :prod]
     block.call unless block.nil?
   end
 
   def bind_to(environment)
-    @environment = environment
-    @hostname = environment.name + "-" + @hostname
-    @fabric = environment.options[@location]
-    @domain = "#{@fabric}.net.local"
-    raise "domain must not contain mgmt" if @domain =~ /mgmt\./
-    @availability_group = environment.name + "-" + @virtual_group
+    super(environment)
+    @availability_group = environment.name + "-" + virtual_service.name
   end
 
   def vip_fqdn
@@ -46,10 +38,10 @@ class Stacks::Server < Stacks::MachineDef
     resolver = Resolv::DNS.new
     {
       'role::http_app' => {
-      'application' => virtual_group,
-      'groups' => groups,
-      'vip' => resolver.getaddress(vip_fqdn).to_s,
-      'environment' => environment.name
+        'application' => virtual_service.name,
+        'groups' => groups,
+        'vip' => resolver.getaddress(vip_fqdn).to_s,
+        'environment' => environment.name
     }}
   end
 end
