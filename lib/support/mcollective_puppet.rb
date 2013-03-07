@@ -1,6 +1,12 @@
 module Support
 end
 
+class Hash
+  def hash_select(&block)
+    return Hash[select(&block)]
+  end
+end
+
 module Support::MCollectivePuppet
   include Support::MCollective
 
@@ -51,20 +57,16 @@ module Support::MCollectivePuppet
     start_time = now
 
     fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
-    while not (undecided = winnow(fates, "passed", "failed")).empty? and not timed_out(start_time, timeout)
+    while not (undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }).empty? and not timed_out(start_time, timeout)
       undecided_statuses = puppetd_status(undecided.keys)
       fates.merge!(undecided_statuses)
-      stopped_statuses = Hash[undecided_statuses.select { |k, v| v == "stopped" }]
+      stopped_statuses = undecided_statuses.hash_select { |k, v| v == "stopped" }
       stopped_results = puppetd_last_run_summary_processed(stopped_statuses.keys)
       fates.merge!(stopped_results)
     end
 
-    unsuccessful = winnow(fates, "passed")
+    unsuccessful = fates.hash_select { |k, v| v != "passed" }
     raise "some machines did not successfully complete puppet runs within #{timeout} sec: #{unsuccessful.to_a.sort.map { |kv| "#{kv[0]} (#{kv[1]})" }.join(', ')}" unless unsuccessful.empty?
-  end
-
-  def winnow(hsh, *rejected_values)
-    return Hash[hsh.reject { |k, v| rejected_values.include?(v) }]
   end
 
   def puppetd_query(selector, fqdns, &block)
