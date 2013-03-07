@@ -85,11 +85,15 @@ module Support::MCollectivePuppet
 
   def puppetd_last_run_summary_processed(fqdns)
     puppetd_query(:last_run_summary, fqdns) do |data|
-      data != nil &&
+      result = data != nil &&
         data.has_key?(:resources) &&
         data[:resources] != nil &&
         data[:resources]["failed"] == 0 &&
         data[:resources]["failed_to_restart"] == 0 ? "passed" : "failed"
+      if result == "failed"
+        puts "failed result: #{data.inspect}"
+      end
+      result
     end
   end
 
