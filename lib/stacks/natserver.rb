@@ -1,6 +1,11 @@
 require 'stacks/namespace'
 
 class Stacks::NatServer < Stacks::MachineDef
+
+  def initialize(base_hostname)
+    super(base_hostname, [:mgmt, :prod, :front])
+  end
+
   def bind_to(environment)
     super(environment)
   end
@@ -9,7 +14,6 @@ class Stacks::NatServer < Stacks::MachineDef
     rules = []
     environment.accept do |node|
       if node.respond_to? :nat
-pp node.nat
         rules << node.nat_rule if node.nat
       end
     end

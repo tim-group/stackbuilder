@@ -23,17 +23,6 @@ class Stacks::Server < Stacks::MachineDef
     return ['blue']
   end
 
-  def to_specs
-    return [{
-      :hostname => @hostname,
-      :domain => @domain,
-      :fabric => @fabric,
-      :group => @availability_group,
-      :networks => @networks,
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
-    }]
-  end
-
   def to_enc()
     resolver = Resolv::DNS.new
     {

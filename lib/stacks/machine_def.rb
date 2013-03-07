@@ -6,8 +6,9 @@ class Stacks::MachineDef
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary)
     @base_hostname = base_hostname
-    @networks = [:mgmt, :prod]
+    @networks = networks
     @location = location
+    @availability_group = nil
   end
 
   def children
@@ -26,8 +27,19 @@ class Stacks::MachineDef
     block.call(self)
   end
 
+  def name
+    return hostname
+  end
+
   def to_specs
-    return []
+    return [{
+      :hostname => @hostname,
+      :domain => @domain,
+      :fabric => @fabric,
+      :group => @availability_group,
+      :networks => @networks,
+      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
+    }]
   end
 
   def qualified_hostname(network)
