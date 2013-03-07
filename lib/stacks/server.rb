@@ -15,9 +15,8 @@ class Stacks::Server < Stacks::MachineDef
   end
 
   def bind_to(environment)
-    super.bind_to(environment)
     @environment = environment
-    #@hostname = environment.name + "-" +
+    @hostname = environment.name + "-" + @hostname
     @fabric = environment.options[@location]
     @domain = "#{@fabric}.net.local"
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
