@@ -17,10 +17,6 @@ class Stacks::MachineDef
     return []
   end
 
-  def accept(&block)
-    block.call(self)
-  end
-
   def bind_to(environment)
     @environment = environment
     @hostname = environment.name + "-" + @hostname
@@ -28,6 +24,10 @@ class Stacks::MachineDef
     @domain = "#{@fabric}.net.local"
     @networks = [:mgmt, :prod]
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
+  end
+
+  def accept(&block)
+    block.call(self)
   end
 
   def to_specs

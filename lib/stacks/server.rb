@@ -5,6 +5,7 @@ class Stacks::Server < Stacks::MachineDef
   attr_reader :environment, :virtual_group
 
   def initialize(virtual_service, index, location, &block)
+    super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
     @virtual_group = virtual_service.name
     @index = index
@@ -14,8 +15,9 @@ class Stacks::Server < Stacks::MachineDef
   end
 
   def bind_to(environment)
+    super.bind_to(environment)
     @environment = environment
-    @hostname = environment.name + "-" + @virtual_group + "-" + @index
+    #@hostname = environment.name + "-" +
     @fabric = environment.options[@location]
     @domain = "#{@fabric}.net.local"
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
@@ -51,6 +53,4 @@ class Stacks::Server < Stacks::MachineDef
       'environment' => environment.name
     }}
   end
-
-
 end
