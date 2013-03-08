@@ -1,6 +1,7 @@
 require 'support/callback'
 
 describe Support::Callback do
+
   it 'allows callbacks to be passed in and executed by the subject code' do
     event_called = false
     callback = Support::Callback.new do
@@ -15,7 +16,7 @@ describe Support::Callback do
     event_called.should eql(true)
   end
 
-  it 'raises an error if a callback is not defined for an event' do
+  it 'does not raise an error if a callback is not defined for an event' do
     callback = Support::Callback.new
     callback.invoke(:event, mock)
   end
@@ -45,6 +46,21 @@ describe Support::Callback do
     end
     callback.invoke(:summary, "hello", :if=>[:event])
     summary.should eql(false)
+  end
+
+  it 'dispatches summary events when the callback is finished' do
+    passed_args = nil
+    callback = Support::Callback.new do
+      has :event do |args|
+        passed_args = args
+      end
+    end
+    
+    callback.invoke(:event, "foo")
+    callback.invoke(:event, "bar")
+    callback.finish
+    
+    passed_args.should eql(["foo", "bar"])
   end
 
 end
