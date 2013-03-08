@@ -64,8 +64,9 @@ module Support::MCollectivePuppet
     callback.finish
   end
 
-  def wait_for_complete(machine_fqdns, timeout=900)
+  def wait_for_complete(machine_fqdns, timeout=900, &block)
     start_time = now
+    callback = Support::Callback.new(&block)
 
     fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
     while not (undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }).empty? and not timed_out(start_time, timeout)
@@ -73,11 +74,22 @@ module Support::MCollectivePuppet
       fates.merge!(undecided_statuses)
       stopped_statuses = undecided_statuses.hash_select { |k, v| v == "stopped" }
       stopped_results = puppetd_last_run_summary_processed(stopped_statuses.keys)
+      stopped_results.sort.each do |machine_fqdn, result|
+        if result == "passed"
+          callback.invoke(:passed, machine_fqdn) 
+        elsif result == "failed"
+          callback.invoke(:failed, machine_fqdn) 
+        end
+      end
       fates.merge!(stopped_results)
     end
 
-    unsuccessful = fates.hash_select { |k, v| v != "passed" }
-    raise "some machines did not successfully complete puppet runs within #{now - start_time} sec: #{unsuccessful.to_a.sort.map { |kv| "#{kv[0]} (#{kv[1]})" }.join(', ')}" unless unsuccessful.empty?
+    undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }
+    undecided.sort.each do |machine_fqdn, result|
+      callback.invoke(:timed_out, machine_fqdn) 
+    end
+
+    callback.finish
   end
 
   def puppetd_status(fqdns)

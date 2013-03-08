@@ -30,9 +30,25 @@ describe Support::MCollectivePuppet do
     @callouts = double
     @mco = double
     @mcollective_puppet = Support::MCollectivePuppet_Test.new(@callouts, @mco)
+    @callback = double
     
     @callouts.should_receive(:now).any_number_of_times do
       0
+    end
+  end
+
+  def wait_for_complete_callback
+    callback = @callback
+    Proc.new do
+      on :passed do |arg|
+        callback.passed(arg)
+      end
+      on :failed do |arg|
+        callback.failed(arg)
+      end
+      on :timed_out do |arg|
+        callback.timed_out(arg)
+      end
     end
   end
 
@@ -48,37 +64,40 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
       {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
-    
-    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+
+    @callback.should_receive(:passed).with('vm1.test.net.local').ordered
+    @callback.should_receive(:passed).with('vm2.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
 
   it 'checks again if one machine\'s puppet agent is not stopped' do
-    # queries status for all machines
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
       {:sender => 'vm2.test.net.local', :data => {:status => 'running'}}
     ])
 
-    # then goes on to get the results from the machine which did stop
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
       {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
-    # then checks the status again for all machines (not just the machine which didn't stop)
+    @callback.should_receive(:passed).with('vm1.test.net.local').ordered
+
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}}
     ])
 
-    # then gets the results from both machines
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
       {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
-    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+    @callback.should_receive(:passed).with('vm2.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
 
   it 'does not query results if no machines are stopped' do
@@ -102,10 +121,13 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
-    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+    @callback.should_receive(:passed).with('vm1.test.net.local').ordered
+    @callback.should_receive(:passed).with('vm2.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
 
-  it 'throws an exception if any machines fail' do
+  it 'reports failure if any machines fail' do
     @callouts.should_receive(:puppetd).with(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       {:sender => 'vm0.test.net.local', :data => {:status => 'stopped'}},
@@ -120,9 +142,11 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 1}}}
     ])
 
-    expect {
-      @mcollective_puppet.wait_for_complete(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"])
-    }.to raise_error("some machines did not successfully complete puppet runs within 0 sec: vm1.test.net.local (failed), vm2.test.net.local (failed)")
+    @callback.should_receive(:passed).with('vm0.test.net.local').ordered
+    @callback.should_receive(:failed).with('vm1.test.net.local').ordered
+    @callback.should_receive(:failed).with('vm2.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
 
   it 'considers a machine to be still running if it is stopped but returns a hollow last run summary' do
@@ -148,6 +172,8 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm7.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
+    @callback.should_receive(:passed).with('vm7.test.net.local').ordered
+
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
@@ -168,10 +194,17 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm6.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
-    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"])
+    @callback.should_receive(:passed).with('vm1.test.net.local').ordered
+    @callback.should_receive(:passed).with('vm2.test.net.local').ordered
+    @callback.should_receive(:passed).with('vm3.test.net.local').ordered
+    @callback.should_receive(:passed).with('vm4.test.net.local').ordered
+    @callback.should_receive(:passed).with('vm5.test.net.local').ordered
+    @callback.should_receive(:passed).with('vm6.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"], &wait_for_complete_callback)
   end
 
-  it 'throws an exception if machines are still running when the time runs out' do
+  it 'reports an error if machines are still running when the time runs out' do
     @callouts.rspec_reset
 
     @callouts.should_receive(:now).ordered.and_return(0) # start_time
@@ -188,12 +221,13 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
-    @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
-    @callouts.should_receive(:now).ordered.and_return(1000001) # error message
+    @callback.should_receive(:passed).with('vm1.test.net.local').ordered
 
-    expect {
-      @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
-    }.to raise_error("some machines did not successfully complete puppet runs within 1000001 sec: vm2.test.net.local (running)")
+    @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
+
+    @callback.should_receive(:timed_out).with('vm2.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
 
   it 'accounts for machines even if they do not appear at first' do
@@ -207,6 +241,8 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
+    @callback.should_receive(:passed).with('vm1.test.net.local').ordered
+
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}}
@@ -217,10 +253,12 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
-    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
+    @callback.should_receive(:passed).with('vm2.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
 
-  it 'throws an exception if machines are still unaccounted for when the time runs out' do
+  it 'reports an error if machines are still unaccounted for when the time runs out' do
     @callouts.rspec_reset
     
     @callouts.should_receive(:now).ordered.and_return(0) # start_time
@@ -236,12 +274,13 @@ describe Support::MCollectivePuppet do
       {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
     ])
 
-    @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
-    @callouts.should_receive(:now).ordered.and_return(1000001) # error message
+    @callback.should_receive(:passed).with('vm1.test.net.local').ordered
 
-    expect {
-      @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"])
-    }.to raise_error("some machines did not successfully complete puppet runs within 1000001 sec: vm2.test.net.local (unaccounted for)")
+    @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
+
+    @callback.should_receive(:timed_out).with('vm2.test.net.local').ordered
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
 
 end
