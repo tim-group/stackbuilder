@@ -85,16 +85,23 @@ module Support::MCollectivePuppet
 
   def puppetd_last_run_summary_processed(fqdns)
     puppetd_query(:last_run_summary, fqdns) do |data|
-      result = data != nil &&
-        data.has_key?(:resources) &&
-        data[:resources] != nil &&
-        data[:resources]["failed"] == 0 &&
-        data[:resources]["failed_to_restart"] == 0 ? "passed" : "failed"
-      if result == "failed"
-        puts "failed result: #{data.inspect}"
+      result = result_for_summary(data)
+      if result != "passed"
+        puts "bad result: #{data.inspect}"
       end
       result
     end
+  end
+
+  def result_for_summary(data)
+    # the agent returns malformed data in a short window between a run finishing and the state file being updated, so treat that as not yet stopped
+    return "stopping" if data.nil?
+    resources = data[:resources]
+    return "stopping" if resources.nil?
+    failed = resources["failed"]
+    failed_to_restart = resources["failed_to_restart"]
+    return "stopping" if failed.nil? or failed_to_restart.nil?
+    return (failed == 0 && failed_to_restart == 0) ? "passed" : "failed"
   end
 
   def puppetd_query(selector, fqdns, &block)

@@ -36,7 +36,7 @@ describe Support::MCollectivePuppet do
     end
   end
 
-  it 'returns promptly if all machines\' puppet agents are stopped' do
+  it 'returns promptly if all machines\' puppet agents are successfully stopped' do
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
@@ -123,6 +123,52 @@ describe Support::MCollectivePuppet do
     expect {
       @mcollective_puppet.wait_for_complete(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"])
     }.to raise_error("some machines did not successfully complete puppet runs within 0 sec: vm1.test.net.local (failed), vm2.test.net.local (failed)")
+  end
+
+  it 'considers a machine to be still running if it is stopped but returns a hollow last run summary' do
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm3.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm4.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm5.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm6.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm7.test.net.local', :data => {:status => 'stopped'}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => nil},
+      {:sender => 'vm2.test.net.local', :data => {}},
+      {:sender => 'vm3.test.net.local', :data => {:resources => nil}}, # this is the only one which actually occurs, but there's no kill like overkill
+      {:sender => 'vm4.test.net.local', :data => {:resources => {}}},
+      {:sender => 'vm5.test.net.local', :data => {:resources => {'failed' => nil, 'failed_to_restart' => 0}}},
+      {:sender => 'vm6.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => nil}}},
+      {:sender => 'vm7.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
+    @mco.should_receive(:status).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm2.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm3.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm4.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm5.test.net.local', :data => {:status => 'stopped'}},
+      {:sender => 'vm6.test.net.local', :data => {:status => 'stopped'}},
+    ])
+
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
+    @mco.should_receive(:last_run_summary).ordered.and_return([
+      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm3.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm4.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm5.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
+      {:sender => 'vm6.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+    ])
+
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"])
   end
 
   it 'throws an exception if machines are still running when the time runs out' do
