@@ -27,11 +27,6 @@ class Support::Callback
     @invoked[event] << arg
 
     unless @blocks[event].nil?
-      if options.has_key? :if
-        options[:if].each do |key|
-          return unless @invoked.has_key? key
-        end
-      end
       @blocks[event].call(arg)
     end
   end

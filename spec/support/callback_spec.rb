@@ -21,33 +21,6 @@ describe Support::Callback do
     callback.invoke(:event, mock)
   end
 
-  it 'allows us to invoke a summary event' do
-    summary = false
-    callback = Support::Callback.new do
-      on :event do |arg|
-      end
-      on :summary do |arg|
-        summary = true
-      end
-    end
-    callback.invoke(:event, "hello")
-    callback.invoke(:summary, :if=>[:event])
-    summary.should eql(true)
-  end
-
-  it 'doesnt invoke a summary invent if the other event is not invoked' do
-    summary = false
-    callback = Support::Callback.new do
-      on :event do |arg|
-      end
-      on :summary do |arg|
-        summary = true
-      end
-    end
-    callback.invoke(:summary, "hello", :if=>[:event])
-    summary.should eql(false)
-  end
-
   it 'dispatches summary events when the callback is finished' do
     passed_args = nil
     callback = Support::Callback.new do
