@@ -10,20 +10,25 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :domain
   attr_reader :fabric
   attr_accessor :application
+  attr_accessor :groups
+  attr_accessor :instances
 
   def initialize(name)
     @name = name
     @definitions = {}
     @nat=false
+    @groups = ['blue']
+    @instances = 2
   end
 
   def bind_to(environment)
     @environment = environment
     @fabric = environment.options[:primary]
     @domain = "#{@fabric}.net.local"
-    2.times do |i|
+    @instances.times do |i|
       index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] = Stacks::Server.new(self, index)
+      @definitions["#{name}-#{index}"] = server = Stacks::Server.new(self, index)
+      server.group=groups[i%groups.size]
     end
     super(environment)
   end

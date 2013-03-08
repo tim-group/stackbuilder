@@ -3,6 +3,7 @@ require 'stacks/machine_def'
 
 class Stacks::Server < Stacks::MachineDef
   attr_reader :environment, :virtual_service
+  attr_accessor :group
 
   def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)
@@ -24,7 +25,7 @@ class Stacks::Server < Stacks::MachineDef
     {
       'role::http_app' => {
         'application' => virtual_service.application,
-        'group' => 'blue', #obviously needs improving
+        'group' => group,
         'vip' => resolver.getaddress(vip_fqdn).to_s,
         'environment' => environment.name
     }}
