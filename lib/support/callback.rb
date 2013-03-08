@@ -5,7 +5,7 @@ class Support::Callback
   def initialize(&block)
     @blocks = {}
     @summary_blocks = {}
-    @invoked = Hash.new { |h, k| h[k] = [] }
+    @summary_args = Hash.new { |h, k| h[k] = [] }
     if block:
       instance_eval(&block)
     end
@@ -23,8 +23,10 @@ class Support::Callback
 
   public
 
-  def invoke(event, arg, options={})
-    @invoked[event] << arg
+  def invoke(event, arg)
+    unless @summary_blocks[event].nil?
+      @summary_args[event] << arg
+    end
 
     unless @blocks[event].nil?
       @blocks[event].call(arg)
@@ -32,10 +34,10 @@ class Support::Callback
   end
 
   def finish
-    @invoked.keys.each do |event|
-      summary_block = @summary_blocks[event]
-      if not summary_block.nil?
-        summary_block.call(@invoked[event])
+    @summary_blocks.each do |event, summary_block|
+      args = @summary_args[event]
+      unless args.empty?
+        summary_block.call(args)
       end
     end
   end
