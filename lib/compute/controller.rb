@@ -75,7 +75,7 @@ class Compute::Controller
       end
     end
 
-    callback.invoke :hasfailures, all_specs, :if => [:failure]
+    callback.finish
   end
 
   def allocate_and_send(selector, all_specs, &block)

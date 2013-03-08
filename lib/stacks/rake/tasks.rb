@@ -127,7 +127,7 @@ namespace :sbx do
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
           end
-          on :hasfailures do
+          has :failure do
             fail "some machines failed to launch"
           end
         end
@@ -154,7 +154,7 @@ namespace :sbx do
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
           end
-          on :hasfailures do
+          has :failure do
             fail "some machines failed to allocate  VIPs"
           end
         end
@@ -183,7 +183,7 @@ namespace :sbx do
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
           end
-          on :hasfailures do
+          has :failure do
             fail "some machines failed to free VIPs"
           end
         end
