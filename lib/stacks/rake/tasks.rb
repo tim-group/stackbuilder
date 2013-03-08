@@ -245,7 +245,23 @@ namespace :sbx do
           end
 
           include Support::MCollectivePuppet
-          wait_for_complete(hosts)
+          wait_for_complete(hosts) do
+            on :passed do |vm|
+              logger.info "successful Puppet run for #{vm}"
+            end
+            on :failed do |vm|
+              logger.warn "failed Puppet run for #{vm}"
+            end
+            on :timed_out do |vm|
+              logger.warn "Puppet run timed out for for #{vm}"
+            end
+            has :failed do |vms|
+              fail("Puppet runs failed for #{vms.join(", ")}")
+            end
+            has :timed_out do |vms|
+              fail("Puppet runs timed out for #{vms.join(", ")}")
+            end
+          end
         end
 
         desc "run Puppet on these machines"
