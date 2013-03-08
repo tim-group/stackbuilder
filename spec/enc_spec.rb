@@ -106,7 +106,9 @@ describe Stacks::DSL do
 
   it 'generates app server configuration appropriately' do
     stack "blah" do
-      virtualservice "appx"
+      virtualservice "appx" do
+        self.application="JavaHttpRef"
+      end
     end
 
     env "ci", :primary=>"st", :secondary=>"bs" do
@@ -120,14 +122,14 @@ describe Stacks::DSL do
     end
 
     server = find("ci-appx-001.mgmt.st.net.local")
-
     server.to_enc.should eql({
       'role::http_app'=> {
-      'application' => 'appx',
-      'groups' => ['blue'],
+      'application' => 'JavaHttpRef',
+      'group' => 'blue',
       'vip' => '1.1.1.1',
       'environment' => 'ci'
     }})
+
   end
 
   it 'returns nil if asked for a machine that does not exist' do

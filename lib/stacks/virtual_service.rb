@@ -9,6 +9,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :nat
   attr_reader :domain
   attr_reader :fabric
+  attr_accessor :application
 
   def initialize(name)
     @name = name

@@ -19,16 +19,12 @@ class Stacks::Server < Stacks::MachineDef
     return @virtual_service.vip_fqdn
   end
 
-  def groups
-    return ['blue']
-  end
-
   def to_enc()
     resolver = Resolv::DNS.new
     {
       'role::http_app' => {
-        'application' => virtual_service.name,
-        'groups' => groups,
+        'application' => virtual_service.application,
+        'group' => 'blue', #obviously needs improving
         'vip' => resolver.getaddress(vip_fqdn).to_s,
         'environment' => environment.name
     }}
