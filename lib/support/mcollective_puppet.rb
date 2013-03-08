@@ -43,6 +43,8 @@ module Support::MCollectivePuppet
     needs_signing.each do |machine_fqdn|
       callback.invoke :unaccounted, machine_fqdn
     end
+
+    callback.finish
   end
 
   def ca_clean(machines_fqdns, &block)
@@ -59,6 +61,7 @@ module Support::MCollectivePuppet
         end
       end
     end
+    callback.finish
   end
 
   def wait_for_complete(machine_fqdns, timeout=900)
