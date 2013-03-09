@@ -27,18 +27,21 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
   def to_enc
     virtual_services_array = virtual_services.map do |virtual_service|
-      realservers = virtual_service.realservers.map do |realserver|
-        realserver.prod_fqdn
-      end
+       grouped_realservers = virtual_service.realservers.group_by do |realserver|
+        realserver.group
+       end
 
-      realservers = realservers.sort
+       realservers = Hash[grouped_realservers.map do |group, realservers|
+         realserver_fqdns = realservers.map do |realserver|
+          realserver.prod_fqdn
+         end.sort
+         [group, realserver_fqdns]
+       end]
 
       [virtual_service.vip_fqdn, {
         'env' => virtual_service.environment.name,
-        'app' => 'JavaHttpRef',
-        'realservers' => {
-          'blue' => realservers
-        }
+        'app' => virtual_service.application,
+        'realservers' => realservers
       }]
     end
 

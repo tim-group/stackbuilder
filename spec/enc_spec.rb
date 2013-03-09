@@ -43,8 +43,13 @@ describe Stacks::DSL do
     end
 
     stack "blah" do
-      virtualservice "appx"
-      virtualservice "app2x"
+      virtualservice "appx" do
+        self.application="JavaHttpRef"
+        self.groups = ['blue','green']
+      end
+      virtualservice "app2x" do
+        self.application="MySuperCoolApp"
+      end
     end
 
     env "st", :primary=>"st", :secondary=>"bs" do
@@ -63,25 +68,30 @@ describe Stacks::DSL do
     st_loadbalancer.virtual_services.size.should eql(2)
     st_loadbalancer.to_enc.should eql(
       {
-      'role::loadbalancer' =>
-      {
+      'role::loadbalancer' => {
         'virtual_servers' => {
-        'ci2-appx-vip.st.net.local' => {
-        'env' => 'ci2',
-        'app' => 'JavaHttpRef',
-        'realservers' => {
-        'blue' => [
-          'ci2-appx-001.st.net.local',
-          'ci2-appx-002.st.net.local'
-      ]}},
-        'ci2-app2x-vip.st.net.local' => {
-        'env' => 'ci2',
-        'app' => 'JavaHttpRef',
-        'realservers' => {
-        'blue' => [
-          'ci2-app2x-001.st.net.local',
-          'ci2-app2x-002.st.net.local'
-      ]}}}}}
+          'ci2-appx-vip.st.net.local' => {
+            'env' => 'ci2',
+            'app' => 'JavaHttpRef',
+            'realservers' => {
+              'blue' => [
+                'ci2-appx-001.st.net.local'
+              ],
+              'green' => [
+                'ci2-appx-002.st.net.local'
+              ]
+            }
+          },
+          'ci2-app2x-vip.st.net.local' => {
+            'env' => 'ci2',
+            'app' => 'MySuperCoolApp',
+            'realservers' => {
+              'blue' => [
+                'ci2-app2x-001.st.net.local',
+                'ci2-app2x-002.st.net.local'
+              ]
+            }
+          }}}}
     )
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
@@ -95,13 +105,14 @@ describe Stacks::DSL do
         'env' => 'ci',
         'app' => 'JavaHttpRef',
         'realservers' => {
-        'blue' => [
-          'ci-appx-001.st.net.local',
-          'ci-appx-002.st.net.local'
-      ]}},
+          'blue' => [
+            'ci-appx-001.st.net.local'],
+          'green'=> [
+            'ci-appx-002.st.net.local']
+      }},
         'ci-app2x-vip.st.net.local' => {
         'env' => 'ci',
-        'app' => 'JavaHttpRef',
+        'app' => 'MySuperCoolApp',
         'realservers' => {
         'blue' => [
           'ci-app2x-001.st.net.local',
@@ -173,9 +184,9 @@ describe Stacks::DSL do
       'role::natserver' => {
       'rules' => [
         {
-      'from' => 'eg-withnat-vip.front.st.net.local',
-      'to'  => 'eg-withnat-vip.st.net.local'
-    }]
+          'from' => 'eg-withnat-vip.front.st.net.local',
+          'to'  => 'eg-withnat-vip.st.net.local'
+        }]
     }})
   end
 
