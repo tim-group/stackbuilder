@@ -20,7 +20,6 @@ class Puppet::Node::Stacks < Puppet::Node::Plain
 
   def find(request)
     node = super
-    node.fact_merge
     machine = @stacks_inventory.find node.parameters['fqdn']
     unless machine.nil?
       node.classes = machine.to_enc
