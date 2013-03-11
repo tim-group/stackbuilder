@@ -13,8 +13,11 @@ class Stacks::NatServer < Stacks::MachineDef
   def find_nat_rules
     rules = []
     environment.accept do |node|
-      if node.respond_to? :nat
-        rules << node.nat_rule if node.nat
+
+      unless node.environment.contains_node_of_type?(Stacks::NatServer) && environment != node.environment
+        if node.respond_to? :nat
+          rules << node.nat_rule if node.nat
+        end
       end
     end
     rules

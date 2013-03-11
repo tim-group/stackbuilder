@@ -208,10 +208,13 @@ describe Stacks::DSL do
 
     env "eg", :primary=>"st", :secondary=>"bs" do
       instantiate_stack "frontexample"
+      env "sub" do
+        instantiate_stack "frontexample"
+      end
     end
 
-    nat = find("eg-nat-001.mgmt.st.net.local")
-    nat.to_enc.should eql(
+    eg_nat = find("eg-nat-001.mgmt.st.net.local")
+    eg_nat.to_enc.should eql(
       {
       'role::natserver' => {
       'rules' => [
@@ -219,6 +222,17 @@ describe Stacks::DSL do
       'from' => 'eg-withnat-vip.front.st.net.local',
       'to'  => 'eg-withnat-vip.st.net.local'
     }]
+    }})
+
+    sub_nat = find("sub-nat-001.mgmt.st.net.local")
+    sub_nat.to_enc.should eql(
+      {
+      'role::natserver' => {
+      'rules' => [
+        {
+          'from' => 'sub-withnat-vip.front.st.net.local',
+          'to'  => 'sub-withnat-vip.st.net.local'
+        }]
     }})
   end
 
