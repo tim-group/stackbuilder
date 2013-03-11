@@ -112,6 +112,27 @@ describe Compute::Controller do
     @compute_controller.launch(specs)
   end
 
+  it 'calls back when a launch is allocated' do
+    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
+
+    specs = [{
+      :hostname => "vm1",
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+    }]
+
+    @compute_node_client.stub(:launch)
+
+    allocation = {}
+
+    @compute_controller.launch(specs) do
+      on :allocated do |vm, host|
+        allocation[vm] = host
+      end
+    end
+
+    allocation.should eql({'vm1' => 'myhost'})
+  end
+
   it 'calls back if any launch command failed' do
     @compute_node_client.stub(:find_hosts).and_return(["myhost"])
 
@@ -127,7 +148,7 @@ describe Compute::Controller do
     @compute_controller.launch(specs) do
       on :failure do |vm|
         failure = true
-     end
+      end
     end
 
     failure.should eql(true)
@@ -201,7 +222,7 @@ describe Compute::Controller do
         successful << vm
       end
     end
-    
+
     successful.should eql(["vm1", "vm2"])
   end
 
@@ -218,14 +239,14 @@ describe Compute::Controller do
     }]
 
     @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => "success"}]])
-    
+
     unaccounted = []
     @compute_controller.clean(specs) do
       on :unaccounted do |vm|
         unaccounted << vm
       end
     end
-    
+
     unaccounted.should eql(["vm2"])
   end
 
