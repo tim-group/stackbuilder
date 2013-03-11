@@ -206,10 +206,18 @@ describe Stacks::DSL do
       end
     end
 
+    stack "example2" do
+      natserver
+      virtualservice 'blahnat' do
+        enable_nat
+        self.port=8008
+      end
+    end
+
     env "eg", :primary=>"st", :secondary=>"bs" do
       instantiate_stack "frontexample"
       env "sub" do
-        instantiate_stack "frontexample"
+        instantiate_stack "example2"
       end
     end
 
@@ -229,9 +237,9 @@ describe Stacks::DSL do
       {
       'role::natserver' => {
         'rules' => {
-          'sub-withnat-vip.front.st.net.local 80' => {
-            'dest_host'  => 'sub-withnat-vip.st.net.local',
-            'dest_port'  => '8000'
+          'sub-blahnat-vip.front.st.net.local 80' => {
+            'dest_host'  => 'sub-blahnat-vip.st.net.local',
+            'dest_port'  => '8008'
           }
         }
       }

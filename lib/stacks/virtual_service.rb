@@ -2,6 +2,7 @@ require 'stacks/namespace'
 require 'stacks/machine_def_container'
 require 'stacks/server'
 require 'stacks/nat'
+require 'uri'
 
 class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
@@ -9,6 +10,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :nat
   attr_reader :domain
   attr_reader :fabric
+  attr_accessor :port
   attr_accessor :application
   attr_accessor :groups
   attr_accessor :instances
@@ -19,6 +21,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @nat=false
     @groups = ['blue']
     @instances = 2
+    @port = 8000
   end
 
   def bind_to(environment)
@@ -74,6 +77,8 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   end
 
   def nat_rule
-    return Stacks::Nat.new(vip_front_fqdn, vip_fqdn)
+    front_uri = URI.parse("http://#{vip_front_fqdn}")
+    prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
+    return Stacks::Nat.new(front_uri, prod_uri)
   end
 end
