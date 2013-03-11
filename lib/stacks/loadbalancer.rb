@@ -1,8 +1,12 @@
 require 'stacks/namespace'
 
 class Stacks::LoadBalancer < Stacks::MachineDef
+
+  attr_accessor :virtual_router_id
+
   def bind_to(environment)
     super(environment)
+    @virtual_router_id = environment.options[:virtual_router_id]
   end
 
   def virtual_services

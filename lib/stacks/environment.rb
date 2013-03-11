@@ -14,8 +14,8 @@ class Stacks::Environment
     return @machine_def_containers[key]
   end
 
-  def env(name, &block)
-    @machine_def_containers[name] = Stacks::Environment.new(name, self.options, @stack_procs)
+  def env(name, options={}, &block)
+    @machine_def_containers[name] = Stacks::Environment.new(name, self.options.merge(options), @stack_procs)
     @machine_def_containers[name].instance_eval(&block) unless block.nil?
   end
 

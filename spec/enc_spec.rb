@@ -15,6 +15,25 @@ describe Stacks::DSL do
     end
   end
 
+  it 'can pass in some options to the stack instantiation' do
+    stack "fabric" do
+      loadbalancer
+    end
+
+    env "parent", :primary=>"st", :secondary=>"bs" do
+      env "e1", :virtual_router_id=>1, :primary=>"space" do
+        instantiate_stack "fabric"
+      end
+
+      env "e2", :virtual_router_id=>2 do
+        instantiate_stack "fabric"
+      end
+    end
+
+    find("e1-lb-001.mgmt.space.net.local").virtual_router_id.should eql(1)
+    find("e2-lb-001.mgmt.st.net.local").virtual_router_id.should eql(2)
+  end
+
   it 'can generate a pair of loadbalancers' do
     stack "fabric" do
       loadbalancer
@@ -24,7 +43,7 @@ describe Stacks::DSL do
     end
     find("rah-lb-001.mgmt.st.net.local").should_not be_nil
     find("rah-lb-002.mgmt.st.net.local").should_not be_nil
- end
+  end
 
   it 'generates config for a sub environment' do
     stack "fabric" do
@@ -80,29 +99,29 @@ describe Stacks::DSL do
     st_loadbalancer.to_enc.should eql(
       {
       'role::loadbalancer' => {
-        'virtual_servers' => {
-          'ci2-appx-vip.st.net.local' => {
-            'env' => 'ci2',
-            'app' => 'JavaHttpRef',
-            'realservers' => {
-              'blue' => [
-                'ci2-appx-001.st.net.local'
-              ],
-              'green' => [
-                'ci2-appx-002.st.net.local'
-              ]
-            }
-          },
-          'ci2-app2x-vip.st.net.local' => {
-            'env' => 'ci2',
-            'app' => 'MySuperCoolApp',
-            'realservers' => {
-              'blue' => [
-                'ci2-app2x-001.st.net.local',
-                'ci2-app2x-002.st.net.local'
-              ]
-            }
-          }}}}
+      'virtual_servers' => {
+      'ci2-appx-vip.st.net.local' => {
+      'env' => 'ci2',
+      'app' => 'JavaHttpRef',
+      'realservers' => {
+      'blue' => [
+        'ci2-appx-001.st.net.local'
+    ],
+      'green' => [
+        'ci2-appx-002.st.net.local'
+    ]
+    }
+    },
+      'ci2-app2x-vip.st.net.local' => {
+      'env' => 'ci2',
+      'app' => 'MySuperCoolApp',
+      'realservers' => {
+      'blue' => [
+        'ci2-app2x-001.st.net.local',
+        'ci2-app2x-002.st.net.local'
+    ]
+    }
+    }}}}
     )
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
@@ -116,8 +135,8 @@ describe Stacks::DSL do
         'env' => 'ci',
         'app' => 'JavaHttpRef',
         'realservers' => {
-          'blue' => [
-            'ci-appx-001.st.net.local'],
+        'blue' => [
+          'ci-appx-001.st.net.local'],
           'green'=> [
             'ci-appx-002.st.net.local']
       }},
@@ -172,7 +191,7 @@ describe Stacks::DSL do
   end
 
   it 'returns nil if asked for a machine that does not exist' do
-     find("no-exist").should eql(nil)
+    find("no-exist").should eql(nil)
   end
 
   it 'configures NAT boxes to NAT incoming public IPs' do
@@ -195,9 +214,9 @@ describe Stacks::DSL do
       'role::natserver' => {
       'rules' => [
         {
-          'from' => 'eg-withnat-vip.front.st.net.local',
-          'to'  => 'eg-withnat-vip.st.net.local'
-        }]
+      'from' => 'eg-withnat-vip.front.st.net.local',
+      'to'  => 'eg-withnat-vip.st.net.local'
+    }]
     }})
   end
 
@@ -205,7 +224,7 @@ describe Stacks::DSL do
 
     expect {
       env "myold", :primary=>"x", :secondary=>"y" do
-        instantiate_stack "no-exist"
+      instantiate_stack "no-exist"
       end
     }.to raise_error "no stack found 'no-exist'"
   end
