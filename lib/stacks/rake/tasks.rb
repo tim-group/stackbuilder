@@ -118,6 +118,9 @@ namespace :sbx do
       sbtask :launch do
         computecontroller = Compute::Controller.new
         computecontroller.launch(machine_def.to_specs) do
+          on :allocated do |vm, host|
+            logger.info "#{vm} allocated to #{host}"
+          end
           on :success do |vm|
             logger.info "#{vm} launched successfully"
           end
