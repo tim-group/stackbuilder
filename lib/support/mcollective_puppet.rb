@@ -100,11 +100,7 @@ module Support::MCollectivePuppet
 
   def puppetd_last_run_summary_processed(fqdns)
     puppetd_query(:last_run_summary, fqdns) do |data|
-      result = result_for_summary(data)
-      if result != "passed"
-        puts "bad result: #{data.inspect}"
-      end
-      result
+      result_for_summary(data)
     end
   end
 
