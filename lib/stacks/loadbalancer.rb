@@ -6,7 +6,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
   def bind_to(environment)
     super(environment)
-    @virtual_router_id = environment.options[:virtual_router_id]
+    @virtual_router_id = environment.options[:virtual_router_id] || 1
   end
 
   def virtual_services
@@ -51,6 +51,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
     {
       'role::loadbalancer'=> {
+        'virtual_router_id' => self.virtual_router_id,
         'virtual_servers' => Hash[virtual_services_array]
       }
     }

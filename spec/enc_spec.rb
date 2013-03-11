@@ -98,7 +98,8 @@ describe Stacks::DSL do
     st_loadbalancer.virtual_services.size.should eql(2)
     st_loadbalancer.to_enc.should eql(
       {
-      'role::loadbalancer' => {
+       'role::loadbalancer' => {
+      'virtual_router_id' => 1,
       'virtual_servers' => {
       'ci2-appx-vip.st.net.local' => {
       'env' => 'ci2',
@@ -130,7 +131,8 @@ describe Stacks::DSL do
       {
       'role::loadbalancer' =>
       {
-        'virtual_servers' => {
+       'virtual_router_id' => 1,
+       'virtual_servers' => {
         'ci-appx-vip.st.net.local' => {
         'env' => 'ci',
         'app' => 'JavaHttpRef',
