@@ -248,12 +248,13 @@ namespace :sbx do
           end
 
           include Support::MCollectivePuppet
+          start_time = Time.now
           wait_for_complete(hosts) do
             on :passed do |vm|
-              logger.info "successful Puppet run for #{vm}"
+              logger.info "successful Puppet run for #{vm} (#{Time.now - start_time} sec)"
             end
             on :failed do |vm|
-              logger.warn "failed Puppet run for #{vm}"
+              logger.warn "failed Puppet run for #{vm} (#{Time.now - start_time} sec)"
             end
             on :timed_out do |vm|
               logger.warn "Puppet run timed out for for #{vm}"
