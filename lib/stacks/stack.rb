@@ -17,8 +17,12 @@ class Stacks::Stack < Stacks::MachineDefContainer
     virtualservice.instance_eval(&block) unless block.nil?
   end
 
-  def loadbalancer
-    @definitions["lb-001"] = Stacks::LoadBalancer.new("lb-001")
+  def loadbalancer(options={:instances=>2})
+    options[:instances].times do |i|
+      index = sprintf("%03d",i+1)
+      hostname = "lb-#{index}"
+      @definitions[hostname] = Stacks::LoadBalancer.new(hostname)
+    end
   end
 
   def natserver

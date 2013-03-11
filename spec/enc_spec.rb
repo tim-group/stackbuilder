@@ -15,6 +15,17 @@ describe Stacks::DSL do
     end
   end
 
+  it 'can generate a pair of loadbalancers' do
+    stack "fabric" do
+      loadbalancer
+    end
+    env "rah", :primary=>"st", :secondary=>"bs" do
+      instantiate_stack "fabric"
+    end
+    find("rah-lb-001.mgmt.st.net.local").should_not be_nil
+    find("rah-lb-002.mgmt.st.net.local").should_not be_nil
+ end
+
   it 'generates config for a sub environment' do
     stack "fabric" do
       loadbalancer
