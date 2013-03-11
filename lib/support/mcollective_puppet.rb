@@ -64,7 +64,7 @@ module Support::MCollectivePuppet
     callback.finish
   end
 
-  def wait_for_complete(machine_fqdns, timeout=900, &block)
+  def wait_for_complete(machine_fqdns, timeout=1600, &block)
     start_time = now
     callback = Support::Callback.new(&block)
 
@@ -76,9 +76,9 @@ module Support::MCollectivePuppet
       stopped_results = puppetd_last_run_summary_processed(stopped_statuses.keys)
       stopped_results.sort.each do |machine_fqdn, result|
         if result == "passed"
-          callback.invoke(:passed, machine_fqdn) 
+          callback.invoke(:passed, machine_fqdn)
         elsif result == "failed"
-          callback.invoke(:failed, machine_fqdn) 
+          callback.invoke(:failed, machine_fqdn)
         end
       end
       fates.merge!(stopped_results)
@@ -86,7 +86,7 @@ module Support::MCollectivePuppet
 
     undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }
     undecided.sort.each do |machine_fqdn, result|
-      callback.invoke(:timed_out, [machine_fqdn, result]) 
+      callback.invoke(:timed_out, [machine_fqdn, result])
     end
 
     callback.finish
