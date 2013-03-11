@@ -1,7 +1,8 @@
 require 'stacks/environment'
 require 'puppet/node'
-require 'puppet/indirector/plain'
-class Puppet::Node::Stacks < Puppet::Indirector::Plain
+require 'puppet/indirector/node/plain'
+
+class Puppet::Node::Stacks < Puppet::Node::Plain
   desc "generates the necessary wiring for all nodes in a stack."
 
   def initialize
