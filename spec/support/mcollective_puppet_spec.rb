@@ -40,14 +40,14 @@ describe Support::MCollectivePuppet do
   def wait_for_complete_callback
     callback = @callback
     Proc.new do
-      on :passed do |arg|
-        callback.passed(arg)
+      on :passed do |vm|
+        callback.passed(vm)
       end
-      on :failed do |arg|
-        callback.failed(arg)
+      on :failed do |vm|
+        callback.failed(vm)
       end
-      on :timed_out do |arg|
-        callback.timed_out(arg)
+      on :timed_out do |vm, result|
+        callback.timed_out(vm, result)
       end
     end
   end
@@ -225,7 +225,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
 
-    @callback.should_receive(:timed_out).with('vm2.test.net.local').ordered
+    @callback.should_receive(:timed_out).with('vm2.test.net.local', 'running').ordered
 
     @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
@@ -278,7 +278,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
 
-    @callback.should_receive(:timed_out).with('vm2.test.net.local').ordered
+    @callback.should_receive(:timed_out).with('vm2.test.net.local', 'unaccounted for').ordered
 
     @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end

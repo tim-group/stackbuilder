@@ -256,14 +256,14 @@ namespace :sbx do
             on :failed do |vm|
               logger.warn "failed Puppet run for #{vm} (#{Time.now - start_time} sec)"
             end
-            on :timed_out do |vm|
-              logger.warn "Puppet run timed out for for #{vm}"
+            on :timed_out do |vm, result|
+              logger.warn "Puppet run timed out for for #{vm} (#{result})"
             end
             has :failed do |vms|
               fail("Puppet runs failed for #{vms.join(", ")}")
             end
-            has :timed_out do |vms|
-              fail("Puppet runs timed out for #{vms.join(", ")}")
+            has :timed_out do |vms_with_results|
+              fail("Puppet runs timed out for #{vms_with_results.map { |vm, result| "#{vm} (#{result})" }.join(", ")}")
             end
           end
         end

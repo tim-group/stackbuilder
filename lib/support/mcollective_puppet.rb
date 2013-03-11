@@ -86,7 +86,7 @@ module Support::MCollectivePuppet
 
     undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }
     undecided.sort.each do |machine_fqdn, result|
-      callback.invoke(:timed_out, machine_fqdn) 
+      callback.invoke(:timed_out, [machine_fqdn, result]) 
     end
 
     callback.finish
