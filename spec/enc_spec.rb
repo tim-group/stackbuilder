@@ -217,23 +217,25 @@ describe Stacks::DSL do
     eg_nat.to_enc.should eql(
       {
       'role::natserver' => {
-      'rules' => [
-        {
-      'from' => 'eg-withnat-vip.front.st.net.local',
-      'to'  => 'eg-withnat-vip.st.net.local'
-    }]
-    }})
+      'rules' => {
+        'eg-withnat-vip.front.st.net.local 80' => {
+          'dest_host'  => 'eg-withnat-vip.st.net.local',
+          'dest_port'  => '8000'
+      }
+    }}})
 
     sub_nat = find("sub-nat-001.mgmt.st.net.local")
     sub_nat.to_enc.should eql(
       {
       'role::natserver' => {
-      'rules' => [
-        {
-          'from' => 'sub-withnat-vip.front.st.net.local',
-          'to'  => 'sub-withnat-vip.st.net.local'
-        }]
-    }})
+        'rules' => {
+          'sub-withnat-vip.front.st.net.local 80' => {
+            'dest_host'  => 'sub-withnat-vip.st.net.local',
+            'dest_port'  => '8000'
+          }
+        }
+      }
+    })
   end
 
   it 'throws an error if we try and instantiate a stack that isnt defined' do

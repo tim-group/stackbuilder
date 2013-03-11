@@ -24,12 +24,13 @@ class Stacks::NatServer < Stacks::MachineDef
   end
 
   def to_enc
-    rules = find_nat_rules.map do |rule|
-      {
-        'to' => rule.to,
-        'from' => rule.from
-      }
-    end
+    rules = Hash[find_nat_rules.map do |rule|
+      ["#{rule.from} 80", {
+          'dest_host' => rule.to,
+          'dest_port' => '8000'
+        }
+      ]
+    end]
 
     {
       'role::natserver' => {
