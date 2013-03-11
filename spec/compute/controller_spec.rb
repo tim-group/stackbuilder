@@ -103,7 +103,7 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => "vm1.mgmt.st.net.local"
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => "success"}]])
@@ -118,7 +118,7 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => "vm1.mgmt.st.net.local"
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => "failed"}]])
