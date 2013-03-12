@@ -29,7 +29,7 @@ class Stacks::NatServer < Stacks::MachineDef
     snat = {
       'SNAT' => {
         'prod' => {
-          'to_source' => "nat-vip.front.#{environment.options[:primary]}.net.local"
+          'to_source' => "nat-vip.front.#{environment.options[:primary_site]}.net.local"
         }
       }
     }
