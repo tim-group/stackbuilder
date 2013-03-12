@@ -28,8 +28,7 @@ describe Stacks::HttpProxy do
     proxyserver.to_enc.should eql(
       {'role::httpproxy'=>
         {
-          'vhosts'           => ["env-proxy-vip.front.st.net.local"],
-          'balancer_members' => ["env-app-vip.st.net.local"]
+          'env-proxy-vip.front.st.net.local' => ["env-app-vip.st.net.local"]
         }
       }
     )

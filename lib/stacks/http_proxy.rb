@@ -28,14 +28,12 @@ class Stacks::HttpProxy < Stacks::MachineDef
   end
 
   def to_enc
-    service_resources = downstream_services().map do |service|
-      {
-        'vhosts' => [virtualservice.vip_front_fqdn],
-        'balancer_members' => [service.vip_fqdn]
-      }
-    end
+    service_resources = Hash[downstream_services().map do |service|
+      [virtualservice.vip_front_fqdn,[service.vip_fqdn]]
+    end]
+
     {
-      'role::httpproxy' => service_resources[0]
+      'role::httpproxy' => service_resources
     }
   end
 end
