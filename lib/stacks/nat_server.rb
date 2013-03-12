@@ -24,13 +24,31 @@ class Stacks::NatServer < Stacks::MachineDef
   end
 
   def to_enc
-    rules = Hash[find_nat_rules.map do |rule|
-      ["#{rule.from.host} #{rule.from.port}", {
-          'dest_host' => rule.to.host,
+    rules = {}
+
+    snat = {
+      'SNAT' => {
+        'prod' => {
+          'to_source' => "nat-vip.front.#{environment.options[:primary]}.net.local"
+        }
+      }
+    }
+
+    dnat_rules = Hash[find_nat_rules.map do |rule|
+      [
+        "#{rule.from.host} #{rule.from.port}",
+        {
+          'dest_host' => "#{rule.to.host}",
           'dest_port' => "#{rule.to.port}"
         }
       ]
     end]
+
+    dnat = {
+      'DNAT' => dnat_rules
+    }
+    rules.merge! snat
+    rules.merge! dnat
 
     {
       'role::natserver' => {

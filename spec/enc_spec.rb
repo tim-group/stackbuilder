@@ -224,26 +224,44 @@ describe Stacks::DSL do
     eg_nat = find("eg-nat-001.mgmt.st.net.local")
     eg_nat.to_enc.should eql(
       {
-      'role::natserver' => {
-      'rules' => {
-        'eg-withnat-vip.front.st.net.local 80' => {
-          'dest_host'  => 'eg-withnat-vip.st.net.local',
-          'dest_port'  => '8000'
+        'role::natserver' => {
+          'rules' => {
+            'SNAT' => {
+              'prod' => {
+                'to_source' => 'nat-vip.front.st.net.local'
+              }
+            },
+            'DNAT' => {
+              'eg-withnat-vip.front.st.net.local 80' => {
+                'dest_host'  => 'eg-withnat-vip.st.net.local',
+                'dest_port'  => '8000'
+              }
+            }
+          }
+        }
       }
-    }}})
+    )
 
     sub_nat = find("sub-nat-001.mgmt.st.net.local")
     sub_nat.to_enc.should eql(
       {
-      'role::natserver' => {
-        'rules' => {
-          'sub-blahnat-vip.front.st.net.local 80' => {
-            'dest_host'  => 'sub-blahnat-vip.st.net.local',
-            'dest_port'  => '8008'
+        'role::natserver' => {
+          'rules' => {
+            'SNAT' => {
+              'prod' => {
+                'to_source' => 'nat-vip.front.st.net.local'
+              }
+            },
+            'DNAT' => {
+              'sub-blahnat-vip.front.st.net.local 80' => {
+                'dest_host'  => 'sub-blahnat-vip.st.net.local',
+                'dest_port'  => '8008'
+              }
+            }
           }
         }
       }
-    })
+    )
   end
 
   it 'throws an error if we try and instantiate a stack that isnt defined' do
