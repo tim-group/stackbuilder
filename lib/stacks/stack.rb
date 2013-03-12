@@ -25,8 +25,12 @@ class Stacks::Stack < Stacks::MachineDefContainer
     end
   end
 
-  def natserver
-    @definitions["nat-001"] = Stacks::NatServer.new("nat-001")
+  def natserver(options={:instances=>2})
+    options[:instances].times do |i|
+      index = sprintf("%03d",i+1)
+      hostname = "nat-#{index}"
+      @definitions[hostname] = Stacks::NatServer.new(hostname)
+    end
   end
 
   def [](key)
