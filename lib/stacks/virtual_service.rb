@@ -65,7 +65,9 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
       pair
     end]
 
+
     {
+      :hostname => "#{environment.name}-#{name}",
       :fabric => @fabric,
       :networks => networks,
       :qualified_hostnames => qualified_hostnames

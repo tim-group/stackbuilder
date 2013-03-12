@@ -63,6 +63,7 @@ class Compute::Controller
 
     all_specs.each do |spec|
       vm = spec[:hostname]
+      pp spec
       result = flattened_results[vm]
       if result.nil?
         callback.invoke :unaccounted, vm
