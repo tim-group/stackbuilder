@@ -12,7 +12,7 @@ describe Stacks::DSL do
       virtualservice "appx"
       virtualservice "dbx"
     end
-    env "ci", :primary=>"st", :secondary=>"bs" do
+    env "ci", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "blah"
     end
   end
@@ -39,7 +39,7 @@ describe Stacks::DSL do
 
   it 'can make an arbitrary specd machine' do
     stack "fabric" do
-      @definitions["puppetmaster"] = Stacks::StandaloneServer.new("puppetmaster-001", :primary) do
+      @definitions["puppetmaster"] = Stacks::StandaloneServer.new("puppetmaster-001", :primary_site) do
         def to_specs
           specs = super
           specs.each do |spec|
@@ -50,7 +50,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "ci", :primary=>"st", :secondary=>"bs" do
+    env "ci", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "fabric"
     end
 

@@ -3,7 +3,7 @@ require 'stacks/environment'
 describe Stacks::VirtualService do
 
   subject do
-    env = Stacks::Environment.new("env", {:primary=>"mars"}, {})
+    env = Stacks::Environment.new("env", {:primary_site=>"mars"}, {})
     subject = Stacks::VirtualService.new("myvs")
     subject.bind_to(env)
     subject

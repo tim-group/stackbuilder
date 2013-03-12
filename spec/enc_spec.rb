@@ -20,8 +20,8 @@ describe Stacks::DSL do
       loadbalancer
     end
 
-    env "parent", :primary=>"st", :secondary=>"bs" do
-      env "e1", :virtual_router_id=>1, :primary=>"space" do
+    env "parent", :primary_site=>"st", :secondary_site=>"bs" do
+      env "e1", :virtual_router_id=>1, :primary_site=>"space" do
         instantiate_stack "fabric"
       end
 
@@ -38,7 +38,7 @@ describe Stacks::DSL do
     stack "fabric" do
       loadbalancer
     end
-    env "rah", :primary=>"st", :secondary=>"bs" do
+    env "rah", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "fabric"
     end
     find("rah-lb-001.mgmt.st.net.local").should_not be_nil
@@ -55,7 +55,7 @@ describe Stacks::DSL do
       virtualservice "app2x"
     end
 
-    env "st", :primary=>"st", :secondary=>"bs" do
+    env "st", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "fabric"
       env "ci" do
         instantiate_stack "fabric"
@@ -82,7 +82,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary=>"st", :secondary=>"bs" do
+    env "st", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "fabric"
       env "ci" do
         instantiate_stack "fabric"
@@ -161,7 +161,7 @@ describe Stacks::DSL do
         self.groups=['blue', 'green']
       end
     end
-    env "ci", :primary=>"st" do
+    env "ci", :primary_site=>"st" do
       instantiate_stack "blah"
     end
 
@@ -178,7 +178,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "ci", :primary=>"st", :secondary=>"bs" do
+    env "ci", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "blah"
     end
 
@@ -214,7 +214,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "eg", :primary=>"st", :secondary=>"bs" do
+    env "eg", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "frontexample"
       env "sub" do
         instantiate_stack "example2"
@@ -249,7 +249,7 @@ describe Stacks::DSL do
   it 'throws an error if we try and instantiate a stack that isnt defined' do
 
     expect {
-      env "myold", :primary=>"x", :secondary=>"y" do
+      env "myold", :primary_site=>"x", :secondary_site=>"y" do
       instantiate_stack "no-exist"
       end
     }.to raise_error "no stack found 'no-exist'"

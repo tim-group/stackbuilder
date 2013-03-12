@@ -26,7 +26,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
 
   def bind_to(environment)
     @environment = environment
-    @fabric = environment.options[:primary]
+    @fabric = environment.options[:primary_site]
     @domain = "#{@fabric}.net.local"
     @instances.times do |i|
       index = sprintf("%03d",i+1)
