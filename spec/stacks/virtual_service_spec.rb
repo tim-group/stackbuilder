@@ -12,6 +12,7 @@ describe Stacks::VirtualService do
   it 'generates specs to ask for vip addresses' do
     subject.to_vip_spec.should eql(
       {
+        :hostname => "env-myvs",
         :fabric => "mars",
         :networks => [:prod],
         :qualified_hostnames => {:prod => "env-myvs-vip.mars.net.local"}
@@ -23,6 +24,7 @@ describe Stacks::VirtualService do
     subject.enable_nat
     subject.to_vip_spec.should eql(
       {
+        :hostname => "env-myvs",
         :fabric => "mars",
         :networks => [:prod, :front],
         :qualified_hostnames => {
