@@ -173,8 +173,6 @@ namespace :sbx do
           end
         end
 
-        pp vip_specs
-
         computecontroller = Compute::Controller.new
         computecontroller.free_ips(vip_specs) do
           on :success do |vm|
@@ -276,7 +274,7 @@ namespace :sbx do
               hosts << child_machine_def.mgmt_fqdn
             end
           end
-          pp hosts
+
           success = mco_client("puppetd", :key => "seed") do |mco|
             engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
             engine.execute()
