@@ -1,15 +1,17 @@
 require 'stacks/namespace'
 
 class Stacks::NatServer < Stacks::MachineDef
-  attr_accessor :virtual_router_id
+  attr_reader :virtual_router_ids
 
   def initialize(base_hostname)
     super(base_hostname, [:mgmt, :prod, :front])
+    @virtual_router_ids = {}
   end
 
   def bind_to(environment)
     super(environment)
-    @virtual_router_id = environment.options[:nat_virtual_router_id] || 101
+    @virtual_router_ids[:front] = environment.options[:nat_front_virtual_router_id] || 105
+    @virtual_router_ids[:prod] = environment.options[:nat_prod_virtual_router_id] || 106
   end
 
   def find_nat_rules
@@ -55,7 +57,8 @@ class Stacks::NatServer < Stacks::MachineDef
     {
       'role::natserver' => {
         'rules' => rules,
-        'virtual_router_id' => self.virtual_router_id
+        'front_virtual_router_id' => self.virtual_router_ids[:front],
+        'prod_virtual_router_id' => self.virtual_router_ids[:prod]
       }
     }
   end

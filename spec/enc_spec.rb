@@ -22,19 +22,26 @@ describe Stacks::DSL do
     end
 
     env "parent", :primary_site=>"st", :secondary_site=>"bs" do
-      env "e1", :lb_virtual_router_id=>1, :nat_virtual_router_id=>40, :primary_site=>"space" do
+      env "e1", :lb_virtual_router_id=>1,
+                :nat_front_virtual_router_id=>40,
+                :nat_prod_virtual_router_id=>41,
+                :primary_site=>"space" do
         instantiate_stack "fabric"
       end
 
-      env "e2", :lb_virtual_router_id=>2, :nat_virtual_router_id=>41 do
+      env "e2", :lb_virtual_router_id=>2,
+                :nat_front_virtual_router_id=>42,
+                :nat_prod_virtual_router_id=>43 do
         instantiate_stack "fabric"
       end
     end
 
     find("e1-lb-001.mgmt.space.net.local").virtual_router_id.should eql(1)
     find("e2-lb-001.mgmt.st.net.local").virtual_router_id.should eql(2)
-    find("e1-nat-001.mgmt.space.net.local").virtual_router_id.should eql(40)
-    find("e2-nat-001.mgmt.st.net.local").virtual_router_id.should eql(41)
+    find("e1-nat-001.mgmt.space.net.local").virtual_router_ids[:front].should eql(40)
+    find("e2-nat-001.mgmt.st.net.local").virtual_router_ids[:front].should eql(42)
+    find("e1-nat-001.mgmt.space.net.local").virtual_router_ids[:prod].should eql(41)
+    find("e2-nat-001.mgmt.st.net.local").virtual_router_ids[:prod].should eql(43)
   end
 
   it 'can generate a pair of loadbalancers' do
@@ -241,7 +248,8 @@ describe Stacks::DSL do
               }
             }
           },
-          'virtual_router_id' => 101
+          'prod_virtual_router_id' => 106,
+          'front_virtual_router_id' => 105
         }
       }
     )
@@ -263,7 +271,8 @@ describe Stacks::DSL do
               }
             }
           },
-          'virtual_router_id' => 101
+          'prod_virtual_router_id' => 106,
+          'front_virtual_router_id' => 105
         }
       }
     )
