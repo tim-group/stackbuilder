@@ -1,7 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
 
-class Stacks::Server < Stacks::MachineDef
+class Stacks::AppServer < Stacks::MachineDef
   attr_reader :environment, :virtual_service
   attr_accessor :group
 

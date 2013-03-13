@@ -1,6 +1,6 @@
 require 'stacks/namespace'
 require 'stacks/machine_def_container'
-require 'stacks/server'
+require 'stacks/app_server'
 require 'stacks/nat'
 require 'uri'
 
@@ -30,7 +30,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @domain = "#{@fabric}.net.local"
     @instances.times do |i|
       index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] = server = Stacks::Server.new(self, index)
+      @definitions["#{name}-#{index}"] = server = Stacks::AppServer.new(self, index)
       server.group=groups[i%groups.size]
     end
     super(environment)

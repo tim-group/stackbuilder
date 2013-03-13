@@ -10,7 +10,7 @@ describe Stacks::HttpProxy do
   it 'blows us if we attempt to use make two vhosts with the same name' do
     proxy_virtualservice = Stacks::VirtualService.new("proxy")
     app_virtualservice = Stacks::VirtualService.new("app")
-    appserver = Stacks::Server.new(app_virtualservice, "001")
+    appserver = Stacks::AppServer.new(app_virtualservice, "001")
     proxyserver = Stacks::HttpProxy.new("proxy-001", proxy_virtualservice)
     env = Stacks::Environment.new("env", {:primary_site=>"st"}, {})
 
@@ -40,7 +40,7 @@ describe Stacks::HttpProxy do
   it 'produces an enc references the downstream virtual service it is proxying' do
     proxy_virtualservice = Stacks::VirtualService.new("proxy")
     app_virtualservice = Stacks::VirtualService.new("app")
-    appserver = Stacks::Server.new(app_virtualservice, "001")
+    appserver = Stacks::AppServer.new(app_virtualservice, "001")
     proxyserver = Stacks::HttpProxy.new("proxy-001", proxy_virtualservice)
     env = Stacks::Environment.new("env", {:primary_site=>"st"}, {})
 
