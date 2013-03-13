@@ -66,8 +66,6 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
       end
       pair
     end]
-
-
     {
       :hostname => "#{environment.name}-#{name}",
       :fabric => @fabric,
@@ -84,5 +82,9 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     front_uri = URI.parse("http://#{vip_front_fqdn}")
     prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
     return Stacks::Nat.new(front_uri, prod_uri)
+  end
+
+  def balances?(type)
+    return @server_type == type
   end
 end

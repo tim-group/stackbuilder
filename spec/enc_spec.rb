@@ -74,7 +74,7 @@ describe Stacks::DSL do
     end
 
     loadbalancer = find("ci-lb-001.mgmt.st.net.local")
-    loadbalancer.virtual_services.size.should eql(2)
+    loadbalancer.virtual_services(:AppServer).size.should eql(2)
   end
 
   it 'can generate the load balancer spec for a sub environment' do
@@ -112,29 +112,17 @@ describe Stacks::DSL do
     end
 
     st_loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    st_loadbalancer.virtual_services.size.should eql(3)
-
+    st_loadbalancer.virtual_services(:AppServer).size.should eql(2)
+    st_loadbalancer.virtual_services(:ProxyServer).size.should eql(1)
 
     pp st_loadbalancer.to_enc
-
 
     st_loadbalancer.to_enc.should eql(
       {
        'role::loadbalancer' => {
           'virtual_router_id' => 1,
           'virtual_servers' => {
-            'ci2-myproxy-vip.st.net.local' => {
-#              'type'        => 'proxy',
-              'env'         => 'ci2',
-              'app'         => nil,
-              'realservers' => {
-                'blue' => [
-                  'ci2-myproxy-001.st.net.local',
-                  'ci2-myproxy-002.st.net.local'
-                ]
-              }
-            },
-            'ci2-appx-vip.st.net.local' => {
+           'ci2-appx-vip.st.net.local' => {
 #'type'        => 'app',
 
               'env' => 'ci2',
@@ -156,11 +144,20 @@ describe Stacks::DSL do
                   'ci2-app2x-001.st.net.local',
                   'ci2-app2x-002.st.net.local'
                 ]
+              }},
+            'ci2-myproxy-vip.st.net.local' => {
+              'type'        => 'proxy',
+              'realservers' => {
+                'blue' => [
+                  'ci2-myproxy-001.st.net.local',
+                  'ci2-myproxy-002.st.net.local'
+                ]
               }
-    }}}})
+            }
+    }}})
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
-    ci_loadbalancer.virtual_services.size.should eql(2)
+    ci_loadbalancer.virtual_services(:AppServer).size.should eql(2)
     ci_loadbalancer.to_enc.should eql({
       'role::loadbalancer' =>{
         'virtual_router_id' => 1,
