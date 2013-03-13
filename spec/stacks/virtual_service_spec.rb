@@ -4,7 +4,7 @@ describe Stacks::VirtualService do
 
   subject do
     env = Stacks::Environment.new("env", {:primary_site=>"mars"}, {})
-    subject = Stacks::VirtualService.new("myvs")
+    subject = Stacks::VirtualService.new("myvs", :AppServer)
     subject.bind_to(env)
     subject
   end

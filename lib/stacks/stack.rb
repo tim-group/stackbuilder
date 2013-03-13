@@ -13,7 +13,7 @@ class Stacks::Stack < Stacks::MachineDefContainer
   end
 
   def virtual_appserver(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualService.new(name)
+    @definitions[name] = virtualservice = Stacks::VirtualService.new(name, :AppServer)
     virtualservice.instance_eval(&block) unless block.nil?
   end
 
