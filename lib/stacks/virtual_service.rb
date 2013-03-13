@@ -15,7 +15,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_accessor :groups
   attr_accessor :instances
 
-  def initialize(name, server_type=:AppServer)
+  def initialize(name, server_type)
     @name = name
     @definitions = {}
     @nat=false
