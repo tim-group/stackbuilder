@@ -1,17 +1,19 @@
 require 'stacks/namespace'
 
-class Stacks::HttpProxy < Stacks::MachineDef
+class Stacks::ProxyServer < Stacks::MachineDef
   attr_reader :virtualservice
 
-  def initialize(base_hostname, virtualservice)
+  def initialize(base_hostname, virtualservice, &config_block)
     super(base_hostname)
     @virtualservice = virtualservice
     @downstream_services = []
     @proxy_vhosts_lookup = {}
     @proxy_vhosts = []
+    @config_block = config_block
   end
 
   def bind_to(environment)
+    @virtualservice.bind_to(environment)
     super(environment)
   end
 
@@ -26,12 +28,12 @@ class Stacks::HttpProxy < Stacks::MachineDef
       self.instance_eval &block
     end
 
-    def add_alias(alias_fqdn)
+    def with_alias(alias_fqdn)
       @aliases << alias_fqdn
     end
   end
 
-  def add(service, &config_block)
+  def create_vhost(service, &config_block)
     @proxy_vhosts << @proxy_vhosts_lookup[service] = Stacks::ProxyVHost.new(virtualservice.vip_front_fqdn, service, &config_block)
   end
 

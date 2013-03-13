@@ -301,7 +301,7 @@ describe Stacks::DSL do
 
 
     env "env", :primary_site=>"st" do
-      instantiate_stack "mystack"
+      instantiate_stack "ref"
     end
 
     proxyserver.to_enc.should eql(

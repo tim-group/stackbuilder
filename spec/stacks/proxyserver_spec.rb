@@ -1,7 +1,7 @@
 require 'stacks/environment'
-require 'stacks/http_proxy'
+require 'stacks/proxy_server'
 
-describe Stacks::HttpProxy do
+describe Stacks::ProxyServer do
 
   it 'allows us to use other CNAMES other than the generated front name' do
 
@@ -11,19 +11,19 @@ describe Stacks::HttpProxy do
     proxy_virtualservice = Stacks::VirtualService.new("proxy", :AppServer)
     app_virtualservice = Stacks::VirtualService.new("app", :AppServer)
     appserver = Stacks::AppServer.new(app_virtualservice, "001")
-    proxyserver = Stacks::HttpProxy.new("proxy-001", proxy_virtualservice)
+    proxyserver = Stacks::ProxyServer.new("proxy-001", proxy_virtualservice)
     env = Stacks::Environment.new("env", {:primary_site=>"st"}, {})
 
     proxy_virtualservice.bind_to(env)
     app_virtualservice.bind_to(env)
     appserver.bind_to(env)
 
-    proxyserver.add("app") do
-      add_alias "example.timgroup.com"
+    proxyserver.create_vhost("app") do
+      with_alias "example.timgroup.com"
     end
 
-    proxyserver.add("app2") do
-      add_alias "example.timgroup.com"
+    proxyserver.create_vhost("app2") do
+      with_alias "example.timgroup.com"
     end
 
     proxyserver.bind_to(env)
@@ -41,15 +41,15 @@ describe Stacks::HttpProxy do
     proxy_virtualservice = Stacks::VirtualService.new("proxy", :AppServer)
     app_virtualservice = Stacks::VirtualService.new("app", :AppServer)
     appserver = Stacks::AppServer.new(app_virtualservice, "001")
-    proxyserver = Stacks::HttpProxy.new("proxy-001", proxy_virtualservice)
+    proxyserver = Stacks::ProxyServer.new("proxy-001", proxy_virtualservice)
     env = Stacks::Environment.new("env", {:primary_site=>"st"}, {})
 
     proxy_virtualservice.bind_to(env)
     app_virtualservice.bind_to(env)
     appserver.bind_to(env)
 
-    proxyserver.add("app") do
-      add_alias "example.timgroup.com"
+    proxyserver.create_vhost("app") do
+      with_alias "example.timgroup.com"
     end
 
     proxyserver.bind_to(env)
