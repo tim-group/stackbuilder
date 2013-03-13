@@ -32,7 +32,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @instances.times do |i|
       index = sprintf("%03d",i+1)
       @definitions["#{name}-#{index}"] = server = Stacks.const_get(@server_type).new(self, index)
-      server.group=groups[i%groups.size]
+      server.group = groups[i%groups.size]
     end
     super(environment)
   end

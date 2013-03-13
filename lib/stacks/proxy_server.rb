@@ -1,11 +1,13 @@
 require 'stacks/namespace'
 
 class Stacks::ProxyServer < Stacks::MachineDef
-  attr_reader :virtualservice
+  attr_reader :virtual_service
+  attr_accessor :group
 
-  def initialize(base_hostname, virtualservice, &config_block)
-    super(base_hostname)
-    @virtualservice = virtualservice
+  def initialize(virtual_service, index, &config_block)
+    super(virtual_service.name + "-" + index)
+    @virtual_service = virtual_service
+
     @downstream_services = []
     @proxy_vhosts_lookup = {}
     @proxy_vhosts = []
@@ -13,7 +15,6 @@ class Stacks::ProxyServer < Stacks::MachineDef
   end
 
   def bind_to(environment)
-    @virtualservice.bind_to(environment)
     super(environment)
   end
 

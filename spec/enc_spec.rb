@@ -288,6 +288,7 @@ describe Stacks::DSL do
 
 
   it 'generates proxyserver enc data' do
+
     pending("implementation")
 
     stack "ref" do
@@ -299,10 +300,11 @@ describe Stacks::DSL do
       end
     end
 
-
     env "env", :primary_site=>"st" do
       instantiate_stack "ref"
     end
+
+    proxyserver = find("env-refproxy-001.mgmt.st.net.local")
 
     proxyserver.to_enc.should eql(
       {'role::proxyserver' => {
