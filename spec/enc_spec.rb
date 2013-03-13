@@ -279,11 +279,44 @@ describe Stacks::DSL do
   end
 
   it 'throws an error if we try and instantiate a stack that isnt defined' do
-
     expect {
       env "myold", :primary_site=>"x", :secondary_site=>"y" do
       instantiate_stack "no-exist"
       end
     }.to raise_error "no stack found 'no-exist'"
   end
+
+
+  it 'generates proxyserver enc data' do
+    pending("implementation")
+
+    stack "ref" do
+      virtualservice "refapp"
+      proxyserver "refproxy" do
+        add("refapp") do
+          add_alias "example.timgroup.com"
+        end
+      end
+    end
+
+
+    env "env", :primary_site=>"st" do
+      instantiate_stack "mystack"
+    end
+
+    proxyserver.to_enc.should eql(
+      {'role::proxyserver'=> {
+          'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
+          'vhosts'=> {
+            'env-refproxy-vip.front.st.net.local' => {
+              'docroot' => 'env-refapp',
+              'proxy_pass_to' => "http://env-refapp-vip.st.net.local:8000",
+              'aliases' => ['example.timgroup.com']
+            }
+          }
+        }
+      }
+    )
+  end
+
 end
