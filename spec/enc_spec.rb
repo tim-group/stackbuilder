@@ -82,6 +82,12 @@ describe Stacks::DSL do
       loadbalancer
     end
 
+
+    stack "proxystack" do
+      virtual_proxyserver "myproxy" do
+      end
+    end
+
     stack "blah" do
       virtual_appserver "appx" do
         self.application="JavaHttpRef"
@@ -101,65 +107,83 @@ describe Stacks::DSL do
 
       env "ci2" do
         instantiate_stack "blah"
+        instantiate_stack "proxystack"
       end
     end
 
     st_loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    st_loadbalancer.virtual_services.size.should eql(2)
+    st_loadbalancer.virtual_services.size.should eql(3)
+
+
+    pp st_loadbalancer.to_enc
+
+
     st_loadbalancer.to_enc.should eql(
       {
        'role::loadbalancer' => {
-      'virtual_router_id' => 1,
-      'virtual_servers' => {
-      'ci2-appx-vip.st.net.local' => {
-      'env' => 'ci2',
-      'app' => 'JavaHttpRef',
-      'realservers' => {
-      'blue' => [
-        'ci2-appx-001.st.net.local'
-    ],
-      'green' => [
-        'ci2-appx-002.st.net.local'
-    ]
-    }
-    },
-      'ci2-app2x-vip.st.net.local' => {
-      'env' => 'ci2',
-      'app' => 'MySuperCoolApp',
-      'realservers' => {
-      'blue' => [
-        'ci2-app2x-001.st.net.local',
-        'ci2-app2x-002.st.net.local'
-    ]
-    }
-    }}}}
-    )
+          'virtual_router_id' => 1,
+          'virtual_servers' => {
+            'ci2-myproxy-vip.st.net.local' => {
+#              'type'        => 'proxy',
+              'env'         => 'ci2',
+              'app'         => nil,
+              'realservers' => {
+                'blue' => [
+                  'ci2-myproxy-001.st.net.local',
+                  'ci2-myproxy-002.st.net.local'
+                ]
+              }
+            },
+            'ci2-appx-vip.st.net.local' => {
+#'type'        => 'app',
+
+              'env' => 'ci2',
+              'app' => 'JavaHttpRef',
+              'realservers' => {
+                'blue' => [
+                  'ci2-appx-001.st.net.local'
+                ],
+                'green' => [
+                  'ci2-appx-002.st.net.local'
+                ]
+              }
+            },
+            'ci2-app2x-vip.st.net.local' => {
+              'env' => 'ci2',
+              'app' => 'MySuperCoolApp',
+              'realservers' => {
+                'blue' => [
+                  'ci2-app2x-001.st.net.local',
+                  'ci2-app2x-002.st.net.local'
+                ]
+              }
+    }}}})
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
     ci_loadbalancer.virtual_services.size.should eql(2)
-    ci_loadbalancer.to_enc.should eql(
-      {
-      'role::loadbalancer' =>
-      {
-       'virtual_router_id' => 1,
-       'virtual_servers' => {
-        'ci-appx-vip.st.net.local' => {
-        'env' => 'ci',
-        'app' => 'JavaHttpRef',
-        'realservers' => {
-        'blue' => [
-          'ci-appx-001.st.net.local'],
-          'green'=> [
-            'ci-appx-002.st.net.local']
-      }},
-        'ci-app2x-vip.st.net.local' => {
-        'env' => 'ci',
-        'app' => 'MySuperCoolApp',
-        'realservers' => {
-        'blue' => [
-          'ci-app2x-001.st.net.local',
-          'ci-app2x-002.st.net.local'
-      ]}}}}}
+    ci_loadbalancer.to_enc.should eql({
+      'role::loadbalancer' =>{
+        'virtual_router_id' => 1,
+        'virtual_servers' => {
+          'ci-appx-vip.st.net.local' => {
+          'env' => 'ci',
+          'app' => 'JavaHttpRef',
+          'realservers' => {
+            'blue' => [
+              'ci-appx-001.st.net.local'],
+            'green'=> [
+              'ci-appx-002.st.net.local']
+          }},
+          'ci-app2x-vip.st.net.local' => {
+          'env' => 'ci',
+          'app' => 'MySuperCoolApp',
+          'realservers' => {
+            'blue' => [
+              'ci-app2x-001.st.net.local',
+              'ci-app2x-002.st.net.local'
+            ]
+          }
+          }}}}
     )
   end
 
