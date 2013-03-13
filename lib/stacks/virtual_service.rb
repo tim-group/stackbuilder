@@ -15,13 +15,14 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_accessor :groups
   attr_accessor :instances
 
-  def initialize(name)
+  def initialize(name, server_type=:AppServer)
     @name = name
     @definitions = {}
     @nat=false
     @groups = ['blue']
     @instances = 2
     @port = 8000
+    @server_type=server_type
   end
 
   def bind_to(environment)
@@ -30,7 +31,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @domain = "#{@fabric}.net.local"
     @instances.times do |i|
       index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] = server = Stacks::AppServer.new(self, index)
+      @definitions["#{name}-#{index}"] = server = Stacks.const_get(@server_type).new(self, index)
       server.group=groups[i%groups.size]
     end
     super(environment)
