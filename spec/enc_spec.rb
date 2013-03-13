@@ -309,7 +309,6 @@ describe Stacks::DSL do
           'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
           'vhosts'        => {
             'example.timgroup.com' => {
-              'environment'    => 'env',
               'application'    => 'ref',
               'proxy_pass_to'  => "http://env-refapp-vip.st.net.local:8000",
               'redirects'      => ['old-example.timgroup.com'],
