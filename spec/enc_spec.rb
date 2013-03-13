@@ -308,12 +308,12 @@ describe Stacks::DSL do
       {'role::proxyserver' => {
           'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
           'vhosts'        => {
-            'env-refproxy-vip.front.st.net.local' => {
-              'environment'   => 'env',
-              'application'   => 'ref',
-              'proxy_pass_to' => "http://env-refapp-vip.st.net.local:8000",
-              'aliases'       => ['example.timgroup.com']
-              'redirects'     => ['old-example.timgroup.com']
+            'example.timgroup.com' => {
+              'environment'    => 'env',
+              'application'    => 'ref',
+              'proxy_pass_to'  => "http://env-refapp-vip.st.net.local:8000",
+              'redirects'      => ['old-example.timgroup.com'],
+              'aliases'        => ['env-refproxy-vip.front.st.net.local'],
             }
           }
         }
