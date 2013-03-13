@@ -1,6 +1,7 @@
 require 'stacks/namespace'
 
 class Stacks::NatServer < Stacks::MachineDef
+  attr_accessor :virtual_router_id
 
   def initialize(base_hostname)
     super(base_hostname, [:mgmt, :prod, :front])
@@ -8,6 +9,7 @@ class Stacks::NatServer < Stacks::MachineDef
 
   def bind_to(environment)
     super(environment)
+    @virtual_router_id = environment.options[:nat_virtual_router_id] || 101
   end
 
   def find_nat_rules
@@ -52,7 +54,8 @@ class Stacks::NatServer < Stacks::MachineDef
 
     {
       'role::natserver' => {
-        'rules' => rules
+        'rules' => rules,
+        'virtual_router_id' => self.virtual_router_id
       }
     }
   end

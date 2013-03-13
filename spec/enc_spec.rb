@@ -15,23 +15,26 @@ describe Stacks::DSL do
     end
   end
 
-  it 'can pass in some options to the stack instantiation' do
+  it 'can pass in virtual_router_id for the loadbalancers and nat boxes to the stack instantiation' do
     stack "fabric" do
       loadbalancer
+      natserver
     end
 
     env "parent", :primary_site=>"st", :secondary_site=>"bs" do
-      env "e1", :virtual_router_id=>1, :primary_site=>"space" do
+      env "e1", :lb_virtual_router_id=>1, :nat_virtual_router_id=>40, :primary_site=>"space" do
         instantiate_stack "fabric"
       end
 
-      env "e2", :virtual_router_id=>2 do
+      env "e2", :lb_virtual_router_id=>2, :nat_virtual_router_id=>41 do
         instantiate_stack "fabric"
       end
     end
 
     find("e1-lb-001.mgmt.space.net.local").virtual_router_id.should eql(1)
     find("e2-lb-001.mgmt.st.net.local").virtual_router_id.should eql(2)
+    find("e1-nat-001.mgmt.space.net.local").virtual_router_id.should eql(40)
+    find("e2-nat-001.mgmt.st.net.local").virtual_router_id.should eql(41)
   end
 
   it 'can generate a pair of loadbalancers' do
@@ -45,7 +48,7 @@ describe Stacks::DSL do
     find("rah-lb-002.mgmt.st.net.local").should_not be_nil
   end
 
-  it 'generates config for a sub environment' do
+  it 'generates load balancer enc data for a sub environment' do
     stack "fabric" do
       loadbalancer
     end
@@ -237,7 +240,8 @@ describe Stacks::DSL do
                 'dest_port'  => '8000'
               }
             }
-          }
+          },
+          'virtual_router_id' => 101
         }
       }
     )
@@ -258,7 +262,8 @@ describe Stacks::DSL do
                 'dest_port'  => '8008'
               }
             }
-          }
+          },
+          'virtual_router_id' => 101
         }
       }
     )

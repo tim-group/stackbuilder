@@ -6,7 +6,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
   def bind_to(environment)
     super(environment)
-    @virtual_router_id = environment.options[:virtual_router_id] || 1
+    @virtual_router_id = environment.options[:lb_virtual_router_id] || 1
   end
 
   def virtual_services
