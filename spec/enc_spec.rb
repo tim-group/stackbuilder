@@ -289,13 +289,12 @@ describe Stacks::DSL do
 
   it 'generates proxyserver enc data' do
 
-    pending("implementation")
-
     stack "ref" do
       virtual_appserver "refapp"
       virtual_proxyserver "refproxy" do
         vhost("refapp") do
-          add_alias "example.timgroup.com"
+          with_alias "example.timgroup.com"
+          with_redirect "old-example.timgroup.com"
         end
       end
     end
@@ -308,13 +307,13 @@ describe Stacks::DSL do
 
     proxyserver.to_enc.should eql(
       {'role::proxyserver' => {
-          'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
+          'vip_fqdn' => 'env-refproxy-vip.st.net.local',
           'vhosts'        => {
-            'example.timgroup.com' => {
-              'application'    => 'ref',
+            'env-refproxy-vip.front.st.net.local' => {
+              'application'    => 'env-refapp',
               'proxy_pass_to'  => "http://env-refapp-vip.st.net.local:8000",
               'redirects'      => ['old-example.timgroup.com'],
-              'aliases'        => ['env-refproxy-vip.front.st.net.local'],
+              'aliases'        => ['example.timgroup.com'],
             }
           }
         }

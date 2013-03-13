@@ -19,7 +19,7 @@ class Stacks::Stack < Stacks::MachineDefContainer
   end
 
   def virtual_proxyserver(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualService.new(name, :ProxyServer)
+    @definitions[name] = virtualservice = Stacks::VirtualService.new(name, :ProxyServer, &block)
   end
 
   def loadbalancer(options={:instances=>2})
