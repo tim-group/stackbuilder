@@ -292,8 +292,8 @@ describe Stacks::DSL do
 
     stack "ref" do
       virtual_appserver "refapp"
-      proxyserver "refproxy" do
-        add("refapp") do
+      virtual_proxyserver "refproxy" do
+        vhost("refapp") do
           add_alias "example.timgroup.com"
         end
       end
