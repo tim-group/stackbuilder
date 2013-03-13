@@ -69,7 +69,7 @@ class Compute::Controller
       elsif result[:result] == "success"
         callback.invoke :success, vm
       else
-        callback.invoke :failure, vm
+        callback.invoke :failure, [vm, result[:result]]
       end
     end
 

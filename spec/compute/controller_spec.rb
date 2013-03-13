@@ -271,7 +271,7 @@ describe Compute::Controller do
       end
     end
 
-    failures.should eql ["vm1"]
+    failures.should eql [["vm1", "failed"]]
   end
 
 end

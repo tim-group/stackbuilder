@@ -119,8 +119,8 @@ namespace :sbx do
           on :success do |vm|
             logger.info "#{vm} launched successfully"
           end
-          on :failure do |vm|
-            logger.error "#{vm} failed to launch"
+          on :failure do |vm, result|
+            logger.error "#{vm} failed to launch: #{result}"
           end
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
@@ -146,8 +146,8 @@ namespace :sbx do
           on :success do |vm|
             logger.info "#{vm} allocated VIP successfully"
           end
-          on :failure do |vm|
-            logger.error "#{vm} failed to allocate VIP"
+          on :failure do |vm, result|
+            logger.error "#{vm} failed to allocate VIP: #{result}"
           end
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
@@ -173,8 +173,8 @@ namespace :sbx do
           on :success do |vm|
             logger.info "#{vm} freed VIP successfully"
           end
-          on :failure do |vm|
-            logger.error "#{vm} failed to free VIP"
+          on :failure do |vm, result|
+            logger.error "#{vm} failed to free VIP: #{result}"
           end
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
@@ -308,6 +308,9 @@ namespace :sbx do
         computecontroller.clean(machine_def.to_specs) do
           on :success do |vm|
             logger.info "cleaned #{vm}"
+          end
+          on :failure do |vm, result|
+            logger.error "#{vm} failed to clean: #{result}"
           end
           on :unaccounted do |vm|
             logger.warn "VM was unaccounted for: #{vm}"
