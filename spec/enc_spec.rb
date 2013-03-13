@@ -61,8 +61,8 @@ describe Stacks::DSL do
     end
 
     stack "blah" do
-      virtualservice "appx"
-      virtualservice "app2x"
+      virtual_appserver "appx"
+      virtual_appserver "app2x"
     end
 
     env "st", :primary_site=>"st", :secondary_site=>"bs" do
@@ -83,11 +83,11 @@ describe Stacks::DSL do
     end
 
     stack "blah" do
-      virtualservice "appx" do
+      virtual_appserver "appx" do
         self.application="JavaHttpRef"
         self.groups = ['blue','green']
       end
-      virtualservice "app2x" do
+      virtual_appserver "app2x" do
         self.application="MySuperCoolApp"
       end
     end
@@ -165,7 +165,7 @@ describe Stacks::DSL do
 
   it 'round robins the groups foreach instance' do
     stack "blah" do
-      virtualservice "appx" do
+      virtual_appserver "appx" do
         self.instances=4
         self.application="JavaHttpRef"
         self.groups=['blue', 'green']
@@ -183,7 +183,7 @@ describe Stacks::DSL do
 
   it 'generates app server configuration appropriately' do
     stack "blah" do
-      virtualservice "appx" do
+      virtual_appserver "appx" do
         self.application="JavaHttpRef"
       end
     end
@@ -209,16 +209,16 @@ describe Stacks::DSL do
   it 'configures NAT boxes to NAT incoming public IPs' do
     stack "frontexample" do
       natserver
-      virtualservice 'withnat' do
+      virtual_appserver 'withnat' do
         enable_nat
       end
-      virtualservice 'withoutnat' do
+      virtual_appserver 'withoutnat' do
       end
     end
 
     stack "example2" do
       natserver
-      virtualservice 'blahnat' do
+      virtual_appserver 'blahnat' do
         enable_nat
         self.port=8008
       end
@@ -291,7 +291,7 @@ describe Stacks::DSL do
     pending("implementation")
 
     stack "ref" do
-      virtualservice "refapp"
+      virtual_appserver "refapp"
       proxyserver "refproxy" do
         add("refapp") do
           add_alias "example.timgroup.com"

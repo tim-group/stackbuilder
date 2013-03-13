@@ -9,8 +9,8 @@ describe Stacks::DSL do
   before do
     extend Stacks::DSL
     stack "blah" do
-      virtualservice "appx"
-      virtualservice "dbx"
+      virtual_appserver "appx"
+      virtual_appserver "dbx"
     end
     env "ci", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "blah"
