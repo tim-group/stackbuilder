@@ -305,13 +305,14 @@ describe Stacks::DSL do
     end
 
     proxyserver.to_enc.should eql(
-      {'role::proxyserver'=> {
+      {'role::proxyserver' => {
           'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
-          'vhosts'=> {
+          'vhosts'        => {
             'env-refproxy-vip.front.st.net.local' => {
-              'docroot' => 'env-refapp',
+              'environment'   => 'env',
+              'application'   => 'ref',
               'proxy_pass_to' => "http://env-refapp-vip.st.net.local:8000",
-              'aliases' => ['example.timgroup.com']
+              'aliases'       => ['example.timgroup.com']
             }
           }
         }
