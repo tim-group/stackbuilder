@@ -20,10 +20,17 @@ class Puppet::Node::Stacks < Puppet::Node::Plain
 
   def find(request)
     node = super
-    machine = @stacks_inventory.find node.parameters['fqdn']
-    unless machine.nil?
+    classes = find_stack_classes(node.parameters['fqdn'])
+    if classes
       node.classes = machine.to_enc
     end
-    node
+    return node
   end
+
+  def find_stack_classes(fqdn)
+    machine = @stacks_inventory.find(fqdn)
+    return nil if machine.nil?
+    return machine.to_enc
+  end
+
 end
