@@ -64,7 +64,7 @@ class Stacks::ProxyServer < Stacks::MachineDef
           services << [virtual_service.vip_front_fqdn, {
             'aliases' => vhost.aliases,
             'redirects' => vhost.redirects,
-            'application' => "#{machine_def.environment.name}-#{machine_def.name}",
+            'application' => "#{machine_def.name}",
             'proxy_pass_to' => "http://#{machine_def.vip_fqdn}:8000"
           }]
         end
