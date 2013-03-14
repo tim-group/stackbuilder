@@ -1,0 +1,20 @@
+#! /usr/bin/env ruby
+
+$: << File.join(File.dirname(__FILE__), "..", "lib")
+
+require 'puppet'
+require 'puppet/indirector/node/stacks'
+
+raise "Usage: puppet_enc FQDN..." if ARGV.empty?
+
+node = Puppet::Node::Stacks.new
+
+ARGV.each do |hostname|
+  classes = node.find_stack_classes(hostname)
+  puts "# #{hostname}:"
+  if classes
+    puts classes.to_yaml
+  else
+    puts "#  no classes found"
+  end
+end

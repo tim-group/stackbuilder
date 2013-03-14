@@ -8,7 +8,7 @@ class Puppet::Node::Stacks < Puppet::Node::Plain
   def initialize
     @stacks_inventory = Object.new
     @stacks_inventory.extend Stacks::DSL
-    dirs = ['.','/etc/stacks/']
+    dirs = ['.', '/etc/stacks/']
     dirs.each do |dir|
       file = "#{dir}/stack.rb"
       if File.exist? file
