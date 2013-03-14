@@ -218,7 +218,7 @@ describe Stacks::DSL do
       'role::http_app'=> {
       'application' => 'JavaHttpRef',
       'group' => 'blue',
-      'vip' => '1.1.1.1',
+      'vip_fqdn' => 'ci-appx-vip.st.net.local',
       'environment' => 'ci'
     }})
   end

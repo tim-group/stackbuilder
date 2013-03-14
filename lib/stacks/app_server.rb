@@ -21,12 +21,11 @@ class Stacks::AppServer < Stacks::MachineDef
   end
 
   def to_enc()
-    resolver = Resolv::DNS.new
     {
       'role::http_app' => {
         'application' => virtual_service.application,
         'group' => group,
-        'vip' => resolver.getaddress(vip_fqdn).to_s,
+        'vip_fqdn' => vip_fqdn,
         'environment' => environment.name
     }}
   end
