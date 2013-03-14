@@ -74,7 +74,7 @@ describe Stacks::DSL do
     end
 
     loadbalancer = find("ci-lb-001.mgmt.st.net.local")
-    loadbalancer.virtual_services(:AppServer).size.should eql(2)
+    loadbalancer.virtual_services(Stacks::VirtualAppService).size.should eql(2)
   end
 
   it 'can generate the load balancer spec for a sub environment' do
@@ -112,8 +112,8 @@ describe Stacks::DSL do
     end
 
     st_loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    st_loadbalancer.virtual_services(:AppServer).size.should eql(2)
-    st_loadbalancer.virtual_services(:ProxyServer).size.should eql(1)
+    st_loadbalancer.virtual_services(Stacks::VirtualAppService).size.should eql(2)
+    st_loadbalancer.virtual_services(Stacks::VirtualProxyService).size.should eql(1)
 
     pp st_loadbalancer.to_enc
 
@@ -157,7 +157,7 @@ describe Stacks::DSL do
     }}})
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
-    ci_loadbalancer.virtual_services(:AppServer).size.should eql(2)
+    ci_loadbalancer.virtual_services(Stacks::VirtualAppService).size.should eql(2)
     ci_loadbalancer.to_enc.should eql({
       'role::loadbalancer' =>{
         'virtual_router_id' => 1,
@@ -230,7 +230,7 @@ describe Stacks::DSL do
   it 'configures NAT boxes to NAT incoming public IPs' do
     stack "frontexample" do
       natserver
-      virtual_appserver 'withnat' do
+      virtual_proxyserver 'withnat' do
         enable_nat
       end
       virtual_appserver 'withoutnat' do
@@ -307,15 +307,20 @@ describe Stacks::DSL do
     }.to raise_error "no stack found 'no-exist'"
   end
 
-
   it 'generates proxyserver enc data' do
-
     stack "ref" do
-      virtual_appserver "refapp"
+      virtual_appserver "refapp" do
+        self.application="MyApp"
+      end
+      virtual_appserver "ref2app" do
+        self.application="MyOtherApp"
+      end
       virtual_proxyserver "refproxy" do
         vhost("refapp") do
           with_alias "example.timgroup.com"
           with_redirect "old-example.timgroup.com"
+        end
+        vhost("ref2app", :server_name => "example.timgroup.com") do
         end
       end
     end
@@ -331,10 +336,16 @@ describe Stacks::DSL do
           'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
           'vhosts'        => {
             'env-refproxy-vip.front.st.net.local' => {
-              'application'    => 'JavaHttpRef',
+              'application'    => 'MyApp',
               'proxy_pass_to'  => "http://env-refapp-vip.st.net.local:8000",
               'redirects'      => ['old-example.timgroup.com'],
               'aliases'        => ['example.timgroup.com'],
+            },
+            'example.timgroup.com' => {
+              'application'    => 'MyOtherApp',
+              'proxy_pass_to'  => "http://env-ref2app-vip.st.net.local:8000",
+              'redirects'      => [],
+              'aliases'        => []
             }
           }
         }

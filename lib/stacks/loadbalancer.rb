@@ -13,7 +13,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
     virtual_services = []
     environment.accept do |node|
       unless node.environment.contains_node_of_type?(Stacks::LoadBalancer) && environment != node.environment
-        virtual_services << node if node.kind_of? ::Stacks::VirtualService and node.balances?(type)
+        virtual_services << node if node.kind_of? type
       end
     end
     virtual_services
@@ -30,7 +30,8 @@ class Stacks::LoadBalancer < Stacks::MachineDef
   end
 
   def to_enc
-    virtual_services_array = virtual_services(:AppServer).map do |virtual_service|
+    #TODO: push these up into the virtual service types
+    virtual_services_array = virtual_services(Stacks::VirtualAppService).map do |virtual_service|
        grouped_realservers = virtual_service.realservers.group_by do |realserver|
         realserver.group
        end
@@ -49,9 +50,9 @@ class Stacks::LoadBalancer < Stacks::MachineDef
       }]
     end
 
-    proxy_virtual_services = virtual_services(:ProxyServer).map do |virtual_service|
+    proxy_virtual_services = virtual_services(Stacks::VirtualProxyService).map do |virtual_service|
        grouped_realservers = virtual_service.realservers.group_by do |realserver|
-        realserver.group
+        'blue'
        end
 
        realservers = Hash[grouped_realservers.map do |group, realservers|

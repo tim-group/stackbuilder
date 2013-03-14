@@ -1,6 +1,8 @@
 require 'stacks/namespace'
 require 'stacks/machine_def_container'
 require 'stacks/virtual_service'
+require 'stacks/virtual_proxy_service'
+require 'stacks/virtual_app_service'
 require 'stacks/loadbalancer'
 require 'stacks/nat_server'
 require 'stacks/proxy_server'
@@ -14,12 +16,13 @@ class Stacks::Stack < Stacks::MachineDefContainer
   end
 
   def virtual_appserver(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualService.new(name, :AppServer)
+    @definitions[name] = virtualservice = Stacks::VirtualAppService.new(name, &block)
     virtualservice.instance_eval(&block) unless block.nil?
   end
 
   def virtual_proxyserver(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualService.new(name, :ProxyServer, &block)
+    @definitions[name] = virtualservice = Stacks::VirtualProxyService.new(name, &block)
+    #virtualservice.instance_eval(&block) unless block.nil?
   end
 
   def loadbalancer(options={:instances=>2})

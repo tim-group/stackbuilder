@@ -7,22 +7,18 @@ require 'uri'
 class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
   attr_reader :environment
-  attr_reader :nat
+  attr_reader :nat #proxy
   attr_reader :domain
   attr_reader :fabric
   attr_accessor :port
-  attr_accessor :application
-  attr_accessor :groups
   attr_accessor :instances
 
-  def initialize(name, server_type, &config_block)
+  def initialize(name, &config_block)
     @name = name
     @definitions = {}
     @nat=false
-    @groups = ['blue']
     @instances = 2
     @port = 8000
-    @server_type=server_type
     @config_block = config_block
   end
 
@@ -30,12 +26,8 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @environment = environment
     @fabric = environment.options[:primary_site]
     @domain = "#{@fabric}.net.local"
-    @instances.times do |i|
-      index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] = server = Stacks.const_get(@server_type).new(self, index, &@config_block)
-      server.group = groups[i%groups.size]
-    end
     super(environment)
+    self.instance_eval(&@config_block) unless @config_block.nil?
   end
 
   def clazz
@@ -82,9 +74,5 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     front_uri = URI.parse("http://#{vip_front_fqdn}")
     prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
     return Stacks::Nat.new(front_uri, prod_uri)
-  end
-
-  def balances?(type)
-    return @server_type == type
   end
 end

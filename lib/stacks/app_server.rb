@@ -8,7 +8,6 @@ class Stacks::AppServer < Stacks::MachineDef
   def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
-    block.call unless block.nil?
   end
 
   def bind_to(environment)
