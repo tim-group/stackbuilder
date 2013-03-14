@@ -77,7 +77,7 @@ class Stacks::ProxyServer < Stacks::MachineDef
   def to_enc
     service_resources = Hash[downstream_services()]
     {'role::proxyserver' => {
-        'vip_fqdn' => self.virtual_service.vip_fqdn,
+        'prod_vip_fqdn' => self.virtual_service.vip_fqdn,
         'vhosts'  => service_resources
       }
     }
