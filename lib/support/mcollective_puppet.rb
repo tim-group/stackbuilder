@@ -70,6 +70,7 @@ module Support::MCollectivePuppet
 
     fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
     while not (undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }).empty? and not timed_out(start_time, timeout)
+      old_fates = fates.clone
       undecided_statuses = puppetd_status(undecided.keys)
       fates.merge!(undecided_statuses)
       stopped_statuses = undecided_statuses.hash_select { |k, v| v == "stopped" }
@@ -82,6 +83,12 @@ module Support::MCollectivePuppet
         end
       end
       fates.merge!(stopped_results)
+      old_fates.each do |machine_fqdn, old_fate|
+        new_fate = fates[machine_fqdn]
+        if new_fate != old_fate
+          callback.invoke(:transitioned, [machine_fqdn, old_fate, new_fate])
+        end
+      end
     end
 
     undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }

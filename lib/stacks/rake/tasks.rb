@@ -243,6 +243,9 @@ namespace :sbx do
           include Support::MCollectivePuppet
           start_time = Time.now
           wait_for_complete(hosts) do
+            on :transitioned do |vm, from, to|
+              logger.debug "#{vm}: #{from} -> #{to} (#{Time.now})"
+            end
             on :passed do |vm|
               logger.info "successful Puppet run for #{vm} (#{Time.now - start_time} sec)"
             end
