@@ -22,7 +22,7 @@ class Puppet::Node::Stacks < Puppet::Node::Plain
     node = super
     classes = find_stack_classes(node.parameters['fqdn'])
     if classes
-      node.classes = machine.to_enc
+      node.classes = classes
     end
     return node
   end
