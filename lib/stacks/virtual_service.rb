@@ -18,7 +18,6 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @definitions = {}
     @nat=false
     @instances = 2
-    @port = 8000
     @config_block = config_block
   end
 

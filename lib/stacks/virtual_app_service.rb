@@ -11,6 +11,7 @@ class Stacks::VirtualAppService < Stacks::VirtualService
   def initialize(name, &config_block)
     @groups = ['blue']
     super(name, &config_block)
+    @port = 8000
  end
 
   def bind_to(environment)
