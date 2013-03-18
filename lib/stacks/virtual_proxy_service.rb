@@ -51,7 +51,13 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
   end
 
   def vhost(service, options={}, &config_block)
-    @proxy_vhosts << @proxy_vhosts_lookup[service] = Stacks::ProxyVHost.new(options[:server_name] || vip_front_fqdn, service, &config_block)
+    if (options.has_key?(:server_name))
+      proxy_vhost = Stacks::ProxyVHost.new(options[:server_name] || vip_front_fqdn, service, &config_block)
+      proxy_vhost.with_alias(vip_front_fqdn)
+    else
+      proxy_vhost = Stacks::ProxyVHost.new(vip_front_fqdn, service, &config_block)
+    end
+    @proxy_vhosts << @proxy_vhosts_lookup[service] = proxy_vhost
   end
 
   def downstream_services

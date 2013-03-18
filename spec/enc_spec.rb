@@ -349,7 +349,7 @@ describe Stacks::DSL do
               'application'    => 'MyOtherApp',
               'proxy_pass_to'  => "http://env-ref2app-vip.st.net.local:8000",
               'redirects'      => [],
-              'aliases'        => []
+              'aliases'        => ['env-refproxy-vip.front.st.net.local']
             }
           }
         }
