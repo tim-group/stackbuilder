@@ -265,7 +265,7 @@ describe Stacks::DSL do
             'DNAT' => {
               'eg-withnat-vip.front.st.net.local 80' => {
                 'dest_host'  => 'eg-withnat-vip.st.net.local',
-                'dest_port'  => '8000'
+                'dest_port'  => '80'
               }
             }
           },
