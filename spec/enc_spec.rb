@@ -115,8 +115,6 @@ describe Stacks::DSL do
     st_loadbalancer.virtual_services(Stacks::VirtualAppService).size.should eql(2)
     st_loadbalancer.virtual_services(Stacks::VirtualProxyService).size.should eql(1)
 
-    pp st_loadbalancer.to_enc
-
     st_loadbalancer.to_enc.should eql(
       {
        'role::loadbalancer' => {
