@@ -71,7 +71,7 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
 
   def nat_rules
     @ports.map do |port|
-     front_uri = URI.parse("http://#{vip_front_fqdn}")
+     front_uri = URI.parse("http://#{vip_front_fqdn}:#{port}")
      prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
      Stacks::Nat.new(front_uri, prod_uri)
     end

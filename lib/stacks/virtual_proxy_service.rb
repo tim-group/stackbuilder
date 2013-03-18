@@ -36,7 +36,7 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
     @proxy_vhosts_lookup = {}
     @proxy_vhosts = []
     @config_block = config_block
-    @ports = [80]
+    @ports = [80, 443]
   end
 
   def bind_to(environment)

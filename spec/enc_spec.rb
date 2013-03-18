@@ -266,6 +266,10 @@ describe Stacks::DSL do
               'eg-withnat-vip.front.st.net.local 80' => {
                 'dest_host'  => 'eg-withnat-vip.st.net.local',
                 'dest_port'  => '80'
+              },
+              'eg-withnat-vip.front.st.net.local 443' => {
+                'dest_host'  => 'eg-withnat-vip.st.net.local',
+                'dest_port'  => '443'
               }
             }
           },
@@ -286,7 +290,7 @@ describe Stacks::DSL do
               }
             },
             'DNAT' => {
-              'sub-blahnat-vip.front.st.net.local 80' => {
+              'sub-blahnat-vip.front.st.net.local 8008' => {
                 'dest_host'  => 'sub-blahnat-vip.st.net.local',
                 'dest_port'  => '8008'
               }
