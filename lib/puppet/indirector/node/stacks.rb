@@ -2,25 +2,23 @@ require 'stacks/environment'
 require 'puppet/node'
 require 'puppet/indirector/node/plain'
 
-class Puppet::Node::Stacks < Puppet::Node::Plain
+class Puppet::Node::Stacks < Puppet::Indirector::Plain
   desc "generates the necessary wiring for all nodes in a stack."
 
-  def initialize
+  def initialize(dir='/etc/stacks', delegate=Puppet::Node::Plain.new)
+    file = "#{dir}/stack.rb"
+    raise "no stacks.rb found in #{dir}" unless File.exist? file
+    config = IO.read file
     @stacks_inventory = Object.new
     @stacks_inventory.extend Stacks::DSL
-    dirs = ['.', '/etc/stacks/']
-    dirs.each do |dir|
-      file = "#{dir}/stack.rb"
-      if File.exist? file
-        config = IO.read file
-        @stacks_inventory.instance_eval(config, file)
-      end
-    end
+    @stacks_inventory.instance_eval(config, file)
+
+    @delegate = delegate
   end
 
   def find(request)
-    node = super
-    classes = find_stack_classes(node.parameters['fqdn'])
+    node = @delegate.find(request)
+    classes = find_stack_classes(request.key)
     if classes
       node.classes = classes
     end
