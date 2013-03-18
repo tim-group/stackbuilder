@@ -1,3 +1,5 @@
 /pkg
 /.project
 /build
+*~
+*.swp
