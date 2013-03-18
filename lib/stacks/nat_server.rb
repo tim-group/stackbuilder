@@ -20,7 +20,7 @@ class Stacks::NatServer < Stacks::MachineDef
 
       unless node.environment.contains_node_of_type?(Stacks::NatServer) && environment != node.environment
         if node.respond_to? :nat
-          rules << node.nat_rule if node.nat
+          rules =  rules.concat node.nat_rules if node.nat
         end
       end
     end

@@ -241,7 +241,7 @@ describe Stacks::DSL do
       natserver
       virtual_appserver 'blahnat' do
         enable_nat
-        self.port=8008
+        self.ports=[8008]
       end
     end
 

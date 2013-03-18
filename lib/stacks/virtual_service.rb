@@ -7,10 +7,10 @@ require 'uri'
 class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :name
   attr_reader :environment
-  attr_reader :nat #proxy
+  attr_reader :nat
   attr_reader :domain
   attr_reader :fabric
-  attr_accessor :port
+  attr_accessor :ports
   attr_accessor :instances
 
   def initialize(name, &config_block)
@@ -69,9 +69,11 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
     @nat = true
   end
 
-  def nat_rule
-    front_uri = URI.parse("http://#{vip_front_fqdn}")
-    prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
-    return Stacks::Nat.new(front_uri, prod_uri)
+  def nat_rules
+    @ports.map do |port|
+     front_uri = URI.parse("http://#{vip_front_fqdn}")
+     prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
+     Stacks::Nat.new(front_uri, prod_uri)
+    end
   end
 end
