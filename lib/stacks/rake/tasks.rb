@@ -100,7 +100,7 @@ namespace :sbx do
         end
       end
 
-      task :provision=> ['puppet:clean', 'launch', 'puppet:sign', 'puppet:wait']
+      task :provision=> ['launch', 'puppet:sign', 'puppet:wait']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
