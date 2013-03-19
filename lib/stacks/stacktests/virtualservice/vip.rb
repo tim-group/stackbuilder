@@ -3,7 +3,8 @@ require 'logger'
 
 shared_examples_for "vip" do |virtualservice|
 
-  it "can connect to #{virtualservice.vip_fqdn} on port #{virtualservice.port}" do
+  it "can connect to #{virtualservice.vip_fqdn} ... on port" do
+    pending("deployment of correct artifact")
     if (virtualservice.fabric == "local")
       node_to_execute_from = Facter["fqdn"].value()
     else
