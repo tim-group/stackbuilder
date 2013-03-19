@@ -100,7 +100,7 @@ namespace :sbx do
         end
       end
 
-      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait']
+      sbtask :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -311,7 +311,8 @@ namespace :sbx do
       end
 
       desc "clean away all traces of these machines"
-      task :clean do
+      sbtask :clean => [:puppet:clean, :clean_nodes]
+      sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
           on :success do |vm|
@@ -327,7 +328,7 @@ namespace :sbx do
       end
 
       desc "carry out all appropriate tests on these machines"
-      task :test do
+      sbtask :test do
         machine_def.accept do |child_machine_def|
           specpath = File.dirname(__FILE__) + "/../stacktests/#{child_machine_def.clazz}/*.rb"
           describe "#{child_machine_def.clazz}.#{child_machine_def.name}" do
