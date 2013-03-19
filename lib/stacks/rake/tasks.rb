@@ -311,7 +311,7 @@ namespace :sbx do
       end
 
       desc "clean away all traces of these machines"
-      sbtask :clean => [:puppet:clean, :clean_nodes]
+      sbtask :clean => ['puppet:clean', 'clean_nodes']
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
