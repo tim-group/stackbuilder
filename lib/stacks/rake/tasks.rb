@@ -100,7 +100,7 @@ namespace :sbx do
         end
       end
 
-      sbtask :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait']
+      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -311,7 +311,7 @@ namespace :sbx do
       end
 
       desc "clean away all traces of these machines"
-      sbtask :clean => ['puppet:clean', 'clean_nodes']
+      task :clean => ['puppet:clean', 'clean_nodes']
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
