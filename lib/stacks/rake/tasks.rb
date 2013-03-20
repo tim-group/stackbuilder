@@ -1,3 +1,6 @@
+$: << File.join(File.dirname(__FILE__), "..", "lib")
+$: << '/opt/orctool/lib'
+require 'orc/util/option_parser'
 require 'rake'
 require 'pp'
 require 'yaml'
@@ -326,6 +329,22 @@ namespace :sbx do
           end
         end
       end
+
+      namespace :orc do
+        desc "deploys the up2date version of the artifact according to the cmdb using orc"
+        sbtask :resolve do
+
+          machine_def.accept do |child_machine_def|
+            if child_machine_def.kind_of? Stacks::VirtualAppService
+              app_service = child_machine_def
+              factory = Orc::Factory.new(:application=>app_service.application,
+                               :environment=>app_service.environment.name)
+              factory.engine.resolve()
+            end
+          end
+        end
+      end
+
 
       desc "carry out all appropriate tests on these machines"
       sbtask :test do
