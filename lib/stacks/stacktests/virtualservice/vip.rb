@@ -8,6 +8,7 @@ require "uri"
 shared_examples_for "vip" do |virtualservice|
   virtualservice.ports do |port|
     it "can connect to #{virtualservice.vip_fqdn} ... on #{port}" do
+      pending("waiting for orc::resolve to work")
       if (virtualservice.fabric == "local")
         node_to_execute_from = Facter["fqdn"].value()
       else
