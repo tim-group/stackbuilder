@@ -322,12 +322,12 @@ describe Stacks::DSL do
           with_alias "example.timgroup.com"
           with_redirect "old-example.timgroup.com"
         end
-        vhost("ref2app", :server_name => "example.timgroup.com") do
+        vhost("ref2app") do
         end
       end
     end
 
-    env "env", :primary_site=>"st" do
+    env "env", :primary_site=>"st", "refproxy.vhost.ref2app.server_name"=>"example.timgroup.com" do
       instantiate_stack "ref"
     end
 
