@@ -66,10 +66,15 @@ class Compute::Controller
       result = flattened_results[vm]
       if result.nil?
         callback.invoke :unaccounted, vm
-      elsif result[:result] == "success"
-        callback.invoke :success, vm
       else
-        callback.invoke :failure, [vm, result[:result]]
+        unpacked_result = result[:result]
+        # check for string to tolerate old-fashioned agents, backward compatibility yo
+        state, msg = unpacked_result.is_a?(String) ? [unpacked_result, unpacked_result] : unpacked_result
+        if state == "success"
+          callback.invoke :success, [vm, msg]
+        else
+          callback.invoke :failure, [vm, msg]
+        end
       end
     end
 

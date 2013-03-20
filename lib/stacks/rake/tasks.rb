@@ -121,11 +121,11 @@ namespace :sbx do
           on :allocated do |vm, host|
             logger.info "#{vm} allocated to #{host}"
           end
-          on :success do |vm|
+          on :success do |vm, msg|
             logger.info "#{vm} launched successfully"
           end
-          on :failure do |vm, result|
-            logger.error "#{vm} failed to launch: #{result}"
+          on :failure do |vm, msg|
+            logger.error "#{vm} failed to launch: #{msg}"
           end
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
@@ -148,11 +148,11 @@ namespace :sbx do
 
         computecontroller = Compute::Controller.new
         computecontroller.allocate_ips(vip_specs) do
-          on :success do |vm|
-            logger.info "#{vm} allocated VIP successfully"
+          on :success do |vm, msg|
+            logger.info "#{vm} allocated VIP successfully: #{msg}"
           end
-          on :failure do |vm, result|
-            logger.error "#{vm} failed to allocate VIP: #{result}"
+          on :failure do |vm, msg|
+            logger.error "#{vm} failed to allocate VIP: #{msg}"
           end
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
@@ -175,11 +175,11 @@ namespace :sbx do
 
         computecontroller = Compute::Controller.new
         computecontroller.free_ips(vip_specs) do
-          on :success do |vm|
+          on :success do |vm, msg|
             logger.info "#{vm} freed VIP successfully"
           end
-          on :failure do |vm, result|
-            logger.error "#{vm} failed to free VIP: #{result}"
+          on :failure do |vm, msg|
+            logger.error "#{vm} failed to free VIP: #{msg}"
           end
           on :unaccounted do |vm|
             logger.error "#{vm} was unaccounted for"
@@ -315,11 +315,11 @@ namespace :sbx do
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
-          on :success do |vm|
+          on :success do |vm, msg|
             logger.info "cleaned #{vm}"
           end
-          on :failure do |vm, result|
-            logger.error "#{vm} failed to clean: #{result}"
+          on :failure do |vm, msg|
+            logger.error "#{vm} failed to clean: #{msg}"
           end
           on :unaccounted do |vm|
             logger.warn "VM was unaccounted for: #{vm}"

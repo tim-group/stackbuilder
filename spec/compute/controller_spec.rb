@@ -106,7 +106,7 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
     }]
 
-    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => "success"}]])
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
     @compute_node_client.should_receive(:launch).with("myhost", specs)
 
     @compute_controller.launch(specs)
@@ -142,16 +142,16 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
     }]
 
-    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => "failed"}]])
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["failed", "o noes"]}]])
 
-    failure = false
+    failure = nil
     @compute_controller.launch(specs) do
-      on :failure do |vm|
-        failure = true
+      on :failure do |vm, msg|
+        failure = msg
       end
     end
 
-    failure.should eql(true)
+    failure.should eql("o noes")
   end
 
   it 'unaccounted for vms raise an error when launching' do
@@ -167,7 +167,7 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    @compute_node_client.stub(:launch).and_return([["myhost", {"vm1" => "success"}]])
+    @compute_node_client.stub(:launch).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
 
     unaccounted = []
     @compute_controller.launch(specs) do
@@ -214,16 +214,16 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => "success"}], ["host2", {"vm2" => "success"}]])
+    @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => ["success", "yay"]}], ["host2", {"vm2" => ["success", "hey"]}]])
 
     successful = []
     @compute_controller.clean(specs) do
-      on :success do |vm|
-        successful << vm
+      on :success do |vm, msg|
+        successful << [vm, msg]
       end
     end
 
-    successful.should eql(["vm1", "vm2"])
+    successful.should eql([["vm1", "yay"], ["vm2", "hey"]])
   end
 
   it 'unaccounted for vms (when clean is called) will be reported' do
@@ -238,7 +238,7 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
-    @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => "success"}]])
+    @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
 
     unaccounted = []
     @compute_controller.clean(specs) do
@@ -250,7 +250,7 @@ describe Compute::Controller do
     unaccounted.should eql(["vm2"])
   end
 
-  it 'will throw an exception if any nodes failed in the clean action ' do
+  it 'will call back if any nodes failed in the clean action ' do
     @dns_client.rspec_reset
 
     specs = [{
@@ -263,15 +263,44 @@ describe Compute::Controller do
       :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
     }]
 
+    @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => ["failed", "o noes"]}], ["host2", {"vm2" => ["success", "yay"]}]])
+
     failures = []
-    @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => "failed"}], ["host2", {"vm2" => "success"}]])
     @compute_controller.clean(specs) do
-      on :failure do |vm|
-        failures << vm
+      on :failure do |vm, msg|
+        failures << [vm, msg]
       end
     end
 
-    failures.should eql [["vm1", "failed"]]
+    failures.should eql [["vm1", "o noes"]]
+  end
+
+  it 'will handle responses from old-fashioned agents' do
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+    },{
+      :hostname => "vm2",
+      :fabric => "st",
+      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+    }]
+
+    @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => "success", "vm2" => "failed"}]])
+
+    successful = []
+    failures = []
+    @compute_controller.clean(specs) do
+      on :success do |vm, msg|
+        successful << [vm, msg]
+      end
+      on :failure do |vm, msg|
+        failures << [vm, msg]
+      end
+    end
+
+    successful.should eql([["vm1", "success"]])
+    failures.should eql [["vm2", "failed"]]
   end
 
 end
