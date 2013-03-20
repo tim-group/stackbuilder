@@ -12,7 +12,7 @@ class Stacks::VirtualAppService < Stacks::VirtualService
     @groups = ['blue']
     super(name, &config_block)
     @ports = [@port]
- end
+  end
 
   def bind_to(environment)
     @instances.times do |i|
