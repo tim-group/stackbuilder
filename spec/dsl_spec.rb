@@ -66,4 +66,13 @@ describe Stacks::DSL do
     }])
   end
 
+  it 'can find sub environments' do
+    env "parent", :primary_site=>"st", :secondary_site=>"bs" do
+      env "sub" do
+      end
+    end
+
+    find_environment("sub").name.should eql("sub")
+    find_environment("parent").name.should eql("parent")
+  end
 end

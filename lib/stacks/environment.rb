@@ -10,6 +10,10 @@ class Stacks::Environment
     @machine_def_containers = {}
   end
 
+  def environment
+    return self
+  end
+
   def [](key)
     return @machine_def_containers[key]
   end
@@ -35,6 +39,7 @@ class Stacks::Environment
   end
 
   def accept(&block)
+    block.call(self)
     @machine_def_containers.values.each do |machine_def|
       machine_def.accept(&block)
     end

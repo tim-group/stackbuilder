@@ -1,5 +1,4 @@
 module Stacks
-
   require 'stacks/stack'
   require 'stacks/environment'
   require 'stacks/standalone_server'
@@ -44,5 +43,15 @@ module Stacks
       end
     end
 
+    def find_environment(environment_name)
+      return_environment = nil
+      accept do |node|
+        if (node.kind_of?(Stacks::Environment) and node.name == environment_name)
+          return_environment = node
+        end
+      end
+
+      return return_environment
+    end
   end
 end

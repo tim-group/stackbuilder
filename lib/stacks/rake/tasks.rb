@@ -19,7 +19,7 @@ require 'stack.rb'
 
 environment_name = ENV.fetch('env', 'dev')
 
-environment = environments[environment_name]
+environment = find_environment(environment_name)
 
 RSpec::Core::Runner.disable_autorun!
 config = RSpec.configuration
