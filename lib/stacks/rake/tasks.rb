@@ -103,7 +103,7 @@ namespace :sbx do
         end
       end
 
-      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait']
+      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait', 'orc:resolve']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
