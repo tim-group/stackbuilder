@@ -40,9 +40,6 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
   end
 
   def bind_to(environment)
-    @environment = environment
-    @fabric = environment.options[:primary_site]
-    @domain = "#{@fabric}.net.local"
     @instances.times do |i|
       index = sprintf("%03d",i+1)
       @definitions["#{name}-#{index}"] = server = Stacks::ProxyServer.new(self, index, &@config_block)
