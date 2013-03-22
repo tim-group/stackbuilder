@@ -8,7 +8,6 @@ require "uri"
 shared_examples_for "vip" do |virtualservice|
   virtualservice.ports do |port|
     it "can connect to #{virtualservice.vip_fqdn} ... on #{port}" do
-      pending("waiting for orc::resolve to work")
       if (virtualservice.fabric == "local")
         node_to_execute_from = Facter["fqdn"].value()
       else
@@ -32,14 +31,14 @@ shared_examples_for "vip" do |virtualservice|
 
   if virtualservice.nat
     it "#{virtualservice.vip_front_fqdn} can be accessed from the Internetover http" do
-      pending("deployment of correct artifact")
+      pending("nat boxes need to be auto-built")
       uri = URI.parse("http://#{virtualservice.vip_front_fqdn}")
       response = Net::HTTP.get_response(uri)
       response.code.should eql('302')
     end
 
     it "#{virtualservice.vip_front_fqdn} can be accessed from the Internet over https" do
-      pending("deployment of correct artifact")
+      pending("nat boxes need to be auto-built")
       request_url = "https://#{virtualservice.vip_front_fqdn}"
 
       uri = URI.parse(request_url)
