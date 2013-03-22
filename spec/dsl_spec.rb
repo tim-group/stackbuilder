@@ -25,7 +25,7 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :networks => [:mgmt,:prod],
-      :qualified_hostnames => {:mgmt=>"ci-appx-001.mgmt.st.net.local", :prod=>"ci-appx-001.st.net.local"}
+      :qualified_hostnames => {:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local"}
       },
       {
       :hostname => "ci-appx-002",
@@ -33,7 +33,7 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :networks => [:mgmt,:prod],
-      :qualified_hostnames => {:mgmt=>"ci-appx-002.mgmt.st.net.local", :prod=>"ci-appx-002.st.net.local"}
+      :qualified_hostnames => {:mgmt => "ci-appx-002.mgmt.st.net.local", :prod => "ci-appx-002.st.net.local"}
       }])
   end
 
@@ -58,9 +58,7 @@ describe Stacks::DSL do
       :hostname => "ci-puppetmaster-001",
       :bling => true,
       :domain => "st.net.local",
-      :qualified_hostnames => {
-          :prod => "ci-puppetmaster-001.st.net.local",
-          :mgmt => "ci-puppetmaster-001.mgmt.st.net.local"},
+      :qualified_hostnames => {:mgmt => "ci-puppetmaster-001.mgmt.st.net.local", :prod => "ci-puppetmaster-001.st.net.local"},
       :networks => [:mgmt, :prod],
       :fabric => "st"
     }])

@@ -47,7 +47,7 @@ class Compute::Controller
 
   def resolve(specs)
     return Hash[specs.map do |spec|
-      qualified_hostname = spec[:qualified_hostnames]['mgmt']
+      qualified_hostname = spec[:qualified_hostnames][:mgmt]
       [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
     end]
   end
@@ -99,7 +99,7 @@ class Compute::Controller
 
   def launch(all_specs, &block)
     current = Hash[resolve(all_specs).to_a.select { |hostname, address| !address.nil? }]
-      raise "some specified machines already exist: #{current.inspect}" unless current.empty?
+    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
 
     allocate_and_send(:launch, all_specs, &block)
   end

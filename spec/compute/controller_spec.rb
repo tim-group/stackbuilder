@@ -103,7 +103,7 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
@@ -117,7 +117,7 @@ describe Compute::Controller do
 
     specs = [{
       :hostname => "vm1",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:launch)
@@ -139,7 +139,7 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["failed", "o noes"]}]])
@@ -160,11 +160,11 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     },{
       :hostname => "vm2",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:launch).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
@@ -187,11 +187,11 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     },{
       :hostname => "vm2",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
     }]
 
     expect {
@@ -207,11 +207,11 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     },{
       :hostname => "vm2",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => ["success", "yay"]}], ["host2", {"vm2" => ["success", "hey"]}]])
@@ -231,11 +231,11 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     },{
       :hostname => "vm2",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
@@ -256,11 +256,11 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     },{
       :hostname => "vm2",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => ["failed", "o noes"]}], ["host2", {"vm2" => ["success", "yay"]}]])
@@ -279,11 +279,11 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm1.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
     },{
       :hostname => "vm2",
       :fabric => "st",
-      :qualified_hostnames => {"mgmt" => "vm2.mgmt.st.net.local"}
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
     }]
 
     @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => "success", "vm2" => "failed"}]])

@@ -27,10 +27,7 @@ describe Stacks::VirtualService do
         :hostname => "env-myvs",
         :fabric => "mars",
         :networks => [:prod, :front],
-        :qualified_hostnames => {
-          :prod => "env-myvs-vip.mars.net.local",
-          :front => "env-myvs-vip.front.mars.net.local"
-        }
+        :qualified_hostnames => {:prod => "env-myvs-vip.mars.net.local", :front => "env-myvs-vip.front.mars.net.local"}
       }
     )
   end
