@@ -1,8 +1,7 @@
 require 'stacks/namespace'
 
 class Stacks::MachineDef
-  attr_reader :hostname, :domain
-  attr_reader :environment
+  attr_reader :hostname, :domain, :environment
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
     @base_hostname = base_hostname

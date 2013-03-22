@@ -4,8 +4,8 @@ require 'puppet/indirector/node/stacks'
 describe Puppet::Node::Stacks do
 
   before :each do
-    @stacks_dir = File.dirname(__FILE__)
-    @delegate = double
+    @stacks_inventory = double('stacks_inventory')
+    @delegate = double('delegate')
   end
 
   def request_for(hostname)
@@ -17,19 +17,14 @@ describe Puppet::Node::Stacks do
     Puppet::Node.new(hostname)
   end
 
-  it 'blows up if there is no stacks file in the specified directory' do
-    expect {
-      Puppet::Node::Stacks.new('/dev') # pretty sure that this will exist, and not contain a stacks.rb
-    }.to raise_error("no stacks.rb found in /dev")
-  end
-
   it 'passes requests on to a delegate to produce an empty node' do
     hostname = 'nosuch.mgmt.local.net.local'
     request = request_for(hostname)
     node = node_for(hostname)
     @delegate.should_receive(:find).with(request).and_return(node)
+    @stacks_inventory.should_receive(:find).with(hostname).and_return(nil)
 
-    indirector = Puppet::Node::Stacks.new(@stacks_dir, @delegate)
+    indirector = Puppet::Node::Stacks.new(@stacks_inventory, @delegate)
     result = indirector.find(request)
 
     result.should eql(node)
@@ -41,13 +36,16 @@ describe Puppet::Node::Stacks do
     request = request_for(hostname)
     node = node_for(hostname)
     @delegate.should_receive(:find).with(request).and_return(node)
+    machine = double('machine')
+    @stacks_inventory.should_receive(:find).with(hostname).and_return(machine)
+    machine.should_receive(:to_enc).and_return({"role::http_app"=>{"application"=>"JavaHttpRef"}})
 
-    indirector = Puppet::Node::Stacks.new(@stacks_dir, @delegate)
+    indirector = Puppet::Node::Stacks.new(@stacks_inventory, @delegate)
     result = indirector.find(request)
 
     result.should eql(node)
     # it is super-shitty that this is tested by reproducing the entire config, but Puppet::Node::Stacks does not lend itself to mocking this
-    result.classes.should eql({"role::http_app"=>{"application"=>"JavaHttpRef", "group"=>"blue", "environment"=>"te", "vip_fqdn"=>"te-stapp-vip.local.net.local"}})
+    result.classes.should eql({"role::http_app"=>{"application"=>"JavaHttpRef"}})
   end
 
 end
