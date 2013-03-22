@@ -13,4 +13,8 @@ class Stacks::Inventory
     return @stacks.find(hostname)
   end
 
+  def find_environment(name)
+    return @stacks.find_environment(name)
+  end
+
 end

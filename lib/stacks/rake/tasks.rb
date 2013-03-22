@@ -6,6 +6,7 @@ require 'pp'
 require 'yaml'
 require 'rubygems'
 require 'stacks/environment'
+require 'stacks/inventory'
 require 'support/mcollective'
 require 'support/mcollective_puppet'
 require 'set' # ci/reporter/rspec should require this but doesn't
@@ -17,12 +18,9 @@ require 'support/logger'
 include Rake::DSL
 include Support::MCollective
 
-extend Stacks::DSL
-require 'stack.rb'
-
+inventory = Stacks::Inventory.new('.')
 environment_name = ENV.fetch('env', 'dev')
-
-environment = find_environment(environment_name)
+environment = inventory.find_environment(environment_name)
 
 RSpec::Core::Runner.disable_autorun!
 config = RSpec.configuration
