@@ -87,8 +87,8 @@ namespace :sbx do
       RSpec::Core::Runner.disable_autorun!
 
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
-      task :to_spec do
-        puts machine_def.to_spec.to_yaml
+      task :to_specs do
+        puts machine_def.to_specs.to_yaml
       end
 
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
