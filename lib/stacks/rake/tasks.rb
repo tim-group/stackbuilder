@@ -115,6 +115,18 @@ namespace :sbx do
         pp computecontroller.resolve(machine_def.to_specs)
       end
 
+      desc "disable notify for these machines"
+      sbtask :disable_notify do
+        computecontroller = Compute::Controller.new
+        computecontroller.disable_notify(machine_def.to_specs)
+      end
+
+      desc "enable notify for these machines"
+      sbtask :enable_notify do
+        computecontroller = Compute::Controller.new
+        computecontroller.enable_notify(machine_def.to_specs)
+      end
+
       desc "launch these machines"
       sbtask :launch do
         computecontroller = Compute::Controller.new

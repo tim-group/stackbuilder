@@ -12,6 +12,7 @@ end
 class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || Compute::Client.new
+    @nagsrv_client = Compute::NagsrvClient.new
     @dns_client = args[:dns_client] || Support::DNS.new
     @logger = args[:logger] || Logger.new(STDOUT)
   end
@@ -23,6 +24,18 @@ class Compute::Controller
       allocation[host].nil? ? allocation[host] = []: false
       allocation[host] << s
       h += 1
+    end
+  end
+
+  def enable_notify(specs)
+    specs.each do |spec|
+      pp @nagsrv_client.toggle_notify('enable-notify',spec[:qualified_hostnames][:mgmt])
+    end
+  end
+
+  def disable_notify(specs)
+    specs.each do |spec|
+      pp @nagsrv_client.toggle_notify('disable-notify',spec[:qualified_hostnames][:mgmt])
     end
   end
 
@@ -127,6 +140,20 @@ end
 
 require 'mcollective'
 require 'support/mcollective'
+
+
+class Compute::NagsrvClient
+  include Support::MCollective
+
+  def toggle_notify(action, mgmt_fqdn)
+    mco_client("nagsrv") do |mco|
+      mco.send(action.to_sym, :forhost => mgmt_fqdn).map do |node|
+        {:sender => node.results[:sender], :statuscode => node[:statuscode], :result => node.results[:data][:output].size}
+      end
+    end
+  end
+
+end
 
 class Compute::Client
   include Support::MCollective
