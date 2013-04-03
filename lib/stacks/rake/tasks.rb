@@ -347,8 +347,11 @@ namespace :sbx do
           machine_def.accept do |child_machine_def|
             if child_machine_def.kind_of? Stacks::VirtualAppService
               app_service = child_machine_def
-              factory = Orc::Factory.new(:application=>app_service.application,
-                               :environment=>app_service.environment.name)
+              factory = Orc::Factory.new(
+                  :application=>app_service.application,
+                  :environment=>app_service.environment.name
+              )
+              factory.cmdb_git.update
               factory.engine.resolve()
             end
           end
