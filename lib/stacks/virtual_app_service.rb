@@ -7,6 +7,7 @@ require 'uri'
 class Stacks::VirtualAppService < Stacks::VirtualService
   attr_accessor :application
   attr_accessor :groups
+  attr_accessor :ram
 
   def initialize(name, &config_block)
     @groups = ['blue']
@@ -19,6 +20,7 @@ class Stacks::VirtualAppService < Stacks::VirtualService
       index = sprintf("%03d",i+1)
       @definitions["#{name}-#{index}"] = server = Stacks::AppServer.new(self, index, &@config_block)
       server.group = groups[i%groups.size]
+      server.ram   = @ram unless @ram.nil?
     end
     super(environment)
     self.instance_eval(&@config_block) unless @config_block.nil?
