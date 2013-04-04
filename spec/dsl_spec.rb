@@ -25,7 +25,8 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :networks => [:mgmt,:prod],
-      :qualified_hostnames => {:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local"}
+      :qualified_hostnames => {:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local"},
+      :ram=>"2097152",
       },
       {
       :hostname => "ci-appx-002",
@@ -33,7 +34,8 @@ describe Stacks::DSL do
       :fabric => "st",
       :group => "ci-appx",
       :networks => [:mgmt,:prod],
-      :qualified_hostnames => {:mgmt => "ci-appx-002.mgmt.st.net.local", :prod => "ci-appx-002.st.net.local"}
+      :qualified_hostnames => {:mgmt => "ci-appx-002.mgmt.st.net.local", :prod => "ci-appx-002.st.net.local"},
+      :ram=>"2097152",
       }])
   end
 
