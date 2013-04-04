@@ -8,6 +8,7 @@ class Stacks::MachineDef
     @networks = networks
     @location = location
     @availability_group = nil
+    @ram = "2097152"
   end
 
   def children
@@ -37,7 +38,8 @@ class Stacks::MachineDef
       :fabric => @fabric,
       :group => @availability_group,
       :networks => @networks,
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
+      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
+      :ram => @ram,
     }]
   end
 
