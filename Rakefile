@@ -14,7 +14,13 @@ end
 desc "Create a debian package"
 task :package do
   sh "mkdir -p build"
+  sh "rm build/*"
   sh "if [ -f *.gem ]; then rm *.gem; fi"
   sh "gem build stacks.gemspec && mv stacks-*.gem build/"
   sh "cd build && fpm -s gem -t deb -n stacks stacks-*.gem"
+end
+
+desc "Create a debian package"
+task :install => [:package] do
+  sh "sudo dpkg -i build/*.deb"
 end
