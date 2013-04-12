@@ -1,5 +1,6 @@
 require 'stacks/environment'
 require 'stacks/inventory'
+require 'socket'
 
 describe Stacks::Inventory do
 
@@ -23,13 +24,14 @@ describe Stacks::Inventory do
   end
 
   it 'finds known nodes' do
-    hostname = 'te-stapp-001.mgmt.local.net.local'
+    parent = Socket.gethostname
+    hostname = "te-stapp-001.mgmt.#{parent}.net.local"
 
     inventory = Stacks::Inventory.new(@stacks_dir)
     result = inventory.find(hostname)
 
     result.hostname.should eql("te-stapp-001")
-    result.domain.should eql("local.net.local")
+    result.domain.should eql("#{parent}.net.local")
     result.vip_fqdn.should eql("te-stapp-vip.local.net.local")
   end
 
