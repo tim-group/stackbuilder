@@ -12,9 +12,14 @@ class Stacks::SftpServer < Stacks::MachineDef
     super(environment)
   end
 
+  def vip_fqdn
+    return @virtual_service.vip_fqdn
+  end
+
   def to_enc
     {
       'role::sftpserver' => {
+        'vip_fqdn' => vip_fqdn,
       }
     }
   end

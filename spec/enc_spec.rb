@@ -378,6 +378,7 @@ describe Stacks::DSL do
      find("rah-sftp-001.mgmt.st.net.local").to_enc.should eql(
        {
          'role::sftpserver' => {
+           'vip_fqdn' => 'rah-sftp-vip.st.net.local'
          }
        }
      )
@@ -385,6 +386,7 @@ describe Stacks::DSL do
      find("rah-sftp-002.mgmt.st.net.local").to_enc.should eql(
        {
          'role::sftpserver' => {
+           'vip_fqdn' => 'rah-sftp-vip.st.net.local'
          }
        }
      )
