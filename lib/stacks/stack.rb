@@ -6,6 +6,7 @@ require 'stacks/virtual_app_service'
 require 'stacks/loadbalancer'
 require 'stacks/nat_server'
 require 'stacks/proxy_server'
+require 'stacks/virtual_sftp_service'
 
 class Stacks::Stack < Stacks::MachineDefContainer
   attr_reader :name
@@ -23,6 +24,10 @@ class Stacks::Stack < Stacks::MachineDefContainer
   def virtual_proxyserver(name, &block)
     @definitions[name] = virtualservice = Stacks::VirtualProxyService.new(name, &block)
     #virtualservice.instance_eval(&block) unless block.nil?
+  end
+
+  def virtual_sftpserver(name, &block)
+    @definitions[name] = virtualservice = Stacks::VirtualSftpService.new(name, &block)
   end
 
   def loadbalancer(options={:instances=>2})
