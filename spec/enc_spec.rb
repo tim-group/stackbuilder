@@ -80,8 +80,8 @@ describe Stacks::DSL do
   it 'can generate the load balancer spec for a sub environment' do
     stack "fabric" do
       loadbalancer
+      virtual_sftpserver 'sftp'
     end
-
 
     stack "proxystack" do
       virtual_proxyserver "myproxy" do
@@ -114,6 +114,7 @@ describe Stacks::DSL do
     st_loadbalancer = find("st-lb-001.mgmt.st.net.local")
     st_loadbalancer.virtual_services(Stacks::VirtualAppService).size.should eql(2)
     st_loadbalancer.virtual_services(Stacks::VirtualProxyService).size.should eql(1)
+    st_loadbalancer.virtual_services(Stacks::VirtualSftpService).size.should eql(1)
 
     st_loadbalancer.to_enc.should eql(
       {
@@ -142,13 +143,23 @@ describe Stacks::DSL do
                   'ci2-app2x-001.st.net.local',
                   'ci2-app2x-002.st.net.local'
                 ]
-              }},
+              }
+            },
             'ci2-myproxy-vip.st.net.local' => {
               'type'        => 'proxy',
               'realservers' => {
                 'blue' => [
                   'ci2-myproxy-001.st.net.local',
                   'ci2-myproxy-002.st.net.local'
+                ]
+              }
+            },
+            'st-sftp-vip.st.net.local' => {
+              'type'        => 'sftp',
+              'realservers' => {
+                'blue' => [
+                  'st-sftp-001.st.net.local',
+                  'st-sftp-002.st.net.local'
                 ]
               }
             }
@@ -161,25 +172,39 @@ describe Stacks::DSL do
         'virtual_router_id' => 1,
         'virtual_servers' => {
           'ci-appx-vip.st.net.local' => {
-          'env' => 'ci',
-          'app' => 'JavaHttpRef',
-          'realservers' => {
-            'blue' => [
-              'ci-appx-001.st.net.local'],
-            'green'=> [
-              'ci-appx-002.st.net.local']
-          }},
+            'env' => 'ci',
+            'app' => 'JavaHttpRef',
+            'realservers' => {
+              'blue' => [
+                'ci-appx-001.st.net.local'
+              ],
+              'green'=> [
+                'ci-appx-002.st.net.local'
+              ]
+            }
+          },
           'ci-app2x-vip.st.net.local' => {
-          'env' => 'ci',
-          'app' => 'MySuperCoolApp',
-          'realservers' => {
-            'blue' => [
-              'ci-app2x-001.st.net.local',
-              'ci-app2x-002.st.net.local'
-            ]
+            'env' => 'ci',
+            'app' => 'MySuperCoolApp',
+            'realservers' => {
+              'blue' => [
+                'ci-app2x-001.st.net.local',
+                'ci-app2x-002.st.net.local'
+              ]
+            }
+          },
+          'ci-sftp-vip.st.net.local' => {
+            'type'        => 'sftp',
+            'realservers' => {
+              'blue' => [
+                'ci-sftp-001.st.net.local',
+                'ci-sftp-002.st.net.local'
+              ]
+            }
           }
-          }}}}
-    )
+        }
+      }
+    })
   end
 
   it 'round robins the groups foreach instance' do

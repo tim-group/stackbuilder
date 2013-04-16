@@ -68,11 +68,30 @@ class Stacks::LoadBalancer < Stacks::MachineDef
       }]
     end
 
+    sftp_virtual_services = virtual_services(Stacks::VirtualSftpService).map do |virtual_service|
+       grouped_realservers = virtual_service.realservers.group_by do |realserver|
+        'blue'
+       end
+
+       realservers = Hash[grouped_realservers.map do |group, realservers|
+         realserver_fqdns = realservers.map do |realserver|
+          realserver.prod_fqdn
+         end.sort
+         [group, realserver_fqdns]
+       end]
+
+      [virtual_service.vip_fqdn, {
+        'type' => 'sftp',
+        'realservers' => realservers
+      }]
+    end
+
+
 
     {
       'role::loadbalancer'=> {
         'virtual_router_id' => self.virtual_router_id,
-        'virtual_servers' => Hash[virtual_services_array].merge(Hash[proxy_virtual_services])
+        'virtual_servers' => Hash[virtual_services_array].merge(Hash[proxy_virtual_services]).merge(Hash[sftp_virtual_services])
       }
     }
   end
