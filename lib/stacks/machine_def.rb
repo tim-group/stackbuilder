@@ -1,8 +1,7 @@
 require 'stacks/namespace'
-require 'socket'
 
 class Stacks::MachineDef
-  attr_reader :hostname, :domain, :environment, :fabric, :domain
+  attr_reader :hostname, :domain, :environment
   attr_accessor :ram
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
@@ -13,23 +12,6 @@ class Stacks::MachineDef
     @ram = "2097152"
   end
 
-  def parent
-    Socket.gethostname
-  end
-
-  def parent_hostname
-    get_hostname_from_fqdn(parent)
-  end
-
-  def get_hostname_from_fqdn(fqdn)
-    case fqdn
-      when /^([\w-]+)/
-        $1
-      else
-        fqdn
-    end
-  end
-
   def children
     return []
   end
@@ -38,13 +20,7 @@ class Stacks::MachineDef
     @environment = environment
     @hostname = environment.name + "-" + @base_hostname
     @fabric = environment.options[@location]
-    case @fabric
-      when 'local'
-        @domain = "#{parent_hostname}.net.local"
-      else
-        @domain = "#{@fabric}.net.local"
-    end
-
+    @domain = "#{@fabric}.net.local"
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
   end
 
