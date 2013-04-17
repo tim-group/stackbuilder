@@ -79,7 +79,7 @@ def sbtask(name, &block)
   end
 end
 
-def free_ip_allocations(type, specs)
+def do_ip_allocations(type, specs)
   method = "#{type}_ips".to_sym
   computecontroller = Compute::Controller.new
   computecontroller.send(method, specs) do
@@ -170,40 +170,18 @@ namespace :sbx do
 
       desc "allocate IPs for these virtual services"
       sbtask :allocate_vips do
-
-        vip_specs = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:to_vip_spec)
-            vip_specs << child_machine_def.to_vip_spec
-          end
-        end
-
-        computecontroller = Compute::Controller.new
-        computecontroller.allocate_ips(vip_specs) do
-          on :success do |vm, msg|
-            logger.info "#{vm} allocated VIP successfully: #{msg}"
-          end
-          on :failure do |vm, msg|
-            logger.error "#{vm} failed to allocate VIP: #{msg}"
-          end
-          on :unaccounted do |vm|
-            logger.error "#{vm} was unaccounted for"
-          end
-          has :failure do
-            fail "some machines failed to allocate  VIPs"
-          end
-        end
+        do_ip_allocations('allocate', machine_def.flatten.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
       end
 
       desc "free IPs for these virtual services"
       sbtask :free_vips do
-        free_ip_allocations('free', machine_def.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
+        do_ip_allocations('free', machine_def.flatten.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
       end
 
       desc "free IPs"
       sbtask :free_ips do
         all_specs = machine_def.flatten.map { |m| m.to_spec }
-        free_ip_allocations('free', machine_def.flatten.map { |m| m.to_spec })
+        do_ip_allocations('free', machine_def.flatten.map { |m| m.to_spec })
       end
 
       desc "perform an MCollective ping against these machines"
