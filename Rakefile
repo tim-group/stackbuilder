@@ -14,7 +14,7 @@ end
 desc "Create a debian package"
 task :package do
   sh "mkdir -p build"
-  sh "if [ -f build/* ]; then rm -r build/*; fi"
+  sh "if [ `ls -1 build/ | wc -l` != 0 ]; then rm -r build/*; fi"
   sh "if [ -f *.gem ]; then rm *.gem; fi"
   sh "gem build stacks.gemspec && mv stacks-*.gem build/"
   sh "cd build && fpm -s gem -t deb -n stacks stacks-*.gem"
