@@ -180,7 +180,12 @@ namespace :sbx do
 
       desc "free IPs for these virtual services"
       sbtask :free_vips do
-        do_ip_allocations('free', machine_def.flatten.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
+        vips = []
+        machine_def.accept do |child_machine_def|
+          vips << child_machine_def.to_vip_spec if child_machine_def.respond_to?(:to_vip_spec)
+        end
+
+        do_ip_allocations('free', vips)
       end
 
       desc "free IPs"
