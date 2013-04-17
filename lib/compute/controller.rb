@@ -1,6 +1,7 @@
 require 'support/callback'
 require 'compute/namespace'
 require 'compute/client'
+require 'compute/nagservclient'
 require 'socket'
 require 'set'
 
@@ -135,23 +136,6 @@ class Compute::Controller
     end
 
     dispatch_results(all_specs, grouped_results, callback)
-  end
-
-end
-
-require 'mcollective'
-require 'support/mcollective'
-
-
-class Compute::NagsrvClient
-  include Support::MCollective
-
-  def toggle_notify(action, mgmt_fqdn)
-    mco_client("nagsrv") do |mco|
-      mco.send(action.to_sym, :forhost => mgmt_fqdn).map do |node|
-        {:sender => node.results[:sender], :statuscode => node[:statuscode], :result => node.results[:data][:output].size}
-      end
-    end
   end
 
 end
