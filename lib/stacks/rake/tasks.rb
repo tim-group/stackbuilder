@@ -79,11 +79,11 @@ def sbtask(name, &block)
   end
 end
 
-def free_ips(specs)
+def free_ip_allocations(specs)
   computecontroller = Compute::Controller.new
   computecontroller.free_ips(specs) do
     on :success do |vm, msg|
-      logger.info "#{vm} freed VIP successfully"
+      logger.info "#{vm} free VIP successfully"
     end
     on :failure do |vm, msg|
       logger.error "#{vm} failed to free VIP: #{msg}"
@@ -196,12 +196,13 @@ namespace :sbx do
 
       desc "free IPs for these virtual services"
       sbtask :free_vips do
-        free_ips(machine_def.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
+        free_ip_allocations(machine_def.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
       end
 
       desc "free IPs"
       sbtask :free_ips do
-        free_ips(machine_def.flatten.map { |m| m.to_spec })
+        all_specs = machine_def.flatten.map { |m| m.to_spec }
+        free_ip_allocations(machine_def.flatten.map { |m| m.to_spec })
       end
 
       desc "perform an MCollective ping against these machines"
