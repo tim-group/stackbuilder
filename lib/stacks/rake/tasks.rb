@@ -201,7 +201,7 @@ namespace :sbx do
 
       desc "free IPs"
       sbtask :free_ips do
-        free_ips(machine_def.accept { |m| m.to_spec })
+        free_ips(machine_def.flatten.map { |m| m.to_spec })
       end
 
       desc "perform an MCollective ping against these machines"

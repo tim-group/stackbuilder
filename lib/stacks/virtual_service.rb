@@ -4,7 +4,7 @@ require 'stacks/app_server'
 require 'stacks/nat'
 require 'uri'
 
-class Stacks::VirtualService < Stacks::MachineDefContainer
+class Stacks::VirtualService
   attr_reader :name
   attr_reader :environment
   attr_reader :nat
@@ -12,6 +12,8 @@ class Stacks::VirtualService < Stacks::MachineDefContainer
   attr_reader :fabric
   attr_accessor :ports
   attr_accessor :instances
+
+  include Stacks::MachineDefContainer
 
   def initialize(name, &config_block)
     @name = name

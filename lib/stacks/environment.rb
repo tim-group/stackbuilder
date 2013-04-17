@@ -1,33 +1,32 @@
 require 'stacks/namespace'
+require 'stacks/machine_def_container'
 
 class Stacks::Environment
   attr_reader :name, :options
+
+  include Stacks::MachineDefContainer
 
   def initialize(name, options, stack_procs)
     @name = name
     @options = options
     @stack_procs = stack_procs
-    @machine_def_containers = {}
+    @definitions = {}
   end
 
   def environment
     return self
   end
 
-  def [](key)
-    return @machine_def_containers[key]
-  end
-
   def env(name, options={}, &block)
-    @machine_def_containers[name] = Stacks::Environment.new(name, self.options.merge(options), @stack_procs)
-    @machine_def_containers[name].instance_eval(&block) unless block.nil?
+    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), @stack_procs)
+    @definitions[name].instance_eval(&block) unless block.nil?
   end
 
   def instantiate_stack(stack_name)
     factory = @stack_procs[stack_name]
     raise "no stack found '#{stack_name}'" if factory.nil?
     instantiated_stack = factory.call(self)
-    @machine_def_containers[instantiated_stack.name] = instantiated_stack
+    @definitions[instantiated_stack.name] = instantiated_stack
   end
 
   def contains_node_of_type?(clazz)
@@ -37,21 +36,5 @@ class Stacks::Environment
     end
     return found
   end
-
-  def accept(&block)
-    block.call(self)
-    @machine_def_containers.values.each do |machine_def|
-      machine_def.accept(&block)
-    end
-  end
-
-  def flatten
-    list = []
-    accept do |m|
-      if m.respond_to?(:to_spec)
-        list << m
-      end
-    end
-    list
-  end
 end
+

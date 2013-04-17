@@ -8,8 +8,10 @@ require 'stacks/nat_server'
 require 'stacks/proxy_server'
 require 'stacks/virtual_sftp_service'
 
-class Stacks::Stack < Stacks::MachineDefContainer
+class Stacks::Stack
   attr_reader :name
+
+  include Stacks::MachineDefContainer
 
   def initialize(name)
     @name = name

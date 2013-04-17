@@ -1,11 +1,10 @@
 require 'stacks/namespace'
 
-class Stacks::MachineDefContainer
+module Stacks::MachineDefContainer
   attr_reader :definitions
   attr_reader :environment
 
-  def initialize()
-    @definitions = {}
+  def self.included(object)
   end
 
   def children
@@ -18,6 +17,16 @@ class Stacks::MachineDefContainer
     children.each do |child|
       child.accept(&block)
     end
+  end
+
+  def flatten
+    list = []
+    accept do |m|
+      if m.respond_to?(:to_spec)
+        list << m
+      end
+    end
+    list
   end
 
   def bind_to(environment)
@@ -37,4 +46,9 @@ class Stacks::MachineDefContainer
     end.flatten
   end
 
+  def [](key)
+    return @definitions[key]
+  end
+
 end
+
