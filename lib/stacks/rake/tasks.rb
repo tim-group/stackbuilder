@@ -79,6 +79,24 @@ def sbtask(name, &block)
   end
 end
 
+def free_ips(specs)
+  computecontroller = Compute::Controller.new
+  computecontroller.free_ips(specs) do
+    on :success do |vm, msg|
+      logger.info "#{vm} freed VIP successfully"
+    end
+    on :failure do |vm, msg|
+      logger.error "#{vm} failed to free VIP: #{msg}"
+    end
+    on :unaccounted do |vm|
+      logger.error "#{vm} was unaccounted for"
+    end
+    has :failure do
+      fail "some machines failed to free VIPs"
+    end
+  end
+end
+
 namespace :sbx do
   environment.accept do |machine_def|
     namespace machine_def.name.to_sym do
@@ -178,29 +196,7 @@ namespace :sbx do
 
       desc "free IPs for these virtual services"
       sbtask :free_vips do
-
-        vip_specs = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:to_vip_spec)
-            vip_specs << child_machine_def.to_vip_spec
-          end
-        end
-
-        computecontroller = Compute::Controller.new
-        computecontroller.free_ips(vip_specs) do
-          on :success do |vm, msg|
-            logger.info "#{vm} freed VIP successfully"
-          end
-          on :failure do |vm, msg|
-            logger.error "#{vm} failed to free VIP: #{msg}"
-          end
-          on :unaccounted do |vm|
-            logger.error "#{vm} was unaccounted for"
-          end
-          has :failure do
-            fail "some machines failed to free VIPs"
-          end
-        end
+        free_ips(machine_def.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
       end
 
       desc "perform an MCollective ping against these machines"
