@@ -199,6 +199,11 @@ namespace :sbx do
         free_ips(machine_def.select { |m| m.respond_to?(:to_vip_spec) }.map { |m| m.to_vip_spec })
       end
 
+      desc "free IPs"
+      sbtask :free_ips do
+        free_ips(machine_def.accept { |m| m.to_spec })
+      end
+
       desc "perform an MCollective ping against these machines"
       sbtask :mping do
         hosts = []
