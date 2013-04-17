@@ -3,7 +3,6 @@ require 'support/monkeypatches' # Add flatten_hashes method to Array
 require 'compute/namespace'
 require 'compute/client'
 require 'compute/nagservclient'
-require 'support/dns'
 require 'socket'
 require 'set'
 
@@ -11,7 +10,6 @@ class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || Compute::Client.new
     @nagsrv_client = Compute::NagsrvClient.new
-    @dns_client = args[:dns_client] || Support::DNS.new
     @logger = args[:logger] || Logger.new(STDOUT)
   end
 
@@ -109,9 +107,6 @@ class Compute::Controller
   end
 
   def launch(all_specs, &block)
-    current = Hash[resolve(all_specs).to_a.select { |hostname, address| !address.nil? }]
-    raise "some specified machines already exist: #{current.inspect}" unless current.empty?
-
     allocate_and_send(:launch, all_specs, &block)
   end
 
