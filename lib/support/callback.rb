@@ -1,5 +1,4 @@
-module Support
-end
+require 'support/namespace'
 
 class Support::Callback
   def initialize(&block)

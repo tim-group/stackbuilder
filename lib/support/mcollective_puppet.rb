@@ -1,5 +1,4 @@
-module Support
-end
+require 'support/namespace'
 
 class Hash
   def hash_select(&block)

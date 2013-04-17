@@ -1,15 +1,11 @@
 require 'support/callback'
+require 'support/monkeypatches' # Add flatten_hashes method to Array
 require 'compute/namespace'
 require 'compute/client'
 require 'compute/nagservclient'
+require 'support/dns'
 require 'socket'
 require 'set'
-
-class Array
-  def flatten_hashes
-    Hash[*self.map(&:to_a).flatten]
-  end
-end
 
 class Compute::Controller
   def initialize(args = {})

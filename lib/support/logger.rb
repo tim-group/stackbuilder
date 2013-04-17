@@ -1,6 +1,5 @@
 require 'logger'
-module Support
-end
+require 'support/namespace'
 
 class Support::RakeFormatter
   @@interactive = $stdout.tty? || ENV.has_key?("BUILD_NUMBER")

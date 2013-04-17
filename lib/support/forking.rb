@@ -1,5 +1,4 @@
-module Support
-end
+require 'support/namespace'
 
 module Support::Forking
   class Future
