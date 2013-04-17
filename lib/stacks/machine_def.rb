@@ -32,8 +32,8 @@ class Stacks::MachineDef
     return hostname
   end
 
-  def to_specs
-    return [{
+  def to_spec
+    return {
       :hostname => @hostname,
       :domain => @domain,
       :fabric => @fabric,
@@ -41,7 +41,12 @@ class Stacks::MachineDef
       :networks => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
       :ram => @ram,
-    }]
+    }
+  end
+
+  # DEPRECATED for flatten / accept interface, remove me!
+  def to_specs
+    [ to_spec ]
   end
 
   def qualified_hostname(network)

@@ -417,4 +417,17 @@ describe Stacks::DSL do
      )
   end
 
+  it 'can be converted to an array of machine_defs (actual machines)' do
+    stack "mystack" do
+      loadbalancer
+      natserver
+    end
+
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "mystack"
+    end
+
+    find_environment("e1").flatten.map { |m| m.name }.should eql(["e1-lb-001","e1-lb-002","e1-nat-001","e1-nat-002"])
+  end
+
 end

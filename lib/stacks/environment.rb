@@ -44,4 +44,14 @@ class Stacks::Environment
       machine_def.accept(&block)
     end
   end
+
+  def flatten
+    list = []
+    accept do |m|
+      if m.respond_to?(:to_spec)
+        list << m
+      end
+    end
+    list
+  end
 end
