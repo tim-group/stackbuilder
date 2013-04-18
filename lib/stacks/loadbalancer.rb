@@ -32,22 +32,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
   def to_enc
     #TODO: push these up into the virtual service types
     virtual_services_array = virtual_services(Stacks::VirtualAppService).map do |virtual_service|
-       grouped_realservers = virtual_service.realservers.group_by do |realserver|
-        realserver.group
-       end
-
-       realservers = Hash[grouped_realservers.map do |group, realservers|
-         realserver_fqdns = realservers.map do |realserver|
-          realserver.prod_fqdn
-         end.sort
-         [group, realserver_fqdns]
-       end]
-
-      [virtual_service.vip_fqdn, {
-        'env' => virtual_service.environment.name,
-        'app' => virtual_service.application,
-        'realservers' => realservers
-      }]
+        virtual_service.to_loadbalancer_config
     end
 
     proxy_virtual_services = virtual_services(Stacks::VirtualProxyService).map do |virtual_service|

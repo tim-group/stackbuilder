@@ -25,4 +25,24 @@ class Stacks::VirtualAppService < Stacks::VirtualService
     super(environment)
     self.instance_eval(&@config_block) unless @config_block.nil?
   end
+
+  def to_loadbalancer_config
+    grouped_realservers = self.realservers.group_by do |realserver|
+      realserver.group
+    end
+
+    realservers = Hash[grouped_realservers.map do |group, realservers|
+      realserver_fqdns = realservers.map do |realserver|
+        realserver.prod_fqdn
+      end.sort
+      [group, realserver_fqdns]
+    end]
+
+    [self.vip_fqdn, {
+      'env' => self.environment.name,
+      'app' => self.application,
+      'realservers' => realservers
+    }]
+
+  end
 end
