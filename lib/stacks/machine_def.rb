@@ -20,7 +20,12 @@ class Stacks::MachineDef
     @environment = environment
     @hostname = environment.name + "-" + @base_hostname
     @fabric = environment.options[@location]
-    @domain = "#{@fabric}.net.local"
+    suffix = 'net.local'
+    @domain = "#{@fabric}.#{suffix}"
+    case @fabric
+      when 'local'
+        @domain = "dev.#{suffix}"
+    end
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
   end
 
