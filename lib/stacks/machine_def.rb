@@ -33,6 +33,10 @@ class Stacks::MachineDef
     block.call(self)
   end
 
+  def flatten
+    return [self]
+  end
+
   def name
     return hostname
   end
