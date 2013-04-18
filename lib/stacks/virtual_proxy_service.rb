@@ -87,4 +87,22 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
 
     return services
   end
+
+  def to_loadbalancer_config
+    grouped_realservers = self.realservers.group_by do |realserver|
+      'blue'
+    end
+
+    realservers = Hash[grouped_realservers.map do |group, realservers|
+      realserver_fqdns = realservers.map do |realserver|
+        realserver.prod_fqdn
+      end.sort
+      [group, realserver_fqdns]
+    end]
+
+    [self.vip_fqdn, {
+      'type' => 'proxy',
+      'realservers' => realservers
+    }]
+  end
 end
