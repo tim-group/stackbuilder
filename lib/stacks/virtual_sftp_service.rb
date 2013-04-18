@@ -39,6 +39,5 @@ class Stacks::VirtualSftpService < Stacks::VirtualService
       'type' => 'sftp',
       'realservers' => realservers
     }]
-
   end
 end

@@ -30,25 +30,13 @@ class Stacks::LoadBalancer < Stacks::MachineDef
   end
 
   def to_enc
-    #TODO: push these up into the virtual service types
-    virtual_services_array = virtual_services(Stacks::VirtualAppService).map do |virtual_service|
+    virtual_services_array = virtual_services(Stacks::VirtualService).map do |virtual_service|
         virtual_service.to_loadbalancer_config
     end
-
-    proxy_virtual_services = virtual_services(Stacks::VirtualProxyService).map do |virtual_service|
-      virtual_service.to_loadbalancer_config
-    end
-
-    sftp_virtual_services = virtual_services(Stacks::VirtualSftpService).map do |virtual_service|
-      virtual_service.to_loadbalancer_config
-    end
-
-
-
     {
       'role::loadbalancer'=> {
         'virtual_router_id' => self.virtual_router_id,
-        'virtual_servers' => Hash[virtual_services_array].merge(Hash[proxy_virtual_services]).merge(Hash[sftp_virtual_services])
+        'virtual_servers' => Hash[virtual_services_array]
       }
     }
   end
