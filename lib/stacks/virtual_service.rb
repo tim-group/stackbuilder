@@ -26,7 +26,12 @@ class Stacks::VirtualService
   def bind_to(environment)
     @environment = environment
     @fabric = environment.options[:primary_site]
-    @domain = "#{@fabric}.net.local"
+    suffix = 'net.local'
+    @domain = "#{@fabric}.#{suffix}"
+    case @fabric
+      when 'local'
+        @domain = "dev.#{suffix}"
+    end
     super(environment)
     self.instance_eval(&@config_block) unless @config_block.nil?
   end

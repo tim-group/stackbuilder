@@ -30,7 +30,7 @@ describe Stacks::Inventory do
 
     result.hostname.should eql("te-stapp-001")
     result.domain.should eql("dev.net.local")
-    result.vip_fqdn.should eql("te-stapp-vip.local.net.local")
+    result.vip_fqdn.should eql("te-stapp-vip.dev.net.local")
   end
 
 end
