@@ -315,7 +315,10 @@ namespace :sbx do
       end
 
       desc "clean away all traces of these machines"
-      task :clean => ['puppet:clean', 'clean_nodes', 'free_ips', 'free_vips']
+      task :clean => ['puppet:clean', 'clean_nodes']
+      desc "frees up ip and vip allocation of these machines"
+      task :free_ip_allocation => ['free_ips', 'free_vips']
+
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
