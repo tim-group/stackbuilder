@@ -5,6 +5,7 @@ require 'mcollective'
 require 'mcollective/pluginmanager'
 require 'puppetroll'
 require 'puppetroll/client'
+require 'facter'
 
 module Support
   module MCollective
@@ -32,6 +33,7 @@ module Support
 
       def new_client(name)
         client = @rpc.rpcclient(name, :options => @mco_options)
+        #puts client.inspect
         if @options.has_key?(:fabric)
           apply_fabric_filter client, @options[:fabric]
         end
@@ -40,7 +42,10 @@ module Support
 
       def apply_fabric_filter(mco, fabric)
         if fabric == "local"
-          mco.identity_filter `hostname --fqdn`.chomp
+            ENV['FACTERLIB'] = "/var/lib/puppet/lib/facter:/var/lib/puppet/facts"
+            if (Facter.value('owner') != "")
+              mco.fact_filter "owner", Facter.value('owner')
+            end
         else
           mco.fact_filter "domain", "mgmt.#{fabric}.net.local"
         end
