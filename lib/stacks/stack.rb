@@ -7,6 +7,7 @@ require 'stacks/loadbalancer'
 require 'stacks/nat_server'
 require 'stacks/proxy_server'
 require 'stacks/virtual_sftp_service'
+require 'stacks/puppetmaster'
 
 class Stacks::Stack
   attr_reader :name
@@ -31,6 +32,10 @@ class Stacks::Stack
   def virtual_sftpserver(name, &block)
     @definitions[name] = virtualservice = Stacks::VirtualSftpService.new(name, &block)
     virtualservice.instance_eval(&block) unless block.nil?
+  end
+
+  def puppetmaster(name="puppetmaster-001")
+    @definitions[name] = Stacks::PuppetMaster.new(name)
   end
 
   def loadbalancer(options={:instances=>2})
