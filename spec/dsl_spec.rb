@@ -87,7 +87,6 @@ describe Stacks::DSL do
 
     environments["ci"]["puppetmaster"]["puppetmaster-001"].to_enc.should eql(nil)
 
-
   end
 
   it 'can find sub environments' do
