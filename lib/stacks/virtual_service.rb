@@ -11,6 +11,7 @@ class Stacks::VirtualService
   attr_reader :domain
   attr_reader :fabric
   attr_accessor :ports
+  attr_accessor :port_map
   attr_accessor :instances
 
   include Stacks::MachineDefContainer
@@ -21,6 +22,7 @@ class Stacks::VirtualService
     @nat=false
     @instances = 2
     @config_block = config_block
+    @port_map = {}
   end
 
   def bind_to(environment)
@@ -77,10 +79,14 @@ class Stacks::VirtualService
   end
 
   def nat_rules
-    @ports.map do |port|
-      front_uri = URI.parse("http://#{vip_front_fqdn}:#{port}")
-      prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
-      Stacks::Nat.new(front_uri, prod_uri)
+    rules = []
+    @ports.map do |back_port|
+      front_port = @port_map[back_port] || back_port
+      puts "MAPPING #{back_port} FOR #{front_port}"
+      front_uri = URI.parse("http://#{vip_front_fqdn}:#{front_port}")
+      prod_uri = URI.parse("http://#{vip_fqdn}:#{back_port}")
+      rules << Stacks::Nat.new(front_uri, prod_uri)
     end
+    rules
   end
 end
