@@ -56,10 +56,10 @@ class Stacks::VirtualService
     networks = (nat==true)? [:prod, :front]: [:prod]
     qualified_hostnames = Hash[networks.map do |network|
       pair = nil
-      if network==:prod
-        pair = [network,vip_fqdn]
+      if network == :prod
+        pair = [network, vip_fqdn]
       end
-      if network==:front
+      if network == :front
         pair = [network, vip_front_fqdn]
       end
       pair
@@ -78,9 +78,9 @@ class Stacks::VirtualService
 
   def nat_rules
     @ports.map do |port|
-     front_uri = URI.parse("http://#{vip_front_fqdn}:#{port}")
-     prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
-     Stacks::Nat.new(front_uri, prod_uri)
+      front_uri = URI.parse("http://#{vip_front_fqdn}:#{port}")
+      prod_uri = URI.parse("http://#{vip_fqdn}:#{port}")
+      Stacks::Nat.new(front_uri, prod_uri)
     end
   end
 end
