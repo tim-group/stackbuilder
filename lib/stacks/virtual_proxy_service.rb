@@ -34,6 +34,7 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
     else
       proxy_vhost = Stacks::ProxyVHost.new(vip_front_fqdn, service, &config_block)
     end
+    proxy_vhost.with_alias(vip_fqdn)
     @proxy_vhosts << @proxy_vhosts_lookup[service] = proxy_vhost
   end
 

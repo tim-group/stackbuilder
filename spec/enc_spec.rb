@@ -373,13 +373,13 @@ describe Stacks::DSL do
               'application'    => 'MyApp',
               'proxy_pass_to'  => "http://env-refapp-vip.st.net.local:8000",
               'redirects'      => ['old-example.timgroup.com'],
-              'aliases'        => ['example.timgroup.com'],
+              'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
             },
             'example.timgroup.com' => {
               'application'    => 'MyOtherApp',
               'proxy_pass_to'  => "http://env-ref2app-vip.st.net.local:8000",
               'redirects'      => [],
-              'aliases'        => ['env-refproxy-vip.front.st.net.local']
+              'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local']
             }
           }
         }
