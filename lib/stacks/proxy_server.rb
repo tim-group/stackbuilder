@@ -6,9 +6,6 @@ class Stacks::ProxyServer < Stacks::MachineDef
   def initialize(virtual_service, index)
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
-    @downstream_services = []
-    @proxy_vhosts_lookup = {}
-    @proxy_vhosts = []
   end
 
   def bind_to(environment)
