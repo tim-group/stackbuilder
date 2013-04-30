@@ -82,7 +82,6 @@ class Stacks::VirtualService
     rules = []
     @ports.map do |back_port|
       front_port = @port_map[back_port] || back_port
-      puts "MAPPING #{back_port} FOR #{front_port}"
       front_uri = URI.parse("http://#{vip_front_fqdn}:#{front_port}")
       prod_uri = URI.parse("http://#{vip_fqdn}:#{back_port}")
       rules << Stacks::Nat.new(front_uri, prod_uri)

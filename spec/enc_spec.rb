@@ -250,6 +250,38 @@ describe Stacks::DSL do
     find("no-exist").should eql(nil)
   end
 
+  it 'can build rabbitmq servers' do
+    stack "rabbit" do
+      virtual_rabbitmqserver do
+      end
+      loadbalancer
+    end
+
+    env "rabbiteg", :primary_site=>"st", :secondary_site=>"bs" do
+      instantiate_stack "rabbit"
+    end
+
+    eg_rabbit = find("rabbiteg-rabbitmq-001.mgmt.st.net.local")
+    eg_rabbit.to_enc.should eql({ 'role::rabbitmq_server_application' => {} })
+    find("rabbiteg-rabbitmq-002.mgmt.st.net.local").to_enc.should eql({ 'role::rabbitmq_server_application' => {} })
+    find("rabbiteg-lb-001.mgmt.st.net.local").to_enc.should eql({
+        'role::loadbalancer' => {
+          'virtual_servers' => {
+              'rabbiteg-rabbitmq-vip.st.net.local' => {
+                'type' => 'rabbitmq',
+                'realservers' => {
+                  'blue' => [
+                    'rabbiteg-rabbitmq-001.st.net.local',
+                    'rabbiteg-rabbitmq-002.st.net.local'
+                  ]
+                }
+              }
+            },
+            'virtual_router_id' => 1
+          }
+        })
+  end
+
   it 'configures NAT boxes to NAT incoming public IPs' do
     stack "frontexample" do
       natserver

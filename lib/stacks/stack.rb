@@ -7,6 +7,7 @@ require 'stacks/loadbalancer'
 require 'stacks/nat_server'
 require 'stacks/proxy_server'
 require 'stacks/virtual_sftp_service'
+require 'stacks/virtual_rabbitmq_service'
 require 'stacks/puppetmaster'
 
 class Stacks::Stack
@@ -31,6 +32,11 @@ class Stacks::Stack
 
   def virtual_sftpserver(name, &block)
     @definitions[name] = virtualservice = Stacks::VirtualSftpService.new(name, &block)
+    virtualservice.instance_eval(&block) unless block.nil?
+  end
+
+  def virtual_rabbitmqserver(&block)
+    @definitions[name] = virtualservice = Stacks::VirtualRabbitMQService.new('rabbitmq', &block)
     virtualservice.instance_eval(&block) unless block.nil?
   end
 
