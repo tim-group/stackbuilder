@@ -59,7 +59,9 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
             'aliases' => vhost.aliases,
             'redirects' => vhost.redirects,
             'application' => machine_def.application,
-            'proxy_pass_to' => "http://#{machine_def.vip_fqdn}:8000"
+            'proxy_pass_rules' => {
+              '/' => "http://#{machine_def.vip_fqdn}:8000"
+             }
           }]
         end
       end
