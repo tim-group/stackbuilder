@@ -378,15 +378,21 @@ describe Stacks::DSL do
       virtual_appserver "refapp" do
         self.application="MyApp"
       end
+
       virtual_appserver "ref2app" do
         self.application="MyOtherApp"
       end
+
+      virtual_appserver "downstreamapp" do
+      end
+
       virtual_proxyserver "refproxy" do
         vhost("refapp") do
           with_alias "example.timgroup.com"
           with_redirect "old-example.timgroup.com"
         end
         vhost("ref2app") do
+          pass "/resources" => "downstreamapp"
         end
       end
     end
@@ -412,8 +418,9 @@ describe Stacks::DSL do
             'example.timgroup.com' => {
               'application'    => 'MyOtherApp',
               'proxy_pass_rules'  => {
-                '/' => "http://env-ref2app-vip.st.net.local:8000"
-              },
+                '/' => "http://env-ref2app-vip.st.net.local:8000",
+                '/resources' => "http://env-downstreamapp-vip.st.net.local:8000"
+               },
               'redirects'      => [],
               'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local']
             }

@@ -44,6 +44,8 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
         return machine_def
       end
     end
+
+    raise "Cannot find the service called "#{service}"
   end
 
   def downstream_services
@@ -59,9 +61,13 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
 
     return Hash[@proxy_vhosts_lookup.values.map do |vhost|
       primary_app = find_virtual_service(vhost.service)
-      proxy_pass_rules = {
-        '/' => "http://#{primary_app.vip_fqdn}:8000"
-      }
+
+      proxy_pass_rules = Hash[vhost.proxy_pass_rules.map do |path, service|
+        [path, "http://#{find_virtual_service(service).vip_fqdn}:8000"]
+      end]
+
+      proxy_pass_rules['/'] = "http://#{primary_app.vip_fqdn}:8000"
+
       [vhost.vhost_fqdn, {
         'aliases' => vhost.aliases,
         'redirects' => vhost.redirects,
