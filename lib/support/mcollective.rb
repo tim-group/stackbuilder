@@ -27,7 +27,7 @@ module Support
         @rpc = MCollectiveRPC.new
         @options = options
         @mco_options = ::MCollective::Util.default_options
-
+        @mco_options[:disctimeout] = 5 # Facter can take aaages to respond
         @mco_options[:timeout] = options[:timeout] if options.has_key?(:timeout)
       end
 
