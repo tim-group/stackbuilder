@@ -4,6 +4,7 @@ require 'uri'
 class Stacks::ProxyVHost
   attr_reader :aliases
   attr_reader :vhost_fqdn
+  attr_reader :service
   attr_reader :redirects
 
   def initialize(vhost_fqdn, service, &block)

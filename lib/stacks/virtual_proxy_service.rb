@@ -38,9 +38,15 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
     @proxy_vhosts << @proxy_vhosts_lookup[service] = proxy_vhost
   end
 
-  def downstream_services
-    services = []
+  def find_virtual_service(service)
+    environment.accept do |machine_def|
+      if machine_def.kind_of? Stacks::VirtualAppService and service.eql? machine_def.name
+        return machine_def
+      end
+    end
+  end
 
+  def downstream_services
     vhost_map = @proxy_vhosts_lookup.values.group_by do |proxy_vhost|
       proxy_vhost.vhost_fqdn
     end
@@ -51,23 +57,19 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
 
     raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size==0
 
-    environment.accept do |machine_def|
-      if machine_def.kind_of? Stacks::VirtualAppService
-        if @proxy_vhosts_lookup.include?(machine_def.name)
-          vhost = @proxy_vhosts_lookup[machine_def.name]
-          services << [vhost.vhost_fqdn, {
-            'aliases' => vhost.aliases,
-            'redirects' => vhost.redirects,
-            'application' => machine_def.application,
-            'proxy_pass_rules' => {
-              '/' => "http://#{machine_def.vip_fqdn}:8000"
-             }
-          }]
-        end
-      end
-    end
+    return Hash[@proxy_vhosts_lookup.values.map do |vhost|
+      primary_app = find_virtual_service(vhost.service)
+      proxy_pass_rules = {
+        '/' => "http://#{primary_app.vip_fqdn}:8000"
+      }
+      [vhost.vhost_fqdn, {
+        'aliases' => vhost.aliases,
+        'redirects' => vhost.redirects,
+        'application' => primary_app.application,
+        'proxy_pass_rules' => proxy_pass_rules
+      }]
+    end]
 
-    return services
   end
 
   def to_loadbalancer_config
