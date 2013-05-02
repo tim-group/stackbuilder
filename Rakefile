@@ -17,7 +17,7 @@ task :package do
   sh "if [ `ls -1 build/ | wc -l` != 0 ]; then rm -r build/*; fi"
   sh "if [ -f *.gem ]; then rm *.gem; fi"
   sh "gem build stacks.gemspec && mv stacks-*.gem build/"
-  sh "cd build && fpm -s gem -t deb -n stacks stacks-*.gem"
+  sh "cd build && fpm -s gem -t deb --post-install ../bin/post-install.sh -n stacks stacks-*.gem"
 end
 
 desc "Create a debian package"

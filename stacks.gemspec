@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.default_executable = %q{}
   s.description = %q{}
   s.email = %q{}
-  s.executables = Dir.new("bin").entries.reject { |entry| entry == '.' || entry == '..' } # Rake and Ruby - WINNING TEAM
+  s.executables = Dir.new("bin").entries.reject { |entry| entry == '.' || entry == '..' || entry == 'post-install.sh' } # Rake and Ruby - WINNING TEAM
   s.extra_rdoc_files = ["KNOWN-ISSUES"]
   s.files = Dir.glob("lib/**/*")
   s.require_paths = ["lib"]
