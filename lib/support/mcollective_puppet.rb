@@ -49,10 +49,9 @@ module Support::MCollectivePuppet
   def ca_clean(machines_fqdns, &block)
     callback = Support::Callback.new(&block)
     machines_fqdns.each do |machine_fqdn|
-         pp "cleaning #{machine_fqdn}"
       puppetca() do |mco|
 
-       cleaned = mco.clean(:certname => machine_fqdn).select do |response|
+        cleaned = mco.clean(:certname => machine_fqdn).select do |response|
           response[:statuscode] == 0
         end.size > 0
         if cleaned
