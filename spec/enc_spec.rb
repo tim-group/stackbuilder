@@ -264,14 +264,14 @@ describe Stacks::DSL do
     eg_rabbit = find("rabbiteg-rabbitmq-001.mgmt.st.net.local")
     eg_rabbit.to_enc.should eql({ 'role::rabbitmq_server_application' => {
       'cluster_nodes' => [
-        'rabbiteg-rabbitmq-001.st.net.local',
-        'rabbiteg-rabbitmq-002.st.net.local'
+        'rabbiteg-rabbitmq-001',
+        'rabbiteg-rabbitmq-002'
       ]
     } })
     find("rabbiteg-rabbitmq-002.mgmt.st.net.local").to_enc.should eql({ 'role::rabbitmq_server_application' => {
       'cluster_nodes' => [
-        'rabbiteg-rabbitmq-001.st.net.local',
-        'rabbiteg-rabbitmq-002.st.net.local'
+        'rabbiteg-rabbitmq-001',
+        'rabbiteg-rabbitmq-002'
       ]
     } })
     find("rabbiteg-lb-001.mgmt.st.net.local").to_enc.should eql({
