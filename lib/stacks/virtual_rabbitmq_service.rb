@@ -23,17 +23,12 @@ class Stacks::VirtualRabbitMQService < Stacks::VirtualService
     super(environment)
   end
 
-  def to_loadbalancer_config
-    grouped_realservers = self.realservers.group_by do |realserver|
-      'blue'
-    end
+  def realserver_prod_fqdns
+    self.realservers.map { |server| server.prod_fqdn }.sort
+  end
 
-    realservers = Hash[grouped_realservers.map do |group, realservers|
-      realserver_fqdns = realservers.map do |realserver|
-        realserver.prod_fqdn
-      end.sort
-      [group, realserver_fqdns]
-    end]
+  def to_loadbalancer_config
+    realservers = {'blue' => realserver_prod_fqdns}
 
     [self.vip_fqdn, {
       'type' => 'rabbitmq',
