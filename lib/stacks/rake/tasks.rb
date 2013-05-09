@@ -33,7 +33,6 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #         use logging
 #         push stuff back out of here
 #         does it complain well when keys aren't to be found anywhere?
-#         puppet out seed key to ci and infra
 #           probably want to have a different key in each dc?
 #
 # possibly:
@@ -282,7 +281,7 @@ namespace :sbx do
             end
           end
 
-          success = mco_client("puppetd", :key => "seed") do |mco|
+          success = mco_client("puppetd") do |mco|
             engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
             engine.execute()
             pp engine.get_report()

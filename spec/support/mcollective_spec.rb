@@ -67,8 +67,7 @@ describe Support::MCollective do
 
   it 'switch the mco key to use' do
     @mock_rpcclient.should_receive(:discover).with(no_args).ordered
-    mco_client("blah", :key => 'seed') do
+    mco_client("blah") do
     end
-    ::MCollective::Config.instance().pluginconf["ssl_client_public"].should eql("/etc/mcollective/ssl/seed.pem")
   end
 end
