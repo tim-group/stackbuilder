@@ -314,7 +314,9 @@ namespace :sbx do
       end
 
       desc "clean away all traces of these machines"
-      task :clean => ['puppet:clean', 'clean_nodes']
+      # Note that the ordering here is important - must have killed VMs before
+      # removing their puppet cert, otherwise we have a race condition
+      task :clean => ['clean_nodes', 'puppet:clean']
       desc "frees up ip and vip allocation of these machines"
       task :free_ip_allocation => ['free_ips', 'free_vips']
 
