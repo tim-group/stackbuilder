@@ -13,7 +13,7 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
 
   def to_enc()
     {
-      'role::rabbitmq_server_application' => {
+      'role::rabbitmq_server' => {
         'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns.map { |fqdn| fqdn.split('.')[0] },
         'vip_fqdn' => vip_fqdn,
        }
