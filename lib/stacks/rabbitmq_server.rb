@@ -6,10 +6,16 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
   end
+
+  def vip_fqdn
+    return @virtual_service.vip_fqdn
+  end
+
   def to_enc()
     {
       'role::rabbitmq_server_application' => {
-        "cluster_nodes" =>  @virtual_service.realserver_prod_fqdns.map { |fqdn| fqdn.split('.')[0] }
+        'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns.map { |fqdn| fqdn.split('.')[0] },
+        'vip_fqdn' => vip_fqdn,
        }
     }
   end

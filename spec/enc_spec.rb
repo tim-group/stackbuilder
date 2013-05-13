@@ -266,13 +266,15 @@ describe Stacks::DSL do
       'cluster_nodes' => [
         'rabbiteg-rabbitmq-001',
         'rabbiteg-rabbitmq-002'
-      ]
+      ],
+      'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
     } })
     find("rabbiteg-rabbitmq-002.mgmt.st.net.local").to_enc.should eql({ 'role::rabbitmq_server_application' => {
       'cluster_nodes' => [
         'rabbiteg-rabbitmq-001',
         'rabbiteg-rabbitmq-002'
-      ]
+      ],
+      'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
     } })
     find("rabbiteg-lb-001.mgmt.st.net.local").to_enc.should eql({
         'role::loadbalancer' => {
