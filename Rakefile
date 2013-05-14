@@ -22,9 +22,9 @@ task :package do
   hash = `git rev-parse --short HEAD`.chomp
   v_part= ENV['BUILD_NUMBER'] || "0.pre.#{hash}"
   version = "0.0.#{v_part}"
-  sh "cp bin/puppet_enc build/usr/local/bin"
+  sh "cp bin/* build/usr/local/bin"
   sh "cp -r lib/* build/usr/local/lib/site_ruby/1.8"
-  sh "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version} --post-install bin/post-install.sh"
+  sh "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version}"
 end
 
 desc "Create a debian package"
