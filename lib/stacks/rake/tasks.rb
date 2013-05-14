@@ -211,7 +211,7 @@ namespace :sbx do
           break if found
         end
 
-        fail("nodes #{hosts} not checked in to mcollective") unless found
+        fail("nodes #{hosts.join(" ")} not checked in to mcollective") unless found
         logger.info "all nodes found in mcollective #{hosts.size}"
       end
 
