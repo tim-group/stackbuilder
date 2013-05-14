@@ -14,14 +14,21 @@ end
 desc "Create a debian package"
 task :package do
   sh "mkdir -p build"
+
   sh "if [ `ls -1 build/ | wc -l` != 0 ]; then rm -r build/*; fi"
   sh "if [ -f *.gem ]; then rm *.gem; fi"
-  sh "gem build stacks.gemspec && mv stacks-*.gem build/"
-  sh "cd build && fpm -s gem -t deb --post-install ../bin/post-install.sh -n stacks stacks-*.gem"
+  sh "mkdir -p build/usr/local/lib/site_ruby/1.8"
+  sh "mkdir -p build/usr/local/bin"
+  hash = `git rev-parse --short HEAD`.chomp
+  v_part= ENV['BUILD_NUMBER'] || "0.pre.#{hash}"
+  version = "0.0.#{v_part}"
+  sh "cp bin/puppet_enc build/usr/local/bin"
+  sh "cp -r lib/* build/usr/local/lib/site_ruby/1.8"
+  sh "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version} --post-install bin/post-install.sh"
 end
 
 desc "Create a debian package"
 task :install => [:package] do
-  sh "sudo dpkg -i build/*.deb"
+  sh "sudo dpkg -i *.deb"
   sh "sudo /etc/init.d/mcollective restart;"
 end
