@@ -8,6 +8,7 @@ require 'stacks/nat_server'
 require 'stacks/proxy_server'
 require 'stacks/virtual_sftp_service'
 require 'stacks/virtual_rabbitmq_service'
+require 'stacks/ci_slave'
 require 'stacks/puppetmaster'
 
 class Stacks::Stack
