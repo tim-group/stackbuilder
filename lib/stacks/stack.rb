@@ -60,6 +60,14 @@ class Stacks::Stack
     end
   end
 
+  def ci_slave(options={:instances=>1})
+    options[:instances].times do |i|
+      index = sprintf("%03d",i+1)
+      hostname = "jenkinsslave-#{index}"
+      @definitions[hostname] = Stacks::CiSlave.new(hostname)
+    end
+  end
+
   def [](key)
     return @definitions[key]
   end
