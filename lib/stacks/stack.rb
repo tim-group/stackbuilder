@@ -31,6 +31,15 @@ class Stacks::Stack
     @definitions[name] = machineset
   end
 
+  def standalone_appserver(name, &block)
+    machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::MachineGroup)
+    machineset.extend(Stacks::AppService)
+    machineset.type=Stacks::AppServer
+    @definitions[name] = machineset
+  end
+
+
   def virtual_proxyserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend(Stacks::MachineGroup)

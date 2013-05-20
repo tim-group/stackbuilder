@@ -246,6 +246,27 @@ describe Stacks::DSL do
     }})
   end
 
+  it 'generates app servers that are not part of a virtual service' do
+    stack "blah" do
+      standalone_appserver "appx" do
+        self.application="JavaHttpRef"
+      end
+    end
+
+    env "ci", :primary_site=>"st", :secondary_site=>"bs" do
+      instantiate_stack "blah"
+    end
+
+    server = find("ci-appx-001.mgmt.st.net.local")
+    server.to_enc.should eql({
+      'role::http_app'=> {
+      'application' => 'JavaHttpRef',
+      'group' => 'blue',
+      'environment' => 'ci'
+    }})
+  end
+
+
   it 'returns nil if asked for a machine that does not exist' do
     find("no-exist").should eql(nil)
   end

@@ -20,12 +20,16 @@ class Stacks::AppServer < Stacks::MachineDef
   end
 
   def to_enc()
-    {
+    enc = {
       'role::http_app' => {
         'application' => virtual_service.application,
         'group' => group,
-        'vip_fqdn' => vip_fqdn,
-        'environment' => environment.name
+       'environment' => environment.name
     }}
+
+    if @virtual_service.respond_to? :vip_fqdn
+      enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn
+    end
+    enc
   end
 end
