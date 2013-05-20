@@ -4,7 +4,6 @@ require 'stacks/app_server'
 require 'stacks/nat'
 require 'uri'
 
-
 class Stacks::MachineSet
   attr_accessor :type
   attr_accessor :name
@@ -38,7 +37,7 @@ end
 module Stacks::AbstractVirtualService
 end
 
-module Stacks::XVirtualService
+module Stacks::VirtualService
   include Stacks::AbstractVirtualService
 
   def self.extended(object)

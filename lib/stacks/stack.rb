@@ -23,7 +23,7 @@ class Stacks::Stack
 
   def virtual_appserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::XAppService)
     machineset.type=Stacks::AppServer
     @definitions[name] = machineset
@@ -31,7 +31,7 @@ class Stacks::Stack
 
   def virtual_proxyserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::XProxyService)
     machineset.type=Stacks::ProxyServer
     @definitions[name] = machineset
@@ -39,7 +39,7 @@ class Stacks::Stack
 
   def virtual_sftpserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::VirtualSftpService)
     machineset.type=Stacks::SftpServer
     @definitions[name] = machineset
@@ -47,7 +47,7 @@ class Stacks::Stack
 
   def virtual_rabbitmqserver(&block)
     machineset = Stacks::MachineSet.new("rabbitmq", &block)
-    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::VirtualRabbitMQService)
     machineset.type=Stacks::RabbitMQServer
     @definitions[name] = machineset
