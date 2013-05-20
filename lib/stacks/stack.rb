@@ -24,17 +24,18 @@ class Stacks::Stack
   def virtual_appserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend(Stacks::XVirtualService)
-    machineset.extend(Stacks::XVirtualAppService)
+    machineset.extend(Stacks::XAppService)
     machineset.type=Stacks::AppServer
-
     @definitions[name] = machineset
-    #@definitions[name] = virtualservice = Stacks::VirtualAppService.new(name, &block)
-    #virtualservice.instance_eval(&block) unless block.nil?
   end
 
   def virtual_proxyserver(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualProxyService.new(name, &block)
-    #virtualservice.instance_eval(&block) unless block.nil?
+    machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::XProxyService)
+    machineset.type=Stacks::ProxyServer
+    @definitions[name] = machineset
+#    @definitions[name] = virtualservice = Stacks::VirtualProxyService.new(name, &block)
   end
 
   def virtual_sftpserver(name, &block)

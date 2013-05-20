@@ -113,7 +113,7 @@ describe Stacks::DSL do
 
     st_loadbalancer = find("st-lb-001.mgmt.st.net.local")
     st_loadbalancer.virtual_services(Stacks::AbstractVirtualService).size.should eql(4)
-    st_loadbalancer.virtual_services(Stacks::VirtualProxyService).size.should eql(1)
+    st_loadbalancer.virtual_services(Stacks::XProxyService).size.should eql(1)
     st_loadbalancer.virtual_services(Stacks::VirtualSftpService).size.should eql(1)
 
     st_loadbalancer.to_enc.should eql(

@@ -5,25 +5,19 @@ require 'stacks/nat'
 require 'stacks/proxy_vhost'
 require 'uri'
 
-class Stacks::VirtualProxyService < Stacks::VirtualService
+module Stacks::XProxyService
+  def self.extended(object)
+    object.configure()
+  end
+
   attr_reader :proxy_vhosts
   attr_reader :proxy_vhosts_lookup
 
-  def initialize(name, &config_block)
-    super(name, &config_block)
+  def configure()
     @downstream_services = []
     @proxy_vhosts_lookup = {}
     @proxy_vhosts = []
-    @config_block = config_block
     @ports = [80, 443]
-  end
-
-  def bind_to(environment)
-    @instances.times do |i|
-      index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] = server = Stacks::ProxyServer.new(self, index, &@config_block)
-    end
-    super(environment)
   end
 
   def vhost(service, options={}, &config_block)

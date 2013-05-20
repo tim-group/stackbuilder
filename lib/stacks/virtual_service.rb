@@ -60,8 +60,10 @@ module Stacks::XVirtualService
   def instantiate_machines(environment)
     @instances.times do |i|
       index = sprintf("%03d",i+1)
-      @definitions["#{name}-#{index}"] = server = Stacks::AppServer.new(self, index, &@config_block)
-      server.group = groups[i%groups.size]
+      @definitions["#{name}-#{index}"] = server = @type.new(self, index, &@config_block)
+      if server.respond_to?(:group)
+        server.group = groups[i%groups.size]
+      end
       server.ram   = @ram unless @ram.nil?
     end
   end
@@ -82,7 +84,7 @@ module Stacks::XVirtualService
       self.instance_eval(&@config_block) unless @config_block.nil?
       instantiate_machines(environment)
       bind_children(environment)
-   end
+    end
   end
 
   def to_loadbalancer_config
@@ -158,11 +160,10 @@ module Stacks::XVirtualService
 
 end
 
-module Stacks::XVirtualAppService
+module Stacks::XAppService
   def self.extended(object)
     object.configure()
   end
-
   attr_accessor :application
 
   def configure()
@@ -170,6 +171,7 @@ module Stacks::XVirtualAppService
 
 end
 
+## deprecated - moving over to more powerful framework
 class Stacks::VirtualService
   attr_reader :name
   attr_reader :environment
