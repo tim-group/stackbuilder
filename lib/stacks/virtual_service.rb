@@ -7,14 +7,20 @@ require 'uri'
 module Stacks::AbstractVirtualService
 end
 
-module Stacks::VirtualService
-  include Stacks::AbstractVirtualService
-
+module Stacks::MachineGroup
   def self.extended(object)
     object.configure()
   end
 
-  attr_accessor :nat
+  def configure()
+    on_bind do |machineset, environment|
+      @environment = environment
+      configure_domain_name(environment)
+      self.instance_eval(&@config_block) unless @config_block.nil?
+      instantiate_machines(environment)
+      bind_children(environment)
+    end
+  end
 
   def configure_domain_name(environment)
     @fabric = environment.options[:primary_site]
@@ -23,6 +29,12 @@ module Stacks::VirtualService
     case @fabric
     when 'local'
       @domain = "dev.#{suffix}"
+    end
+  end
+
+  def bind_children(environment)
+    children.each do |child|
+      child.bind_to(environment)
     end
   end
 
@@ -37,23 +49,21 @@ module Stacks::VirtualService
     end
   end
 
-  def bind_children(environment)
-    children.each do |child|
-      child.bind_to(environment)
-    end
+
+end
+
+module Stacks::VirtualService
+  include Stacks::AbstractVirtualService
+
+  def self.extended(object)
+    object.configure()
   end
+
+  attr_accessor :nat
 
   def configure()
     @nat=false
     @port_map = {}
-
-    on_bind do |machineset, environment|
-      @environment = environment
-      configure_domain_name(environment)
-      self.instance_eval(&@config_block) unless @config_block.nil?
-      instantiate_machines(environment)
-      bind_children(environment)
-    end
   end
 
   def to_loadbalancer_config

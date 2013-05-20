@@ -4,6 +4,10 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
   attr_accessor :virtual_router_id
 
+  def initialize(server_group, index, &block)
+    super(server_group.name + "-" + index)
+  end
+
   def bind_to(environment)
     super(environment)
     @virtual_router_id = environment.options[:lb_virtual_router_id] || 1

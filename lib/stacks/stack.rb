@@ -24,6 +24,7 @@ class Stacks::Stack
 
   def virtual_appserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::MachineGroup)
     machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::AppService)
     machineset.type=Stacks::AppServer
@@ -32,6 +33,7 @@ class Stacks::Stack
 
   def virtual_proxyserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::MachineGroup)
     machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::XProxyService)
     machineset.type=Stacks::ProxyServer
@@ -40,6 +42,7 @@ class Stacks::Stack
 
   def virtual_sftpserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::MachineGroup)
     machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::VirtualSftpService)
     machineset.type=Stacks::SftpServer
@@ -48,6 +51,7 @@ class Stacks::Stack
 
   def virtual_rabbitmqserver(&block)
     machineset = Stacks::MachineSet.new("rabbitmq", &block)
+    machineset.extend(Stacks::MachineGroup)
     machineset.extend(Stacks::VirtualService)
     machineset.extend(Stacks::VirtualRabbitMQService)
     machineset.type=Stacks::RabbitMQServer
@@ -58,12 +62,17 @@ class Stacks::Stack
     @definitions[name] = Stacks::PuppetMaster.new(name)
   end
 
-  def loadbalancer(options={:instances=>2})
-    options[:instances].times do |i|
-      index = sprintf("%03d",i+1)
-      hostname = "lb-#{index}"
-      @definitions[hostname] = Stacks::LoadBalancer.new(hostname)
-    end
+  def loadbalancer(options={:instances=>2}, &block)
+    machineset = Stacks::MachineSet.new("lb", &block)
+    machineset.extend(Stacks::MachineGroup)
+    machineset.type=Stacks::LoadBalancer
+    @definitions["lb"] = machineset
+
+    #options[:instances].times do |i|
+    #  index = sprintf("%03d",i+1)
+    #  hostname = "lb-#{index}"
+    #  @definitions[hostname] = Stacks::LoadBalancer.new(hostname)
+    #end
   end
 
   def natserver(options={:instances=>2})
