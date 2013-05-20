@@ -62,33 +62,25 @@ class Stacks::Stack
     @definitions[name] = Stacks::PuppetMaster.new(name)
   end
 
-  def loadbalancer(options={:instances=>2}, &block)
+  def loadbalancer(&block)
     machineset = Stacks::MachineSet.new("lb", &block)
     machineset.extend(Stacks::MachineGroup)
     machineset.type=Stacks::LoadBalancer
     @definitions["lb"] = machineset
-
-    #options[:instances].times do |i|
-    #  index = sprintf("%03d",i+1)
-    #  hostname = "lb-#{index}"
-    #  @definitions[hostname] = Stacks::LoadBalancer.new(hostname)
-    #end
   end
 
-  def natserver(options={:instances=>2})
-    options[:instances].times do |i|
-      index = sprintf("%03d",i+1)
-      hostname = "nat-#{index}"
-      @definitions[hostname] = Stacks::NatServer.new(hostname)
-    end
+  def natserver(&block)
+    machineset = Stacks::MachineSet.new("nat", &block)
+    machineset.extend(Stacks::MachineGroup)
+    machineset.type=Stacks::NatServer
+    @definitions["nat"] = machineset
   end
 
-  def ci_slave(options={:instances=>1})
-    options[:instances].times do |i|
-      index = sprintf("%03d",i+1)
-      hostname = "jenkinsslave-#{index}"
-      @definitions[hostname] = Stacks::CiSlave.new(hostname)
-    end
+  def ci_slave(&block)
+    machineset = Stacks::MachineSet.new("jenkinsslave", &block)
+    machineset.extend(Stacks::MachineGroup)
+    machineset.type=Stacks::NatServer
+    @definitions["jenkinsslave"] = machineset
   end
 
   def [](key)

@@ -3,7 +3,16 @@ require 'stacks/environment'
 describe Stacks::NatServer do
 
   subject do
-    Stacks::NatServer.new("my-nat-server")
+
+    class Group
+      attr_accessor :name
+
+      def initialize(name)
+        @name = name
+      end
+    end
+
+    Stacks::NatServer.new(Group.new("my-nat-server"), "001")
   end
 
   it 'has access to the front, prod and mgmt networks' do

@@ -3,9 +3,10 @@ require 'stacks/namespace'
 class Stacks::NatServer < Stacks::MachineDef
   attr_reader :virtual_router_ids
 
-  def initialize(base_hostname)
-    super(base_hostname, [:mgmt, :prod, :front])
+  def initialize(server_group, index, &block)
+    super(server_group.name + "-" + index, [:mgmt, :prod, :front])
     @virtual_router_ids = {}
+    self
   end
 
   def bind_to(environment)
