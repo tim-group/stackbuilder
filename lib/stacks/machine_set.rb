@@ -10,6 +10,8 @@ class Stacks::MachineSet
   attr_accessor :fabric
   attr_accessor :instances
   attr_accessor :ports
+  attr_accessor :port_map
+  attr_accessor :ram
   attr_accessor :groups
 
   include Stacks::MachineDefContainer
