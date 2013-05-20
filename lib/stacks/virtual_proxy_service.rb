@@ -40,7 +40,7 @@ class Stacks::VirtualProxyService < Stacks::VirtualService
 
   def find_virtual_service(service)
     environment.accept do |machine_def|
-      if machine_def.kind_of? Stacks::VirtualAppService and service.eql? machine_def.name
+      if machine_def.kind_of? Stacks::AbstractVirtualService and service.eql? machine_def.name
         return machine_def
       end
     end

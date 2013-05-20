@@ -22,8 +22,14 @@ class Stacks::Stack
   end
 
   def virtual_appserver(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualAppService.new(name, &block)
-    virtualservice.instance_eval(&block) unless block.nil?
+    machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::XVirtualAppService)
+    machineset.type=Stacks::AppServer
+
+    @definitions[name] = machineset
+    #@definitions[name] = virtualservice = Stacks::VirtualAppService.new(name, &block)
+    #virtualservice.instance_eval(&block) unless block.nil?
   end
 
   def virtual_proxyserver(name, &block)

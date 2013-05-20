@@ -30,7 +30,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
   end
 
   def to_enc
-    virtual_services_array = virtual_services(Stacks::VirtualService).map do |virtual_service|
+    virtual_services_array = virtual_services(Stacks::AbstractVirtualService).map do |virtual_service|
         virtual_service.to_loadbalancer_config
     end
     {
