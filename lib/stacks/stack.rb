@@ -38,8 +38,11 @@ class Stacks::Stack
   end
 
   def virtual_sftpserver(name, &block)
-    @definitions[name] = virtualservice = Stacks::VirtualSftpService.new(name, &block)
-    virtualservice.instance_eval(&block) unless block.nil?
+    machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::VirtualSftpService)
+    machineset.type=Stacks::SftpServer
+    @definitions[name] = machineset
   end
 
   def virtual_rabbitmqserver(&block)

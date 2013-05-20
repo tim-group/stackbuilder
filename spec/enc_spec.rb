@@ -261,9 +261,6 @@ describe Stacks::DSL do
       instantiate_stack "rabbit"
     end
 
-    pp environments
-
-
     eg_rabbit = find("rabbiteg-rabbitmq-001.mgmt.st.net.local")
     eg_rabbit.to_enc.should eql({ 'role::rabbitmq_server' => {
       'cluster_nodes' => [
