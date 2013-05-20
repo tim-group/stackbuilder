@@ -35,7 +35,6 @@ class Stacks::Stack
     machineset.extend(Stacks::XProxyService)
     machineset.type=Stacks::ProxyServer
     @definitions[name] = machineset
-#    @definitions[name] = virtualservice = Stacks::VirtualProxyService.new(name, &block)
   end
 
   def virtual_sftpserver(name, &block)
@@ -44,8 +43,11 @@ class Stacks::Stack
   end
 
   def virtual_rabbitmqserver(&block)
-    @definitions[name] = virtualservice = Stacks::VirtualRabbitMQService.new('rabbitmq', &block)
-    virtualservice.instance_eval(&block) unless block.nil?
+    machineset = Stacks::MachineSet.new("rabbitmq", &block)
+    machineset.extend(Stacks::XVirtualService)
+    machineset.extend(Stacks::VirtualRabbitMQService)
+    machineset.type=Stacks::RabbitMQServer
+    @definitions[name] = machineset
   end
 
   def puppetmaster(name="puppetmaster-001")
