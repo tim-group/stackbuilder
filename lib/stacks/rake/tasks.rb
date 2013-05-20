@@ -340,7 +340,7 @@ namespace :sbx do
         sbtask :resolve do
 
           machine_def.accept do |child_machine_def|
-            if child_machine_def.kind_of? Stacks::VirtualAppService
+            if child_machine_def.kind_of? Stacks::AppService
               app_service = child_machine_def
               factory = Orc::Factory.new(
                   :application=>app_service.application,
