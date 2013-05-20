@@ -24,7 +24,7 @@ class Stacks::Stack
   def virtual_appserver(name, &block)
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend(Stacks::VirtualService)
-    machineset.extend(Stacks::XAppService)
+    machineset.extend(Stacks::AppService)
     machineset.type=Stacks::AppServer
     @definitions[name] = machineset
   end
