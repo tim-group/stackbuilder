@@ -23,48 +23,24 @@ class Stacks::Stack
   end
 
   def virtual_appserver(name, &block)
-    machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.extend(Stacks::VirtualService)
-    machineset.extend(Stacks::AppService)
-    machineset.type=Stacks::AppServer
-    @definitions[name] = machineset
+    machineset_with(name, [Stacks::VirtualService, Stacks::AppService], Stacks::AppServer, &block);
   end
 
   def standalone_appserver(name, &block)
-    machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.extend(Stacks::AppService)
-    machineset.type=Stacks::AppServer
-    @definitions[name] = machineset
+    machineset_with(name, [Stacks::AppService], Stacks::AppServer, &block);
   end
 
 
   def virtual_proxyserver(name, &block)
-    machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.extend(Stacks::VirtualService)
-    machineset.extend(Stacks::XProxyService)
-    machineset.type=Stacks::ProxyServer
-    @definitions[name] = machineset
+    machineset_with(name, [Stacks::VirtualService, Stacks::XProxyService], Stacks::ProxyServer, &block)
   end
 
   def virtual_sftpserver(name, &block)
-    machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.extend(Stacks::VirtualService)
-    machineset.extend(Stacks::VirtualSftpService)
-    machineset.type=Stacks::SftpServer
-    @definitions[name] = machineset
+    machineset_with(name, [Stacks::VirtualService, Stacks::VirtualSftpService], Stacks::SftpServer, &block)
   end
 
   def virtual_rabbitmqserver(&block)
-    machineset = Stacks::MachineSet.new("rabbitmq", &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.extend(Stacks::VirtualService)
-    machineset.extend(Stacks::VirtualRabbitMQService)
-    machineset.type=Stacks::RabbitMQServer
-    @definitions[name] = machineset
+    machineset_with('rabbitmq', [Stacks::VirtualService, Stacks::VirtualRabbitMQService], Stacks::RabbitMQServer, &block)
   end
 
   def puppetmaster(name="puppetmaster-001")
@@ -72,28 +48,28 @@ class Stacks::Stack
   end
 
   def loadbalancer(&block)
-    machineset = Stacks::MachineSet.new("lb", &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.type=Stacks::LoadBalancer
-    @definitions["lb"] = machineset
+    machineset_with('lb', [], Stacks::LoadBalancer, &block)
   end
 
   def natserver(&block)
-    machineset = Stacks::MachineSet.new("nat", &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.type=Stacks::NatServer
-    @definitions["nat"] = machineset
+    machineset_with('nat', [], Stacks::NatServer, &block)
   end
 
   def ci_slave(&block)
-    machineset = Stacks::MachineSet.new("jenkinsslave", &block)
-    machineset.extend(Stacks::MachineGroup)
-    machineset.type=Stacks::NatServer
-    @definitions["jenkinsslave"] = machineset
+    machineset_with('jenkinsslave', [], Stacks::CiSlave, &block)
   end
 
   def [](key)
     return @definitions[key]
   end
 
+  private
+  def machineset_with(name, extends, type, &block)
+    machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::MachineGroup)
+    extends.each { |e| machineset.extend(e) }
+    machineset.type=type
+    @definitions[name]=machineset
+  end
 end
+
