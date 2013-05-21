@@ -14,7 +14,7 @@ end
 desc "Create a debian package"
 task :package do
   sh "mkdir -p build"
-  sh "if [ `ls -1 *.deb/ 2>/dev/null | wc -l` != 0 ]; then rm *.deb; fi"
+  sh "if [ `ls -1 *.deb 2>/dev/null | wc -l` != 0 ]; then rm *.deb; fi"
   sh "if [ `ls -1 build/ 2>/dev/null | wc -l` != 0 ]; then rm -r build/*; fi"
   sh "if [ -f *.gem ]; then rm *.gem; fi"
   sh "mkdir -p build/usr/local/lib/site_ruby/1.8"
