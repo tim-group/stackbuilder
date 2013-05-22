@@ -71,7 +71,8 @@ class Compute::Controller
         raise "unable to find any suitable compute nodes" if hosts.empty?
 
         compute_allocation = Compute::Allocation.new(allocation)
-        alloction = new_allocation.merge(compute_allocation.allocate(hosts, specs))
+        new_allocation = compute_allocation.allocate(hosts, specs)
+        alloction = new_allocation.merge(allocation)
       end
     end
 
