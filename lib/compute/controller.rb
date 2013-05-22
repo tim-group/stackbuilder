@@ -47,7 +47,7 @@ class Compute::Controller
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
     fabrics.each do |fabric, specs|
-        @compute_node_client.audit_host(fabric)
+      @compute_node_client.audit_host(fabric)
     end
   end
 
@@ -62,7 +62,7 @@ class Compute::Controller
         allocation[localhost] = specs
       else
 
-        allocation.merge Hash[@compute_node_client.audit_hosts(fabric).map do |key,value|
+        current_allocation = Hash[@compute_node_client.audit_hosts(fabric).map do |key,value|
           active_hosts = !value.nil?? value[:active_hosts] : []
           [key, active_hosts]
         end]
@@ -71,7 +71,8 @@ class Compute::Controller
         raise "unable to find any suitable compute nodes" if hosts.empty?
 
         compute_allocation = Compute::Allocation.new(allocation)
-        allocation.merge compute_allocation.allocate(hosts, specs)
+        new_allocation = compute_allocation.allocate(hosts, specs)
+        alloction = new_allocation.merge(allocation)
       end
     end
 
