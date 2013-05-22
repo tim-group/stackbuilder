@@ -14,9 +14,7 @@ class Compute::Client
       end
     end
 
-    pp Hash[response]
-
-
+    Hash[response]
   end
 
   def find_hosts(fabric)

@@ -6,21 +6,29 @@ require 'compute/nagservclient'
 require 'socket'
 require 'set'
 
+class Compute::Allocation
+
+  def initialize(current_allocation)
+    @current_allocation = current_allocation
+  end
+
+  def allocate(hosts, specs)
+    h = 0
+    specs.each do |s|
+      host = hosts[h.modulo(hosts.size)]
+      @current_allocation[host].nil? ? @current_allocation[host] = []: false
+      @current_allocation[host] << s
+      h += 1
+    end
+    @current_allocation
+  end
+end
+
 class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || Compute::Client.new
     @nagsrv_client = Compute::NagsrvClient.new
     @logger = args[:logger] || Logger.new(STDOUT)
-  end
-
-  def allocate_specs_by_rr(hosts, specs, allocation)
-    h = 0
-    specs.each do |s|
-      host = hosts[h.modulo(hosts.size)]
-      allocation[host].nil? ? allocation[host] = []: false
-      allocation[host] << s
-      h += 1
-    end
   end
 
   def enable_notify(specs)
@@ -53,9 +61,17 @@ class Compute::Controller
         localhost = Socket.gethostbyname(Socket.gethostname).first
         allocation[localhost] = specs
       else
-        hosts = @compute_node_client.find_hosts(fabric)
+
+        allocation.merge Hash[@compute_node_client.audit_hosts(fabric).map do |key,value|
+          active_hosts = !value.nil?? value[:active_hosts] : []
+          [key, active_hosts]
+        end]
+
+        hosts = @compute_node_client.audit_hosts(fabric).keys.sort
         raise "unable to find any suitable compute nodes" if hosts.empty?
-        allocate_specs_by_rr(hosts, specs, allocation)
+
+        compute_allocation = Compute::Allocation.new(allocation)
+        allocation.merge compute_allocation.allocate(hosts, specs)
       end
     end
 

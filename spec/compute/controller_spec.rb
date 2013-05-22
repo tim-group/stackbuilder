@@ -4,14 +4,12 @@ describe Compute::Controller do
 
   before :each do
     @compute_node_client = double
-
     @logger = double
-
     @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client, :logger=>@logger
   end
 
   it 'no hosts found' do
-    @compute_node_client.stub(:find_hosts).and_return([])
+    @compute_node_client.stub(:audit_hosts).and_return({})
 
     specs = [
       {:hostname => "vm1"},
@@ -24,7 +22,7 @@ describe Compute::Controller do
   end
 
   it 'allocates to the local fabric' do
-    @compute_node_client.stub(:find_hosts).and_return([])
+    @compute_node_client.stub(:audit_hosts).and_return([])
 
     specs = [{
       :hostname => "vm1",
@@ -40,8 +38,13 @@ describe Compute::Controller do
   end
 
   it 'allocates to a remote fabric' do
-    @compute_node_client.stub(:find_hosts).with("st").and_return(["st-kvm-001.mgmt.st.net.local"])
-    @compute_node_client.stub(:find_hosts).with("bs").and_return(["bs-kvm-001.mgmt.bs.net.local"])
+    @compute_node_client.stub(:audit_hosts).with("st").and_return({
+      "st-kvm-001.mgmt.st.net.local" => {:active_hosts=>[]}
+    })
+
+    @compute_node_client.stub(:audit_hosts).with("bs").and_return({
+      "bs-kvm-001.mgmt.bs.net.local" => {:active_hosts=>[]}
+    })
 
     specs = [{
       :hostname => "vm1",
@@ -62,16 +65,57 @@ describe Compute::Controller do
     })
   end
 
+  xit 'doesnt allocate the same machine twice' do
+     @compute_node_client.stub(:audit_hosts).with("st").and_return({
+      "st-kvm-001.mgmt.st.net.local" => {
+        :active_domains => []
+      },
+      "st-kvm-002.mgmt.st.net.local" => {
+        :active_domains => ["vm0"]
+      },
+      "st-kvm-003.mgmt.st.net.local" => {
+         :active_domains => []
+      }
+    })
+
+    specs = [
+      {:hostname => "vm0", :fabric => "st"},
+      {:hostname => "vm1", :fabric => "st"},
+      {:hostname => "vm2", :fabric => "st"},
+      {:hostname => "vm3", :fabric => "st"},
+      {:hostname => "vm4", :fabric => "st"}
+    ]
+
+    allocations = @compute_controller.allocate(specs)
+
+    allocations.should eql({
+      "st-kvm-001.mgmt.st.net.local" => [specs[3], specs[1]],
+      "st-kvm-002.mgmt.st.net.local" => [specs[0], specs[4]],
+      "st-kvm-003.mgmt.st.net.local" => [specs[2]],
+    })
+  end
+
   it 'allocates by slicing specs' do
-    @compute_node_client.stub(:find_hosts).with("st").and_return([
-      "st-kvm-001.mgmt.st.net.local",
-      "st-kvm-002.mgmt.st.net.local",
-      "st-kvm-003.mgmt.st.net.local"
-    ])
-    @compute_node_client.stub(:find_hosts).with("bs").and_return([
-      "bs-kvm-001.mgmt.bs.net.local",
-      "bs-kvm-002.mgmt.bs.net.local"
-    ])
+     @compute_node_client.stub(:audit_hosts).with("st").and_return({
+      "st-kvm-001.mgmt.st.net.local" => {
+        :active_domains => []
+      },
+      "st-kvm-002.mgmt.st.net.local" => {
+        :active_domains => []
+      },
+      "st-kvm-003.mgmt.st.net.local" => {
+        :active_domains => []
+      }
+    })
+
+    @compute_node_client.stub(:audit_hosts).with("bs").and_return({
+      "bs-kvm-001.mgmt.bs.net.local" => {
+        :active_domains => []
+      },
+      "bs-kvm-002.mgmt.bs.net.local" => {
+        :active_domains => ["vm0"]
+      }
+    })
 
     specs = [
       {:hostname => "vm0", :fabric => "st"},
@@ -86,6 +130,7 @@ describe Compute::Controller do
 
     allocations = @compute_controller.allocate(specs)
 
+
     allocations.should eql({
       "st-kvm-001.mgmt.st.net.local" => [specs[0],specs[3]],
       "st-kvm-002.mgmt.st.net.local" => [specs[1],specs[4]],
@@ -96,7 +141,7 @@ describe Compute::Controller do
   end
 
   it 'launches the vms on the allocated hosts' do
-    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
+    @compute_node_client.stub(:audit_hosts).and_return("myhost"=>{})
 
     specs = [{
       :hostname => "vm1",
@@ -111,7 +156,7 @@ describe Compute::Controller do
   end
 
   it 'calls back when a launch is allocated' do
-    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
+    @compute_node_client.stub(:audit_hosts).and_return({"myhost"=>{}})
 
     specs = [{
       :hostname => "vm1",
@@ -132,7 +177,7 @@ describe Compute::Controller do
   end
 
   it 'calls back if any launch command failed' do
-    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
+    @compute_node_client.stub(:audit_hosts).and_return({"myhost"=>{}})
 
     specs = [{
       :hostname => "vm1",
@@ -153,7 +198,7 @@ describe Compute::Controller do
   end
 
   it 'unaccounted for vms raise an error when launching' do
-    @compute_node_client.stub(:find_hosts).and_return(["myhost"])
+    @compute_node_client.stub(:audit_hosts).and_return({"myhost" =>{}})
 
     specs = [{
       :hostname => "vm1",
