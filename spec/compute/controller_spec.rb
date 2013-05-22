@@ -65,7 +65,7 @@ describe Compute::Controller do
     })
   end
 
-  xit 'doesnt allocate the same machine twice' do
+  it 'doesnt allocate the same machine twice' do
      @compute_node_client.stub(:audit_hosts).with("st").and_return({
       "st-kvm-001.mgmt.st.net.local" => {
         :active_domains => []
@@ -89,9 +89,9 @@ describe Compute::Controller do
     allocations = @compute_controller.allocate(specs)
 
     allocations.should eql({
-      "st-kvm-001.mgmt.st.net.local" => [specs[3], specs[1]],
-      "st-kvm-002.mgmt.st.net.local" => [specs[0], specs[4]],
-      "st-kvm-003.mgmt.st.net.local" => [specs[2]],
+      "st-kvm-001.mgmt.st.net.local" => [specs[1], specs[4]],
+      "st-kvm-002.mgmt.st.net.local" => [specs[0], specs[2]],
+      "st-kvm-003.mgmt.st.net.local" => [specs[3]],
     })
   end
 
@@ -113,7 +113,7 @@ describe Compute::Controller do
         :active_domains => []
       },
       "bs-kvm-002.mgmt.bs.net.local" => {
-        :active_domains => ["vm0"]
+        :active_domains => []
       }
     })
 

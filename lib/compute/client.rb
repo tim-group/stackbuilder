@@ -6,10 +6,14 @@ class Compute::Client
   include Support::MCollective
 
   def audit_hosts(fabric)
+    hosts = find_hosts(fabric)
+
+    raise "unable to find any compute nodes" if [] == hosts
+
     response = mco_client("libvirt", :nodes=>find_hosts(fabric)) do |mco|
       result = mco.hvinfo()
       result.map do |hv|
-        raise "all compute nodes must respond with a status code of 0" unless hv[:statuscode]==0
+        raise "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode]==0
         [hv[:sender], hv[:data]]
       end
     end

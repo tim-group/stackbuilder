@@ -7,20 +7,49 @@ require 'socket'
 require 'set'
 
 class Compute::Allocation
-
-  def initialize(current_allocation)
-    @current_allocation = current_allocation
+  def initialize(audit)
+    @current_allocation = Hash[audit.map do |key,value|
+      active_hosts = !value.nil?? value[:active_domains] : []
+      [key, active_hosts]
+    end]
   end
 
-  def allocate(hosts, specs)
+  def create_vm_to_host_map
+    Hash[@current_allocation.reject { |host,vms| vms.nil? }.map do |host, vms|
+      vms.map do |vm|
+        [vm, host]
+      end.flatten
+    end]
+  end
+
+  def allocate(specs)
+    hosts = @current_allocation.keys.sort
+
+    raise "unable to find any suitable compute nodes" if hosts.empty?
+
     h = 0
-    specs.each do |s|
-      host = hosts[h.modulo(hosts.size)]
-      @current_allocation[host].nil? ? @current_allocation[host] = []: false
-      @current_allocation[host] << s
-      h += 1
+    vms_to_host_map = create_vm_to_host_map
+
+    new_allocation = {}
+
+    specs.sort_by {|spec|spec[:hostname]}.each do |spec|
+
+      if (vms_to_host_map.include?(spec[:hostname]))
+        host = vms_to_host_map[spec[:hostname]]
+        add_to_allocation(new_allocation, host, spec)
+      else
+        host = hosts[h.modulo(hosts.size)]
+        add_to_allocation(new_allocation, host, spec)
+       h += 1
+      end
     end
-    @current_allocation
+    new_allocation
+  end
+
+  private
+  def add_to_allocation(new_allocation, host, spec)
+    new_allocation[host].nil? ? new_allocation[host] = []: false
+    new_allocation[host] << spec
   end
 end
 
@@ -47,7 +76,7 @@ class Compute::Controller
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
     fabrics.each do |fabric, specs|
-      @compute_node_client.audit_host(fabric)
+      pp @compute_node_client.audit_hosts(fabric)
     end
   end
 
@@ -61,18 +90,9 @@ class Compute::Controller
         localhost = Socket.gethostbyname(Socket.gethostname).first
         allocation[localhost] = specs
       else
-
-        current_allocation = Hash[@compute_node_client.audit_hosts(fabric).map do |key,value|
-          active_hosts = !value.nil?? value[:active_hosts] : []
-          [key, active_hosts]
-        end]
-
-        hosts = @compute_node_client.audit_hosts(fabric).keys.sort
-        raise "unable to find any suitable compute nodes" if hosts.empty?
-
-        compute_allocation = Compute::Allocation.new(allocation)
-        new_allocation = compute_allocation.allocate(hosts, specs)
-        alloction = new_allocation.merge(allocation)
+        audit = @compute_node_client.audit_hosts(fabric)
+        new_allocation = Compute::Allocation.new(audit).allocate(specs)
+        allocation = allocation.merge(new_allocation)
       end
     end
 
