@@ -5,6 +5,20 @@ require 'support/mcollective'
 class Compute::Client
   include Support::MCollective
 
+  def audit_hosts(fabric)
+    response = mco_client("libvirt", :nodes=>find_hosts(fabric)) do |mco|
+      result = mco.hvinfo()
+      result.map do |hv|
+        raise "all compute nodes must respond with a status code of 0" unless hv[:statuscode]==0
+        [hv[:sender], hv[:data]]
+      end
+    end
+
+    pp Hash[response]
+
+
+  end
+
   def find_hosts(fabric)
     mco_client("computenode", :fabric => fabric) do |mco|
       mco.discover.sort()

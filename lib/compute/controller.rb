@@ -35,6 +35,14 @@ class Compute::Controller
     end
   end
 
+  def audit(specs)
+    fabrics = specs.group_by { |spec| spec[:fabric] }
+
+    fabrics.each do |fabric, specs|
+        @compute_node_client.audit_host(fabric)
+    end
+  end
+
   def allocate(specs)
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
