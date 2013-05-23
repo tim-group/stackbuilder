@@ -90,7 +90,7 @@ describe Compute::Controller do
 
     allocations.should eql({
       "st-kvm-001.mgmt.st.net.local" => [specs[1], specs[4]],
-      "st-kvm-002.mgmt.st.net.local" => [specs[0], specs[2]],
+      "st-kvm-002.mgmt.st.net.local" => [specs[2]],
       "st-kvm-003.mgmt.st.net.local" => [specs[3]],
     })
   end

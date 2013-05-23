@@ -18,8 +18,8 @@ class Compute::Allocation
     Hash[@current_allocation.reject { |host,vms| vms.nil? }.map do |host, vms|
       vms.map do |vm|
         [vm, host]
-      end.flatten
-    end]
+      end
+    end.flatten(1)]
   end
 
   def allocate(specs)
@@ -33,16 +33,13 @@ class Compute::Allocation
     new_allocation = {}
 
     specs.sort_by {|spec|spec[:hostname]}.each do |spec|
-
-      if (vms_to_host_map.include?(spec[:hostname]))
-        host = vms_to_host_map[spec[:hostname]]
-        add_to_allocation(new_allocation, host, spec)
-      else
+      unless (vms_to_host_map.include?(spec[:hostname]))
         host = hosts[h.modulo(hosts.size)]
         add_to_allocation(new_allocation, host, spec)
        h += 1
       end
     end
+
     new_allocation
   end
 
@@ -144,6 +141,7 @@ class Compute::Controller
         callback.invoke :allocated, [vm[:hostname], host]
       end
     end
+
     grouped_results = allocation.map do |host, specs|
       @compute_node_client.send(selector, host, specs)
     end
