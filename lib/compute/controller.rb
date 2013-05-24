@@ -148,6 +148,12 @@ class Compute::Controller
       allocated_specs << specs
     end
 
+    active_specs = all_specs.to_set - allocated_specs.flatten.to_set
+
+    active_specs.each do |vm|
+      callback.invoke :already_active, vm[:hostname]
+    end
+
     grouped_results = allocation.map do |host, allocated_specs|
       @compute_node_client.send(selector, host, allocated_specs)
     end

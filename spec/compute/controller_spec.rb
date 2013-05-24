@@ -172,11 +172,17 @@ describe Compute::Controller do
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
     @compute_node_client.should_receive(:launch).with("myhost", [specs[0]])
 
+    already_active = []
     @compute_controller.launch(specs) do
       on :unaccounted do
         fail "no machines should be unaccounted for"
       end
+      on :already_active do |vm|
+        already_active << vm
+      end
     end
+
+    already_active.should eql ["vm2"]
   end
 
   it 'calls back when a launch is allocated' do
