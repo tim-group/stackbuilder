@@ -155,6 +155,30 @@ describe Compute::Controller do
     @compute_controller.launch(specs)
   end
 
+  it 'machines that are already allocated should show up as that' do
+    @compute_node_client.stub(:audit_hosts).and_return("myhost"=>{:active_domains=>["vm2"]})
+
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
+    },
+    {
+      :hostname => "vm2",
+      :fabric => "st",
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
+    }]
+
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
+    @compute_node_client.should_receive(:launch).with("myhost", [specs[0]])
+
+    @compute_controller.launch(specs) do
+      on :unaccounted do
+        fail "no machines should be unaccounted for"
+      end
+    end
+  end
+
   it 'calls back when a launch is allocated' do
     @compute_node_client.stub(:audit_hosts).and_return({"myhost"=>{}})
 

@@ -142,11 +142,17 @@ class Compute::Controller
       end
     end
 
-    grouped_results = allocation.map do |host, specs|
-      @compute_node_client.send(selector, host, specs)
+    allocated_specs = []
+
+    allocation.each do |host, specs|
+      allocated_specs << specs
     end
 
-    dispatch_results(all_specs, grouped_results, callback)
+    grouped_results = allocation.map do |host, allocated_specs|
+      @compute_node_client.send(selector, host, allocated_specs)
+    end
+
+    dispatch_results(allocated_specs, grouped_results, callback)
   end
 
   def launch(all_specs, &block)
