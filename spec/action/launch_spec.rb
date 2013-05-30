@@ -12,7 +12,6 @@ describe 'launch' do
     end
   end
 
-
   class Host
     attr_accessor :allocated_machines
     attr_accessor :provisionally_allocated_machines
@@ -22,6 +21,7 @@ describe 'launch' do
       @provisionally_allocated_machines = []
       @fqdn = fqdn
       @allocated_machines = []
+      @policies
     end
 
     def machines
@@ -33,6 +33,10 @@ describe 'launch' do
       @provisionally_allocated_machines << machine
     end
 
+    def add_policy(&block)
+      @policies << block
+    end
+
     def set_preference_function(&block)
       @preference_function = block
     end
@@ -42,10 +46,9 @@ describe 'launch' do
     end
 
     def can_allocate(machine)
-      policies.check(machine)
-      # exclude if asking for too much disk
-      # exclude if asking for too much ram
-      # exclude if already contains a machine in this host group
+      @policies.each do |policy|
+        return false if policy.call(self, machine)
+      end
     end
 
     def preference(machine)
@@ -241,4 +244,27 @@ describe 'launch' do
 
       get_action("launch").call(services, env)
   end
+
+  it 'will not allocate to a machine that fails a policy' do
+    env = test_env_with_refstack
+    compute_controller = double
+    host_repo = host_repo_with_hosts(3) do |host, i|
+      host.add_policy do |host, machine|
+        host.fqdn /h1/
+      end
+    end
+
+    services = Services.new(
+      :host_repo => host_repo,
+      :compute_controller=> compute_controller)
+
+    compute_controller.should_receive(:launch).with(
+        "h2" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
+        "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+      )
+
+      get_action("launch").call(services, env)
+  end
+
+
 end
