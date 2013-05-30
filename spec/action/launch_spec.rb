@@ -8,7 +8,7 @@ describe 'launch' do
       result.each.each do |vm|
         machine_repo.find(vm)
       end
-      host = Host.new(:allocated_machines=>nil, :policies=>nil, :preferences=>nil)
+      host = Host.new(:allocated_machines=>nil, :policies=>nil)
     end
   end
 
@@ -33,6 +33,14 @@ describe 'launch' do
       @provisionally_allocated_machines << machine
     end
 
+    def set_preference_function(&block)
+      @preference_function = block
+    end
+
+    def has_preference_function?
+      return  !@preference_function.nil?
+    end
+
     def can_allocate(machine)
       policies.check(machine)
       # exclude if asking for too much disk
@@ -40,8 +48,8 @@ describe 'launch' do
       # exclude if already contains a machine in this host group
     end
 
-    def utility(machine)
-      preferences.rate(machine)
+    def preference(machine)
+      @preference_function.call(self)
     end
   end
 
@@ -51,6 +59,20 @@ describe 'launch' do
     def initialize(args)
       @hosts = args[:hosts]
       @next_increment = 0
+
+      preference_function = Proc.new do |host|
+        index = (@next_increment % hosts.size)
+        if hosts.index(host) == index
+          1
+        else
+          0
+        end
+      end
+
+      hosts.each do |host|
+        host.set_preference_function(&preference_function) unless host.has_preference_function?
+      end
+
     end
 
     private
@@ -60,9 +82,10 @@ describe 'launch' do
       #    end.order_by utility
       #    candidate_hosts[0]
 
-      candidate_host = hosts[@next_increment % hosts.size]
+      candidate_hosts =   hosts.sort_by {|host| -host.preference(machine) }
+
       @next_increment=@next_increment+1
-      return candidate_host
+      candidate_hosts[0]
     end
 
     def unallocated_machines(machines)
@@ -157,7 +180,7 @@ describe 'launch' do
     hosts = []
     n.times do |i|
       host = Host.new("h#{i+1}")
-      block.call(host) unless block.nil?
+      block.call(host,i) unless block.nil?
       hosts << host
     end
 
@@ -170,7 +193,7 @@ describe 'launch' do
     env = test_env_with_refstack
     compute_controller = double
     services = Services.new(
-      :host_repo => host_repo_with_hosts(2),
+      :host_repo => host_repo_with_hosts(3),
       :compute_controller=> compute_controller)
 
       compute_controller.should_receive(:launch).with(
@@ -184,7 +207,7 @@ describe 'launch' do
   it 'will not allocate machines that are already allocated' do
     env = test_env_with_refstack
     compute_controller = double
-    host_repo = host_repo_with_hosts(2) do |host|
+    host_repo = host_repo_with_hosts(2) do |host,i|
       host.allocated_machines << find("test-refapp-001.mgmt.t.net.local")
     end
     services = Services.new(
@@ -198,4 +221,24 @@ describe 'launch' do
       get_action("launch").call(services, env)
   end
 
+  it 'will not allocate to the machine with the highest preference' do
+    env = test_env_with_refstack
+    compute_controller = double
+    host_repo = host_repo_with_hosts(3) do |host, i|
+      host.set_preference_function do |host|
+        i
+      end
+    end
+
+    services = Services.new(
+      :host_repo => host_repo,
+      :compute_controller=> compute_controller)
+
+      compute_controller.should_receive(:launch).with(
+        "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
+          find("test-refapp-002.mgmt.t.net.local").to_spec]
+      )
+
+      get_action("launch").call(services, env)
+  end
 end
