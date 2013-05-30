@@ -29,7 +29,7 @@ describe 'launch' do
 
     def machines
       # merge allocated and provisionally_allocated
-      @provisionally_allocated_machines
+      provisionally_allocated_machines + allocated_machines
     end
 
     def provisionally_allocate(machine)
@@ -68,12 +68,15 @@ describe 'launch' do
       @next_increment = 0
 
       preference_function = Proc.new do |host|
-        index = (@next_increment % hosts.size)
-        if hosts.index(host) == index
-          1
-        else
-          0
-        end
+
+        -host.machines.size
+
+#        index = (@next_increment % hosts.size)
+#        if hosts.index(host) == index
+#          "1"
+#        else
+#          "0"
+#        end
       end
 
       hosts.each do |host|
@@ -84,12 +87,12 @@ describe 'launch' do
 
     private
     def find_suitable_host_for(machine)
-      candidate_hosts = hosts.reject {|host| !host.can_allocate(machine)}.sort_by {|host| -host.preference(machine) }
+      candidate_hosts = hosts.reject {|host| !host.can_allocate(machine)}.sort_by {|host| [host.preference(machine), host.fqdn._descending_]}
       candidate_host = candidate_hosts[0]
       next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
       @next_increment=hosts.index(next_host)
       candidate_host
-   end
+    end
 
     def unallocated_machines(machines)
       allocated_machines = []
@@ -257,12 +260,12 @@ describe 'launch' do
       :host_repo => host_repo,
       :compute_controller=> compute_controller)
 
-    compute_controller.should_receive(:launch).with(
+      compute_controller.should_receive(:launch).with(
         "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
         "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
-    )
+      )
 
-    get_action("launch").call(services, env)
+      get_action("launch").call(services, env)
   end
 
 
@@ -272,6 +275,10 @@ describe 'launch' do
         NO
       end
     end
+  end
+
+  enough_ram_policy = Proc.new do |host, machine|
+    host.ram - machine.ram >0
   end
 
 end
