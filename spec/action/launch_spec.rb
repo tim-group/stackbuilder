@@ -265,4 +265,13 @@ describe 'launch' do
     get_action("launch").call(services, env)
   end
 
+
+  ha_policy = Proc.new do |host, machine|
+    host.machines.each do |m|
+      if m.group == machine.group
+        NO
+      end
+    end
+  end
+
 end
