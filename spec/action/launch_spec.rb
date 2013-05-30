@@ -1,4 +1,7 @@
-
+### TODO
+###   pull out round robinning thing
+##    define correct way to add policies and preference algo
+##
 describe 'launch' do
   class HostRepository
     attr_accessor :machine_repo
@@ -21,7 +24,7 @@ describe 'launch' do
       @provisionally_allocated_machines = []
       @fqdn = fqdn
       @allocated_machines = []
-      @policies
+      @policies = []
     end
 
     def machines
@@ -47,8 +50,9 @@ describe 'launch' do
 
     def can_allocate(machine)
       @policies.each do |policy|
-        return false if policy.call(self, machine)
+        return false unless policy.call(self, machine)
       end
+      return true
     end
 
     def preference(machine)
@@ -80,16 +84,12 @@ describe 'launch' do
 
     private
     def find_suitable_host_for(machine)
-      #    candidate_hosts = hosts.reject do |host|
-      #      !host.can_allocate(host)
-      #    end.order_by utility
-      #    candidate_hosts[0]
-
-      candidate_hosts =   hosts.sort_by {|host| -host.preference(machine) }
-
-      @next_increment=@next_increment+1
-      candidate_hosts[0]
-    end
+      candidate_hosts = hosts.reject {|host| !host.can_allocate(machine)}.sort_by {|host| -host.preference(machine) }
+      candidate_host = candidate_hosts[0]
+      next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
+      @next_increment=hosts.index(next_host)
+      candidate_host
+   end
 
     def unallocated_machines(machines)
       allocated_machines = []
@@ -191,7 +191,6 @@ describe 'launch' do
     host_repo
   end
 
-
   it 'will allocate and launch a bunch of machines' do
     env = test_env_with_refstack
     compute_controller = double
@@ -250,7 +249,7 @@ describe 'launch' do
     compute_controller = double
     host_repo = host_repo_with_hosts(3) do |host, i|
       host.add_policy do |host, machine|
-        host.fqdn /h1/
+        host.fqdn !~ /h2/
       end
     end
 
@@ -259,12 +258,11 @@ describe 'launch' do
       :compute_controller=> compute_controller)
 
     compute_controller.should_receive(:launch).with(
-        "h2" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
+        "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
         "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
-      )
+    )
 
-      get_action("launch").call(services, env)
+    get_action("launch").call(services, env)
   end
-
 
 end
