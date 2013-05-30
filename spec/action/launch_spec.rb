@@ -87,7 +87,7 @@ describe 'launch' do
 
     private
     def find_suitable_host_for(machine)
-      candidate_hosts = hosts.reject {|host| !host.can_allocate(machine)}.sort_by {|host| [host.preference(machine), host.fqdn._descending_]}
+      candidate_hosts = hosts.reject {|host| !host.can_allocate(machine)}.sort_by {|host| [host.preference(machine), host.fqdn]}
       candidate_host = candidate_hosts[0]
       next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
       @next_increment=hosts.index(next_host)
