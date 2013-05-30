@@ -21,6 +21,7 @@ describe 'launch' do
     def initialize(fqdn)
       @provisionally_allocated_machines = []
       @fqdn = fqdn
+      @allocated_machines = []
     end
 
     def machines
@@ -54,18 +55,25 @@ describe 'launch' do
 
     private
     def find_suitable_host_for(machine)
-  #    candidate_hosts = hosts.reject do |host|
-  #      !host.can_allocate(host)
-  #    end.order_by utility
-  #    candidate_hosts[0]
+      #    candidate_hosts = hosts.reject do |host|
+      #      !host.can_allocate(host)
+      #    end.order_by utility
+      #    candidate_hosts[0]
 
-       candidate_host = hosts[@next_increment % hosts.size]
-       @next_increment=@next_increment+1
-       return candidate_host
+      candidate_host = hosts[@next_increment % hosts.size]
+      @next_increment=@next_increment+1
+      return candidate_host
     end
 
     def unallocated_machines(machines)
-      return machines
+      allocated_machines = []
+      hosts.each do |host|
+        host.allocated_machines.each do |machine|
+          allocated_machines << machine
+        end
+      end
+
+      return machines - allocated_machines
     end
 
     public
@@ -84,7 +92,7 @@ describe 'launch' do
           machine.to_spec
         end
         [host.fqdn, specs]
-      end]
+      end].reject {|host, specs| specs.size==0}
     end
   end
 
@@ -98,27 +106,41 @@ describe 'launch' do
     end
   end
 
-  ## Actions
-  def action(name, &block)
-    @@actions = {name=> block}
-  end
+  require 'stacks/namespace'
 
-  def get_action(name)
-    @@actions[name]
-  end
+  module Stacks::Actions
+    attr_accessor :actions
+    def self.extended(object)
+      object.actions = {}
 
-  it 'will allocate and launch a bunch of machines' do
-    action 'launch' do |services, machine_def|
-      hosts = services.host_repo.find_current()
-      hosts.allocate(machine_def.flatten)
-      specs = hosts.to_unlaunched_specs()
-      pp specs
-      services.compute_controller.launch(specs)
+      object.action 'launch' do |services, machine_def|
+        hosts = services.host_repo.find_current()
+        hosts.allocate(machine_def.flatten)
+        specs = hosts.to_unlaunched_specs()
+        services.compute_controller.launch(specs)
+      end
+
     end
 
-    require 'stacks/namespace'
-    extend Stacks::DSL
+    def self.included(object)
+      self.extended(object)
+    end
 
+    def action(name, &block)
+      @actions = {name=> block}
+    end
+
+    def get_action(name)
+      @actions[name]
+    end
+  end
+
+  before do
+    extend Stacks::DSL
+    extend Stacks::Actions
+  end
+
+  def test_env_with_refstack
     stack "ref" do
       virtual_appserver "refapp"
     end
@@ -127,23 +149,53 @@ describe 'launch' do
       instantiate_stack "ref"
     end
 
-    env = find_environment("test")
+    find_environment("test")
+  end
 
+  def host_repo_with_hosts(n, &block)
     host_repo = double
-    host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>[Host.new("h1"), Host.new("h2")]))
+    hosts = []
+    n.times do |i|
+      host = Host.new("h#{i+1}")
+      block.call(host) unless block.nil?
+      hosts << host
+    end
+
+    host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>hosts))
+    host_repo
+  end
+
+
+  it 'will allocate and launch a bunch of machines' do
+    env = test_env_with_refstack
     compute_controller = double
     services = Services.new(
-        :host_repo => host_repo,
-        :compute_controller=> compute_controller)
+      :host_repo => host_repo_with_hosts(2),
+      :compute_controller=> compute_controller)
 
-    compute_controller.should_receive(:launch).with(
-      "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
-      "h2" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
-    )
+      compute_controller.should_receive(:launch).with(
+        "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
+        "h2" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+      )
 
-    get_action("launch").call(services, env)
+      get_action("launch").call(services, env)
+  end
 
+  it 'will not allocate machines that are already allocated' do
+    env = test_env_with_refstack
+    compute_controller = double
+    host_repo = host_repo_with_hosts(2) do |host|
+      host.allocated_machines << find("test-refapp-001.mgmt.t.net.local")
+    end
+    services = Services.new(
+      :host_repo => host_repo,
+      :compute_controller=> compute_controller)
 
+      compute_controller.should_receive(:launch).with(
+        "h1" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+      )
+
+      get_action("launch").call(services, env)
   end
 
 end
