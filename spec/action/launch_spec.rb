@@ -40,6 +40,10 @@ describe 'launch' do
       @policies << block
     end
 
+    def set_preference_functions(functions)
+      @preference_functions = functions
+    end
+
     def add_preference_function(&block)
       @preference_functions << block
     end
@@ -62,25 +66,30 @@ describe 'launch' do
     end
   end
 
+  module HostPreference
+
+    def self.least_machines()
+      Proc.new do |host|
+        host.machines.size
+      end
+    end
+
+    def self.alphabetical_fqdn()
+      Proc.new do |host|
+        host.fqdn
+      end
+    end
+
+  end
+
   class Hosts
     attr_accessor :hosts
 
     def initialize(args)
       @hosts = args[:hosts]
-
-      preference_function = Proc.new do |host|
-        host.machines.size
-      end
-
-      alphabetical_function = Proc.new do |host|
-        host.fqdn
-      end
-
       hosts.each do |host|
-        host.add_preference_function(&preference_function)
-        host.add_preference_function(&alphabetical_function)
+        host.set_preference_functions(args[:preference_functions])
       end
-
     end
 
     private
@@ -184,7 +193,12 @@ describe 'launch' do
     find_environment("test")
   end
 
-  def host_repo_with_hosts(n, &block)
+    def standard_preference_functions
+      return [HostPreference.least_machines(), HostPreference.alphabetical_fqdn]
+    end
+
+
+  def host_repo_with_hosts(n, preference_functions=standard_preference_functions, &block)
     host_repo = double
     hosts = []
     n.times do |i|
@@ -193,7 +207,7 @@ describe 'launch' do
       hosts << host
     end
 
-    host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>hosts))
+    host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
     host_repo
   end
 
@@ -232,11 +246,16 @@ describe 'launch' do
   it 'will not allocate to the machine with the highest preference' do
     env = test_env_with_refstack
     compute_controller = double
-    host_repo = host_repo_with_hosts(3) do |host, i|
-      host.add_preference_function do |host|
-        -i
-      end
+
+    chooseh3 = Proc.new do |host|
+        if host.fqdn =~/h3/
+          0
+        else
+          1
+        end
     end
+
+    host_repo = host_repo_with_hosts(3, [chooseh3])
 
     services = Services.new(
       :host_repo => host_repo,
