@@ -40,7 +40,7 @@ describe 'launch' do
       @policies << block
     end
 
-    def set_preference_function(&block)
+    def set_preference_functions(&block)
       @preference_function = block
     end
 
@@ -65,18 +65,9 @@ describe 'launch' do
 
     def initialize(args)
       @hosts = args[:hosts]
-      @next_increment = 0
 
       preference_function = Proc.new do |host|
-
-        -host.machines.size
-
-#        index = (@next_increment % hosts.size)
-#        if hosts.index(host) == index
-#          "1"
-#        else
-#          "0"
-#        end
+        host.machines.size
       end
 
       hosts.each do |host|
@@ -88,6 +79,7 @@ describe 'launch' do
     private
     def find_suitable_host_for(machine)
       candidate_hosts = hosts.reject {|host| !host.can_allocate(machine)}.sort_by {|host| [host.preference(machine), host.fqdn]}
+
       candidate_host = candidate_hosts[0]
       next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
       @next_increment=hosts.index(next_host)
@@ -231,7 +223,7 @@ describe 'launch' do
     compute_controller = double
     host_repo = host_repo_with_hosts(3) do |host, i|
       host.set_preference_function do |host|
-        i
+        -i
       end
     end
 
