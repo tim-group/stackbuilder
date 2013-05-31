@@ -1,5 +1,6 @@
 ### TODO
-###   pull out round robinning thing
+##    use HostRepository in test so that when Hosts are build the prefs can be set
+##    there
 ##    define correct way to add policies and preference algo
 ##
 describe 'launch' do
