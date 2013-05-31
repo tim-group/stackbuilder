@@ -25,10 +25,10 @@ describe 'launch' do
       @fqdn = fqdn
       @allocated_machines = []
       @policies = []
+      @preference_functions = []
     end
 
     def machines
-      # merge allocated and provisionally_allocated
       provisionally_allocated_machines + allocated_machines
     end
 
@@ -40,12 +40,12 @@ describe 'launch' do
       @policies << block
     end
 
-    def set_preference_functions(&block)
-      @preference_function = block
+    def add_preference_function(&block)
+      @preference_functions << block
     end
 
     def has_preference_function?
-      return  !@preference_function.nil?
+      return  @preference_functions.size>0
     end
 
     def can_allocate(machine)
@@ -56,7 +56,9 @@ describe 'launch' do
     end
 
     def preference(machine)
-      @preference_function.call(self)
+      @preference_functions.map do |function|
+        function.call(self)
+      end
     end
   end
 
@@ -70,15 +72,24 @@ describe 'launch' do
         host.machines.size
       end
 
+      alphabetical_function = Proc.new do |host|
+        host.fqdn
+      end
+
       hosts.each do |host|
-        host.set_preference_function(&preference_function) unless host.has_preference_function?
+        host.add_preference_function(&preference_function)
+        host.add_preference_function(&alphabetical_function)
       end
 
     end
 
     private
     def find_suitable_host_for(machine)
-      candidate_hosts = hosts.reject {|host| !host.can_allocate(machine)}.sort_by {|host| [host.preference(machine), host.fqdn]}
+      candidate_hosts = hosts.reject do |host|
+          !host.can_allocate(machine)
+      end.sort_by do |host|
+        host.preference(machine)
+      end
 
       candidate_host = candidate_hosts[0]
       next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
@@ -222,7 +233,7 @@ describe 'launch' do
     env = test_env_with_refstack
     compute_controller = double
     host_repo = host_repo_with_hosts(3) do |host, i|
-      host.set_preference_function do |host|
+      host.add_preference_function do |host|
         -i
       end
     end
