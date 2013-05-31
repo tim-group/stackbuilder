@@ -27,6 +27,17 @@ module Stacks
       environments[name].instance_eval(&block) unless block.nil?
     end
 
+    def find_by_hostname(hostname)
+      node = nil
+      accept do |machine_def|
+        if machine_def.respond_to? :hostname and machine_def.hostname == hostname
+          node = machine_def
+        end
+      end
+      node
+    end
+
+
     def find(fqdn)
       node = nil
       accept do |machine_def|

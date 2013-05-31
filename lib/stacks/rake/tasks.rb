@@ -15,12 +15,19 @@ require 'set'
 require 'rspec'
 require 'compute/controller'
 require 'support/logger'
+require 'host_repository'
+
 include Rake::DSL
 include Support::MCollective
 
 inventory = Stacks::Inventory.new('.')
 environment_name = ENV.fetch('env', 'dev')
 environment = inventory.find_environment(environment_name)
+
+host_repository = HostRepository.new(
+  :machine_repo => inventory,
+  :preference_functions => [],
+  :compute_node_client => Compute::Client.new)
 
 RSpec::Core::Runner.disable_autorun!
 config = RSpec.configuration
@@ -125,6 +132,12 @@ namespace :sbx do
       sbtask :allocate do
         computecontroller = Compute::Controller.new
         pp computecontroller.allocate(machine_def.to_specs)
+      end
+
+
+      desc "a"
+      sbtask :audit_hosts do
+        pp host_repository.find_current
       end
 
       sbtask :audit do

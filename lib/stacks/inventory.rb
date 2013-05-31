@@ -9,8 +9,12 @@ class Stacks::Inventory
     @stacks.instance_eval(IO.read(stack_file), stack_file)
   end
 
-  def find(hostname)
-    return @stacks.find(hostname)
+  def find(fqdn)
+    return @stacks.find(fqdn)
+  end
+
+  def find_by_hostname(hostname)
+    return @stacks.find_by_hostname(hostname)
   end
 
   def find_environment(name)

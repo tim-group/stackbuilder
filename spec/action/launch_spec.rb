@@ -2,37 +2,19 @@
 ##    use HostRepository in test so that when Hosts are build the prefs can be set
 ##    there
 ##    define correct way to add policies and preference algo
+## =>   remove the need for set_preference_functions
+# =>    move files into main source tree
+#
+#     plumbing
 ##
+require 'host_repository'
+
 describe 'launch' do
-  class HostRepository
-    attr_accessor :machine_repo
-    attr_reader :preference_functions
 
-    def initialize(args)
-      @machine_repo = args[:machine_repo]
-      @preference_functions = args[:preference_functions]
-      @compute_node_client = args[:compute_node_client]
-    end
-
-    def find_current
-      result = @compute_node_client.audit()
-      hosts = []
-      result.each do |fqdn, attr|
-        vms = []
-        attr[:active_domains].each do |fqdn|
-          vms << machine_repo.find(fqdn)
-        end
-        host = Host.new(fqdn, :preference_functions => preference_functions)
-        host.allocated_machines = vms
-        hosts << host
-      end
-      Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
-    end
-  end
 
   it 'creates a Hosts object with corresponding Host objects' do
     env = test_env_with_refstack
-    machines = env.flatten.map {|machine| machine.mgmt_fqdn}
+    machines = env.flatten.map {|machine| machine.hostname}
 
     compute_node_client = double
     n = 5
@@ -56,168 +38,6 @@ describe 'launch' do
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)
       host.machines.should eql(env.flatten)
-    end
-  end
-
-  class Host
-    attr_accessor :allocated_machines
-    attr_accessor :provisionally_allocated_machines
-    attr_reader :fqdn
-    attr_reader :preference_functions
-
-    def initialize(fqdn, args = {:preference_functions=>[]})
-      @provisionally_allocated_machines = []
-      @fqdn = fqdn
-      @allocated_machines = []
-      @policies = []
-      @preference_functions = [] #args[:preference_functions]
-    end
-
-    def machines
-      provisionally_allocated_machines + allocated_machines
-    end
-
-    def provisionally_allocate(machine)
-      @provisionally_allocated_machines << machine
-    end
-
-    def add_policy(&block)
-      @policies << block
-    end
-
-    def set_preference_functions(functions)
-      @preference_functions = functions
-    end
-
-    def add_preference_function(&block)
-      @preference_functions << block
-    end
-
-    def has_preference_function?
-      return  @preference_functions.size>0
-    end
-
-    def can_allocate(machine)
-      @policies.each do |policy|
-        return false unless policy.call(self, machine)
-      end
-      return true
-    end
-
-    def preference(machine)
-      @preference_functions.map do |function|
-        function.call(self)
-      end
-    end
-  end
-
-  module HostPreference
-
-    def self.least_machines()
-      Proc.new do |host|
-        host.machines.size
-      end
-    end
-
-    def self.alphabetical_fqdn()
-      Proc.new do |host|
-        host.fqdn
-      end
-    end
-
-  end
-
-  class Hosts
-    attr_accessor :hosts
-
-    def initialize(args)
-      @hosts = args[:hosts]
-      hosts.each do |host|
-        host.set_preference_functions(args[:preference_functions])
-      end
-    end
-
-    private
-    def find_suitable_host_for(machine)
-      candidate_hosts = hosts.reject do |host|
-        !host.can_allocate(machine)
-      end.sort_by do |host|
-        host.preference(machine)
-      end
-
-      candidate_host = candidate_hosts[0]
-      next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
-      @next_increment=hosts.index(next_host)
-      candidate_host
-    end
-
-    def unallocated_machines(machines)
-      allocated_machines = []
-      hosts.each do |host|
-        host.allocated_machines.each do |machine|
-          allocated_machines << machine
-        end
-      end
-
-      return machines - allocated_machines
-    end
-
-    public
-    def allocate(machines)
-      unallocated_machines = unallocated_machines(machines)
-
-      unallocated_machines.each do |machine|
-        host = find_suitable_host_for(machine)
-        host.provisionally_allocate(machine)
-      end
-    end
-
-    def to_unlaunched_specs
-      Hash[@hosts.map do |host|
-        specs = host.provisionally_allocated_machines.map do |machine|
-          machine.to_spec
-        end
-        [host.fqdn, specs]
-      end].reject {|host, specs| specs.size==0}
-    end
-  end
-
-  class Services
-    attr_accessor :host_repo
-    attr_accessor :compute_controller
-
-    def initialize(arguments)
-      @host_repo = arguments[:host_repo]
-      @compute_controller = arguments[:compute_controller]
-    end
-  end
-
-  require 'stacks/namespace'
-
-  module Stacks::Actions
-    attr_accessor :actions
-    def self.extended(object)
-      object.actions = {}
-
-      object.action 'launch' do |services, machine_def|
-        hosts = services.host_repo.find_current()
-        hosts.allocate(machine_def.flatten)
-        specs = hosts.to_unlaunched_specs()
-        services.compute_controller.launch(specs)
-      end
-
-    end
-
-    def self.included(object)
-      self.extended(object)
-    end
-
-    def action(name, &block)
-      @actions = {name=> block}
-    end
-
-    def get_action(name)
-      @actions[name]
     end
   end
 
