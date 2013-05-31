@@ -6,27 +6,71 @@
 describe 'launch' do
   class HostRepository
     attr_accessor :machine_repo
+    attr_reader :preference_functions
+
+    def initialize(args)
+      @machine_repo = args[:machine_repo]
+      @preference_functions = args[:preference_functions]
+      @compute_node_client = args[:compute_node_client]
+    end
 
     def find_current
-      result = audit()
-      result.each.each do |vm|
-        machine_repo.find(vm)
+      result = @compute_node_client.audit()
+      hosts = []
+      result.each do |fqdn, attr|
+        vms = []
+        attr[:active_domains].each do |fqdn|
+          vms << machine_repo.find(fqdn)
+        end
+        host = Host.new(fqdn, :preference_functions => preference_functions)
+        host.allocated_machines = vms
+        hosts << host
       end
-      host = Host.new(:allocated_machines=>nil, :policies=>nil)
+      Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
+    end
+  end
+
+  it 'creates a Hosts object with corresponding Host objects' do
+    env = test_env_with_refstack
+    machines = env.flatten.map {|machine| machine.mgmt_fqdn}
+
+    compute_node_client = double
+    n = 5
+    result = {}
+    n.times do |i|
+      result["h#{i}"] = {
+        :active_domains=>machines
+      }
+    end
+
+    preference_functions = []
+    compute_node_client.stub(:audit).and_return(result)
+
+    host_repo = HostRepository.new(
+      :machine_repo => self,
+      :preference_functions=>preference_functions,
+      :compute_node_client => compute_node_client)
+
+    hosts = host_repo.find_current
+    hosts.hosts.size.should eql(n)
+    hosts.hosts.each do |host|
+      host.preference_functions.should eql(preference_functions)
+      host.machines.should eql(env.flatten)
     end
   end
 
   class Host
     attr_accessor :allocated_machines
     attr_accessor :provisionally_allocated_machines
-    attr_accessor :fqdn
+    attr_reader :fqdn
+    attr_reader :preference_functions
 
-    def initialize(fqdn)
+    def initialize(fqdn, args = {:preference_functions=>[]})
       @provisionally_allocated_machines = []
       @fqdn = fqdn
       @allocated_machines = []
       @policies = []
-      @preference_functions = []
+      @preference_functions = [] #args[:preference_functions]
     end
 
     def machines
@@ -96,7 +140,7 @@ describe 'launch' do
     private
     def find_suitable_host_for(machine)
       candidate_hosts = hosts.reject do |host|
-          !host.can_allocate(machine)
+        !host.can_allocate(machine)
       end.sort_by do |host|
         host.preference(machine)
       end
@@ -194,22 +238,37 @@ describe 'launch' do
     find_environment("test")
   end
 
-    def standard_preference_functions
-      return [HostPreference.least_machines(), HostPreference.alphabetical_fqdn]
-    end
+  def standard_preference_functions
+    return [HostPreference.least_machines(), HostPreference.alphabetical_fqdn]
+  end
 
 
   def host_repo_with_hosts(n, preference_functions=standard_preference_functions, &block)
-    host_repo = double
-    hosts = []
+    compute_node_client = double
+
+    result = {}
     n.times do |i|
-      host = Host.new("h#{i+1}")
-      block.call(host,i) unless block.nil?
-      hosts << host
+      result["h#{i}"] = {
+        :active_vms=>[]
+      }
     end
 
-    host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
-    host_repo
+    compute_node_client.stub(:audit).and_return(result)
+
+    host_repox = HostRepository.new(
+      :preference_functions=>preference_functions,
+      :compute_node_client => compute_node_client)
+
+      host_repo = double
+      hosts = []
+      n.times do |i|
+        host = Host.new("h#{i+1}")
+        block.call(host,i) unless block.nil?
+        hosts << host
+      end
+
+      host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
+      host_repo
   end
 
   it 'will allocate and launch a bunch of machines' do
@@ -249,11 +308,11 @@ describe 'launch' do
     compute_controller = double
 
     chooseh3 = Proc.new do |host|
-        if host.fqdn =~/h3/
-          0
-        else
-          1
-        end
+      if host.fqdn =~/h3/
+        0
+      else
+        1
+      end
     end
 
     host_repo = host_repo_with_hosts(3, [chooseh3])
