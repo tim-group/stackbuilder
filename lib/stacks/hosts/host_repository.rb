@@ -1,4 +1,5 @@
 require 'stacks/hosts/namespace'
+require 'stacks/hosts/hosts'
 
 class Stacks::Hosts::HostRepository
   attr_accessor :machine_repo

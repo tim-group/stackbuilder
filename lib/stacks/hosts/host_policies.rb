@@ -12,4 +12,11 @@ module Stacks::Hosts::HostPolicies
       !member_of_group_exists
     end
   end
+
+  def self.do_not_overallocated_ram_policy
+  end  
+  
+  def self.do_not_overallocated_disk_policy
+  end
+
 end

@@ -13,8 +13,9 @@ module Stacks::Hosts::HostPreference
     end
   end
 
+  def self.most_available_ram()
+  end
 
-  #  enough_ram_policy = Proc.new do |host, machine|
-  #    host.ram - machine.ram >0
-  #  end
+  def self.most_available_disk()
+  end
 end
