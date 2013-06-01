@@ -7,7 +7,13 @@
 #
 #     plumbing
 ##
-require 'host_repository'
+require 'stacks/hosts/host_repository'
+require 'stacks/hosts/hosts'
+require 'stacks/hosts/host_preference'
+
+require 'stacks/core/services'
+require 'stacks/core/actions'
+
 
 describe 'launch' do
 
@@ -90,6 +96,18 @@ describe 'launch' do
       host_repo
   end
 
+  it 'gives me a list of machines that I want to launch but are already launched' do
+    env = test_env_with_refstack
+    hx = Host.new("hx")
+    hx.allocated_machines=env.flatten
+    hosts = Hosts.new(:hosts => [hx])
+
+    hosts.hosts.each do |host|
+      pp host.fqdn
+      pp host.allocated_machines
+    end
+
+  end
 
   it 'will allocate machines to machines in the correct fabric' do
 

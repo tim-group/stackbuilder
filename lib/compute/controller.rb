@@ -77,6 +77,12 @@ class Compute::Controller
     end
   end
 
+  def launch_raw(allocation)
+    allocation.each do |host, machines|
+      pp @compute_node_client.launch(host, machines)
+    end
+  end
+
   def allocate(specs)
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
