@@ -11,7 +11,6 @@ require 'host_repository'
 
 describe 'launch' do
 
-
   it 'creates a Hosts object with corresponding Host objects' do
     env = test_env_with_refstack
     machines = env.flatten.map {|machine| machine.hostname}
@@ -26,14 +25,14 @@ describe 'launch' do
     end
 
     preference_functions = []
-    compute_node_client.stub(:audit).and_return(result)
+    compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repo = HostRepository.new(
       :machine_repo => self,
       :preference_functions=>preference_functions,
       :compute_node_client => compute_node_client)
 
-    hosts = host_repo.find_current
+    hosts = host_repo.find_current("t")
     hosts.hosts.size.should eql(n)
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)
@@ -73,7 +72,7 @@ describe 'launch' do
       }
     end
 
-    compute_node_client.stub(:audit).and_return(result)
+    compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repox = HostRepository.new(
       :preference_functions=>preference_functions,
@@ -89,6 +88,11 @@ describe 'launch' do
 
       host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
       host_repo
+  end
+
+
+  it 'will allocate machines to machines in the correct fabric' do
+
   end
 
   it 'will allocate and launch a bunch of machines' do

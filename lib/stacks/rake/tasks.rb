@@ -134,8 +134,7 @@ namespace :sbx do
         pp computecontroller.allocate(machine_def.to_specs)
       end
 
-
-      desc "a"
+      desc "new hosts model auditing"
       sbtask :audit_hosts do
         pp host_repository.find_current
       end

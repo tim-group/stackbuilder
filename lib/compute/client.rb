@@ -5,10 +5,6 @@ require 'support/mcollective'
 class Compute::Client
   include Support::MCollective
 
-  def audit
-    audit_hosts("local")
-  end
-
   def audit_hosts(fabric)
     hosts = find_hosts(fabric)
 
