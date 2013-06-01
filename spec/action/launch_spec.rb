@@ -47,7 +47,7 @@ describe 'launch' do
 
   before do
     extend Stacks::DSL
-    extend Stacks::Actions
+    extend Stacks::Core::Actions
   end
 
   def test_env_with_refstack
@@ -114,7 +114,7 @@ describe 'launch' do
   it 'will allocate and launch a bunch of machines' do
     env = test_env_with_refstack
     compute_controller = double
-    services = Services.new(
+    services = Stacks::Core::Services.new(
       :host_repo => host_repo_with_hosts(3),
       :compute_controller=> compute_controller)
 
@@ -132,7 +132,7 @@ describe 'launch' do
     host_repo = host_repo_with_hosts(2) do |host,i|
       host.allocated_machines << find("test-refapp-001.mgmt.t.net.local")
     end
-    services = Services.new(
+    services = Stacks::Core::Services.new(
       :host_repo => host_repo,
       :compute_controller=> compute_controller)
 
@@ -157,7 +157,7 @@ describe 'launch' do
 
     host_repo = host_repo_with_hosts(3, [chooseh3])
 
-    services = Services.new(
+    services = Stacks::Core::Services.new(
       :host_repo => host_repo,
       :compute_controller=> compute_controller)
 
@@ -178,7 +178,7 @@ describe 'launch' do
       end
     end
 
-    services = Services.new(
+    services = Stacks::Core::Services.new(
       :host_repo => host_repo,
       :compute_controller=> compute_controller)
 

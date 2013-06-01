@@ -1,6 +1,6 @@
 require 'stacks/core/namespace'
 
-module Stacks::Actions
+module Stacks::Core::Actions
   attr_accessor :actions
   def self.extended(object)
     object.actions = {}
