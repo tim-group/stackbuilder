@@ -1,6 +1,6 @@
 require 'stacks/core/namespace'
 
-class Services
+class Stacks::Core::Services
   attr_accessor :host_repo
   attr_accessor :compute_controller
 
