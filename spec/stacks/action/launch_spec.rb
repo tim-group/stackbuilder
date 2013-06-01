@@ -48,19 +48,19 @@ describe 'launch' do
     compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repox = Stacks::Hosts::HostRepository.new(
-      :preference_functions=>preference_functions,
-      :compute_node_client => compute_node_client)
+    :preference_functions=>preference_functions,
+    :compute_node_client => compute_node_client)
 
-      host_repo = double
-      hosts = []
-      n.times do |i|
-        host = Stacks::Hosts::Host.new("h#{i+1}")
-        block.call(host,i) unless block.nil?
-        hosts << host
-      end
+    host_repo = double
+    hosts = []
+    n.times do |i|
+      host = Stacks::Hosts::Host.new("h#{i+1}")
+      block.call(host,i) unless block.nil?
+      hosts << host
+    end
 
-      host_repo.stub(:find_current).and_return(Stacks::Hosts::Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
-      host_repo
+    host_repo.stub(:find_current).and_return(Stacks::Hosts::Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
+    host_repo
   end
 
   it 'gives me a list of machines that I want to launch but are already launched' do
@@ -68,12 +68,10 @@ describe 'launch' do
     hx = Stacks::Hosts::Host.new("hx")
     hx.allocated_machines=env.flatten
     hosts = Stacks::Hosts::Hosts.new(:hosts => [hx])
-
     hosts.hosts.each do |host|
       pp host.fqdn
       pp host.allocated_machines
     end
-
   end
 
   it 'will allocate machines to machines in the correct fabric' do
@@ -84,15 +82,15 @@ describe 'launch' do
     env = test_env_with_refstack
     compute_controller = double
     services = Stacks::Core::Services.new(
-      :host_repo => host_repo_with_hosts(3),
-      :compute_controller=> compute_controller)
+    :host_repo => host_repo_with_hosts(3),
+    :compute_controller=> compute_controller)
 
-      compute_controller.should_receive(:launch).with(
-        "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
-        "h2" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
-      )
+    compute_controller.should_receive(:launch).with(
+    "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
+    "h2" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+    )
 
-      get_action("launch").call(services, env)
+    get_action("launch").call(services, env)
   end
 
   it 'will not allocate machines that are already allocated' do
@@ -102,14 +100,14 @@ describe 'launch' do
       host.allocated_machines << find("test-refapp-001.mgmt.t.net.local")
     end
     services = Stacks::Core::Services.new(
-      :host_repo => host_repo,
-      :compute_controller=> compute_controller)
+    :host_repo => host_repo,
+    :compute_controller=> compute_controller)
 
-      compute_controller.should_receive(:launch).with(
-        "h1" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
-      )
+    compute_controller.should_receive(:launch).with(
+    "h1" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+    )
 
-      get_action("launch").call(services, env)
+    get_action("launch").call(services, env)
   end
 
   it 'will not allocate to the machine with the highest preference' do
@@ -127,15 +125,15 @@ describe 'launch' do
     host_repo = host_repo_with_hosts(3, [chooseh3])
 
     services = Stacks::Core::Services.new(
-      :host_repo => host_repo,
-      :compute_controller=> compute_controller)
+    :host_repo => host_repo,
+    :compute_controller=> compute_controller)
 
-      compute_controller.should_receive(:launch).with(
-        "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
-          find("test-refapp-002.mgmt.t.net.local").to_spec]
-      )
+    compute_controller.should_receive(:launch).with(
+    "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
+      find("test-refapp-002.mgmt.t.net.local").to_spec]
+    )
 
-      get_action("launch").call(services, env)
+    get_action("launch").call(services, env)
   end
 
   it 'will not allocate to a machine that fails a policy' do
@@ -148,28 +146,15 @@ describe 'launch' do
     end
 
     services = Stacks::Core::Services.new(
-      :host_repo => host_repo,
-      :compute_controller=> compute_controller)
+    :host_repo => host_repo,
+    :compute_controller=> compute_controller)
 
-      compute_controller.should_receive(:launch).with(
-        "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
-        "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
-      )
+    compute_controller.should_receive(:launch).with(
+    "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
+    "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+    )
 
-      get_action("launch").call(services, env)
-  end
-
-
-  ha_policy = Proc.new do |host, machine|
-    host.machines.each do |m|
-      if m.group == machine.group
-        NO
-      end
-    end
-  end
-
-  enough_ram_policy = Proc.new do |host, machine|
-    host.ram - machine.ram >0
+    get_action("launch").call(services, env)
   end
 
 end

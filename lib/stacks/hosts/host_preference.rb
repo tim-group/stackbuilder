@@ -12,4 +12,9 @@ module Stacks::Hosts::HostPreference
       host.fqdn
     end
   end
+
+
+  #  enough_ram_policy = Proc.new do |host, machine|
+  #    host.ram - machine.ram >0
+  #  end
 end
