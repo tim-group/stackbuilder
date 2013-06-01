@@ -1,6 +1,6 @@
 require 'stacks/hosts/namespace'
 
-class Host
+class Stacks::Hosts::Host
   attr_accessor :allocated_machines
   attr_accessor :provisionally_allocated_machines
   attr_reader :fqdn

@@ -18,12 +18,12 @@ class HostRepository
       attr[:active_domains].each do |vm_hostname|
         vms << machine_repo.find_by_hostname(vm_hostname)
       end
-      host = Host.new(fqdn, :preference_functions => preference_functions)
+      host = Stacks::Hosts::Host.new(fqdn, :preference_functions => preference_functions)
       host.allocated_machines = vms
       hosts << host
     end
 
-    Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
+    Stacks::Hosts::Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
   end
 end
 

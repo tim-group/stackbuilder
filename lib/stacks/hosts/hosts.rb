@@ -1,7 +1,7 @@
 require 'stacks/hosts/namespace'
 require 'stacks/hosts/host'
 
-class Hosts
+class Stacks::Hosts::Hosts
   attr_accessor :hosts
   def initialize(args)
     @hosts = args[:hosts]

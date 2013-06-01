@@ -1,6 +1,6 @@
 require 'stacks/hosts/namespace'
 
-module HostPreference
+module Stacks::Hosts::HostPreference
   def self.least_machines()
     Proc.new do |host|
       host.machines.size

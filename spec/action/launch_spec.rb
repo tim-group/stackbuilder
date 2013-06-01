@@ -10,7 +10,6 @@
 require 'stacks/hosts/host_repository'
 require 'stacks/hosts/hosts'
 require 'stacks/hosts/host_preference'
-
 require 'stacks/core/services'
 require 'stacks/core/actions'
 
@@ -64,9 +63,8 @@ describe 'launch' do
   end
 
   def standard_preference_functions
-    return [HostPreference.least_machines(), HostPreference.alphabetical_fqdn]
+    return [Stacks::Hosts::HostPreference.least_machines(), Stacks::Hosts::HostPreference.alphabetical_fqdn]
   end
-
 
   def host_repo_with_hosts(n, preference_functions=standard_preference_functions, &block)
     compute_node_client = double
@@ -87,20 +85,20 @@ describe 'launch' do
       host_repo = double
       hosts = []
       n.times do |i|
-        host = Host.new("h#{i+1}")
+        host = Stacks::Hosts::Host.new("h#{i+1}")
         block.call(host,i) unless block.nil?
         hosts << host
       end
 
-      host_repo.stub(:find_current).and_return(Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
+      host_repo.stub(:find_current).and_return(Stacks::Hosts::Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
       host_repo
   end
 
   it 'gives me a list of machines that I want to launch but are already launched' do
     env = test_env_with_refstack
-    hx = Host.new("hx")
+    hx = Stacks::Hosts::Host.new("hx")
     hx.allocated_machines=env.flatten
-    hosts = Hosts.new(:hosts => [hx])
+    hosts = Stacks::Hosts::Hosts.new(:hosts => [hx])
 
     hosts.hosts.each do |host|
       pp host.fqdn
