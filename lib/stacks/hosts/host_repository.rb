@@ -1,6 +1,6 @@
 require 'stacks/hosts/namespace'
 
-class HostRepository
+class Stacks::Hosts::HostRepository
   attr_accessor :machine_repo
   attr_reader :preference_functions
 

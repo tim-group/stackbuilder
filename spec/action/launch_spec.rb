@@ -13,38 +13,7 @@ require 'stacks/hosts/host_preference'
 require 'stacks/core/services'
 require 'stacks/core/actions'
 
-
 describe 'launch' do
-
-  it 'creates a Hosts object with corresponding Host objects' do
-    env = test_env_with_refstack
-    machines = env.flatten.map {|machine| machine.hostname}
-
-    compute_node_client = double
-    n = 5
-    result = {}
-    n.times do |i|
-      result["h#{i}"] = {
-        :active_domains=>machines
-      }
-    end
-
-    preference_functions = []
-    compute_node_client.stub(:audit_hosts).and_return(result)
-
-    host_repo = HostRepository.new(
-      :machine_repo => self,
-      :preference_functions=>preference_functions,
-      :compute_node_client => compute_node_client)
-
-    hosts = host_repo.find_current("t")
-    hosts.hosts.size.should eql(n)
-    hosts.hosts.each do |host|
-      host.preference_functions.should eql(preference_functions)
-      host.machines.should eql(env.flatten)
-    end
-  end
-
   before do
     extend Stacks::DSL
     extend Stacks::Core::Actions
@@ -78,7 +47,7 @@ describe 'launch' do
 
     compute_node_client.stub(:audit_hosts).and_return(result)
 
-    host_repox = HostRepository.new(
+    host_repox = Stacks::Hosts::HostRepository.new(
       :preference_functions=>preference_functions,
       :compute_node_client => compute_node_client)
 
