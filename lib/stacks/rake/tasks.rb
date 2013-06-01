@@ -136,7 +136,10 @@ namespace :sbx do
 
       desc "new hosts model auditing"
       sbtask :audit_hosts do
-        pp host_repository.find_current
+        hosts = host_repository.find_current("st")
+        hosts.allocate(machine_def.flatten)
+
+        pp hosts.to_unlaunched_specs
       end
 
       sbtask :audit do
