@@ -12,9 +12,14 @@ module Stacks::Core::Actions
       raise "we don't support launching in multiple locations right now" unless fabrics.size==1
 
       hosts = services.host_repo.find_current(fabrics.shift)
+      
       hosts.allocate(machine_def.flatten)
+      
       specs = hosts.to_unlaunched_specs()
-      services.compute_controller.launch_raw(specs)
+      
+      services.compute_controller.launch_raw(specs) do
+        
+      end
     end
   end
 

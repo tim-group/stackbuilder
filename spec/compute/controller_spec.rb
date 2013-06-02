@@ -27,10 +27,10 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "local"
-    }, {
+      }, {
       :hostname => "vm2",
       :fabric => "local"
-    }]
+      }]
 
     localhost = `hostname --fqdn`.chomp
 
@@ -49,13 +49,13 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :fabric => "st"
-    }, {
+      }, {
       :hostname => "vm2",
       :fabric => "st"
-    }, {
+      }, {
       :hostname => "vm3",
       :fabric => "bs"
-    }]
+      }]
 
     allocations = @compute_controller.allocate(specs)
 
@@ -66,15 +66,15 @@ describe Compute::Controller do
   end
 
   it 'doesnt allocate the same machine twice' do
-     @compute_node_client.stub(:audit_hosts).with("st").and_return({
+    @compute_node_client.stub(:audit_hosts).with("st").and_return({
       "st-kvm-001.mgmt.st.net.local" => {
-        :active_domains => []
+      :active_domains => []
       },
       "st-kvm-002.mgmt.st.net.local" => {
-        :active_domains => ["vm0"]
+      :active_domains => ["vm0"]
       },
       "st-kvm-003.mgmt.st.net.local" => {
-         :active_domains => []
+      :active_domains => []
       }
     })
 
@@ -96,24 +96,24 @@ describe Compute::Controller do
   end
 
   it 'allocates by slicing specs' do
-     @compute_node_client.stub(:audit_hosts).with("st").and_return({
+    @compute_node_client.stub(:audit_hosts).with("st").and_return({
       "st-kvm-001.mgmt.st.net.local" => {
-        :active_domains => []
+      :active_domains => []
       },
       "st-kvm-002.mgmt.st.net.local" => {
-        :active_domains => []
+      :active_domains => []
       },
       "st-kvm-003.mgmt.st.net.local" => {
-        :active_domains => []
+      :active_domains => []
       }
     })
 
     @compute_node_client.stub(:audit_hosts).with("bs").and_return({
       "bs-kvm-001.mgmt.bs.net.local" => {
-        :active_domains => []
+      :active_domains => []
       },
       "bs-kvm-002.mgmt.bs.net.local" => {
-        :active_domains => []
+      :active_domains => []
       }
     })
 
@@ -129,7 +129,6 @@ describe Compute::Controller do
     ]
 
     allocations = @compute_controller.allocate(specs)
-
 
     allocations.should eql({
       "st-kvm-001.mgmt.st.net.local" => [specs[0],specs[3]],
@@ -147,7 +146,7 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
     @compute_node_client.should_receive(:launch).with("myhost", specs)
@@ -162,12 +161,12 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    },
-    {
+      },
+      {
       :hostname => "vm2",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
     @compute_node_client.should_receive(:launch).with("myhost", [specs[0]])
@@ -191,7 +190,7 @@ describe Compute::Controller do
     specs = [{
       :hostname => "vm1",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:launch)
 
@@ -206,6 +205,26 @@ describe Compute::Controller do
     allocation.should eql({'vm1' => 'myhost'})
   end
 
+  it 'calls back if any launchraw command failed' do
+    specs = {
+      "myhost" => [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
+      }]}
+
+    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["failed", "o noes"]}]])
+
+    failure = nil
+    @compute_controller.launch_raw(specs) do
+      on :failure do |vm, msg|
+        failure = msg
+      end
+    end
+
+    failure.should eql("o noes")
+  end
+
   it 'calls back if any launch command failed' do
     @compute_node_client.stub(:audit_hosts).and_return({"myhost"=>{}})
 
@@ -213,7 +232,7 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", {"vm1" => ["failed", "o noes"]}]])
 
@@ -234,11 +253,11 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    },{
+      },{
       :hostname => "vm2",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:launch).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
 
@@ -257,11 +276,11 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    },{
+      },{
       :hostname => "vm2",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => ["success", "yay"]}], ["host2", {"vm2" => ["success", "hey"]}]])
 
@@ -280,11 +299,11 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    },{
+      },{
       :hostname => "vm2",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => ["success", "yay"]}]])
 
@@ -303,11 +322,11 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    },{
+      },{
       :hostname => "vm2",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:clean).and_return([["host1", {"vm1" => ["failed", "o noes"]}], ["host2", {"vm2" => ["success", "yay"]}]])
 
@@ -326,11 +345,11 @@ describe Compute::Controller do
       :hostname => "vm1",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    },{
+      },{
       :hostname => "vm2",
       :fabric => "st",
       :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
-    }]
+      }]
 
     @compute_node_client.stub(:clean).and_return([["myhost", {"vm1" => "success", "vm2" => "failed"}]])
 

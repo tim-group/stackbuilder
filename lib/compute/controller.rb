@@ -69,6 +69,7 @@ class Compute::Controller
     end
   end
 
+  # DEP
   def audit(specs)
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
@@ -77,12 +78,20 @@ class Compute::Controller
     end
   end
 
-  def launch_raw(allocation)
-    allocation.each do |host, machines|
-      pp @compute_node_client.launch(host, machines)
+  def launch_raw(allocation, &block)
+    grouped_results = allocation.map do |host, specs|
+      @compute_node_client.launch(host, specs)
     end
+
+    all_specs = allocation.map do |host, specs|
+      specs
+    end.flatten
+    
+    callback = Support::Callback.new(&block)
+    dispatch_results(all_specs, grouped_results, callback)
   end
 
+  # DEP
   def allocate(specs)
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
@@ -119,6 +128,10 @@ class Compute::Controller
     end.flatten_hashes
 
     all_specs.each do |spec|
+      unless spec.is_a?(Hash)
+        pp spec
+      end
+      
       vm = spec[:hostname]
       result = flattened_results[vm]
       if result.nil?
@@ -189,6 +202,4 @@ class Compute::Controller
 
     dispatch_results(all_specs, grouped_results, callback)
   end
-
 end
-
