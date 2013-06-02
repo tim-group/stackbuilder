@@ -1,12 +1,3 @@
-### TODO
-##    use HostRepository in test so that when Hosts are build the prefs can be set
-##    there
-##    define correct way to add policies and preference algo
-## =>   remove the need for set_preference_functions
-# =>    move files into main source tree
-#
-#     plumbing
-##
 require 'stacks/hosts/host_repository'
 require 'stacks/hosts/hosts'
 require 'stacks/hosts/host_preference'
@@ -33,8 +24,8 @@ describe 'launch' do
 
   def standard_preference_functions
     return [
-        Stacks::Hosts::HostPreference.least_machines(), 
-        Stacks::Hosts::HostPreference.alphabetical_fqdn]
+      Stacks::Hosts::HostPreference.least_machines(),
+      Stacks::Hosts::HostPreference.alphabetical_fqdn]
   end
 
   def host_repo_with_hosts(n, preference_functions=standard_preference_functions, &block)
@@ -65,14 +56,28 @@ describe 'launch' do
     host_repo
   end
 
+  it 'gives me a list of machines that are already launched' do
+    env = test_env_with_refstack
+    hx = Stacks::Hosts::Host.new("hx")
+    hx.allocated_machines=env.flatten
+    hosts = Stacks::Hosts::Hosts.new(:hosts => [hx])
+
+    Hash[hosts.allocated_machines(env.flatten).map do |machine, host|
+      [ machine.mgmt_fqdn,host.fqdn]
+    end].should eql({
+      "test-refapp-001.mgmt.t.net.local" => "hx",
+      "test-refapp-002.mgmt.t.net.local" => "hx"
+    })
+  end
+
   it 'gives me a list of machines that I want to launch but are already launched' do
     env = test_env_with_refstack
     hx = Stacks::Hosts::Host.new("hx")
     hx.allocated_machines=env.flatten
     hosts = Stacks::Hosts::Hosts.new(:hosts => [hx])
     hosts.hosts.each do |host|
-      pp host.fqdn
-      pp host.allocated_machines
+      #      pp host.fqdn
+      #      pp host.allocated_machines
     end
   end
 

@@ -31,12 +31,26 @@ class Stacks::Hosts::Hosts
         allocated_machines << machine
       end
     end
-
+    
     return machines - allocated_machines
   end
 
   public
 
+  def allocated_machines(machines)
+    
+    hash = []
+    
+    hosts.map do |host|
+      intersection =  host.allocated_machines.to_set & machines.to_set
+      intersection.map do |machine|
+        hash << [machine, host]
+      end
+    end
+    
+    Hash[hash]
+  end
+  
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
 
