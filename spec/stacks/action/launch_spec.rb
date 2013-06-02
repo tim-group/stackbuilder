@@ -32,7 +32,9 @@ describe 'launch' do
   end
 
   def standard_preference_functions
-    return [Stacks::Hosts::HostPreference.least_machines(), Stacks::Hosts::HostPreference.alphabetical_fqdn]
+    return [
+        Stacks::Hosts::HostPreference.least_machines(), 
+        Stacks::Hosts::HostPreference.alphabetical_fqdn]
   end
 
   def host_repo_with_hosts(n, preference_functions=standard_preference_functions, &block)
@@ -85,7 +87,7 @@ describe 'launch' do
     :host_repo => host_repo_with_hosts(3),
     :compute_controller=> compute_controller)
 
-    compute_controller.should_receive(:launch).with(
+    compute_controller.should_receive(:launch_raw).with(
     "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
     "h2" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
@@ -103,7 +105,7 @@ describe 'launch' do
     :host_repo => host_repo,
     :compute_controller=> compute_controller)
 
-    compute_controller.should_receive(:launch).with(
+    compute_controller.should_receive(:launch_raw).with(
     "h1" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
 
@@ -128,7 +130,7 @@ describe 'launch' do
     :host_repo => host_repo,
     :compute_controller=> compute_controller)
 
-    compute_controller.should_receive(:launch).with(
+    compute_controller.should_receive(:launch_raw).with(
     "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
       find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
@@ -149,7 +151,7 @@ describe 'launch' do
     :host_repo => host_repo,
     :compute_controller=> compute_controller)
 
-    compute_controller.should_receive(:launch).with(
+    compute_controller.should_receive(:launch_raw).with(
     "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
     "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
