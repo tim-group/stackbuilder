@@ -42,7 +42,7 @@ class Stacks::Factory
 
   def services()
     @services ||= Stacks::Core::Services.new(
-      :machine_repo=>inventory,
+      :compute_controller=>compute_controller,
       :host_repo =>host_repository
     )
   end

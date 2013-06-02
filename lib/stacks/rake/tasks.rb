@@ -17,10 +17,13 @@ require 'rspec'
 require 'compute/controller'
 require 'support/logger'
 require 'stacks/factory'
+require 'stacks/core/actions'
+
 factory = Stacks::Factory.new
 
 include Rake::DSL
 include Support::MCollective
+extend Stacks::Core::Actions
 
 environment_name = ENV.fetch('env', 'dev')
 environment = factory.inventory.find_environment(environment_name)
@@ -130,11 +133,14 @@ namespace :sbx do
         pp computecontroller.allocate(machine_def.to_specs)
       end
 
+      sbtask :launch2 do
+        get_action("launch").call(factory.services, machine_def)
+      end
+      
       desc "new hosts model auditing"
       sbtask :audit_hosts do
         hosts = factory.host_repository.find_current("st")
         hosts.allocate(machine_def.flatten)
-
         hosts.hosts.each do |host|
           pp host.fqdn
           host.allocated_machines.each do |machine|
@@ -143,8 +149,6 @@ namespace :sbx do
             end
           end
         end
-
-        factory.compute_controller.launch_raw(hosts.to_unlaunched_specs)
       end
 
       sbtask :audit do
