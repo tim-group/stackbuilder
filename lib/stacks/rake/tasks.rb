@@ -18,7 +18,7 @@ require 'compute/controller'
 require 'stacks/factory'
 require 'stacks/core/actions'
 
-@factory = Stacks::Factory.new
+@@factory = @factory = Stacks::Factory.new
 
 include Rake::DSL
 include Support::MCollective
@@ -71,7 +71,7 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #
 
 def logger
-  @factory.logger
+  @@factory.logger
 end
   
 def sbtask(name, &block)
@@ -137,7 +137,8 @@ namespace :sbx do
         pp computecontroller.allocate(machine_def.to_specs)
       end
 
-      sbtask :launch2 do
+      desc "launch these machines"
+      sbtask :launch do
         get_action("launch").call(@factory.services, machine_def)
       end
 
@@ -183,31 +184,6 @@ namespace :sbx do
       sbtask :enable_notify do
         computecontroller = Compute::Controller.new
         computecontroller.enable_notify(machine_def.to_specs)
-      end
-
-      desc "launch these machines"
-      sbtask :launch do
-        computecontroller = Compute::Controller.new
-        computecontroller.launch(machine_def.to_specs) do
-          on :already_active do |vm|
-            logger.info "#{vm} is already running"
-          end
-          on :allocated do |vm, host|
-            logger.info "#{vm} allocated to #{host}"
-          end
-          on :success do |vm, msg|
-            logger.info "#{vm} launched successfully"
-          end
-          on :failure do |vm, msg|
-            logger.error "#{vm} failed to launch: #{msg}"
-          end
-          on :unaccounted do |vm|
-            logger.error "#{vm} was unaccounted for"
-          end
-          has :failure do
-            fail "some machines failed to launch"
-          end
-        end
       end
 
       desc "allocate IPs for these virtual services"
