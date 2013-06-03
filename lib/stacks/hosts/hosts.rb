@@ -19,8 +19,11 @@ class Stacks::Hosts::Hosts
     end
 
     candidate_host = candidate_hosts[0]
+    raise "an allocation violates a policy" if candidate_hosts.size==0
+
     next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
     @next_increment=hosts.index(next_host)
+    
     candidate_host
   end
 

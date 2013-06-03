@@ -10,6 +10,7 @@ require 'compute/controller'
 require 'support/logger'
 require 'stacks/hosts/host_repository'
 require 'stacks/hosts/host_preference'
+require 'stacks/hosts/host_policies'
 require 'stacks/core/services'
 require 'stacks/namespace'
 
@@ -54,6 +55,12 @@ class Stacks::Factory
     @inventory ||= Stacks::Inventory.new('.')
   end
 
+  def policies()
+    @policies ||= [
+      Stacks::Hosts::HostPolicies.ha_group_policy
+    ]
+  end
+  
   def preference_functions()
     @preference_functions ||= [
       Stacks::Hosts::HostPreference.least_machines(),
@@ -71,16 +78,17 @@ class Stacks::Factory
 
   def host_repository()
     @host_repository ||= Stacks::Hosts::HostRepository.new(
-    :machine_repo => inventory,
-    :preference_functions=>preference_functions,
-    :compute_node_client => compute_node_client)
+      :machine_repo => inventory,
+      :preference_functions=>preference_functions,
+      :policies => policies,
+      :compute_node_client => compute_node_client)
   end
 
   def services()
     @services ||= Stacks::Core::Services.new(
-    :compute_controller=>compute_controller,
-    :host_repo =>host_repository,
-    :logger => logger
+      :compute_controller=>compute_controller,
+      :host_repo =>host_repository,
+      :logger => logger
     )
   end
 end

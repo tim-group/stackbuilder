@@ -167,4 +167,22 @@ describe 'launch' do
     get_action("launch").call(services, env)
   end
 
+  it 'blows up when no machines meet the policy' do
+    env = test_env_with_refstack
+    compute_controller = double
+    host_repo = host_repo_with_hosts(3) do |host, i|
+      host.add_policy do |host, machine|
+        host.fqdn =~ /not here/
+      end
+    end
+
+    services = Stacks::Core::Services.new(
+    :host_repo => host_repo,
+    :compute_controller=> compute_controller)
+
+    expect {
+      get_action("launch").call(services, env)
+    }.to raise_error("an allocation violates a policy")
+  end
+
 end

@@ -5,12 +5,13 @@ class Stacks::Hosts::Host
   attr_accessor :provisionally_allocated_machines
   attr_reader :fqdn
   attr_reader :preference_functions
-
-  def initialize(fqdn, args = {:preference_functions=>[]})
+  attr_accessor :policies
+  
+  def initialize(fqdn, args = {:preference_functions=>[], :policies=>[]})
     @provisionally_allocated_machines = []
     @fqdn = fqdn
     @allocated_machines = []
-    @policies = []
+    @policies = args[:policies]
     @preference_functions = [] #args[:preference_functions]
   end
 

@@ -8,6 +8,6 @@ class Stacks::Core::Services
   def initialize(arguments)
     @host_repo = arguments[:host_repo]
     @compute_controller = arguments[:compute_controller]
-    @logger = arguments[:logger]
+    @logger = arguments[:logger] || Logger.new(STDOUT)
   end
 end
