@@ -15,18 +15,17 @@ require 'ci/reporter/rspec'
 require 'set'
 require 'rspec'
 require 'compute/controller'
-require 'support/logger'
 require 'stacks/factory'
 require 'stacks/core/actions'
 
-factory = Stacks::Factory.new
+@factory = Stacks::Factory.new
 
 include Rake::DSL
 include Support::MCollective
 extend Stacks::Core::Actions
 
 environment_name = ENV.fetch('env', 'dev')
-environment = factory.inventory.find_environment(environment_name)
+environment = @factory.inventory.find_environment(environment_name)
 
 RSpec::Core::Runner.disable_autorun!
 config = RSpec.configuration
@@ -71,6 +70,10 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #      clean     dependson [destroy_vms, clean_certs]
 #
 
+def logger
+  @factory.logger
+end
+  
 def sbtask(name, &block)
   task name do |task|
     logger.start task.name
@@ -80,6 +83,7 @@ def sbtask(name, &block)
       logger.failed(name)
       raise e
     end
+
     logger.passed(name)
   end
 end
@@ -134,11 +138,11 @@ namespace :sbx do
       end
 
       sbtask :launch2 do
-        get_action("launch").call(factory.services, machine_def)
+        get_action("launch").call(@factory.services, machine_def)
       end
 
       sbtask :blah do
-        hosts = factory.host_repository.find_current("st")
+        hosts = @factory.host_repository.find_current("st")
         hosts.allocated_machines(machine_def.flatten).map do |machine, host|
           logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
         end
@@ -146,7 +150,7 @@ namespace :sbx do
 
       desc "new hosts model auditing"
       sbtask :audit_hosts do
-        hosts = factory.host_repository.find_current("st")
+        hosts = @factory.host_repository.find_current("st")
         hosts.allocate(machine_def.flatten)
         hosts.hosts.each do |host|
           pp host.fqdn
@@ -382,8 +386,8 @@ namespace :sbx do
             if child_machine_def.kind_of? Stacks::AppService
               app_service = child_machine_def
               factory = Orc::Factory.new(
-              :application=>app_service.application,
-              :environment=>app_service.environment.name
+                :application=>app_service.application,
+                :environment=>app_service.environment.name
               )
               factory.cmdb_git.update
               factory.engine.resolve()
