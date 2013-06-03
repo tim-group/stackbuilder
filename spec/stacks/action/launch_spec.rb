@@ -70,15 +70,18 @@ describe 'launch' do
     })
   end
 
-  it 'gives me a list of machines that I want to launch but are already launched' do
+  it 'gives me a list of machines that are going to be launched' do
     env = test_env_with_refstack
     hx = Stacks::Hosts::Host.new("hx")
-    hx.allocated_machines=env.flatten
-    hosts = Stacks::Hosts::Hosts.new(:hosts => [hx])
-    hosts.hosts.each do |host|
-      #      pp host.fqdn
-      #      pp host.allocated_machines
-    end
+    hosts = Stacks::Hosts::Hosts.new(:hosts => [hx], :preference_functions=>[])
+
+    hosts.allocate(env.flatten)
+    Hash[hosts.new_machine_allocation().map do |machine, host|
+      [ machine.mgmt_fqdn,host.fqdn]
+    end].should eql({
+      "test-refapp-001.mgmt.t.net.local" => "hx",
+      "test-refapp-002.mgmt.t.net.local" => "hx"
+    })
   end
 
   it 'will allocate machines to machines in the correct fabric' do

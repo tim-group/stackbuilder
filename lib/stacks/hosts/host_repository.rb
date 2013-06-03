@@ -12,6 +12,8 @@ class Stacks::Hosts::HostRepository
   end
 
   def find_current(fabric)
+    
+    #### if local - remove preference and policies
     result = @compute_node_client.audit_hosts(fabric)
     hosts = []
     result.each do |fqdn, attr|

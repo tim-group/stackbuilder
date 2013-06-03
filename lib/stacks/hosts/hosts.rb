@@ -37,10 +37,19 @@ class Stacks::Hosts::Hosts
 
   public
 
-  def allocated_machines(machines)
-    
+  def new_machine_allocation()
     hash = []
+    hosts.map do |host|
+      host.provisionally_allocated_machines.each do |machine|
+        hash << [machine, host]
+      end
+    end
     
+    Hash[hash]
+  end
+  
+  def allocated_machines(machines)
+    hash = []
     hosts.map do |host|
       intersection =  host.allocated_machines.to_set & machines.to_set
       intersection.map do |machine|
@@ -53,7 +62,6 @@ class Stacks::Hosts::Hosts
   
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
-
     unallocated_machines.each do |machine|
       host = find_suitable_host_for(machine)
       host.provisionally_allocate(machine)
