@@ -57,7 +57,7 @@ class Stacks::Factory
 
   def policies()
     @policies ||= [
-#      Stacks::Hosts::HostPolicies.ha_group_policy
+      Stacks::Hosts::HostPolicies.ha_group
     ]
   end
 
