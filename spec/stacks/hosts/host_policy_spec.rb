@@ -23,7 +23,7 @@ describe Stacks::Hosts::HostPolicies do
     env = test_env_with_refstack
     machines = env.flatten
     h1 = Stacks::Hosts::Host.new("h1")
-    Stacks::Hosts::HostPolicies.ha_group_policy().call(h1, machines[1]).should eql(true)
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1]).should eql(true)
   end
 
   it 'rejects allocations that allocate >1 machine of the same group to the same host' do
@@ -31,7 +31,18 @@ describe Stacks::Hosts::HostPolicies do
     machines = env.flatten
     h1 = Stacks::Hosts::Host.new("h1")
     h1.allocated_machines << machines[0]
-    Stacks::Hosts::HostPolicies.ha_group_policy().call(h1, machines[1]).should eql(false)
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1]).should eql(false)
   end
 
+  it 'allows allocation if the availability group is unset' do
+    machine = double
+    running_machine= double
+    
+    machine.stub(:availability_group).and_return(nil)
+    running_machine.stub(:availability_group).and_return(nil)
+
+    h1 = Stacks::Hosts::Host.new("h1")
+    h1.allocated_machines << running_machine
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machine).should eql(true)
+  end
 end
