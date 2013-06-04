@@ -12,7 +12,6 @@ class Stacks::AppServer < Stacks::MachineDef
 
   def bind_to(environment)
     super(environment)
-    @availability_group = environment.name + "-" + virtual_service.name
   end
 
   def vip_fqdn

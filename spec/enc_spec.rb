@@ -506,4 +506,20 @@ describe Stacks::DSL do
     find_environment("e1").flatten.map { |m| m.name }.should eql(["e1-lb-001","e1-lb-002","e1-nat-001","e1-nat-002"])
   end
 
+  it 'things that are part of virtual services are given availability groups' do
+    stack "mystack" do
+      virtual_appserver "x"
+      virtual_proxyserver "px"
+      virtual_sftpserver "sx"
+    end
+
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "mystack"
+    end
+
+    find_environment("e1")["mystack"]["x"]["x-001"].availability_group.should eql("e1-x")
+    find_environment("e1")["mystack"]["px"]["px-001"].availability_group.should eql("e1-px")
+    find_environment("e1")["mystack"]["sx"]["sx-001"].availability_group.should eql("e1-sx")
+  end
+
 end

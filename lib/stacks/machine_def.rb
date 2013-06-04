@@ -2,7 +2,7 @@ require 'stacks/namespace'
 
 class Stacks::MachineDef
   attr_reader :hostname, :domain, :environment
-  attr_reader :availability_group
+  attr_accessor :availability_group
   attr_reader :fabric
   attr_accessor :ram
 

@@ -30,7 +30,6 @@ class Stacks::Stack
     machineset_with(name, [Stacks::AppService], Stacks::AppServer, &block);
   end
 
-
   def virtual_proxyserver(name, &block)
     machineset_with(name, [Stacks::VirtualService, Stacks::XProxyService], Stacks::ProxyServer, &block)
   end

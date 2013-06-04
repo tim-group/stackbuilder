@@ -46,6 +46,7 @@ module Stacks::MachineGroup
         server.group = groups[i%groups.size]
       end
       server.ram   = @ram unless @ram.nil?
+      server.availability_group = environment.name + "-" + self.name
     end
   end
 
