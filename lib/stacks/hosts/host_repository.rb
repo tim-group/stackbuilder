@@ -22,9 +22,9 @@ class Stacks::Hosts::HostRepository
         vm_object = machine_repo.find_by_hostname(vm_hostname)
         vms << vm_object unless vm_object.nil?
       end
-      
-      policies = [] if fabric == "local"
-      
+
+      @policies = [] if fabric == "local"
+
       host = Stacks::Hosts::Host.new(fqdn,
         :preference_functions => preference_functions,
         :policies => policies)

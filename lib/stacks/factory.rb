@@ -57,10 +57,10 @@ class Stacks::Factory
 
   def policies()
     @policies ||= [
-      Stacks::Hosts::HostPolicies.ha_group_policy
+#      Stacks::Hosts::HostPolicies.ha_group_policy
     ]
   end
-  
+
   def preference_functions()
     @preference_functions ||= [
       Stacks::Hosts::HostPreference.least_machines(),
