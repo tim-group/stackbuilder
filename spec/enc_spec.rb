@@ -271,6 +271,21 @@ describe Stacks::DSL do
     find("no-exist").should eql(nil)
   end
 
+  it 'can build elastics search clusters' do
+    stack "es" do
+      elasticsearch do
+      end
+    end
+
+    env "eg", :primary_site=>"st", :secondary_site=>"bs" do
+      instantiate_stack "es"
+    end
+
+    eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
+    eg_es.to_enc.should eql({ 'role::elasticsearch_node' => {}})
+  end
+
+
   it 'can build rabbitmq servers' do
     stack "rabbit" do
       virtual_rabbitmqserver do

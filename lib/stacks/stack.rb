@@ -10,6 +10,7 @@ require 'stacks/proxy_server'
 require 'stacks/virtual_sftp_service'
 require 'stacks/virtual_rabbitmq_service'
 require 'stacks/ci_slave'
+require 'stacks/elasticsearch_node'
 require 'stacks/puppetmaster'
 
 class Stacks::Stack
@@ -56,6 +57,10 @@ class Stacks::Stack
 
   def ci_slave(&block)
     machineset_with('jenkinsslave', [], Stacks::CiSlave, &block)
+  end
+
+  def elasticsearch(&block)
+    machineset_with('elasticsearch', [], Stacks::ElasticSearchNode, &block)
   end
 
   def [](key)
