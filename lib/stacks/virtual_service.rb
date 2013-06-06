@@ -68,21 +68,26 @@ module Stacks::VirtualService
   end
 
   def to_loadbalancer_config
+    least_servers_in_a_group = self.realservers.size
     grouped_realservers = self.realservers.group_by do |realserver|
       realserver.group
     end
-
+    num_servers_in_group = {}
     realservers = Hash[grouped_realservers.map do |group, realservers|
+      least_servers_in_a_group = realservers.size unless realservers.size > least_servers_in_a_group
       realserver_fqdns = realservers.map do |realserver|
         realserver.prod_fqdn
       end.sort
       [group, realserver_fqdns]
     end]
 
+    monitor_warn = least_servers_in_a_group == 1 ? 0 : 1
+
     [self.vip_fqdn, {
       'env' => self.environment.name,
       'app' => self.application,
-      'realservers' => realservers
+      'realservers' => realservers,
+      'monitor_warn' => monitor_warn
     }]
 
   end

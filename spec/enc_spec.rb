@@ -55,26 +55,49 @@ describe Stacks::DSL do
     find("rah-lb-002.mgmt.st.net.local").should_not be_nil
   end
 
-  it 'generates load balancer enc data for a sub environment' do
+  it 'generates load balancer enc data with the correct warn_level based least number of servers in a group'  do
     stack "fabric" do
       loadbalancer
     end
 
-    stack "blah" do
-      virtual_appserver "appx"
-      virtual_appserver "app2x"
+    stack "twoapp" do
+      virtual_appserver "twoapp"
+
+    end
+
+    stack "oneapp" do
+      virtual_appserver "oneapp" do
+        self.groups = ['blue', 'green']
+      end
     end
 
     env "st", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "fabric"
-      env "ci" do
-        instantiate_stack "fabric"
-        instantiate_stack "blah"
-      end
+      instantiate_stack "twoapp"
+      instantiate_stack "oneapp"
     end
-
-    loadbalancer = find("ci-lb-001.mgmt.st.net.local")
-    loadbalancer.virtual_services(Stacks::AbstractVirtualService).size.should eql(2)
+    loadbalancer = find("st-lb-001.mgmt.st.net.local")
+    loadbalancer.to_enc.should eql(
+      {"role::loadbalancer"=>
+        {"virtual_router_id"=>1,
+         "virtual_servers"=>
+          {"st-twoapp-vip.st.net.local"=>
+            {"realservers"=>
+              {"blue"=>["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]},
+             "env"=>"st",
+             "app"=>nil,
+             "monitor_warn"=>1},
+           "st-oneapp-vip.st.net.local"=>
+            {"realservers"=>
+              {"green"=>["st-oneapp-002.st.net.local"],
+               "blue"=>["st-oneapp-001.st.net.local"]},
+             "env"=>"st",
+             "app"=>nil,
+             "monitor_warn"=>0}
+         }
+        }
+      }
+    )
   end
 
   it 'can generate the load balancer spec for a sub environment' do
@@ -126,6 +149,7 @@ describe Stacks::DSL do
 
               'env' => 'ci2',
               'app' => 'JavaHttpRef',
+              'monitor_warn'=>0,
               'realservers' => {
                 'blue' => [
                   'ci2-appx-001.st.net.local'
@@ -138,6 +162,7 @@ describe Stacks::DSL do
             'ci2-app2x-vip.st.net.local' => {
               'env' => 'ci2',
               'app' => 'MySuperCoolApp',
+              'monitor_warn'=>1,
               'realservers' => {
                 'blue' => [
                   'ci2-app2x-001.st.net.local',
@@ -172,6 +197,7 @@ describe Stacks::DSL do
         'virtual_router_id' => 1,
         'virtual_servers' => {
           'ci-appx-vip.st.net.local' => {
+            'monitor_warn'=>0,
             'env' => 'ci',
             'app' => 'JavaHttpRef',
             'realservers' => {
@@ -184,6 +210,7 @@ describe Stacks::DSL do
             }
           },
           'ci-app2x-vip.st.net.local' => {
+            'monitor_warn'=>1,
             'env' => 'ci',
             'app' => 'MySuperCoolApp',
             'realservers' => {
