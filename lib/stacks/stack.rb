@@ -11,6 +11,7 @@ require 'stacks/virtual_sftp_service'
 require 'stacks/virtual_rabbitmq_service'
 require 'stacks/ci_slave'
 require 'stacks/elasticsearch_node'
+require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/puppetmaster'
 
 class Stacks::Stack
@@ -61,6 +62,10 @@ class Stacks::Stack
 
   def elasticsearch(&block)
     machineset_with('elasticsearch', [], Stacks::ElasticSearchNode, &block)
+  end
+
+  def rate_limited_forward_proxy(name='rate_limited_forward_proxy', &block)
+    machineset_with(name, [], Stacks::RateLimitedForwardProxyServer, &block)
   end
 
   def [](key)

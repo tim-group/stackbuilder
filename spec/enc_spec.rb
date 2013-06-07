@@ -548,7 +548,7 @@ describe Stacks::DSL do
     find_environment("e1").flatten.map { |m| m.name }.should eql(["e1-lb-001","e1-lb-002","e1-nat-001","e1-nat-002"])
   end
 
-  xit 'can build forward proxy servers' do
+  it 'can build forward proxy servers' do
     stack "mystack" do
       rate_limited_forward_proxy 's3proxy'
     end
@@ -557,9 +557,11 @@ describe Stacks::DSL do
       instantiate_stack "mystack"
     end
 
-    find("e1-s3proxy.mgmt.space.net.local").to_enc.should eql({
-      'rate_limited_forward_proxy' => {}
+    find("e1-s3proxy-001.mgmt.space.net.local").to_enc.should eql({
+      'role::rate_limited_forward_proxy' => {}
     })
+
+    find("e1-s3proxy-001.mgmt.space.net.local").networks.should eql ([:mgmt, :prod])
   end
 
   it 'things that are part of virtual services are given availability groups' do

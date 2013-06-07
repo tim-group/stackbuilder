@@ -3,7 +3,7 @@ require 'stacks/namespace'
 class Stacks::MachineDef
   attr_reader :hostname, :domain, :environment
   attr_accessor :availability_group
-  attr_reader :fabric
+  attr_reader :fabric, :networks
   attr_accessor :ram
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
