@@ -60,8 +60,8 @@ class Stacks::Stack
     machineset_with('jenkinsslave', [], Stacks::CiSlave, &block)
   end
 
-  def elasticsearch(&block)
-    machineset_with('elasticsearch', [], Stacks::ElasticSearchNode, &block)
+  def elasticsearch(name = 'elasticsearch', &block)
+    machineset_with(name, [], Stacks::ElasticSearchNode, &block)
   end
 
   def rate_limited_forward_proxy(name='rate_limited_forward_proxy', &block)

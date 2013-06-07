@@ -38,6 +38,10 @@ module Stacks::MachineGroup
     end
   end
 
+  def availability_group(environment)
+    environment.name + "-" + self.name
+  end
+
   def instantiate_machines(environment)
     @instances.times do |i|
       index = sprintf("%03d",i+1)
@@ -46,7 +50,7 @@ module Stacks::MachineGroup
         server.group = groups[i%groups.size]
       end
       server.ram   = @ram unless @ram.nil?
-      server.availability_group = environment.name + "-" + self.name
+      server.availability_group = availability_group(environment)
     end
   end
 
