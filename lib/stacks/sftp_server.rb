@@ -8,10 +8,6 @@ class Stacks::SftpServer < Stacks::MachineDef
     @virtual_service = virtual_service
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def vip_fqdn
     return @virtual_service.vip_fqdn
   end
@@ -20,6 +16,7 @@ class Stacks::SftpServer < Stacks::MachineDef
     {
       'role::sftpserver' => {
         'vip_fqdn' => vip_fqdn,
+        'env' => environment,
       }
     }
   end
