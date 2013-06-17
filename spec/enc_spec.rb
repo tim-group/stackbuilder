@@ -309,7 +309,7 @@ describe Stacks::DSL do
     end
 
     eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
-    eg_es.to_enc.should eql({ 'role::elasticsearch_node' => {}})
+    eg_es.to_enc.should eql({ 'role::elasticsearch_node' => { "cluster_nodes"=>["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"]}})
   end
 
 

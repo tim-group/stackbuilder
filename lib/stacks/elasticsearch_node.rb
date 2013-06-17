@@ -1,9 +1,12 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
+require 'pp'
 
 class Stacks::ElasticSearchNode < Stacks::MachineDef
+  attr_reader :machine_set
   def initialize(server_group, index, &block)
-    super(server_group.name + "-" + index, [:mgmt])
+    @machine_set = server_group
+    super(server_group.name + "-" + index, [:prod, :mgmt])
     self
   end
 
@@ -14,7 +17,7 @@ class Stacks::ElasticSearchNode < Stacks::MachineDef
   def to_enc
     {
       'role::elasticsearch_node' => {
-        'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns
+        'cluster_nodes' =>  machine_set.definitions.values.map { |machinedef| machinedef.prod_fqdn }
       }
     }
   end
