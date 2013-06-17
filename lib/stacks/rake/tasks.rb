@@ -73,7 +73,7 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 def logger
   @@factory.logger
 end
-  
+
 def sbtask(name, &block)
   task name do |task|
     logger.start task.name
@@ -389,3 +389,4 @@ namespace :sbx do
     end
   end
 end
+
