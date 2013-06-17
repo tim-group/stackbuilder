@@ -13,7 +13,9 @@ class Stacks::ElasticSearchNode < Stacks::MachineDef
 
   def to_enc
     {
-      'role::elasticsearch_node' => {}
+      'role::elasticsearch_node' => {
+        'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns
+      }
     }
   end
 end
