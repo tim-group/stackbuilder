@@ -1,6 +1,5 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
-require 'pp'
 
 class Stacks::ElasticSearchNode < Stacks::MachineDef
   attr_reader :machine_set
