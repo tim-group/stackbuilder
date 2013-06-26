@@ -114,6 +114,7 @@ module Support::MCollectivePuppet
   def result_for_summary(data)
     # the agent returns malformed data in a short window between a run finishing and the state file being updated, so treat that as not yet stopped
     return "stopping" if data.nil?
+    return "stopping" if data[:summary].nil?
     resources = data[:summary]["resources"]
     return "stopping" if resources.nil?
     failed = resources["failed"]

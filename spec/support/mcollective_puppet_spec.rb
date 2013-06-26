@@ -218,7 +218,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm1.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
