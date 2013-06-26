@@ -31,7 +31,7 @@ describe Support::MCollectivePuppet do
     @mco = double
     @mcollective_puppet = Support::MCollectivePuppet_Test.new(@callouts, @mco)
     @callback = double
-    
+
     @callouts.should_receive(:now).any_number_of_times do
       0
     end
@@ -61,8 +61,8 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm1.test.net.local', :data => {:summary=>{'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm2.test.net.local', :data => {:summary=>{'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -80,7 +80,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm1.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -92,7 +92,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm2.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm2.test.net.local').ordered
@@ -117,8 +117,8 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm1.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm2.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -137,9 +137,9 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm0.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 1, 'failed_to_restart' => 0}}},
-      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 1}}}
+      {:sender => 'vm0.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm1.test.net.local', :data => {:summary => {'resources' => {'failed' => 1, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm2.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 1}}}}
     ])
 
     @callback.should_receive(:passed).with('vm0.test.net.local').ordered
@@ -165,11 +165,11 @@ describe Support::MCollectivePuppet do
     @mco.should_receive(:last_run_summary).ordered.and_return([
       {:sender => 'vm1.test.net.local', :data => nil},
       {:sender => 'vm2.test.net.local', :data => {}},
-      {:sender => 'vm3.test.net.local', :data => {:resources => nil}}, # this is the only one which actually occurs, but there's no kill like overkill
-      {:sender => 'vm4.test.net.local', :data => {:resources => {}}},
-      {:sender => 'vm5.test.net.local', :data => {:resources => {'failed' => nil, 'failed_to_restart' => 0}}},
-      {:sender => 'vm6.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => nil}}},
-      {:sender => 'vm7.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm3.test.net.local', :data => {:summary => {'resources' => nil}}}, # this is the only one which actually occurs, but there's no kill like overkill
+      {:sender => 'vm4.test.net.local', :data => {:summary => {'resources' => {}}}},
+      {:sender => 'vm5.test.net.local', :data => {:summary => {'resources' => {'failed' => nil, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm6.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => nil}}}},
+      {:sender => 'vm7.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm7.test.net.local').ordered
@@ -186,12 +186,12 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm3.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm4.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm5.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}},
-      {:sender => 'vm6.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm1.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm2.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm3.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm4.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm5.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}},
+      {:sender => 'vm6.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -238,7 +238,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm1.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -250,7 +250,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm2.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm2.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm2.test.net.local').ordered
@@ -260,7 +260,7 @@ describe Support::MCollectivePuppet do
 
   it 'reports an error if machines are still unaccounted for when the time runs out' do
     @callouts.rspec_reset
-    
+
     @callouts.should_receive(:now).ordered.and_return(0) # start_time
 
     @callouts.should_receive(:now).ordered.and_return(1) # timed_out
@@ -271,7 +271,7 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      {:sender => 'vm1.test.net.local', :data => {:resources => {'failed' => 0, 'failed_to_restart' => 0}}}
+      {:sender => 'vm1.test.net.local', :data => {:summary => {'resources' => {'failed' => 0, 'failed_to_restart' => 0}}}}
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
