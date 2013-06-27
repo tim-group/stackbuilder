@@ -37,7 +37,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       name = "xp#{version}-#{index}"
-      @definitions[name] = Stacks::Selenium::XpNode.new(name, self.hub)
+      @definitions[name] = Stacks::Selenium::XpNode.new(name, self.hub, options)
       server.ram   = @ram unless @ram.nil?
     end
   end
@@ -54,10 +54,12 @@ end
 
 class Stacks::Selenium::XpNode < Stacks::MachineDef
   attr_reader :hub
+  attr_reader :options
 
-  def initialize(base_hostname, hub)
+  def initialize(base_hostname, hub, options)
     super(base_hostname, [:mgmt])
     @hub = hub
+    @options = options
   end
 
   def bind_to(environment)
@@ -68,7 +70,7 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec = super
     spec[:template] = "xpboot"
     spec[:se_version] = "2.32.0"
-    spec[:gold_image_path] = "/var/local/images/dev-sxp-gold.img"
+    spec[:gold_image_path] = options[:gold_image]
     spec[:se_hub] = self.hub.mgmt_fqdn
     spec[:launch_script] = "start-grid.bat"
     spec

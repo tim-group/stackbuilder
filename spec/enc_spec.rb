@@ -586,9 +586,7 @@ describe Stacks::DSL do
   it 'generates a selenium grid' do
     stack "segrid" do
       segrid :v=>2 do
-        winxp "8", :instances=>10
-        winxp "7", :instances=>5
-        winxp "6", :instances=>5
+        winxp "6", :instances=>10, :gold_image=> "/var/local/images/dev-sxp-gold.img"
         ubuntu :instances=>5
       end
     end
