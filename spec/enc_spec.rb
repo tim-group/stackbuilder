@@ -598,7 +598,7 @@ describe Stacks::DSL do
     end
 
     find_environment("e1")["segrid"]["segrid"]["hub-001"].to_spec.should eql(
-      {   :fabric=>"space",
+      { :fabric=>"space",
         :template=>"sehub",
         :qualified_hostnames=>
         {:mgmt=>"e1-hub-001.mgmt.space.net.local"},
@@ -638,6 +638,32 @@ describe Stacks::DSL do
         :domain=>"space.net.local"})
   end
 
+  it 'generates jenkins slaves' do
+    stack "jenkins" do
+      ci_slave do
+      end
+    end
 
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "jenkins"
+    end
+
+
+    find_environment("e1")["jenkins"]["jenkinsslave"]["jenkinsslave-002"].to_spec.should eql(
+      {
+        :fabric=>"space",
+        :vcpus =>"8",
+        :qualified_hostnames=>{
+          :mgmt=>"e1-jenkinsslave-002.mgmt.space.net.local",
+          :prod=>"e1-jenkinsslave-002.space.net.local",
+          :front=>"e1-jenkinsslave-002.front.space.net.local"},
+        :group=>"e1-jenkinsslave",
+        :networks=>[:mgmt, :prod, :front],
+        :hostname=>"e1-jenkinsslave-002",
+        :ram=>"2097152",
+        :domain=>"space.net.local"}
+    )
+
+  end
 
 end

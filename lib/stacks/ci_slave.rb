@@ -7,9 +7,16 @@ class Stacks::CiSlave < Stacks::MachineDef
     self
   end
 
- def bind_to(environment)
+  def bind_to(environment)
     super(environment)
   end
+
+  def to_spec
+    spec = super
+    spec[:vcpus] = "8"
+    spec
+  end
+
 
   def to_enc
     {
