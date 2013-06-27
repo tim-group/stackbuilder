@@ -23,17 +23,17 @@ describe Stacks::DSL do
 
     env "parent", :primary_site=>"st", :secondary_site=>"bs" do
       env "e1", :lb_virtual_router_id=>1,
-                :nat_front_virtual_router_id=>40,
-                :nat_prod_virtual_router_id=>41,
-                :primary_site=>"space" do
+        :nat_front_virtual_router_id=>40,
+        :nat_prod_virtual_router_id=>41,
+        :primary_site=>"space" do
         instantiate_stack "fabric"
-      end
+        end
 
       env "e2", :lb_virtual_router_id=>2,
-                :nat_front_virtual_router_id=>42,
-                :nat_prod_virtual_router_id=>43 do
+        :nat_front_virtual_router_id=>42,
+        :nat_prod_virtual_router_id=>43 do
         instantiate_stack "fabric"
-      end
+        end
     end
 
     find("e1-lb-001.mgmt.space.net.local").virtual_router_id.should eql(1)
@@ -80,23 +80,23 @@ describe Stacks::DSL do
     loadbalancer.to_enc.should eql(
       {"role::loadbalancer"=>
         {"virtual_router_id"=>1,
-         "virtual_servers"=>
-          {"st-twoapp-vip.st.net.local"=>
-            {"realservers"=>
-              {"blue"=>["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]},
-             "env"=>"st",
-             "app"=>nil,
-             "monitor_warn"=>1},
-           "st-oneapp-vip.st.net.local"=>
+          "virtual_servers"=>
+        {"st-twoapp-vip.st.net.local"=>
+          {"realservers"=>
+            {"blue"=>["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]},
+              "env"=>"st",
+              "app"=>nil,
+              "monitor_warn"=>1},
+              "st-oneapp-vip.st.net.local"=>
             {"realservers"=>
               {"green"=>["st-oneapp-002.st.net.local"],
-               "blue"=>["st-oneapp-001.st.net.local"]},
-             "env"=>"st",
-             "app"=>nil,
-             "monitor_warn"=>0}
-         }
+                "blue"=>["st-oneapp-001.st.net.local"]},
+                "env"=>"st",
+                "app"=>nil,
+                "monitor_warn"=>0}
         }
-      }
+        }
+    }
     )
   end
 
@@ -141,96 +141,96 @@ describe Stacks::DSL do
 
     st_loadbalancer.to_enc.should eql(
       {
-       'role::loadbalancer' => {
-          'virtual_router_id' => 1,
-          'virtual_servers' => {
-           'ci2-appx-vip.st.net.local' => {
-#'type'        => 'app',
+      'role::loadbalancer' => {
+      'virtual_router_id' => 1,
+      'virtual_servers' => {
+      'ci2-appx-vip.st.net.local' => {
+      #'type'        => 'app',
 
-              'env' => 'ci2',
-              'app' => 'JavaHttpRef',
-              'monitor_warn'=>0,
-              'realservers' => {
-                'blue' => [
-                  'ci2-appx-001.st.net.local'
-                ],
-                'green' => [
-                  'ci2-appx-002.st.net.local'
-                ]
-              }
-            },
-            'ci2-app2x-vip.st.net.local' => {
-              'env' => 'ci2',
-              'app' => 'MySuperCoolApp',
-              'monitor_warn'=>1,
-              'realservers' => {
-                'blue' => [
-                  'ci2-app2x-001.st.net.local',
-                  'ci2-app2x-002.st.net.local'
-                ]
-              }
-            },
-            'ci2-myproxy-vip.st.net.local' => {
-              'type'        => 'proxy',
-              'realservers' => {
-                'blue' => [
-                  'ci2-myproxy-001.st.net.local',
-                  'ci2-myproxy-002.st.net.local'
-                ]
-              }
-            },
-            'st-sftp-vip.st.net.local' => {
-              'type'        => 'sftp',
-              'realservers' => {
-                'blue' => [
-                  'st-sftp-001.st.net.local',
-                  'st-sftp-002.st.net.local'
-                ]
-              }
-            }
+      'env' => 'ci2',
+      'app' => 'JavaHttpRef',
+      'monitor_warn'=>0,
+      'realservers' => {
+      'blue' => [
+        'ci2-appx-001.st.net.local'
+    ],
+      'green' => [
+        'ci2-appx-002.st.net.local'
+    ]
+    }
+    },
+      'ci2-app2x-vip.st.net.local' => {
+      'env' => 'ci2',
+      'app' => 'MySuperCoolApp',
+      'monitor_warn'=>1,
+      'realservers' => {
+      'blue' => [
+        'ci2-app2x-001.st.net.local',
+        'ci2-app2x-002.st.net.local'
+    ]
+    }
+    },
+      'ci2-myproxy-vip.st.net.local' => {
+      'type'        => 'proxy',
+      'realservers' => {
+      'blue' => [
+        'ci2-myproxy-001.st.net.local',
+        'ci2-myproxy-002.st.net.local'
+    ]
+    }
+    },
+      'st-sftp-vip.st.net.local' => {
+      'type'        => 'sftp',
+      'realservers' => {
+      'blue' => [
+        'st-sftp-001.st.net.local',
+        'st-sftp-002.st.net.local'
+    ]
+    }
+    }
     }}})
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
     ci_loadbalancer.virtual_services(Stacks::AbstractVirtualService).size.should eql(3)
     ci_loadbalancer.to_enc.should eql({
       'role::loadbalancer' =>{
-        'virtual_router_id' => 1,
-        'virtual_servers' => {
-          'ci-appx-vip.st.net.local' => {
-            'monitor_warn'=>0,
-            'env' => 'ci',
-            'app' => 'JavaHttpRef',
-            'realservers' => {
-              'blue' => [
-                'ci-appx-001.st.net.local'
-              ],
-              'green'=> [
-                'ci-appx-002.st.net.local'
-              ]
-            }
-          },
-          'ci-app2x-vip.st.net.local' => {
-            'monitor_warn'=>1,
-            'env' => 'ci',
-            'app' => 'MySuperCoolApp',
-            'realservers' => {
-              'blue' => [
-                'ci-app2x-001.st.net.local',
-                'ci-app2x-002.st.net.local'
-              ]
-            }
-          },
-          'ci-sftp-vip.st.net.local' => {
-            'type'        => 'sftp',
-            'realservers' => {
-              'blue' => [
-                'ci-sftp-001.st.net.local',
-                'ci-sftp-002.st.net.local'
-              ]
-            }
-          }
-        }
-      }
+      'virtual_router_id' => 1,
+      'virtual_servers' => {
+      'ci-appx-vip.st.net.local' => {
+      'monitor_warn'=>0,
+      'env' => 'ci',
+      'app' => 'JavaHttpRef',
+      'realservers' => {
+      'blue' => [
+        'ci-appx-001.st.net.local'
+    ],
+      'green'=> [
+        'ci-appx-002.st.net.local'
+    ]
+    }
+    },
+      'ci-app2x-vip.st.net.local' => {
+      'monitor_warn'=>1,
+      'env' => 'ci',
+      'app' => 'MySuperCoolApp',
+      'realservers' => {
+      'blue' => [
+        'ci-app2x-001.st.net.local',
+        'ci-app2x-002.st.net.local'
+    ]
+    }
+    },
+      'ci-sftp-vip.st.net.local' => {
+      'type'        => 'sftp',
+      'realservers' => {
+      'blue' => [
+        'ci-sftp-001.st.net.local',
+        'ci-sftp-002.st.net.local'
+    ]
+    }
+    }
+    }
+    }
     })
   end
 
@@ -329,32 +329,32 @@ describe Stacks::DSL do
       'cluster_nodes' => [
         'rabbiteg-rabbitmq-001',
         'rabbiteg-rabbitmq-002'
-      ],
+    ],
       'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
     } })
     find("rabbiteg-rabbitmq-002.mgmt.st.net.local").to_enc.should eql({ 'role::rabbitmq_server' => {
       'cluster_nodes' => [
         'rabbiteg-rabbitmq-001',
         'rabbiteg-rabbitmq-002'
-      ],
+    ],
       'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
     } })
     find("rabbiteg-lb-001.mgmt.st.net.local").to_enc.should eql({
-        'role::loadbalancer' => {
-          'virtual_servers' => {
-              'rabbiteg-rabbitmq-vip.st.net.local' => {
-                'type' => 'rabbitmq',
-                'realservers' => {
-                  'blue' => [
-                    'rabbiteg-rabbitmq-001.st.net.local',
-                    'rabbiteg-rabbitmq-002.st.net.local'
-                  ]
-                }
-              }
-            },
-            'virtual_router_id' => 1
-          }
-        })
+      'role::loadbalancer' => {
+      'virtual_servers' => {
+      'rabbiteg-rabbitmq-vip.st.net.local' => {
+      'type' => 'rabbitmq',
+      'realservers' => {
+      'blue' => [
+        'rabbiteg-rabbitmq-001.st.net.local',
+        'rabbiteg-rabbitmq-002.st.net.local'
+    ]
+    }
+    }
+    },
+      'virtual_router_id' => 1
+    }
+    })
   end
 
   it 'configures NAT boxes to NAT incoming public IPs' do
@@ -388,55 +388,55 @@ describe Stacks::DSL do
     eg_nat = find("eg-nat-001.mgmt.st.net.local")
     eg_nat.to_enc.should eql(
       {
-        'role::natserver' => {
-          'rules' => {
-            'SNAT' => {
-              'prod' => {
-                'to_source' => 'nat-vip.front.st.net.local'
-              }
-            },
-            'DNAT' => {
-              'eg-withnat-vip.front.st.net.local 80' => {
-                'dest_host'  => 'eg-withnat-vip.st.net.local',
-                'dest_port'  => '80'
-              },
-              'eg-withnat-vip.front.st.net.local 443' => {
-                'dest_host'  => 'eg-withnat-vip.st.net.local',
-                'dest_port'  => '443'
-              },
-              'eg-sftp-vip.front.st.net.local 22' => {
-                'dest_host'  => 'eg-sftp-vip.st.net.local',
-                'dest_port'  => '22'
-              }
-            }
-          },
-          'prod_virtual_router_id' => 106,
-          'front_virtual_router_id' => 105
-        }
-      }
+      'role::natserver' => {
+      'rules' => {
+      'SNAT' => {
+      'prod' => {
+      'to_source' => 'nat-vip.front.st.net.local'
+    }
+    },
+      'DNAT' => {
+      'eg-withnat-vip.front.st.net.local 80' => {
+      'dest_host'  => 'eg-withnat-vip.st.net.local',
+      'dest_port'  => '80'
+    },
+      'eg-withnat-vip.front.st.net.local 443' => {
+      'dest_host'  => 'eg-withnat-vip.st.net.local',
+      'dest_port'  => '443'
+    },
+      'eg-sftp-vip.front.st.net.local 22' => {
+      'dest_host'  => 'eg-sftp-vip.st.net.local',
+      'dest_port'  => '22'
+    }
+    }
+    },
+      'prod_virtual_router_id' => 106,
+      'front_virtual_router_id' => 105
+    }
+    }
     )
 
     sub_nat = find("sub-nat-001.mgmt.st.net.local")
     sub_nat.to_enc.should eql(
       {
-        'role::natserver' => {
-          'rules' => {
-            'SNAT' => {
-              'prod' => {
-                'to_source' => 'nat-vip.front.st.net.local'
-              }
-            },
-            'DNAT' => {
-              'sub-blahnat-vip.front.st.net.local 8008' => {
-                'dest_host'  => 'sub-blahnat-vip.st.net.local',
-                'dest_port'  => '8008'
-              }
-            }
-          },
-          'prod_virtual_router_id' => 106,
-          'front_virtual_router_id' => 105
-        }
-      }
+      'role::natserver' => {
+      'rules' => {
+      'SNAT' => {
+      'prod' => {
+      'to_source' => 'nat-vip.front.st.net.local'
+    }
+    },
+      'DNAT' => {
+      'sub-blahnat-vip.front.st.net.local 8008' => {
+      'dest_host'  => 'sub-blahnat-vip.st.net.local',
+      'dest_port'  => '8008'
+    }
+    }
+    },
+      'prod_virtual_router_id' => 106,
+      'front_virtual_router_id' => 105
+    }
+    }
     )
   end
 
@@ -480,28 +480,28 @@ describe Stacks::DSL do
 
     proxyserver.to_enc.should eql(
       {'role::proxyserver' => {
-          'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
-          'vhosts'        => {
-            'env-refproxy-vip.front.st.net.local' => {
-              'application'    => 'MyApp',
-              'proxy_pass_rules'  => {
-                '/' => "http://env-refapp-vip.st.net.local:8000"
-              },
-              'redirects'      => ['old-example.timgroup.com'],
-              'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
-            },
-            'example.timgroup.com' => {
-              'application'    => 'MyOtherApp',
-              'proxy_pass_rules'  => {
-                '/' => "http://env-ref2app-vip.st.net.local:8000",
-                '/resources' => "http://env-downstreamapp-vip.st.net.local:8000"
-               },
-              'redirects'      => [],
-              'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local']
-            }
-          }
-        }
-      }
+      'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
+      'vhosts'        => {
+      'env-refproxy-vip.front.st.net.local' => {
+      'application'    => 'MyApp',
+      'proxy_pass_rules'  => {
+      '/' => "http://env-refapp-vip.st.net.local:8000"
+    },
+      'redirects'      => ['old-example.timgroup.com'],
+      'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
+    },
+    'example.timgroup.com' => {
+      'application'    => 'MyOtherApp',
+      'proxy_pass_rules'  => {
+      '/' => "http://env-ref2app-vip.st.net.local:8000",
+      '/resources' => "http://env-downstreamapp-vip.st.net.local:8000"
+    },
+      'redirects'      => [],
+      'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local']
+    }
+    }
+    }
+    }
     )
   end
 
@@ -535,6 +535,7 @@ describe Stacks::DSL do
          }
        }
      )
+
   end
 
   it 'can be converted to an array of machine_defs (actual machines)' do
@@ -596,14 +597,21 @@ describe Stacks::DSL do
       instantiate_stack "segrid"
     end
 
-    find_environment("e1")["segrid"]["segrid"]["hub-001"].should_not be_nil
+    find_environment("e1")["segrid"]["segrid"]["hub-001"].to_spec.should eql(
+      {   :fabric=>"space",
+          :template=>"sehub",
+          :qualified_hostnames=>
+            {:mgmt=>"e1-hub-001.mgmt.space.net.local"},
+          :group=>nil,
+          :networks=>[:mgmt],
+          :hostname=>"e1-hub-001",
+          :ram=>"2097152",
+          :domain=>"space.net.local"}
+    )
 
     find_environment("e1")["segrid"]["segrid"]["xp6-005"].should_not be_nil
-    find_environment("e1")["segrid"]["segrid"]["xp7-005"].should_not be_nil
-    find_environment("e1")["segrid"]["segrid"]["xp8-005"].should_not be_nil
 
     find_environment("e1")["segrid"]["segrid"]["browser-001"].should_not be_nil
-
     find_environment("e1")["segrid"]["segrid"]["hub-001"].to_spec
 
     find_environment("e1")["segrid"]["segrid"]["xp6-005"].to_spec
