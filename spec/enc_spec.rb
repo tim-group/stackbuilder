@@ -614,7 +614,7 @@ describe Stacks::DSL do
         :template=>"xpboot",
         :se_hub => 'e1-hub-001.mgmt.space.net.local',
         :se_version =>  '2.32.0',
-        :gold_image_path => '/var/local/gold.img',
+        :gold_image_path => '/var/local/images/dev-sxp-gold.img',
         :launch_script => 'start-grid.bat',
         :qualified_hostnames=>
         {:mgmt=>"e1-xp6-005.mgmt.space.net.local"},
@@ -625,17 +625,17 @@ describe Stacks::DSL do
         :domain=>"space.net.local"}
     )
 
-    find_environment("e1")["segrid"]["segrid"]["browser-001"].should_not be_nil
-    find_environment("e1")["segrid"]["segrid"]["hub-001"].to_spec
-
-    find_environment("e1")["segrid"]["segrid"]["xp6-005"].to_spec
-    find_environment("e1")["segrid"]["segrid"]["xp7-005"].should_not be_nil
-    find_environment("e1")["segrid"]["segrid"]["xp8-005"].should_not be_nil
-
-    find_environment("e1")["segrid"]["segrid"]["browser-001"].should_not be_nil
-
-
-
+    find_environment("e1")["segrid"]["segrid"]["browser-001"].to_spec.should eql({  :fabric=>"space",
+        :template=>"senode",
+        :se_hub => 'e1-hub-001.mgmt.space.net.local',
+        :se_version =>  '2.32.0',
+        :qualified_hostnames=>
+        {:mgmt=>"e1-browser-001.mgmt.space.net.local"},
+        :group=>nil,
+        :networks=>[:mgmt],
+        :hostname=>"e1-browser-001",
+        :ram=>"2097152",
+        :domain=>"space.net.local"})
   end
 
 

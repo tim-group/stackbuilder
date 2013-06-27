@@ -46,7 +46,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       name = "browser-#{index}"
-      @definitions[name] = Stacks::Selenium::UbuntuNode.new(name)
+      @definitions[name] = Stacks::Selenium::UbuntuNode.new(name, self.hub)
       server.ram   = @ram unless @ram.nil?
     end
   end
@@ -68,7 +68,7 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec = super
     spec[:template] = "xpboot"
     spec[:se_version] = "2.32.0"
-    spec[:gold_image_path] = "/var/local/gold.img"
+    spec[:gold_image_path] = "/var/local/images/dev-sxp-gold.img"
     spec[:se_hub] = self.hub.mgmt_fqdn
     spec[:launch_script] = "start-grid.bat"
     spec
@@ -77,12 +77,23 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
 end
 
 class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
-  def initialize(base_hostname)
+  attr_reader :hub
+
+  def initialize(base_hostname, hub)
     super(base_hostname, [:mgmt])
+    @hub = hub
   end
 
   def bind_to(environment)
     super(environment)
+  end
+
+  def to_spec
+    spec = super
+    spec[:template] = "senode"
+    spec[:se_version] = "2.32.0"
+    spec[:se_hub] = self.hub.mgmt_fqdn
+    spec
   end
 end
 
