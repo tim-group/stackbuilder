@@ -585,7 +585,7 @@ describe Stacks::DSL do
 
   it 'generates a selenium grid' do
     stack "segrid" do
-      segrid do
+      segrid :v=>2 do
         winxp "8", :instances=>10
         winxp "7", :instances=>5
         winxp "6", :instances=>5
@@ -599,9 +599,9 @@ describe Stacks::DSL do
 
     find_environment("e1")["segrid"]["segrid"]["hub-001"].to_spec.should eql(
       {   :fabric=>"space",
-          :template=>"sehub",
-          :qualified_hostnames=>
-            {:mgmt=>"e1-hub-001.mgmt.space.net.local"},
+        :template=>"sehub",
+        :qualified_hostnames=>
+        {:mgmt=>"e1-hub-001.mgmt.space.net.local"},
           :group=>nil,
           :networks=>[:mgmt],
           :hostname=>"e1-hub-001",
@@ -609,7 +609,21 @@ describe Stacks::DSL do
           :domain=>"space.net.local"}
     )
 
-    find_environment("e1")["segrid"]["segrid"]["xp6-005"].should_not be_nil
+    find_environment("e1")["segrid"]["segrid"]["xp6-005"].to_spec.should eql(
+      {  :fabric=>"space",
+        :template=>"xpboot",
+        :se_hub => 'e1-hub-001.mgmt.space.net.local',
+        :se_version =>  '2.32.0',
+        :gold_image_path => '/var/local/gold.img',
+        :launch_script => 'start-grid.bat',
+        :qualified_hostnames=>
+        {:mgmt=>"e1-xp6-005.mgmt.space.net.local"},
+        :group=>nil,
+        :networks=>[:mgmt],
+        :hostname=>"e1-xp6-005",
+        :ram=>"2097152",
+        :domain=>"space.net.local"}
+    )
 
     find_environment("e1")["segrid"]["segrid"]["browser-001"].should_not be_nil
     find_environment("e1")["segrid"]["segrid"]["hub-001"].to_spec

@@ -69,7 +69,7 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::RateLimitedForwardProxyServer, &block)
   end
 
-  def segrid(&block)
+  def segrid(options, &block)
     machineset = Stacks::MachineSet.new("segrid", &block)
     machineset.extend Stacks::Selenium::Grid
     @definitions["segrid"] = machineset
