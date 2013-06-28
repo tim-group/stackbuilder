@@ -109,6 +109,12 @@ end
 
 namespace :sbx do
   environment.accept do |machine_def|
+
+    if machine_def.name.nil?
+        pp machine_def
+    end
+    pp machine_def.name
+
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
 
@@ -389,4 +395,3 @@ namespace :sbx do
     end
   end
 end
-

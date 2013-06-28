@@ -582,5 +582,40 @@ describe Stacks::DSL do
     find_environment("e1")["mystack"]["sx"]["sx-001"].availability_group.should eql("e1-sx")
   end
 
+  it 'generates a selenium grid' do
+    stack "segrid" do
+      segrid do
+        winxp "8", :instances=>10
+        winxp "7", :instances=>5
+        winxp "6", :instances=>5
+        ubuntu :instances=>5
+      end
+    end
+
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "segrid"
+    end
+
+    find_environment("e1")["segrid"]["segrid"]["hub-001"].should_not be_nil
+
+    find_environment("e1")["segrid"]["segrid"]["xp6-005"].should_not be_nil
+    find_environment("e1")["segrid"]["segrid"]["xp7-005"].should_not be_nil
+    find_environment("e1")["segrid"]["segrid"]["xp8-005"].should_not be_nil
+
+    find_environment("e1")["segrid"]["segrid"]["browser-001"].should_not be_nil
+
+    find_environment("e1")["segrid"]["segrid"]["hub-001"].to_spec
+
+    find_environment("e1")["segrid"]["segrid"]["xp6-005"].to_spec
+    find_environment("e1")["segrid"]["segrid"]["xp7-005"].should_not be_nil
+    find_environment("e1")["segrid"]["segrid"]["xp8-005"].should_not be_nil
+
+    find_environment("e1")["segrid"]["segrid"]["browser-001"].should_not be_nil
+
+
+
+  end
+
+
 
 end

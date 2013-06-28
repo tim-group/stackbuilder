@@ -13,6 +13,7 @@ require 'stacks/ci_slave'
 require 'stacks/elasticsearch_node'
 require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/puppetmaster'
+require 'stacks/selenium/hub'
 
 class Stacks::Stack
   attr_reader :name
@@ -66,6 +67,12 @@ class Stacks::Stack
 
   def rate_limited_forward_proxy(name='rate_limited_forward_proxy', &block)
     machineset_with(name, [], Stacks::RateLimitedForwardProxyServer, &block)
+  end
+
+  def segrid(&block)
+    machineset = Stacks::MachineSet.new("segrid", &block)
+    machineset.extend Stacks::Selenium::Grid
+    @definitions["segrid"] = machineset
   end
 
   def [](key)
