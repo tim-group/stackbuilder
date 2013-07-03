@@ -4,7 +4,7 @@ class Stacks::MachineDef
   attr_reader :hostname, :domain, :environment
   attr_accessor :availability_group
   attr_reader :fabric, :networks
-  attr_accessor :ram
+  attr_accessor :ram, :image_size, :vcpus
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
     @base_hostname = base_hostname
@@ -44,15 +44,20 @@ class Stacks::MachineDef
   end
 
   def to_spec
-    return {
+    spec = {
       :hostname => @hostname,
       :domain => @domain,
       :fabric => @fabric,
       :group => @availability_group,
       :networks => @networks,
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
-      :ram => @ram,
+      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }
+
+    spec[:ram] = ram unless ram.nil?
+    spec[:vcpus] = vcpus unless vcpus.nil?
+    spec[:image_size] = image_size unless image_size.nil?
+
+    spec
   end
 
   # DEPRECATED for flatten / accept interface, remove me!

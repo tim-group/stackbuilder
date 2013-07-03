@@ -641,6 +641,11 @@ describe Stacks::DSL do
   it 'generates jenkins slaves' do
     stack "jenkins" do
       ci_slave do
+        each_machine do |machine|
+          machine.vcpus = '8'
+          machine.image_size = '10G'
+          machine.ram = '8000'
+        end
       end
     end
 
@@ -653,6 +658,7 @@ describe Stacks::DSL do
       {
         :fabric=>"space",
         :vcpus =>"8",
+        :image_size =>"10G",
         :qualified_hostnames=>{
           :mgmt=>"e1-jenkinsslave-002.mgmt.space.net.local",
           :prod=>"e1-jenkinsslave-002.space.net.local",
@@ -660,7 +666,7 @@ describe Stacks::DSL do
         :group=>"e1-jenkinsslave",
         :networks=>[:mgmt, :prod, :front],
         :hostname=>"e1-jenkinsslave-002",
-        :ram=>"2097152",
+        :ram=>"8000",
         :domain=>"space.net.local"}
     )
 

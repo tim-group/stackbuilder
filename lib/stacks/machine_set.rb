@@ -34,4 +34,12 @@ class Stacks::MachineSet
       step.call(self, environment)
     end
   end
+
+  def each_machine(&block)
+    on_bind do
+      accept do |machine|
+        block.call(machine) if machine.kind_of? Stacks::MachineDef
+      end
+    end
+  end
 end
