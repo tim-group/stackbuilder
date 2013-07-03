@@ -1,9 +1,13 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
+require 'stacks/ha'
 
 class Stacks::AppServer < Stacks::MachineDef
+
+  include Stacks::HA
   attr_reader :environment, :virtual_service
   attr_accessor :group
+
 
   def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)

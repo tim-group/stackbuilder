@@ -1,6 +1,8 @@
 require 'stacks/namespace'
+require 'stacks/ha'
 
 class Stacks::ProxyServer < Stacks::MachineDef
+  include Stacks::HA
   attr_reader :virtual_service
 
   def initialize(virtual_service, index)

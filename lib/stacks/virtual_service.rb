@@ -49,7 +49,10 @@ module Stacks::MachineGroup
       if server.respond_to?(:group)
         server.group = groups[i%groups.size]
       end
-      server.availability_group = availability_group(environment)
+
+      if server.respond_to?(:availability_group)
+        server.availability_group = availability_group(environment)
+      end
     end
   end
 

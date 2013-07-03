@@ -57,10 +57,6 @@ class Stacks::Stack
     machineset_with('nat', [], Stacks::NatServer, &block)
   end
 
-  def ci_slave(&block)
-    machineset_with('jenkinsslave', [], Stacks::CiSlave, &block)
-  end
-
   def elasticsearch(name = 'elasticsearch', &block)
     machineset_with(name, [], Stacks::ElasticSearchNode, &block)
   end
@@ -73,6 +69,13 @@ class Stacks::Stack
     machineset = Stacks::MachineSet.new("segrid", &block)
     machineset.extend Stacks::Selenium::Grid
     @definitions["segrid"] = machineset
+  end
+
+  def ci_slave(&block)
+    machineset = Stacks::MachineSet.new("jenkinsslave", &block)
+    machineset.extend Stacks::Selenium::Grid
+    @definitions["segrid"] = machineset
+    machineset_with('jenkinsslave', [], Stacks::CiSlave, &block)
   end
 
   def [](key)

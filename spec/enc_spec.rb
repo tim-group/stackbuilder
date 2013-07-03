@@ -663,7 +663,7 @@ describe Stacks::DSL do
           :mgmt=>"e1-jenkinsslave-002.mgmt.space.net.local",
           :prod=>"e1-jenkinsslave-002.space.net.local",
           :front=>"e1-jenkinsslave-002.front.space.net.local"},
-        :group=>"e1-jenkinsslave",
+        :group=>nil,
         :networks=>[:mgmt, :prod, :front],
         :hostname=>"e1-jenkinsslave-002",
         :ram=>"8000",
