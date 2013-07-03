@@ -38,7 +38,6 @@ module Stacks::Selenium::Grid
       index = sprintf("%03d",i+1)
       name = "xp#{version}-#{index}"
       @definitions[name] = Stacks::Selenium::XpNode.new(name, self.hub, options)
-      server.ram   = @ram unless @ram.nil?
     end
   end
 
@@ -47,7 +46,6 @@ module Stacks::Selenium::Grid
       index = sprintf("%03d",i+1)
       name = "browser-#{index}"
       @definitions[name] = Stacks::Selenium::UbuntuNode.new(name, self.hub)
-      server.ram   = @ram unless @ram.nil?
     end
   end
 end

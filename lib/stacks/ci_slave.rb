@@ -11,13 +11,6 @@ class Stacks::CiSlave < Stacks::MachineDef
     super(environment)
   end
 
-  def to_spec
-    spec = super
-    spec[:vcpus] = "8"
-    spec
-  end
-
-
   def to_enc
     {
       'role::cinode_precise' => {}

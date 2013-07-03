@@ -49,7 +49,6 @@ module Stacks::MachineGroup
       if server.respond_to?(:group)
         server.group = groups[i%groups.size]
       end
-      server.ram   = @ram unless @ram.nil?
       server.availability_group = availability_group(environment)
     end
   end
