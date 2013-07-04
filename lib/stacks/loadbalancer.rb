@@ -1,7 +1,9 @@
 require 'stacks/namespace'
+require 'stacks/ha'
 
 class Stacks::LoadBalancer < Stacks::MachineDef
 
+  include Stacks::HA
   attr_accessor :virtual_router_id
 
   def initialize(server_group, index, &block)
