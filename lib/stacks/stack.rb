@@ -72,9 +72,6 @@ class Stacks::Stack
   end
 
   def ci_slave(&block)
-    machineset = Stacks::MachineSet.new("jenkinsslave", &block)
-    machineset.extend Stacks::Selenium::Grid
-    @definitions["segrid"] = machineset
     machineset_with('jenkinsslave', [], Stacks::CiSlave, &block)
   end
 
