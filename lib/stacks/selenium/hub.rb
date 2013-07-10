@@ -68,7 +68,7 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec = super
     spec[:template] = "xpboot"
     spec[:se_version] = options[:se_version]
-    spec[:gold_image_path] = options[:gold_image]
+    spec[:gold_image_url] = options[:gold_image]
     spec[:se_hub] = self.hub.mgmt_fqdn
     spec[:launch_script] = "start-grid.bat"
     spec
