@@ -130,6 +130,7 @@ namespace :sbx do
         end
       end
 
+      desc "perform all steps required to create and configure the machine(s)"
       task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait', 'orc:resolve']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
