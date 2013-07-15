@@ -1,6 +1,6 @@
 require 'stacks/test_framework'
 
-describe_stack 'selenium' do
+describe_stack 'mongodb' do
   given do
     stack "mongo" do
       mongodb "mongodb" do
@@ -22,7 +22,15 @@ describe_stack 'selenium' do
       }})
 
     host.to_specs.should eql([
-      {:fabric=>"space", :qualified_hostnames=>{:mgmt=>"e1-mongodb-001.mgmt.space.net.local", :prod=>"e1-mongodb-001.space.net.local"}, :group=>nil, :networks=>[:mgmt, :prod], :hostname=>"e1-mongodb-001", :ram=>"2097152", :domain=>"space.net.local"}])
+      {:fabric=>"space",
+       :qualified_hostnames=>{
+          :mgmt=>"e1-mongodb-001.mgmt.space.net.local",
+          :prod=>"e1-mongodb-001.space.net.local"},
+        :group=>nil,
+        :networks=>[:mgmt, :prod],
+        :hostname=>"e1-mongodb-001",
+        :ram=>"2097152",
+        :domain=>"space.net.local"}])
 
   end
 end
