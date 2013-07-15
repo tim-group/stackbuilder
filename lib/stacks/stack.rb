@@ -14,6 +14,9 @@ require 'stacks/elasticsearch_node'
 require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
+require 'stacks/mongodb_server'
+
+
 
 class Stacks::Stack
   attr_reader :name
@@ -43,6 +46,10 @@ class Stacks::Stack
 
   def virtual_rabbitmqserver(&block)
     machineset_with('rabbitmq', [Stacks::VirtualService, Stacks::VirtualRabbitMQService], Stacks::RabbitMQServer, &block)
+  end
+
+  def mongodb(name='mongodb', &block)
+    machineset_with(name, [], Stacks::MongoDBServer, &block)
   end
 
   def puppetmaster(name="puppetmaster-001")
