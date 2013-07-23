@@ -388,32 +388,40 @@ describe Stacks::DSL do
     eg_nat = find("eg-nat-001.mgmt.st.net.local")
     eg_nat.to_enc.should eql(
       {
-      'role::natserver' => {
-      'rules' => {
-      'SNAT' => {
-      'prod' => {
-      'to_source' => 'nat-vip.front.st.net.local'
-    }
-    },
-      'DNAT' => {
-      'eg-withnat-vip.front.st.net.local 80' => {
-      'dest_host'  => 'eg-withnat-vip.st.net.local',
-      'dest_port'  => '80'
-    },
-      'eg-withnat-vip.front.st.net.local 443' => {
-      'dest_host'  => 'eg-withnat-vip.st.net.local',
-      'dest_port'  => '443'
-    },
-      'eg-sftp-vip.front.st.net.local 22' => {
-      'dest_host'  => 'eg-sftp-vip.st.net.local',
-      'dest_port'  => '22'
-    }
-    }
-    },
-      'prod_virtual_router_id' => 106,
-      'front_virtual_router_id' => 105
-    }
-    }
+        'role::natserver' => {
+          'rules' => {
+            'SNAT' => {
+              'prod' => {
+                'to_source' => 'nat-vip.front.st.net.local'
+              }
+            },
+            'DNAT' => {
+              'eg-withnat-vip.front.st.net.local 80' => {
+                'dest_host'  => 'eg-withnat-vip.st.net.local',
+                'dest_port'  => '80'
+              },
+              'eg-withnat-vip.front.st.net.local 443' => {
+                'dest_host'  => 'eg-withnat-vip.st.net.local',
+                'dest_port'  => '443'
+              },
+              'eg-sftp-vip.front.st.net.local 21' => {
+                'dest_host'  => 'eg-sftp-vip.st.net.local',
+                'dest_port'  => '21'
+              },
+              'eg-sftp-vip.front.st.net.local 22' => {
+                'dest_host'  => 'eg-sftp-vip.st.net.local',
+                'dest_port'  => '22'
+              },
+              'eg-sftp-vip.front.st.net.local 2222' => {
+                'dest_host'  => 'eg-sftp-vip.st.net.local',
+                'dest_port'  => '2222'
+              }
+            }
+          },
+          'prod_virtual_router_id'  => 106,
+          'front_virtual_router_id' => 105
+        }
+      }
     )
 
     sub_nat = find("sub-nat-001.mgmt.st.net.local")
