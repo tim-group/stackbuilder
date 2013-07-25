@@ -30,8 +30,9 @@ module Stacks::VirtualSftpService
     end]
 
     [self.vip_fqdn, {
-      'type' => 'sftp',
-      'realservers' => realservers
+      'type'        => 'sftp',
+      'realservers' => realservers,
+      'persistent'  => @persistent
     }]
   end
 end

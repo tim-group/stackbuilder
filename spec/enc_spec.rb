@@ -55,6 +55,28 @@ describe Stacks::DSL do
     find("rah-lb-002.mgmt.st.net.local").should_not be_nil
   end
 
+  it 'generates load balancer enc data with persistent when enable_persistent is specified'  do
+    stack "loadbalancer" do
+      loadbalancer
+    end
+
+    stack "sftp" do
+      virtual_sftpserver "sftp" do
+        enable_persistence
+      end
+    end
+
+    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+      instantiate_stack "loadbalancer"
+      instantiate_stack "sftp"
+    end
+    loadbalancer = find("st-lb-001.mgmt.st.net.local")
+    loadbalancer.to_enc.should eql(
+      {"role::loadbalancer"=>{"virtual_servers"=>{"st-sftp-vip.st.net.local"=>{"type"=>"sftp", "realservers"=>{"blue"=>["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"]}, "persistent"=>true}}, "virtual_router_id"=>1}}
+    )
+
+  end
+
   it 'generates load balancer enc data with the correct warn_level based least number of servers in a group'  do
     stack "fabric" do
       loadbalancer
@@ -181,6 +203,7 @@ describe Stacks::DSL do
     },
       'st-sftp-vip.st.net.local' => {
       'type'        => 'sftp',
+      'persistent'  => false,
       'realservers' => {
       'blue' => [
         'st-sftp-001.st.net.local',
@@ -222,6 +245,7 @@ describe Stacks::DSL do
     },
       'ci-sftp-vip.st.net.local' => {
       'type'        => 'sftp',
+      'persistent'  => false,
       'realservers' => {
       'blue' => [
         'ci-sftp-001.st.net.local',
