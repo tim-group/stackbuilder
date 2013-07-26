@@ -66,11 +66,11 @@ module Stacks::VirtualService
     object.configure()
   end
 
-  attr_accessor :nat, :persistent
+  attr_accessor :nat, :persistent_ports
 
   def configure()
     @nat=false
-    @persistent=false
+    @persistent_ports = []
     @port_map = {}
   end
 
@@ -139,8 +139,8 @@ module Stacks::VirtualService
     @nat = true
   end
 
-  def enable_persistence
-    @persistent = true
+  def enable_persistence(port)
+    @persistent_ports << port
   end
 
   def nat_rules

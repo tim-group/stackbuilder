@@ -32,7 +32,7 @@ module Stacks::VirtualSftpService
     [self.vip_fqdn, {
       'type'        => 'sftp',
       'realservers' => realservers,
-      'persistent'  => @persistent
+      'persistent_ports'  => @persistent_ports
     }]
   end
 end
