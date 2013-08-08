@@ -135,8 +135,7 @@ namespace :sbx do
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
-        computecontroller = Compute::Controller.new
-        pp computecontroller.allocate(machine_def.to_specs)
+        get_action("allocate").call(@factory.services, machine_def)
       end
 
       desc "launch these machines"

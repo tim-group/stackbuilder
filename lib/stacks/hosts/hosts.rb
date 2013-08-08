@@ -23,7 +23,7 @@ class Stacks::Hosts::Hosts
 
     next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
     @next_increment=hosts.index(next_host)
-    
+
     candidate_host
   end
 
@@ -34,7 +34,7 @@ class Stacks::Hosts::Hosts
         allocated_machines << machine
       end
     end
-    
+
     return machines - allocated_machines
   end
 
@@ -47,10 +47,10 @@ class Stacks::Hosts::Hosts
         hash << [machine, host]
       end
     end
-    
+
     Hash[hash]
   end
-  
+
   def allocated_machines(machines)
     hash = []
     hosts.map do |host|
@@ -59,10 +59,10 @@ class Stacks::Hosts::Hosts
         hash << [machine, host]
       end
     end
-    
+
     Hash[hash]
   end
-  
+
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
     unallocated_machines.each do |machine|

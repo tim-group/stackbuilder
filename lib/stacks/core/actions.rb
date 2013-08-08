@@ -5,6 +5,26 @@ module Stacks::Core::Actions
   def self.extended(object)
     object.actions = {}
 
+    object.action 'allocate' do |services, machine_def|
+      machines = machine_def.flatten
+
+      fabrics = machines.map {|machine| machine.fabric}.uniq
+      raise "we don't support launching in multiple locations right now" unless fabrics.size==1
+
+      hosts = services.host_repo.find_current(fabrics.shift)
+
+      hosts.allocated_machines(machine_def.flatten).map do |machine, host|
+        services.logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
+      end
+
+      hosts.allocate(machine_def.flatten)
+
+      hosts.new_machine_allocation.each do |machine, host|
+        services.logger.info "#{machine.mgmt_fqdn} *would be* allocated to #{host.fqdn}\n"
+      end
+
+   end
+
     object.action 'launch' do |services, machine_def|
       machines = machine_def.flatten
 
@@ -50,7 +70,7 @@ module Stacks::Core::Actions
   end
 
   def action(name, &block)
-    @actions = {name=> block}
+    @actions[name] = block
   end
 
   def get_action(name)
