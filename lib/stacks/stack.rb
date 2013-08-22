@@ -78,8 +78,8 @@ class Stacks::Stack
     @definitions["segrid"] = machineset
   end
 
-  def ci_slave(&block)
-    machineset_with('jenkinsslave', [], Stacks::CiSlave, &block)
+  def ci_slave(name, &block)
+    machineset_with(name, [], Stacks::CiSlave, &block)
   end
 
   def [](key)
