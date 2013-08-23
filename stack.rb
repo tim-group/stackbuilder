@@ -80,7 +80,7 @@ stack 'fabric' do
 end
 
 stack 'jenkins' do
-  ci_slave
+  cislave 'jenkinsslave'
 end
 
 # where we have more than one loadbalancer in a location, virtual_router_id is

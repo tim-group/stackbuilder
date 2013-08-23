@@ -2,7 +2,7 @@ require 'stacks/test_framework'
 describe_stack 'jenkins' do
   given do
     stack "jenkins" do
-      ci_slave do
+      cislave 'jenkinsslave' do
         each_machine do |machine|
           machine.vcpus = '8'
           machine.image_size = '10G'
