@@ -194,6 +194,7 @@ describe Stacks::DSL do
     },
       'ci2-myproxy-vip.st.net.local' => {
       'type'        => 'proxy',
+      'ports'=>[80, 443],
       'realservers' => {
       'blue' => [
         'ci2-myproxy-001.st.net.local',
@@ -368,6 +369,7 @@ describe Stacks::DSL do
       'virtual_servers' => {
       'rabbiteg-rabbitmq-vip.st.net.local' => {
       'type' => 'rabbitmq',
+      'ports'=>[5672],
       'realservers' => {
       'blue' => [
         'rabbiteg-rabbitmq-001.st.net.local',
