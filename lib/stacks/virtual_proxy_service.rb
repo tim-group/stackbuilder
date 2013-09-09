@@ -86,6 +86,7 @@ module Stacks::XProxyService
 
     [self.vip_fqdn, {
       'type' => 'proxy',
+      'ports' => @ports,
       'realservers' => realservers
     }]
   end

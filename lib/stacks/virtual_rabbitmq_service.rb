@@ -27,6 +27,7 @@ module Stacks::VirtualRabbitMQService
 
     [self.vip_fqdn, {
       'type' => 'rabbitmq',
+      'ports' => @ports,
       'realservers' => realservers
     }]
   end
