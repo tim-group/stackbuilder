@@ -18,9 +18,15 @@ module Stacks::Hosts::HostPolicies
   end
 
   def self.do_not_overallocated_ram_policy
+    Proc.new do |host, machine|
+      true
+    end
   end
 
   def self.do_not_overallocated_disk_policy
+    Proc.new do |host, machine|
+      true
+    end
   end
 
 end

@@ -57,7 +57,9 @@ class Stacks::Factory
 
   def policies()
     @policies ||= [
-      Stacks::Hosts::HostPolicies.ha_group
+      Stacks::Hosts::HostPolicies.ha_group,
+      Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy,
+      Stacks::Hosts::HostPolicies.do_not_overallocated_disk_policy
     ]
   end
 
