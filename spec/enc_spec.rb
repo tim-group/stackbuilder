@@ -77,7 +77,7 @@ describe Stacks::DSL do
 
   end
 
-  it 'generates load balancer enc data with the correct warn_level based least number of servers in a group'  do
+  it 'generates load balancer enc data with the correct warn_level based on fewest number of servers in a group'  do
     stack "fabric" do
       loadbalancer
     end

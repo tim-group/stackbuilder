@@ -24,7 +24,7 @@ describe 'launch' do
 
   def standard_preference_functions
     return [
-      Stacks::Hosts::HostPreference.least_machines(),
+      Stacks::Hosts::HostPreference.fewest_machines(),
       Stacks::Hosts::HostPreference.alphabetical_fqdn]
   end
 

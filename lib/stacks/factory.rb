@@ -65,7 +65,7 @@ class Stacks::Factory
 
   def preference_functions()
     @preference_functions ||= [
-      Stacks::Hosts::HostPreference.least_machines(),
+      Stacks::Hosts::HostPreference.fewest_machines(),
       Stacks::Hosts::HostPreference.alphabetical_fqdn()
     ]
   end

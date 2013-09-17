@@ -1,7 +1,7 @@
 require 'stacks/hosts/namespace'
 
 module Stacks::Hosts::HostPreference
-  def self.least_machines()
+  def self.fewest_machines()
     Proc.new do |host|
       host.machines.size
     end
