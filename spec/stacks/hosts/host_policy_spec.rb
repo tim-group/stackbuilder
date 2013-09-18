@@ -51,11 +51,11 @@ describe Stacks::Hosts::HostPolicies do
     provisionally_allocated_machine = double
     existing_machine = double
 
-    candidate_machine.stub(:ram).and_return(100)
-    provisionally_allocated_machine.stub(:ram).and_return(10)
-    existing_machine.stub(:ram).and_return(1)
+    candidate_machine.stub(:ram).and_return('100')
+    provisionally_allocated_machine.stub(:ram).and_return('10')
+    existing_machine.stub(:ram).and_return('1')
 
-    h1 = Stacks::Hosts::Host.new("h1", 111)
+    h1 = Stacks::Hosts::Host.new("h1", :ram => '111')
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
@@ -67,11 +67,11 @@ describe Stacks::Hosts::HostPolicies do
     provisionally_allocated_machine = double
     existing_machine = double
 
-    candidate_machine.stub(:ram).and_return(100)
-    provisionally_allocated_machine.stub(:ram).and_return(10)
-    existing_machine.stub(:ram).and_return(1)
+    candidate_machine.stub(:ram).and_return('100')
+    provisionally_allocated_machine.stub(:ram).and_return('10')
+    existing_machine.stub(:ram).and_return('1')
 
-    h1 = Stacks::Hosts::Host.new("h1", 110)
+    h1 = Stacks::Hosts::Host.new("h1", :ram => '110')
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
