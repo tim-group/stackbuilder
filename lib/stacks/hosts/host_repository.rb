@@ -27,7 +27,8 @@ class Stacks::Hosts::HostRepository
 
       host = Stacks::Hosts::Host.new(fqdn,
         :preference_functions => preference_functions,
-        :policies => policies)
+        :policies => policies,
+        :ram => attr[:memory])
 
       host.allocated_machines = vms
       hosts << host

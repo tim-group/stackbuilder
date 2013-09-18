@@ -19,13 +19,17 @@ module Stacks::Hosts::HostPolicies
 
   def self.do_not_overallocated_ram_policy
     Proc.new do |host, machine|
-      allocated_ram = 0
-      host.machines.each do |allocated_machine|
-        allocated_ram = allocated_ram + Integer(allocated_machine.ram)
+      host_ram = Integer(host.ram)
+      if host_ram > 0
+        allocated_ram = 0
+        host.machines.each do |allocated_machine|
+          allocated_ram = allocated_ram + Integer(allocated_machine.ram)
+        end
+        available_ram = host_ram - allocated_ram
+        available_ram >= Integer(machine.ram)
+      else
+        true
       end
-      host_ram = 61839108 # TODO: obtain from host attr_reader
-      available_ram = host_ram - allocated_ram
-      available_ram >= Integer(machine.ram)
     end
   end
 

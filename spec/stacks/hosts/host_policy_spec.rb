@@ -45,4 +45,20 @@ describe Stacks::Hosts::HostPolicies do
     h1.allocated_machines << running_machine
     Stacks::Hosts::HostPolicies.ha_group().call(h1, machine).should eql(true)
   end
+
+  it 'allows allocations where the host ram is sufficient' do
+    env = test_env_with_refstack
+    machines = env.flatten
+    h1 = Stacks::Hosts::Host.new("h1", :ram => '4194304')
+    h1.allocated_machines << machines[0]
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1]).should eql(true)
+  end
+
+  it 'rejects allocations where the host ram is insufficient' do
+    env = test_env_with_refstack
+    machines = env.flatten
+    h1 = Stacks::Hosts::Host.new("h1", :ram => '4194303')
+    h1.allocated_machines << machines[0]
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1]).should eql(false)
+  end
 end
