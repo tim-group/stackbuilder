@@ -182,7 +182,7 @@ describe 'launch' do
 
     expect {
       get_action("launch").call(services, env)
-    }.to raise_error("an allocation violates a policy")
+    }.to raise_error("unable to allocate test-refapp-001 due to policy violation")
   end
 
 end
