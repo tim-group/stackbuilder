@@ -18,13 +18,8 @@ class Stacks::Hosts::Hosts
       host.preference(machine)
     end
 
-    candidate_host = candidate_hosts[0]
-    raise "an allocation violates a policy" if candidate_hosts.size==0
-
-    next_host = candidate_hosts[candidate_hosts.index(candidate_host)+1]
-    @next_increment=hosts.index(next_host)
-
-    candidate_host
+    raise "unable to allocate #{machine.name} due to policy violation" if candidate_hosts.size==0
+    candidate_hosts[0]
   end
 
   def unallocated_machines(machines)
