@@ -39,7 +39,7 @@ module Stacks::XProxyService
       end
     end
 
-    raise "Cannot find the service called "#{service}"
+    raise "Cannot find the service called #{service}"
   end
 
   def downstream_services
