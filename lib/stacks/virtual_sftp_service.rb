@@ -30,8 +30,9 @@ module Stacks::VirtualSftpService
     end]
 
     [self.vip_fqdn, {
-      'type'        => 'sftp',
-      'realservers' => realservers,
+      'monitor_warn' => 0, #FIXME: When adding server redundancy
+      'type'         => 'sftp',
+      'realservers'  => realservers,
       'persistent_ports'  => @persistent_ports
     }]
   end
