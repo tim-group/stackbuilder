@@ -23,7 +23,7 @@ describe Stacks::Hosts::HostPolicies do
     env = test_env_with_refstack
     machines = env.flatten
     h1 = Stacks::Hosts::Host.new("h1")
-    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1]).should eql(true)
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1])[:passed].should eql(true)
   end
 
   it 'rejects allocations that allocate >1 machine of the same group to the same host' do
@@ -31,7 +31,7 @@ describe Stacks::Hosts::HostPolicies do
     machines = env.flatten
     h1 = Stacks::Hosts::Host.new("h1")
     h1.allocated_machines << machines[0]
-    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1]).should eql(false)
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machines[1])[:passed].should eql(false)
   end
 
   it 'allows allocation if the availability group is unset' do
@@ -43,7 +43,7 @@ describe Stacks::Hosts::HostPolicies do
 
     h1 = Stacks::Hosts::Host.new("h1")
     h1.allocated_machines << running_machine
-    Stacks::Hosts::HostPolicies.ha_group().call(h1, machine).should eql(true)
+    Stacks::Hosts::HostPolicies.ha_group().call(h1, machine)[:passed].should eql(true)
   end
 
   it 'allows allocations where the host ram is sufficient' do
@@ -59,11 +59,10 @@ describe Stacks::Hosts::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine).should eql(true)
+    Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine)[:passed].should eql(true)
   end
 
   it 'rejects allocations where the host ram is insufficient' do
-    pending('temporarily disabled')
     candidate_machine = double
     provisionally_allocated_machine = double
     existing_machine = double
@@ -76,6 +75,6 @@ describe Stacks::Hosts::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine).should eql(false)
+    Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine)[:passed].should eql(false)
   end
 end

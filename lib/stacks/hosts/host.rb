@@ -34,10 +34,15 @@ class Stacks::Hosts::Host
   end
 
   def can_allocate(machine)
+    result = { :allocatable => true, :reasons => []}
     @policies.each do |policy|
-      return false unless policy.call(self, machine)
+      policy_result = policy.call(self, machine)
+      if (policy_result[:passed] != true)
+        result[:allocatable] = false
+        result[:reasons] << policy_result[:reason]
+      end
     end
-    return true
+    result
   end
 
   def preference(machine)

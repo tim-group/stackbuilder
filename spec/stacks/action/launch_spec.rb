@@ -151,7 +151,7 @@ describe 'launch' do
     compute_controller = double
     host_repo = host_repo_with_hosts(3) do |host, i|
       host.add_policy do |host, machine|
-        host.fqdn !~ /h2/
+        { :passed => host.fqdn !~ /h2/ }
       end
     end
 
@@ -172,7 +172,7 @@ describe 'launch' do
     compute_controller = double
     host_repo = host_repo_with_hosts(3) do |host, i|
       host.add_policy do |host, machine|
-        host.fqdn =~ /not here/
+        { :passed => host.fqdn =~ /not here/, :reason => "r#{host.fqdn}"}
       end
     end
 
@@ -182,7 +182,7 @@ describe 'launch' do
 
     expect {
       get_action("launch").call(services, env)
-    }.to raise_error("unable to allocate test-refapp-001 due to policy violation")
+    }.to raise_error("unable to allocate test-refapp-001 due to policy violation:\n  unable to allocate to h1 because it is [rh1]\n  unable to allocate to h2 because it is [rh2]\n  unable to allocate to h3 because it is [rh3]")
   end
 
 end

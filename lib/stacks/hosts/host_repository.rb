@@ -11,6 +11,7 @@ class Stacks::Hosts::HostRepository
     @preference_functions = args[:preference_functions]
     @compute_node_client = args[:compute_node_client]
     @policies = args[:policies]
+    @logger = args[:logger]
   end
 
   def find_current(fabric)
@@ -34,7 +35,7 @@ class Stacks::Hosts::HostRepository
       hosts << host
     end
 
-    Stacks::Hosts::Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
+    Stacks::Hosts::Hosts.new(:hosts => hosts, :preference_functions => preference_functions, :logger => @logger)
   end
 end
 

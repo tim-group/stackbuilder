@@ -5,6 +5,7 @@ class Stacks::Hosts::Hosts
   attr_accessor :hosts
   def initialize(args)
     @hosts = args[:hosts]
+    @logger = args[:logger]
     hosts.each do |host|
       host.set_preference_functions(args[:preference_functions])
     end
@@ -12,14 +13,24 @@ class Stacks::Hosts::Hosts
 
   private
   def find_suitable_host_for(machine)
+    allocation_denials = []
+
     candidate_hosts = hosts.reject do |host|
-      !host.can_allocate(machine)
-    end.sort_by do |host|
-      host.preference(machine)
+      allocation_check_result = host.can_allocate(machine)
+      if !allocation_check_result[:allocatable]
+        reason_message = allocation_check_result[:reasons].join("; ")
+        if @logger != nil
+          @logger.info("Unable to allocate #{machine.name} to #{host.fqdn} because it is [#{reason_message}]")
+        end
+        allocation_denials << "unable to allocate to #{host.fqdn} because it is [#{reason_message}]"
+      end
+      !allocation_check_result[:allocatable]
     end
 
-    raise "unable to allocate #{machine.name} due to policy violation" if candidate_hosts.size==0
-    candidate_hosts[0]
+    raise "unable to allocate #{machine.name} due to policy violation:\n  #{allocation_denials.join("\n  ")}" if candidate_hosts.size==0
+    candidate_hosts.sort_by do |host|
+      host.preference(machine)
+    end[0]
   end
 
   def unallocated_machines(machines)

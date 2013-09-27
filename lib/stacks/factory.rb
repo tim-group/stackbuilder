@@ -83,7 +83,9 @@ class Stacks::Factory
       :machine_repo => inventory,
       :preference_functions=>preference_functions,
       :policies => policies,
-      :compute_node_client => compute_node_client)
+      :compute_node_client => compute_node_client,
+      :logger => logger
+    )
   end
 
   def services()
