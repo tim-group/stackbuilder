@@ -20,7 +20,7 @@ class Stacks::Hosts::Hosts
       if !allocation_check_result[:allocatable]
         reason_message = allocation_check_result[:reasons].join("; ")
         if @logger != nil
-          @logger.info("Unable to allocate #{machine.name} to #{host.fqdn} because it is [#{reason_message}]")
+          @logger.debug("Unable to allocate #{machine.name} to #{host.fqdn} because it is [#{reason_message}]")
         end
         allocation_denials << "unable to allocate to #{host.fqdn} because it is [#{reason_message}]"
       end
