@@ -7,13 +7,15 @@ class Stacks::ProxyVHost
   attr_reader :service
   attr_reader :redirects
   attr_reader :proxy_pass_rules
+  attr_reader :type
 
-  def initialize(vhost_fqdn, service, &block)
+  def initialize(vhost_fqdn, service, type = 'default', &block)
     @vhost_fqdn = vhost_fqdn
     @service = service
     @aliases = []
     @redirects = []
     @proxy_pass_rules = {}
+    @type = type
     self.instance_eval &block
   end
 
