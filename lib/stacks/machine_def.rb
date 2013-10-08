@@ -1,4 +1,5 @@
 require 'stacks/namespace'
+require 'facter'
 
 class Stacks::MachineDef
   attr_reader :hostname, :domain, :environment
@@ -26,8 +27,18 @@ class Stacks::MachineDef
     case @fabric
       when 'local'
         @domain = "dev.#{suffix}"
+        @hostname = "#{@hostname}-#{owner_fact}"
     end
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
+  end
+
+  def owner_fact()
+   unless $LOAD_PATH.include?('/var/lib/puppet/lib')
+      $LOAD_PATH << '/var/lib/puppet/lib'
+   end
+   Facter.loadfacts
+   raise 'Owner fact was not found, unable to continue' if Facter.value('owner') == nil
+   Facter.value 'owner'
   end
 
   def accept(&block)
