@@ -24,7 +24,7 @@ describe Stacks::MachineDef do
       end
     end
     machinedef = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("env", {:primary_site=>"st"}, {})
+    env = Stacks::Environment.new("env", {:primary_site=>"local"}, {})
     expect { machinedef.owner_fact }.to raise_error /Owner fact was not found/
 
   end
