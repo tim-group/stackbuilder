@@ -14,7 +14,7 @@ describe Stacks::Inventory do
   end
 
   it 'returns nil when asked to find an unknown node' do
-    hostname = 'nosuch.mgmt.local.net.local'
+    hostname = 'nosuch.mgmt.space.net.local'
 
     inventory = Stacks::Inventory.new(@stacks_dir)
     result = inventory.find(hostname)
@@ -23,14 +23,14 @@ describe Stacks::Inventory do
   end
 
   it 'finds known nodes' do
-    hostname = 'te-stapp-001.mgmt.dev.net.local'
+    hostname = 'te-stapp-001.mgmt.space.net.local'
 
     inventory = Stacks::Inventory.new(@stacks_dir)
     result = inventory.find(hostname)
 
     result.hostname.should eql("te-stapp-001")
-    result.domain.should eql("dev.net.local")
-    result.vip_fqdn.should eql("te-stapp-vip.dev.net.local")
+    result.domain.should eql("space.net.local")
+    result.vip_fqdn.should eql("te-stapp-vip.space.net.local")
   end
 
 end
