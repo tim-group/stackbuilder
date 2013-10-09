@@ -38,7 +38,6 @@ describe 'launch' do
   def host_repo_with_hosts(
       n,
       preference_functions=standard_preference_functions,
-      name_generator=lambda {|i| "h#{i}"},
       &block)
 
     compute_node_client = double
@@ -59,7 +58,7 @@ describe 'launch' do
     host_repo = double
     hosts = []
     n.times do |i|
-      host = Stacks::Hosts::Host.new(name_generator.call(i+1))
+      host = Stacks::Hosts::Host.new("h#{i+1}")
       block.call(host,i) unless block.nil?
       hosts << host
     end
