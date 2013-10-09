@@ -28,7 +28,12 @@ describe 'launch' do
       Stacks::Hosts::HostPreference.alphabetical_fqdn]
   end
 
-  def host_repo_with_hosts(n, preference_functions=standard_preference_functions, &block)
+  def host_repo_with_hosts(
+      n,
+      preference_functions=standard_preference_functions,
+      name_generator=lambda {|i| "h#{i}"},
+      &block)
+
     compute_node_client = double
 
     result = {}
@@ -47,7 +52,7 @@ describe 'launch' do
     host_repo = double
     hosts = []
     n.times do |i|
-      host = Stacks::Hosts::Host.new("h#{i+1}")
+      host = Stacks::Hosts::Host.new(name_generator.call(i+1))
       block.call(host,i) unless block.nil?
       hosts << host
     end
@@ -185,4 +190,21 @@ describe 'launch' do
     }.to raise_error("unable to allocate test-refapp-001 due to policy violation:\n  unable to allocate to h1 because it is [rh1]\n  unable to allocate to h2 because it is [rh2]\n  unable to allocate to h3 because it is [rh3]")
   end
 
+  xit 'will not provision a machine with the no owner fact set in hostname' do
+    env = test_env_with_refstack
+    compute_controller = double
+    host_repo = host_repo_with_hosts(1) do |host,i|
+      host.allocated_machines << find("test-refapp-001-OWNER-FACT-NOT-FOUND.mgmt.t.net.local")
+    end
+    services = Stacks::Core::Services.new(
+    :host_repo => host_repo,
+    :compute_controller=> compute_controller)
+
+    compute_controller.should_receive(:launch_raw)
+
+    expect {
+      get_action("launch").call(services, env)
+    }.to raise_error("cannot instantiate machines in local site without owner fact")
+    #get_action("launch").call(services, env)
+  end
 end

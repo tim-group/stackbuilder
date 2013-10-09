@@ -33,12 +33,15 @@ class Stacks::MachineDef
   end
 
   def owner_fact()
-   unless $LOAD_PATH.include?('/var/lib/puppet/lib')
+    unless $LOAD_PATH.include?('/var/lib/puppet/lib')
       $LOAD_PATH << '/var/lib/puppet/lib'
-   end
-   Facter.loadfacts
-   raise 'Owner fact was not found, unable to continue' if Facter.value('owner') == nil
-   Facter.value 'owner'
+    end
+    Facter.loadfacts
+    if Facter.value('owner') == nil
+      'OWNER-FACT-NOT-FOUND'
+    else
+      Facter.value 'owner'
+    end
   end
 
   def accept(&block)

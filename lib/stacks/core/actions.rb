@@ -1,4 +1,5 @@
 require 'stacks/core/namespace'
+require 'ruby-debug' ; Debugger.start
 
 module Stacks::Core::Actions
   attr_accessor :actions
@@ -27,6 +28,14 @@ module Stacks::Core::Actions
 
     object.action 'launch' do |services, machine_def|
       machines = machine_def.flatten
+      
+      #debugger
+
+      machines.each do |machine|
+        if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
+          raise "cannot instantiate machines in local site without owner fact"
+        end
+      end
 
       fabrics = machines.map {|machine| machine.fabric}.uniq
       raise "we don't support launching in multiple locations right now" unless fabrics.size==1
