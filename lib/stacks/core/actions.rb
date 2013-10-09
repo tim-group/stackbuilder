@@ -1,5 +1,4 @@
 require 'stacks/core/namespace'
-require 'ruby-debug' ; Debugger.start
 
 module Stacks::Core::Actions
   attr_accessor :actions
@@ -28,8 +27,6 @@ module Stacks::Core::Actions
 
     object.action 'launch' do |services, machine_def|
       machines = machine_def.flatten
-      
-      #debugger
 
       machines.each do |machine|
         if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
