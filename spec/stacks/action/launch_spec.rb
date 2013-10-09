@@ -10,7 +10,7 @@ describe 'launch' do
     extend Stacks::Core::Actions
   end
 
-  def test_env_with_refstack
+  def test_env
     stack "ref" do
       virtual_appserver "refapp"
     end
@@ -19,7 +19,14 @@ describe 'launch' do
       instantiate_stack "ref"
     end
 
-    find_environment("test")
+    env "dev", :primary_site => "local" do
+      instantiate_stack "ref"
+    end
+  end
+
+  def test_env_with_refstack(env='test')
+    test_env
+    find_environment(env)
   end
 
   def standard_preference_functions
@@ -190,21 +197,4 @@ describe 'launch' do
     }.to raise_error("unable to allocate test-refapp-001 due to policy violation:\n  unable to allocate to h1 because it is [rh1]\n  unable to allocate to h2 because it is [rh2]\n  unable to allocate to h3 because it is [rh3]")
   end
 
-  xit 'will not provision a machine with the no owner fact set in hostname' do
-    env = test_env_with_refstack
-    compute_controller = double
-    host_repo = host_repo_with_hosts(1) do |host,i|
-      host.allocated_machines << find("test-refapp-001-OWNER-FACT-NOT-FOUND.mgmt.t.net.local")
-    end
-    services = Stacks::Core::Services.new(
-    :host_repo => host_repo,
-    :compute_controller=> compute_controller)
-
-    compute_controller.should_receive(:launch_raw)
-
-    expect {
-      get_action("launch").call(services, env)
-    }.to raise_error("cannot instantiate machines in local site without owner fact")
-    #get_action("launch").call(services, env)
-  end
 end
