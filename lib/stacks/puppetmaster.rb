@@ -18,6 +18,8 @@ class Stacks::PuppetMaster < Stacks::MachineDef
       :fabric              => @fabric,
       :template            => 'puppetmaster',
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
+      :aliases             => ['puppet'],
+      :ram                 => '2097152'
     }
   end
 
