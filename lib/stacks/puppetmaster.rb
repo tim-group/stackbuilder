@@ -10,6 +10,17 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     super(environment)
   end
 
+  def to_spec
+    return {
+      :hostname            => @hostname,
+      :networks            => @networks,
+      :domain              => @domain,
+      :fabric              => @fabric,
+      :template            => 'puppetmaster',
+      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
+    }
+  end
+
   def to_enc
   end
 end
