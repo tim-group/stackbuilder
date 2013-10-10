@@ -10,6 +10,10 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     super(environment)
   end
 
+  def needs_signing?
+    false
+  end
+
   def to_spec
     return {
       :hostname            => @hostname,

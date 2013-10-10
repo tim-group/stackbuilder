@@ -18,6 +18,10 @@ class Stacks::MachineDef
     return []
   end
 
+  def needs_signing?
+    true
+  end
+
   def bind_to(environment)
     @environment = environment
     @hostname = environment.name + "-" + @base_hostname

@@ -193,7 +193,6 @@ namespace :sbx do
         machine_def.accept do |child_machine_def|
           vips << child_machine_def.to_vip_spec if child_machine_def.respond_to?(:to_vip_spec)
         end
-
         do_ip_allocations('allocate', vips)
       end
 
@@ -203,7 +202,6 @@ namespace :sbx do
         machine_def.accept do |child_machine_def|
           vips << child_machine_def.to_vip_spec if child_machine_def.respond_to?(:to_vip_spec)
         end
-
         do_ip_allocations('free', vips)
       end
 
@@ -238,23 +236,27 @@ namespace :sbx do
       namespace :puppet do
         desc "sign outstanding Puppet certificate signing requests for these machines"
         sbtask :sign do
-          hosts = []
+          puppet_certs_to_sign = []
           machine_def.accept do |child_machine_def|
             if child_machine_def.respond_to?(:mgmt_fqdn)
-              hosts << child_machine_def.mgmt_fqdn
+              if child_machine_def.needs_signing?
+                puppet_certs_to_sign << child_machine_def.mgmt_fqdn
+              else
+                logger.info "not signing cert for #{child_machine_def.mgmt_fqdn}"
+              end
             end
           end
 
           include Support::MCollectivePuppet
-          ca_sign(hosts) do
-            on :success do |vm|
-              logger.info "successfully signed cert for #{vm}"
+          ca_sign(puppet_certs_to_sign) do
+            on :success do |machine|
+              logger.info "successfully signed cert for #{machine}"
             end
-            on :failed do |vm|
-              logger.warn "failed to signed cert for #{vm}"
+            on :failed do |machine|
+              logger.warn "failed to signed cert for #{machine}"
             end
             on :unaccounted do |vm|
-              logger.warn "cert not signed for #{vm} (unaccounted for)"
+              logger.warn "cert not signed for #{machine} (unaccounted for)"
             end
           end
         end
