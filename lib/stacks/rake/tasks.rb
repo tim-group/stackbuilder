@@ -193,7 +193,11 @@ namespace :sbx do
         machine_def.accept do |child_machine_def|
           vips << child_machine_def.to_vip_spec if child_machine_def.respond_to?(:to_vip_spec)
         end
-        do_ip_allocations('allocate', vips)
+        if vips.empty?
+          logger.info 'no vips to allocate'
+        else
+          do_ip_allocations('allocate', vips)
+        end
       end
 
       desc "free IPs for these virtual services"
@@ -242,7 +246,7 @@ namespace :sbx do
               if child_machine_def.needs_signing?
                 puppet_certs_to_sign << child_machine_def.mgmt_fqdn
               else
-                logger.info "not signing cert for #{child_machine_def.mgmt_fqdn}"
+                logger.info "signing not needed for #{child_machine_def.mgmt_fqdn}"
               end
             end
           end
@@ -255,7 +259,7 @@ namespace :sbx do
             on :failed do |machine|
               logger.warn "failed to signed cert for #{machine}"
             end
-            on :unaccounted do |vm|
+            on :unaccounted do |machine|
               logger.warn "cert not signed for #{machine} (unaccounted for)"
             end
           end
@@ -313,22 +317,26 @@ namespace :sbx do
           fail("some nodes have failed their puppet runs") unless success
         end
 
-        desc ""
+        desc "Remove signed certs from puppetmaster"
         sbtask :clean do
-          hosts = []
+          puppet_certs_to_clean = []
           machine_def.accept do |child_machine_def|
             if child_machine_def.respond_to?(:mgmt_fqdn)
-              hosts << child_machine_def.mgmt_fqdn
+              if child_machine_def.needs_signing?
+                puppet_certs_to_clean << child_machine_def.mgmt_fqdn
+              else
+                logger.info "removal of cert not needed for #{child_machine_def.mgmt_fqdn}"
+              end
             end
           end
 
           include Support::MCollectivePuppet
-          ca_clean(hosts) do
-            on :success do |vm|
-              logger.info "successfully removed cert for #{vm}"
+          ca_clean(puppet_certs_to_clean) do
+            on :success do |machine|
+              logger.info "successfully removed cert for #{machine}"
             end
-            on :failed do |vm|
-              logger.warn "failed to remove cert for #{vm}"
+            on :failed do |machine|
+              logger.warn "failed to remove cert for #{machine}"
             end
           end
         end
