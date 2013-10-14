@@ -51,15 +51,31 @@ describe Stacks::Hosts::HostPolicies do
     provisionally_allocated_machine = double
     existing_machine = double
 
-    candidate_machine.stub(:ram).and_return('100')
-    provisionally_allocated_machine.stub(:ram).and_return('10')
-    existing_machine.stub(:ram).and_return('1')
+    candidate_machine.stub(:ram).and_return('2097152') # 2GB
+    provisionally_allocated_machine.stub(:ram).and_return('2097152') # 2GB
+    existing_machine.stub(:ram).and_return('2097152') # 2GB
 
-    h1 = Stacks::Hosts::Host.new("h1", :ram => '111')
+    h1 = Stacks::Hosts::Host.new("h1", :ram => '8388608') # 8GB
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
     Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine)[:passed].should eql(true)
+  end
+
+  it 'rejects allocations where the host ram is insufficient due to host reserve' do
+    candidate_machine = double
+    provisionally_allocated_machine = double
+    existing_machine = double
+
+    candidate_machine.stub(:ram).and_return('2097152') # 2GB
+    provisionally_allocated_machine.stub(:ram).and_return('2097152') # 2GB
+    existing_machine.stub(:ram).and_return('2097152') # 2GB
+
+    h1 = Stacks::Hosts::Host.new("h1", :ram => '8388607') # 1 byte under 8GB
+    h1.allocated_machines << existing_machine
+    h1.provisionally_allocated_machines << provisionally_allocated_machine
+
+    Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine)[:passed].should eql(false)
   end
 
   it 'rejects allocations where the host ram is insufficient' do
@@ -67,11 +83,11 @@ describe Stacks::Hosts::HostPolicies do
     provisionally_allocated_machine = double
     existing_machine = double
 
-    candidate_machine.stub(:ram).and_return('100')
-    provisionally_allocated_machine.stub(:ram).and_return('10')
-    existing_machine.stub(:ram).and_return('1')
+    candidate_machine.stub(:ram).and_return('2097152') # 2GB
+    provisionally_allocated_machine.stub(:ram).and_return('2097152') # 2GB
+    existing_machine.stub(:ram).and_return('2097152') # 2GB
 
-    h1 = Stacks::Hosts::Host.new("h1", :ram => '110')
+    h1 = Stacks::Hosts::Host.new("h1", :ram => '4194304') # 4GB
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 

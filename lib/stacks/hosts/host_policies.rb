@@ -19,14 +19,15 @@ module Stacks::Hosts::HostPolicies
     Proc.new do |host, machine|
       result = { :passed => true }
       host_ram = Integer(host.ram)
+      host_reserve_ram = 2097152 #2 GB
       if host_ram > 0
         allocated_ram = 0
         host.machines.each do |allocated_machine|
           allocated_ram = allocated_ram + Integer(allocated_machine.ram)
         end
-        available_ram = host_ram - allocated_ram
+        available_ram = (host_ram - allocated_ram) - host_reserve_ram
         if available_ram < Integer(machine.ram)
-          result = { :passed => false, :reason => "unable to fulfil ram requirement of #{machine.ram} because #{allocated_ram}/#{host_ram} is allocated" }
+          result = { :passed => false, :reason => "unable to fulfil ram requirement of #{machine.ram} because only #{available_ram} is available. Memory stats: #{allocated_ram+host_reserve_ram}/#{host_ram}" }
         end
       end
       result
