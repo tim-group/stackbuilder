@@ -7,5 +7,6 @@ module Stacks::AppService
   attr_accessor :application
 
   def configure()
+    @ports = [8000]
   end
 end

@@ -406,10 +406,19 @@ describe Stacks::DSL do
       end
     end
 
+    stack "exampledefaultport" do
+      natserver
+      virtual_appserver 'defaultport' do
+        enable_nat
+      end
+    end
+
+
     env "eg", :primary_site=>"st", :secondary_site=>"bs" do
       instantiate_stack "frontexample"
       env "sub" do
         instantiate_stack "example2"
+        instantiate_stack "exampledefaultport"
       end
     end
 
@@ -457,17 +466,21 @@ describe Stacks::DSL do
       {
       'role::natserver' => {
       'rules' => {
-      'SNAT' => {
-      'prod' => {
-      'to_source' => 'nat-vip.front.st.net.local'
-    }
-    },
-      'DNAT' => {
-      'sub-blahnat-vip.front.st.net.local 8008' => {
-      'dest_host'  => 'sub-blahnat-vip.st.net.local',
-      'dest_port'  => '8008'
-    }
-    }
+        'SNAT' => {
+          'prod' => {
+            'to_source' => 'nat-vip.front.st.net.local'
+           }
+         },
+         'DNAT' => {
+           'sub-blahnat-vip.front.st.net.local 8008' => {
+             'dest_host'  => 'sub-blahnat-vip.st.net.local',
+             'dest_port'  => '8008'
+           },
+            "sub-defaultport-vip.front.st.net.local 8000" => {
+              "dest_port"=>"8000",
+              "dest_host"=>"sub-defaultport-vip.st.net.local"
+           }
+         }
     },
       'prod_virtual_router_id' => 106,
       'front_virtual_router_id' => 105
