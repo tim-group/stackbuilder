@@ -15,8 +15,7 @@ require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
 require 'stacks/mongodb_server'
-
-
+require 'stacks/quantapp_server'
 
 class Stacks::Stack
   attr_reader :name
@@ -80,6 +79,10 @@ class Stacks::Stack
 
   def cislave(name, &block)
     machineset_with(name, [], Stacks::CiSlave, &block)
+  end
+
+  def quantapp(name='quantapp', &block)
+    machineset_with(name, [], Stacks::QuantAppServer, &block)
   end
 
   def [](key)
