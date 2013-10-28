@@ -66,12 +66,13 @@ module Stacks::VirtualService
     object.configure()
   end
 
-  attr_accessor :nat, :persistent_ports
+  attr_accessor :nat, :persistent_ports, :healthcheck_timeout
 
   def configure()
     @nat=false
     @persistent_ports = []
     @port_map = {}
+    @healthcheck_timeout = 10
   end
 
   def to_loadbalancer_config
@@ -95,7 +96,7 @@ module Stacks::VirtualService
       'app' => self.application,
       'realservers' => realservers,
       'monitor_warn' => monitor_warn,
-      'healthcheck_timeout' => 10
+      'healthcheck_timeout' => self.healthcheck_timeout
     }]
 
   end

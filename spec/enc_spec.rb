@@ -125,6 +125,56 @@ describe Stacks::DSL do
     )
   end
 
+  it 'generates load balancer enc data with the a different healthcheck_timeout if specified'  do
+    stack "fabric" do
+      loadbalancer
+    end
+
+    stack "twoapp" do
+      virtual_appserver "twoapp"
+    end
+
+    stack "oneapp" do
+      virtual_appserver "oneapp" do
+        self.groups = ['blue', 'green']
+        self.healthcheck_timeout = 999
+      end
+    end
+
+    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+      instantiate_stack "fabric"
+      instantiate_stack "twoapp"
+      instantiate_stack "oneapp"
+    end
+    loadbalancer = find("st-lb-001.mgmt.st.net.local")
+    loadbalancer.to_enc.should eql(
+      {"role::loadbalancer"=>
+        {"virtual_router_id"=>1,
+          "virtual_servers"=>
+        {"st-twoapp-vip.st.net.local"=>
+          { "healthcheck_timeout" => 10,
+            "realservers"=>
+            {"blue"=>["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]},
+              "env"=>"st",
+              "app"=>nil,
+              "monitor_warn"=>1},
+         "st-oneapp-vip.st.net.local"=>
+            { "healthcheck_timeout" => 10,
+              "realservers"=>
+              {"green"=>["st-oneapp-002.st.net.local"],
+                "blue"=>["st-oneapp-001.st.net.local"]},
+                "env"=>"st",
+                "app"=>nil,
+                "monitor_warn"=>0,
+                "healthcheck_timeout" => 999
+              }
+        }
+        }
+    }
+    )
+  end
+
+
   it 'can generate the load balancer spec for a sub environment' do
     stack "fabric" do
       loadbalancer
