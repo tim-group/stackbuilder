@@ -104,18 +104,21 @@ describe Stacks::DSL do
         {"virtual_router_id"=>1,
           "virtual_servers"=>
         {"st-twoapp-vip.st.net.local"=>
-          {"realservers"=>
+          { "healthcheck_timeout" => 10,
+            "realservers"=>
             {"blue"=>["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]},
               "env"=>"st",
               "app"=>nil,
               "monitor_warn"=>1},
-              "st-oneapp-vip.st.net.local"=>
-            {"realservers"=>
+         "st-oneapp-vip.st.net.local"=>
+            { "healthcheck_timeout" => 10,
+              "realservers"=>
               {"green"=>["st-oneapp-002.st.net.local"],
                 "blue"=>["st-oneapp-001.st.net.local"]},
                 "env"=>"st",
                 "app"=>nil,
-                "monitor_warn"=>0}
+                "monitor_warn"=>0,
+              }
         }
         }
     }
@@ -172,6 +175,8 @@ describe Stacks::DSL do
       'env' => 'ci2',
       'app' => 'JavaHttpRef',
       'monitor_warn'=>0,
+      'healthcheck_timeout' => 10,
+
       'realservers' => {
       'blue' => [
         'ci2-appx-001.st.net.local'
@@ -185,6 +190,8 @@ describe Stacks::DSL do
       'env' => 'ci2',
       'app' => 'MySuperCoolApp',
       'monitor_warn'=>1,
+      'healthcheck_timeout' => 10,
+
       'realservers' => {
       'blue' => [
         'ci2-app2x-001.st.net.local',
@@ -222,21 +229,23 @@ describe Stacks::DSL do
       'virtual_router_id' => 1,
       'virtual_servers' => {
       'ci-appx-vip.st.net.local' => {
-      'monitor_warn'=>0,
-      'env' => 'ci',
-      'app' => 'JavaHttpRef',
-      'realservers' => {
-      'blue' => [
-        'ci-appx-001.st.net.local'
-    ],
-      'green'=> [
-        'ci-appx-002.st.net.local'
+        'healthcheck_timeout' => 10,
+        'monitor_warn'=>0,
+        'env' => 'ci',
+        'app' => 'JavaHttpRef',
+        'realservers' => {
+          'blue' => [
+            'ci-appx-001.st.net.local'
+          ],
+          'green'=> [
+             'ci-appx-002.st.net.local'
     ]
     }
     },
       'ci-app2x-vip.st.net.local' => {
-      'monitor_warn'=>1,
-      'env' => 'ci',
+         'healthcheck_timeout' => 10,
+         'monitor_warn'=>1,
+        'env' => 'ci',
       'app' => 'MySuperCoolApp',
       'realservers' => {
       'blue' => [

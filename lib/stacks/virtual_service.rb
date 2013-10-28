@@ -94,7 +94,8 @@ module Stacks::VirtualService
       'env' => self.environment.name,
       'app' => self.application,
       'realservers' => realservers,
-      'monitor_warn' => monitor_warn
+      'monitor_warn' => monitor_warn,
+      'healthcheck_timeout' => 10
     }]
 
   end
