@@ -22,7 +22,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
       :fabric              => @fabric,
       :template            => 'puppetmaster',
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
-      :aliases             => ['puppet'],
+      :cnames              => { :mgmt =>  { 'puppet' => "#{qualified_hostname(:mgmt)}" } },
       :ram                 => '2097152'
     }
   end

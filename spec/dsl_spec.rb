@@ -81,7 +81,7 @@ describe Stacks::DSL do
       :qualified_hostnames => {:mgmt => "ci-puppetmaster-001.mgmt.st.net.local"},
       :networks => [:mgmt],
       :template => 'puppetmaster',
-      :aliases => ['puppet'],
+      :cnames => {:mgmt => {'puppet' => 'ci-puppetmaster-001.mgmt.st.net.local'}},
       :fabric => "st",
       :ram => "2097152"
     }])

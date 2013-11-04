@@ -86,7 +86,7 @@ class Compute::Controller
     all_specs = allocation.map do |host, specs|
       specs
     end.flatten
-    
+
     callback = Support::Callback.new(&block)
     dispatch_results(all_specs, grouped_results, callback)
   end
@@ -131,7 +131,7 @@ class Compute::Controller
       unless spec.is_a?(Hash)
         pp spec
       end
-      
+
       vm = spec[:hostname]
       result = flattened_results[vm]
       if result.nil?
@@ -201,5 +201,13 @@ class Compute::Controller
     end
 
     dispatch_results(all_specs, grouped_results, callback)
+  end
+
+  def add_cnames(all_specs, &block)
+    allocate_and_send(:add_cnames, all_specs, &block)
+  end
+
+  def remove_cnames(all_specs, &block)
+    allocate_and_send(:remove_cnames, all_specs, &block)
   end
 end

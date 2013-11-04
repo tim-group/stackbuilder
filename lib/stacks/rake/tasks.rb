@@ -107,6 +107,25 @@ def do_ip_allocations(type, specs)
   end
 end
 
+def do_cnames(type, specs)
+  method = "#{type}_cnames".to_sym
+  computecontroller = Compute::Controller.new
+  computecontroller.send(method, specs) do
+    on :success do |vm, msg|
+      logger.info "#{vm} #{type} CNAME successfully"
+    end
+    on :failure do |vm, msg|
+      logger.error "#{vm} failed to #{type} CNAME entry: #{msg}"
+    end
+    on :unaccounted do |vm|
+      logger.error "#{vm} was unaccounted for"
+    end
+    has :failure do
+      fail "some machines failed to #{type} CNAMEs"
+    end
+  end
+end
+
 namespace :sbx do
   environment.accept do |machine_def|
 
@@ -131,7 +150,7 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait', 'orc:resolve']
+      task :provision=> ['allocate_vips', 'launch', 'add_cnames', 'puppet:sign', 'puppet:wait', 'orc:resolve']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -185,6 +204,16 @@ namespace :sbx do
       sbtask :enable_notify do
         computecontroller = Compute::Controller.new
         computecontroller.enable_notify(machine_def.to_specs)
+      end
+
+      desc "add CNAME entries to DNS"
+      sbtask :add_cnames do
+        do_cnames('add', machine_def.to_specs)
+      end
+
+      desc "remove CNAME entries from DNS"
+      sbtask :remove_cnames do
+        do_cnames('remove', machine_def.to_specs)
       end
 
       desc "allocate IPs for these virtual services"
@@ -348,7 +377,7 @@ namespace :sbx do
       # removing their puppet cert, otherwise we have a race condition
       task :clean => ['clean_nodes', 'puppet:clean']
       desc "frees up ip and vip allocation of these machines"
-      task :free_ip_allocation => ['free_ips', 'free_vips']
+      task :free_ip_allocation => ['remove_cnames', 'free_ips', 'free_vips']
 
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
