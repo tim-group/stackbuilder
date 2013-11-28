@@ -24,7 +24,7 @@ describe_stack 'selenium' do
         :template=>"sehub",
         :qualified_hostnames=>
         {:mgmt=>"e1-hub-001.mgmt.space.net.local"},
-          :group=>nil,
+          :availability_group=>nil,
           :networks=>[:mgmt],
           :hostname=>"e1-hub-001",
           :ram=>"2097152",
@@ -41,7 +41,7 @@ describe_stack 'selenium' do
         :launch_script => 'start-grid.bat',
         :qualified_hostnames=>
         {:mgmt=>"e1-xp6-005.mgmt.space.net.local"},
-          :group=>nil,
+          :availability_group=>nil,
           :networks=>[:mgmt],
           :hostname=>"e1-xp6-005",
           :ram=>"2097152",
@@ -56,7 +56,7 @@ describe_stack 'selenium' do
       :se_version =>  '2.32.0',
       :qualified_hostnames=>
       {:mgmt=>"e1-browser-001.mgmt.space.net.local"},
-        :group=>nil,
+        :availability_group=>nil,
         :networks=>[:mgmt],
         :hostname=>"e1-browser-001",
         :ram=>"2097152",

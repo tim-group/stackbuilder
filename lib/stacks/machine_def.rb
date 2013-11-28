@@ -66,7 +66,7 @@ class Stacks::MachineDef
       :hostname => @hostname,
       :domain => @domain,
       :fabric => @fabric,
-      :group => availability_group,
+      :availability_group => availability_group,
       :networks => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }

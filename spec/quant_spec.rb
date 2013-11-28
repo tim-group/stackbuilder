@@ -22,7 +22,7 @@ describe_stack 'quant' do
        :qualified_hostnames=>{
           :mgmt=>"e1-quantapp-001.mgmt.space.net.local",
           :prod=>"e1-quantapp-001.space.net.local"},
-        :group=>"e1-quantapp",
+        :availability_group=>"e1-quantapp",
         :networks=>[:mgmt, :prod],
         :hostname=>"e1-quantapp-001",
         :ram=>"4194304",

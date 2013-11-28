@@ -26,7 +26,7 @@ describe_stack 'mongodb' do
        :qualified_hostnames=>{
           :mgmt=>"e1-mongodb-001.mgmt.space.net.local",
           :prod=>"e1-mongodb-001.space.net.local"},
-        :group=>"e1-mongodb",
+        :availability_group=>"e1-mongodb",
         :networks=>[:mgmt, :prod],
         :hostname=>"e1-mongodb-001",
         :ram=>"2097152",

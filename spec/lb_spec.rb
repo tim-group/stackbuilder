@@ -17,7 +17,7 @@ describe_stack 'lb' do
       :qualified_hostnames=>{
       :mgmt=>"e1-lb-002.mgmt.space.net.local",
       :prod=>"e1-lb-002.space.net.local"},
-      :group=>"e1-lb",
+      :availability_group=>"e1-lb",
       :networks=>[:mgmt, :prod],
       :hostname=>"e1-lb-002",
       :ram=>"2097152",

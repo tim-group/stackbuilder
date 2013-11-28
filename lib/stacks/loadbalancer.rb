@@ -26,7 +26,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
   def to_specs
     return [{
       :hostname => @hostname,
-      :group  => availability_group,
+      :availability_group  => availability_group,
       :domain => @domain,
       :fabric => @fabric,
       :networks => @networks,
