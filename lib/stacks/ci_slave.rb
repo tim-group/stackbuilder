@@ -7,6 +7,10 @@ class Stacks::CiSlave < Stacks::MachineDef
     self
   end
 
+  def availability_group
+    nil
+  end
+
   def bind_to(environment)
     super(environment)
   end
