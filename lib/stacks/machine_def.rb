@@ -2,6 +2,7 @@ require 'stacks/namespace'
 require 'facter'
 
 class Stacks::MachineDef
+  attr_accessor :availability_group
   attr_reader :hostname, :domain, :environment
   attr_reader :fabric, :networks
   attr_accessor :ram, :image_size, :vcpus

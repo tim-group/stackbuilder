@@ -28,7 +28,7 @@ describe_stack 'jenkins' do
         :mgmt=>"e1-jenkinsslave-002.mgmt.space.net.local",
         :prod=>"e1-jenkinsslave-002.space.net.local",
         :front=>"e1-jenkinsslave-002.front.space.net.local"},
-        :group=>nil,
+        :group=>"e1-jenkinsslave",
         :networks=>[:mgmt, :prod, :front],
         :hostname=>"e1-jenkinsslave-002",
         :ram=>"8000",
