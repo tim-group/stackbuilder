@@ -85,6 +85,10 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::QuantAppServer, &block)
   end
 
+  def standard(name, &block)
+    @definitions[name] = Stacks::MachineDef.new(name)
+  end
+
   def [](key)
     return @definitions[key]
   end
