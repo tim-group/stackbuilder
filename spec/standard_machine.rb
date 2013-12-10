@@ -12,6 +12,8 @@ describe_stack 'standard' do
   end
 
   host("e1-mymachine-001.mgmt.space.net.local") do |host|
+    host.to_enc
+
     host.to_specs.should eql([
       {:fabric=>"space",
        :qualified_hostnames=>{

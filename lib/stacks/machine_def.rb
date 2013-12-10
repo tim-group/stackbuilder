@@ -83,6 +83,10 @@ class Stacks::MachineDef
     [ to_spec ]
   end
 
+  def to_enc
+    return {}
+  end
+
   def qualified_hostname(network)
     raise "no such network '#{network}'" unless @networks.include?(network)
     if network.eql?(:prod)
