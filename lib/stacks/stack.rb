@@ -16,6 +16,7 @@ require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
 require 'stacks/mongodb_server'
 require 'stacks/quantapp_server'
+require 'stacks/standard_server'
 
 class Stacks::Stack
   attr_reader :name
@@ -86,7 +87,7 @@ class Stacks::Stack
   end
 
   def standard(name, &block)
-    @definitions[name] = Stacks::MachineDef.new(name)
+    machineset_with(name, [], Stacks::StandardServer, &block)
   end
 
   def [](key)
