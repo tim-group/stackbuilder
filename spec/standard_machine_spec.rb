@@ -3,7 +3,7 @@ require 'stacks/test_framework'
 describe_stack 'standard' do
   given do
     stack "standard" do
-      standard "mymachine-001"
+      standard "mymachine"
     end
 
     env "e1", :primary_site=>"space" do
@@ -19,7 +19,7 @@ describe_stack 'standard' do
        :qualified_hostnames=>{
           :mgmt=>"e1-mymachine-001.mgmt.space.net.local",
           :prod=>"e1-mymachine-001.space.net.local"},
-        :availability_group => nil,
+        :availability_group => "e1-mymachine",
         :networks=>[:mgmt, :prod],
         :hostname=>"e1-mymachine-001",
         :domain=>"space.net.local",
