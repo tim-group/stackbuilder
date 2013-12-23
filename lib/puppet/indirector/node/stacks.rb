@@ -13,17 +13,12 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
 
   def find(request)
     node = @delegate.find(request)
-    classes = find_stack_classes(request.key)
-    if classes
-      node.classes = classes
+    machine = @stacks_inventory.find(request.key)
+    if machine
+      node.classes = machine.to_enc
+      node.parameters['logicalenv'] = machine.environment.name
     end
     return node
-  end
-
-  def find_stack_classes(fqdn)
-    machine = @stacks_inventory.find(fqdn)
-    return nil if machine.nil?
-    return machine.to_enc
   end
 
 end

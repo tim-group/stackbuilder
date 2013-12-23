@@ -37,11 +37,14 @@ describe Puppet::Node::Stacks do
     node = node_for(hostname)
     @delegate.should_receive(:find).with(request).and_return(node)
     machine = double('machine')
+    machine.stub(:environment).and_return(Stacks::Environment.new("testenv",{},{}))
     @stacks_inventory.should_receive(:find).with(hostname).and_return(machine)
     machine.should_receive(:to_enc).and_return({"role::http_app"=>{"application"=>"JavaHttpRef"}})
 
     indirector = Puppet::Node::Stacks.new(@stacks_inventory, @delegate)
     result = indirector.find(request)
+
+    node.parameters['logicalenv'].should eql('testenv')
 
     result.should eql(node)
     # it is super-shitty that this is tested by reproducing the entire config, but Puppet::Node::Stacks does not lend itself to mocking this
