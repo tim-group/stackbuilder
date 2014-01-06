@@ -14,7 +14,7 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
   def find(request)
     node = @delegate.find(request)
     machine = @stacks_inventory.find(request.key)
-    if machine
+    if machine.nil?
       node.classes = machine.to_enc
       node.parameters['logicalenv'] = machine.environment.name
     end
