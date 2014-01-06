@@ -39,7 +39,7 @@ describe Puppet::Node::Stacks do
     machine = double('machine')
     machine.stub(:environment).and_return(Stacks::Environment.new("testenv",{},{}))
     @stacks_inventory.should_receive(:find).with(hostname).and_return(machine)
-    machine.should_receive(:to_enc).and_return({"role::http_app"=>{"application"=>"JavaHttpRef"}})
+    machine.should_receive(:to_enc).and_return()
 
     indirector = Puppet::Node::Stacks.new(@stacks_inventory, @delegate)
     result = indirector.find(request)
