@@ -15,6 +15,7 @@ require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
 require 'stacks/mongodb_server'
+require 'stacks/mysqldb_server'
 require 'stacks/quantapp_server'
 require 'stacks/standard_server'
 
@@ -50,6 +51,10 @@ class Stacks::Stack
 
   def mongodb(name='mongodb', &block)
     machineset_with(name, [], Stacks::MongoDBServer, &block)
+  end
+
+  def mysqldb(name='mongodb', &block)
+    machineset_with(name, [], Stacks::MysqlDBServer, &block)
   end
 
   def puppetmaster(name="puppetmaster-001")
