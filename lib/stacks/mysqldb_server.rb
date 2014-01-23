@@ -3,6 +3,7 @@ require 'stacks/machine_def'
 
 class Stacks::MysqlDBServer < Stacks::MachineDef
 
+  attr_accessor :database_name, :application
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
@@ -14,8 +15,13 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
 
   def to_enc()
     {
-      'role::mysqldb_server' => {
-       }
+      'role::databaseserver' => {
+        'application'              => self.application,
+        'environment'              => environment.name,
+        'database_name'            => self.database_name,
+        'restart_on_config_change' => true,  
+      }
+
     }
   end
 end
