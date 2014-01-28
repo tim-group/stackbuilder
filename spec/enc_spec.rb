@@ -597,7 +597,8 @@ describe Stacks::DSL do
     },
       'redirects'      => ['old-example.timgroup.com'],
       'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
-      'type' => 'default'
+      'type' => 'default',
+      'vhost_properties'=>{}
     },
     'example.timgroup.com' => {
       'application'    => 'MyOtherApp',
@@ -607,7 +608,8 @@ describe Stacks::DSL do
     },
       'redirects'      => [],
       'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local'],
-      'type' => 'default'
+      'type' => 'default',
+      'vhost_properties'=>{}
     }
     }
     }

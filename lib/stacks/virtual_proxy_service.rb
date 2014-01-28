@@ -21,9 +21,9 @@ module Stacks::XProxyService
   end
 
 
-  def vhost(service, options={}, &config_block)
+  def vhost(service, options={}, vhost_properties={}, &config_block)
      key = "#{self.name}.vhost.#{service}.server_name"
-    _vhost(key, vip_front_fqdn, vip_fqdn, service, 'default', options, &config_block)
+    _vhost(key, vip_front_fqdn, vip_fqdn, service, 'default', options, vhost_properties, &config_block)
   end
 
   def sso_vip_front_fqdn
@@ -34,12 +34,12 @@ module Stacks::XProxyService
     "#{environment.name}-#{name}-sso-vip.#{@domain}"
   end
 
-  def sso_vhost(service, options={}, &config_block)
+  def sso_vhost(service, options={}, vhost_properties={}, &config_block)
      key = "#{self.name}.vhost.#{service}-sso.server_name"
-     _vhost(key, sso_vip_front_fqdn, sso_vip_fqdn, service, 'sso', options, &config_block)
+     _vhost(key, sso_vip_front_fqdn, sso_vip_fqdn, service, 'sso', options, vhost_properties, &config_block)
   end
 
-  def _vhost(key, default_vhost_fqdn, alias_fqdn, service, type, options={}, &config_block)
+  def _vhost(key, default_vhost_fqdn, alias_fqdn, service, type, options={}, vhost_properties={}, &config_block)
    if (environment.options.has_key?(key))
       proxy_vhost = Stacks::ProxyVHost.new(environment.options[key], service, type, &config_block)
       proxy_vhost.with_alias(default_vhost_fqdn)
@@ -47,6 +47,7 @@ module Stacks::XProxyService
       proxy_vhost = Stacks::ProxyVHost.new(default_vhost_fqdn, service, type, &config_block)
     end
     proxy_vhost.with_alias(alias_fqdn)
+    proxy_vhost.vhost_properties(vhost_properties)
     @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
   end
 
@@ -85,7 +86,8 @@ module Stacks::XProxyService
         'redirects' => vhost.redirects,
         'application' => primary_app.application,
         'proxy_pass_rules' => proxy_pass_rules,
-        'type'  => vhost.type
+        'type'  => vhost.type,
+        'vhost_properties' => vhost.properties
       }]
     end]
 

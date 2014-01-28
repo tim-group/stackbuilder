@@ -7,6 +7,7 @@ class Stacks::ProxyVHost
   attr_reader :service
   attr_reader :redirects
   attr_reader :proxy_pass_rules
+  attr_reader :properties
   attr_reader :type
 
   def initialize(vhost_fqdn, service, type = 'default', &block)
@@ -16,6 +17,7 @@ class Stacks::ProxyVHost
     @redirects = []
     @proxy_pass_rules = {}
     @type = type
+    @properties = {}
     self.instance_eval &block
   end
 
@@ -30,5 +32,10 @@ class Stacks::ProxyVHost
   def pass(proxy_pass_rule)
     @proxy_pass_rules.merge!(proxy_pass_rule)
   end
+  
+  def vhost_properties(properties)
+    @properties.merge!(properties)
+  end
+  
 end
 
