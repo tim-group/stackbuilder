@@ -1,6 +1,6 @@
 require 'stacks/hosts/namespace'
 
-module Stacks::Hosts::HostPolicies
+module StackBuilder::Allocator::HostPolicies
   def self.ha_group()
     Proc.new do |host, machine|
       result = { :passed => true }

@@ -1,6 +1,6 @@
 require 'stacks/hosts/namespace'
 
-module Stacks::Hosts::HostPreference
+module StackBuilder::Allocator::Hosts::HostPreference
   def self.fewest_machines()
     Proc.new do |host|
       host.machines.size

@@ -1,7 +1,7 @@
-require 'stacks/hosts/namespace'
-require 'stacks/hosts/hosts'
+require 'allocator/namespace'
+require 'allocator/hosts'
 
-class Stacks::Hosts::HostRepository
+class StackBuilder::Allocator::HostRepository
   attr_accessor :machine_repo
   attr_reader :preference_functions
   attr_reader :policies
@@ -26,7 +26,7 @@ class Stacks::Hosts::HostRepository
 
       @policies = [] if fabric == "local"
 
-      host = Stacks::Hosts::Host.new(fqdn,
+      host = StackBuilder::Allocator::Host.new(fqdn,
         :preference_functions => preference_functions,
         :policies => policies,
         :ram => attr[:memory])
@@ -35,7 +35,7 @@ class Stacks::Hosts::HostRepository
       hosts << host
     end
 
-    Stacks::Hosts::Hosts.new(:hosts => hosts, :preference_functions => preference_functions, :logger => @logger)
+    StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions, :logger => @logger)
   end
 end
 

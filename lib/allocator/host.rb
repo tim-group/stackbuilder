@@ -1,13 +1,13 @@
 require 'stacks/hosts/namespace'
 
-class Stacks::Hosts::Host
+class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines
   attr_accessor :provisionally_allocated_machines
   attr_reader :fqdn
   attr_reader :ram
   attr_reader :preference_functions
   attr_accessor :policies
-  
+
   def initialize(fqdn, args = {:preference_functions=>[], :policies=>[], :ram=>'0'})
     @provisionally_allocated_machines = []
     @fqdn = fqdn

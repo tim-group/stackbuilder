@@ -1,7 +1,7 @@
-require 'stacks/hosts/namespace'
-require 'stacks/hosts/host'
+require 'allocator/namespace'
+require 'allocator/host'
 
-class Stacks::Hosts::Hosts
+class StackBuilder::Allocator::Hosts
   attr_accessor :hosts
   def initialize(args)
     @hosts = args[:hosts]

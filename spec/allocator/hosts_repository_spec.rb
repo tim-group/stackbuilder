@@ -1,6 +1,6 @@
-require 'stacks/hosts/host_repository'
+require 'allocator/host_repository'
 
-describe Stacks::Hosts::HostRepository do
+describe StackBuilder::Allocator::HostRepository do
   before do
     extend Stacks::DSL
   end
@@ -29,7 +29,7 @@ describe Stacks::Hosts::HostRepository do
     result = {"onlyhost" => {:active_domains=>[]}}
     compute_node_client.stub(:audit_hosts).and_return(result)
 
-    host_repo = Stacks::Hosts::HostRepository.new(
+    host_repo = StackBuilder::Allocator::HostRepository.new(
       :machine_repo => self,
       :preference_functions=>preference_functions,
       :policies=>[policy],
@@ -39,7 +39,7 @@ describe Stacks::Hosts::HostRepository do
     hosts.hosts.size.should eql(1)
     hosts.allocate(env.flatten)
   end
-  
+
   it 'creates a Hosts object with corresponding Host objects' do
     env = test_env_with_refstack
     machines = env.flatten.map {|machine| machine.hostname}
@@ -56,7 +56,7 @@ describe Stacks::Hosts::HostRepository do
     preference_functions = []
     compute_node_client.stub(:audit_hosts).and_return(result)
 
-    host_repo = Stacks::Hosts::HostRepository.new(
+    host_repo = StackBuilder::Allocator::HostRepository.new(
     :machine_repo => self,
     :preference_functions=>preference_functions,
     :compute_node_client => compute_node_client)
