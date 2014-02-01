@@ -1,4 +1,4 @@
-require 'stacks/hosts/namespace'
+require 'allocator/namespace'
 
 class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines

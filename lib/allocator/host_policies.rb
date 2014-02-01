@@ -1,4 +1,4 @@
-require 'stacks/hosts/namespace'
+require 'allocator/namespace'
 
 module StackBuilder::Allocator::HostPolicies
   def self.ha_group()

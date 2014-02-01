@@ -8,9 +8,9 @@ require 'support/mcollective'
 require 'support/mcollective_puppet'
 require 'compute/controller'
 require 'support/logger'
-require 'stacks/hosts/host_repository'
-require 'stacks/hosts/host_preference'
-require 'stacks/hosts/host_policies'
+require 'allocator/host_repository'
+require 'allocator/host_preference'
+require 'allocator/host_policies'
 require 'stacks/core/services'
 require 'stacks/namespace'
 
@@ -57,16 +57,16 @@ class Stacks::Factory
 
   def policies()
     @policies ||= [
-      Stacks::Hosts::HostPolicies.ha_group,
-      Stacks::Hosts::HostPolicies.do_not_overallocated_ram_policy,
-      Stacks::Hosts::HostPolicies.do_not_overallocated_disk_policy
+      StackBuilder::Allocator::HostPolicies.ha_group,
+      StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy,
+      StackBuilder::Allocator::HostPolicies.do_not_overallocated_disk_policy
     ]
   end
 
   def preference_functions()
     @preference_functions ||= [
-      Stacks::Hosts::HostPreference.fewest_machines(),
-      Stacks::Hosts::HostPreference.alphabetical_fqdn()
+      StackBuilder::Allocator::HostPreference.fewest_machines(),
+      StackBuilder::Allocator::HostPreference.alphabetical_fqdn()
     ]
   end
 
@@ -79,7 +79,7 @@ class Stacks::Factory
   end
 
   def host_repository()
-    @host_repository ||= Stacks::Hosts::HostRepository.new(
+    @host_repository ||= StackBuilder::Allocator::HostRepository.new(
       :machine_repo => inventory,
       :preference_functions=>preference_functions,
       :policies => policies,
