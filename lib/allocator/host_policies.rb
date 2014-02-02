@@ -3,8 +3,10 @@ require 'allocator/namespace'
 module StackBuilder::Allocator::HostPolicies
   def self.ha_group()
     Proc.new do |host, machine|
+      machine_spec = machine.to_spec
+
       result = { :passed => true }
-      if machine.respond_to? :availability_group and machine.availability_group != nil
+      if machine_spec[:availability_group]
         host.machines.each do |allocated_machine|
           if allocated_machine.respond_to? :availability_group and machine.availability_group == allocated_machine.availability_group
             result = { :passed => false, :reason => "already running  #{allocated_machine.name}, which is in same availability group" }

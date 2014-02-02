@@ -38,6 +38,14 @@ describe StackBuilder::Allocator::HostPolicies do
     machine = double
     running_machine= double
 
+    machine.stub(:to_spec).and_return({
+      :availability_group => nil
+    })
+
+    running_machine.stub(:to_spec).and_return({
+      :availability_group => nil
+    })
+
     machine.stub(:availability_group).and_return(nil)
     running_machine.stub(:availability_group).and_return(nil)
 
