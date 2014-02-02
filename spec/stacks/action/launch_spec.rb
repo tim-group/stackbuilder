@@ -1,6 +1,6 @@
-require 'stacks/hosts/host_repository'
-require 'stacks/hosts/hosts'
-require 'stacks/hosts/host_preference'
+require 'allocator/host_repository'
+require 'allocator/hosts'
+require 'allocator/host_preference'
 require 'stacks/core/services'
 require 'stacks/core/actions'
 
@@ -31,8 +31,8 @@ describe 'launch' do
 
   def standard_preference_functions
     return [
-      Stacks::Hosts::HostPreference.fewest_machines(),
-      Stacks::Hosts::HostPreference.alphabetical_fqdn]
+      StackBuilder::Allocator::HostPreference.fewest_machines(),
+      StackBuilder::Allocator::HostPreference.alphabetical_fqdn]
   end
 
   def host_repo_with_hosts(
@@ -51,27 +51,27 @@ describe 'launch' do
 
     compute_node_client.stub(:audit_hosts).and_return(result)
 
-    host_repox = Stacks::Hosts::HostRepository.new(
+    host_repox = StackBuilder::Allocator::HostRepository.new(
     :preference_functions=>preference_functions,
     :compute_node_client => compute_node_client)
 
     host_repo = double
     hosts = []
     n.times do |i|
-      host = Stacks::Hosts::Host.new("h#{i+1}")
+      host = StackBuilder::Allocator::Host.new("h#{i+1}")
       block.call(host,i) unless block.nil?
       hosts << host
     end
 
-    host_repo.stub(:find_current).and_return(Stacks::Hosts::Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
+    host_repo.stub(:find_current).and_return(StackBuilder::Allocator::Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
     host_repo
   end
 
   it 'gives me a list of machines that are already launched' do
     env = test_env_with_refstack
-    hx = Stacks::Hosts::Host.new("hx")
+    hx = StackBuilder::Allocator::Host.new("hx")
     hx.allocated_machines=env.flatten
-    hosts = Stacks::Hosts::Hosts.new(:hosts => [hx])
+    hosts = StackBuilder::Allocator::Hosts.new(:hosts => [hx])
 
     Hash[hosts.allocated_machines(env.flatten).map do |machine, host|
       [ machine.mgmt_fqdn,host.fqdn]
@@ -83,8 +83,8 @@ describe 'launch' do
 
   it 'gives me a list of machines that are going to be launched' do
     env = test_env_with_refstack
-    hx = Stacks::Hosts::Host.new("hx")
-    hosts = Stacks::Hosts::Hosts.new(:hosts => [hx], :preference_functions=>[])
+    hx = StackBuilder::Allocator::Host.new("hx")
+    hosts = StackBuilder::Allocator::Hosts.new(:hosts => [hx], :preference_functions=>[])
 
     hosts.allocate(env.flatten)
     Hash[hosts.new_machine_allocation().map do |machine, host|

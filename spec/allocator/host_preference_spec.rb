@@ -1,15 +1,15 @@
-require 'stacks/hosts/hosts'
-require 'stacks/hosts/host_preference'
+require 'allocator/hosts'
+require 'allocator/host_preference'
 
-describe Stacks::Hosts::HostPreference do
+describe StackBuilder::Allocator::HostPreference do
   it 'does shit' do
     preference_function = Proc.new do |host|
       host.machines.size
     end
 
-    h1 = Stacks::Hosts::Host.new("h1")
-    h2 = Stacks::Hosts::Host.new("h2")
-    h3 = Stacks::Hosts::Host.new("h3")
+    h1 = StackBuilder::Allocator::Host.new("h1")
+    h2 = StackBuilder::Allocator::Host.new("h2")
+    h3 = StackBuilder::Allocator::Host.new("h3")
 
     h1.allocated_machines << "x"
     hosts = [h3,h1,h2]
@@ -21,9 +21,9 @@ describe Stacks::Hosts::HostPreference do
       host.machines.size
     end
 
-    h1 = Stacks::Hosts::Host.new("h1")
-    h2 = Stacks::Hosts::Host.new("h2")
-    h3 = Stacks::Hosts::Host.new("h3")
+    h1 = StackBuilder::Allocator::Host.new("h1")
+    h2 = StackBuilder::Allocator::Host.new("h2")
+    h3 = StackBuilder::Allocator::Host.new("h3")
 
     h1.allocated_machines << "x"
     hosts = [h3,h1,h2]
