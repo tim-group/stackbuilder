@@ -7,26 +7,27 @@ module Stacks::Core::Actions
 
     object.action 'allocate' do |services, machine_def|
       machines = machine_def.flatten
-
+      machine_specs = machine_def.flatten.map {|machine| machine.to_spec}
       fabrics = machines.map {|machine| machine.fabric}.uniq
       raise "we don't support launching in multiple locations right now" unless fabrics.size==1
 
       hosts = services.host_repo.find_current(fabrics.shift)
 
-      hosts.allocated_machines(machine_def.flatten).map do |machine, host|
-        services.logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
+      hosts.allocated_machines(machine_specs).map do |machine, host|
+        services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host.fqdn}")
       end
 
-      hosts.allocate(machine_def.flatten)
+      hosts.allocate(machine_specs)
 
       hosts.new_machine_allocation.each do |machine, host|
-        services.logger.info "#{machine.mgmt_fqdn} *would be* allocated to #{host.fqdn}\n"
+        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host.fqdn}\n"
       end
 
    end
 
     object.action 'launch' do |services, machine_def|
       machines = machine_def.flatten
+      machine_specs = machine_def.flatten.map {|machine| machine.to_spec}
 
       machines.each do |machine|
         if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
@@ -39,14 +40,14 @@ module Stacks::Core::Actions
 
       hosts = services.host_repo.find_current(fabrics.shift)
 
-      hosts.allocated_machines(machine_def.flatten).map do |machine, host|
-        services.logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
+      hosts.allocated_machines(machine_specs).map do |machine, host|
+        services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host.fqdn}")
       end
 
-      hosts.allocate(machine_def.flatten)
+      hosts.allocate(machine_specs)
 
       hosts.new_machine_allocation.each do |machine, host|
-        services.logger.info "#{machine.mgmt_fqdn} *now* allocated to #{host.fqdn}\n"
+        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *now* allocated to #{host.fqdn}\n"
       end
 
       specs = hosts.to_unlaunched_specs()

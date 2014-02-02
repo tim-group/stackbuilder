@@ -66,7 +66,7 @@ describe StackBuilder::Allocator::HostRepository do
     hosts.hosts.size.should eql(n)
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)
-      host.machines.should eql(env.flatten.map {|machine| machine.to_specs})
+      host.machines.should eql(env.flatten.map {|machine| machine.to_specs}.flatten)
     end
   end
 end

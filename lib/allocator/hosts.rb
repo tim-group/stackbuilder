@@ -20,14 +20,14 @@ class StackBuilder::Allocator::Hosts
       if !allocation_check_result[:allocatable]
         reason_message = allocation_check_result[:reasons].join("; ")
         if @logger != nil
-          @logger.debug("Unable to allocate #{machine.name} to #{host.fqdn} because it is [#{reason_message}]")
+          @logger.debug("Unable to allocate #{machine[:hostname]} to #{host.fqdn} because it is [#{reason_message}]")
         end
         allocation_denials << "unable to allocate to #{host.fqdn} because it is [#{reason_message}]"
       end
       !allocation_check_result[:allocatable]
     end
 
-    raise "unable to allocate #{machine.name} due to policy violation:\n  #{allocation_denials.join("\n  ")}" if candidate_hosts.size==0
+    raise "unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}" if candidate_hosts.size==0
     candidate_hosts.sort_by do |host|
       host.preference(machine)
     end[0]
@@ -77,11 +77,10 @@ class StackBuilder::Allocator::Hosts
     end
   end
 
+  ##TEST.ME
   def to_unlaunched_specs
     Hash[@hosts.map do |host|
-      specs = host.provisionally_allocated_machines.map do |machine|
-        machine.to_spec
-      end
+      specs = host.provisionally_allocated_machines()
       [host.fqdn, specs]
     end].reject {|host, specs| specs.size==0}
   end
