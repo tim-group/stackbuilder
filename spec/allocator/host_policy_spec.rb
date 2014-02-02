@@ -1,25 +1,9 @@
-require 'stacks/namespace'
 require 'allocator/hosts'
 require 'allocator/host_policies'
 
 describe StackBuilder::Allocator::HostPolicies do
-  before do
-    @machine_repo = Object.new
-    @machine_repo.extend Stacks::DSL
-  end
-
   def test_env_with_refstack
-    @machine_repo.stack "ref" do
-      virtual_appserver "refapp"
-    end
-
-    @machine_repo.env "test", :primary_site => "t" do
-      instantiate_stack "ref"
-    end
-
-    @machine_repo.find_environment("test")
-
-    return [{
+   return [{
       :hostname=>"refapp1",
       :availability_group=>"refapp"
     },{
