@@ -1,3 +1,4 @@
+require 'stacks/namespace'
 require 'allocator/hosts'
 require 'allocator/host_policies'
 
@@ -17,6 +18,14 @@ describe StackBuilder::Allocator::HostPolicies do
     end
 
     @machine_repo.find_environment("test")
+
+    return [{
+      :hostname=>"refapp1",
+      :availability_group=>"refapp"
+    },{
+      :hostname=>"refapp2",
+      :availability_group=>"refapp"
+    }]
   end
 
   it 'allows allocations that have no machine of the same group to the same host' do
@@ -38,16 +47,15 @@ describe StackBuilder::Allocator::HostPolicies do
     machine = double
     running_machine= double
 
-    machine.stub(:to_spec).and_return({
+    machine = {
+      :hostname=>"host1",
       :availability_group => nil
-    })
+    }
 
-    running_machine.stub(:to_spec).and_return({
+    running_machine = {
+      :hostname=>"host2",
       :availability_group => nil
-    })
-
-    machine.stub(:availability_group).and_return(nil)
-    running_machine.stub(:availability_group).and_return(nil)
+    }
 
     h1 = StackBuilder::Allocator::Host.new("h1")
     h1.allocated_machines << running_machine
@@ -55,13 +63,21 @@ describe StackBuilder::Allocator::HostPolicies do
   end
 
   it 'allows allocations where the host ram is sufficient' do
-    candidate_machine = double
-    provisionally_allocated_machine = double
-    existing_machine = double
 
-    candidate_machine.stub(:ram).and_return('2097152') # 2GB
-    provisionally_allocated_machine.stub(:ram).and_return('2097152') # 2GB
-    existing_machine.stub(:ram).and_return('2097152') # 2GB
+    candidate_machine = {
+      :hostname=>"candidate_machine",
+      :ram => 2097152
+    }
+
+    provisionally_allocated_machine = {
+      :hostname => "provisionally_allocated_machine",
+      :ram => 2097152
+    }
+
+    existing_machine = {
+      :hostname => "existing machine",
+      :ram => 2097152
+    }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '8388608') # 8GB
     h1.allocated_machines << existing_machine
@@ -71,13 +87,20 @@ describe StackBuilder::Allocator::HostPolicies do
   end
 
   it 'rejects allocations where the host ram is insufficient due to host reserve' do
-    candidate_machine = double
-    provisionally_allocated_machine = double
-    existing_machine = double
+    candidate_machine = {
+      :hostname=>"candidate_machine",
+      :ram => 2097152
+    }
 
-    candidate_machine.stub(:ram).and_return('2097152') # 2GB
-    provisionally_allocated_machine.stub(:ram).and_return('2097152') # 2GB
-    existing_machine.stub(:ram).and_return('2097152') # 2GB
+    provisionally_allocated_machine = {
+      :hostname => "provisionally_allocated_machine",
+      :ram => 2097152
+    }
+
+    existing_machine = {
+      :hostname => "existing machine",
+      :ram => 2097152
+    }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '8388607') # 1 byte under 8GB
     h1.allocated_machines << existing_machine
@@ -87,13 +110,20 @@ describe StackBuilder::Allocator::HostPolicies do
   end
 
   it 'rejects allocations where the host ram is insufficient' do
-    candidate_machine = double
-    provisionally_allocated_machine = double
-    existing_machine = double
+    candidate_machine = {
+      :hostname=>"candidate_machine",
+      :ram => 2097152
+    }
 
-    candidate_machine.stub(:ram).and_return('2097152') # 2GB
-    provisionally_allocated_machine.stub(:ram).and_return('2097152') # 2GB
-    existing_machine.stub(:ram).and_return('2097152') # 2GB
+    provisionally_allocated_machine = {
+      :hostname => "provisionally_allocated_machine",
+      :ram => 2097152
+    }
+
+    existing_machine = {
+      :hostname => "existing machine",
+      :ram => 2097152
+    }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304') # 4GB
     h1.allocated_machines << existing_machine
