@@ -1,3 +1,4 @@
+require 'stacks/namespace'
 require 'allocator/host_repository'
 
 describe StackBuilder::Allocator::HostRepository do
@@ -65,7 +66,7 @@ describe StackBuilder::Allocator::HostRepository do
     hosts.hosts.size.should eql(n)
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)
-      host.machines.should eql(env.flatten)
+      host.machines.should eql(env.flatten.map {|machine| machine.to_specs})
     end
   end
 end
