@@ -91,11 +91,19 @@ class StackBuilder::Allocator::Hosts
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
 
-    Hash[unallocated_machines.map do |machine|
+    allocated_machines = Hash[unallocated_machines.map do |machine|
       host = find_suitable_host_for(machine)
       host.provisionally_allocate(machine)
       [machine, host.fqdn]
     end]
+
+    return_map = {}
+    allocated_machines.each do |machine, host|
+      return_map[host] = [] unless (return_map[host])
+      return_map[host] << machine
+    end
+
+    return_map
   end
 
   ##TEST.ME

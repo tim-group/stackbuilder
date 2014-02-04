@@ -8,9 +8,6 @@ module Stacks::Core::Actions
     object.action 'allocate' do |services, machine_def|
       machines = machine_def.flatten
       machine_specs = machine_def.flatten.map {|machine| machine.to_spec}
-      fabrics = machines.map {|machine| machine.fabric}.uniq
-      raise "we don't support launching in multiple locations right now" unless fabrics.size==1
-
       allocation_results = services.allocator.allocate(machine_specs)
 
       allocation_results[:already_allocated].each do |machine, host|
@@ -26,31 +23,25 @@ module Stacks::Core::Actions
     object.action 'launch' do |services, machine_def|
       machines = machine_def.flatten
       machine_specs = machine_def.flatten.map {|machine| machine.to_spec}
-
       machines.each do |machine|
         if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
           raise "cannot instantiate machines in local site without owner fact"
         end
       end
 
-      fabrics = machines.map {|machine| machine.fabric}.uniq
-      raise "we don't support launching in multiple locations right now" unless fabrics.size==1
+      allocation_results = services.allocator.allocate(machine_specs)
 
-      hosts = services.host_repo.find_current(fabrics.shift)
-
-      hosts.allocated_machines(machine_specs).map do |machine, host|
-        services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host.fqdn}")
+      allocation_results[:already_allocated].each do |machine, host|
+        services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}")
       end
 
-      hosts.allocate(machine_specs)
-
-      hosts.new_machine_allocation.each do |machine, host|
-        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *now* allocated to #{host.fqdn}\n"
+      allocation_results[:newly_allocated].each do |host, machines|
+        machines.each do |machine|
+          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
+        end
       end
 
-      specs = hosts.to_unlaunched_specs()
-
-      services.compute_controller.launch_raw(specs) do
+      services.compute_controller.launch_raw(allocation_results[:newly_allocated]) do
         on :allocated do |vm, host|
           services.logger.info "#{vm} allocated to #{host}"
         end
