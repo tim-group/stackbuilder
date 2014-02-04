@@ -69,12 +69,33 @@ class StackBuilder::Allocator::Hosts
     Hash[hash]
   end
 
+
+  def do_allocation(specs)
+    allocated_machines = Hash[hosts.map do |host|
+      host.allocated_machines.map do |machine|
+        [machine, host.fqdn]
+      end
+    end.flatten(1)]
+
+    already_allocated = allocated_machines.reject do |machine, host|
+      !specs.include?(machine)
+    end
+
+    return {
+      :already_allocated => already_allocated,
+      :newly_allocated => allocate(specs)
+    }
+  end
+
+  ### TODO: make private
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
-    unallocated_machines.each do |machine|
+
+    Hash[unallocated_machines.map do |machine|
       host = find_suitable_host_for(machine)
       host.provisionally_allocate(machine)
-    end
+      [machine, host.fqdn]
+    end]
   end
 
   ##TEST.ME

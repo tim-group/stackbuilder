@@ -11,6 +11,7 @@ require 'support/logger'
 require 'allocator/host_repository'
 require 'allocator/host_preference'
 require 'allocator/host_policies'
+require 'allocator/ephemeral_allocator'
 require 'stacks/core/services'
 require 'stacks/namespace'
 
@@ -88,10 +89,15 @@ class Stacks::Factory
     )
   end
 
+  def allocator()
+    StackBuilder::Allocator::EphemeralAllocator.new(:host_repository => host_repository)
+  end
+
   def services()
     @services ||= Stacks::Core::Services.new(
-      :compute_controller=>compute_controller,
-      :host_repo =>host_repository,
+      :compute_controller => compute_controller,
+      :host_repo => host_repository,
+      :allocator => allocator,
       :logger => logger
     )
   end
