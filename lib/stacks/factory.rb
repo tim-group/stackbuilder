@@ -96,7 +96,6 @@ class Stacks::Factory
   def services()
     @services ||= Stacks::Core::Services.new(
       :compute_controller => compute_controller,
-      :host_repo => host_repository,
       :allocator => allocator,
       :logger => logger
     )
