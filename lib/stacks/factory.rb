@@ -12,6 +12,7 @@ require 'allocator/host_repository'
 require 'allocator/host_preference'
 require 'allocator/host_policies'
 require 'allocator/ephemeral_allocator'
+require 'dns/basic_dns_service'
 require 'stacks/core/services'
 require 'stacks/namespace'
 
@@ -79,6 +80,10 @@ class Stacks::Factory
     @compute_node_client ||= Compute::Client.new()
   end
 
+  def dns_service()
+    @dns_service ||= StackBuilder::DNS::BasicDNSService.new(:logger=>logger)
+  end
+
   def host_repository()
     @host_repository ||= StackBuilder::Allocator::HostRepository.new(
       :machine_repo => inventory,
@@ -97,6 +102,7 @@ class Stacks::Factory
     @services ||= Stacks::Core::Services.new(
       :compute_controller => compute_controller,
       :allocator => allocator,
+      :dns_service => dns_service,
       :logger => logger
     )
   end

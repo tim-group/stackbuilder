@@ -1,5 +1,10 @@
 require 'stacks/core/namespace'
 
+##- allocate
+##- allocate_ips
+##-
+##- launch
+
 module Stacks::Core::Actions
   attr_accessor :actions
   def self.extended(object)
@@ -17,7 +22,6 @@ module Stacks::Core::Actions
       allocation_results[:newly_allocated].each do |machine, host|
         services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
       end
-
    end
 
     object.action 'launch' do |services, machine_def|

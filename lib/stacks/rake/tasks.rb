@@ -88,44 +88,6 @@ def sbtask(name, &block)
   end
 end
 
-def do_ip_allocations(type, specs)
-  method = "#{type}_ips".to_sym
-  computecontroller = Compute::Controller.new
-  computecontroller.send(method, specs) do
-    on :success do |vm, msg|
-      logger.info "#{vm} #{type} IP successfully"
-    end
-    on :failure do |vm, msg|
-      logger.error "#{vm} failed to #{type} IP: #{msg}"
-    end
-    on :unaccounted do |vm|
-      logger.error "#{vm} was unaccounted for"
-    end
-    has :failure do
-      fail "some machines failed to #{type} IPs"
-    end
-  end
-end
-
-def do_cnames(type, specs)
-  method = "#{type}_cnames".to_sym
-  computecontroller = Compute::Controller.new
-  computecontroller.send(method, specs) do
-    on :success do |vm, msg|
-      logger.info "#{vm} #{type} CNAME successfully"
-    end
-    on :failure do |vm, msg|
-      logger.error "#{vm} failed to #{type} CNAME entry: #{msg}"
-    end
-    on :unaccounted do |vm|
-      logger.error "#{vm} was unaccounted for"
-    end
-    has :failure do
-      fail "some machines failed to #{type} CNAMEs"
-    end
-  end
-end
-
 namespace :sbx do
   environment.accept do |machine_def|
 
@@ -208,12 +170,12 @@ namespace :sbx do
 
       desc "add CNAME entries to DNS"
       sbtask :add_cnames do
-        do_cnames('add', machine_def.to_specs)
+        @factory.services.dns.allocate(machine_def.to_specs)
       end
 
       desc "remove CNAME entries from DNS"
       sbtask :remove_cnames do
-        do_cnames('remove', machine_def.to_specs)
+        @factory.services.dns.free(machine_def.to_specs)
       end
 
       desc "allocate IPs for these virtual services"
@@ -225,7 +187,7 @@ namespace :sbx do
         if vips.empty?
           logger.info 'no vips to allocate'
         else
-          do_ip_allocations('allocate', vips)
+          @factory.services.dns.allocate(vips)
         end
       end
 
@@ -235,13 +197,13 @@ namespace :sbx do
         machine_def.accept do |child_machine_def|
           vips << child_machine_def.to_vip_spec if child_machine_def.respond_to?(:to_vip_spec)
         end
-        do_ip_allocations('free', vips)
+        @factory.services.dns.free(vips)
       end
 
       desc "free IPs"
       sbtask :free_ips do
         all_specs = machine_def.flatten.map { |m| m.to_spec }
-        do_ip_allocations('free', machine_def.flatten.map { |m| m.to_spec })
+        @factory.services.dns.free(all_specs)
       end
 
       desc "perform an MCollective ping against these machines"
