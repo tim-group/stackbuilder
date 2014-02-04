@@ -11,6 +11,24 @@ class StackBuilder::Allocator::Hosts
     end
   end
 
+  public
+  def do_allocation(specs)
+    allocated_machines = Hash[hosts.map do |host|
+      host.allocated_machines.map do |machine|
+        [machine, host.fqdn]
+      end
+    end.flatten(1)]
+
+    already_allocated = allocated_machines.reject do |machine, host|
+      !specs.include?(machine)
+    end
+
+    return {
+      :already_allocated => already_allocated,
+      :newly_allocated => allocate(specs)
+    }
+  end
+
   private
   def find_suitable_host_for(machine)
     allocation_denials = []
@@ -33,6 +51,7 @@ class StackBuilder::Allocator::Hosts
     end[0]
   end
 
+  private
   def unallocated_machines(machines)
     allocated_machines = []
     hosts.each do |host|
@@ -44,50 +63,7 @@ class StackBuilder::Allocator::Hosts
     return machines - allocated_machines
   end
 
-  public
-
-  def new_machine_allocation()
-    hash = []
-    hosts.map do |host|
-      host.provisionally_allocated_machines.each do |machine|
-        hash << [machine, host]
-      end
-    end
-
-    Hash[hash]
-  end
-
-  def allocated_machines(machines)
-    hash = []
-    hosts.map do |host|
-      intersection =  host.allocated_machines.to_set & machines.to_set
-      intersection.map do |machine|
-        hash << [machine, host]
-      end
-    end
-
-    Hash[hash]
-  end
-
-
-  def do_allocation(specs)
-    allocated_machines = Hash[hosts.map do |host|
-      host.allocated_machines.map do |machine|
-        [machine, host.fqdn]
-      end
-    end.flatten(1)]
-
-    already_allocated = allocated_machines.reject do |machine, host|
-      !specs.include?(machine)
-    end
-
-    return {
-      :already_allocated => already_allocated,
-      :newly_allocated => allocate(specs)
-    }
-  end
-
-  ### TODO: make private
+  private
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
 
@@ -106,11 +82,4 @@ class StackBuilder::Allocator::Hosts
     return_map
   end
 
-  ##TEST.ME
-  def to_unlaunched_specs
-    Hash[@hosts.map do |host|
-      specs = host.provisionally_allocated_machines()
-      [host.fqdn, specs]
-    end].reject {|host, specs| specs.size==0}
-  end
 end
