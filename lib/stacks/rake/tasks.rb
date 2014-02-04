@@ -112,7 +112,7 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision=> ['allocate_vips', 'launch', 'add_cnames', 'puppet:sign', 'puppet:wait', 'orc:resolve']
+      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait', 'orc:resolve']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -166,16 +166,6 @@ namespace :sbx do
       sbtask :enable_notify do
         computecontroller = Compute::Controller.new
         computecontroller.enable_notify(machine_def.to_specs)
-      end
-
-      desc "add CNAME entries to DNS"
-      sbtask :add_cnames do
-        @factory.services.dns.allocate(machine_def.to_specs)
-      end
-
-      desc "remove CNAME entries from DNS"
-      sbtask :remove_cnames do
-        @factory.services.dns.free(machine_def.to_specs)
       end
 
       desc "allocate IPs for these virtual services"
@@ -339,7 +329,7 @@ namespace :sbx do
       # removing their puppet cert, otherwise we have a race condition
       task :clean => ['clean_nodes', 'puppet:clean']
       desc "frees up ip and vip allocation of these machines"
-      task :free_ip_allocation => ['remove_cnames', 'free_ips', 'free_vips']
+      task :free_ip_allocation => ['free_ips', 'free_vips']
 
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
