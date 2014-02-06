@@ -100,9 +100,8 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:template] = "win7"
-    spec[:selenium] = { :hub_host => self.hub.mgmt_fqdn, 
-                        :version => options[:se_version] }
+    spec[:template] = "win7boot"
+    spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     spec[:gold_image_url] = options[:gold_image]
     spec
   end

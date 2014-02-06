@@ -7,8 +7,7 @@ describe_stack 'selenium' do
           :gold_image=> "file:///var/local/images/dev-sxp-gold.img",
           :se_version=>"2.32.0"
         win7 "9", :instances=>10,
-          :gold_image=> "file:///var/local/images/dev-win7ie9-gold.img",
-          :se_version=>"2.32.0"
+          :gold_image=> "http://iso.youdevise.com/gold/win7-ie9-gold.img"
         ubuntu :instances=>5
       end
     end
@@ -39,7 +38,7 @@ describe_stack 'selenium' do
       {  :fabric=>"space",
         :template=>"xpboot",
         :se_hub => 'e1-hub-001.mgmt.space.net.local',
-        :se_version =>  '2.32.0',
+        :se_version => '2.32.0',
         :gold_image_url => 'file:///var/local/images/dev-sxp-gold.img',
         :launch_script => 'start-grid.bat',
         :qualified_hostnames=>
@@ -53,18 +52,17 @@ describe_stack 'selenium' do
 
   host("e1-win7ie9-005.mgmt.space.net.local") do |host|
     host.to_spec.should eql(
-      {  :fabric=>"space",
-        :template=>"win7",
-        :selenium => { :hub_host => 'e1-hub-001.mgmt.space.net.local',
-                       :version =>  '2.32.0' },
-        :gold_image_url => 'file:///var/local/images/dev-win7ie9-gold.img',
+      { :fabric=>"space",
+        :template=>"win7boot",
+        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
+        :gold_image_url => 'http://iso.youdevise.com/gold/win7-ie9-gold.img',
         :qualified_hostnames=>
-        {:mgmt=>"e1-win7ie9-005.mgmt.space.net.local"},
-        :availability_group=>nil,
-        :networks=>[:mgmt],
-        :hostname=>"e1-win7ie9-005",
-        :ram=>"2097152",
-        :domain=>"space.net.local"})
+        { :mgmt=>"e1-win7ie9-005.mgmt.space.net.local"},
+          :availability_group=>nil,
+          :networks=>[:mgmt],
+          :hostname=>"e1-win7ie9-005",
+          :ram=>"2097152",
+          :domain=>"space.net.local"})
   end
 
   host("e1-browser-001.mgmt.space.net.local") do |host|
