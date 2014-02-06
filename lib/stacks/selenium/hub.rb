@@ -41,6 +41,14 @@ module Stacks::Selenium::Grid
     end
   end
 
+  def win7(version,options)
+    options[:instances].times do |i|
+      index = sprintf("%03d",i+1)
+      name = "win7ie#{version}-#{index}"
+      @definitions[name] = Stacks::Selenium::Win7Node.new(name, self.hub, options)
+    end
+  end
+
   def ubuntu(options)
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
@@ -75,6 +83,32 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
   end
 
 end
+
+class Stacks::Selenium::Win7Node < Stacks::MachineDef
+  attr_reader :hub
+  attr_reader :options
+
+  def initialize(base_hostname, hub, options)
+    super(base_hostname, [:mgmt])
+    @hub = hub
+    @options = options
+  end
+
+  def bind_to(environment)
+    super(environment)
+  end
+
+  def to_spec
+    spec = super
+    spec[:template] = "win7"
+    spec[:selenium] = { :hub_host => self.hub.mgmt_fqdn, 
+                        :version => options[:se_version] }
+    spec[:gold_image_url] = options[:gold_image]
+    spec
+  end
+
+end
+
 
 class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
   attr_reader :hub
