@@ -63,7 +63,7 @@ class StackBuilder::Allocator::Hosts
     return machines - allocated_machines
   end
 
-  private
+  public
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
 
