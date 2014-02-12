@@ -355,7 +355,8 @@ describe Stacks::DSL do
       'application' => 'JavaHttpRef',
       'group' => 'blue',
       'vip_fqdn' => 'ci-appx-vip.st.net.local',
-      'environment' => 'ci'
+      'environment' => 'ci',
+      'dependencies' => {}
     }})
   end
 
@@ -375,7 +376,8 @@ describe Stacks::DSL do
       'role::http_app'=> {
       'application' => 'JavaHttpRef',
       'group' => 'blue',
-      'environment' => 'ci'
+      'environment' => 'ci',
+      'dependencies' => {}
     }})
   end
 

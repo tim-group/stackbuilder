@@ -12,6 +12,7 @@ class Stacks::MachineSet
   attr_accessor :ports
   attr_accessor :port_map
   attr_accessor :groups
+  attr_accessor :depends_on
 
   include Stacks::MachineDefContainer
 
@@ -22,6 +23,7 @@ class Stacks::MachineSet
     @bind_steps = []
     @instances = 2
     @config_block = config_block
+    @depends_on = []
   end
 
   def on_bind(&block)
