@@ -29,8 +29,22 @@ describe_stack 'stack-with-dependencies' do
           "environment" => "e1",
           "dependencies" => {
               'example.url' => 'http://e1-exampleapp-vip.space.net.local:8000'
-           }
+           },
+          "dependant_instances" => []
          }
     })
+  end
+
+  host("e1-exampleapp-002.mgmt.space.net.local") do |host|
+    host.to_enc.should eql(
+                           {"role::http_app"=>
+                                {"group"=>"blue",
+                                 "vip_fqdn"=>"e1-exampleapp-vip.space.net.local",
+                                 "application"=>"example",
+                                 "environment" => "e1",
+                                 "dependencies" => {},
+                                 "dependant_instances" => ["e1-exampleapp2-001.space.net.local","e1-exampleapp2-002.space.net.local"]
+                                }
+                           })
   end
 end

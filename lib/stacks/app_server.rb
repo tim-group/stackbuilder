@@ -38,6 +38,17 @@ class Stacks::AppServer < Stacks::MachineDef
     end
   end
 
+  private
+  def dependant_services
+    dependants = []
+    environment.accept do |machine_def|
+      if machine_def.kind_of? Stacks::VirtualService and machine_def.depends_on.include?(virtual_service.name)
+        dependants.push machine_def
+      end
+    end
+    dependants
+  end
+
   public
   def to_enc()
 
@@ -45,12 +56,19 @@ class Stacks::AppServer < Stacks::MachineDef
       [dependency.application + ".url", "http://" + dependency.vip_fqdn + ":8000"]
     end]
 
+    dependant_instances = dependant_services.map do |service|
+      service.children
+    end.flatten.map do |instance|
+      instance.prod_fqdn
+    end
+
     enc = {
       'role::http_app' => {
       'application' => virtual_service.application,
       'group' => group,
       'environment' => environment.name,
-      'dependencies' => deps
+      'dependencies' => deps,
+      'dependant_instances' => dependant_instances
     }}
 
     if @virtual_service.respond_to? :vip_fqdn

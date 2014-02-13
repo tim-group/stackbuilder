@@ -356,7 +356,8 @@ describe Stacks::DSL do
       'group' => 'blue',
       'vip_fqdn' => 'ci-appx-vip.st.net.local',
       'environment' => 'ci',
-      'dependencies' => {}
+      'dependencies' => {},
+      'dependant_instances' => []
     }})
   end
 
@@ -377,7 +378,8 @@ describe Stacks::DSL do
       'application' => 'JavaHttpRef',
       'group' => 'blue',
       'environment' => 'ci',
-      'dependencies' => {}
+      'dependencies' => {},
+      'dependant_instances' => []
     }})
   end
 
