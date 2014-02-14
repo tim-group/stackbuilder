@@ -156,4 +156,10 @@ module Stacks::VirtualService
     rules
   end
 
+  def config_params
+    [
+        [application + ".url", "http://" + vip_fqdn + ":8000"]
+    ]
+  end
+
 end

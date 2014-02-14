@@ -52,8 +52,8 @@ class Stacks::AppServer < Stacks::MachineDef
   public
   def to_enc()
 
-    deps = Hash[resolve_virtual_services(virtual_service.depends_on).map do |dependency|
-      [dependency.application + ".url", "http://" + dependency.vip_fqdn + ":8000"]
+    deps = Hash[resolve_virtual_services(virtual_service.depends_on).inject([]) do |acc, dependency|
+      acc + dependency.config_params
     end]
 
     dependant_instances = dependant_services.map do |service|
