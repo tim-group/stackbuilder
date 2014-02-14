@@ -5,7 +5,7 @@ describe_stack 'stack-with-dependencies' do
     stack "example" do
       virtual_appserver 'exampleapp' do
         self.groups = ['blue']
-        self.application = 'example'
+        self.application = 'ExAmPLE'
       end
 
       virtual_appserver 'exampleapp2' do
@@ -40,7 +40,7 @@ describe_stack 'stack-with-dependencies' do
                            {"role::http_app"=>
                                 {"group"=>"blue",
                                  "vip_fqdn"=>"e1-exampleapp-vip.space.net.local",
-                                 "application"=>"example",
+                                 "application"=>"ExAmPLE",
                                  "environment" => "e1",
                                  "dependencies" => [],
                                  "dependant_instances" => ["e1-exampleapp2-001.space.net.local","e1-exampleapp2-002.space.net.local"]
