@@ -27,9 +27,9 @@ describe_stack 'stack-with-dependencies' do
           "vip_fqdn"=>"e1-exampleapp2-vip.space.net.local",
           "application"=>"example2",
           "environment" => "e1",
-          "dependencies" => {
-              'example.url' => 'http://e1-exampleapp-vip.space.net.local:8000'
-           },
+          "dependencies" => [
+              ['example.url', 'http://e1-exampleapp-vip.space.net.local:8000']
+           ],
           "dependant_instances" => []
          }
     })
@@ -42,7 +42,7 @@ describe_stack 'stack-with-dependencies' do
                                  "vip_fqdn"=>"e1-exampleapp-vip.space.net.local",
                                  "application"=>"example",
                                  "environment" => "e1",
-                                 "dependencies" => {},
+                                 "dependencies" => [],
                                  "dependant_instances" => ["e1-exampleapp2-001.space.net.local","e1-exampleapp2-002.space.net.local"]
                                 }
                            })

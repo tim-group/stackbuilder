@@ -67,8 +67,8 @@ class Stacks::AppServer < Stacks::MachineDef
       'application' => virtual_service.application,
       'group' => group,
       'environment' => environment.name,
-      'dependencies' => deps,
-      'dependant_instances' => dependant_instances
+      'dependencies' => deps.sort_by { |key, value| key },
+      'dependant_instances' => dependant_instances.sort
     }}
 
     if @virtual_service.respond_to? :vip_fqdn
