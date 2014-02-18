@@ -6,7 +6,6 @@ class Stacks::AppServer < Stacks::MachineDef
   attr_reader :environment, :virtual_service
   attr_accessor :group
 
-
   def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
@@ -68,7 +67,8 @@ class Stacks::AppServer < Stacks::MachineDef
       'group' => group,
       'environment' => environment.name,
       'dependencies' => deps.sort_by { |key, value| key },
-      'dependant_instances' => dependant_instances.sort
+      'dependant_instances' => dependant_instances.sort,
+      'port' => '8000'
     }}
 
     if @virtual_service.respond_to? :vip_fqdn

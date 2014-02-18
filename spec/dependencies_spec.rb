@@ -30,7 +30,8 @@ describe_stack 'stack-with-dependencies' do
           "dependencies" => [
               ['example.url', 'http://e1-exampleapp-vip.space.net.local:8000']
            ],
-          "dependant_instances" => []
+          "dependant_instances" => [],
+          'port'        => '8000'
          }
     })
   end
@@ -43,7 +44,8 @@ describe_stack 'stack-with-dependencies' do
                                  "application"=>"ExAmPLE",
                                  "environment" => "e1",
                                  "dependencies" => [],
-                                 "dependant_instances" => ["e1-exampleapp2-001.space.net.local","e1-exampleapp2-002.space.net.local"]
+                                 "dependant_instances" => ["e1-exampleapp2-001.space.net.local","e1-exampleapp2-002.space.net.local"],
+                                 'port'        => '8000'
                                 }
                            })
   end
