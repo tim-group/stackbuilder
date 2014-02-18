@@ -21,6 +21,13 @@ module Stacks::TestFramework
       block.call(host)
     end
   end
+
+  def model(desc, &block)
+    subject = @subject
+    it '#{desc}' do
+      block.call(subject)
+    end
+  end
 end
 
 module Stacks::Matchers

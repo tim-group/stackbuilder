@@ -16,6 +16,7 @@ module Stacks::Selenium::Grid
     end
 
     on_bind do |m,environment|
+      @environment = environment
       self.instance_eval(&@config_block)
       bind_children(environment)
     end

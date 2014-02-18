@@ -17,7 +17,12 @@ describe_stack 'selenium' do
     end
   end
 
-  host("") do |host|
+  model("contains an environment on every node in the tree") do |root|
+
+    root.accept do |node|
+      node.environment.should_not eql(nil)
+    end
+
   end
 
   host("e1-hub-001.mgmt.space.net.local") do |host|
