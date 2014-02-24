@@ -4,3 +4,4 @@
 /build
 *~
 *.swp
+.idea/ stackbuilder.iml
