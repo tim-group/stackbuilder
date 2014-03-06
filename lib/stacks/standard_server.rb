@@ -8,5 +8,10 @@ class Stacks::StandardServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
   end
 
+  def to_enc
+    return {
+      'server::default_new_mgmt_net_local' => {}
+    }
+  end
 end
 
