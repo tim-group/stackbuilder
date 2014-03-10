@@ -7,7 +7,7 @@ module StackBuilder::Allocator::HostPolicies
       if machine_spec[:availability_group]
         host.machines.each do |allocated_machine|
           if allocated_machine[:availability_group] and machine_spec[:availability_group] == allocated_machine[:availability_group]
-            result = { :passed => false, :reason => "already running  #{allocated_machine[:hostname]}, which is in same availability group" }
+            result = { :passed => false, :reason => "already running #{allocated_machine[:hostname]}, which is in same availability group" }
           end
         end
       end
