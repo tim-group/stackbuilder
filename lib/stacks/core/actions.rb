@@ -19,9 +19,12 @@ module Stacks::Core::Actions
         services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}")
       end
 
-      allocation_results[:newly_allocated].each do |machine, host|
-        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
+      allocation_results[:newly_allocated].each do |host, machines|
+        machines.each do |machine|
+          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
+        end
       end
+
    end
 
     object.action 'launch' do |services, machine_def|
