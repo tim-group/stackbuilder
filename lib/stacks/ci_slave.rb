@@ -3,7 +3,7 @@ require 'stacks/machine_def'
 
 class Stacks::CiSlave < Stacks::MachineDef
   def initialize(server_group, index, &block)
-    super(server_group.name + "-" + index, [:mgmt, :prod, :front])
+    super(server_group.name + "-" + index, [:mgmt])
     self
   end
 
