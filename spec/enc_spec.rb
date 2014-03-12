@@ -682,7 +682,7 @@ describe Stacks::DSL do
       'role::rate_limited_forward_proxy' => {}
     })
 
-    find("e1-s3proxy-001.mgmt.space.net.local").networks.should eql ([:mgmt, :prod])
+    find("e1-s3proxy-001.mgmt.space.net.local").networks.should eql([:mgmt, :prod])
   end
 
   it 'things that are part of virtual services are given availability groups' do

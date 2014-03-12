@@ -25,11 +25,10 @@ describe_stack 'jenkins' do
         :vcpus =>"8",
         :image_size =>"10G",
         :qualified_hostnames=>{
-        :mgmt=>"e1-jenkinsslave-002.mgmt.space.net.local",
-        :prod=>"e1-jenkinsslave-002.space.net.local",
-        :front=>"e1-jenkinsslave-002.front.space.net.local"},
+          :mgmt=>"e1-jenkinsslave-002.mgmt.space.net.local",
+        },
         :availability_group=>nil,
-        :networks=>[:mgmt, :prod, :front],
+        :networks=>[:mgmt],
         :hostname=>"e1-jenkinsslave-002",
         :ram=>"8000",
         :domain=>"space.net.local"})
