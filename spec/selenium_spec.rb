@@ -61,6 +61,7 @@ describe_stack 'selenium' do
         :template=>"win7boot",
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :gold_image_url => 'http://iso.youdevise.com/gold/win7-ie9-gold.img',
+        :image_size => "15G",
         :qualified_hostnames=>
         { :mgmt=>"e1-win7ie9-005.mgmt.space.net.local"},
           :availability_group=>nil,
