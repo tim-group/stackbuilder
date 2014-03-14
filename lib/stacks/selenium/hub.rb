@@ -104,6 +104,7 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
     spec[:template] = "win7boot"
     spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     spec[:gold_image_url] = options[:gold_image]
+    spec[:image_size] = "15G"
     spec
   end
 
