@@ -42,10 +42,12 @@ describe_stack 'selenium' do
     host.to_spec.should eql(
       {  :fabric=>"space",
         :template=>"xpboot",
+        :kvm_template => 'kvm_no_virtio',
         :se_hub => 'e1-hub-001.mgmt.space.net.local',
         :se_version => '2.32.0',
         :gold_image_url => 'file:///var/local/images/dev-sxp-gold.img',
         :launch_script => 'start-grid.bat',
+        :image_size => "8G",
         :qualified_hostnames=>
         {:mgmt=>"e1-xp6-005.mgmt.space.net.local"},
           :availability_group=>nil,
