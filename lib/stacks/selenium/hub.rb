@@ -80,7 +80,7 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec[:se_version] = options[:se_version]
     spec[:gold_image_url] = options[:gold_image]
     spec[:image_size] = "8G"
-    spec[:se_hub] = self.hub.mgmt_fqdn
+    spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     spec[:launch_script] = "start-grid.bat"
     spec
   end
@@ -129,7 +129,7 @@ class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
     spec = super
     spec[:template] = "senode"
     spec[:se_version] = "2.32.0"
-    spec[:se_hub] = self.hub.mgmt_fqdn
+    spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     spec
   end
 end
