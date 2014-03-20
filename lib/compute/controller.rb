@@ -80,7 +80,13 @@ class Compute::Controller
 
   def launch_raw(allocation, &block)
     grouped_results = allocation.map do |host, specs|
-      @compute_node_client.launch(host, specs)
+      results = specs.map do |spec|
+        @compute_node_client.launch(host, [spec])
+      end
+
+      results.group_by do |sender, result|
+        sender
+      end
     end
 
     all_specs = allocation.map do |host, specs|
