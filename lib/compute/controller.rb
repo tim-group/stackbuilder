@@ -36,7 +36,7 @@ class Compute::Allocation
       unless (vms_to_host_map.include?(spec[:hostname]))
         host = hosts[h.modulo(hosts.size)]
         add_to_allocation(new_allocation, host, spec)
-       h += 1
+        h += 1
       end
     end
 
@@ -84,9 +84,18 @@ class Compute::Controller
         @compute_node_client.launch(host, [spec])
       end
 
-      results.group_by do |sender, result|
-        sender
+      grouped = {}
+
+      results.flatten(1).each do |sender, result_hash|
+        grouped[sender] = {} if grouped[sender].nil?
+        grouped[sender] = grouped[sender].merge(result_hash)
       end
+
+      final_result = grouped.map do |key,value|
+        [key,value]
+      end
+
+      final_result
     end
 
     all_specs = allocation.map do |host, specs|
@@ -135,7 +144,6 @@ class Compute::Controller
 
     all_specs.each do |spec|
       unless spec.is_a?(Hash)
-        pp spec
       end
 
       vm = spec[:hostname]
