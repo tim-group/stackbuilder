@@ -79,24 +79,30 @@ class Compute::Controller
   end
 
   def launch_raw(allocation, &block)
-    grouped_results = allocation.map do |host, specs|
-      results = specs.map do |spec|
-        @compute_node_client.launch(host, [spec])
+    grouped_results = []
+
+    threads = allocation.map do |host, specs|
+      Thread.new(host, specs) do |host, specs|
+        results = specs.map do |spec|
+          @compute_node_client.launch(host, [spec])
+        end
+
+        grouped = {}
+
+        results.flatten(1).each do |sender, result_hash|
+          grouped[sender] = {} if grouped[sender].nil?
+          grouped[sender] = grouped[sender].merge(result_hash)
+        end
+
+        final_result = grouped.map do |key,value|
+          [key,value]
+        end
+
+        grouped_results << final_result
       end
-
-      grouped = {}
-
-      results.flatten(1).each do |sender, result_hash|
-        grouped[sender] = {} if grouped[sender].nil?
-        grouped[sender] = grouped[sender].merge(result_hash)
-      end
-
-      final_result = grouped.map do |key,value|
-        [key,value]
-      end
-
-      final_result
     end
+
+    threads.each {|t| t.join}
 
     all_specs = allocation.map do |host, specs|
       specs
