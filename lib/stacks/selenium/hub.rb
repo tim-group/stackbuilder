@@ -12,7 +12,6 @@ module Stacks::Selenium::Grid
 
   def configure()
     on_bind do
-      @hub = create_hub()
     end
 
     on_bind do |m,environment|
@@ -31,7 +30,7 @@ module Stacks::Selenium::Grid
 
 
   def create_hub(name="hub-001")
-    @definitions[name] = Stacks::Selenium::Hub.new(name)
+    @hub = @definitions[name] = Stacks::Selenium::Hub.new(name)
   end
 
   def winxp(version,options)
@@ -80,7 +79,11 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec[:se_version] = options[:se_version]
     spec[:gold_image_url] = options[:gold_image]
     spec[:image_size] = "8G"
-    spec[:selenium_hub_host] = self.hub.mgmt_fqdn
+
+    if not self.hub.nil?
+      spec[:selenium_hub_host] = self.hub.mgmt_fqdn
+    end
+
     spec[:launch_script] = "start-grid.bat"
     spec
   end
@@ -104,7 +107,11 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
   def to_spec
     spec = super
     spec[:template] = "win7boot"
-    spec[:selenium_hub_host] = self.hub.mgmt_fqdn
+
+    if not self.hub.nil?
+      spec[:selenium_hub_host] = self.hub.mgmt_fqdn
+    end
+
     spec[:gold_image_url] = options[:gold_image]
     spec[:image_size] = "15G"
     spec
@@ -129,7 +136,11 @@ class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
     spec = super
     spec[:template] = "senode"
     spec[:se_version] = "2.32.0"
-    spec[:selenium_hub_host] = self.hub.mgmt_fqdn
+
+    if not self.hub.nil?
+      spec[:selenium_hub_host] = self.hub.mgmt_fqdn
+    end
+
     spec
   end
 end

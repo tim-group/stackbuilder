@@ -3,6 +3,7 @@ describe_stack 'selenium' do
   given do
     stack "segrid" do
       segrid :v=>2 do
+        create_hub()
         winxp "6", :instances=>10,
           :gold_image=> "file:///var/local/images/dev-sxp-gold.img",
           :se_version=>"2.32.0"
@@ -12,8 +13,24 @@ describe_stack 'selenium' do
       end
     end
 
+    stack "qatestmachines" do
+      segrid :v=>2 do
+        winxp "6", :instances=>10,
+          :gold_image=> "file:///var/local/images/dev-sxp-gold.img",
+          :se_version=>"2.32.0"
+        win7 "9", :instances=>10,
+          :gold_image=> "http://iso.youdevise.com/gold/win7-ie9-gold.img"
+        ubuntu :instances=>5
+      end
+    end
+
+
     env "e1", :primary_site=>"space" do
       instantiate_stack "segrid"
+    end
+
+    env "qa", :primary_site=>"space" do
+      instantiate_stack "qatestmachines"
     end
   end
 
@@ -23,6 +40,22 @@ describe_stack 'selenium' do
       node.environment.should_not eql(nil)
     end
 
+  end
+
+  model("does not create a hub when you do not define one") do |root|
+    root.find('qa-hub-001.mgmt.space.net.local').should be_nil()
+  end
+
+  host("qa-win7ie9-005.mgmt.space.net.local") do |host|
+    host.to_spec[:selenium_hub_host].should be_nil()
+  end
+
+  host("qa-xp6-005.mgmt.space.net.local") do |host|
+    host.to_spec[:selenium_hub_host].should be_nil()
+  end
+
+  host("qa-browser-005.mgmt.space.net.local") do |host|
+    host.to_spec[:selenium_hub_host].should be_nil()
   end
 
   host("e1-hub-001.mgmt.space.net.local") do |host|
