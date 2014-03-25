@@ -209,25 +209,27 @@ describe Compute::Controller do
     specs = {
       "myhost" => [
         {
-      :hostname => "vm1",
-      :fabric => "st",
-      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
-    },
-      {
-      :hostname => "vm2",
-      :fabric => "st",
-      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
+          :hostname => "vm1",
+          :fabric => "st",
+          :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
+        },
+        {
+          :hostname => "vm2",
+          :fabric => "st",
+          :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
+        }
+      ]
     }
-    ]}
 
 #    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
 
-        @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", {"vm1" => ["success", "o noes"]}]])
-       @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).and_return([["myhost", {"vm2" => ["success", "yes"]}]])
-
+    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).and_return([["myhost", {"vm1" => ["success", "o noes"]}]])
+    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", {"vm2" => ["success", "yes"]}]])
 
     result = []
 
+    @logger.should_receive(:info).with("myhost launch vm1 result: myhost: success")
+    @logger.should_receive(:info).with("myhost launch vm2 result: myhost: success")
     @compute_controller.launch_raw(specs) do
       on :success do |row|
         result << row
@@ -250,6 +252,8 @@ describe Compute::Controller do
     @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["failed", "o noes"]}]])
 
     failure = nil
+
+    @logger.should_receive(:info).with("myhost launch vm1 result: myhost: failed")
     @compute_controller.launch_raw(specs) do
       on :failure do |vm, msg|
         failure = msg

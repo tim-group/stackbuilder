@@ -83,15 +83,22 @@ class Compute::Controller
 
     threads = allocation.map do |host, specs|
       Thread.new(host, specs) do |host, specs|
-        results = specs.map do |spec|
-          @compute_node_client.launch(host, [spec])
-        end
-
         grouped = {}
 
-        results.flatten(1).each do |sender, result_hash|
-          grouped[sender] = {} if grouped[sender].nil?
-          grouped[sender] = grouped[sender].merge(result_hash)
+        specs.map do |spec|
+          result = @compute_node_client.launch(host, [spec])
+
+          result.each do |sender, result_hash|
+            if not result_hash[spec[:hostname]].nil?
+              result_text = result_hash[spec[:hostname]].first
+            else
+              result_text = "nil"
+            end
+            @logger.info("#{host} launch #{spec[:hostname]} result: #{sender}: #{result_text}")
+
+            grouped[sender] = {} if grouped[sender].nil?
+            grouped[sender] = grouped[sender].merge(result_hash)
+          end
         end
 
         final_result = grouped.map do |key,value|
