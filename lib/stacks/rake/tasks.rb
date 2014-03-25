@@ -346,6 +346,34 @@ namespace :sbx do
         end
       end
 
+      sbtask :showvnc do
+        hosts = []
+        machine_def.accept do |child|
+          if child.kind_of? Stacks::MachineDef
+            hosts << child.name
+          end
+        end
+        mco_client("libvirt", :nodes=>hosts) do |mco|
+          mco.fact_filter "domain=mgmt.ci.net.local"
+          results = {}
+          hosts.each do |host|
+            mco.domainxml(:domain=>host) do |result|
+              xml = result[:body][:data][:xml]
+              sender = result[:senderid]
+              if not xml.nil?
+                matches = /type='vnc' port='(\d+)'/.match(xml)
+                results[host] = {
+                  :host => sender,
+                  :port => matches[1]
+                }
+              end
+            end
+          end
+          results.each do |vm, location|
+            puts "#{vm}  -> #{location[:host]}:#{location[:port]}"
+          end
+        end
+      end
       namespace :orc do
         desc "deploys the up2date version of the artifact according to the cmdb using orc"
         sbtask :resolve do
