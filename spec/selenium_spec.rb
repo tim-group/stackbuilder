@@ -4,10 +4,10 @@ describe_stack 'selenium' do
     stack "segrid" do
       segrid :v=>2 do
         hub()
-        winxp "6", :instances=>10,
+        winxp "6", :instances=>2,
           :gold_image=> "file:///var/local/images/dev-sxp-gold.img",
           :se_version=>"2.32.0"
-        win7 "9", :instances=>10,
+        win7 "9", :instances=>2,
           :gold_image=> "http://iso.youdevise.com/gold/win7-ie9-gold.img"
         ubuntu :instances=>5
       end
@@ -67,10 +67,22 @@ describe_stack 'selenium' do
           :networks=>[:mgmt],
           :hostname=>"e1-hub-001",
           :ram=>"2097152",
-          :domain=>"space.net.local"})
+          :domain=>"space.net.local",
+          :nodes=>   ["e1-browser-001",
+               "e1-browser-002",
+               "e1-browser-003",
+               "e1-browser-004",
+               "e1-browser-005",
+               "e1-win7ie9-001",
+               "e1-win7ie9-002",
+               "e1-xp6-001",
+               "e1-xp6-002"],
+
+           }
+    )
   end
 
-  host("e1-xp6-005.mgmt.space.net.local") do |host|
+  host("e1-xp6-002.mgmt.space.net.local") do |host|
     host.to_spec.should eql(
       {  :fabric=>"space",
         :template=>"xpboot",
@@ -81,15 +93,15 @@ describe_stack 'selenium' do
         :launch_script => 'start-grid.bat',
         :image_size => "8G",
         :qualified_hostnames=>
-        {:mgmt=>"e1-xp6-005.mgmt.space.net.local"},
+        {:mgmt=>"e1-xp6-002.mgmt.space.net.local"},
           :availability_group=>nil,
           :networks=>[:mgmt],
-          :hostname=>"e1-xp6-005",
+          :hostname=>"e1-xp6-002",
           :ram=>"2097152",
           :domain=>"space.net.local"})
   end
 
-  host("e1-win7ie9-005.mgmt.space.net.local") do |host|
+  host("e1-win7ie9-002.mgmt.space.net.local") do |host|
     host.to_spec.should eql(
       { :fabric=>"space",
         :template=>"win7boot",
@@ -97,10 +109,10 @@ describe_stack 'selenium' do
         :gold_image_url => 'http://iso.youdevise.com/gold/win7-ie9-gold.img',
         :image_size => "15G",
         :qualified_hostnames=>
-        { :mgmt=>"e1-win7ie9-005.mgmt.space.net.local"},
+        { :mgmt=>"e1-win7ie9-002.mgmt.space.net.local"},
           :availability_group=>nil,
           :networks=>[:mgmt],
-          :hostname=>"e1-win7ie9-005",
+          :hostname=>"e1-win7ie9-002",
           :ram=>"2097152",
           :domain=>"space.net.local"})
   end

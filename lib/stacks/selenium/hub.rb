@@ -28,7 +28,7 @@ module Stacks::Selenium::Grid
   end
 
   def hub(name="hub-001")
-    @hub = @definitions[name] = Stacks::Selenium::Hub.new(name)
+    @hub = @definitions[name] = Stacks::Selenium::Hub.new(name, @definitions)
   end
 
   def winxp(version,options)
@@ -145,8 +145,9 @@ end
 
 
 class Stacks::Selenium::Hub < Stacks::MachineDef
-  def initialize(base_hostname)
+  def initialize(base_hostname, nodes)
     super(base_hostname, [:mgmt])
+    @nodes = nodes
   end
 
   def bind_to(environment)
@@ -156,6 +157,7 @@ class Stacks::Selenium::Hub < Stacks::MachineDef
   def to_spec
     spec = super
     spec[:template] = "sehub"
+    spec[:nodes] = @nodes.map {|name,node| node.name}.reject{|name,node| name==self.name}.sort
     spec
   end
 end
