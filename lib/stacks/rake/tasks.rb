@@ -354,7 +354,6 @@ namespace :sbx do
           end
         end
         mco_client("libvirt", :nodes=>hosts) do |mco|
-          mco.fact_filter "domain=mgmt.ci.net.local"
           results = {}
           hosts.each do |host|
             mco.domainxml(:domain=>host) do |result|
