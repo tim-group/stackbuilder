@@ -353,7 +353,8 @@ namespace :sbx do
             hosts << child.name
           end
         end
-        mco_client("libvirt", :nodes=>hosts) do |mco|
+        mco_client("libvirt") do |mco|
+          mco.fact_filter "domain=/(st|ci)/"
           results = {}
           hosts.each do |host|
             mco.domainxml(:domain=>host) do |result|
