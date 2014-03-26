@@ -3,7 +3,7 @@ describe_stack 'selenium' do
   given do
     stack "segrid" do
       segrid :v=>2 do
-        create_hub()
+        hub()
         winxp "6", :instances=>10,
           :gold_image=> "file:///var/local/images/dev-sxp-gold.img",
           :se_version=>"2.32.0"
@@ -23,7 +23,6 @@ describe_stack 'selenium' do
         ubuntu :instances=>5
       end
     end
-
 
     env "e1", :primary_site=>"space" do
       instantiate_stack "segrid"

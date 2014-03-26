@@ -4,7 +4,6 @@ module Stacks::Selenium
 end
 
 module Stacks::Selenium::Grid
-  attr_reader :hub
 
   def self.extended(object)
     object.configure()
@@ -28,8 +27,7 @@ module Stacks::Selenium::Grid
     end
   end
 
-
-  def create_hub(name="hub-001")
+  def hub(name="hub-001")
     @hub = @definitions[name] = Stacks::Selenium::Hub.new(name)
   end
 
@@ -37,7 +35,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       name = "xp#{version}-#{index}"
-      @definitions[name] = Stacks::Selenium::XpNode.new(name, self.hub, options)
+      @definitions[name] = Stacks::Selenium::XpNode.new(name, @hub, options)
     end
   end
 
@@ -45,7 +43,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       name = "win7ie#{version}-#{index}"
-      @definitions[name] = Stacks::Selenium::Win7Node.new(name, self.hub, options)
+      @definitions[name] = Stacks::Selenium::Win7Node.new(name, @hub, options)
     end
   end
 
@@ -53,7 +51,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       name = "browser-#{index}"
-      @definitions[name] = Stacks::Selenium::UbuntuNode.new(name, self.hub)
+      @definitions[name] = Stacks::Selenium::UbuntuNode.new(name, @hub)
     end
   end
 end
