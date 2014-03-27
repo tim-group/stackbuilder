@@ -89,6 +89,17 @@ def sbtask(name, &block)
 end
 
 namespace :sbx do
+
+  task :find_rogue do
+    hosts = @factory.host_repository.find_current("local")
+
+    rogue_machines = hosts.hosts.map do |host|
+      host.allocated_machines
+    end.flatten().reject {|vm| vm[:in_model]}
+
+    pp rogue_machines
+  end
+
   environment.accept do |machine_def|
 
     namespace machine_def.name.to_sym do

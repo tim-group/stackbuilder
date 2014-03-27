@@ -21,7 +21,11 @@ class StackBuilder::Allocator::HostRepository
       vms = []
       attr[:active_domains].each do |vm_hostname|
         vm_object = machine_repo.find_by_hostname(vm_hostname)
-        vms << vm_object.to_spec unless vm_object.nil?
+        if vm_object.nil?
+          vms << {:hostname => vm_hostname, :in_model => false}
+        else
+          vms << vm_object.to_spec
+        end
       end
 
       @policies = [] if fabric == "local"
