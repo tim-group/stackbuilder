@@ -378,6 +378,31 @@ describe Compute::Controller do
     failures.should eql [["vm1", "o noes"]]
   end
 
+  it 'will fail to clean up if the vm is set to be non-destroyable ' do
+    specs = [{
+      :hostname => "vm1",
+      :fabric => "st",
+      :disallow_destroy => true,
+      :qualified_hostnames => {:mgmt => "vm1.mgmt.st.net.local"}
+    },{
+      :hostname => "vm2",
+      :fabric => "st",
+      :disallow_destroy => false,
+      :qualified_hostnames => {:mgmt => "vm2.mgmt.st.net.local"}
+    }]
+
+    @compute_node_client.stub(:clean).with("st", [specs[1]]).and_return([["st", {"vm2" => ["success", "yay"]}]])
+
+    failures = []
+    @compute_controller.clean(specs) do
+      on :failure do |vm, msg|
+        failures << [vm, msg]
+      end
+    end
+
+    failures.should eql [["vm1", "VM marked as non-destroyable"]]
+  end
+
   it 'will handle responses from old-fashioned agents' do
     specs = [{
       :hostname => "vm1",

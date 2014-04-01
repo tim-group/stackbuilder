@@ -222,12 +222,15 @@ class Compute::Controller
   def clean(all_specs, &block)
     callback = Support::Callback.new(&block)
 
-    fabrics = all_specs.group_by { |spec| spec[:fabric] }
-    grouped_results = fabrics.map do |fabric, specs|
-      @compute_node_client.clean(fabric, specs)
+    non_destroyable_specs, destroyable_specs = all_specs.partition do
+      |spec | spec[:disallow_destroy]
     end
 
-    dispatch_results(all_specs, grouped_results, callback)
+    destroyable_spec_results = clean_destroyable_vms(destroyable_specs)
+
+    dispatch_results(destroyable_specs, destroyable_spec_results, callback)
+
+    fail_non_destroyable_vms(non_destroyable_specs, callback)
   end
 
   def add_cnames(all_specs, &block)
@@ -237,4 +240,20 @@ class Compute::Controller
   def remove_cnames(all_specs, &block)
     allocate_and_send(:remove_cnames, all_specs, &block)
   end
+
+  private
+    def clean_destroyable_vms(destroyable_specs)
+      fabrics = destroyable_specs.group_by { |spec| spec[:fabric] }
+      grouped_results = fabrics.map do |fabric, specs|
+        @compute_node_client.clean(fabric, specs)
+      end
+      grouped_results
+    end
+
+    def fail_non_destroyable_vms(non_destroyable_specs, callback)
+      non_destroyable_specs.each do |spec|
+        callback.invoke :failure, [ spec[:hostname], "VM marked as non-destroyable"]
+      end
+    end
+
 end
