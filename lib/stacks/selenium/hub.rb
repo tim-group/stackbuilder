@@ -51,7 +51,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       name = "browser-#{index}"
-      @definitions[name] = Stacks::Selenium::UbuntuNode.new(name, @hub)
+      @definitions[name] = Stacks::Selenium::UbuntuNode.new(name, @hub, options)
     end
   end
 end
@@ -74,13 +74,13 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec = super
     spec[:template] = "xpboot"
     spec[:kvm_template] = 'kvm_no_virtio'
-    spec[:se_version] = options[:se_version]
     spec[:gold_image_url] = options[:gold_image]
     spec[:image_size] = "8G"
 
     if not self.hub.nil?
       spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     end
+    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
 
     spec[:launch_script] = "start-grid.bat"
     spec
@@ -109,9 +109,11 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
     if not self.hub.nil?
       spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     end
+    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
 
     spec[:gold_image_url] = options[:gold_image]
     spec[:image_size] = "15G"
+
     spec
   end
 
@@ -120,10 +122,12 @@ end
 
 class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
   attr_reader :hub
+  attr_reader :options
 
-  def initialize(base_hostname, hub)
+  def initialize(base_hostname, hub, options)
     super(base_hostname, [:mgmt])
     @hub = hub
+    @options = options
   end
 
   def bind_to(environment)
@@ -133,11 +137,11 @@ class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
   def to_spec
     spec = super
     spec[:template] = "senode"
-    spec[:se_version] = "2.32.0"
 
     if not self.hub.nil?
       spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     end
+    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
 
     spec
   end
