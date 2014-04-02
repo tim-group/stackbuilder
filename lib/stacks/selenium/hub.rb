@@ -27,8 +27,8 @@ module Stacks::Selenium::Grid
     end
   end
 
-  def hub(name="hub-001")
-    @hub = @definitions[name] = Stacks::Selenium::Hub.new(name, @definitions)
+  def hub(options={}, name="hub-001")
+    @hub = @definitions[name] = Stacks::Selenium::Hub.new(name, @definitions, options)
   end
 
   def winxp(version,options)
@@ -145,9 +145,12 @@ end
 
 
 class Stacks::Selenium::Hub < Stacks::MachineDef
-  def initialize(base_hostname, nodes)
+  attr_reader :options
+
+  def initialize(base_hostname, nodes, options)
     super(base_hostname, [:mgmt])
     @nodes = nodes
+    @options = options
   end
 
   def bind_to(environment)
@@ -158,6 +161,7 @@ class Stacks::Selenium::Hub < Stacks::MachineDef
     spec = super
     spec[:template] = "sehub"
     spec[:nodes] = @nodes.map {|name,node| node.name}.reject{|name,node| name==self.name}.sort
+    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
     spec
   end
 end

@@ -3,7 +3,7 @@ describe_stack 'selenium' do
   given do
     stack "segrid" do
       segrid :v=>2 do
-        hub()
+        hub :selenium_version=>"2.41.0"
         winxp "6", :instances=>2,
           :gold_image=> "file:///var/local/images/dev-sxp-gold.img",
           :se_version=>"2.32.0"
@@ -61,24 +61,23 @@ describe_stack 'selenium' do
     host.to_spec.should eql(
       { :fabric=>"space",
         :template=>"sehub",
-        :qualified_hostnames=>
-        {:mgmt=>"e1-hub-001.mgmt.space.net.local"},
-          :availability_group=>nil,
-          :networks=>[:mgmt],
-          :hostname=>"e1-hub-001",
-          :ram=>"2097152",
-          :domain=>"space.net.local",
-          :nodes=>   ["e1-browser-001",
-               "e1-browser-002",
-               "e1-browser-003",
-               "e1-browser-004",
-               "e1-browser-005",
-               "e1-win7ie9-001",
-               "e1-win7ie9-002",
-               "e1-xp6-001",
-               "e1-xp6-002"],
-
-           }
+        :qualified_hostnames => { :mgmt=>"e1-hub-001.mgmt.space.net.local" },
+        :availability_group=>nil,
+        :networks=>[:mgmt],
+        :hostname=>"e1-hub-001",
+        :ram=>"2097152",
+        :domain=>"space.net.local",
+        :nodes=>["e1-browser-001",
+                 "e1-browser-002",
+                 "e1-browser-003",
+                 "e1-browser-004",
+                 "e1-browser-005",
+                 "e1-win7ie9-001",
+                 "e1-win7ie9-002",
+                 "e1-xp6-001",
+                 "e1-xp6-002"],
+        :selenium_version=>"2.41.0"
+      }
     )
   end
 
