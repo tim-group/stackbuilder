@@ -108,17 +108,19 @@ describe_stack 'selenium' do
   host("e1-win7ie9-002.mgmt.space.net.local") do |host|
     host.to_spec.should eql(
       { :fabric => "space",
+        :availability_group => nil,
         :template => "win7boot",
-        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
-        :selenium_version => "2.39.0",
         :gold_image_url => 'http://iso.youdevise.com/gold/win7-ie9-gold.img',
         :image_size => "15G",
-        :qualified_hostnames=> { :mgmt => "e1-win7ie9-002.mgmt.space.net.local"},
-        :availability_group => nil,
+        :ram => "2097152",
         :networks => [:mgmt],
         :hostname => "e1-win7ie9-002",
-        :ram => "2097152",
-        :domain => "space.net.local"})
+        :qualified_hostnames=> { :mgmt => "e1-win7ie9-002.mgmt.space.net.local"},
+        :domain => "space.net.local",
+        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
+        :selenium_version => "2.39.0",
+        :ie_version => "9"
+      })
   end
 
   host("e1-browser-001.mgmt.space.net.local") do |host|

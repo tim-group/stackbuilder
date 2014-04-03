@@ -43,7 +43,8 @@ module Stacks::Selenium::Grid
   def win7(version,options)
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
-      name = "win7ie#{version}-#{index}"
+      options[:ie_version] = options[:ie_version] || version # TODO: Remove this once refstack has been updated to pass in :ie_version
+      name = "win7ie#{options[:ie_version]}-#{index}"
       @definitions[name] = Stacks::Selenium::Win7Node.new(name, @hub, options)
     end
   end
@@ -81,7 +82,7 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     if not self.hub.nil?
       spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     end
-    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
+    spec[:selenium_version] = options[:selenium_version] || "2.32.0" # TODO: Remove default once refstack has been updated to pass in :ie_version
     spec[:ie_version] = options[:ie_version]
 
     spec
@@ -106,14 +107,14 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
   def to_spec
     spec = super
     spec[:template] = "win7boot"
+    spec[:gold_image_url] = options[:gold_image]
+    spec[:image_size] = "15G"
 
     if not self.hub.nil?
       spec[:selenium_hub_host] = self.hub.mgmt_fqdn
     end
-    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
-
-    spec[:gold_image_url] = options[:gold_image]
-    spec[:image_size] = "15G"
+    spec[:selenium_version] = options[:selenium_version] || "2.32.0" # TODO: Remove default once refstack has been updated to pass in :ie_version
+    spec[:ie_version] = options[:ie_version]
 
     spec
   end
