@@ -31,21 +31,28 @@ module Stacks::Selenium::Grid
     @hub = @definitions[name] = Stacks::Selenium::Hub.new(name, @definitions, options)
   end
 
-  def winxp(version,options)
-    options[:instances].times do |i|
-      index = sprintf("%03d",i+1)
-      options[:ie_version] = options[:ie_version] || version # TODO: Remove this once refstack has been updated to pass in :ie_version
-      name = "ie#{options[:ie_version]}-#{index}"
-      @definitions[name] = Stacks::Selenium::XpNode.new(name, @hub, options)
-    end
+  def winxp(version, options)
+    options[:ie_version] = options[:ie_version] || version # TODO: Remove this once refstack has been updated to pass in :ie_version
+    win "xp", options
   end
 
-  def win7(version,options)
+  def win7(version, options)
+    options[:ie_version] = options[:ie_version] || version # TODO: Remove this once refstack has been updated to pass in :ie_version
+    win "win7", options
+  end
+
+  def win(win_version, options)
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
-      options[:ie_version] = options[:ie_version] || version # TODO: Remove this once refstack has been updated to pass in :ie_version
       name = "ie#{options[:ie_version]}-#{index}"
-      @definitions[name] = Stacks::Selenium::Win7Node.new(name, @hub, options)
+
+      if win_version == "xp"
+        @definitions[name] = Stacks::Selenium::XpNode.new(name, @hub, options)
+      elsif win_version == "win7"
+        @definitions[name] = Stacks::Selenium::Win7Node.new(name, @hub, options)
+      else
+        raise "Unkown version of Windows: #{win_version}"
+      end
     end
   end
 

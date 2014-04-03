@@ -12,6 +12,10 @@ describe_stack 'selenium' do
                   :gold_image=> "http://iso.youdevise.com/gold/win7-ie9-gold.img",
                   :selenium_version => "2.39.0",
                   :ie_version => "9"
+        win "win7", :instances => 1,
+                    :gold_image=> "http://iso.youdevise.com/gold/win7-ie10-gold.img",
+                    :selenium_version => "2.39.0",
+                    :ie_version => "10"
         ubuntu :instances => 5,
                :selenium_version => "2.32.0"
       end
@@ -78,6 +82,7 @@ describe_stack 'selenium' do
                    "e1-browser-003",
                    "e1-browser-004",
                    "e1-browser-005",
+                   "e1-ie10-001",
                    "e1-ie6-001",
                    "e1-ie6-002",
                    "e1-ie9-001",
@@ -121,6 +126,24 @@ describe_stack 'selenium' do
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.39.0",
         :ie_version => "9"
+      })
+  end
+
+  host("e1-ie10-001.mgmt.space.net.local") do |host|
+    host.to_spec.should eql(
+      { :fabric => "space",
+        :availability_group => nil,
+        :template => "win7boot",
+        :gold_image_url => 'http://iso.youdevise.com/gold/win7-ie10-gold.img',
+        :image_size => "15G",
+        :ram => "2097152",
+        :networks => [:mgmt],
+        :hostname => "e1-ie10-001",
+        :qualified_hostnames=> { :mgmt => "e1-ie10-001.mgmt.space.net.local"},
+        :domain => "space.net.local",
+        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
+        :selenium_version => "2.39.0",
+        :ie_version => "10"
       })
   end
 
