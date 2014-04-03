@@ -6,7 +6,8 @@ describe_stack 'selenium' do
         hub :selenium_version => "2.41.0"
         winxp "6", :instances => 2,
                    :gold_image=> "file:///var/local/images/dev-sxp-gold.img",
-                   :selenium_version => "2.41.0"
+                   :selenium_version => "2.41.0",
+                   :ie_version => "6"
         win7 "9", :instances => 2,
                   :gold_image=> "http://iso.youdevise.com/gold/win7-ie9-gold.img",
                   :selenium_version => "2.39.0"
@@ -88,19 +89,20 @@ describe_stack 'selenium' do
   host("e1-xp6-002.mgmt.space.net.local") do |host|
     host.to_spec.should eql(
       { :fabric => "space",
+        :availability_group => nil,
         :template => "xpboot",
         :kvm_template => 'kvm_no_virtio',
-        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
-        :selenium_version => "2.41.0",
+        :launch_script => "start-grid.bat",
         :gold_image_url => 'file:///var/local/images/dev-sxp-gold.img',
-        :launch_script => 'start-grid.bat',
         :image_size => "8G",
-        :qualified_hostnames=> { :mgmt => "e1-xp6-002.mgmt.space.net.local" },
-        :availability_group => nil,
+        :ram => "2097152",
         :networks => [:mgmt],
         :hostname => "e1-xp6-002",
-        :ram => "2097152",
-        :domain => "space.net.local"
+        :qualified_hostnames=> { :mgmt => "e1-xp6-002.mgmt.space.net.local" },
+        :domain => "space.net.local",
+        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
+        :selenium_version => "2.41.0",
+        :ie_version => "6"
       })
   end
 
