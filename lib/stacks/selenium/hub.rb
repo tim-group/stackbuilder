@@ -84,7 +84,6 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec[:selenium_version] = options[:selenium_version] || "2.32.0"
     spec[:ie_version] = options[:ie_version]
 
-    spec[:launch_script] = "start-grid.bat"
     spec
   end
 

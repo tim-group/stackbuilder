@@ -92,7 +92,6 @@ describe_stack 'selenium' do
         :availability_group => nil,
         :template => "xpboot",
         :kvm_template => 'kvm_no_virtio',
-        :launch_script => "start-grid.bat",
         :gold_image_url => 'file:///var/local/images/dev-sxp-gold.img',
         :image_size => "8G",
         :ram => "2097152",
