@@ -35,7 +35,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       options[:ie_version] = options[:ie_version] || version # TODO: Remove this once refstack has been updated to pass in :ie_version
-      name = "xp#{options[:ie_version]}-#{index}"
+      name = "ie#{options[:ie_version]}-#{index}"
       @definitions[name] = Stacks::Selenium::XpNode.new(name, @hub, options)
     end
   end
@@ -44,7 +44,7 @@ module Stacks::Selenium::Grid
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
       options[:ie_version] = options[:ie_version] || version # TODO: Remove this once refstack has been updated to pass in :ie_version
-      name = "win7ie#{options[:ie_version]}-#{index}"
+      name = "ie#{options[:ie_version]}-#{index}"
       @definitions[name] = Stacks::Selenium::Win7Node.new(name, @hub, options)
     end
   end

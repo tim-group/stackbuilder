@@ -10,7 +10,8 @@ describe_stack 'selenium' do
                    :ie_version => "6"
         win7 "9", :instances => 2,
                   :gold_image=> "http://iso.youdevise.com/gold/win7-ie9-gold.img",
-                  :selenium_version => "2.39.0"
+                  :selenium_version => "2.39.0",
+                  :ie_version => "9"
         ubuntu :instances => 5,
                :selenium_version => "2.32.0"
       end
@@ -50,11 +51,11 @@ describe_stack 'selenium' do
     root.find('qa-hub-001.mgmt.space.net.local').should be_nil()
   end
 
-  host("qa-win7ie9-005.mgmt.space.net.local") do |host|
+  host("qa-ie9-005.mgmt.space.net.local") do |host|
     host.to_spec[:selenium_hub_host].should be_nil()
   end
 
-  host("qa-xp6-005.mgmt.space.net.local") do |host|
+  host("qa-ie6-005.mgmt.space.net.local") do |host|
     host.to_spec[:selenium_hub_host].should be_nil()
   end
 
@@ -77,16 +78,16 @@ describe_stack 'selenium' do
                    "e1-browser-003",
                    "e1-browser-004",
                    "e1-browser-005",
-                   "e1-win7ie9-001",
-                   "e1-win7ie9-002",
-                   "e1-xp6-001",
-                   "e1-xp6-002"],
+                   "e1-ie6-001",
+                   "e1-ie6-002",
+                   "e1-ie9-001",
+                   "e1-ie9-002"],
         :selenium_version => "2.41.0"
       }
     )
   end
 
-  host("e1-xp6-002.mgmt.space.net.local") do |host|
+  host("e1-ie6-002.mgmt.space.net.local") do |host|
     host.to_spec.should eql(
       { :fabric => "space",
         :availability_group => nil,
@@ -96,8 +97,8 @@ describe_stack 'selenium' do
         :image_size => "8G",
         :ram => "2097152",
         :networks => [:mgmt],
-        :hostname => "e1-xp6-002",
-        :qualified_hostnames=> { :mgmt => "e1-xp6-002.mgmt.space.net.local" },
+        :hostname => "e1-ie6-002",
+        :qualified_hostnames=> { :mgmt => "e1-ie6-002.mgmt.space.net.local" },
         :domain => "space.net.local",
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.41.0",
@@ -105,7 +106,7 @@ describe_stack 'selenium' do
       })
   end
 
-  host("e1-win7ie9-002.mgmt.space.net.local") do |host|
+  host("e1-ie9-002.mgmt.space.net.local") do |host|
     host.to_spec.should eql(
       { :fabric => "space",
         :availability_group => nil,
@@ -114,8 +115,8 @@ describe_stack 'selenium' do
         :image_size => "15G",
         :ram => "2097152",
         :networks => [:mgmt],
-        :hostname => "e1-win7ie9-002",
-        :qualified_hostnames=> { :mgmt => "e1-win7ie9-002.mgmt.space.net.local"},
+        :hostname => "e1-ie9-002",
+        :qualified_hostnames=> { :mgmt => "e1-ie9-002.mgmt.space.net.local"},
         :domain => "space.net.local",
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.39.0",
