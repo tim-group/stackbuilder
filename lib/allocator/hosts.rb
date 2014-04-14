@@ -2,10 +2,13 @@ require 'allocator/namespace'
 require 'allocator/host'
 
 class StackBuilder::Allocator::Hosts
-  attr_accessor :hosts
+  attr_reader :hosts
+
   def initialize(args)
     @hosts = args[:hosts]
     @logger = args[:logger]
+
+    raise 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
     hosts.each do |host|
       host.set_preference_functions(args[:preference_functions])
     end
