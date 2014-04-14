@@ -36,20 +36,22 @@ class StackBuilder::Allocator::Hosts
   def find_suitable_host_for(machine)
     allocation_denials = []
 
-    raise "Unable to allocate #{machine[:hostname]} as there are no hosts available" if hosts.empty?
+    raise "unable to allocate #{machine[:hostname]} as there are no hosts available" if hosts.empty?
 
     candidate_hosts = hosts.reject do |host|
       allocation_check_result = host.can_allocate(machine)
       if !allocation_check_result[:allocatable]
         reasons = allocation_check_result[:reasons]
         reason_message = reasons.empty? ? 'unsuitable for an unknown reason' : allocation_check_result[:reasons].join("; ")
-        @logger.debug("Allocating #{machine[:hostname]} -- skipping #{host.fqdn} because it is [#{reason_message}]") unless @logger.nil?
+        if @logger != nil
+          @logger.debug("Unable to allocate #{machine[:hostname]} to #{host.fqdn} because it is [#{reason_message}]")
+        end
         allocation_denials << "unable to allocate to #{host.fqdn} because it is [#{reason_message}]"
-        return true
       end
+      !allocation_check_result[:allocatable]
     end
 
-    raise "Unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}" if candidate_hosts.empty?
+    raise "unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}" if candidate_hosts.empty?
     candidate_hosts.sort_by do |host|
       host.preference(machine)
     end[0]
