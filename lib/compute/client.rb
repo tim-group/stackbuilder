@@ -18,6 +18,8 @@ class Compute::Client
       end
     end
 
+    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
+
     Hash[response]
   end
 
