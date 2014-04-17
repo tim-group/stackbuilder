@@ -18,6 +18,7 @@ require 'stacks/mongodb_server'
 require 'stacks/mysqldb_server'
 require 'stacks/quantapp_server'
 require 'stacks/standard_server'
+require 'stacks/logstash_server'
 
 class Stacks::Stack
   attr_reader :name
@@ -55,6 +56,10 @@ class Stacks::Stack
 
   def mysqldb(name='mongodb', &block)
     machineset_with(name, [], Stacks::MysqlDBServer, &block)
+  end
+
+  def logstash(name='logstash', &block)
+    machineset_with(name, [], Stacks::LogstashServer, &block)
   end
 
   def puppetmaster(name="puppetmaster-001")
