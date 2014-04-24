@@ -90,6 +90,81 @@ end
 
 namespace :sbx do
 
+  task :audit_host_machines do
+    hosts = @factory.host_repository.find_current(environment.options[:primary_site])
+
+    data = {}
+
+    hosts.hosts.map do |host|
+      ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
+      disk_stats = StackBuilder::Allocator::PolicyHelpers.disk_stats_of(host)
+      data[host.fqdn] = {
+        :ram => {
+          :allocated => ram_stats[:allocated_ram],
+          :available => ram_stats[:host_ram],
+        },
+        :lvm => {
+          :allocated => disk_stats[:allocated],
+          :available => disk_stats[:total],
+        }
+      }
+
+    end
+
+    lengths = {}
+
+    data.each do |fqdn,stat_types|
+      if lengths[:fqdn].nil? or lengths[:fqdn] < fqdn.length
+        lengths[:fqdn] = fqdn.length
+      end
+      stat_types.each do |stat_type, stats|
+        stat_type_key = stat_type.to_s
+        if lengths[stat_type_key].nil? or lengths[stat_type_key] <stat_type.to_s.length
+          lengths[stat_type_key] = stat_type.to_s.length
+        end
+        stats.each do |stat_name, stat|
+          key = "#{stat_type.to_s} #{stat_name.to_s}"
+          if lengths[key].nil? or lengths[key] < stat.to_s.length
+            lengths[key] = stat.to_s.length
+          end
+        end
+      end
+    end
+
+    headers = []
+    outputs = []
+    data.each do |fqdn,stat_types|
+      output = []
+      output_string = "#{fqdn.ljust(lengths[:fqdn])}:"
+      headers << "fqdn".ljust(output_string.length) if headers[output.size].nil?
+      output << output_string
+      stat_types.each do |stat_type, stats|
+        allocated_output = ""
+        available_output = ""
+        percentage_output = ""
+        stats.each do |stat_name, stat|
+          key = "#{stat_type.to_s} #{stat_name.to_s}"
+          case stat_name
+          when :allocated
+            allocated_output = stat.to_s.rjust(lengths[key])
+          when :available
+            available_output = stat.to_s.rjust(lengths[key])
+            percentage_output = "#{(stats[:allocated].to_f/stat.to_f*100).round.to_s.rjust(3)}%"
+          end
+        end
+        output_string = "#{allocated_output}/#{available_output} #{percentage_output}"
+        headers << stat_type.to_s.ljust(output_string.length) if headers[output.size].nil?
+        output << output_string
+      end
+      outputs << output
+    end
+
+    puts headers.join('  ')
+    outputs.each do |output|
+      puts output.join('  ')
+    end
+  end
+
   task :find_rogue do
     hosts = @factory.host_repository.find_current("local")
 
