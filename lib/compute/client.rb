@@ -20,25 +20,7 @@ class Compute::Client
 
     raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
 
-    libvirt_response_hash = Hash[response]
-
-    response = mco_client("lvm", :nodes => hosts) do |mco|
-      result = mco.vgdisplay()
-      result.map do |vg|
-        raise "all compute nodes must respond with a status code of 0 #{vg.pretty_inspect}" unless vg[:statuscode]==0
-        [vg[:sender], {:lvm_vg => vg[:data]}]
-      end
-    end
-
-    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
-
-    lvm_response_hash = Hash[response]
-
-    libvirt_response_hash.each do |fqdn, attr|
-      libvirt_response_hash[fqdn] = attr.merge(lvm_response_hash[fqdn])
-    end
-
-    libvirt_response_hash
+    Hash[response]
   end
 
   def find_hosts(fabric)

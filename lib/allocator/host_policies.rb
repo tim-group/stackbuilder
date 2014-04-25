@@ -1,8 +1,6 @@
 require 'allocator/namespace'
-require 'allocator/policy_helpers'
 
 module StackBuilder::Allocator::HostPolicies
-
   def self.ha_group()
     Proc.new do |host, machine_spec|
       result = { :passed => true }
@@ -18,15 +16,19 @@ module StackBuilder::Allocator::HostPolicies
   end
 
   def self.do_not_overallocated_ram_policy
-    helper = StackBuilder::Allocator::PolicyHelpers
     Proc.new do |host, machine|
       result = { :passed => true }
-      host_ram_stats = helper.ram_stats_of(host)
-      if host_ram_stats[:available_ram] < Integer(machine[:ram])
-        result = {
-          :passed => false,
-          :reason => "unable to fulfil ram requirement of #{machine[:ram]} because only #{host_ram_stats[:available_ram]} is available. Memory stats: #{host_ram_stats[:allocated_ram]+host_ram_stats[:host_reserve_ram]}/#{host_ram_stats[:host_ram]}"
-        }
+      host_ram = Integer(host.ram)
+      host_reserve_ram = 2097152 #2 GB
+      if host_ram > 0
+        allocated_ram = 0
+        host.machines.each do |allocated_machine|
+          allocated_ram = allocated_ram + Integer(allocated_machine[:ram])
+        end
+        available_ram = (host_ram - allocated_ram) - host_reserve_ram
+        if available_ram < Integer(machine[:ram])
+          result = { :passed => false, :reason => "unable to fulfil ram requirement of #{machine[:ram]} because only #{available_ram} is available. Memory stats: #{allocated_ram+host_reserve_ram}/#{host_ram}" }
+        end
       end
       result
     end

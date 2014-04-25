@@ -33,8 +33,7 @@ class StackBuilder::Allocator::HostRepository
       host = StackBuilder::Allocator::Host.new(fqdn,
         :preference_functions => preference_functions,
         :policies => policies,
-        :ram => attr[:memory],
-        :lvm => attr[:lvm_vg])
+        :ram => attr[:memory])
 
       host.allocated_machines = vms
       hosts << host
