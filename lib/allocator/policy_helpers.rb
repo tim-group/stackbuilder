@@ -21,4 +21,11 @@ module StackBuilder::Allocator::PolicyHelpers
   def self.disk_stats_of(host)
     host.lvm
   end
+
+  def self.vm_stats_of(host)
+    result = {
+      :num_vms => host.machines.length
+    }
+    result
+  end
 end

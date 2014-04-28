@@ -98,6 +98,7 @@ namespace :sbx do
     hosts.hosts.map do |host|
       ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
       disk_stats = StackBuilder::Allocator::PolicyHelpers.disk_stats_of(host)
+      vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
       data[host.fqdn] = {
         :ram => {
           :allocated => ram_stats[:allocated_ram],
@@ -106,7 +107,10 @@ namespace :sbx do
         :lvm => {
           :allocated => disk_stats[:allocated],
           :available => disk_stats[:total],
-        }
+        },
+        :vms => {
+          :allocated => vm_stats[:num_vms],
+        },
       }
 
     end
@@ -152,16 +156,20 @@ namespace :sbx do
             percentage_output = "#{(stats[:allocated].to_f/stat.to_f*100).round.to_s.rjust(3)}%"
           end
         end
-        output_string = "#{allocated_output}/#{available_output} #{percentage_output}"
+        if available_output != ""
+          output_string = "#{allocated_output}/#{available_output} #{percentage_output}"
+        else
+          output_string = "#{allocated_output}"
+        end
         headers << stat_type.to_s.ljust(output_string.length) if headers[output.size].nil?
         output << output_string
       end
       outputs << output
     end
 
-    puts headers.join('  ')
-    outputs.each do |output|
-      puts output.join('  ')
+    puts headers.join('   ')
+    outputs.sort.each do |output|
+      puts output.join('   ')
     end
   end
 
