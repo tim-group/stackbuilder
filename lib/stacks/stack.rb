@@ -19,6 +19,7 @@ require 'stacks/mysqldb_server'
 require 'stacks/quantapp_server'
 require 'stacks/standard_server'
 require 'stacks/logstash_server'
+require 'stacks/fmanalyticsapp_server'
 
 class Stacks::Stack
   attr_reader :name
@@ -60,6 +61,10 @@ class Stacks::Stack
 
   def logstash(name='logstash', &block)
     machineset_with(name, [], Stacks::LogstashServer, &block)
+  end
+
+  def fmanalyticsapp(name='fmanalyticsapp', &block)
+    machineset_with(name, [], Stacks::FmAnalyticsAppServer, &block)
   end
 
   def puppetmaster(name="puppetmaster-001")
