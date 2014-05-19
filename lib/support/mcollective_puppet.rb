@@ -142,6 +142,8 @@ module Support::MCollectivePuppet
       puppetmaster = "antarctica.oyldn.youdevise.com"
     elsif (machine_fqdn =~ /mgmt.pg.net.local/)
       puppetmaster = "australia.pgldn.youdevise.com"
+    elsif (machine_fqdn =~ /mgmt.ci.net.local/)
+      puppetmaster = "ldn-puppet-001.youdevise.com"
     end
 
     if (puppetmaster.nil?)
