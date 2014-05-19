@@ -10,7 +10,7 @@ module Support::MCollectivePuppet
   include Support::MCollective
 
   def ca_sign(machines_fqdns, &block)
-    timeout = 360
+    timeout = 200
     callback = Support::Callback.new(&block)
     needs_signing = machines_fqdns.clone.to_set
 
@@ -49,7 +49,7 @@ module Support::MCollectivePuppet
   def ca_clean(machines_fqdns, &block)
     callback = Support::Callback.new(&block)
     machines_fqdns.each do |machine_fqdn|
-      puppetca() do |mco|
+      puppetca(machine_fqdn) do |mco|
 
         cleaned = mco.clean(:certname => machine_fqdn).select do |response|
           response[:statuscode] == 0
@@ -132,8 +132,23 @@ module Support::MCollectivePuppet
     end]
   end
 
-  def puppetca(&block)
-    mco_client("puppetca", &block)
+  def puppetca(machine_fqdn=nil, &block)
+
+    puppetmaster = nil
+
+    if (machine_fqdn =~ /mgmt.st.net.local/)
+      puppetmaster = "st-puppetmaster-001.mgmt.st.net.local"
+    elsif (machine_fqdn =~ /mgmt.oy.net.local/)
+      puppetmaster = "antarctica.oyldn.youdevise.com"
+    elsif (machine_fqdn =~ /mgmt.pg.net.local/)
+      puppetmaster = "australia.pgldn.youdevise.com"
+    end
+
+    if (puppetmaster.nil?)
+      mco_client("puppetca", &block)
+    else
+      mco_client("puppetca", :nodes => [puppetmaster], &block)
+    end
   end
 
   def puppetd(nodes, &block)
