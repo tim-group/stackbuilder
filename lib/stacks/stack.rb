@@ -93,6 +93,10 @@ class Stacks::Stack
     @definitions["segrid"] = machineset
   end
 
+  def debrepo(name, &block)
+    machineset_with(name, [], Stacks::DebRepo, &block)
+  end
+
   def cislave(name, &block)
     machineset_with(name, [], Stacks::CiSlave, &block)
   end
