@@ -17,7 +17,8 @@ require 'rspec'
 require 'compute/controller'
 require 'stacks/factory'
 require 'stacks/core/actions'
-
+require 'thread'
+require 'stacks/subscription'
 @@factory = @factory = Stacks::Factory.new
 
 include Rake::DSL
@@ -88,6 +89,10 @@ def sbtask(name, &block)
   end
 end
 
+
+@@subscription = Subscription.new()
+@@subscription.start(["provision.*", "puppet_status"])
+
 namespace :sbx do
 
   task :audit_host_machines do
@@ -101,16 +106,16 @@ namespace :sbx do
       vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
       data[host.fqdn] = {
         :ram => {
-          :allocated => ram_stats[:allocated_ram],
-          :available => ram_stats[:host_ram],
-        },
-        :lvm => {
-          :allocated => disk_stats[:allocated],
-          :available => disk_stats[:total],
-        },
-        :vms => {
-          :allocated => vm_stats[:num_vms],
-        },
+        :allocated => ram_stats[:allocated_ram],
+        :available => ram_stats[:host_ram],
+      },
+      :lvm => {
+        :allocated => disk_stats[:allocated],
+        :available => disk_stats[:total],
+      },
+      :vms => {
+        :allocated => vm_stats[:num_vms],
+      },
       }
 
     end
@@ -312,6 +317,15 @@ namespace :sbx do
         logger.info "all nodes found in mcollective #{hosts.size}"
       end
 
+
+      def timed_out(start_time, timeout)
+        return (now - start_time) > timeout
+      end
+
+      def now
+        return Time.now
+      end
+
       namespace :puppet do
         desc "sign outstanding Puppet certificate signing requests for these machines"
         sbtask :sign do
@@ -326,18 +340,9 @@ namespace :sbx do
             end
           end
 
-          include Support::MCollectivePuppet
-          ca_sign(puppet_certs_to_sign) do
-            on :success do |machine|
-              logger.info "successfully signed cert for #{machine}"
-            end
-            on :failed do |machine|
-              logger.warn "failed to signed cert for #{machine}"
-            end
-            on :unaccounted do |machine|
-              logger.warn "cert not signed for #{machine} (unaccounted for)"
-            end
-          end
+          pp @@subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
+
+          puts "all certs signed " if puppet_certs_to_sign.empty?
         end
 
         desc "wait for puppet to complete its run on these machines"
@@ -349,28 +354,31 @@ namespace :sbx do
             end
           end
 
+          pp @@subscription.wait_for_hosts("puppet_status", hosts, 600)
+          puts "yehah puppet"
+
           include Support::MCollectivePuppet
           start_time = Time.now
-          wait_for_complete(hosts) do
-            on :transitioned do |vm, from, to|
-              logger.debug "#{vm}: #{from} -> #{to} (#{Time.now})"
-            end
-            on :passed do |vm|
-              logger.info "successful Puppet run for #{vm} (#{Time.now - start_time} sec)"
-            end
-            on :failed do |vm|
-              logger.warn "failed Puppet run for #{vm} (#{Time.now - start_time} sec)"
-            end
-            on :timed_out do |vm, result|
-              logger.warn "Puppet run timed out for for #{vm} (#{result})"
-            end
-            has :failed do |vms|
-              fail("Puppet runs failed for #{vms.join(", ")}")
-            end
-            has :timed_out do |vms_with_results|
-              fail("Puppet runs timed out for #{vms_with_results.map { |vm, result| "#{vm} (#{result})" }.join(", ")}")
-            end
-          end
+#          wait_for_complete(hosts) do
+#            on :transitioned do |vm, from, to|
+#              logger.debug "#{vm}: #{from} -> #{to} (#{Time.now})"
+#            end
+#            on :passed do |vm|
+#              logger.info "successful Puppet run for #{vm} (#{Time.now - start_time} sec)"
+#            end
+#            on :failed do |vm|
+#              logger.warn "failed Puppet run for #{vm} (#{Time.now - start_time} sec)"
+ #           end
+ #           on :timed_out do |vm, result|
+ #             logger.warn "Puppet run timed out for for #{vm} (#{result})"
+#            end
+#            has :failed do |vms|
+ #             fail("Puppet runs failed for #{vms.join(", ")}")
+ #           end
+ #           has :timed_out do |vms_with_results|
+ #             fail("Puppet runs timed out for #{vms_with_results.map { |vm, result| "#{vm} (#{result})" }.join(", ")}")
+ #           end
+ #         end
         end
 
         desc "run Puppet on these machines"
