@@ -17,7 +17,7 @@ describe Subscription do
   it 'waits for all hosts to check-in' do
     topic = random_topic
     subscription = Subscription.new(:pop_timeout=>1)
-    subscription.start(topic, timeout)
+    subscription.start(topic)
 
     threads = []
     threads << Thread.new {
@@ -48,7 +48,7 @@ describe Subscription do
     topic2 = random_topic
 
     subscription2 = Subscription.new(:pop_timeout=>1)
-    subscription2.start([topic, topic2], 600)
+    subscription2.start([topic, topic2])
 
     threads = []
     threads << Thread.new {
