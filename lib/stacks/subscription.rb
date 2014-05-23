@@ -11,6 +11,15 @@ class Subscription
     @pop_timeout = options[:pop_timeout] || 30
   end
 
+  class WaitResponse
+    attr_reader :responses
+
+    def initialize(responses)
+      @responses = responses
+    end
+  end
+
+
   def self.create_client()
     configfile = MCollective::Util.config_file_for_user
 
@@ -45,10 +54,8 @@ class Subscription
 
   def start(topics)
     @stomp = Subscription.create_client()
-
     topics.each do |topic|
       @queues[topic] = Queue.new
-
       @stomp.subscribe("/topic/#{topic}") do |msg|
         @queues[topic] << msg
       end
@@ -74,7 +81,7 @@ class Subscription
         puts e
       end
     end
-    return return_results
+    return WaitResponse.new(return_results)
   end
 
   private
