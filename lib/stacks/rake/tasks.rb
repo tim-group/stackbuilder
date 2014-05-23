@@ -340,13 +340,17 @@ namespace :sbx do
             end
           end
 
-          pp @@subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
+          result = @@subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
+          result.each do |vm, status|
+            logger.info "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)"
+          end
 
           puts "all certs signed " if puppet_certs_to_sign.empty?
         end
 
         desc "wait for puppet to complete its run on these machines"
         sbtask :wait do
+          start_time = Time.now
           hosts = []
           machine_def.accept do |child_machine_def|
             if child_machine_def.respond_to?(:mgmt_fqdn)
@@ -354,32 +358,16 @@ namespace :sbx do
             end
           end
 
-          pp @@subscription.wait_for_hosts("puppet_status", hosts, 3600)
-          puts "yehah puppet"
+          run_result = @@subscription.wait_for_hosts("puppet_status", hosts, 3600)
 
-          include Support::MCollectivePuppet
-          start_time = Time.now
-#          wait_for_complete(hosts) do
-#            on :transitioned do |vm, from, to|
-#              logger.debug "#{vm}: #{from} -> #{to} (#{Time.now})"
-#            end
-#            on :passed do |vm|
-#              logger.info "successful Puppet run for #{vm} (#{Time.now - start_time} sec)"
-#            end
-#            on :failed do |vm|
-#              logger.warn "failed Puppet run for #{vm} (#{Time.now - start_time} sec)"
- #           end
- #           on :timed_out do |vm, result|
- #             logger.warn "Puppet run timed out for for #{vm} (#{result})"
-#            end
-#            has :failed do |vms|
- #             fail("Puppet runs failed for #{vms.join(", ")}")
- #           end
- #           has :timed_out do |vms_with_results|
- #             fail("Puppet runs timed out for #{vms_with_results.map { |vm, result| "#{vm} (#{result})" }.join(", ")}")
- #           end
- #         end
-        end
+          run_result.each do |vm, status|
+            logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
+          end
+
+          if not run_result.all_passed?
+            fail("Puppet runs have timed out or failed, see above for details")
+          end
+       end
 
         desc "run Puppet on these machines"
         sbtask :run do

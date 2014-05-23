@@ -59,4 +59,31 @@ describe Subscription do
     subscription2.wait_for_hosts(topic, ["a"]).responses.should have_messages_for_hosts(["a"])
     subscription2.wait_for_hosts(topic2, ["a"]).responses.should have_messages_for_hosts(["a"])
   end
+
+  it 'correctly shows: successful, failed and unknowns' do
+    topic = random_topic
+
+    subscription = Subscription.new(:pop_timeout=>1)
+    subscription.start([topic])
+
+    threads = []
+    threads << Thread.new {
+      subscription.stomp.publish("/topic/#{topic}", {"host"=>"a", "status"=>"changed"}.to_json)
+      subscription.stomp.publish("/topic/#{topic}", {"host"=>"b", "status"=>"failed"}.to_json)
+    }
+
+    result = subscription.wait_for_hosts(topic, ["a", "b", "c"])
+
+    result.passed.should eql(["a"])
+    result.failed.should eql(["b"])
+    result.unaccounted_for.should eql(["c"])
+
+    result.all.should eql({
+      "a" => "success",
+      "b" =>  "failed",
+      "c" =>  "unaccounted_for"
+    })
+    result.all_passed?.should eql(false)
+  end
+
 end

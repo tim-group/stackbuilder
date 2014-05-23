@@ -1,9 +1,7 @@
 require 'mcollective'
 
 class Subscription
-
   @@loaded = false
-
   attr_reader :stomp
 
   def initialize(options = {})
@@ -14,11 +12,45 @@ class Subscription
   class WaitResponse
     attr_reader :responses
 
-    def initialize(responses)
+    def initialize(all, responses)
+      @all = all
       @responses = responses
     end
-  end
 
+    def passed
+      @responses.reject {|response| response["status"] == "failed"}.map {|response| response["host"]}
+    end
+
+    def failed
+      @responses.select {|response| response["status"] == "failed"}.map {|response| response["host"]}
+    end
+
+    def unaccounted_for
+      responded = @responses.map {|response| response["host"]}
+      (@all - responded)
+    end
+
+    def all
+      result= {}
+
+      passed.each do |vm|
+        result[vm] = "success"
+      end
+
+      failed.each do |vm|
+        result[vm] = "failed"
+      end
+
+      unaccounted_for.each do |vm|
+        result[vm] = "unaccounted_for"
+      end
+
+      result
+    end
+    def all_passed?
+      return (unaccounted_for.empty? and failed.empty?)
+    end
+  end
 
   def self.create_client()
     configfile = MCollective::Util.config_file_for_user
@@ -81,7 +113,7 @@ class Subscription
         puts e
       end
     end
-    return WaitResponse.new(return_results)
+    return WaitResponse.new(hosts, return_results)
   end
 
   private
