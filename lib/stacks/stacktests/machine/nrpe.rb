@@ -8,6 +8,8 @@ shared_examples_for "nrpe" do |machine|
     results
   end
 
+  fail("no nrpe checks executed on host #{machine.mgmt_fqdn}")
+
   unless commands.nil? or commands[0].nil?
     commands[0].each do |command,command_result|
       it "#{command}" do
