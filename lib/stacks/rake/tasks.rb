@@ -339,9 +339,9 @@ namespace :sbx do
               end
             end
           end
-
+          start_time = Time.now
           result = @@subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
-          result.each do |vm, status|
+          result.all.each do |vm, status|
             logger.info "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)"
           end
 
@@ -360,7 +360,7 @@ namespace :sbx do
 
           run_result = @@subscription.wait_for_hosts("puppet_status", hosts, 3600)
 
-          run_result.each do |vm, status|
+          run_result.all.each do |vm, status|
             logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
           end
 
