@@ -354,7 +354,7 @@ namespace :sbx do
             end
           end
 
-          pp @@subscription.wait_for_hosts("puppet_status", hosts, 600)
+          pp @@subscription.wait_for_hosts("puppet_status", hosts, 3600)
           puts "yehah puppet"
 
           include Support::MCollectivePuppet
