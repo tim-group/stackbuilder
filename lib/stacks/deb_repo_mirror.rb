@@ -1,7 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
 
-class Stacks::DebRepo < Stacks::MachineDef
+class Stacks::DebRepoMirror < Stacks::MachineDef
 
   def initialize(virtual_service, index)
     @virtual_service = virtual_service
@@ -10,7 +10,7 @@ class Stacks::DebRepo < Stacks::MachineDef
 
   def to_enc
     {
-      'role::deb_repo' => {}
+      'role::deb_repo_mirror' => {}
     }
   end
 end
