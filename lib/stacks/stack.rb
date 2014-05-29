@@ -97,6 +97,9 @@ class Stacks::Stack
   def debrepo(name, &block)
     machineset_with(name, [], Stacks::DebRepo, &block)
   end
+  def debrepo_mirror(name, &block)
+    machineset_with(name, [], Stacks::DebRepoMirror, &block)
+  end
 
   def cislave(name, &block)
     machineset_with(name, [], Stacks::CiSlave, &block)
