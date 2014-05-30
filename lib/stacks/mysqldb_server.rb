@@ -27,11 +27,19 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
   end
 
   def to_enc()
+    app = self.application
+    db = self.database_name
+
+    if (@virtual_service.application != nil and @virtual_service.database_name != nil)
+      app = @virtual_service.application
+      db = @virtual_service.database_name
+    end
+
     {
       'role::databaseserver' => {
-        'application'              => self.application,
+        'application'              => app,
         'environment'              => environment.name,
-        'database_name'            => self.database_name,
+        'database_name'            => db,
         'restart_on_config_change' => true,
       }
     }

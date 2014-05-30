@@ -18,6 +18,7 @@ require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
 require 'stacks/mongodb_server'
 require 'stacks/mysqldb_server'
+require 'stacks/mysql_cluster'
 require 'stacks/quantapp_server'
 require 'stacks/standard_server'
 require 'stacks/logstash_server'
@@ -58,7 +59,7 @@ class Stacks::Stack
   end
 
   def mysqldb(name='mongodb', &block)
-    machineset_with(name, [], Stacks::MysqlDBServer, &block)
+    machineset_with(name, [Stacks::MysqlCluster], Stacks::MysqlDBServer, &block)
   end
 
   def logstash(name='logstash', &block)
