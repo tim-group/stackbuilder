@@ -43,4 +43,54 @@ class Stacks::MachineSet
       end
     end
   end
+
+  def config_params
+    [] # parameters for config.properties of apps depending on this service
+  end
+
+  private
+  def find_virtual_service(service)
+    environment.accept do |machine_def|
+      if machine_def.kind_of? Stacks::MachineSet and service.eql? machine_def.name
+        return machine_def
+      end
+    end
+
+    raise "Cannot find the service called #{service}"
+  end
+
+
+  private
+  def resolve_virtual_services(dependencies)
+    dependencies.map do |dependency|
+      find_virtual_service(dependency)
+    end
+  end
+
+  private
+  def dependant_services
+    dependants = []
+    environment.accept do |machine_def|
+      if machine_def.kind_of? Stacks::MachineDefContainer and machine_def.respond_to? :depends_on and machine_def.depends_on.include?(self.name)
+        dependants.push machine_def
+      end
+    end
+    dependants
+  end
+
+  public
+  def dependant_instances
+    (dependant_services.map do |service|
+      service.children
+    end.flatten.map do |instance|
+      instance.prod_fqdn
+    end).sort
+  end
+  
+  public
+  def dependency_config
+    (Hash[resolve_virtual_services(depends_on).inject([]) do |acc, dependency|
+      acc + dependency.config_params
+     end]).sort_by { |key, value| key }
+  end
 end
