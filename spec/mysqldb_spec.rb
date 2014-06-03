@@ -5,9 +5,9 @@ describe_stack 'myapp' do
     stack "myapp" do
       mysqldb "mydb" do
         self.instances = 1
+        self.database_name = "mydb"
+        self.application = "myapp"
         each_machine do |machine|
-          machine.database_name = "mydb"
-          machine.application = "myapp"
           machine.image_size = '5G'
           machine.ram = '4194304'
         end
@@ -17,9 +17,9 @@ describe_stack 'myapp' do
     stack "nodestroy" do
       mysqldb "nodestroydb" do
         self.instances = 1
-       each_machine do |machine|
-          machine.database_name = "mydb"
-          machine.application = "myapp"
+        self.database_name = "mydb"
+        self.application = "myapp"
+        each_machine do |machine|
           machine.image_size = '5G'
           machine.ram = '4194304'
         end
@@ -29,10 +29,10 @@ describe_stack 'myapp' do
     stack "allowdestroy" do
       mysqldb "allowdestroydb" do
         self.instances = 1
-       each_machine do |machine|
+        self.database_name = "mydb"
+        self.application = "myapp"
+        each_machine do |machine|
           machine.allow_destroy()
-          machine.database_name = "mydb"
-          machine.application = "myapp"
           machine.image_size = '5G'
           machine.ram = '4194304'
         end
