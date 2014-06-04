@@ -358,7 +358,7 @@ namespace :sbx do
             end
           end
 
-          run_result = @@subscription.wait_for_hosts("puppet_status", hosts, 3600)
+          run_result = @@subscription.wait_for_hosts("puppet_status", hosts, 5400)
 
           run_result.all.each do |vm, status|
             logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
