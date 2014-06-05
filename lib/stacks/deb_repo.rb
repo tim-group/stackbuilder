@@ -13,5 +13,19 @@ class Stacks::DebRepo < Stacks::MachineDef
       'role::deb_repo' => {}
     }
   end
+
+  def to_specs
+    cname = {
+      :cnames => {
+        :mgmt =>  {
+          'aptly-master'     => "#{qualified_hostname(:mgmt)}",
+          'deb-transitional' => "#{qualified_hostname(:mgmt)}"
+        }
+      }
+    }
+    specs = super.shift
+    specs.merge!(cname)
+    [specs]
+  end
 end
 
