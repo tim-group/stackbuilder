@@ -57,6 +57,7 @@ describe_stack 'myapp' do
         :hostname=>"testing-nodestroydb-001",
         :ram=>"4194304",
         :image_size=>"5G",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"5G"}},
         :domain=>"space.net.local"}])
 
   end
@@ -72,6 +73,7 @@ describe_stack 'myapp' do
         :hostname=>"testing-allowdestroydb-001",
         :ram=>"4194304",
         :image_size=>"5G",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"5G"}},
         :domain=>"space.net.local"}])
 
   end

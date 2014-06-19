@@ -87,7 +87,8 @@ describe_stack 'selenium' do
                    "e1-ie6-002",
                    "e1-ie9-001",
                    "e1-ie9-002"],
-        :selenium_version => "2.41.0"
+        :selenium_version => "2.41.0",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
       }
     )
   end
@@ -107,7 +108,8 @@ describe_stack 'selenium' do
         :domain => "space.net.local",
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.41.0",
-        :ie_version => "6"
+        :ie_version => "6",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"8G"}},
       })
   end
 
@@ -125,7 +127,8 @@ describe_stack 'selenium' do
         :domain => "space.net.local",
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.39.0",
-        :ie_version => "9"
+        :ie_version => "9",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"15G"}},
       })
   end
 
@@ -143,7 +146,8 @@ describe_stack 'selenium' do
         :domain => "space.net.local",
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.39.0",
-        :ie_version => "10"
+        :ie_version => "10",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"15G"}},
       })
   end
 
@@ -158,7 +162,8 @@ describe_stack 'selenium' do
       :qualified_hostnames=> {:mgmt => "e1-browser-001.mgmt.space.net.local"},
       :domain => "space.net.local",
       :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
-      :selenium_version => '2.32.0'
+      :selenium_version => '2.32.0',
+      :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
     })
   end
 

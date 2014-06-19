@@ -27,6 +27,7 @@ describe_stack 'debrepomirror' do
         :hostname=>"e1-debrepomirror-001",
         :ram=>"2097152",
         :cnames => {:mgmt => {'deb-transitional' => 'e1-debrepomirror-001.mgmt.space.net.local'}},
+        :storage => {'/'.to_sym => {:type=>"os", :size=>"3G"}},
         :domain=>"space.net.local"}])
 
   end

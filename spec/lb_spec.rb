@@ -21,6 +21,7 @@ describe_stack 'lb' do
       :networks=>[:mgmt, :prod],
       :hostname=>"e1-lb-002",
       :ram=>"2097152",
+      :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
       :domain=>"space.net.local"})
   end
 

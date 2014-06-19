@@ -5,7 +5,7 @@ class Stacks::MachineDef
   attr_accessor :availability_group
   attr_reader :hostname, :domain, :environment
   attr_reader :fabric, :networks
-  attr_accessor :ram, :image_size, :vcpus
+  attr_accessor :ram, :image_size, :storage, :vcpus
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
     @base_hostname = base_hostname
@@ -61,6 +61,15 @@ class Stacks::MachineDef
     return hostname
   end
 
+  def storage
+    return {
+      '/'.to_sym =>  {
+        :type => 'os',
+        :size => image_size || '3G'
+      }
+    }
+  end
+
   def to_spec
     spec = {
       :hostname => @hostname,
@@ -74,7 +83,7 @@ class Stacks::MachineDef
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:image_size] = image_size unless image_size.nil?
-
+    spec[:storage] = storage
     spec
   end
 
