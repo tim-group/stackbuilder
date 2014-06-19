@@ -14,17 +14,18 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     true
   end
 
-  def to_spec
-    return {
-      :hostname            => @hostname,
-      :networks            => @networks,
-      :domain              => @domain,
-      :fabric              => @fabric,
+  def to_specs
+    specs = super.shift
+    puppetmaster_special = {
       :template            => 'puppetmaster',
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
-      :cnames              => { :mgmt =>  { 'puppet' => "#{qualified_hostname(:mgmt)}" } },
-      :ram                 => '2097152'
+      :cnames              => {
+        :mgmt =>  {
+         'puppet' => "#{qualified_hostname(:mgmt)}"
+        }
+      },
     }
+    specs.merge!(puppetmaster_special)
+    [specs]
   end
 
   def to_enc
