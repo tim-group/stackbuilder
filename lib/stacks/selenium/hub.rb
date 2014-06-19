@@ -73,6 +73,7 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     super(base_hostname, [:mgmt])
     @hub = hub
     @options = options
+    @image_size = "8G"
   end
 
   def bind_to(environment)
@@ -84,7 +85,6 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec[:template] = "xpboot"
     spec[:kvm_template] = 'kvm_no_virtio'
     spec[:gold_image_url] = options[:gold_image]
-    spec[:image_size] = "8G"
 
     if not self.hub.nil?
       spec[:selenium_hub_host] = self.hub.mgmt_fqdn
@@ -105,6 +105,7 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
     super(base_hostname, [:mgmt])
     @hub = hub
     @options = options
+    @image_size = "15G"
   end
 
   def bind_to(environment)
@@ -115,7 +116,6 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
     spec = super
     spec[:template] = "win7boot"
     spec[:gold_image_url] = options[:gold_image]
-    spec[:image_size] = "15G"
 
     if not self.hub.nil?
       spec[:selenium_hub_host] = self.hub.mgmt_fqdn
