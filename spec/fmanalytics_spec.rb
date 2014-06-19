@@ -25,6 +25,7 @@ describe_stack 'fmanalytics' do
         :networks=>[:mgmt, :prod],
         :hostname=>"e1-fmanalyticsapp-001",
         :ram=>"2097152",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
         :domain=>"space.net.local"}])
 
   end

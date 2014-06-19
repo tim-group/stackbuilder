@@ -26,6 +26,7 @@ describe_stack 'quant' do
         :networks=>[:mgmt, :prod],
         :hostname=>"e1-quantapp-001",
         :ram=>"4194304",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
         :domain=>"space.net.local"}])
 
   end

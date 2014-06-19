@@ -31,6 +31,7 @@ describe_stack 'jenkins' do
         :networks=>[:mgmt],
         :hostname=>"e1-jenkinsslave-002",
         :ram=>"8000",
+        :storage => {'/'.to_sym =>{:type=>"os", :size=>"10G"}},
         :domain=>"space.net.local"})
   end
 

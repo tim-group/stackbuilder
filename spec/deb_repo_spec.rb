@@ -32,6 +32,7 @@ describe_stack 'debrepo' do
             'deb-transitional' => 'e1-debrepo-001.mgmt.space.net.local'
            }
         },
+        :storage => {'/'.to_sym => {:type=>"os", :size=>"3G"}},
         :domain=>"space.net.local"}])
 
   end

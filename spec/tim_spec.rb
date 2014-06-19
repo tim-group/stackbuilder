@@ -40,6 +40,7 @@ describe_stack 'tim' do
         :ram=>"14680064",
         :vcpus=>"8",
         :image_size=>'10G',
+        :storage=>{'/'.to_sym => {:type=>"os", :size=>"10G"}},
         :domain=>"space.net.local"}])
   end
   host("e1-timcyclic-001.mgmt.space.net.local") do |host|
@@ -64,6 +65,7 @@ describe_stack 'tim' do
         :ram=>"14680064",
         :vcpus=>"8",
         :image_size=>'10G',
+        :storage=>{'/'.to_sym => {:type=>"os", :size=>"10G"}},
         :domain=>"space.net.local"}])
   end
 end

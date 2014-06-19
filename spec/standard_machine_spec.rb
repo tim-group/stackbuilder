@@ -23,6 +23,7 @@ describe_stack 'standard' do
         :networks=>[:mgmt, :prod],
         :hostname=>"e1-mymachine-001",
         :domain=>"space.net.local",
+        :storage => {'/'.to_sym => {:type=>"os", :size=>"3G"}},
         :ram => "2097152"}])
   end
 end
