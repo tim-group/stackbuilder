@@ -68,30 +68,6 @@ describe Stacks::DSL do
     }])
   end
 
-  it 'can instantiate a puppet master' do
-    stack "puppetmaster" do
-      puppetmaster
-    end
-
-    env "ci", :primary_site=>"st", :secondary_site=>"bs" do
-      instantiate_stack "puppetmaster"
-    end
-
-    environments["ci"]["puppetmaster"].to_specs.should eql([{
-      :hostname => "ci-puppetmaster-001",
-      :domain => "st.net.local",
-      :qualified_hostnames => {:mgmt => "ci-puppetmaster-001.mgmt.st.net.local"},
-      :networks => [:mgmt],
-      :template => 'puppetmaster',
-      :cnames => {:mgmt => {'puppet' => 'ci-puppetmaster-001.mgmt.st.net.local'}},
-      :fabric => "st",
-      :ram => "2097152"
-    }])
-
-    environments["ci"]["puppetmaster"]["puppetmaster-001"].to_enc.should eql(nil)
-
-  end
-
   it 'can find sub environments' do
     env "parent", :primary_site=>"st", :secondary_site=>"bs" do
       env "sub" do
