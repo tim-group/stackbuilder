@@ -62,8 +62,12 @@ class Stacks::MachineDef
   end
 
   def storage
-    return { :/ => image_size } unless image_size.nil?
-    nil
+    return {
+      '/'.to_sym =>  {
+        :type => 'os',
+        :size => image_size || '3G'
+      }
+    }
   end
 
   def to_spec
@@ -79,8 +83,7 @@ class Stacks::MachineDef
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:image_size] = image_size unless image_size.nil?
-    spec[:storage] = storage unless storage.nil?
-
+    spec[:storage] = storage
     spec
   end
 
