@@ -23,6 +23,7 @@ require 'stacks/quantapp_server'
 require 'stacks/standard_server'
 require 'stacks/logstash_server'
 require 'stacks/fmanalyticsapp_server'
+require 'stacks/analyticsapp_server'
 
 class Stacks::Stack
   attr_reader :name
@@ -64,6 +65,10 @@ class Stacks::Stack
 
   def logstash(name='logstash', &block)
     machineset_with(name, [], Stacks::LogstashServer, &block)
+  end
+
+  def analyticsapp(name='analyticsapp', &block)
+    machineset_with(name, [], Stacks::AnalyticsAppServer, &block)
   end
 
   def fmanalyticsapp(name='fmanalyticsapp', &block)
