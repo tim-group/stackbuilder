@@ -211,7 +211,7 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:wait', 'orc:resolve']
+      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -347,6 +347,34 @@ namespace :sbx do
 
           puts "all certs signed " if puppet_certs_to_sign.empty?
         end
+
+        desc "sign outstanding Puppet certificate signing requests for these machines"
+        sbtask :poll_sign do
+          puppet_certs_to_sign = []
+          machine_def.accept do |child_machine_def|
+            if child_machine_def.respond_to?(:mgmt_fqdn)
+              if child_machine_def.needs_signing?
+                puppet_certs_to_sign << child_machine_def.mgmt_fqdn
+              else
+                logger.info "signing not needed for #{child_machine_def.mgmt_fqdn}"
+              end
+            end
+          end
+
+          include Support::MCollectivePuppet
+          ca_sign(puppet_certs_to_sign) do
+            on :success do |machine|
+              logger.info "successfully signed cert for #{machine}"
+            end
+            on :failed do |machine|
+              logger.warn "failed to signed cert for #{machine}"
+            end
+            on :unaccounted do |machine|
+              logger.warn "cert not signed for #{machine} (unaccounted for)"
+            end
+          end
+        end
+
 
         desc "wait for puppet to complete its run on these machines"
         sbtask :wait do
