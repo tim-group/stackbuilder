@@ -9,6 +9,7 @@ describe_stack 'myapp' do
         self.application = "myapp"
         each_machine do |machine|
           machine.image_size = '5G'
+          machine.data_size = '10G'
           machine.ram = '4194304'
         end
       end
@@ -57,7 +58,9 @@ describe_stack 'myapp' do
         :hostname=>"testing-nodestroydb-001",
         :ram=>"4194304",
         :image_size=>"5G",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"5G"}},
+        :storage => {
+          '/'.to_sym              => {:type=>"os",   :size=>"5G"},
+        },
         :domain=>"space.net.local"}])
 
   end
@@ -73,12 +76,19 @@ describe_stack 'myapp' do
         :hostname=>"testing-allowdestroydb-001",
         :ram=>"4194304",
         :image_size=>"5G",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"5G"}},
+        :storage => {
+          '/'.to_sym              => {:type=>"os",  :size=>"5G"},
+        },
         :domain=>"space.net.local"}])
 
   end
 
   host("testing-mydb-001.mgmt.space.net.local") do |host|
+    host.to_specs.shift[:storage].should eql({
+      '/'.to_sym              => {:type=>"os",  :size=>"5G"},
+      '/var/lib/mysql'.to_sym => {:type=>"data", :size=>"10G"},
+    })
+
     host.to_enc.should eql({
       'role::databaseserver' => {
         'application' => 'myapp',
