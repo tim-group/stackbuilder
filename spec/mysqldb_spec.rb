@@ -9,7 +9,9 @@ describe_stack 'myapp' do
         self.application = "myapp"
         each_machine do |machine|
           machine.image_size = '5G'
-          machine.data_size = '10G'
+          machine.modify_storage({
+            '/var/lib/mysql' => { :type => 'data', :size => '10G' },
+          })
           machine.ram = '4194304'
         end
       end

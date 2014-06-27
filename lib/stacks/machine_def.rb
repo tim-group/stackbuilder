@@ -13,6 +13,12 @@ class Stacks::MachineDef
     @location = location
     @availability_group = nil
     @ram = "2097152"
+    @storage = {
+      '/'.to_sym =>  {
+        :type => 'os',
+        :size => '3G'
+      }
+    }
   end
 
   def children
@@ -61,13 +67,34 @@ class Stacks::MachineDef
     return hostname
   end
 
+  def supported_storage_types
+     ['os', 'data']
+  end
+
+  def modify_storage(storage_modifications)
+    storage_modifications.each do |mount_point, values|
+       if @storage[mount_point.to_sym].nil?
+         @storage[mount_point.to_sym] = values
+       else
+         @storage[mount_point.to_sym].merge!(values)
+       end
+    end
+  end
+
+  def legacy_override_root_storage_using_image_size
+    modify_storage({ '/'.to_sym => {  :size => image_size }  })
+  end
+
+  def validate_storage
+    @storage.each do |mount_point, values|
+      raise "#{values[:type]} is not a supported storage type, supported types: #{supported_storage_types.join(', ')}" unless supported_storage_types.include?(values[:type])
+    end
+  end
+
   def storage
-    return {
-      '/'.to_sym =>  {
-        :type => 'os',
-        :size => image_size || '3G'
-      }
-    }
+    legacy_override_root_storage_using_image_size if image_size
+    validate_storage
+    return @storage
   end
 
   def to_spec
