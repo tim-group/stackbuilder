@@ -22,7 +22,6 @@ require 'stacks/mysql_cluster'
 require 'stacks/quantapp_server'
 require 'stacks/standard_server'
 require 'stacks/logstash_server'
-require 'stacks/fmanalyticsapp_server'
 require 'stacks/analyticsapp_server'
 
 class Stacks::Stack
@@ -69,10 +68,6 @@ class Stacks::Stack
 
   def analyticsapp(name='analyticsapp', &block)
     machineset_with(name, [], Stacks::AnalyticsAppServer, &block)
-  end
-
-  def fmanalyticsapp(name='fmanalyticsapp', &block)
-    machineset_with(name, [], Stacks::FmAnalyticsAppServer, &block)
   end
 
   def puppetmaster(name="puppetmaster-001")
