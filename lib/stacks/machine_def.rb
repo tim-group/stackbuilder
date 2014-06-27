@@ -16,7 +16,13 @@ class Stacks::MachineDef
     @storage = {
       '/'.to_sym =>  {
         :type => 'os',
-        :size => '3G'
+        :size => '3G',
+        :prepare => {
+          :method => 'image',
+          :options => {
+            :path => '/var/local/images/gold/generic.img'
+          },
+        },
       }
     }
   end
@@ -67,33 +73,32 @@ class Stacks::MachineDef
     return hostname
   end
 
-  def supported_storage_types
-     ['os', 'data']
-  end
-
   def modify_storage(storage_modifications)
     storage_modifications.each do |mount_point, values|
        if @storage[mount_point.to_sym].nil?
          @storage[mount_point.to_sym] = values
        else
-         @storage[mount_point.to_sym].merge!(values)
+         @storage[mount_point.to_sym] = recurse_merge(@storage[mount_point.to_sym], values)
        end
     end
   end
 
-  def legacy_override_root_storage_using_image_size
-    modify_storage({ '/'.to_sym => {  :size => image_size }  })
+  def recurse_merge(a,b)
+    a.merge(b) do |_,x,y|
+      (x.is_a?(Hash) && y.is_a?(Hash)) ? recurse_merge(x,y) : y
+    end
   end
 
-  def validate_storage
-    @storage.each do |mount_point, values|
-      raise "#{values[:type]} is not a supported storage type, supported types: #{supported_storage_types.join(', ')}" unless supported_storage_types.include?(values[:type])
-    end
+  def legacy_override_root_storage_using_image_size
+    modify_storage({
+      '/'.to_sym => {
+        :size => image_size
+      }
+    })
   end
 
   def storage
     legacy_override_root_storage_using_image_size if image_size
-    validate_storage
     return @storage
   end
 
