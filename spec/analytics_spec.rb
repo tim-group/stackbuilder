@@ -3,7 +3,7 @@ require 'stacks/test_framework'
 describe_stack 'fmanalytics' do
   given do
     stack "fmanalytics" do
-      fmanalyticsapp
+      analyticsapp
     end
 
     env "e1", :primary_site=>"space" do
