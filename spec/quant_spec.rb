@@ -17,6 +17,5 @@ describe_stack 'quant' do
       'role::quantapp_server' => {
       }})
     host.to_specs.shift[:ram].should eql('4194304')
-
   end
 end
