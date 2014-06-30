@@ -20,19 +20,7 @@ describe_stack 'jenkins' do
     host.should have_ancestory(
       ["e1","jenkins", "jenkinsslave", "jenkinsslave-002"])
 
-      host.to_spec.should eql({
-        :fabric=>"space",
-        :vcpus =>"8",
-        :image_size =>"10G",
-        :qualified_hostnames=>{
-          :mgmt=>"e1-jenkinsslave-002.mgmt.space.net.local",
-        },
-        :availability_group=>nil,
-        :networks=>[:mgmt],
-        :hostname=>"e1-jenkinsslave-002",
-        :ram=>"8000",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"10G"}},
-        :domain=>"space.net.local"})
+      host.to_enc.should eql({'role::cinode_precise' => {}})
   end
 
 end
