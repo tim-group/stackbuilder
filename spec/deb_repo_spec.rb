@@ -17,23 +17,12 @@ describe_stack 'debrepo' do
       'role::deb_repo' => {}
     })
 
-    host.to_specs.should eql([
-     {:fabric=>"space",
-       :qualified_hostnames=>{
-          :mgmt=>"e1-debrepo-001.mgmt.space.net.local",
-          :prod=>"e1-debrepo-001.space.net.local"},
-        :availability_group=>"e1-debrepo",
-        :networks=>[:mgmt, :prod],
-        :hostname=>"e1-debrepo-001",
-        :ram=>"2097152",
-        :cnames => {
-           :mgmt => {
-            'aptly-master'     => 'e1-debrepo-001.mgmt.space.net.local',
-            'deb-transitional' => 'e1-debrepo-001.mgmt.space.net.local'
-           }
-        },
-        :storage => {'/'.to_sym => {:type=>"os", :size=>"3G"}},
-        :domain=>"space.net.local"}])
+    host.to_specs.shift[:cnames].should eql({
+      :mgmt => {
+        'aptly-master'     => 'e1-debrepo-001.mgmt.space.net.local',
+        'deb-transitional' => 'e1-debrepo-001.mgmt.space.net.local'
+      }
+    })
 
   end
 end

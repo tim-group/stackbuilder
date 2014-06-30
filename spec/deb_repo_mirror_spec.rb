@@ -17,18 +17,9 @@ describe_stack 'debrepomirror' do
       'role::deb_repo_mirror' => {}
     })
 
-    host.to_specs.should eql([
-     {:fabric=>"space",
-       :qualified_hostnames=>{
-          :mgmt=>"e1-debrepomirror-001.mgmt.space.net.local",
-          :prod=>"e1-debrepomirror-001.space.net.local"},
-        :availability_group=>"e1-debrepomirror",
-        :networks=>[:mgmt, :prod],
-        :hostname=>"e1-debrepomirror-001",
-        :ram=>"2097152",
-        :cnames => {:mgmt => {'deb-transitional' => 'e1-debrepomirror-001.mgmt.space.net.local'}},
-        :storage => {'/'.to_sym => {:type=>"os", :size=>"3G"}},
-        :domain=>"space.net.local"}])
+    host.to_specs.shift[:cnames].should eql({
+      :mgmt => {'deb-transitional' => 'e1-debrepomirror-001.mgmt.space.net.local'}
+    })
 
   end
 end
