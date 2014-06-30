@@ -20,18 +20,5 @@ describe_stack 'mongodb' do
       'role::mongodb_server' => {
         'mongosecret' => "myapp"
       }})
-
-    host.to_specs.should eql([
-      {:fabric=>"space",
-       :qualified_hostnames=>{
-          :mgmt=>"e1-mongodb-001.mgmt.space.net.local",
-          :prod=>"e1-mongodb-001.space.net.local"},
-        :availability_group=>"e1-mongodb",
-        :networks=>[:mgmt, :prod],
-        :hostname=>"e1-mongodb-001",
-        :ram=>"2097152",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
-        :domain=>"space.net.local"}])
-
   end
 end
