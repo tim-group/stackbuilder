@@ -68,103 +68,50 @@ describe_stack 'selenium' do
   end
 
   host("e1-hub-001.mgmt.space.net.local") do |host|
-    host.to_spec.should eql(
-      { :fabric => "space",
-        :template => "sehub",
-        :qualified_hostnames => { :mgmt => "e1-hub-001.mgmt.space.net.local" },
-        :availability_group => nil,
-        :networks => [:mgmt],
-        :hostname => "e1-hub-001",
-        :ram => "2097152",
-        :domain => "space.net.local",
-        :nodes => ["e1-browser-001",
-                   "e1-browser-002",
-                   "e1-browser-003",
-                   "e1-browser-004",
-                   "e1-browser-005",
-                   "e1-ie10-001",
-                   "e1-ie6-001",
-                   "e1-ie6-002",
-                   "e1-ie9-001",
-                   "e1-ie9-002"],
-        :selenium_version => "2.41.0",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
-      }
-    )
+    host.to_spec[:template].should eql "sehub"
+    host.to_spec[:selenium_version].should eql('2.41.0')
+    host.to_spec[:nodes].should eql([
+      'e1-browser-001',
+      'e1-browser-002',
+      'e1-browser-003',
+      'e1-browser-004',
+      'e1-browser-005',
+      'e1-ie10-001',
+      'e1-ie6-001',
+      'e1-ie6-002',
+      'e1-ie9-001',
+      'e1-ie9-002'])
   end
 
   host("e1-ie6-002.mgmt.space.net.local") do |host|
-    host.to_spec.should eql(
-      { :fabric => "space",
-        :availability_group => nil,
-        :template => "xpboot",
-        :kvm_template => 'kvm_no_virtio',
-        :gold_image_url => 'file:///var/local/images/dev-sxp-gold.img',
-        :image_size => "8G",
-        :ram => "2097152",
-        :networks => [:mgmt],
-        :hostname => "e1-ie6-002",
-        :qualified_hostnames=> { :mgmt => "e1-ie6-002.mgmt.space.net.local" },
-        :domain => "space.net.local",
-        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
-        :selenium_version => "2.41.0",
-        :ie_version => "6",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"8G"}},
-      })
+    host.to_spec[:template].should eql("xpboot")
+    host.to_spec[:gold_image_url].should eql 'file:///var/local/images/dev-sxp-gold.img'
+    host.to_spec[:kvm_template].should eql 'kvm_no_virtio'
+    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
+    host.to_spec[:selenium_version].should eql '2.41.0'
+    host.to_spec[:ie_version].should eql '6'
   end
 
   host("e1-ie9-002.mgmt.space.net.local") do |host|
-    host.to_spec.should eql(
-      { :fabric => "space",
-        :availability_group => nil,
-        :template => "win7boot",
-        :gold_image_url => 'http://iso.youdevise.com/gold/win7-ie9-gold.img',
-        :image_size => "15G",
-        :ram => "2097152",
-        :networks => [:mgmt],
-        :hostname => "e1-ie9-002",
-        :qualified_hostnames=> { :mgmt => "e1-ie9-002.mgmt.space.net.local"},
-        :domain => "space.net.local",
-        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
-        :selenium_version => "2.39.0",
-        :ie_version => "9",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"15G"}},
-      })
+    host.to_spec[:template].should eql("win7boot")
+    host.to_spec[:gold_image_url].should eql 'http://iso.youdevise.com/gold/win7-ie9-gold.img'
+    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
+    host.to_spec[:selenium_version].should eql '2.39.0'
+    host.to_spec[:ie_version].should eql '9'
   end
 
   host("e1-ie10-001.mgmt.space.net.local") do |host|
-    host.to_spec.should eql(
-      { :fabric => "space",
-        :availability_group => nil,
-        :template => "win7boot",
-        :gold_image_url => 'http://iso.youdevise.com/gold/win7-ie10-gold.img',
-        :image_size => "15G",
-        :ram => "2097152",
-        :networks => [:mgmt],
-        :hostname => "e1-ie10-001",
-        :qualified_hostnames=> { :mgmt => "e1-ie10-001.mgmt.space.net.local"},
-        :domain => "space.net.local",
-        :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
-        :selenium_version => "2.39.0",
-        :ie_version => "10",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"15G"}},
-      })
+    host.to_spec[:template].should eql("win7boot")
+    host.to_spec[:gold_image_url].should eql 'http://iso.youdevise.com/gold/win7-ie10-gold.img'
+    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
+    host.to_spec[:selenium_version].should eql '2.39.0'
+    host.to_spec[:ie_version].should eql '10'
   end
 
   host("e1-browser-001.mgmt.space.net.local") do |host|
-    host.to_spec.should eql({
-      :fabric => "space",
-      :availability_group => nil,
-      :template => "senode",
-      :ram => "2097152",
-      :networks => [:mgmt],
-      :hostname => "e1-browser-001",
-      :qualified_hostnames=> {:mgmt => "e1-browser-001.mgmt.space.net.local"},
-      :domain => "space.net.local",
-      :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
-      :selenium_version => '2.32.0',
-      :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
-    })
+    host.to_spec[:template].should eql("senode")
+    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
+    host.to_spec[:selenium_version].should eql '2.32.0'
   end
 
 end
