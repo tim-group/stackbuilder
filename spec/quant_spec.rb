@@ -16,18 +16,7 @@ describe_stack 'quant' do
     host.to_enc.should eql({
       'role::quantapp_server' => {
       }})
-
-    host.to_specs.should eql([
-      {:fabric=>"space",
-       :qualified_hostnames=>{
-          :mgmt=>"e1-quantapp-001.mgmt.space.net.local",
-          :prod=>"e1-quantapp-001.space.net.local"},
-        :availability_group=>"e1-quantapp",
-        :networks=>[:mgmt, :prod],
-        :hostname=>"e1-quantapp-001",
-        :ram=>"4194304",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"3G"}},
-        :domain=>"space.net.local"}])
+    host.to_specs.shift[:ram].should eql('4194304')
 
   end
 end
