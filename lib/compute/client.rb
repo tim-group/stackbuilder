@@ -34,8 +34,22 @@ class Compute::Client
 
     lvm_response_hash = Hash[response]
 
+    response = mco_client("computenodeconfig", :nodes => hosts) do |mco|
+      result = mco.get(:key => 'storage')
+
+      result.map do |resp|
+        raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
+        [resp[:sender], {:storage => resp[:data]}]
+      end
+    end
+
+    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
+
+    storage_response_hash = Hash[response]
+
     libvirt_response_hash.each do |fqdn, attr|
       libvirt_response_hash[fqdn] = attr.merge(lvm_response_hash[fqdn])
+      libvirt_response_hash[fqdn] = attr.merge(storage_response_hash[fqdn])
     end
 
     libvirt_response_hash

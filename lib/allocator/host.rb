@@ -9,7 +9,7 @@ class StackBuilder::Allocator::Host
   attr_reader :preference_functions
   attr_accessor :policies
 
-  def initialize(fqdn, args = {:preference_functions=>[], :policies=>[], :ram=>'0', :lvm=>{}})
+  def initialize(fqdn, args = {:preference_functions=>[], :policies=>[], :ram=>'0', :lvm=>{}, :storage=>{}})
     @provisionally_allocated_machines = []
     @fqdn = fqdn
     @allocated_machines = []
@@ -17,6 +17,7 @@ class StackBuilder::Allocator::Host
     @preference_functions = [] #args[:preference_functions]
     @ram = args[:ram]
     @lvm = args[:lvm]
+    @storage = args[:storage]
   end
 
   def machines
