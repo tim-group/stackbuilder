@@ -19,26 +19,12 @@ describe Stacks::DSL do
 
   it 'binds to configuration from the environment' do
     appx = environments["ci"]["blah"]["appx"]
-    appx.to_specs.should eql([{
-        :hostname => "ci-appx-001",
-        :domain => "st.net.local",
-        :fabric => "st",
-        :availability_group => "ci-appx",
-        :networks => [:mgmt,:prod],
-        :qualified_hostnames => {:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local"},
-        :ram=>"2097152",
-        :storage => {'/'.to_sym => {:type=>"os", :size=>"3G"}},
-      },
-      {
-        :hostname => "ci-appx-002",
-        :domain => "st.net.local",
-        :fabric => "st",
-        :availability_group => "ci-appx",
-        :networks => [:mgmt,:prod],
-        :qualified_hostnames => {:mgmt => "ci-appx-002.mgmt.st.net.local", :prod => "ci-appx-002.st.net.local"},
-        :ram=>"2097152",
-        :storage => {'/'.to_sym => {:type=>"os", :size=>"3G"}},
-      }])
+    appx.to_specs.size.should eql 2
+    appx.to_specs.shift[:hostname].should eql('ci-appx-001')
+    appx.to_specs.shift[:domain].should eql('st.net.local')
+    appx.to_specs.shift[:fabric].should eql('st')
+    appx.to_specs.shift[:availability_group].should eql('ci-appx')
+    appx.to_specs.shift[:qualified_hostnames].should eql({:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local"})
   end
 
   it 'can make an arbitrary specd machine' do
