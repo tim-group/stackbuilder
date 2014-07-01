@@ -109,7 +109,7 @@ describe_stack 'selenium' do
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.41.0",
         :ie_version => "6",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"8G"}},
+        :storage => {'/'.to_sym =>{:type=>"os", :prepare=>{:options=>{:create_in_fstab=>false, :path=>"file:///var/local/images/dev-sxp-gold.img", :resize=>false, :virtio=>false}}, :size=>"8G"}},
       })
   end
 
@@ -128,7 +128,7 @@ describe_stack 'selenium' do
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.39.0",
         :ie_version => "9",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"15G"}},
+        :storage => {'/'.to_sym =>{:type=>"os", :prepare=>{:options=>{:create_in_fstab=>false, :path=>"http://iso.youdevise.com/gold/win7-ie9-gold.img", :resize=>false}}, :size=>"15G"}},
       })
   end
 
@@ -147,7 +147,7 @@ describe_stack 'selenium' do
         :selenium_hub_host => 'e1-hub-001.mgmt.space.net.local',
         :selenium_version => "2.39.0",
         :ie_version => "10",
-        :storage => {'/'.to_sym =>{:type=>"os", :size=>"15G"}},
+        :storage => {'/'.to_sym =>{:type=>"os", :prepare=>{:options=>{:create_in_fstab=>false, :path=>"http://iso.youdevise.com/gold/win7-ie10-gold.img", :resize=>false}}, :size=>"15G"}},
       })
   end
 
