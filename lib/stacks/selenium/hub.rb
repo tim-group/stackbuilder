@@ -94,8 +94,8 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec[:storage]['/'.to_sym][:prepare] = {} if spec[:storage]['/'.to_sym][:prepare].nil?
     spec[:storage]['/'.to_sym][:prepare][:options] = {} if spec[:storage]['/'.to_sym][:prepare][:options].nil?
     spec[:storage]['/'.to_sym][:prepare][:options][:resize] = false
-    spec[:storage]['/'.to_sym][:prepare][:options][:create_fstab] = false
     spec[:storage]['/'.to_sym][:prepare][:options][:path] = options[:gold_image]
+    spec[:storage]['/'.to_sym][:prepare][:options][:create_in_fstab] = false
 
     spec
   end
