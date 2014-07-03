@@ -38,4 +38,23 @@ module StackBuilder::Allocator::HostPolicies
     end
   end
 
+  def self.has_required_storage_types_policy
+    helper = StackBuilder::Allocator::PolicyHelpers
+    Proc.new do |host, machine|
+      result = { :passed => true }
+      storage_types = helper.storage_types_available_on(host)
+      missing_storage_types = []
+      machine[:storage].keys.each do |mount_point|
+        type = machine[:storage][mount_point][:type]
+        missing_storage_types << type unless storage_types.include? type
+      end
+      if missing_storage_types != []
+        result = {
+          :passed => false,
+          :reason => "unable to fulfil storage requirement for types #{missing_storage_types.join(',')}. Storage types available are #{storage_types.join(',')}"
+        }
+      end
+      result
+    end
+  end
 end

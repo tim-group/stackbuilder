@@ -34,7 +34,9 @@ class StackBuilder::Allocator::HostRepository
         :preference_functions => preference_functions,
         :policies => policies,
         :ram => attr[:memory],
-        :lvm => attr[:lvm_vg])
+        :lvm => attr[:lvm_vg],
+        :storage => attr[:storage]
+      )
 
       host.allocated_machines = vms
       hosts << host
