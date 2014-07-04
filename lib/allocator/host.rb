@@ -17,7 +17,7 @@ class StackBuilder::Allocator::Host
     @preference_functions = [] #args[:preference_functions]
     @ram = args[:ram]
     @lvm = args[:lvm]
-    @storage = args[:storage]
+#    @storage = args[:storage]
   end
 
   def machines
