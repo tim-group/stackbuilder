@@ -14,11 +14,11 @@ class Stacks::DebRepoMirror < Stacks::MachineDef
     }
   end
 
-  def to_specs
+  def to_spec
+    specs = super
     cname = { :cnames => { :mgmt =>  { 'deb-transitional' => "#{qualified_hostname(:mgmt)}" } } }
-    specs = super.shift
     specs.merge!(cname)
-    [specs]
+    specs
   end
 end
 
