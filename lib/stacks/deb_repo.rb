@@ -14,7 +14,8 @@ class Stacks::DebRepo < Stacks::MachineDef
     }
   end
 
-  def to_specs
+  def to_spec
+    specs = super
     cname = {
       :cnames => {
         :mgmt =>  {
@@ -23,9 +24,8 @@ class Stacks::DebRepo < Stacks::MachineDef
         }
       }
     }
-    specs = super.shift
     specs.merge!(cname)
-    [specs]
+    specs
   end
 end
 
