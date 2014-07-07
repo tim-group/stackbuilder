@@ -36,7 +36,7 @@ module StackBuilder::Allocator::HostPolicies
     Proc.new do |host, machine|
       missing_storage_types = machine[:storage].inject([]) do |result, (mount_point, values)|
         host_storage_type = host.storage[values[:type]]
-        result << host_storage_type if host_storage_type.nil?
+        result << values[:type] if host_storage_type.nil?
         result
       end
       result = { :passed => true }
@@ -46,7 +46,6 @@ module StackBuilder::Allocator::HostPolicies
             :reason => "unable to fulfil storage requirement for types #{missing_storage_types.join(',')}. Storage types available are #{host.storage.keys.sort.join(',')}"
         }
       end
-      pp result
       result
     end
   end
@@ -72,8 +71,6 @@ module StackBuilder::Allocator::HostPolicies
                         Available: #{sorted_keys.collect{|key| storage_without_enough_space[key][:available_space]}.join(',')}G"
         }
       end
-      pp result
-      
       result
 
 
