@@ -344,8 +344,6 @@ namespace :sbx do
           result.all.each do |vm, status|
             logger.info "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)"
           end
-
-          puts "all certs signed " if puppet_certs_to_sign.empty?
         end
 
         desc "sign outstanding Puppet certificate signing requests for these machines"
@@ -353,10 +351,10 @@ namespace :sbx do
           puppet_certs_to_sign = []
           machine_def.accept do |child_machine_def|
             if child_machine_def.respond_to?(:mgmt_fqdn)
-              if child_machine_def.needs_signing?
+              if child_machine_def.needs_poll_signing?
                 puppet_certs_to_sign << child_machine_def.mgmt_fqdn
               else
-                logger.info "signing not needed for #{child_machine_def.mgmt_fqdn}"
+                logger.info "poll signing not needed for #{child_machine_def.mgmt_fqdn}"
               end
             end
           end

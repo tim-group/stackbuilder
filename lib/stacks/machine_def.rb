@@ -35,6 +35,10 @@ class Stacks::MachineDef
     true
   end
 
+  def needs_poll_signing?
+    true
+  end
+
   def bind_to(environment)
     @environment = environment
     @hostname = environment.name + "-" + @base_hostname

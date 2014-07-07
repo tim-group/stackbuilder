@@ -11,7 +11,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
   end
 
   def needs_signing?
-    true
+    false
   end
 
   def to_specs
