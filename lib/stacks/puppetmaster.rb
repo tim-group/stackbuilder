@@ -14,6 +14,12 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     false
   end
 
+  def to_enc
+    {
+      'role::puppetmaster' => {}
+    }
+  end
+
   def to_spec
     specs = super
     puppetmaster_special = {
@@ -28,6 +34,4 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     specs
   end
 
-  def to_enc
-  end
 end
