@@ -14,8 +14,8 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     false
   end
 
-  def to_specs
-    specs = super.shift
+  def to_spec
+    specs = super
     puppetmaster_special = {
       :template            => 'puppetmaster',
       :cnames              => {
@@ -25,7 +25,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
       },
     }
     specs.merge!(puppetmaster_special)
-    [specs]
+    specs
   end
 
   def to_enc
