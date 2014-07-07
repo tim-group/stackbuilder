@@ -28,14 +28,13 @@ class StackBuilder::Allocator::HostRepository
         end
       end
 
-      @policies = [] if fabric == "local"
+#      @policies = [] if fabric == "local"
 
       host = StackBuilder::Allocator::Host.new(fqdn,
         :preference_functions => preference_functions,
         :policies => policies,
         :ram => attr[:memory],
-        :lvm => attr[:lvm_vg] #,
-#        :storage => attr[:storage]
+        :storage => attr[:storage]
       )
 
       host.allocated_machines = vms

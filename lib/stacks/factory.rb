@@ -59,10 +59,9 @@ class Stacks::Factory
 
   def policies()
     @policies ||= [
-#      StackBuilder::Allocator::HostPolicies.has_required_storage_types_policy,
+      StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy,
       StackBuilder::Allocator::HostPolicies.ha_group,
       StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy,
-      StackBuilder::Allocator::HostPolicies.do_not_overallocated_disk_policy
     ]
   end
 
