@@ -5,19 +5,18 @@ class StackBuilder::Allocator::Host
   attr_accessor :provisionally_allocated_machines
   attr_reader :fqdn
   attr_reader :ram
-  attr_reader :lvm
+  attr_reader :storage
   attr_reader :preference_functions
   attr_accessor :policies
 
-  def initialize(fqdn, args = {:preference_functions=>[], :policies=>[], :ram=>'0', :lvm=>{}, :storage=>{}})
+  def initialize(fqdn, args = {:preference_functions=>[], :policies=>[], :ram=>'0', :storage=>{}})
     @provisionally_allocated_machines = []
     @fqdn = fqdn
     @allocated_machines = []
     @policies = args[:policies]
     @preference_functions = [] #args[:preference_functions]
     @ram = args[:ram]
-    @lvm = args[:lvm]
-#    @storage = args[:storage]
+    @storage = args[:storage]
   end
 
   def machines
@@ -38,7 +37,19 @@ class StackBuilder::Allocator::Host
 
   def can_allocate(machine)
     result = { :allocatable => true, :reasons => []}
-    @policies.each do |policy|
+
+    # FIXME: Remove this once all machines have new config
+    policies = @policies.select do |policy|
+      use_policy = true
+      if @storage.nil?
+        if policy == StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy or policy == StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy
+          use_policy = false
+        end
+      end
+      use_policy
+    end
+
+    policies.each do |policy|
       policy_result = policy.call(self, machine)
       if (policy_result[:passed] != true)
         result[:allocatable] = false

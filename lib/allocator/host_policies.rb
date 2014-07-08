@@ -32,29 +32,50 @@ module StackBuilder::Allocator::HostPolicies
     end
   end
 
-  def self.do_not_overallocated_disk_policy
+  def self.ensure_defined_storage_types_policy
     Proc.new do |host, machine|
-      { :passed => true }
-    end
-  end
-
-  def self.has_required_storage_types_policy
-    helper = StackBuilder::Allocator::PolicyHelpers
-    Proc.new do |host, machine|
-      result = { :passed => true }
-      storage_types = helper.storage_types_available_on(host)
-      missing_storage_types = []
-      machine[:storage].keys.each do |mount_point|
-        type = machine[:storage][mount_point][:type]
-        missing_storage_types << type unless storage_types.include? type
+      missing_storage_types = machine[:storage].inject([]) do |result, (mount_point, values)|
+        host_storage_type = host.storage[values[:type]]
+        result << values[:type] if host_storage_type.nil?
+        result
       end
-      if missing_storage_types != []
+      result = { :passed => true }
+      if (missing_storage_types.any?)
         result = {
-          :passed => false,
-          :reason => "unable to fulfil storage requirement for types #{missing_storage_types.join(',')}. Storage types available are #{storage_types.join(',')}"
+            :passed => false,
+            :reason => "unable to fulfil storage requirement for types #{missing_storage_types.join(',')}. Storage types available are #{host.storage.keys.sort.join(',')}"
         }
       end
       result
+    end
+  end
+  def self.do_not_overallocate_disk_policy
+    Proc.new do |host, machine|
+      storage_without_enough_space = machine[:storage].inject({}) do |result, (mount_point, values)|
+        machine_storage_type = values[:type]
+        host_storage_type = host.storage[machine_storage_type]
+        required_space = values[:size].to_f
+        unless host_storage_type.nil?
+          available_space = host_storage_type[:free].to_f
+          if (required_space > available_space)
+            result[machine_storage_type] = {:available_space => available_space, :required_space => required_space}
+          end
+        else
+          result[machine_storage_type] = {:available_space => 0, :required_space => required_space}
+        end
+        result
+      end
+      result = { :passed => true }
+      if (!storage_without_enough_space.empty?)
+        sorted_keys = storage_without_enough_space.keys.sort
+        result = {
+            :passed => false,
+            :reason => "unable to fulfil storage requirement for types #{sorted_keys.join(',')}. Not enough disk space available. Required: #{sorted_keys.collect{|key| storage_without_enough_space[key][:required_space]}.join(',') }G - Available: #{sorted_keys.collect{|key| storage_without_enough_space[key][:available_space]}.join(',')}G"
+        }
+      end
+      result
+
+
     end
   end
 end

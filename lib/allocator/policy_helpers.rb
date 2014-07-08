@@ -28,8 +28,4 @@ module StackBuilder::Allocator::PolicyHelpers
     }
     result
   end
-
-  def self.storage_types_available_on(host)
-    host.storage.keys
-  end
 end
