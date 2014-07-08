@@ -12,7 +12,7 @@ describe_stack 'puppetmaster' do
 
   host("e1-puppetmaster-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql ({
-      'role::puppetmaster' => {}
+      'role::dev_puppetmaster' => {}
     })
     host.to_specs.first[:template].should eql('puppetmaster')
     host.to_specs.first[:cnames].should eql({
