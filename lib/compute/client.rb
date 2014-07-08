@@ -25,7 +25,7 @@ class Compute::Client
     # FIXME:
     # Once all computenodes have new storage config, unwrap this code
     # from begin/rescue
-    response = nil
+    response = []
     begin
       response = mco_client("computenodestorage", :nodes => hosts) do |mco|
         result = mco.details()
