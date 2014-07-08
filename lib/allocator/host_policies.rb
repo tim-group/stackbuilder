@@ -57,7 +57,7 @@ module StackBuilder::Allocator::HostPolicies
     Proc.new do |host, machine|
       storage_without_enough_space = machine[:storage].inject({}) do |result, (mount_point, values)|
         machine_storage_type = values[:type]
-        host_storage_type = host.storage[machine_storage_type]
+        host_storage_type = host.storage[machine_storage_type] rescue nil
         required_space = values[:size].to_f
         unless host_storage_type.nil?
           available_space = host_storage_type[:free].to_f
