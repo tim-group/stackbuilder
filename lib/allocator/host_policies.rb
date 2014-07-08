@@ -41,11 +41,14 @@ module StackBuilder::Allocator::HostPolicies
         result
       end
       result = { :passed => true }
-      if (missing_storage_types.any?)
-        result = {
-            :passed => false,
-            :reason => "unable to fulfil storage requirement for types #{missing_storage_types.join(',')}. Storage types available are #{host.storage.keys.sort.join(',')}"
-        }
+      # FIXME: unwrap from unless once all compute nodes have storage config
+      unless host_storage_type.nil?
+        if (missing_storage_types.any?)
+          result = {
+              :passed => false,
+              :reason => "unable to fulfil storage requirement for types #{missing_storage_types.join(',')}. Storage types available are #{host.storage.keys.sort.join(',')}"
+          }
+        end
       end
       result
     end
