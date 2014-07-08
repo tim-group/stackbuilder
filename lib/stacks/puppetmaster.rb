@@ -2,12 +2,9 @@ require 'stacks/namespace'
 
 class Stacks::PuppetMaster < Stacks::MachineDef
 
-  def initialize(base_hostname)
-    super(base_hostname, [:mgmt])
-  end
-
-  def bind_to(environment)
-    super(environment)
+  attr_accessor :cnames
+  def initialize(machineset, index, &block)
+    super(machineset.name + "-" + index, [:mgmt])
   end
 
   def needs_signing?
@@ -30,6 +27,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
         }
       },
     }
+    puppetmaster_special[:cnames] = cnames unless cnames.nil?
     specs.merge!(puppetmaster_special)
     specs
   end

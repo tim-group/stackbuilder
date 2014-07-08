@@ -70,8 +70,8 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::AnalyticsAppServer, &block)
   end
 
-  def puppetmaster(name="puppetmaster-001")
-    @definitions[name] = Stacks::PuppetMaster.new(name)
+  def puppetmaster(name="puppetmaster", &block)
+    machineset_with(name, [], Stacks::PuppetMaster, &block)
   end
 
   def loadbalancer(&block)
