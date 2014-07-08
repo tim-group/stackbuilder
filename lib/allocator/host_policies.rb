@@ -35,7 +35,8 @@ module StackBuilder::Allocator::HostPolicies
   def self.ensure_defined_storage_types_policy
     Proc.new do |host, machine|
       missing_storage_types = machine[:storage].inject([]) do |result, (mount_point, values)|
-        host_storage_type = host.storage[values[:type]]
+        # FIXME: remove the rescue once all compute nodes have storage config
+        host_storage_type = host.storage[values[:type]] rescue nil
         result << values[:type] if host_storage_type.nil?
         result
       end
