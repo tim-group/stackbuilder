@@ -16,7 +16,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
 
   def to_enc
     {
-      'role::puppetmaster' => {}
+      'role::dev_puppetmaster' => {}
     }
   end
 
