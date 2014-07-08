@@ -38,18 +38,7 @@ class StackBuilder::Allocator::Host
   def can_allocate(machine)
     result = { :allocatable => true, :reasons => []}
 
-    # FIXME: Remove this once all machines have new config
-    policies = @policies.select do |policy|
-      use_policy = true
-      if @storage.nil?
-        if policy == StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy or policy == StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy
-          use_policy = false
-        end
-      end
-      use_policy
-    end
-
-    policies.each do |policy|
+    relevant_policies.each do |policy|
       policy_result = policy.call(self, machine)
       if (policy_result[:passed] != true)
         result[:allocatable] = false
@@ -57,6 +46,21 @@ class StackBuilder::Allocator::Host
       end
     end
     result
+  end
+
+  # FIXME: Remove this once all machines have new config
+  def relevant_policies
+    @policies.select do |policy|
+      use_policy = true
+      if @storage.nil?
+        proc1 = StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy
+        proc2 = StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy
+        if policy.to_s == proc1.to_s or policy.to_s == proc2.to_s
+          use_policy = false
+        end
+      end
+      use_policy
+    end
   end
 
   def preference(machine)

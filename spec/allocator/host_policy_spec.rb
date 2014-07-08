@@ -116,16 +116,14 @@ describe StackBuilder::Allocator::HostPolicies do
     StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine)[:passed].should eql(false)
   end
 
-  # FIXME: renable this once all compute nodes have a storage spec.
-  xit 'rejects allocations where the host has no defined storage types' do
+  it 'rejects allocations where the host has no defined storage types' do
     machine = {:storage => {:mount_point => {:type => "something"}}}
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {})
     StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy().call(h1, machine)[:passed].should eql(false)
 
   end
 
-  # FIXME: renable this once all compute nodes have a storage spec.
-  xit 'accepts allocations where the host has no defined storage types' do
+  it 'accepts allocations where the host has no defined storage types' do
     machine = {:storage => {:mount_point => {:type => "LVS"}}}
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"LVS" => {"some_key" => "value"}})
     StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy().call(h1, machine)[:passed].should eql(true)
@@ -145,6 +143,5 @@ describe StackBuilder::Allocator::HostPolicies do
 
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy().call(h1, machine)[:passed].should eql(true)
   end
-
 
 end
