@@ -42,7 +42,7 @@ module StackBuilder::Allocator::HostPolicies
       end
       result = { :passed => true }
       # FIXME: unwrap from unless once all compute nodes have storage config
-      unless host_storage_type.nil?
+      unless host.storage.nil?
         if (missing_storage_types.any?)
           result = {
               :passed => false,
