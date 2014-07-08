@@ -28,7 +28,7 @@ class StackBuilder::Allocator::HostRepository
         end
       end
 
-#      @policies = [] if fabric == "local"
+      @policies = [] if fabric == "local"
 
       host = StackBuilder::Allocator::Host.new(fqdn,
         :preference_functions => preference_functions,
