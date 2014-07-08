@@ -22,16 +22,23 @@ class Compute::Client
 
     libvirt_response_hash = Hash[response]
 
-    response = mco_client("computenodestorage", :nodes => hosts) do |mco|
-      result = mco.details()
-      result.map do |resp|
-        # FIXME: Once all compute nodes have new storage config, renable this
-        #raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
-        [resp[:sender], {:storage => resp[:data]}]
+    # FIXME:
+    # Once all computenodes have new storage config, unwrap this code
+    # from begin/rescue
+    response = nil
+    begin
+      response = mco_client("computenodestorage", :nodes => hosts) do |mco|
+        result = mco.details()
+        result.map do |resp|
+          # FIXME: Once all compute nodes have new storage config, renable this
+          #raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
+          [resp[:sender], {:storage => resp[:data]}]
+        end
       end
-    end
 
-    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
+      raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
+    rescue
+    end
 
     storage_response_hash = Hash[response]
 
