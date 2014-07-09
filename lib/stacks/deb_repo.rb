@@ -3,6 +3,7 @@ require 'stacks/machine_def'
 
 class Stacks::DebRepo < Stacks::MachineDef
 
+  attr_accessor :cnames
   def initialize(virtual_service, index)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
@@ -25,6 +26,7 @@ class Stacks::DebRepo < Stacks::MachineDef
       }
     }
     specs.merge!(cname)
+    specs[:cnames] = cnames unless cnames.nil?
     specs
   end
 end

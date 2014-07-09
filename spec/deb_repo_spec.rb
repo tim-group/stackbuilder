@@ -26,3 +26,24 @@ describe_stack 'debrepo' do
 
   end
 end
+
+describe_stack 'debrepo without a cname' do
+  given do
+    stack "debrepo" do
+      debrepo "debrepo" do
+        each_machine do |machine|
+          machine.cnames = {}
+        end
+      end
+    end
+
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "debrepo"
+    end
+  end
+
+  host("e1-debrepo-001.mgmt.space.net.local") do |host|
+    host.to_specs.shift[:cnames].should eql({})
+
+  end
+end
