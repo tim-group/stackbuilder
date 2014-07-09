@@ -188,10 +188,14 @@ namespace :sbx do
     pp rogue_machines
   end
 
+  require 'set'
+  machine_names = Set.new
   environment.accept do |machine_def|
 
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
+      raise "Duplicate machine name detected: #{machine_def.name}. Look for a stack that has the same name as the server being created.\neg.\n stack '#{machine_def.name}' do\n  app '#{machine_def.name}'\nend\nStacks and Servers with the same name are currently un-supported as it results in duplicates" if machine_names.include?(machine_def.name)
+      machine_names << machine_def.name
 
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_specs do
