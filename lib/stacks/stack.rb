@@ -90,10 +90,10 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::RateLimitedForwardProxyServer, &block)
   end
 
-  def segrid(options, &block)
-    machineset = Stacks::MachineSet.new("segrid", &block)
+  def segrid(name='segrid', options={}, &block)
+    machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend Stacks::Selenium::Grid
-    @definitions["segrid"] = machineset
+    @definitions[name] = machineset
   end
 
   def debrepo(name, &block)
