@@ -52,7 +52,7 @@ class StackBuilder::Allocator::Host
   def relevant_policies
     @policies.select do |policy|
       use_policy = true
-      if @storage.nil?
+      if @storage.nil? or @storage == {}
         proc1 = StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy
         proc2 = StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy
         if policy.to_s == proc1.to_s or policy.to_s == proc2.to_s
