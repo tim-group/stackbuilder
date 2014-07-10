@@ -13,13 +13,9 @@ class Stacks::StandaloneServer < Stacks::MachineDef
     super(environment)
   end
 
-  def to_specs
-    return [{
-      :hostname => @hostname,
-      :domain => @domain,
-      :fabric => @fabric,
-      :networks => @networks,
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
-    }]
+  def to_spec()
+    spec = super()
+    spec.delete(:availability_group)
+    spec
   end
 end

@@ -50,7 +50,20 @@ describe Stacks::DSL do
       :domain => "st.net.local",
       :qualified_hostnames => {:mgmt => "ci-puppetmaster-001.mgmt.st.net.local", :prod => "ci-puppetmaster-001.st.net.local"},
       :networks => [:mgmt, :prod],
-      :fabric => "st"
+      :fabric => "st",
+      :ram=>"2097152",
+      :storage=>{
+        :/ => {
+          :type=>"os",
+          :size=>"3G",
+          :prepare=>{
+            :method=>"image",
+            :options=>{
+              :path=>"/var/local/images/gold/generic.img"
+            }
+          }
+        }
+      }
     }])
   end
 
