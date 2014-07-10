@@ -194,8 +194,8 @@ namespace :sbx do
 
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
-      raise "Duplicate machine name detected: #{machine_def.name}. Look for a stack that has the same name as the server being created.\neg.\n stack '#{machine_def.name}' do\n  app '#{machine_def.name}'\nend\nStacks and Servers with the same name are currently un-supported as it results in duplicates" if machine_names.include?(machine_def.name)
-      machine_names << machine_def.name
+      raise "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. Look for a stack that has the same name as the server being created.\neg.\n stack '#{machine_def.name}' do\n  app '#{machine_def.name}" if machine_names.include?("#{machine_def.environment.name}:#{machine_def.name}")
+      machine_names << "#{machine_def.environment.name}:#{machine_def.name}"
 
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_specs do
