@@ -104,18 +104,17 @@ namespace :sbx do
     used = ram_stats[:allocated_ram]
     total = ram_stats[:host_ram]
     used_percentage = "#{(used.to_f/total.to_f*100).round.to_s.rjust(3)}%" rescue 0
-    "#{used}/#{total} #{used_percentage}%"
+    {:ram_stats => "#{used}/#{total} #{used_percentage}"}
   end
 
 
   def storage_stats_to_string(storage_stats)
     storage_stats.inject({}) do |stats, (storage_type, value_hash)|
-      storage_stats[storage_type] = storage_type.to_s
       arch = value_hash[:arch]
       used = value_hash[:used]
       total = value_hash[:total]
-      used_percentage = "#{(used.to_f/total.to_f*100).round.to_s.rjust(3)}%" rescue 0
-      stats[storage_type] = "#{arch}: #{used}/#{total} #{used_percentage}%"
+      used_percentage = "#{(used.to_f/total.to_f*100).round.to_s}%" rescue 0
+      stats[storage_type.to_sym] = "#{arch.to_s}: #{used.to_s}/#{total.to_s} #{used_percentage.to_s}"
       stats
     end
   end
@@ -127,15 +126,40 @@ namespace :sbx do
 
     hosts.hosts.map do |host|
       ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
-      puts 'Ram'
-      puts ram_stats_to_string(ram_stats)
-      storage_stats = StackBuilder::Allocator::PolicyHelpers.disk_stats_of(host)
-      puts 'Storage'
-      pp storage_stats_to_string(storage_stats)
+      storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
       vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
-      puts 'VM Stats'
-      pp vm_stats
-      pp vm_stats.merge(ram_stats_to_string(ram_stats).merge(storage_stats_to_string(storage_stats)))
+      merged_stats = storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
+      pp " heellll #{merged_stats}"
+
+      headers = merged_stats.keys.push("fqdn".to_sym).inject([]) do |results, element|
+        results << element
+      end
+      order = []
+      headers.each do |header|
+        case header
+        when :fqdn
+          order.insert(0,header)
+        when :num_vms
+          order.insert(1,header)
+        when :ram_stats
+          order.insert(2,header)
+        when :os
+          order.insert(3,header)
+        else
+          order.push(header)
+        end
+      end
+      order = order.select {|header| !header.nil? }
+
+      #ordered_headers = []
+
+      #dorder.keys.sort.each do |position|
+       # ordered_headers << order[position]
+      #end
+
+      pp order
+      #_headers
+
       data[host.fqdn] = {
         :ram     => {
           :allocated => ram_stats[:allocated_ram],

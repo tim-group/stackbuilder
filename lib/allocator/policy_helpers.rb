@@ -18,7 +18,7 @@ module StackBuilder::Allocator::PolicyHelpers
     result
   end
 
-  def self.disk_stats_of(host)
+  def self.storage_stats_of(host)
     host.storage
   end
 
