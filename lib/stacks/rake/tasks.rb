@@ -95,6 +95,31 @@ end
 
 namespace :sbx do
 
+
+  # Convert data to a hash (ram, storage etc.) join the hash together.
+  # Make a set of headers from keys in hash (custom ordering)
+  #
+
+  def ram_stats_to_string(ram_stats)
+    used = ram_stats[:allocated_ram]
+    total = ram_stats[:host_ram]
+    used_percentage = "#{(used.to_f/total.to_f*100).round.to_s.rjust(3)}%" rescue 0
+    "#{used}/#{total} #{used_percentage}%"
+  end
+
+
+  def storage_stats_to_string(storage_stats)
+    storage_stats.inject({}) do |stats, (storage_type, value_hash)|
+      storage_stats[storage_type] = storage_type.to_s
+      arch = value_hash[:arch]
+      used = value_hash[:used]
+      total = value_hash[:total]
+      used_percentage = "#{(used.to_f/total.to_f*100).round.to_s.rjust(3)}%" rescue 0
+      stats[storage_type] = "#{arch}: #{used}/#{total} #{used_percentage}%"
+      stats
+    end
+  end
+
   task :audit_host_machines do
     hosts = @factory.host_repository.find_current(environment.options[:primary_site])
 
@@ -102,22 +127,24 @@ namespace :sbx do
 
     hosts.hosts.map do |host|
       ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
-      disk_stats = StackBuilder::Allocator::PolicyHelpers.disk_stats_of(host)
+      puts 'Ram'
+      puts ram_stats_to_string(ram_stats)
+      storage_stats = StackBuilder::Allocator::PolicyHelpers.disk_stats_of(host)
+      puts 'Storage'
+      pp storage_stats_to_string(storage_stats)
       vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
+      puts 'VM Stats'
+      pp vm_stats
+      pp vm_stats.merge(ram_stats_to_string(ram_stats).merge(storage_stats_to_string(storage_stats)))
       data[host.fqdn] = {
-        :ram => {
-        :allocated => ram_stats[:allocated_ram],
-        :available => ram_stats[:host_ram],
-      },
-      :lvm => {
-        :allocated => disk_stats[:allocated],
-        :available => disk_stats[:total],
-      },
-      :vms => {
-        :allocated => vm_stats[:num_vms],
-      },
+        :ram     => {
+          :allocated => ram_stats[:allocated_ram],
+          :available => ram_stats[:host_ram],
+        },
+        :vms     => {
+          :allocated => vm_stats[:num_vms],
+        },
       }
-
     end
 
     lengths = {}
@@ -151,6 +178,7 @@ namespace :sbx do
         allocated_output = ""
         available_output = ""
         percentage_output = ""
+        arch = ""
         stats.each do |stat_name, stat|
           key = "#{stat_type.to_s} #{stat_name.to_s}"
           case stat_name
@@ -158,14 +186,17 @@ namespace :sbx do
             allocated_output = stat.to_s.rjust(lengths[key])
           when :available
             available_output = stat.to_s.rjust(lengths[key])
-            percentage_output = "#{(stats[:allocated].to_f/stat.to_f*100).round.to_s.rjust(3)}%"
+            percentage_output = "#{(stats[:allocated].to_f/stat.to_f*100).round.to_s.rjust(3)}%" rescue 0
+          when :arch
+            arch = stat rescue 'Unknown'
           end
         end
         if available_output != ""
-          output_string = "#{allocated_output}/#{available_output} #{percentage_output}"
+          output_string = "[#{allocated_output}/#{available_output} #{percentage_output} - #{arch}]"
         else
           output_string = "#{allocated_output}"
         end
+        #output_string += arch
         headers << stat_type.to_s.ljust(output_string.length) if headers[output.size].nil?
         output << output_string
       end

@@ -19,7 +19,7 @@ module StackBuilder::Allocator::PolicyHelpers
   end
 
   def self.disk_stats_of(host)
-    host.lvm
+    host.storage
   end
 
   def self.vm_stats_of(host)
