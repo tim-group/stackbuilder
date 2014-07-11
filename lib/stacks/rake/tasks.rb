@@ -129,7 +129,8 @@ namespace :sbx do
       storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
       vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
       merged_stats = storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
-      pp " heellll #{merged_stats}"
+      merged_stats[:fqdn] = host.fqdn
+      pp merged_stats
 
       headers = merged_stats.keys.push("fqdn".to_sym).inject([]) do |results, element|
         results << element
@@ -151,45 +152,42 @@ namespace :sbx do
       end
       order = order.select {|header| !header.nil? }
 
-      #ordered_headers = []
+      ordered_hash = {}
+      order.each do |header|
+        ordered_hash[header.to_sym] = merged_stats[header.to_sym]
+      end
+      data[host.fqdn]=ordered_hash
 
-      #dorder.keys.sort.each do |position|
-       # ordered_headers << order[position]
-      #end
-
-      pp order
-      #_headers
-
-      data[host.fqdn] = {
-        :ram     => {
-          :allocated => ram_stats[:allocated_ram],
-          :available => ram_stats[:host_ram],
-        },
-        :vms     => {
-          :allocated => vm_stats[:num_vms],
-        },
-      }
+     # data[host.fqdn] = {
+     #   :ram     => {
+     #     :allocated => ram_stats[:allocated_ram],
+     #     :available => ram_stats[:host_ram],
+     #   },
+     #   :vms     => {
+     #     :allocated => vm_stats[:num_vms],
+     #   },
+     # }
     end
 
     lengths = {}
 
-    data.each do |fqdn,stat_types|
-      if lengths[:fqdn].nil? or lengths[:fqdn] < fqdn.length
-        lengths[:fqdn] = fqdn.length
-      end
-      stat_types.each do |stat_type, stats|
-        stat_type_key = stat_type.to_s
-        if lengths[stat_type_key].nil? or lengths[stat_type_key] <stat_type.to_s.length
-          lengths[stat_type_key] = stat_type.to_s.length
-        end
-        stats.each do |stat_name, stat|
-          key = "#{stat_type.to_s} #{stat_name.to_s}"
-          if lengths[key].nil? or lengths[key] < stat.to_s.length
-            lengths[key] = stat.to_s.length
-          end
-        end
-      end
-    end
+#    data.each do |fqdn,stat_types|
+#      if lengths[:fqdn].nil? or lengths[:fqdn] < fqdn.length
+#        lengths[:fqdn] = fqdn.length
+#      end
+#      stat_types.each do |stat_type, stats|
+#        stat_type_key = stat_type.to_s
+#        if lengths[stat_type_key].nil? or lengths[stat_type_key] <stat_type.to_s.length
+#          lengths[stat_type_key] = stat_type.to_s.length
+#        end
+#        stats.each do |stat_name, stat|
+#          key = "#{stat_type.to_s} #{stat_name.to_s}"
+#          if lengths[key].nil? or lengths[key] < stat.to_s.length
+#            lengths[key] = stat.to_s.length
+#          end
+#        end
+#      end
+#    end
 
     headers = []
     outputs = []
