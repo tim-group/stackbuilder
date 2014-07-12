@@ -157,28 +157,29 @@ namespace :sbx do
     end
   end
 
-  task :audit_host_machines do
-    hosts = @factory.host_repository.find_current(environment.options[:primary_site])
+  def stats_for(host)
+    ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
+    storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
+    vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
+    storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
+  end
 
-    data = hosts.hosts.inject({}) do |data, host|
-      ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
-      storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
-      vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
-      merged_stats = storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
-      ordered_headers = ordered_headers_from(merged_stats)
+  def details_for(hosts)
+    hosts.inject({}) do |data, host|
+      stats = stats_for(host)
+      ordered_headers = ordered_headers_from(stats)
       data_values = ordered_headers.inject({}) do |ordered_hash, header|
-        ordered_hash[header.to_sym] = merged_stats[header.to_sym]
+        ordered_hash[header.to_sym] = stats[header.to_sym]
         ordered_hash
       end
       data[host.fqdn] = [ordered_headers, data_values]
       data
     end
+  end
 
-    tabulate(data)
-
-
-
-
+  task :audit_host_machines do
+    hosts = @factory.host_repository.find_current(environment.options[:primary_site])
+    tabulate(details_for(hosts.hosts))
   end
 
   task :find_rogue do
