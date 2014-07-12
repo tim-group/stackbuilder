@@ -125,14 +125,12 @@ namespace :sbx do
     end
     order = headers.inject([]) do |order, header|
       case header
-        when :fqdn
+       when :num_vms
           order.insert(0, header)
-        when :num_vms
-          order.insert(1, header)
         when :ram_stats
-          order.insert(2, header)
+          order.insert(1, header)
         when :os
-          order.insert(3, header)
+          order.insert(2, header)
         else
           order.push(header)
       end
@@ -146,7 +144,7 @@ namespace :sbx do
     include Collimator
 
     data.each do |fqdn, (headers, data)|
-      Table.header("Host Details")
+      Table.header("fqdn: #{fqdn}")
       headers.each do |header|
         Table.column(header.to_s, :width => data[header].size, :justification => :center)
       end
@@ -167,8 +165,6 @@ namespace :sbx do
       storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
       vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
       merged_stats = storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
-      merged_stats[:fqdn] = host.fqdn
-
       ordered_headers = ordered_headers_from(merged_stats)
       data_values = ordered_headers.inject({}) do |ordered_hash, header|
         ordered_hash[header.to_sym] = merged_stats[header.to_sym]
