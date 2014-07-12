@@ -120,7 +120,7 @@ namespace :sbx do
   end
 
   def ordered_headers_from(merged_stats)
-    headers = merged_stats.keys.push("fqdn".to_sym).inject([]) do |results, element|
+    headers = merged_stats.keys.inject([]) do |results, element|
       results << element
     end
     order = headers.inject([]) do |order, header|
@@ -141,27 +141,7 @@ namespace :sbx do
     order.select {|header| !header.nil? }
   end
 
-  task :audit_host_machines do
-    hosts = @factory.host_repository.find_current(environment.options[:primary_site])
-
-    data = {}
-
-    hosts.hosts.map do |host|
-      ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
-      storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
-      vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
-      merged_stats = storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
-      merged_stats[:fqdn] = host.fqdn
-      pp merged_stats
-
-      ordered_headers = ordered_headers_from(merged_stats)
-      data_values = ordered_headers.inject({}) do |ordered_hash, header|
-        ordered_hash[header.to_sym] = merged_stats[header.to_sym]
-        ordered_hash
-      end
-      data[host.fqdn] = [ordered_headers, data_values]
-    end
-
+  def tabulate(data)
     require 'collimator'
     include Collimator
 
@@ -177,6 +157,31 @@ namespace :sbx do
       Table.row(values)
       Table.tabulate
     end
+  end
+
+  task :audit_host_machines do
+    hosts = @factory.host_repository.find_current(environment.options[:primary_site])
+
+    data = hosts.hosts.inject({}) do |data, host|
+      ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
+      storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
+      vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
+      merged_stats = storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
+      merged_stats[:fqdn] = host.fqdn
+
+      ordered_headers = ordered_headers_from(merged_stats)
+      data_values = ordered_headers.inject({}) do |ordered_hash, header|
+        ordered_hash[header.to_sym] = merged_stats[header.to_sym]
+        ordered_hash
+      end
+      data[host.fqdn] = [ordered_headers, data_values]
+      data
+    end
+
+    tabulate(data)
+
+
+
 
   end
 
