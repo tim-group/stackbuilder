@@ -146,7 +146,9 @@ namespace :sbx do
     data.each do |fqdn, (headers, data)|
       Table.header("fqdn: #{fqdn}")
       headers.each do |header|
-        Table.column(header.to_s, :width => data[header].size, :justification => :center)
+        data_size = data[header].size
+        width = header.size > data_size ? header.size : data_size
+        Table.column(header.to_s, :width => width, :justification => :center)
       end
       values = headers.inject([]) do |values, header|
         values << data[header]
