@@ -154,41 +154,27 @@ namespace :sbx do
       merged_stats[:fqdn] = host.fqdn
       pp merged_stats
 
-      data[host.fqdn] = ordered_headers_from(merged_stats).inject({}) do |ordered_hash, header|
+      ordered_headers = ordered_headers_from(merged_stats)
+      data_values = ordered_headers.inject({}) do |ordered_hash, header|
         ordered_hash[header.to_sym] = merged_stats[header.to_sym]
         ordered_hash
       end
+      data[host.fqdn] = [ordered_headers, data_values]
     end
-
-    lengths = {}
-
-#    data.each do |fqdn,stat_types|
-#      if lengths[:fqdn].nil? or lengths[:fqdn] < fqdn.length
-#        lengths[:fqdn] = fqdn.length
-#      end
-#      stat_types.each do |stat_type, stats|
-#        stat_type_key = stat_type.to_s
-#        if lengths[stat_type_key].nil? or lengths[stat_type_key] <stat_type.to_s.length
-#          lengths[stat_type_key] = stat_type.to_s.length
-#        end
-#        stats.each do |stat_name, stat|
-#          key = "#{stat_type.to_s} #{stat_name.to_s}"
-#          if lengths[key].nil? or lengths[key] < stat.to_s.length
-#            lengths[key] = stat.to_s.length
-#          end
-#        end
-#      end
-#    end
 
     require 'collimator'
     include Collimator
 
-    data.each do |fqdn, stat_types|
+    data.each do |fqdn, (headers, data)|
       Table.header("Host Details")
-      stat_types.each do |header, value|
-        Table.column(header.to_s, :width => value.size, :padding => 0, :justification => :center)
+      headers.each do |header|
+        Table.column(header.to_s, :width => data[header].size, :justification => :center)
       end
-      Table.row(stat_types.values)
+      values = headers.inject([]) do |values, header|
+        values << data[header]
+        values
+      end
+      Table.row(values)
       Table.tabulate
     end
 
