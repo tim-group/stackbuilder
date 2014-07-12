@@ -119,6 +119,27 @@ namespace :sbx do
     end
   end
 
+  def ordered_headers_from(merged_stats)
+    headers = merged_stats.keys.push("fqdn".to_sym).inject([]) do |results, element|
+      results << element
+    end
+    order = headers.inject([]) do |order, header|
+      case header
+        when :fqdn
+          order.insert(0, header)
+        when :num_vms
+          order.insert(1, header)
+        when :ram_stats
+          order.insert(2, header)
+        when :os
+          order.insert(3, header)
+        else
+          order.push(header)
+      end
+    end
+    order.select {|header| !header.nil? }
+  end
+
   task :audit_host_machines do
     hosts = @factory.host_repository.find_current(environment.options[:primary_site])
 
@@ -132,41 +153,9 @@ namespace :sbx do
       merged_stats[:fqdn] = host.fqdn
       pp merged_stats
 
-      headers = merged_stats.keys.push("fqdn".to_sym).inject([]) do |results, element|
-        results << element
-      end
-      order = []
-      headers.each do |header|
-        case header
-        when :fqdn
-          order.insert(0,header)
-        when :num_vms
-          order.insert(1,header)
-        when :ram_stats
-          order.insert(2,header)
-        when :os
-          order.insert(3,header)
-        else
-          order.push(header)
-        end
-      end
-      order = order.select {|header| !header.nil? }
-
-      ordered_hash = {}
-      order.each do |header|
+      data[host.fqdn] = ordered_headers_from(merged_stats).inject({}) do |ordered_hash, header|
         ordered_hash[header.to_sym] = merged_stats[header.to_sym]
       end
-      data[host.fqdn]=ordered_hash
-
-     # data[host.fqdn] = {
-     #   :ram     => {
-     #     :allocated => ram_stats[:allocated_ram],
-     #     :available => ram_stats[:host_ram],
-     #   },
-     #   :vms     => {
-     #     :allocated => vm_stats[:num_vms],
-     #   },
-     # }
     end
 
     lengths = {}
