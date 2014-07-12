@@ -147,7 +147,7 @@ namespace :sbx do
       Table.header("fqdn: #{fqdn}")
       headers.each do |header|
         data_size = data[header].size
-        width = header.size > data_size ? header.size : data_size
+        width = header.to_s.size > data_size ? header.to_s.size : data_size
         Table.column(header.to_s, :width => width, :justification => :center)
       end
       values = headers.inject([]) do |values, header|
