@@ -136,6 +136,7 @@ namespace :sbx do
         else
           order.push(header)
       end
+      order
     end
     order.select {|header| !header.nil? }
   end
@@ -155,6 +156,7 @@ namespace :sbx do
 
       data[host.fqdn] = ordered_headers_from(merged_stats).inject({}) do |ordered_hash, header|
         ordered_hash[header.to_sym] = merged_stats[header.to_sym]
+        ordered_hash
       end
     end
 
@@ -178,46 +180,18 @@ namespace :sbx do
 #      end
 #    end
 
-    headers = []
-    outputs = []
-    data.each do |fqdn,stat_types|
-      output = []
-      output_string = "#{fqdn.ljust(lengths[:fqdn])}:"
-      headers << "fqdn".ljust(output_string.length) if headers[output.size].nil?
-      output << output_string
-      stat_types.each do |stat_type, stats|
-        allocated_output = ""
-        available_output = ""
-        percentage_output = ""
-        arch = ""
-        stats.each do |stat_name, stat|
-          key = "#{stat_type.to_s} #{stat_name.to_s}"
-          case stat_name
-          when :allocated
-            allocated_output = stat.to_s.rjust(lengths[key])
-          when :available
-            available_output = stat.to_s.rjust(lengths[key])
-            percentage_output = "#{(stats[:allocated].to_f/stat.to_f*100).round.to_s.rjust(3)}%" rescue 0
-          when :arch
-            arch = stat rescue 'Unknown'
-          end
-        end
-        if available_output != ""
-          output_string = "[#{allocated_output}/#{available_output} #{percentage_output} - #{arch}]"
-        else
-          output_string = "#{allocated_output}"
-        end
-        #output_string += arch
-        headers << stat_type.to_s.ljust(output_string.length) if headers[output.size].nil?
-        output << output_string
+    require 'collimator'
+    include Collimator
+
+    data.each do |fqdn, stat_types|
+      Table.header("Host Details")
+      stat_types.each do |header, value|
+        Table.column(header.to_s, :width => value.size, :padding => 0, :justification => :center)
       end
-      outputs << output
+      Table.row(stat_types.values)
+      Table.tabulate
     end
 
-    puts headers.join('   ')
-    outputs.sort.each do |output|
-      puts output.join('   ')
-    end
   end
 
   task :find_rogue do
