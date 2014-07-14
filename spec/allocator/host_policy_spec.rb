@@ -116,6 +116,30 @@ describe StackBuilder::Allocator::HostPolicies do
     StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy().call(h1, candidate_machine)[:passed].should eql(false)
   end
 
+  it 'rejects allocations where the host provisioning has been disabled' do
+    candidate_machine = {
+      :hostname=>"candidate_machine",
+      :ram => 2097152
+    }
+
+    provisionally_allocated_machine = {
+      :hostname => "provisionally_allocated_machine",
+      :ram => 2097152
+    }
+
+    existing_machine = {
+      :hostname => "existing machine",
+      :ram => 2097152
+    }
+
+    h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304', :allocation_disabled => true) # 4GB
+    h1.allocated_machines << existing_machine
+    h1.provisionally_allocated_machines << provisionally_allocated_machine
+
+    StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy().call(h1, candidate_machine)[:passed].should eql(false)
+  end
+
+
   it 'rejects allocations where the host has no defined storage types' do
     machine = {:storage => {:mount_point => {:type => "something"}}}
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {})

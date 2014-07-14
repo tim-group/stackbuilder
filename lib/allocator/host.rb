@@ -3,6 +3,7 @@ require 'allocator/namespace'
 class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines
   attr_accessor :provisionally_allocated_machines
+  attr_accessor :allocation_disabled
   attr_reader :fqdn
   attr_reader :ram
   attr_reader :storage
@@ -17,6 +18,8 @@ class StackBuilder::Allocator::Host
     @preference_functions = [] #args[:preference_functions]
     @ram = args[:ram]
     @storage = args[:storage]
+    @allocation_disabled = args[:allocation_disabled] || false
+
   end
 
   def machines
