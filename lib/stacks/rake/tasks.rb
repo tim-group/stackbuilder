@@ -145,8 +145,8 @@ namespace :sbx do
     ordered_headers = order(all_headers)
     ordered_header_widths = data.inject({}) do |ordered_header_widths, (fqdn, data_values)|
       row = ordered_headers.inject([]) do |row_values, header|
-        value = data_values[header] rescue ""
-        width = data_values[header].size > header.to_s.size ? data_values[header].size : header.to_s.size
+        value = data_values[header] || ""
+        width = value.size > header.to_s.size ? value.size : header.to_s.size
         if (!ordered_header_widths.has_key?(header))
           ordered_header_widths[header] = width
         else
