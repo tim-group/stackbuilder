@@ -95,11 +95,6 @@ end
 
 namespace :sbx do
 
-
-  # Convert data to a hash (ram, storage etc.) join the hash together.
-  # Make a set of headers from keys in hash (custom ordering)
-  #
-
   def ram_stats_to_string(ram_stats)
     used = ram_stats[:allocated_ram]
     total = ram_stats[:host_ram]
@@ -119,18 +114,17 @@ namespace :sbx do
     end
   end
 
-  def ordered_headers_from(merged_stats)
-    headers = merged_stats.keys.inject([]) do |results, element|
-      results << element
-    end
+  def order(headers)
     order = headers.inject([]) do |order, header|
       case header
-       when :num_vms
+       when :fqdn
           order.insert(0, header)
-        when :ram_stats
+       when :vms
           order.insert(1, header)
-        when :os
+        when :ram_stats
           order.insert(2, header)
+        when :os
+          order.insert(3, header)
         else
           order.push(header)
       end
@@ -142,39 +136,52 @@ namespace :sbx do
   def tabulate(data)
     require 'collimator'
     include Collimator
+    require 'set'
+    all_headers = data.inject(Set.new) do |all_headers, (fqdn, header)|
 
-    data.each do |fqdn, (headers, data)|
-      Table.header("fqdn: #{fqdn}")
-      headers.each do |header|
-        data_size = data[header].size
-        width = header.to_s.size > data_size ? header.to_s.size : data_size
-        Table.column(header.to_s, :width => width, :justification => :center)
-      end
-      values = headers.inject([]) do |values, header|
-        values << data[header]
-        values
-      end
-      Table.row(values)
-      Table.tabulate
+      all_headers.merge(header.keys)
+      all_headers
     end
-  end
+    ordered_headers = order(all_headers)
+    ordered_header_widths = data.inject({}) do |ordered_header_widths, (fqdn, data_values)|
+      row = ordered_headers.inject([]) do |row_values, header|
+        value = data_values[header] rescue ""
+        width = data_values[header].size > header.to_s.size ? data_values[header].size : header.to_s.size
+        if (!ordered_header_widths.has_key?(header))
+          ordered_header_widths[header] = width
+        else
+          ordered_header_widths[header] = width if ordered_header_widths[header] < width
+        end
+        row_values << value
+        row_values
+      end
+      Table.row(row)
+      ordered_header_widths
+    end
+
+    Table.header("")
+    ordered_headers.each do |header|
+      width = ordered_header_widths[header] rescue header.to_s.size
+      Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
+    end
+    Table.tabulate
+ end
 
   def stats_for(host)
     ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
     storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
     vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
-    storage_stats_to_string(storage_stats).merge(vm_stats).merge(ram_stats_to_string(ram_stats))
+    merge  = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats)]
+    merged_stats = Hash[*merge.map(&:to_a).flatten]
+
+    merged_stats[:fqdn] = host.fqdn
+    merged_stats
   end
 
   def details_for(hosts)
     hosts.inject({}) do |data, host|
       stats = stats_for(host)
-      ordered_headers = ordered_headers_from(stats)
-      data_values = ordered_headers.inject({}) do |ordered_hash, header|
-        ordered_hash[header.to_sym] = stats[header.to_sym]
-        ordered_hash
-      end
-      data[host.fqdn] = [ordered_headers, data_values]
+      data[host.fqdn] = stats
       data
     end
   end

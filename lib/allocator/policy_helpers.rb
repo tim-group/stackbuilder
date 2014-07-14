@@ -24,7 +24,7 @@ module StackBuilder::Allocator::PolicyHelpers
 
   def self.vm_stats_of(host)
     result = {
-      :num_vms => host.machines.length
+      :vms => host.machines.length
     }
     result
   end
