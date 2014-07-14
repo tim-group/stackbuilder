@@ -24,8 +24,8 @@ task :package do
   version = "0.0.#{v_part}"
   sh "cp bin/* build/usr/local/bin"
   sh "cp -r lib/* build/usr/local/lib/site_ruby/1.8"
-  sh "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version}"
-  puts "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version}"
+  sh "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version} --dep-pre-depends rubygem-collimator"
+  puts "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version} --deb-pre-depends rubygem-collimator"
 end
 
 desc "Create a debian package"
