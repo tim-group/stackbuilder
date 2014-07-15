@@ -8,7 +8,7 @@ describe StackBuilder::Allocator::Host do
 
 
     h1 = StackBuilder::Allocator::Host.new("h1", {:policies => Stacks::Factory.new.policies})
-    h1.relevant_policies.length.should eql(2)
+    h1.relevant_policies.length.should eql(3)
 
   end
 
