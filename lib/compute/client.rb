@@ -5,6 +5,24 @@ require 'support/mcollective'
 class Compute::Client
   include Support::MCollective
 
+  def get_fact(fact, hosts)
+    fact_response = mco_client('rpcutil',:nodes=>hosts) do |mco|
+      result = mco.get_fact(:fact => fact)
+      result.map do |resp|
+        [resp[:sender], { resp[:data][:fact].to_sym => resp[:data][:value] }]
+      end
+    end
+    fact_response
+  end
+
+  def merge_attributes_by_fqdn(source_hash, target_hash)
+    source_hash.each do |fqdn, attr|
+        target_hash[fqdn] = attr.merge(target_hash[fqdn])
+    end
+    target_hash
+  end
+
+
   def audit_hosts(fabric)
     hosts = find_hosts(fabric)
 
@@ -20,7 +38,11 @@ class Compute::Client
 
     raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
 
-    libvirt_response_hash = Hash[response]
+    response_hash = Hash[response]
+    allocation_disabled_fact_hash = Hash[get_fact('allocation_disabled', hosts)]
+    response_hash = merge_attributes_by_fqdn(allocation_disabled_fact_hash, response_hash)
+
+    libvirt_response_hash = Hash[response_hash]
 
     # FIXME:
     # Once all computenodes have new storage config, unwrap this code
@@ -40,6 +62,7 @@ class Compute::Client
     rescue
     end
 
+
     # FIXME:
     # Once all computenodes have new storage config, unwrap this code
     # from unless
@@ -52,6 +75,8 @@ class Compute::Client
     end
 
     libvirt_response_hash
+
+
   end
 
   def find_hosts(fabric)
