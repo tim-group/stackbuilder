@@ -9,7 +9,7 @@ class Compute::Client
     fact_response = mco_client('rpcutil',:nodes=>hosts) do |mco|
       result = mco.get_fact(:fact => fact)
       result.map do |resp|
-        [resp[:sender], { resp[:data][:fact].to_sym => resp[:data][:value] }]
+        [resp[:sender], { fact.to_sym => resp[:data][:value] }]
       end
     end
     fact_response
