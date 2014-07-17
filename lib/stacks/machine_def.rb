@@ -5,7 +5,7 @@ class Stacks::MachineDef
   attr_accessor :availability_group
   attr_reader :hostname, :domain, :environment
   attr_reader :fabric, :networks
-  attr_accessor :ram, :image_size, :storage, :vcpus, :fabric
+  attr_accessor :ram, :image_size, :storage, :vcpus
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
     @base_hostname = base_hostname
@@ -39,16 +39,13 @@ class Stacks::MachineDef
     true
   end
 
-  def fabric
-    environment.options[@location]
-  end
-
   def bind_to(environment)
     @environment = environment
     @hostname = environment.name + "-" + @base_hostname
+    @fabric = environment.options[@location]
     suffix = 'net.local'
-    @domain = "#{fabric}.#{suffix}"
-    case fabric
+    @domain = "#{@fabric}.#{suffix}"
+    case @fabric
       when 'local'
         @domain = "dev.#{suffix}"
         @hostname = "#{@hostname}-#{owner_fact}"
@@ -113,7 +110,7 @@ class Stacks::MachineDef
     spec = {
       :hostname => @hostname,
       :domain => @domain,
-      :fabric => fabric,
+      :fabric => @fabric,
       :availability_group => availability_group,
       :networks => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
