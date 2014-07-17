@@ -9,6 +9,7 @@ require 'stacks/environment'
 require 'stacks/inventory'
 require 'support/mcollective'
 require 'support/mcollective_puppet'
+require 'support/nagios'
 require 'set' # ci/reporter/rspec should require this but doesn't
 
 require 'ci/reporter/rspec'
@@ -228,7 +229,7 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve']
+      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -460,7 +461,7 @@ namespace :sbx do
       desc "clean away all traces of these machines"
       # Note that the ordering here is important - must have killed VMs before
       # removing their puppet cert, otherwise we have a race condition
-      task :clean => ['clean_nodes', 'puppet:clean']
+      task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
       desc "frees up ip and vip allocation of these machines"
       task :free_ip_allocation => ['free_ips', 'free_vips']
 
@@ -478,6 +479,45 @@ namespace :sbx do
           end
         end
       end
+
+      sbtask :schedule_downtime do
+        hosts = []
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+            hosts << child_machine_def
+          end
+        end
+
+        nagios_helper = Support::Nagios::Helper.new
+        nagios_helper.schedule_downtime(hosts, 600) do #600 = 10 mins
+          on :success do |response_hash|
+            logger.info "successfully scheduled downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+          end
+          on :failed do |response|
+            logger.info "failed to schedule downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+          end
+        end
+      end
+
+      sbtask :cancel_downtime do
+        hosts = []
+        machine_def.accept do |child_machine_def|
+          if child_machine_def.respond_to?(:mgmt_fqdn)
+            hosts << child_machine_def
+          end
+        end
+
+        nagios_helper = Support::Nagios::Helper.new
+        nagios_helper.cancel_downtime(hosts) do
+          on :success do |response_hash|
+            logger.info "successfully cancelled downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+          end
+          on :failed do |response_hash|
+            logger.info "failed to cancel downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+          end
+        end
+      end
+
 
       sbtask :showvnc do
         hosts = []
