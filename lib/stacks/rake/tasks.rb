@@ -231,6 +231,9 @@ namespace :sbx do
       desc "perform all steps required to create and configure the machine(s)"
       task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
 
+      desc "perform a clean followed by a provision"
+      task :reprovision=> ['clean', 'provision']
+
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
         get_action("allocate").call(@factory.services, machine_def)
