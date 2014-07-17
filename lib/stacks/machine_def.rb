@@ -5,7 +5,7 @@ class Stacks::MachineDef
   attr_accessor :availability_group
   attr_reader :hostname, :domain, :environment
   attr_reader :fabric, :networks
-  attr_accessor :ram, :image_size, :storage, :vcpus
+  attr_accessor :ram, :image_size, :storage, :vcpus, :fabric
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
     @base_hostname = base_hostname
@@ -37,6 +37,10 @@ class Stacks::MachineDef
 
   def needs_poll_signing?
     true
+  end
+
+  def fabric
+    @fabric
   end
 
   def bind_to(environment)
