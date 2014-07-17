@@ -1,29 +1,45 @@
 require 'net/http'
 require 'json'
 require 'resolv'
+require 'support/callback'
+require 'stacks/namespace'
 
 module Support
   module Nagios
 
     class Helper
-      def initialize(options)
+      def initialize(options={})
         @helper = options[:helper] ||  Nagios::HttpHelper.new(options)
       end
 
-      def schedule_downtime(fqdn, duration=600)
-        @helper.schedule_downtime(fqdn, duration)
+      def schedule_downtime(machines, duration=600, &block)
+        callback = Support::Callback.new(&block)
+        machines.each do |machine|
+          response = @helper.schedule_downtime(machine, duration)
+          callback.invoke :success, {:machine => machine.hostname, :result => response}
+        end
       end
 
-      def cancel_downtime(fqdn)
-        @helper.cancel_downtime(fqdn)
+      def cancel_downtime(machines, &block)
+        callback = Support::Callback.new(&block)
+        machines.each do |machine|
+          response = @helper.cancel_downtime(machine)
+          callback.invoke :success, {:machine => machine.hostname, :result => response}
+        end
       end
 
     end
 
     class HttpHelper
       def initialize(options)
-        default_nagios_servers = ['antarctica.mgmt.oy.net.local:5152', 'australia.mgmt.pg.net.local:5152']
+        ## FIXME: This does not belong here, but we dont know where it should go
+        default_nagios_servers = {
+          'oy' => 'antarctica.mgmt.oy.net.local',
+          'pg' => 'australia.mgmt.pg.net.local'
+        }
+        default_api_port = 5152
         @nagios_servers = options[:nagios_servers]  || default_nagios_servers
+        @nagios_api_port = options[:nagios_api_port]  || default_api_port
       end
 
       def http_request(url, body, initheader)
@@ -66,26 +82,27 @@ module Support
         result
       end
 
-      def modify_downtime(action, fqdn, duration=nil)
-        body = { "host" => fqdn }
+      def get_nagios_server_for_fabric(fabric)
+        return @nagios_servers[fabric] rescue nil
+      end
+
+      def modify_downtime(action, machine, duration=nil)
+        body = { "host" => machine.mgmt_fqdn }
         body["duration"] = duration unless duration.nil?
         header = {'Content-Type' =>'application/json' }
-
-        responses = {}
-        @nagios_servers.each do |server|
-          url = "http://#{server}/#{action}_downtime"
-          response = http_request(url, body.to_json, header)
-          responses[server] = process_response(response)
-        end
-        responses
+        nagios_server = get_nagios_server_for_fabric(machine.fabric)
+        return "Failed: #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_server.nil?
+        url = "http://#{nagios_server}:#{@nagios_api_port}/#{action}_downtime"
+        response = http_request(url, body.to_json, header)
+        return "#{nagios_server} = #{process_response(response)}"
       end
 
-      def schedule_downtime(fqdn, duration=600)
-        modify_downtime('schedule', fqdn, duration)
+      def schedule_downtime(machine, duration=600)
+        modify_downtime('schedule', machine, duration)
       end
 
-      def cancel_downtime(fqdn)
-        modify_downtime('cancel', fqdn)
+      def cancel_downtime(machine)
+        modify_downtime('cancel', machine)
       end
     end
   end
