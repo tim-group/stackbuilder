@@ -112,7 +112,7 @@ describe Support::Nagios::HttpHelper do
     env = Stacks::Environment.new("env", {:primary_site=>"me"}, {})
     test_machine_in_me.bind_to(env)
     helper = @test.invoke_test_server_with_fixture_and_create_helper('downtime_cancelled_none_found')
-    helper.cancel_downtime(test_machine_in_me).should eql('Failed: env-test - No nagios server found for me')
+    helper.cancel_downtime(test_machine_in_me).should eql('skipping env-test - No nagios server found for me')
   end
 
 end

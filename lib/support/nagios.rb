@@ -91,7 +91,7 @@ module Support
         body["duration"] = duration unless duration.nil?
         header = {'Content-Type' =>'application/json' }
         nagios_server = get_nagios_server_for_fabric(machine.fabric)
-        return "Failed: #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_server.nil?
+        return "skipping #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_server.nil?
         url = "http://#{nagios_server}:#{@nagios_api_port}/#{action}_downtime"
         response = http_request(url, body.to_json, header)
         return "#{nagios_server} = #{process_response(response)}"
