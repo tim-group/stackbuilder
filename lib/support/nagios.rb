@@ -7,15 +7,15 @@ require 'stacks/namespace'
 module Support
   module Nagios
 
-    class Helper
+    class Service
       def initialize(options={})
-        @helper = options[:helper] ||  Nagios::HttpHelper.new(options)
+        @service = options[:service] ||  Nagios::Service::Http.new(options)
       end
 
       def schedule_downtime(machines, duration=600, &block)
         callback = Support::Callback.new(&block)
         machines.each do |machine|
-          response = @helper.schedule_downtime(machine, duration)
+          response = @service.schedule_downtime(machine, duration)
           callback.invoke :success, {:machine => machine.hostname, :result => response}
         end
       end
@@ -23,14 +23,14 @@ module Support
       def cancel_downtime(machines, &block)
         callback = Support::Callback.new(&block)
         machines.each do |machine|
-          response = @helper.cancel_downtime(machine)
+          response = @service.cancel_downtime(machine)
           callback.invoke :success, {:machine => machine.hostname, :result => response}
         end
       end
 
     end
 
-    class HttpHelper
+    class Service::Http
       def initialize(options)
         ## FIXME: This does not belong here, but we dont know where it should go
         default_nagios_servers = {
