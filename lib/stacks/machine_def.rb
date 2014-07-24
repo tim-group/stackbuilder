@@ -15,9 +15,10 @@ class Stacks::MachineDef
     @ram = "2097152"
     @storage = {
       '/'.to_sym =>  {
-        :type => 'os',
-        :size => '3G',
-        :prepare => {
+        :type        => 'os',
+        :size        => '3G',
+        :persistent  => false,
+        :prepare     => {
           :method => 'image',
           :options => {
             :path => '/var/local/images/gold/generic.img'
