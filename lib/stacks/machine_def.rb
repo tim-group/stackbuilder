@@ -17,7 +17,6 @@ class Stacks::MachineDef
       '/'.to_sym =>  {
         :type        => 'os',
         :size        => '3G',
-        :persistent  => false,
         :prepare     => {
           :method => 'image',
           :options => {
