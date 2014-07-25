@@ -472,10 +472,10 @@ namespace :sbx do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
           on :success do |vm, msg|
-            logger.info "cleaned #{vm}"
+            logger.info "successfully cleaned #{vm}: #{msg}"
           end
           on :failure do |vm, msg|
-            logger.error "#{vm} failed to clean: #{msg}"
+            logger.error "failed to clean #{vm}: #{msg}"
           end
           on :unaccounted do |vm|
             logger.warn "VM was unaccounted for: #{vm}"
