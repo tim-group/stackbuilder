@@ -43,7 +43,7 @@ class StackBuilder::Allocator::Hosts
       if !allocation_check_result[:allocatable]
         reasons = allocation_check_result[:reasons]
         reason_message = reasons.empty? ? 'unsuitable for an unknown reason' : allocation_check_result[:reasons].join("; ")
-        @logger.debug("Allocating #{machine[:hostname]} -- skipping #{host.fqdn} because it is [#{reason_message}]") unless @logger.nil?
+        @logger.debug("Allocating #{machine[:hostname]} -- skipping #{host.fqdn} - #{reasons.size} reasons:\n          * #{reason_message}") unless @logger.nil?
         allocation_denials << "unable to allocate to #{host.fqdn} because it is [#{reason_message}]"
       end
       !allocation_check_result[:allocatable]

@@ -9,7 +9,7 @@ module StackBuilder::Allocator::HostPolicies
       if machine_spec[:availability_group]
         host.machines.each do |allocated_machine|
           if allocated_machine[:availability_group] and machine_spec[:availability_group] == allocated_machine[:availability_group]
-            result = { :passed => false, :reason => "already running #{allocated_machine[:hostname]}, which is in same availability group" }
+            result = { :passed => false, :reason => "Availability group violation (already running #{allocated_machine[:hostname]})" }
           end
         end
       end
@@ -20,7 +20,7 @@ module StackBuilder::Allocator::HostPolicies
   def self.allocation_temporarily_disabled_policy
     Proc.new do |host, machine|
       result = { :passed => true }
-      result = { :passed => false, :reason => "allocation temporarily disabled" } if host.allocation_disabled
+      result = { :passed => false, :reason => "Allocation disabled" } if host.allocation_disabled
       result
     end
   end
@@ -33,7 +33,7 @@ module StackBuilder::Allocator::HostPolicies
       if host_ram_stats[:available_ram] < Integer(machine[:ram])
         result = {
           :passed => false,
-          :reason => "unable to fulfil ram requirement of #{machine[:ram]} because only #{host_ram_stats[:available_ram]} is available. Memory stats: #{host_ram_stats[:allocated_ram]+host_ram_stats[:host_reserve_ram]}/#{host_ram_stats[:host_ram]}"
+          :reason => "Insufficient memory (required: #{machine[:ram]} available: #{host_ram_stats[:available_ram]})"
         }
       end
       result
@@ -54,7 +54,7 @@ module StackBuilder::Allocator::HostPolicies
         if (missing_storage_types.any?)
           result = {
               :passed => false,
-              :reason => "unable to fulfil storage requirement for types #{missing_storage_types.join(',')}. Storage types available are #{host.storage.keys.sort.join(',')}"
+              :reason => "Storage type not available (required: #{missing_storage_types.join(',')} available: #{host.storage.keys.sort.join(',')})"
           }
         end
       end
@@ -82,7 +82,7 @@ module StackBuilder::Allocator::HostPolicies
         sorted_keys = storage_without_enough_space.keys.sort
         result = {
             :passed => false,
-            :reason => "unable to fulfil storage requirement for types #{sorted_keys.join(',')}. Not enough disk space available. Required: #{sorted_keys.collect{|key| storage_without_enough_space[key][:required_space]}.join(',') }G - Available: #{sorted_keys.collect{|key| storage_without_enough_space[key][:available_space]}.join(',')}G"
+            :reason => "Insufficient disk space (required: #{sorted_keys.collect{|key| storage_without_enough_space[key][:required_space]}.join(',') }G available: #{sorted_keys.collect{|key| storage_without_enough_space[key][:available_space]}.join(',')}G)"
         }
       end
       result
