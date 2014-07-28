@@ -63,7 +63,8 @@ class Stacks::Factory
       StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy,
       StackBuilder::Allocator::HostPolicies.ha_group,
       StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy,
-      StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy
+      StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy,
+      StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy
     ]
   end
 

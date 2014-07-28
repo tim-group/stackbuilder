@@ -61,6 +61,49 @@ module StackBuilder::Allocator::HostPolicies
       result
     end
   end
+
+  def self.check_storage_exists(mount_point)
+    false
+  end
+
+  def self.require_persistent_storage_to_exist_policy
+    Proc.new do |host, machine|
+      result = { :passed => true }
+
+      persistent_storage_not_found = {}
+      if !host.storage.nil?
+        machine[:storage].each do |mount_point, attributes|
+          persistent = attributes[:persistent]
+          persistence_options = attributes[:persistence_options]
+          if persistent
+            case persistence_options[:on_storage_not_found]
+            when :raise_error
+              underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/','_').gsub(/_$/, '')}"
+              type = attributes[:type]
+              unless host.storage[type][:existing_storage].include? underscore_name.to_sym
+                persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
+                persistent_storage_not_found[type] << underscore_name
+              end
+            when :create_new
+              # Allow the storage to be created
+            end
+          end
+        end
+        reasons = persistent_storage_not_found.keys.map do |type|
+          "#{type}: #{persistent_storage_not_found[type].join(',')}"
+        end
+        unless persistent_storage_not_found.empty?
+          result = {
+            :passed => false,
+            :reason => "Persistent storage not present for type #{reasons.join(',')}"
+          }
+        end
+
+      end
+      result
+    end
+  end
+
   def self.do_not_overallocate_disk_policy
     Proc.new do |host, machine|
       storage_without_enough_space = machine[:storage].inject({}) do |result, (mount_point, values)|

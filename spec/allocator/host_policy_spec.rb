@@ -151,6 +151,21 @@ describe StackBuilder::Allocator::HostPolicies do
     machine = {:storage => {:mount_point => {:type => "LVS"}}}
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"LVS" => {"some_key" => "value"}})
     StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy().call(h1, machine)[:passed].should eql(true)
+  end
+
+  it 'rejects allocations where the hosts persistant storage does not exist on this computenode' do
+    machine = {
+      :hostname => 'test-db-001',
+      :storage => {
+        "/var/lib/mysql/".to_sym => {
+          :type => "data",
+          :size => "1G",
+          :persistent => true
+        }
+      }
+    }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => {})
+    StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy().call(h1, machine)[:passed].should eql(false)
 
   end
 

@@ -41,7 +41,7 @@ class StackBuilder::Allocator::Host
   def can_allocate(machine)
     result = { :allocatable => true, :reasons => []}
 
-    relevant_policies.each do |policy|
+    relevant_policies(machine[:fabric]).each do |policy|
       policy_result = policy.call(self, machine)
       if (policy_result[:passed] != true)
         result[:allocatable] = false
@@ -52,10 +52,12 @@ class StackBuilder::Allocator::Host
   end
 
   # FIXME: Remove this once all machines have new config
-  def relevant_policies
+  def relevant_policies(fabric)
     @policies.select do |policy|
       use_policy = true
-      if @storage.nil? or @storage == {}
+      if fabric == "local"
+        use_policy = false if policy.to_s == StackBuilder::Allocator::HostPolicies.ha_group.to_s
+      elsif @storage.nil? or @storage == {}
         proc1 = StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy
         proc2 = StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy
         if policy.to_s == proc1.to_s or policy.to_s == proc2.to_s
