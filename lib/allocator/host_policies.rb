@@ -52,9 +52,10 @@ module StackBuilder::Allocator::HostPolicies
       # FIXME: unwrap from unless once all compute nodes have storage config
       unless host.storage.nil?
         if (missing_storage_types.any?)
+          unique_missing_storage_types = Set.new(missing_storage_types).to_a
           result = {
               :passed => false,
-              :reason => "Storage type not available (required: #{missing_storage_types.join(',')} available: #{host.storage.keys.sort.join(',')})"
+              :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} available: #{host.storage.keys.sort.join(',')})"
           }
         end
       end
