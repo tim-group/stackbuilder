@@ -166,10 +166,10 @@ describe StackBuilder::Allocator::HostPolicies do
       }
     }
     host_storage = {
-      :os => {
+      'os' => {
         :existing_storage => { }
       },
-      :data => {
+      'data' => {
         :existing_storage => { 'test-db-001_var_lib_mysql'.to_sym => 1.00 }
       }
     }
