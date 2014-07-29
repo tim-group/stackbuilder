@@ -1,4 +1,5 @@
 require 'allocator/namespace'
+require 'allocator/host_policies'
 
 class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines
@@ -26,8 +27,8 @@ class StackBuilder::Allocator::Host
     provisionally_allocated_machines + allocated_machines
   end
 
-  def provisionally_allocate(machine)
-    @provisionally_allocated_machines << machine
+  def provisionally_allocate(machine_hash)
+    @provisionally_allocated_machines << machine_hash
   end
 
   def add_policy(&block)
@@ -38,11 +39,10 @@ class StackBuilder::Allocator::Host
     @preference_functions = functions
   end
 
-  def can_allocate(machine)
+  def can_allocate(machine_hash)
     result = { :allocatable => true, :reasons => []}
-
-    relevant_policies(machine[:fabric]).each do |policy|
-      policy_result = policy.call(self, machine)
+    relevant_policies(machine_hash[:fabric]).each do |policy|
+      policy_result = policy.call(self, machine_hash)
       if (policy_result[:passed] != true)
         result[:allocatable] = false
         result[:reasons] << policy_result[:reason]
@@ -68,7 +68,7 @@ class StackBuilder::Allocator::Host
     end
   end
 
-  def preference(machine)
+  def preference(machine_hash)
     @preference_functions.map do |function|
       function.call(self)
     end

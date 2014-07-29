@@ -79,7 +79,7 @@ module StackBuilder::Allocator::HostPolicies
             case persistence_options[:on_storage_not_found]
             when :raise_error
               underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/','_').gsub(/_$/, '')}"
-              type = attributes[:type]
+              type = attributes[:type].to_sym
               unless host.storage[type][:existing_storage].include? underscore_name.to_sym
                 persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
                 persistent_storage_not_found[type] << underscore_name

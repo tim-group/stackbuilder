@@ -153,6 +153,31 @@ describe StackBuilder::Allocator::HostPolicies do
     StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy().call(h1, machine)[:passed].should eql(true)
   end
 
+  it 'accept allocations where the hosts persistant storage does exist on this computenode' do
+    machine = {
+      :hostname => 'test-db-001',
+      :storage => {
+        "/var/lib/mysql/".to_sym => {
+          :type => "data",
+          :size => "1G",
+          :persistent => true,
+          :persistence_options => { :on_storage_not_found => :raise_error }
+        }
+      }
+    }
+    host_storage = {
+      :os => {
+        :existing_storage => { }
+      },
+      :data => {
+        :existing_storage => { 'test-db-001_var_lib_mysql'.to_sym => 1.00 }
+      }
+    }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
+    StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy().call(h1, machine)[:passed].should eql(true)
+
+  end
+
   it 'rejects allocations where the hosts persistant storage does not exist on this computenode' do
     machine = {
       :hostname => 'test-db-001',
@@ -160,11 +185,20 @@ describe StackBuilder::Allocator::HostPolicies do
         "/var/lib/mysql/".to_sym => {
           :type => "data",
           :size => "1G",
-          :persistent => true
+          :persistent => true,
+          :persistence_options => { :on_storage_not_found => :raise_error }
         }
       }
     }
-    h1 = StackBuilder::Allocator::Host.new("h1", :storage => {})
+    host_storage = {
+      :os => {
+        :existing_storage => { }
+      },
+      :data => {
+        :existing_storage => { }
+      }
+    }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
     StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy().call(h1, machine)[:passed].should eql(false)
 
   end

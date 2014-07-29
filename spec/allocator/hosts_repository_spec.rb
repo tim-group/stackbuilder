@@ -1,4 +1,5 @@
 require 'stacks/namespace'
+require 'stacks/factory'
 require 'allocator/host_repository'
 
 describe StackBuilder::Allocator::HostRepository do
@@ -16,29 +17,6 @@ describe StackBuilder::Allocator::HostRepository do
     end
 
     find_environment("test")
-  end
-
-  it 'removes all policies if using local fabric' do
-    env = test_env_with_refstack
-    compute_node_client = double
-
-    preference_functions = []
-    policy = Proc.new do |machine,host|
-      raise "I should not be called"
-    end
-
-    result = {"onlyhost" => {:active_domains=>[]}}
-    compute_node_client.stub(:audit_hosts).and_return(result)
-
-    host_repo = StackBuilder::Allocator::HostRepository.new(
-      :machine_repo => self,
-      :preference_functions=>preference_functions,
-      :policies=>[policy],
-      :compute_node_client => compute_node_client)
-
-    hosts = host_repo.find_current("local")
-    hosts.hosts.size.should eql(1)
-    hosts.allocate(env.flatten)
   end
 
   it 'creates a Hosts object with corresponding Host objects' do
