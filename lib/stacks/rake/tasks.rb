@@ -100,7 +100,7 @@ namespace :sbx do
     used = ram_stats[:allocated_ram]
     total = ram_stats[:host_ram]
     used_percentage = "#{(used.to_f/total.to_f*100).round.to_s.rjust(3)}%" rescue 0
-    {:ram_stats => "#{used}/#{total} #{used_percentage}"}
+    {'memory(GB)'.to_sym => "#{used}/#{total} #{used_percentage}"}
   end
 
 
@@ -110,7 +110,7 @@ namespace :sbx do
       used = value_hash[:used]
       total = value_hash[:total]
       used_percentage = "#{(used.to_f/total.to_f*100).round.to_s}%" rescue 0
-      stats[storage_type.to_sym] = "#{arch.to_s}: #{used.to_s}/#{total.to_s} #{used_percentage.to_s}"
+      stats["#{storage_type}(GB)".to_sym] = "#{arch.to_s}: #{used.to_s}/#{total.to_s} #{used_percentage.to_s}"
       stats
     end
   end
@@ -122,9 +122,9 @@ namespace :sbx do
           order.insert(0, header)
        when :vms
           order.insert(1, header)
-        when :ram_stats
+        when 'memory(GB)'.to_sym
           order.insert(2, header)
-        when :os
+        when 'os(GB)'.to_sym
           order.insert(3, header)
         else
           order.push(header)
@@ -168,9 +168,27 @@ namespace :sbx do
     Table.tabulate
  end
 
+  def KB_to_GB(value)
+    ((value.to_f / (1024*1024) * 100).round / 100.0)
+  end
+
+  def convert_hash_values_from_KB_to_GB(result_hash)
+    gb_hash = result_hash.each.inject({}) do |result, (key, value)|
+      if value.is_a?(Hash)
+        result[key] = convert_hash_values_from_KB_to_GB(value)
+      elsif value.is_a?(String) or value.is_a?(Symbol)
+        result[key] = value
+      else
+        result[key] = KB_to_GB(value).to_f.floor
+      end
+      result
+    end
+    return gb_hash
+  end
+
   def stats_for(host)
-    ram_stats = StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host)
-    storage_stats = StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host)
+    ram_stats = convert_hash_values_from_KB_to_GB(StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host))
+    storage_stats = convert_hash_values_from_KB_to_GB(StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host))
     vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
     merge  = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats)]
     merged_stats = Hash[*merge.map(&:to_a).flatten]
