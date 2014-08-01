@@ -57,7 +57,7 @@ describe_stack 'should provide correct enc data' do
           'application' => 'myapp',
           'database_name' => 'mydb',
           'environment' => 'testing',
-          'restart_on_config_change' => true
+          'restart_on_config_change' => false
       }
     })
   end

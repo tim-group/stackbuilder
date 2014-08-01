@@ -31,7 +31,7 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
         'application'              => @virtual_service.application,
         'environment'              => environment.name,
         'database_name'            => @virtual_service.database_name,
-        'restart_on_config_change' => true,
+        'restart_on_config_change' => false,
       }
     }
   end
