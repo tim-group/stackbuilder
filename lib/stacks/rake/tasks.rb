@@ -510,12 +510,13 @@ namespace :sbx do
         end
 
         nagios_helper = Support::Nagios::Service.new
-        nagios_helper.schedule_downtime(hosts, 900) do #900 = 15 mins
+        downtime_secs = 1800 #1800 = 30 mins
+        nagios_helper.schedule_downtime(hosts, downtime_secs) do
           on :success do |response_hash|
-            logger.info "successfully scheduled downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+            logger.info "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
           end
           on :failed do |response|
-            logger.info "failed to schedule downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+            logger.info "failed to schedule #{downtime_secs} seconds downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
           end
         end
       end
