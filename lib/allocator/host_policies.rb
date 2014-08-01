@@ -75,9 +75,10 @@ module StackBuilder::Allocator::HostPolicies
       if !host.storage.nil?
         machine[:storage].each do |mount_point, attributes|
           persistent = attributes[:persistent]
-          persistence_options = attributes[:persistence_options]
+          persistence_options = attributes[:persistence_options] rescue {}
+          on_storage_not_found = persistence_options[:on_storage_not_found] rescue :raise_error
           if persistent
-            case persistence_options[:on_storage_not_found]
+            case on_storage_not_found
             when :raise_error
               underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/','_').gsub(/_$/, '')}"
               type = attributes[:type]
