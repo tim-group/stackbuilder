@@ -54,10 +54,11 @@ describe_stack 'should provide correct enc data' do
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
       'role::databaseserver' => {
-          'application' => 'myapp',
-          'database_name' => 'mydb',
-          'environment' => 'testing',
-          'restart_on_config_change' => false
+          'application'              => 'myapp',
+          'database_name'            => 'mydb',
+          'environment'              => 'testing',
+          'restart_on_config_change' => false,
+          'restart_on_install'       => true
       }
     })
   end
