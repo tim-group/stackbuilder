@@ -4,8 +4,7 @@ require 'facter'
 class Stacks::MachineDef
   attr_accessor :availability_group
   attr_reader :hostname, :domain, :environment
-  attr_reader :fabric, :networks
-  attr_accessor :ram, :image_size, :storage, :vcpus, :fabric
+  attr_accessor :fabric, :image_size, :networks, :ram, :storage, :vcpus
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
     @base_hostname = base_hostname
