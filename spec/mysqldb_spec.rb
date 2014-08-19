@@ -1,8 +1,8 @@
 require 'stacks/test_framework'
 
 
-
 describe_stack 'should default to disallow destory' do
+
   given do
     stack "mysql" do
       mysqldb "mydb"
@@ -14,6 +14,7 @@ describe_stack 'should default to disallow destory' do
   end
 
   host("testing-mydb-001.mgmt.space.net.local") do |host|
+    host.destroyable?.should eql false
     host.to_specs.shift[:disallow_destroy].should eql true
   end
 end
@@ -32,6 +33,7 @@ describe_stack 'should allow destroy to be overwritten' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
+    host.destroyable?.should eql true
     host.to_specs.shift[:disallow_destroy].should eql nil
   end
 end

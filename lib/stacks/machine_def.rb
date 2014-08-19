@@ -35,12 +35,16 @@ class Stacks::MachineDef
     true
   end
 
+  def destroyable?
+    @destroyable
+  end
+
   def needs_poll_signing?
     true
   end
 
-  def allow_destroy()
-    @destroyable = true
+  def allow_destroy(destroyable=true)
+    @destroyable = destroyable
   end
 
   def fabric

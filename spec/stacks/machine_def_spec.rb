@@ -53,6 +53,23 @@ describe Stacks::MachineDef do
 
   end
 
+  it 'should be destroyable by default' do
+    machinedef = Stacks::MachineDef.new("test")
+    env = Stacks::Environment.new("noenv", { :primary_site=>"local" }, {})
+    machinedef.bind_to(env)
+    machinedef.destroyable?.should eql true
+    machinedef.to_spec[:disallow_destroy].should eql nil
+  end
+
+  it 'should allow destroyable to be overriden' do
+    machinedef = Stacks::MachineDef.new("test")
+    env = Stacks::Environment.new("noenv", { :primary_site=>"local" }, {})
+    machinedef.bind_to(env)
+    machinedef.allow_destroy(false)
+    machinedef.destroyable?.should eql false
+    machinedef.to_spec[:disallow_destroy].should eql true
+  end
+
   it 'should disable persistent if the environment does not support it' do
     machinedef = Stacks::MachineDef.new("test")
     machinedef.modify_storage({
