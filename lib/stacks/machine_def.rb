@@ -4,7 +4,7 @@ require 'facter'
 class Stacks::MachineDef
   attr_accessor :availability_group
   attr_reader :hostname, :domain, :environment
-  attr_accessor :fabric, :image_size, :networks, :ram, :storage, :vcpus
+  attr_accessor :fabric, :networks, :ram, :storage, :vcpus
 
   def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
     @base_hostname = base_hostname
@@ -96,16 +96,7 @@ class Stacks::MachineDef
     end
   end
 
-  def legacy_override_root_storage_using_image_size
-    modify_storage({
-      '/'.to_sym => {
-        :size => image_size
-      }
-    })
-  end
-
   def storage
-    legacy_override_root_storage_using_image_size if image_size
     return @storage
   end
 
@@ -121,7 +112,6 @@ class Stacks::MachineDef
 
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
-    spec[:image_size] = image_size unless image_size.nil?
     spec[:storage] = storage
     spec
   end

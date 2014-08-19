@@ -15,26 +15,6 @@ describe_stack 'should default root storage size to 3G' do
   end
 end
 
-describe_stack 'legacy override root storage size when image_size is set' do
-  given do
-    stack 'demo' do
-      standalone_appserver 'override' do
-        each_machine do |machine|
-          machine.image_size = '99G'
-        end
-      end
-    end
-    env "e1", { :primary_site=>"space" } do
-      instantiate_stack "demo"
-    end
-  end
-
-  host("e1-override-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('99G')
-  end
-end
-
-
 describe_stack 'allow additional storage to be specified' do
   given do
     stack 'demo' do
