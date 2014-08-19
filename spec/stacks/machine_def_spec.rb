@@ -52,4 +52,20 @@ describe Stacks::MachineDef do
     machinedef.hostname.should_not include('OWNER-FACT-NOT-FOUND')
 
   end
+
+  it 'should disable persistent if the environment does not support it' do
+    machinedef = Stacks::MachineDef.new("test")
+    machinedef.modify_storage({
+      '/'.to_sym         => { :persistent => true },
+      '/mnt/data'.to_sym => { :persistent => true }
+    })
+    env = Stacks::Environment.new("noenv", {
+        :primary_site=>"local",
+        :persistent_storage_supported => false
+       }, {}
+    )
+    machinedef.bind_to(env)
+    machinedef.to_spec[:storage]['/'.to_sym][:persistent].should eql false
+    machinedef.to_spec[:storage]['/mnt/data'.to_sym][:persistent].should eql false
+  end
 end

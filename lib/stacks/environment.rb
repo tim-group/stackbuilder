@@ -11,10 +11,15 @@ class Stacks::Environment
     @options = options
     @stack_procs = stack_procs
     @definitions = {}
+    @persistent_storage_supported = options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
   end
 
   def environment
     return self
+  end
+
+  def persistent_storage_supported?
+     @persistent_storage_supported
   end
 
   def env(name, options={}, &block)

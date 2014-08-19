@@ -56,6 +56,12 @@ class Stacks::MachineDef
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
   end
 
+  def disable_persistent_storage
+    @storage.each do |mount_point, values|
+       modify_storage({mount_point.to_sym => { :persistent => false }})
+    end
+  end
+
   def owner_fact()
     unless $LOAD_PATH.include?('/var/lib/puppet/lib')
       $LOAD_PATH << '/var/lib/puppet/lib'
@@ -101,6 +107,8 @@ class Stacks::MachineDef
   end
 
   def to_spec
+    disable_persistent_storage unless environment.persistent_storage_supported?
+
     spec = {
       :hostname => @hostname,
       :domain => @domain,
