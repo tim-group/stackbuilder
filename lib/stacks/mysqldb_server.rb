@@ -11,6 +11,7 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
     storage = {
       '/mnt/data' => {
         :type                => 'data',
+        :size                => '10G',
         :persistent          => true,
         :persistence_options => {
           :on_storage_not_found => :raise_error

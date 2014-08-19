@@ -103,6 +103,7 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
+    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql '10G'
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found].should eql :raise_error
   end
 
