@@ -108,3 +108,19 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
   end
 
 end
+
+describe_stack 'should provide a default of 4GB of ram' do
+  given do
+    stack "mysql" do
+      mysqldb "mydb" do
+      end
+    end
+    env "testing", :primary_site=>"space" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    host.to_specs.shift[:ram].should eql '4194304'
+  end
+
+end
