@@ -89,3 +89,21 @@ describe_stack 'should allow storage options to be overwritten' do
     host.to_specs.shift[:storage]['/'.to_sym].should include(:size =>"5G")
   end
 end
+
+describe_stack 'should always provide a default data mount of /mnt/data with sensible defaults' do
+  given do
+    stack "mysql" do
+      mysqldb "mydb" do
+      end
+    end
+    env "testing", :primary_site=>"space" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
+    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
+    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found].should eql :raise_error
+  end
+
+end

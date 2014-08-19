@@ -8,6 +8,16 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
     @virtual_service = virtual_service
     @allow_destroy = false
     super(virtual_service.name + "-" + index)
+    storage = {
+      '/mnt/data' => {
+        :type                => 'data',
+        :persistent          => true,
+        :persistence_options => {
+          :on_storage_not_found => :raise_error
+        }
+      }
+    }
+    modify_storage(storage)
   end
 
   def vip_fqdn
