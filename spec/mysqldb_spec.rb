@@ -109,7 +109,7 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
 
 end
 
-describe_stack 'should provide a default of 4GB of ram' do
+describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
   given do
     stack "mysql" do
       mysqldb "mydb" do
@@ -121,6 +121,7 @@ describe_stack 'should provide a default of 4GB of ram' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     host.to_specs.shift[:ram].should eql '4194304'
+    host.to_specs.shift[:vcpus].should eql '2'
   end
 
 end

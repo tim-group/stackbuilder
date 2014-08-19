@@ -20,6 +20,7 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
     }
     modify_storage(storage)
     @ram = '4194304' # 4GB
+    @vcpus = '2'
   end
 
   def vip_fqdn
