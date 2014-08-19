@@ -24,6 +24,7 @@ class Stacks::MachineDef
         },
       }
     }
+    @destroyable = true
   end
 
   def children
@@ -36,6 +37,10 @@ class Stacks::MachineDef
 
   def needs_poll_signing?
     true
+  end
+
+  def allow_destroy()
+    @destroyable = true
   end
 
   def fabric
@@ -118,6 +123,7 @@ class Stacks::MachineDef
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }
 
+    spec[:disallow_destroy] = true if !@destroyable
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:storage] = storage
