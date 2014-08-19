@@ -12,6 +12,7 @@ class Stacks::Environment
     @stack_procs = stack_procs
     @definitions = {}
     @persistent_storage_supported = options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
+    @every_machine_destroyable = options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
   end
 
   def environment
@@ -20,6 +21,10 @@ class Stacks::Environment
 
   def persistent_storage_supported?
      @persistent_storage_supported
+  end
+
+  def every_machine_destroyable?
+    @every_machine_destroyable
   end
 
   def env(name, options={}, &block)
