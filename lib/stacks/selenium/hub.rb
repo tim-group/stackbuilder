@@ -73,8 +73,7 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     super(base_hostname, [:mgmt])
     @hub = hub
     @options = options
-    storage = { '/'.to_sym => { :size => '8G' } }
-    modify_storage(storage)
+    modify_storage({ '/'.to_sym => { :size => '8G' } })
   end
 
   def bind_to(environment)
