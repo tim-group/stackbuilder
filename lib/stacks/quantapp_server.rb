@@ -14,7 +14,6 @@ class Stacks::QuantAppServer < Stacks::MachineDef
 
   def to_spec
    spec = super
-   spec[:ram] = '4194304'
    spec
   end
 
