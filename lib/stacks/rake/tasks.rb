@@ -556,10 +556,12 @@ namespace :sbx do
               xml = result[:body][:data][:xml]
               sender = result[:senderid]
               if not xml.nil?
-                matches = /type='vnc' port='(\d+)'/.match(xml)
+                matches = /type='vnc' port='(\-?\d+)'/.match(xml)
+                raise "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
+                raise "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" if matches.captures.empty?
                 results[host] = {
                   :host => sender,
-                  :port => matches[1]
+                  :port => matches.captures.first
                 }
               end
             end
