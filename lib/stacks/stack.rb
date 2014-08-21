@@ -17,6 +17,7 @@ require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
 require 'stacks/mongodb_server'
+require 'stacks/mongodb_cluster'
 require 'stacks/mysqldb_server'
 require 'stacks/mysql_cluster'
 require 'stacks/quantapp_server'
@@ -56,7 +57,7 @@ class Stacks::Stack
   end
 
   def mongodb(name='mongodb', &block)
-    machineset_with(name, [], Stacks::MongoDBServer, &block)
+    machineset_with(name, [Stacks::MongoDBCluster], Stacks::MongoDBServer, &block)
   end
 
   def mysqldb(name='mysqldb', &block)
