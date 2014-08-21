@@ -3,8 +3,6 @@ require 'stacks/machine_def'
 
 class Stacks::MongoDBServer < Stacks::MachineDef
 
-  attr_accessor :mongosecret
-
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
@@ -17,7 +15,7 @@ class Stacks::MongoDBServer < Stacks::MachineDef
   def to_enc()
     {
       'role::mongodb_server' => {
-        'mongosecret' => self.mongosecret
+        'application' => @virtual_service.application
        }
     }
   end

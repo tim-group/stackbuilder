@@ -59,7 +59,7 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::MongoDBServer, &block)
   end
 
-  def mysqldb(name='mongodb', &block)
+  def mysqldb(name='mysqldb', &block)
     machineset_with(name, [Stacks::MysqlCluster], Stacks::MysqlDBServer, &block)
   end
 
