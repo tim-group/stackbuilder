@@ -3,9 +3,11 @@ require 'stacks/machine_def'
 
 class Stacks::MongoDBServer < Stacks::MachineDef
 
+  attr_accessor :arbiter
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
+    @arbiter = false
   end
 
   def vip_fqdn
@@ -15,7 +17,8 @@ class Stacks::MongoDBServer < Stacks::MachineDef
   def to_enc()
     {
       'role::mongodb_server' => {
-        'application' => @virtual_service.application
+        'application' => @virtual_service.application,
+        'arbiter'     => @arbiter
        }
     }
   end
