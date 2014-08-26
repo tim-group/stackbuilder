@@ -210,6 +210,17 @@ describe StackBuilder::Allocator::HostPolicies do
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy().call(h1, machine)[:passed].should eql(false)
   end
 
+  it 'rejects overallocated disks for same type' do
+    machine = {
+      :storage => {
+        '/foo'.to_sym      => {:type => 'data', :size => "10G"},
+        '/mnt/data'.to_sym => {:type => 'data', :size => "10G"}
+      }
+    }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"data" => {:free => "15G"}})
+    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy().call(h1, machine)[:passed].should eql(false)
+  end
+
   it 'accepts disk space it can allocate' do
     machine = {:storage => {:mount_point => {:type => "LVS", :size => "2G"}}}
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"LVS" => {:free => "5G"}})

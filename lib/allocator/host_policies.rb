@@ -112,18 +112,21 @@ module StackBuilder::Allocator::HostPolicies
   end
 
   def self.do_not_overallocate_disk_policy
+    required_space_hash = {}
     Proc.new do |host, machine|
-      storage_without_enough_space = machine[:storage].inject({}) do |result, (mount_point, values)|
-        machine_storage_type = values[:type]
-        host_storage_type = host.storage[machine_storage_type] rescue nil
-        required_space = values[:size].to_f
+      machine[:storage].each do |mount_point, values|
+        required_space_hash[values[:type]] = 0 if !required_space_hash.has_key?(values[:type])
+        required_space_hash[values[:type]] += values[:size].to_f
+      end
+      storage_without_enough_space = required_space_hash.inject({}) do |result, (type, required_space)|
+        host_storage_type = host.storage[type] rescue nil
         unless host_storage_type.nil?
           available_space = host_storage_type[:free].to_f
-          if (required_space > available_space)
-            result[machine_storage_type] = {:available_space => available_space, :required_space => required_space}
+          if (required_space > host_storage_type[:free].to_f)
+            result[type] = {:available_space => available_space, :required_space => required_space}
           end
         else
-          result[machine_storage_type] = {:available_space => 0, :required_space => required_space}
+          result[type] = {:available_space => 0, :required_space => required_space}
         end
         result
       end
@@ -136,8 +139,6 @@ module StackBuilder::Allocator::HostPolicies
         }
       end
       result
-
-
     end
   end
 end
