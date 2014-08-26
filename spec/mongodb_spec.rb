@@ -17,7 +17,8 @@ describe_stack 'mongodb' do
     host.to_enc.should eql({
       'role::mongodb_server' => {
         'application' => "myapp",
-        'arbiter'     => false
+        'arbiter'     => false,
+        'backup'      => false
       }})
   end
 end
