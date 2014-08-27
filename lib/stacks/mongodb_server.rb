@@ -3,11 +3,10 @@ require 'stacks/machine_def'
 
 class Stacks::MongoDBServer < Stacks::MachineDef
 
-  attr_accessor :arbiter, :backup
+  attr_accessor :backup
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
-    @arbiter = false
     @backup = false
   end
 
@@ -22,9 +21,8 @@ class Stacks::MongoDBServer < Stacks::MachineDef
        },
        'mongodb::users' => {
          'environment' => environment.name
-       }
+       },
     }
-    enc['mongodb::arbiter'] = {} if @arbiter
     enc['mongodb::backup'] = {} if @backup
     enc
   end

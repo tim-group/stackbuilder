@@ -20,9 +20,6 @@ describe_stack 'mongodb' do
     stack "mongo_arbiter" do
       mongodb "mongodbarbiter" do
         self.application = 'myapp'
-        each_machine do |machine|
-          machine.arbiter = true
-        end
       end
     end
 
@@ -51,7 +48,6 @@ describe_stack 'mongodb' do
 
   host("latest-mongodbarbiter-001.mgmt.space.net.local") do |host|
     host.to_enc['role::mongodb_server']['application'].should eql("myapp")
-    host.to_enc['mongodb::arbiter'].should eql({})
     host.to_enc['mongodb::users']['environment'].should eql('latest')
   end
 
