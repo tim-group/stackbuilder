@@ -16,13 +16,17 @@ class Stacks::MongoDBServer < Stacks::MachineDef
   end
 
   def to_enc()
-    {
+    enc = {
       'role::mongodb_server' => {
-        'application' => @virtual_service.application,
-        'arbiter'     => @arbiter,
-        'backup'      => @backup
+        'application' => @virtual_service.application
+       },
+       'mongodb::users' => {
+         'environment' => environment.name
        }
     }
+    enc['mongodb::arbiter'] = {} if @arbiter
+    enc['mongodb::backup'] = {} if @backup
+    enc
   end
 end
 
