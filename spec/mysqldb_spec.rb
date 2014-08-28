@@ -54,15 +54,11 @@ describe_stack 'should provide correct enc data' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql({
-      'role::databaseserver' => {
-          'application'              => 'myapp',
-          'database_name'            => 'mydb',
-          'environment'              => 'testing',
-          'restart_on_config_change' => false,
-          'restart_on_install'       => true
-      }
-    })
+    host.to_enc['role::databaseserver']['application'].should eql 'myapp'
+    host.to_enc['role::databaseserver']['database_name'].should eql 'mydb'
+    host.to_enc['role::databaseserver']['environment'].should eql 'testing'
+    host.to_enc['role::databaseserver']['restart_on_config_change'].should eql false
+    host.to_enc['role::databaseserver']['restart_on_install'].should eql true
   end
 end
 
@@ -125,5 +121,29 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
     host.to_specs.shift[:ram].should eql '4194304'
     host.to_specs.shift[:vcpus].should eql '2'
   end
+end
 
+describe_stack 'should support dependencies' do
+  given do
+    stack 'fr' do
+      virtual_appserver 'frapp' do
+        self.application = 'futuresroll'
+        self.depends_on = ["frdb"]
+      end
+    end
+    stack 'fr_db' do
+      mysqldb 'frdb' do
+        self.database_name = "futuresroll"
+        self.application = "futuresroll"
+      end
+    end
+
+    env "testing", :primary_site=>"space" do
+      instantiate_stack "fr"
+      instantiate_stack "fr_db"
+    end
+  end
+  host("testing-frdb-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::databaseserver']['allowed_hosts'].should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
+  end
 end

@@ -33,6 +33,7 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
         'application'              => @virtual_service.application,
         'environment'              => environment.name,
         'database_name'            => @virtual_service.database_name,
+        'allowed_hosts'            => @virtual_service.dependant_instances,
         'restart_on_config_change' => false,
         'restart_on_install'       => true,
       }
