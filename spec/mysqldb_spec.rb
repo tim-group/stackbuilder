@@ -137,13 +137,29 @@ describe_stack 'should support dependencies' do
         self.application = "futuresroll"
       end
     end
+    stack 'hr' do
+      virtual_appserver 'hrapp' do
+        self.application = 'huturesroll'
+      end
+    end
+    stack 'hr_db' do
+      mysqldb 'hrdb' do
+        self.database_name = "huturesroll"
+        self.application = "huturesroll"
+      end
+    end
 
     env "testing", :primary_site=>"space" do
       instantiate_stack "fr"
       instantiate_stack "fr_db"
+      instantiate_stack "hr"
+      instantiate_stack "hr_db"
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     host.to_enc['role::databaseserver']['allowed_hosts'].should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
+  end
+  host("testing-hrdb-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::databaseserver']['allowed_hosts'].should be_nil
   end
 end
