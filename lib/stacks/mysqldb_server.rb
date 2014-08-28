@@ -28,16 +28,23 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
   end
 
   def to_enc()
-    {
+    enc = {
       'role::databaseserver' => {
         'application'              => @virtual_service.application,
         'environment'              => environment.name,
         'database_name'            => @virtual_service.database_name,
-        'allowed_hosts'            => @virtual_service.dependant_instances,
         'restart_on_config_change' => false,
         'restart_on_install'       => true,
       }
     }
+
+    if @virtual_service.dependant_instances and ! @virtual_service.dependant_instances.nil?
+      enc['role::databaseserver'].merge!({
+        'allowed_hosts' => @virtual_service.dependant_instances,
+      })
+    end
+
+    enc
   end
 
 end
