@@ -20,6 +20,7 @@ require 'stacks/mongodb_server'
 require 'stacks/mongodb_cluster'
 require 'stacks/mysqldb_server'
 require 'stacks/mysql_cluster'
+require 'stacks/loadbalancer_cluster'
 require 'stacks/quantapp_server'
 require 'stacks/standard_server'
 require 'stacks/logstash_server'
@@ -81,7 +82,7 @@ class Stacks::Stack
   end
 
   def loadbalancer(&block)
-    machineset_with('lb', [], Stacks::LoadBalancer, &block)
+    machineset_with('lb', [Stacks::LoadBalancerCluster], Stacks::LoadBalancer, &block)
   end
 
   def natserver(&block)
