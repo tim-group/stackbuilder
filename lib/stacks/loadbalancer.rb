@@ -4,8 +4,9 @@ class Stacks::LoadBalancer < Stacks::MachineDef
 
   attr_accessor :virtual_router_id
 
-  def initialize(server_group, index, &block)
-    super(server_group.name + "-" + index)
+  def initialize(virtual_service, index, &block)
+    @virtual_service = virtual_service
+    super(virtual_service.name + "-" + index)
   end
 
   def bind_to(environment)
@@ -13,18 +14,8 @@ class Stacks::LoadBalancer < Stacks::MachineDef
     @virtual_router_id = environment.options[:lb_virtual_router_id] || 1
   end
 
-  def virtual_services(type)
-    virtual_services = []
-    environment.accept do |node|
-      unless node.environment.contains_node_of_type?(Stacks::LoadBalancer) && environment != node.environment
-        virtual_services << node if node.kind_of? type
-      end
-    end
-    virtual_services
-  end
-
-  def to_enc
-    virtual_services_array = virtual_services(Stacks::AbstractVirtualService).map do |virtual_service|
+ def to_enc
+    virtual_services_array = @virtual_service.virtual_services(Stacks::AbstractVirtualService).map do |virtual_service|
         virtual_service.to_loadbalancer_config
     end
     {
