@@ -61,6 +61,12 @@ module Stacks::XProxyService
     raise "Cannot find the service called #{service}"
   end
 
+  def depends_on
+    @proxy_vhosts_lookup.values.map do |vhost|
+      vhost.service
+    end
+  end
+
   def downstream_services
     vhost_map = @proxy_vhosts_lookup.values.group_by do |proxy_vhost|
       proxy_vhost.vhost_fqdn
@@ -74,7 +80,6 @@ module Stacks::XProxyService
 
     return Hash[@proxy_vhosts_lookup.values.map do |vhost|
       primary_app = find_virtual_service(vhost.service)
-
       proxy_pass_rules = Hash[vhost.proxy_pass_rules.map do |path, service|
         [path, "http://#{find_virtual_service(service).vip_fqdn}:8000"]
       end]
