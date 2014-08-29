@@ -17,4 +17,11 @@ module Stacks::MysqlCluster
   def clazz
     return 'mysqlcluster'
   end
+
+  def config_params
+    # This is where we can specify config params we want to spit out for config.properties
+    # Not currently used as we need to think about how to standardise the application configuration
+    []
+    # example: [ [ 'db.config' = database_name ] ]
+  end
 end
