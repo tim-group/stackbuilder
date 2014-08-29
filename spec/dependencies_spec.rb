@@ -2,6 +2,9 @@ require 'stacks/test_framework'
 
 describe_stack 'stack-with-dependencies' do
   given do
+    stack 'loadbalancer' do
+      loadbalancer
+    end
     stack "example" do
       virtual_appserver 'exampleapp' do
         self.groups = ['blue']
@@ -17,6 +20,7 @@ describe_stack 'stack-with-dependencies' do
 
     env "e1", :primary_site=>"space" do
       instantiate_stack "example"
+      instantiate_stack "loadbalancer"
     end
   end
 
@@ -30,7 +34,7 @@ describe_stack 'stack-with-dependencies' do
           "dependencies" => [
               ['example.url', 'http://e1-exampleapp-vip.space.net.local:8000']
            ],
-          "dependant_instances" => [],
+          "dependant_instances" => ['e1-lb-001.space.net.local','e1-lb-002.space.net.local'],
           'port'        => '8000'
          }
     })
@@ -44,7 +48,7 @@ describe_stack 'stack-with-dependencies' do
                                  "application"=>"ExAmPLE",
                                  "environment" => "e1",
                                  "dependencies" => [],
-                                 "dependant_instances" => ["e1-exampleapp2-001.space.net.local","e1-exampleapp2-002.space.net.local"],
+                                 "dependant_instances" => ["e1-exampleapp2-001.space.net.local","e1-exampleapp2-002.space.net.local", 'e1-lb-001.space.net.local', 'e1-lb-002.space.net.local'],
                                  'port'        => '8000'
                                 }
                            })
