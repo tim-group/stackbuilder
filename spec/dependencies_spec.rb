@@ -6,6 +6,13 @@ describe_stack 'stack-with-dependencies' do
       loadbalancer
     end
     stack "example" do
+
+      virtual_proxyserver 'exampleproxy' do
+        vhost('exampleapp') do
+        end
+        enable_nat
+      end
+
       virtual_appserver 'exampleapp' do
         self.groups = ['blue']
         self.application = 'ExAmPLE'
@@ -39,6 +46,10 @@ describe_stack 'stack-with-dependencies' do
      ])
   end
 
+  host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
+    host.to_enc["role::proxyserver"]["vhosts"]["e1-exampleproxy-vip.front.space.net.local"]["proxy_pass_rules"].should eql({"/"=>"http://e1-exampleapp-vip.space.net.local:8000"})
+  end
+
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
     host.to_enc["role::http_app"]["dependant_instances"].should eql([
         'e1-lb-001.space.net.local',
@@ -52,6 +63,8 @@ describe_stack 'stack-with-dependencies' do
     host.to_enc["role::http_app"]["dependant_instances"].should eql([
       "e1-exampleapp2-001.space.net.local",
       "e1-exampleapp2-002.space.net.local",
+      "e1-exampleproxy-001.space.net.local",
+      "e1-exampleproxy-002.space.net.local",
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
