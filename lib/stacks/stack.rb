@@ -46,7 +46,7 @@ class Stacks::Stack
   end
 
   def virtual_proxyserver(name, &block)
-    machineset_with(name, [Stacks::VirtualService, Stacks::XProxyService], Stacks::ProxyServer, &block)
+    machineset_with(name, [Stacks::VirtualService, Stacks::VirtualProxyService], Stacks::ProxyServer, &block)
   end
 
   def virtual_sftpserver(name, &block)

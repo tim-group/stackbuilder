@@ -5,7 +5,7 @@ require 'stacks/nat'
 require 'stacks/proxy_vhost'
 require 'uri'
 
-module Stacks::XProxyService
+module Stacks::VirtualProxyService
   def self.extended(object)
     object.configure()
   end
