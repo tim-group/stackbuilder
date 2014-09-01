@@ -394,13 +394,7 @@ describe Compute::Controller do
     @compute_node_client.stub(:clean).with("st", [specs[1]]).and_return([["st", {"vm2" => ["success", "yay"]}]])
 
     failures = []
-    @compute_controller.clean(specs) do
-      on :failure do |vm, msg|
-        failures << [vm, msg]
-      end
-    end
-
-    failures.should eql [["vm1", "VM marked as non-destroyable"]]
+    expect { @compute_controller.clean(specs) }.to raise_error
   end
 
   it 'will handle responses from old-fashioned agents' do
