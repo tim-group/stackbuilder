@@ -128,7 +128,7 @@ describe_stack 'should support dependencies' do
     stack 'fr' do
       virtual_appserver 'frapp' do
         self.application = 'futuresroll'
-        self.depends_on = ["frdb"]
+        self.depends_on = 'frdb'
       end
     end
     stack 'fr_db' do
@@ -157,9 +157,11 @@ describe_stack 'should support dependencies' do
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['allowed_hosts'].should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
+    host.to_enc['role::databaseserver']['dependant_instances'].should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
+    host.to_enc['role::databaseserver']['dependencies'].should eql([])
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['allowed_hosts'].should be_nil
+    host.to_enc['role::databaseserver']['dependant_instances'].should be_nil
+    host.to_enc['role::databaseserver']['dependencies'].should be_nil
   end
 end

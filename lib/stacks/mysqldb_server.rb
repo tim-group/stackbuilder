@@ -40,7 +40,8 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
 
     if @virtual_service.dependant_instances and ! @virtual_service.dependant_instances.nil? and @virtual_service.dependant_instances != []
       enc['role::databaseserver'].merge!({
-        'allowed_hosts' => @virtual_service.dependant_instances,
+        'dependencies' => @virtual_service.dependency_config,
+        'dependant_instances' => @virtual_service.dependant_instances,
       })
     end
 
