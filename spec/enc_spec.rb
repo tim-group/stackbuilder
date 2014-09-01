@@ -210,10 +210,6 @@ describe Stacks::DSL do
     end
 
     st_loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    st_loadbalancer.virtual_services(Stacks::AbstractVirtualService).size.should eql(4)
-    st_loadbalancer.virtual_services(Stacks::XProxyService).size.should eql(1)
-    st_loadbalancer.virtual_services(Stacks::VirtualSftpService).size.should eql(1)
-
     st_loadbalancer.to_enc.should eql(
       {
       'role::loadbalancer' => {
@@ -273,7 +269,6 @@ describe Stacks::DSL do
     }}})
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
-    ci_loadbalancer.virtual_services(Stacks::AbstractVirtualService).size.should eql(3)
     ci_loadbalancer.to_enc.should eql({
       'role::loadbalancer' =>{
       'virtual_router_id' => 1,
