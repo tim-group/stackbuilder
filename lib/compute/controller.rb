@@ -252,7 +252,8 @@ class Compute::Controller
 
     def fail_non_destroyable_vms(non_destroyable_specs, callback)
       non_destroyable_specs.each do |spec|
-        callback.invoke :failure, [ spec[:hostname], "VM marked as non-destroyable"]
+        @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, please specify machine.allow_destroy(true)")
+        raise "#{spec[:hostname]} is not destroyable"
       end
     end
 
