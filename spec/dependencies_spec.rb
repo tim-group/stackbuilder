@@ -82,12 +82,10 @@ describe_stack 'stack-with-dependencies' do
       "e1-exampleapp2-001.space.net.local",
       "e1-exampleapp2-002.space.net.local"
     ])
-    host.to_enc["mysql_hacks::application_rights_wrapper"]['example2@e1-exampleapp2-001.space.net.local'].should eql({
-      'database'           => 'example',
+    host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']['example2@e1-exampleapp2-001.space.net.local/example'].should eql({
       'password_hiera_key' => 'enc/e1/example2/password',
     })
-    host.to_enc["mysql_hacks::application_rights_wrapper"]['example2@e1-exampleapp2-002.space.net.local'].should eql({
-      'database'           => 'example',
+    host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']['example2@e1-exampleapp2-002.space.net.local/example'].should eql({
       'password_hiera_key' => 'enc/e1/example2/password',
     })
   end
