@@ -44,7 +44,7 @@ class Stacks::MachineSet
     end
   end
 
-  def config_params
+  def config_params(dependant)
     [] # parameters for config.properties of apps depending on this service
   end
 
@@ -67,7 +67,7 @@ class Stacks::MachineSet
     end
   end
 
-  private
+  public
   def dependant_services
     dependants = []
     environment.accept do |machine_def|
@@ -86,11 +86,11 @@ class Stacks::MachineSet
       instance.prod_fqdn
     end).sort
   end
-  
+
   public
   def dependency_config
     (Hash[resolve_virtual_services(depends_on).inject([]) do |acc, dependency|
-      acc + dependency.config_params
+      acc + dependency.config_params(self)
      end]).sort_by { |key, value| key }
   end
 end

@@ -156,7 +156,7 @@ module Stacks::VirtualService
     rules
   end
 
-  def config_params
+  def config_params(dependant)
     [
         [application.downcase + ".url", "http://" + vip_fqdn + ":8000"]
     ]
