@@ -54,6 +54,7 @@ describe_stack 'should provide correct enc data' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     host.to_enc['role::databaseserver']['database_name'].should eql 'mydb'
+    host.to_enc['role::databaseserver']['application'].should eql false
     host.to_enc['role::databaseserver']['environment'].should eql 'testing'
     host.to_enc['role::databaseserver']['restart_on_config_change'].should eql false
     host.to_enc['role::databaseserver']['restart_on_install'].should eql true
