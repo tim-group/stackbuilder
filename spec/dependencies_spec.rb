@@ -61,7 +61,7 @@ describe_stack 'stack-with-dependencies' do
     host.to_enc["role::http_app"]["dependencies"].should eql([
        ["db.example.database", "example"],
        ["db.example.hostname", "e1-exampledb-001.space.net.local"],
-       ["db.example.password_hiera_key", "enc/e1/example2/password"],
+       ["db.example.password_hiera_key", "enc/e1/example2/mysql_password"],
        ["db.example.username", "example2"],
        ['example.url', 'http://e1-exampleapp-vip.space.net.local:8000'],
     ])
@@ -83,10 +83,10 @@ describe_stack 'stack-with-dependencies' do
       "e1-exampleapp2-002.space.net.local"
     ])
     host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']['example2@e1-exampleapp2-001.space.net.local/example'].should eql({
-      'password_hiera_key' => 'enc/e1/example2/password',
+      'password_hiera_key' => 'enc/e1/example2/mysql_password',
     })
     host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']['example2@e1-exampleapp2-002.space.net.local/example'].should eql({
-      'password_hiera_key' => 'enc/e1/example2/password',
+      'password_hiera_key' => 'enc/e1/example2/mysql_password',
     })
   end
 
