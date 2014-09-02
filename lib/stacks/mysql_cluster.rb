@@ -25,15 +25,15 @@ module Stacks::MysqlCluster
   end
 
   def dependant_instance_mysql_rights()
-    rights = {}
+    rights = {
+      'mysql_hacks::application_rights_wrapper' => {}
+    }
     dependant_services.each do |service|
       service.children.each do |dependant|
-        rights.merge!({
-          'mysql_hacks::application_rights_wrapper' => {
-           "#{service.application}@#{dependant.prod_fqdn}" => {
-              'database'            => "#{database_name}",
-              'password_hiera_key'  => "enc/#{service.environment.name}/#{service.application}/password"
-            }
+        rights['mysql_hacks::application_rights_wrapper'].merge!({
+          "#{service.application}@#{dependant.prod_fqdn}" => {
+            'database'            => "#{database_name}",
+            'password_hiera_key'  => "enc/#{service.environment.name}/#{service.application}/password"
           }
         })
       end
