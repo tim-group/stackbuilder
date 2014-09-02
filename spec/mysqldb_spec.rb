@@ -43,7 +43,6 @@ describe_stack 'should provide correct enc data' do
     stack "mysql" do
       mysqldb "mydb" do
        self.database_name = "mydb"
-       self.application = "myapp"
        each_machine do |machine|
           machine.allow_destroy()
         end
@@ -54,7 +53,6 @@ describe_stack 'should provide correct enc data' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['application'].should eql 'myapp'
     host.to_enc['role::databaseserver']['database_name'].should eql 'mydb'
     host.to_enc['role::databaseserver']['environment'].should eql 'testing'
     host.to_enc['role::databaseserver']['restart_on_config_change'].should eql false
@@ -67,7 +65,6 @@ describe_stack 'should allow storage options to be overwritten' do
     stack "mysql" do
       mysqldb "mydb" do
        self.database_name = "mydb"
-       self.application = "myapp"
        each_machine do |machine|
           machine.modify_storage({
             '/'              => { :size => '5G' },
@@ -134,7 +131,6 @@ describe_stack 'should support dependencies' do
     stack 'fr_db' do
       mysqldb 'frdb' do
         self.database_name = "futuresroll"
-        self.application = "futuresroll"
       end
     end
     stack 'hr' do
@@ -145,7 +141,6 @@ describe_stack 'should support dependencies' do
     stack 'hr_db' do
       mysqldb 'hrdb' do
         self.database_name = "huturesroll"
-        self.application = "huturesroll"
       end
     end
 
