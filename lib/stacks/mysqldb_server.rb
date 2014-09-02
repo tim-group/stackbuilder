@@ -3,7 +3,6 @@ require 'stacks/machine_def'
 
 class Stacks::MysqlDBServer < Stacks::MachineDef
 
-  attr_accessor :database_name, :application
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
@@ -23,14 +22,10 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
     @destroyable = false
   end
 
-  def vip_fqdn
-    return @virtual_service.vip_fqdn
-  end
 
   def to_enc()
     enc = {
       'role::databaseserver' => {
-        'application'              => @virtual_service.application,
         'environment'              => environment.name,
         'database_name'            => @virtual_service.database_name,
         'restart_on_config_change' => false,
@@ -43,8 +38,8 @@ class Stacks::MysqlDBServer < Stacks::MachineDef
         'dependencies' => @virtual_service.dependency_config,
         'dependant_instances' => @virtual_service.dependant_instances,
       })
+      enc.merge!(@virtual_service.dependant_instance_mysql_rights)
     end
-
     enc
   end
 
