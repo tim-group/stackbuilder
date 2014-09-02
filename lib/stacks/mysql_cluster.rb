@@ -9,11 +9,12 @@ module Stacks::MysqlCluster
     object.configure()
   end
 
-  attr_accessor :database_name, :application
+  attr_accessor :database_name, :application, :instances
 
   def configure()
     @database_name = ''
     @application = false
+    @instances = 1
   end
 
   def clazz
