@@ -399,58 +399,6 @@ describe Stacks::DSL do
     eg_es.to_enc.should eql({ 'role::elasticsearch_node' => { "cluster_nodes"=>["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"]}})
   end
 
-
-  it 'can build rabbitmq servers' do
-    stack "rabbit" do
-      virtual_rabbitmqserver do
-      end
-      loadbalancer
-    end
-
-    env "rabbiteg", :primary_site=>"st", :secondary_site=>"bs" do
-      instantiate_stack "rabbit"
-    end
-
-    eg_rabbit = find("rabbiteg-rabbitmq-001.mgmt.st.net.local")
-    eg_rabbit.to_enc.should eql({
-      'role::rabbitmq_server' => {
-        'cluster_nodes' => [
-          'rabbiteg-rabbitmq-001',
-          'rabbiteg-rabbitmq-002'
-        ],
-        'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local',
-      },
-      'server::default_new_mgmt_net_local' => nil,
-    })
-    find("rabbiteg-rabbitmq-002.mgmt.st.net.local").to_enc.should eql({
-      'role::rabbitmq_server' => {
-        'cluster_nodes' => [
-          'rabbiteg-rabbitmq-001',
-          'rabbiteg-rabbitmq-002'
-        ],
-        'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
-      },
-      'server::default_new_mgmt_net_local' => nil,
-    })
-    find("rabbiteg-lb-001.mgmt.st.net.local").to_enc.should eql({
-      'role::loadbalancer' => {
-      'virtual_servers' => {
-      'rabbiteg-rabbitmq-vip.st.net.local' => {
-      'type' => 'rabbitmq',
-      'ports'=>[5672],
-      'realservers' => {
-      'blue' => [
-        'rabbiteg-rabbitmq-001.st.net.local',
-        'rabbiteg-rabbitmq-002.st.net.local'
-    ]
-    }
-    }
-    },
-      'virtual_router_id' => 1
-    }
-    })
-  end
-
   it 'configures NAT boxes to NAT incoming public IPs' do
     stack "frontexample" do
       natserver
