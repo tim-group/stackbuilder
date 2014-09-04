@@ -16,7 +16,8 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
       'role::rabbitmq_server' => {
         'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns.map { |fqdn| fqdn.split('.')[0] },
         'vip_fqdn' => vip_fqdn,
-       }
+       },
+       'server::default_new_mgmt_net_local' => nil
     }
   end
 end
