@@ -53,8 +53,8 @@ class Stacks::Stack
     machineset_with(name, [Stacks::VirtualService, Stacks::VirtualSftpService], Stacks::SftpServer, &block)
   end
 
-  def virtual_rabbitmqserver(&block)
-    machineset_with('rabbitmq', [Stacks::VirtualService, Stacks::VirtualRabbitMQService], Stacks::RabbitMQServer, &block)
+  def virtual_rabbitmqserver(name='rabbitmq', &block)
+    machineset_with(name, [Stacks::VirtualService, Stacks::VirtualRabbitMQService], Stacks::RabbitMQServer, &block)
   end
 
   def mongodb(name='mongodb', &block)
