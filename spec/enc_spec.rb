@@ -412,20 +412,26 @@ describe Stacks::DSL do
     end
 
     eg_rabbit = find("rabbiteg-rabbitmq-001.mgmt.st.net.local")
-    eg_rabbit.to_enc.should eql({ 'role::rabbitmq_server' => {
-      'cluster_nodes' => [
-        'rabbiteg-rabbitmq-001',
-        'rabbiteg-rabbitmq-002'
-    ],
-      'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
-    } })
-    find("rabbiteg-rabbitmq-002.mgmt.st.net.local").to_enc.should eql({ 'role::rabbitmq_server' => {
-      'cluster_nodes' => [
-        'rabbiteg-rabbitmq-001',
-        'rabbiteg-rabbitmq-002'
-    ],
-      'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
-    } })
+    eg_rabbit.to_enc.should eql({
+      'role::rabbitmq_server' => {
+        'cluster_nodes' => [
+          'rabbiteg-rabbitmq-001',
+          'rabbiteg-rabbitmq-002'
+        ],
+        'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local',
+      },
+      'server::default_new_mgmt_net_local' => nil,
+    })
+    find("rabbiteg-rabbitmq-002.mgmt.st.net.local").to_enc.should eql({
+      'role::rabbitmq_server' => {
+        'cluster_nodes' => [
+          'rabbiteg-rabbitmq-001',
+          'rabbiteg-rabbitmq-002'
+        ],
+        'vip_fqdn' => 'rabbiteg-rabbitmq-vip.st.net.local'
+      },
+      'server::default_new_mgmt_net_local' => nil,
+    })
     find("rabbiteg-lb-001.mgmt.st.net.local").to_enc.should eql({
       'role::loadbalancer' => {
       'virtual_servers' => {
