@@ -58,6 +58,7 @@ describe_stack 'should provide correct enc data' do
     host.to_enc['role::databaseserver']['environment'].should eql 'testing'
     host.to_enc['role::databaseserver']['restart_on_config_change'].should eql false
     host.to_enc['role::databaseserver']['restart_on_install'].should eql true
+    host.to_enc['role::databaseserver']['datadir'].should eql '/mnt/data/mysql'
   end
 end
 
