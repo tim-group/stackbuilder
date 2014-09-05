@@ -23,16 +23,27 @@ class Stacks::AppServer < Stacks::MachineDef
   def to_enc()
     enc = {
       'role::http_app' => {
-      'application' => virtual_service.application,
-      'group' => group,
-      'environment' => environment.name,
-      'dependencies' => @virtual_service.dependency_config,
-      'dependant_instances' => @virtual_service.dependant_instances,
-      'port' => '8000'
-    }}
+        'application' => virtual_service.application,
+        'group' => group,
+        'environment' => environment.name,
+        'dependencies' => @virtual_service.dependency_config,
+        'dependant_instances' => @virtual_service.dependant_instances,
+        'port' => '8000'
+      }
+    }
 
     if @virtual_service.respond_to? :vip_fqdn
       enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn
+    end
+
+    peers = @virtual_service.children.map do |child|
+      child.qualified_hostname(:prod)
+    end
+
+    peers.delete self.qualified_hostname(:prod)
+
+    unless peers == []
+      enc['role::http_app']['dependencies'] << ['cache.peers', "[\"#{peers.join(',')}\"]"]
     end
     enc
   end

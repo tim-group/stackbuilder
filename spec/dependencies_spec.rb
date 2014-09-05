@@ -64,6 +64,7 @@ describe_stack 'stack-with-dependencies' do
        ["db.example.password_hiera_key", "enc/e1/example2/mysql_password"],
        ["db.example.username", "example2"],
        ['example.url', 'http://e1-exampleapp-vip.space.net.local:8000'],
+       ["cache.peers", "[\"e1-exampleapp2-001.space.net.local\"]"],
     ])
   end
   host("e1-exampleapp-002.mgmt.space.net.local") do |host|
@@ -75,7 +76,7 @@ describe_stack 'stack-with-dependencies' do
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
-    host.to_enc["role::http_app"]["dependencies"].should eql([])
+    host.to_enc["role::http_app"]["dependencies"].should eql([["cache.peers", "[\"e1-exampleapp-001.space.net.local\"]"]])
   end
   host("e1-exampledb-001.mgmt.space.net.local") do |host|
     host.to_enc["role::databaseserver"]["dependant_instances"].should eql([

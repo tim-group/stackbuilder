@@ -352,7 +352,9 @@ describe Stacks::DSL do
       'vip_fqdn' => 'ci-appx-vip.st.net.local',
       'environment' => 'ci',
       'port'        => '8000',
-      'dependencies' => [],
+      'dependencies' => [
+        ["cache.peers", "[\"ci-appx-002.st.net.local\"]"]
+      ],
       'dependant_instances' => []
     }})
   end
@@ -375,7 +377,9 @@ describe Stacks::DSL do
       'group' => 'blue',
       'environment' => 'ci',
       'port'        => '8000',
-      'dependencies' => [],
+      'dependencies' => [
+        ["cache.peers", "[\"ci-appx-002.st.net.local\"]"]
+      ],
       'dependant_instances' => []
     }})
   end
