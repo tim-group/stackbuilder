@@ -55,6 +55,8 @@ module Stacks::MachineGroup
       end
     end
   end
+
+
 end
 
 module Stacks::VirtualService

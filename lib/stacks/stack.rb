@@ -22,8 +22,6 @@ require 'stacks/mysqldb_server'
 require 'stacks/mysql_cluster'
 require 'stacks/loadbalancer_cluster'
 require 'stacks/quantapp_server'
-require 'stacks/shadow_server'
-require 'stacks/shadow_server_cluster'
 require 'stacks/standard_server'
 require 'stacks/logstash_server'
 require 'stacks/fmanalyticsapp_server'
@@ -57,10 +55,6 @@ class Stacks::Stack
 
   def virtual_rabbitmqserver(name='rabbitmq', &block)
     machineset_with(name, [Stacks::VirtualService, Stacks::VirtualRabbitMQService], Stacks::RabbitMQServer, &block)
-  end
-
-  def shadow_server(name, &block)
-    machineset_with(name, [Stacks::ShadowServerCluster], Stacks::ShadowServer, &block)
   end
 
   def mongodb(name='mongodb', &block)
