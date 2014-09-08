@@ -4,7 +4,7 @@ require 'stacks/machine_def'
 class Stacks::ShadowServer < Stacks::MachineDef
 
   attr_reader :environment, :virtual_service
-  attr_accessor :group, :hostname, :domain, :name
+  attr_accessor :group, :hostname, :domain
 
   def initialize(virtual_service, index, &block)
     super(virtual_service.name)
