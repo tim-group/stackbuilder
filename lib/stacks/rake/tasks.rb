@@ -224,60 +224,62 @@ namespace :sbx do
   machine_names = Set.new
   environment.accept do |machine_def|
 
-    namespace machine_def.name.to_sym do
-      RSpec::Core::Runner.disable_autorun!
-      raise "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. Look for a stack that has the same name as the server being created.\neg.\n stack '#{machine_def.name}' do\n  app '#{machine_def.name}" if machine_names.include?("#{machine_def.environment.name}:#{machine_def.name}")
-      machine_names << "#{machine_def.environment.name}:#{machine_def.name}"
+    unless machine_def.kind_of? Stacks::ShadowServer
+      namespace machine_def.name.to_sym do
+        RSpec::Core::Runner.disable_autorun!
+        raise "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. Look for a stack that has the same name as the server being created.\neg.\n stack '#{machine_def.name}' do\n  app '#{machine_def.name}" if machine_names.include?("#{machine_def.environment.name}:#{machine_def.name}")
+        machine_names << "#{machine_def.environment.name}:#{machine_def.name}"
 
-      desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
-      task :to_specs do
-        puts machine_def.to_specs.to_yaml
-      end
-
-      desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
-      task :to_vip_spec do
-        puts machine_def.to_vip_spec.to_yaml
-      end
-
-      if machine_def.respond_to? :to_enc
         desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
-        task :to_enc do
-          puts machine_def.to_enc.to_yaml
+        task :to_specs do
+          puts machine_def.to_specs.to_yaml
         end
-      end
 
-      desc "perform all steps required to create and configure the machine(s)"
-      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
-
-      desc "perform a clean followed by a provision"
-      task :reprovision=> ['clean', 'provision']
-
-      desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
-      sbtask :allocate do
-        get_action("allocate").call(@factory.services, machine_def)
-      end
-
-      desc "launch these machines"
-      sbtask :launch do
-        get_action("launch").call(@factory.services, machine_def)
-      end
-
-      sbtask :blah do
-        hosts = @factory.host_repository.find_current("st")
-        hosts.allocated_machines(machine_def.flatten).map do |machine, host|
-          logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
+        desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
+        task :to_vip_spec do
+          puts machine_def.to_vip_spec.to_yaml
         end
-      end
 
-      desc "new hosts model auditing"
-      sbtask :audit_hosts do
-        hosts = @factory.host_repository.find_current("st")
-        hosts.allocate(machine_def.flatten)
-        hosts.hosts.each do |host|
-          pp host.fqdn
-          host.allocated_machines.each do |machine|
-            unless machine.nil?
-              puts "\t #{machine.mgmt_fqdn}"
+        if machine_def.respond_to? :to_enc
+          desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
+          task :to_enc do
+            puts machine_def.to_enc.to_yaml
+          end
+        end
+
+        desc "perform all steps required to create and configure the machine(s)"
+        task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
+
+        desc "perform a clean followed by a provision"
+        task :reprovision=> ['clean', 'provision']
+
+        desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
+        sbtask :allocate do
+          get_action("allocate").call(@factory.services, machine_def)
+        end
+
+        desc "launch these machines"
+        sbtask :launch do
+          get_action("launch").call(@factory.services, machine_def)
+        end
+
+        sbtask :blah do
+          hosts = @factory.host_repository.find_current("st")
+          hosts.allocated_machines(machine_def.flatten).map do |machine, host|
+            logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
+          end
+        end
+
+        desc "new hosts model auditing"
+        sbtask :audit_hosts do
+          hosts = @factory.host_repository.find_current("st")
+          hosts.allocate(machine_def.flatten)
+          hosts.hosts.each do |host|
+            pp host.fqdn
+            host.allocated_machines.each do |machine|
+              unless machine.nil?
+                puts "\t #{machine.mgmt_fqdn}"
+              end
             end
           end
         end
