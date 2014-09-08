@@ -25,9 +25,7 @@ describe_stack 'tim' do
         'group' => 'blue',
         'environment' => 'e1',
         'port'        => '8000',
-        'dependencies' => [
-          ["cache.peers", "[\"e1-timcyclic-002.space.net.local\"]"]
-         ],
+        'dependencies' => [],
         'dependant_instances' => []
        }
      })

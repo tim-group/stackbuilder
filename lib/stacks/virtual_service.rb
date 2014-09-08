@@ -64,9 +64,10 @@ module Stacks::VirtualService
     object.configure()
   end
 
-  attr_accessor :nat, :persistent_ports, :healthcheck_timeout
+  attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout
 
   def configure()
+    @ehcache = false
     @nat=false
     @persistent_ports = []
     @port_map = {}
@@ -155,7 +156,7 @@ module Stacks::VirtualService
   end
 
   def config_params(dependant)
-    [
+    config = [
         [application.downcase + ".url", "http://" + vip_fqdn + ":8000"]
     ]
   end

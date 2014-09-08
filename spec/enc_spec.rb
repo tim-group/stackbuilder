@@ -352,9 +352,7 @@ describe Stacks::DSL do
       'vip_fqdn' => 'ci-appx-vip.st.net.local',
       'environment' => 'ci',
       'port'        => '8000',
-      'dependencies' => [
-        ["cache.peers", "[\"ci-appx-002.st.net.local\"]"]
-      ],
+      'dependencies' => [],
       'dependant_instances' => []
     }})
   end
@@ -377,9 +375,7 @@ describe Stacks::DSL do
       'group' => 'blue',
       'environment' => 'ci',
       'port'        => '8000',
-      'dependencies' => [
-        ["cache.peers", "[\"ci-appx-002.st.net.local\"]"]
-      ],
+      'dependencies' => [],
       'dependant_instances' => []
     }})
   end
@@ -652,5 +648,20 @@ describe Stacks::DSL do
     find_environment("e1")["mystack"]["x"]["x-001"].availability_group.should eql("e1-x")
     find_environment("e1")["mystack"]["px"]["px-001"].availability_group.should eql("e1-px")
     find_environment("e1")["mystack"]["sx"]["sx-001"].availability_group.should eql("e1-sx")
+  end
+
+  it 'adds cache.peers to the enc if enable_ehcache is set inside a virtual_appserver' do
+    stack "mystack" do
+      virtual_appserver "x" do
+        enable_ehcache
+      end
+    end
+
+    env "e1", :primary_site=>'space' do
+      instantiate_stack "mystack"
+    end
+
+    server = find("e1-x-001.mgmt.space.net.local")
+    server.to_enc['role::http_app']['dependencies'].should include(['cache.peers','["e1-x-002.space.net.local"]'])
   end
 end
