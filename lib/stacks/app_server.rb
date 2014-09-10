@@ -44,7 +44,7 @@ class Stacks::AppServer < Stacks::MachineDef
       peers.delete self.qualified_hostname(:prod)
 
       unless peers == []
-        enc['role::http_app']['dependencies'] << ['cache.peers', "[\"#{peers.join(',')}\"]"]
+        enc['role::http_app']['dependencies']['cache.peers'] = "[\"#{peers.join(',')}\"]"
       end
     end
     enc

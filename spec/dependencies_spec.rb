@@ -63,13 +63,12 @@ describe_stack 'stack-with-dependencies' do
         'e1-lb-001.space.net.local',
         'e1-lb-002.space.net.local'
     ])
-    host.to_enc["role::http_app"]["dependencies"].should eql([
-       ["db.example.database", "example"],
-       ["db.example.hostname", "e1-exampledb-001.space.net.local"],
-       ["db.example.password_hiera_key", "enc/e1/example2/mysql_password"],
-       ["db.example.username", "example2"],
-       ['example.url', 'http://e1-exampleapp-vip.space.net.local:8000'],
-    ])
+    deps = host.to_enc["role::http_app"]["dependencies"]
+    deps["db.example.database"].should eql("example")
+    deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
+    deps["db.example.password_hiera_key"].should eql("enc/e1/example2/mysql_password")
+    deps["db.example.username"].should eql("example2")
+    deps['example.url'].should eql('http://e1-exampleapp-vip.space.net.local:8000')
   end
   host("e1-exampleapp-002.mgmt.space.net.local") do |host|
     host.to_enc["role::http_app"]["dependant_instances"].should eql([
@@ -80,7 +79,7 @@ describe_stack 'stack-with-dependencies' do
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
-    host.to_enc["role::http_app"]["dependencies"].should eql([])
+    host.to_enc["role::http_app"]["dependencies"].should eql({})
   end
   host("e1-exampledb-001.mgmt.space.net.local") do |host|
     host.to_enc["role::databaseserver"]["dependant_instances"].should eql([
@@ -127,15 +126,15 @@ describe_stack 'stack with dependencies that does not provide config params when
   end
 
   host("e1-configapp-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["dependencies"].should eql([
-       ["db.example.database", "example"],
-       ["db.example.hostname", "e1-exampledb-001.space.net.local"],
-       ["db.example.password_hiera_key", "enc/e1/example/mysql_password"],
-       ["db.example.username", "example"],
-    ])
+    host.to_enc["role::http_app"]["dependencies"].should eql({
+       "db.example.database"           => "example",
+       "db.example.hostname"           => "e1-exampledb-001.space.net.local",
+       "db.example.password_hiera_key" => "enc/e1/example/mysql_password",
+       "db.example.username"           => "example",
+    })
   end
   host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["dependencies"].should eql([])
+    host.to_enc["role::http_app"]["dependencies"].should eql({})
   end
 end
 

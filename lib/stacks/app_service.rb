@@ -16,8 +16,8 @@ module Stacks::AppService
   end
 
   def config_params(dependant)
-    config = [
-        [application.downcase + ".url", "http://" + vip_fqdn + ":8000"]
-    ]
+    config = {
+      "#{application.downcase}.url" => "http://#{vip_fqdn}:8000"
+    }
   end
 end

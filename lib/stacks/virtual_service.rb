@@ -156,7 +156,7 @@ module Stacks::VirtualService
   end
 
   def config_params(dependant)
-   []
+    {}
   end
 
 end
