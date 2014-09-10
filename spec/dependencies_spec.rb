@@ -23,6 +23,11 @@ describe_stack 'stack-with-dependencies' do
         self.application = 'example2'
         self.depends_on = ["exampleapp", "exampledb"]
       end
+      virtual_appserver 'exampleapp2' do
+        self.groups = ['blue']
+        self.application = 'example2'
+        self.depends_on = ["exampleapp", "exampledb"]
+      end
     end
     stack "example_db" do
       mysqldb "exampledb" do
@@ -91,3 +96,46 @@ describe_stack 'stack-with-dependencies' do
   end
 
 end
+
+describe_stack 'stack with dependencies that does not provide config params when specified ' do
+  given do
+    stack "example" do
+
+      virtual_appserver 'configapp' do
+        self.groups = ['blue']
+        self.application = 'example'
+        self.depends_on = ["exampledb"]
+      end
+      virtual_appserver 'noconfigapp' do
+        self.groups = ['blue']
+        self.application = 'example'
+        self.depends_on = ["exampledb"]
+        self.auto_configure_dependencies = false
+      end
+    end
+    stack "example_db" do
+      mysqldb "exampledb" do
+        self.instances = 1
+        self.database_name = 'example'
+      end
+    end
+
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "example"
+      instantiate_stack "example_db"
+    end
+  end
+
+  host("e1-configapp-001.mgmt.space.net.local") do |host|
+    host.to_enc["role::http_app"]["dependencies"].should eql([
+       ["db.example.database", "example"],
+       ["db.example.hostname", "e1-exampledb-001.space.net.local"],
+       ["db.example.password_hiera_key", "enc/e1/example/mysql_password"],
+       ["db.example.username", "example"],
+    ])
+  end
+  host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
+    host.to_enc["role::http_app"]["dependencies"].should eql([])
+  end
+end
+

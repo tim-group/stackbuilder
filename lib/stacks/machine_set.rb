@@ -13,6 +13,7 @@ class Stacks::MachineSet
   attr_accessor :port_map
   attr_accessor :groups
   attr_accessor :depends_on
+  attr_accessor :auto_configure_dependencies
 
   include Stacks::MachineDefContainer
 
@@ -24,6 +25,7 @@ class Stacks::MachineSet
     @instances = 2
     @config_block = config_block
     @depends_on = []
+    @auto_configure_dependencies = true
   end
 
   def on_bind(&block)
@@ -89,8 +91,11 @@ class Stacks::MachineSet
 
   public
   def dependency_config
-    (Hash[resolve_virtual_services(depends_on).inject([]) do |acc, dependency|
+    config = []
+    config = (Hash[resolve_virtual_services(depends_on).inject([]) do |acc, dependency|
       acc + dependency.config_params(self)
-     end]).sort_by { |key, value| key }
+     end]).sort_by { |key, value| key } if @auto_configure_dependencies
+     config
   end
+
 end
