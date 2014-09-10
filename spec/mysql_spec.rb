@@ -5,7 +5,7 @@ describe_stack 'should default to disallow destory' do
 
   given do
     stack "mysql" do
-      mysqldb "mydb"
+      mysql_cluster "mydb"
     end
 
     env "testing", :primary_site=>"space" do
@@ -22,7 +22,7 @@ end
 describe_stack 'should allow destroy to be overwritten' do
   given do
     stack "mysql" do
-      mysqldb "mydb" do
+      mysql_cluster "mydb" do
        each_machine do |machine|
           machine.allow_destroy()
         end
@@ -41,7 +41,7 @@ end
 describe_stack 'should provide correct enc data' do
   given do
     stack "mysql" do
-      mysqldb "mydb" do
+      mysql_cluster "mydb" do
        self.database_name = "mydb"
        each_machine do |machine|
           machine.allow_destroy()
@@ -65,7 +65,7 @@ end
 describe_stack 'should allow storage options to be overwritten' do
   given do
     stack "mysql" do
-      mysqldb "mydb" do
+      mysql_cluster "mydb" do
        self.database_name = "mydb"
        each_machine do |machine|
           machine.modify_storage({
@@ -90,7 +90,7 @@ end
 describe_stack 'should always provide a default data mount of /mnt/data with sensible defaults' do
   given do
     stack "mysql" do
-      mysqldb "mydb" do
+      mysql_cluster "mydb" do
       end
     end
     env "testing", :primary_site=>"space" do
@@ -109,7 +109,7 @@ end
 describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
   given do
     stack "mysql" do
-      mysqldb "mydb" do
+      mysql_cluster "mydb" do
       end
     end
     env "testing", :primary_site=>"space" do
@@ -131,7 +131,7 @@ describe_stack 'should support dependencies' do
       end
     end
     stack 'fr_db' do
-      mysqldb 'frdb' do
+      mysql_cluster 'frdb' do
         self.database_name = "futuresroll"
       end
     end
@@ -141,7 +141,7 @@ describe_stack 'should support dependencies' do
       end
     end
     stack 'hr_db' do
-      mysqldb 'hrdb' do
+      mysql_cluster 'hrdb' do
         self.database_name = "huturesroll"
       end
     end

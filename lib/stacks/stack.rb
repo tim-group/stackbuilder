@@ -18,7 +18,7 @@ require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
 require 'stacks/mongodb_server'
 require 'stacks/mongodb_cluster'
-require 'stacks/mysqldb_server'
+require 'stacks/mysql_server'
 require 'stacks/mysql_cluster'
 require 'stacks/legacy_mysqldb_server'
 require 'stacks/legacy_mysql_cluster'
@@ -69,8 +69,8 @@ class Stacks::Stack
     machineset_with(name, [Stacks::MongoDBCluster], Stacks::MongoDBServer, &block)
   end
 
-  def mysqldb(name='mysqldb', &block)
-    machineset_with(name, [Stacks::MysqlCluster], Stacks::MysqlDBServer, &block)
+  def mysql_cluster(name='mysqldb', &block)
+    machineset_with(name, [Stacks::MysqlCluster], Stacks::MysqlServer, &block)
   end
 
   def legacy_mysqldb(name='mysqldb', &block)

@@ -30,7 +30,7 @@ describe_stack 'stack-with-dependencies' do
       end
     end
     stack "example_db" do
-      mysqldb "exampledb" do
+      legacy_mysqldb "exampledb" do
         self.instances = 1
         self.database_name = 'example'
       end
@@ -113,7 +113,7 @@ describe_stack 'stack with dependencies that does not provide config params when
       end
     end
     stack "example_db" do
-      mysqldb "exampledb" do
+      legacy_mysqldb "exampledb" do
         self.instances = 1
         self.database_name = 'example'
       end

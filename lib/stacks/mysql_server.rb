@@ -1,7 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
 
-class Stacks::MysqlDBServer < Stacks::MachineDef
+class Stacks::MysqlServer < Stacks::MachineDef
 
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
