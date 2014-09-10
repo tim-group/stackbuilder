@@ -155,7 +155,7 @@ describe_stack 'should support dependencies' do
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     host.to_enc['role::databaseserver']['dependant_instances'].should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
-    host.to_enc['role::databaseserver']['dependencies'].should eql([])
+    host.to_enc['role::databaseserver']['dependencies'].should eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
     host.to_enc['role::databaseserver']['dependant_instances'].should be_nil
