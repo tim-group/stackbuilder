@@ -15,6 +15,12 @@ class Stacks::MysqlServer < Stacks::MachineDef
     end
 
     super(@name)
+    @ram = '4194304' # 4GB
+    @vcpus = '2'
+    @destroyable = false
+    @master = (role == :master)? true : false
+    @backup = (role == :backup)? true : false
+
     storage = {
       '/mnt/data' => {
         :type       => 'data',
@@ -22,23 +28,23 @@ class Stacks::MysqlServer < Stacks::MachineDef
         :persistent => true,
       }
     }
-    modify_storage(storage)
-    @ram = '4194304' # 4GB
-    @vcpus = '2'
-    @destroyable = false
-    @master = (role == :master)? true : false
-    @backup = (role == :backup)? true : false
-  end
-
-  def backup_storage(size)
     backup_storage = {
       '/mnt/storage' => {
         :type       => 'data',
-        :size       => size,
+        :size       => '10G',
         :persistent => true,
       },
     }
-    modify_storage(backup_storage)
+    modify_storage(storage)
+    modify_storage(backup_storage) if @backup
+  end
+
+  def backup_storage_size(size)
+    modify_storage({'/mnt/storage' => { :size => size }})
+  end
+
+  def storage_size(size)
+    modify_storage({'/mnt/data' => { :size => size }})
   end
 
   def master?
@@ -61,10 +67,13 @@ class Stacks::MysqlServer < Stacks::MachineDef
       }
     }
 
-    if @virtual_service.dependant_instances and ! @virtual_service.dependant_instances.nil? and @virtual_service.dependant_instances != []
+    dependant_instances = @virtual_service.dependant_instances_including_children
+    dependant_instances.delete self.prod_fqdn
+
+    if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::databaseserver'].merge!({
         'dependencies' => @virtual_service.dependency_config,
-        'dependant_instances' => @virtual_service.dependant_instances,
+        'dependant_instances' => dependant_instances,
       })
       enc.merge!(@virtual_service.dependant_instance_mysql_rights)
     end

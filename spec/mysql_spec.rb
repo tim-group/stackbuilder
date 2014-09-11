@@ -15,12 +15,16 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     host.master?.should eql true
     host.backup?.should eql false
+    host.to_enc['role::databaseserver']['dependant_instances'].should eql([
+      'testing-frdb-002.space.net.local',
+      'testing-frdbbackup-001.space.net.local',
+    ])
   end
   host("testing-frdb-002.mgmt.space.net.local") do |host|
     host.master?.should eql false
     host.backup?.should eql false
   end
-  host("testing-frdbbackup-003.mgmt.space.net.local") do |host|
+  host("testing-frdbbackup-001.mgmt.space.net.local") do |host|
     host.master?.should eql false
     host.backup?.should eql true
   end
@@ -178,11 +182,11 @@ describe_stack 'should support dependencies' do
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['dependant_instances'].should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
+    host.to_enc['role::databaseserver']['dependant_instances'].should include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
     host.to_enc['role::databaseserver']['dependencies'].should eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['dependant_instances'].should be_nil
-    host.to_enc['role::databaseserver']['dependencies'].should be_nil
+    host.to_enc['role::databaseserver']['dependant_instances'].should_not include('testing-frapp-001.space.net.local','testing-frapp-002.space.net.local')
+    host.to_enc['role::databaseserver']['dependencies'].should eql({})
   end
 end

@@ -9,7 +9,7 @@ module Stacks::MysqlCluster
     object.configure()
   end
 
-  attr_accessor :database_name, :application, :instances
+  attr_accessor :database_name, :application, :master_instances, :slave_instances, :backup_instances
 
   def configure()
     @database_name = ''
@@ -17,7 +17,6 @@ module Stacks::MysqlCluster
     @master_instances = 1
     @slave_instances = 1
     @backup_instances = 1
-
   end
 
   def instantiate_machine(name, type, index, environment)
@@ -38,6 +37,7 @@ module Stacks::MysqlCluster
       index = sprintf("%03d",i+=1)
       instantiate_machine(name, :slave, index, environment)
     end
+    i = 0
     @backup_instances.times do
       index = sprintf("%03d",i+=1)
       instantiate_machine(name, :backup, index, environment)
