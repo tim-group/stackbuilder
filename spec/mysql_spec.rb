@@ -27,6 +27,7 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
   host("testing-frdbbackup-001.mgmt.space.net.local") do |host|
     host.master?.should eql false
     host.backup?.should eql true
+    host.to_specs.shift[:storage][:"/mnt/storage"][:size].should eql '10G'
   end
 end
 
@@ -96,12 +97,8 @@ describe_stack 'should allow storage options to be overwritten' do
     stack "mysql" do
       mysql_cluster "mydb" do
        self.database_name = "mydb"
-       each_machine do |machine|
-          machine.modify_storage({
-            '/'              => { :size => '5G' },
-            '/var/lib/mysql' => { :type => 'data', :size => '10G' },
-          })
-        end
+       self.data_size('14G')
+       self.backup_size('29G')
       end
     end
     env "testing", :primary_site=>"space" do
@@ -109,10 +106,11 @@ describe_stack 'should allow storage options to be overwritten' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(:type=>"data")
-    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(:size=>"10G")
-    host.to_specs.shift[:storage]['/'.to_sym].should include(:type=>"os")
-    host.to_specs.shift[:storage]['/'.to_sym].should include(:size =>"5G")
+    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
+    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql "14G"
+  end
+  host("testing-mydbbackup-001.mgmt.space.net.local") do |host|
+    host.to_specs.shift[:storage]['/mnt/storage'.to_sym][:size].should eql "29G"
   end
 end
 

@@ -39,11 +39,11 @@ class Stacks::MysqlServer < Stacks::MachineDef
     modify_storage(backup_storage) if @backup
   end
 
-  def backup_storage_size(size)
-    modify_storage({'/mnt/storage' => { :size => size }})
+  def backup_size(size)
+    modify_storage({'/mnt/storage' => { :size => size }}) if @backup
   end
 
-  def storage_size(size)
+  def data_size(size)
     modify_storage({'/mnt/data' => { :size => size }})
   end
 
@@ -69,6 +69,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
 
     dependant_instances = @virtual_service.dependant_instances_including_children
     dependant_instances.delete self.prod_fqdn
+
 
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::databaseserver'].merge!({

@@ -69,10 +69,16 @@ class Stacks::MachineSet
     end
   end
 
+  private
   def children_prod_fqdn
     children.map do |service|
       service.prod_fqdn
     end
+  end
+
+  public
+  def dependant_instances_including_children
+    dependant_instances.concat(children_prod_fqdn)
   end
 
   public
@@ -84,11 +90,6 @@ class Stacks::MachineSet
       end
     end
     dependants
-  end
-
-  public
-  def dependant_instances_including_children
-    dependant_instances.concat(children_prod_fqdn)
   end
 
   public
