@@ -1,11 +1,10 @@
 require 'stacks/test_framework'
 
-
-describe_stack 'should default to disallow destory' do
+describe_stack 'should provide 3 mysql servers by default, one is a master' do
 
   given do
     stack "mysql" do
-      mysql_cluster "mydb"
+      mysql_cluster "frdb"
     end
 
     env "testing", :primary_site=>"space" do
@@ -13,7 +12,33 @@ describe_stack 'should default to disallow destory' do
     end
   end
 
-  host("testing-mydb-001.mgmt.space.net.local") do |host|
+  host("testing-frdb-001.mgmt.space.net.local") do |host|
+    host.master?.should eql true
+    host.backup?.should eql false
+  end
+  host("testing-frdb-002.mgmt.space.net.local") do |host|
+    host.master?.should eql false
+    host.backup?.should eql false
+  end
+  host("testing-frdbbackup-003.mgmt.space.net.local") do |host|
+    host.master?.should eql false
+    host.backup?.should eql true
+  end
+end
+
+describe_stack 'should default to disallow destory' do
+
+  given do
+    stack "mysql" do
+      mysql_cluster "spoondb"
+    end
+
+    env "testing", :primary_site=>"space" do
+      instantiate_stack "mysql"
+    end
+  end
+
+  host("testing-spoondb-001.mgmt.space.net.local") do |host|
     host.destroyable?.should eql false
     host.to_specs.shift[:disallow_destroy].should eql true
   end
@@ -101,7 +126,6 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql '10G'
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found].should eql :raise_error
   end
 
 end

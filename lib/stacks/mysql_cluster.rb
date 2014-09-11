@@ -14,16 +14,45 @@ module Stacks::MysqlCluster
   def configure()
     @database_name = ''
     @application = false
-    @instances = 1
+    @master_instances = 1
+    @slave_instances = 1
+    @backup_instances = 1
+
+  end
+
+  def instantiate_machine(name, type, index, environment)
+    server = @type.new(self, type, index, &@config_block)
+    server.group = groups[i%groups.size] if server.respond_to?(:group)
+    server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
+    @definitions[server.name] = server
+    server
+  end
+
+  def instantiate_machines(environment)
+    i = 0
+    @master_instances.times do
+      index = sprintf("%03d",i+=1)
+      instantiate_machine(name, :master, index, environment)
+    end
+    @slave_instances.times do
+      index = sprintf("%03d",i+=1)
+      instantiate_machine(name, :slave, index, environment)
+    end
+    @backup_instances.times do
+      index = sprintf("%03d",i+=1)
+      instantiate_machine(name, :backup, index, environment)
+    end
   end
 
   def clazz
     return 'mysqlcluster'
   end
 
-  def mysqldb_server
-    raise 'MySQL cluster does not currently support more than 1 server' if children.size > 1
-    mysqldb_server = children.first
+  def masters
+    masters = children.reject { |mysql_server| !mysql_server.master? }
+    raise "No masters were not found! #{children}" if masters.empty?
+    #Only return the first master (multi-master support not implemented)
+    [masters.first.prod_fqdn]
   end
 
   def dependant_instance_mysql_rights()
@@ -45,9 +74,9 @@ module Stacks::MysqlCluster
   def config_params(dependant)
     # This is where we can provide config params to App servers (only) to put into their config.properties
     {
-      "db.#{@database_name}.hostname"           => mysqldb_server.prod_fqdn,
+      "db.#{@database_name}.hostname"           => masters.join(','),
       "db.#{@database_name}.database"           => database_name,
-      "db.#{@database_name}.username"           => "#{dependant.application}",
+      "db.#{@database_name}.username"           => dependant.application,
       "db.#{@database_name}.password_hiera_key" => "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
     }
   end

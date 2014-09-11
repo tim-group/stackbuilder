@@ -3,25 +3,51 @@ require 'stacks/machine_def'
 
 class Stacks::MysqlServer < Stacks::MachineDef
 
-  def initialize(virtual_service, index, &block)
+  attr_reader :name
+  attr_accessor :master
+
+  def initialize(virtual_service, role, index, &block)
     @virtual_service = virtual_service
-    super(virtual_service.name + "-" + index)
+    if role == :backup
+      @name = "#{virtual_service.name}#{role.to_s}-#{index}"
+    else
+      @name = "#{virtual_service.name}-#{index}"
+    end
+
+    super(@name)
     storage = {
       '/mnt/data' => {
-        :type                => 'data',
-        :size                => '10G',
-        :persistent          => true,
-        :persistence_options => {
-          :on_storage_not_found => :raise_error
-        }
+        :type       => 'data',
+        :size       => '10G',
+        :persistent => true,
       }
     }
     modify_storage(storage)
     @ram = '4194304' # 4GB
     @vcpus = '2'
     @destroyable = false
+    @master = (role == :master)? true : false
+    @backup = (role == :backup)? true : false
   end
 
+  def backup_storage(size)
+    backup_storage = {
+      '/mnt/storage' => {
+        :type       => 'data',
+        :size       => size,
+        :persistent => true,
+      },
+    }
+    modify_storage(backup_storage)
+  end
+
+  def master?
+    @master
+  end
+
+  def backup?
+    @backup
+  end
 
   def to_enc()
     enc = {
