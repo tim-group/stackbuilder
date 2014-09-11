@@ -44,7 +44,10 @@ class Stacks::AppServer < Stacks::MachineDef
       peers.delete self.qualified_hostname(:prod)
 
       unless peers == []
+        enc['role::http_app']['dependencies']['cache.enabled'] = "true"
         enc['role::http_app']['dependencies']['cache.peers'] = "[\"#{peers.join(',')}\"]"
+        enc['role::http_app']['dependencies']['cache.registryPort'] = "49000"
+        enc['role::http_app']['dependencies']['cache.remoteObjectPort'] = "49010"
       end
     end
     enc

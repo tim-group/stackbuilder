@@ -650,7 +650,7 @@ describe Stacks::DSL do
     find_environment("e1")["mystack"]["sx"]["sx-001"].availability_group.should eql("e1-sx")
   end
 
-  it 'adds cache.peers to the enc if enable_ehcache is set inside a virtual_appserver' do
+  it 'adds ehcache settings to the enc if enable_ehcache is set inside a virtual_appserver' do
     stack "mystack" do
       virtual_appserver "x" do
         enable_ehcache
@@ -663,5 +663,8 @@ describe Stacks::DSL do
 
     server = find("e1-x-001.mgmt.space.net.local")
     server.to_enc['role::http_app']['dependencies']['cache.peers'].should eql('["e1-x-002.space.net.local"]')
+    server.to_enc['role::http_app']['dependencies']['cache.enabled'].should eql('true')
+    server.to_enc['role::http_app']['dependencies']['cache.registryPort'].should eql('49000')
+    server.to_enc['role::http_app']['dependencies']['cache.remoteObjectPort'].should eql('49010')
   end
 end
