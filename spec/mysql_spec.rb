@@ -16,7 +16,7 @@ describe_stack 'should provide a legacy mode to be backwards compatible with old
 
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     host.master?.should eql true
-    host.to_enc['role::databaseserver']['dependant_instances'].should eql nil
+    host.to_enc['role::mysql_server']['dependant_instances'].should eql nil
   end
 end
 describe_stack 'should provide 3 mysql servers by default, one is a master' do
@@ -34,7 +34,7 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     host.master?.should eql true
     host.backup?.should eql false
-    host.to_enc['role::databaseserver']['dependant_instances'].should eql([
+    host.to_enc['role::mysql_server']['dependant_instances'].should eql([
       'testing-frdb-002.space.net.local',
       'testing-frdbbackup-001.space.net.local',
     ])
@@ -102,12 +102,37 @@ describe_stack 'should provide correct enc data' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['database_name'].should eql 'mydb'
-    host.to_enc['role::databaseserver']['application'].should eql false
-    host.to_enc['role::databaseserver']['environment'].should eql 'testing'
-    host.to_enc['role::databaseserver']['restart_on_config_change'].should eql false
-    host.to_enc['role::databaseserver']['restart_on_install'].should eql true
-    host.to_enc['role::databaseserver']['datadir'].should eql '/mnt/data/mysql'
+    enc_role = host.to_enc['role::mysql_server']
+    enc_role['backup'].should eql(false)
+    enc_role['config'].should eql({})
+    enc_role['database_name'].should eql('mydb')
+    enc_role['datadir'].should eql('/mnt/data/mysql')
+    enc_role['environment'].should eql('testing')
+    enc_role['master'].should eql(true)
+    enc_role['server_id'].should eql(0)
+    host.to_enc.should include('server::default_new_mgmt_net_local')
+  end
+  host("testing-mydb-002.mgmt.space.net.local") do |host|
+    enc_role = host.to_enc['role::mysql_server']
+    enc_role['backup'].should eql(false)
+    enc_role['config'].should eql({})
+    enc_role['database_name'].should eql('mydb')
+    enc_role['datadir'].should eql('/mnt/data/mysql')
+    enc_role['environment'].should eql('testing')
+    enc_role['master'].should eql(false)
+    enc_role['server_id'].should eql(1)
+    host.to_enc.should include('server::default_new_mgmt_net_local')
+  end
+  host("testing-mydbbackup-001.mgmt.space.net.local") do |host|
+    enc_role = host.to_enc['role::mysql_server']
+    enc_role['backup'].should eql(true)
+    enc_role['config'].should eql({})
+    enc_role['database_name'].should eql('mydb')
+    enc_role['datadir'].should eql('/mnt/data/mysql')
+    enc_role['environment'].should eql('testing')
+    enc_role['master'].should eql(false)
+    enc_role['server_id'].should eql(2)
+    host.to_enc.should include('server::default_new_mgmt_net_local')
   end
 end
 
@@ -199,11 +224,11 @@ describe_stack 'should support dependencies' do
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['dependant_instances'].should include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
-    host.to_enc['role::databaseserver']['dependencies'].should eql({})
+    host.to_enc['role::mysql_server']['dependant_instances'].should include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
+    host.to_enc['role::mysql_server']['dependencies'].should eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['dependant_instances'].should_not include('testing-frapp-001.space.net.local','testing-frapp-002.space.net.local')
-    host.to_enc['role::databaseserver']['dependencies'].should eql({})
+    host.to_enc['role::mysql_server']['dependant_instances'].should_not include('testing-frapp-001.space.net.local','testing-frapp-002.space.net.local')
+    host.to_enc['role::mysql_server']['dependencies'].should eql({})
   end
 end

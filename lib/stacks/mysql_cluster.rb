@@ -79,7 +79,6 @@ module Stacks::MysqlCluster
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {}}
     }
-    #pp dependant_services
     dependant_services.each do |service|
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].merge!({

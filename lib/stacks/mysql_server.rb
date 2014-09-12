@@ -48,24 +48,33 @@ class Stacks::MysqlServer < Stacks::MachineDef
     @backup
   end
 
+  def config
+    {}
+  end
+
+  def server_id
+    @virtual_service.children.index(self)
+  end
+
   def to_enc()
     enc = {
-      'role::databaseserver' => {
-        'environment'              => environment.name,
-        'application'              => @virtual_service.application,
+      'role::mysql_server' => {
+        'backup'                   => backup?,
+        'config'                   => config,
         'database_name'            => @virtual_service.database_name,
-        'restart_on_config_change' => false,
-        'restart_on_install'       => true,
-        'datadir'                  => '/mnt/data/mysql'
-      }
+        'datadir'                  => '/mnt/data/mysql',
+        'environment'              => environment.name,
+        'master'                   => master?,
+        'server_id'                => server_id,
+      },
+      'server::default_new_mgmt_net_local' => nil,
     }
 
     dependant_instances = @virtual_service.dependant_instances_including_children
     dependant_instances.delete self.prod_fqdn
 
-
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
-      enc['role::databaseserver'].merge!({
+      enc['role::mysql_server'].merge!({
         'dependencies' => @virtual_service.dependency_config,
         'dependant_instances' => dependant_instances,
       })
