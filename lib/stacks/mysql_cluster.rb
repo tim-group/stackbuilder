@@ -46,6 +46,12 @@ module Stacks::MysqlCluster
     end
   end
 
+  def legacy_mode
+    @master_instances = 1
+    @slave_instances = 0
+    @backup_instances = 0
+  end
+
   def clazz
     return 'mysqlcluster'
   end

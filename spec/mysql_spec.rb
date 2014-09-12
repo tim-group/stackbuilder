@@ -1,5 +1,24 @@
 require 'stacks/test_framework'
 
+describe_stack 'should provide a legacy mode to be backwards compatible with old mysqldb code' do
+
+  given do
+    stack "mysql" do
+      mysql_cluster "frdb" do
+        self.legacy_mode
+      end
+    end
+
+    env "testing", :primary_site=>"space" do
+      instantiate_stack "mysql"
+    end
+  end
+
+  host("testing-frdb-001.mgmt.space.net.local") do |host|
+    host.master?.should eql true
+    host.to_enc['role::databaseserver']['dependant_instances'].should eql nil
+  end
+end
 describe_stack 'should provide 3 mysql servers by default, one is a master' do
 
   given do
