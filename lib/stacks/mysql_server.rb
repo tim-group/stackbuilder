@@ -3,18 +3,11 @@ require 'stacks/machine_def'
 
 class Stacks::MysqlServer < Stacks::MachineDef
 
-  attr_reader :name
   attr_accessor :master
 
-  def initialize(virtual_service, role, index, &block)
+  def initialize(base_hostname, virtual_service, role, index, &block)
+    super(base_hostname)
     @virtual_service = virtual_service
-    if role == :backup
-      @name = "#{virtual_service.name}#{role.to_s}-#{index}"
-    else
-      @name = "#{virtual_service.name}-#{index}"
-    end
-
-    super(@name)
     @ram = '4194304' # 4GB
     @vcpus = '2'
     @destroyable = false
