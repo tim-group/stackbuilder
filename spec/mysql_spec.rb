@@ -112,10 +112,10 @@ describe_stack 'should provide correct enc data' do
     enc_role['server_id'].should eql(1)
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql({
-      'replicant@testing-mydb-002.space.net.local/mydb' => {
+      'replicant@testing-mydb-002.space.net.local' => {
         'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
       },
-      'replicant@testing-mydbbackup-001.space.net.local/mydb' => {
+      'replicant@testing-mydbbackup-001.space.net.local' => {
         'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
       }
     })
