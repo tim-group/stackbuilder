@@ -109,7 +109,7 @@ describe_stack 'should provide correct enc data' do
     enc_role['datadir'].should eql('/mnt/data/mysql')
     enc_role['environment'].should eql('testing')
     enc_role['master'].should eql(true)
-    enc_role['server_id'].should eql(0)
+    enc_role['server_id'].should eql(1)
     host.to_enc.should include('server::default_new_mgmt_net_local')
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
@@ -120,7 +120,7 @@ describe_stack 'should provide correct enc data' do
     enc_role['datadir'].should eql('/mnt/data/mysql')
     enc_role['environment'].should eql('testing')
     enc_role['master'].should eql(false)
-    enc_role['server_id'].should eql(1)
+    enc_role['server_id'].should eql(2)
     host.to_enc.should include('server::default_new_mgmt_net_local')
   end
   host("testing-mydbbackup-001.mgmt.space.net.local") do |host|
@@ -131,7 +131,7 @@ describe_stack 'should provide correct enc data' do
     enc_role['datadir'].should eql('/mnt/data/mysql')
     enc_role['environment'].should eql('testing')
     enc_role['master'].should eql(false)
-    enc_role['server_id'].should eql(2)
+    enc_role['server_id'].should eql(3)
     host.to_enc.should include('server::default_new_mgmt_net_local')
   end
 end

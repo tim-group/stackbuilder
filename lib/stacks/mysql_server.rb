@@ -53,7 +53,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
   end
 
   def server_id
-    @virtual_service.children.index(self)
+    @virtual_service.children.index(self) +1
   end
 
   def to_enc()
