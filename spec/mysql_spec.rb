@@ -120,30 +120,30 @@ describe_stack 'should provide correct enc data' do
       }
     })
   end
-#  host("testing-mydb-002.mgmt.space.net.local") do |host|
-#    enc_role = host.to_enc['role::mysql_server']
-#    enc_role['backup'].should eql(false)
-#    enc_role['config'].should eql({})
-#    enc_role['database_name'].should eql('mydb')
-#    enc_role['datadir'].should eql('/mnt/data/mysql')
-#    enc_role['environment'].should eql('testing')
-#    enc_role['master'].should eql(false)
-#    enc_role['server_id'].should eql(2)
-#    host.to_enc.should include('server::default_new_mgmt_net_local')
-#    host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
-#  end
-#  host("testing-mydbbackup-001.mgmt.space.net.local") do |host|
-#    enc_role = host.to_enc['role::mysql_server']
-#    enc_role['backup'].should eql(true)
-#    enc_role['config'].should eql({})
-#    enc_role['database_name'].should eql('mydb')
-#    enc_role['datadir'].should eql('/mnt/data/mysql')
-#    enc_role['environment'].should eql('testing')
-#    enc_role['master'].should eql(false)
-#    enc_role['server_id'].should eql(3)
-#    host.to_enc.should include('server::default_new_mgmt_net_local')
-#    host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
-#  end
+  host("testing-mydb-002.mgmt.space.net.local") do |host|
+    enc_role = host.to_enc['role::mysql_server']
+    enc_role['backup'].should eql(false)
+    enc_role['config'].should eql({})
+    enc_role['database_name'].should eql('mydb')
+    enc_role['datadir'].should eql('/mnt/data/mysql')
+    enc_role['environment'].should eql('testing')
+    enc_role['master'].should eql(false)
+    enc_role['server_id'].should eql(2)
+    host.to_enc.should include('server::default_new_mgmt_net_local')
+    host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
+  end
+ host("testing-mydbbackup-001.mgmt.space.net.local") do |host|
+    enc_role = host.to_enc['role::mysql_server']
+    enc_role['backup'].should eql(true)
+    enc_role['config'].should eql({})
+    enc_role['database_name'].should eql('mydb')
+    enc_role['datadir'].should eql('/mnt/data/mysql')
+    enc_role['environment'].should eql('testing')
+    enc_role['master'].should eql(false)
+    enc_role['server_id'].should eql(3)
+    host.to_enc.should include('server::default_new_mgmt_net_local')
+    host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
+  end
 end
 
 describe_stack 'should allow storage options to be overwritten' do
