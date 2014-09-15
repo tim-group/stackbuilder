@@ -9,11 +9,10 @@ module Stacks::MysqlCluster
     object.configure()
   end
 
-  attr_accessor :database_name, :application, :master_instances, :slave_instances, :backup_instances
+  attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances
 
   def configure()
     @database_name = ''
-    @application = false
     @master_instances = 1
     @slave_instances = 1
     @backup_instances = 1
@@ -46,7 +45,7 @@ module Stacks::MysqlCluster
     end
   end
 
-  def legacy_mode
+  def single_instance
     @master_instances = 1
     @slave_instances = 0
     @backup_instances = 0
