@@ -78,7 +78,9 @@ class Stacks::MysqlServer < Stacks::MachineDef
         'dependencies' => @virtual_service.dependency_config,
         'dependant_instances' => dependant_instances,
       })
-      enc.merge!(@virtual_service.dependant_instance_mysql_rights)
+      unless backup?
+        enc.merge!(@virtual_service.dependant_instance_mysql_rights)
+      end
     end
     if master?
       enc.merge!(@virtual_service.dependant_children_replication_mysql_rights)
