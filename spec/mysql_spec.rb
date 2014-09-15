@@ -143,6 +143,7 @@ describe_stack 'should provide correct enc data' do
     enc_role['server_id'].should eql(3)
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
+    host.to_enc.should_not include('mysql_hacks::application_rights_wrapper')
   end
 end
 
