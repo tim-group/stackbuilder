@@ -75,6 +75,20 @@ module Stacks::MysqlCluster
     [masters.first.prod_fqdn]
   end
 
+  def dependant_children_replication_mysql_rights()
+    rights = {
+      'mysql_hacks::application_rights_wrapper' => { 'rights' => {}}
+    }
+    children.each do |dependant|
+        rights['mysql_hacks::replication_rights_wrapper']['rights'].merge!({
+          "replicant@#{dependant.prod_fqdn}/#{database_name}" => {
+            'password_hiera_key'  => "enc/#{service.environment.name}/#{database_name}/replication/mysql_password"
+          }
+        })
+    end
+    rights
+  end
+
   def dependant_instance_mysql_rights()
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {}}
