@@ -33,7 +33,7 @@ module StackBuilder::Allocator::HostPolicies
       if host_ram_stats[:available_ram] < Integer(machine[:ram])
         result = {
           :passed => false,
-          :reason => "Insufficient memory (required: #{machine[:ram]} available: #{host_ram_stats[:available_ram]})"
+          :reason => "Insufficient memory (required: #{machine[:ram]} KiB available: #{host_ram_stats[:available_ram]} KiB)"
         }
       end
       result
