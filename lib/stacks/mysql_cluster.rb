@@ -67,6 +67,12 @@ module Stacks::MysqlCluster
     end
   end
 
+  def create_persistent_storage_override
+    each_machine do |machine|
+      machine.create_persistent_storage_override
+    end
+  end
+
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
     raise "No masters were not found! #{children}" if masters.empty?
