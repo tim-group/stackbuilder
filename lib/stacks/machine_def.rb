@@ -25,6 +25,7 @@ class Stacks::MachineDef
       }
     }
     @destroyable = true
+    @dont_start = false
   end
 
   def children
@@ -115,6 +116,10 @@ class Stacks::MachineDef
     return @storage
   end
 
+  def dont_start
+    @dont_start = true
+  end
+
   def to_spec
     disable_persistent_storage unless environment.persistent_storage_supported?
     @destroyable = true if environment.every_machine_destroyable?
@@ -132,6 +137,7 @@ class Stacks::MachineDef
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:storage] = storage
+    spec[:dont_start] = true if @dont_start
     spec
   end
 
