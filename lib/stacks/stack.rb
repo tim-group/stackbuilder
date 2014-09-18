@@ -13,6 +13,7 @@ require 'stacks/ci_slave'
 require 'stacks/deb_repo'
 require 'stacks/deb_repo_mirror'
 require 'stacks/elasticsearch_node'
+require 'stacks/gold'
 require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/puppetmaster'
 require 'stacks/selenium/hub'
@@ -112,6 +113,12 @@ class Stacks::Stack
   def segrid(name='segrid', options={}, &block)
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend Stacks::Selenium::Grid
+    @definitions[name] = machineset
+  end
+
+  def gold(name, &block)
+    machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend Stacks::Gold
     @definitions[name] = machineset
   end
 
