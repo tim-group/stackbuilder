@@ -6,13 +6,15 @@ class Stacks::MysqlServer < Stacks::MachineDef
   attr_accessor :master
 
   def initialize(base_hostname, virtual_service, role, index, &block)
-    super(base_hostname)
+    @master = (role == :master)? true : false
+    @backup = (role == :backup)? true : false
+    location = backup? ? (:secondary_site) : (:primary_site)
+
+    super(base_hostname, [:mgmt,:prod], location)
     @virtual_service = virtual_service
     @ram = '4194304' # 4GB
     @vcpus = '2'
     @destroyable = false
-    @master = (role == :master)? true : false
-    @backup = (role == :backup)? true : false
 
     storage = {
       '/mnt/data' => {
