@@ -19,6 +19,37 @@ describe_stack 'should provide a single instance mode to be backwards compatible
     host.to_enc['role::mysql_server']['dependant_instances'].should eql nil
   end
 end
+describe_stack 'should provide the correct cross routing enc data' do
+  given do
+    stack "mysql" do
+      mysql_cluster "frdb"
+    end
+
+    env "testing", :primary_site=>"pg", :secondary_site=>"oy" do
+      instantiate_stack "mysql"
+    end
+  end
+
+  host("testing-frdb-001.mgmt.pg.net.local") do |host|
+    host.to_enc['networking::routing::to_site'].should eql({
+      'network' => 'prod',
+      'site'    => 'oy'
+    })
+  end
+  host("testing-frdb-002.mgmt.pg.net.local") do |host|
+    host.to_enc['networking::routing::to_site'].should eql({
+      'network' => 'prod',
+      'site'    => 'oy'
+    })
+  end
+  host("testing-frdbbackup-001.mgmt.oy.net.local") do |host|
+    host.to_enc['networking::routing::to_site'].should eql({
+      'network' => 'prod',
+      'site'    => 'pg'
+    })
+  end
+end
+
 describe_stack 'should provide 3 mysql servers by default, one is a master' do
 
   given do

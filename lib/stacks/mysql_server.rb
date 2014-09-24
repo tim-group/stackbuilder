@@ -84,6 +84,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
       },
       'server::default_new_mgmt_net_local' => nil,
     }
+    enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
     dependant_instances = @virtual_service.dependant_instances_including_children
     dependant_instances.delete self.prod_fqdn

@@ -13,10 +13,28 @@ class Stacks::Environment
     @definitions = {}
     @persistent_storage_supported = options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
     @every_machine_destroyable = options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
+    @primary_site = options[:primary_site] rescue nil
+    @secondary_site = options[:secondary_site] rescue nil
   end
 
   def environment
     return self
+  end
+
+  def cross_site_routing_required?
+    return false if @primary_site.nil? or @secondary_site.nil?
+    return @primary_site != @secondary_site
+  end
+
+  def cross_site_routing(fabric, network='prod')
+    raise "Un-supported cross site routing network #{network}" if network != 'prod'
+    site = (fabric == @primary_site)? @secondary_site : @primary_site
+    {
+      "networking::routing::to_site" => {
+         'network' => network,
+         'site'    => site,
+      }
+    }
   end
 
   def persistent_storage_supported?
