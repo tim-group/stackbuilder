@@ -101,7 +101,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
     enc['role::mysql_rights'] = {
       'environment'   => environment.name,
       'database_name' => @virtual_service.database_name,
-    } unless backup?
+    }
     if master?
       enc.merge!(@virtual_service.dependant_children_replication_mysql_rights)
     end
