@@ -205,6 +205,7 @@ namespace :sbx do
     end
   end
 
+  desc 'Print a report of KVM host CPU/Storage/Memory allocation'
   task :audit_host_machines do
     hosts = @factory.host_repository.find_current(environment.options[:primary_site])
     tabulate(details_for(hosts.hosts))
