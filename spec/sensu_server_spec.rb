@@ -13,7 +13,7 @@ describe_stack 'sensu' do
 
   host("e1-sensu-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
-      'role::sensu_server' => {
+      'role::sensu' => {
         'server' => true
       }
     })

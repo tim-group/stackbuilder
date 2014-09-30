@@ -10,7 +10,7 @@ class Stacks::SensuServer < Stacks::MachineDef
 
   def to_enc
     {
-      'role::sensu_server' => {
+      'role::sensu' => {
         'server' => true
       }
     }
