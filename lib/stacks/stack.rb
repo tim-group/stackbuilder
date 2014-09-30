@@ -31,6 +31,7 @@ require 'stacks/standard_server'
 require 'stacks/logstash_server'
 require 'stacks/fmanalyticsapp_server'
 require 'stacks/analyticsapp_server'
+require 'stacks/sensu_server'
 
 class Stacks::Stack
   attr_reader :name
@@ -135,6 +136,10 @@ class Stacks::Stack
 
   def quantapp(name='quantapp', &block)
     machineset_with(name, [], Stacks::QuantAppServer, &block)
+  end
+
+  def sensu(name='sensu', &block)
+    machineset_with(name, [], Stacks::SensuServer, &block)
   end
 
   def standard(name, &block)
