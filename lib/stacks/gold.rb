@@ -80,6 +80,7 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
       raise "Unkown version of Windows: #{win_version}"
     end
     spec[:template] = "#{@win_version}gold"
+    spec[:wait_for_shutdown] = 300
     spec
   end
 end
