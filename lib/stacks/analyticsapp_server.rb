@@ -17,5 +17,18 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
       'role::analyticsapp_server' => {}
     }
   end
+
+  def data_size(size)
+    modify_storage({'/mnt/data' => { :size => size }})
+  end
+
+  def create_persistent_storage_override
+    modify_storage({
+      '/mnt/data' => {
+         :persistence_options => { :on_storage_not_found => :create_new }
+      }
+    })
+  end
+
 end
 
