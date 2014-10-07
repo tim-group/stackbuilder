@@ -14,6 +14,8 @@ describe_stack 'analytics' do
   host("e1-analyticsapp-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
       'role::analyticsapp_server' => {
-    }})
+         'datadir'   => '/mnt/data/finmet',
+      }
+    })
   end
 end
