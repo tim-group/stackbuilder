@@ -14,7 +14,9 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
 
   def to_enc()
     {
-      'role::analyticsapp_server' => {}
+      'role::analyticsapp_server' => {
+         'datadir'   => '/mnt/data/finmet',
+      }
     }
   end
 
