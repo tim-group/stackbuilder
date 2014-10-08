@@ -5,6 +5,7 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
 
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
+    @data_directory  = false
     super(virtual_service.name + "-" + index)
   end
 
@@ -15,12 +16,13 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
   def to_enc()
     {
       'role::analyticsapp_server' => {
-         'datadir'   => '/mnt/data/finmet',
+         'datadir'   => @data_directory,
       }
     }
   end
 
-  def data_size(size)
+  def data_size(datadir, size)
+    @data_directory = "/mnt/data/#{datadir}"
     modify_storage({'/mnt/data' => { :size => size }})
   end
 
