@@ -22,8 +22,18 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
   end
 
   def data_size(datadir, size)
+
     @data_directory = "/mnt/data/#{datadir}"
-    modify_storage({'/mnt/data' => { :size => size }})
+
+    storage = {
+      '/mnt/data' => {
+        :type       => 'data',
+        :size       => size,
+        :persistent => true,
+      }
+    }
+    modify_storage(storage)
+
   end
 
   def create_persistent_storage_override
