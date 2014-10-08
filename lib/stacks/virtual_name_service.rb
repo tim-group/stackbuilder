@@ -21,12 +21,12 @@ module Stacks::VirtualNameService
 
     {
       self.vip_fqdn => {
-        'type' => 'dns?',
+        'type' => 'dns',
         'ports' => @ports,
         'realservers' => prod_realservers
       },
       self.vip_mgmt_fqdn => {
-        'type' => 'dns?',
+        'type' => 'dns',
         'ports' => @ports,
         'realservers' => mgmt_realservers
       }
