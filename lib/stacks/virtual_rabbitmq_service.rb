@@ -25,10 +25,12 @@ module Stacks::VirtualRabbitMQService
   def to_loadbalancer_config
     realservers = {'blue' => realserver_prod_fqdns}
 
-    [self.vip_fqdn, {
-      'type' => 'rabbitmq',
-      'ports' => @ports,
-      'realservers' => realservers
-    }]
+    {
+      self.vip_fqdn => {
+        'type' => 'rabbitmq',
+        'ports' => @ports,
+        'realservers' => realservers
+      }
+    }
   end
 end

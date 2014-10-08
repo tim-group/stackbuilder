@@ -15,13 +15,14 @@ class Stacks::LoadBalancer < Stacks::MachineDef
   end
 
  def to_enc
-    virtual_services_array = @virtual_service.virtual_services(Stacks::AbstractVirtualService).map do |virtual_service|
-        virtual_service.to_loadbalancer_config
+    virtual_services_hash = {}
+    @virtual_service.virtual_services(Stacks::AbstractVirtualService).map do |virtual_service|
+      virtual_services_hash.merge! virtual_service.to_loadbalancer_config
     end
     {
       'role::loadbalancer'=> {
         'virtual_router_id' => self.virtual_router_id,
-        'virtual_servers' => Hash[virtual_services_array]
+        'virtual_servers' => virtual_services_hash
       }
     }
   end

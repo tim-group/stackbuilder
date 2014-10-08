@@ -90,14 +90,15 @@ module Stacks::VirtualService
 
     monitor_warn = fewest_servers_in_a_group == 1 ? 0 : 1
 
-    [self.vip_fqdn, {
-      'env' => self.environment.name,
-      'app' => self.application,
-      'realservers' => realservers,
-      'monitor_warn' => monitor_warn,
-      'healthcheck_timeout' => self.healthcheck_timeout
-    }]
-
+    {
+      self.vip_fqdn => {
+        'env' => self.environment.name,
+        'app' => self.application,
+        'realservers' => realservers,
+        'monitor_warn' => monitor_warn,
+        'healthcheck_timeout' => self.healthcheck_timeout
+      }
+    }
   end
 
   def clazz

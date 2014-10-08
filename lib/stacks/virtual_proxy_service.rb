@@ -110,10 +110,12 @@ module Stacks::VirtualProxyService
       [group, realserver_fqdns]
     end]
 
-    [self.vip_fqdn, {
-      'type' => 'proxy',
-      'ports' => @ports,
-      'realservers' => realservers
-    }]
+    {
+      self.vip_fqdn => {
+        'type' => 'proxy',
+        'ports' => @ports,
+        'realservers' => realservers
+      }
+    }
   end
 end
