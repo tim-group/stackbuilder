@@ -21,6 +21,8 @@ class Stacks::NameServer < Stacks::MachineDef
   public
   def to_enc()
     enc = {
+      'role::ns_server::pg'               => nil,
+      'server::default_mgmt_pg_net_local' => nil,
     }
     enc
   end
