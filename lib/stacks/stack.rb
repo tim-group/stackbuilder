@@ -9,6 +9,7 @@ require 'stacks/nat_server'
 require 'stacks/proxy_server'
 require 'stacks/virtual_sftp_service'
 require 'stacks/virtual_rabbitmq_service'
+require 'stacks/virtual_name_service'
 require 'stacks/ci_slave'
 require 'stacks/deb_repo'
 require 'stacks/deb_repo_mirror'
@@ -28,6 +29,7 @@ require 'stacks/quantapp_server'
 require 'stacks/shadow_server'
 require 'stacks/shadow_server_cluster'
 require 'stacks/standard_server'
+require 'stacks/name_server'
 require 'stacks/logstash_server'
 require 'stacks/fmanalyticsapp_server'
 require 'stacks/analyticsapp_server'
@@ -61,6 +63,10 @@ class Stacks::Stack
 
   def virtual_rabbitmqserver(name='rabbitmq', &block)
     machineset_with(name, [Stacks::VirtualService, Stacks::VirtualRabbitMQService], Stacks::RabbitMQServer, &block)
+  end
+
+  def virtual_nameserver(name, &block)
+    machineset_with(name, [Stacks::VirtualService, Stacks::VirtualNameService], Stacks::NameServer, &block);
   end
 
   def shadow_server(name, &block)

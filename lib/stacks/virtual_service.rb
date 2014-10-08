@@ -113,6 +113,10 @@ module Stacks::VirtualService
     "#{environment.name}-#{name}-vip.#{@domain}"
   end
 
+  def vip_mgmt_fqdn
+    "#{environment.name}-#{name}-vip.mgmt.#{@domain}"
+  end
+
   def vip_front_fqdn
     "#{environment.name}-#{name}-vip.front.#{@domain}"
   end
