@@ -16,7 +16,8 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
   def to_enc()
     {
       'role::analyticsapp_server' => {
-         'datadir'   => @data_directory,
+         'datadir'     => @data_directory,
+         'environment' => environment.name,
       }
     }
   end
