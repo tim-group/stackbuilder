@@ -32,8 +32,8 @@ class Stacks::BindServer < Stacks::MachineDef
     super(environment)
   end
 
-  def vip_fqdn
-    return @virtual_service.vip_fqdn
+  def vip_fqdn(net)
+    return @virtual_service.vip_fqdn(net)
   end
 
   def zones_fqdn
