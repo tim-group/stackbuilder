@@ -5,6 +5,7 @@ module Stacks::VirtualNameService
 
   def configure()
     @ports = [53]
+    add_vip_network :mgmt
   end
 
   def realserver_prod_fqdns
