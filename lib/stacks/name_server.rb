@@ -14,8 +14,8 @@ class Stacks::NameServer < Stacks::MachineDef
     super(environment)
   end
 
-  def vip_fqdn
-    return @virtual_service.vip_fqdn
+  def vip_fqdn(net)
+    return @virtual_service.vip_fqdn(net)
   end
 
   public

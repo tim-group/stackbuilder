@@ -10,10 +10,6 @@ class Stacks::MongoDBServer < Stacks::MachineDef
     @backup = false
   end
 
-  def vip_fqdn
-    return @virtual_service.vip_fqdn
-  end
-
   def to_enc()
     enc = {
       'role::mongodb_server' => {

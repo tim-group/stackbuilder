@@ -15,8 +15,8 @@ class Stacks::AppServer < Stacks::MachineDef
     super(environment)
   end
 
-  def vip_fqdn
-    return @virtual_service.vip_fqdn
+  def vip_fqdn(net)
+    return @virtual_service.vip_fqdn(net)
   end
 
   public
@@ -33,7 +33,7 @@ class Stacks::AppServer < Stacks::MachineDef
     }
 
     if @virtual_service.respond_to? :vip_fqdn
-      enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn
+      enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod)
     end
 
     if @virtual_service.ehcache

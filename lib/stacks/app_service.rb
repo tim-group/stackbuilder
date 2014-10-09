@@ -1,4 +1,3 @@
-
 module Stacks::AppService
   def self.extended(object)
     object.configure()
@@ -17,7 +16,7 @@ module Stacks::AppService
 
   def config_params(dependant)
     config = {
-      "#{application.downcase}.url" => "http://#{vip_fqdn}:8000"
+      "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000"
     }
   end
 end

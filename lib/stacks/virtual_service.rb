@@ -72,6 +72,7 @@ module Stacks::VirtualService
     @persistent_ports = []
     @port_map = {}
     @healthcheck_timeout = 10
+    @vip_networks = [:prod]
   end
 
   def to_loadbalancer_config
@@ -91,7 +92,7 @@ module Stacks::VirtualService
     monitor_warn = fewest_servers_in_a_group == 1 ? 0 : 1
 
     {
-      self.vip_fqdn => {
+      self.vip_fqdn(:prod) => {
         'env' => self.environment.name,
         'app' => self.application,
         'realservers' => realservers,
@@ -109,40 +110,34 @@ module Stacks::VirtualService
     return @definitions.values
   end
 
-  def vip_fqdn
-    "#{environment.name}-#{name}-vip.#{@domain}"
-  end
-
-  def vip_mgmt_fqdn
-    "#{environment.name}-#{name}-vip.mgmt.#{@domain}"
-  end
-
-  def vip_front_fqdn
-    "#{environment.name}-#{name}-vip.front.#{@domain}"
+  def vip_fqdn(net)
+    case net
+    when nil, :prod
+      "#{environment.name}-#{name}-vip.#{@domain}"
+    else
+      "#{environment.name}-#{name}-vip.#{net}.#{@domain}"
+    end
   end
 
   def to_vip_spec
-    networks = (nat==true)? [:prod, :front]: [:prod]
-    qualified_hostnames = Hash[networks.map do |network|
-      pair = nil
-      if network == :prod
-        pair = [network, vip_fqdn]
-      end
-      if network == :front
-        pair = [network, vip_front_fqdn]
-      end
-      pair
+    qualified_hostnames = Hash[@vip_networks.map do |network|
+      pair = [network, vip_fqdn(network)]
     end]
     {
       :hostname => "#{environment.name}-#{name}",
       :fabric => @fabric,
-        :networks => networks,
+        :networks => @vip_networks,
         :qualified_hostnames => qualified_hostnames
     }
   end
 
+  def add_vip_network(network)
+    @vip_networks << network unless @vip_networks.include? network
+  end
+
   def enable_nat
     @nat = true
+    add_vip_network :front
   end
 
   def enable_persistence(port)
@@ -153,8 +148,8 @@ module Stacks::VirtualService
     rules = []
     @ports.map do |back_port|
       front_port = @port_map[back_port] || back_port
-      front_uri = URI.parse("http://#{vip_front_fqdn}:#{front_port}")
-      prod_uri = URI.parse("http://#{vip_fqdn}:#{back_port}")
+      front_uri = URI.parse("http://#{vip_fqdn(:front)}:#{front_port}")
+      prod_uri = URI.parse("http://#{vip_fqdn(:prod)}:#{back_port}")
       rules << Stacks::Nat.new(front_uri, prod_uri)
     end
     rules

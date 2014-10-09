@@ -23,7 +23,7 @@ module Stacks::VirtualProxyService
 
   def vhost(service, options={}, vhost_properties={}, &config_block)
      key = "#{self.name}.vhost.#{service}.server_name"
-    _vhost(key, vip_front_fqdn, vip_fqdn, service, 'default', options, vhost_properties, &config_block)
+    _vhost(key, vip_fqdn(:front), vip_fqdn(:prod), service, 'default', options, vhost_properties, &config_block)
   end
 
   def sso_vip_front_fqdn
@@ -81,10 +81,10 @@ module Stacks::VirtualProxyService
     return Hash[@proxy_vhosts_lookup.values.map do |vhost|
       primary_app = find_virtual_service(vhost.service)
       proxy_pass_rules = Hash[vhost.proxy_pass_rules.map do |path, service|
-        [path, "http://#{find_virtual_service(service).vip_fqdn}:8000"]
+        [path, "http://#{find_virtual_service(service).vip_fqdn(:prod)}:8000"]
       end]
 
-      proxy_pass_rules['/'] = "http://#{primary_app.vip_fqdn}:8000"
+      proxy_pass_rules['/'] = "http://#{primary_app.vip_fqdn(:prod)}:8000"
 
       [vhost.vhost_fqdn, {
         'aliases' => vhost.aliases,
@@ -111,7 +111,7 @@ module Stacks::VirtualProxyService
     end]
 
     {
-      self.vip_fqdn => {
+      self.vip_fqdn(:prod) => {
         'type' => 'proxy',
         'ports' => @ports,
         'realservers' => realservers

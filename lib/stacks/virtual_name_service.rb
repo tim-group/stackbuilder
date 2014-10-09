@@ -20,12 +20,12 @@ module Stacks::VirtualNameService
     mgmt_realservers = {'blue' => realserver_mgmt_fqdns}
 
     {
-      self.vip_fqdn => {
+      self.vip_fqdn(:prod) => {
         'type' => 'dns',
         'ports' => @ports,
         'realservers' => prod_realservers
       },
-      self.vip_mgmt_fqdn => {
+      self.vip_fqdn(:mgmt) => {
         'type' => 'dns',
         'ports' => @ports,
         'realservers' => mgmt_realservers

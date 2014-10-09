@@ -5,7 +5,6 @@ require 'stacks/nat'
 require 'uri'
 
 module Stacks::VirtualRabbitMQService
-
   def self.extended(object)
     object.configure()
   end
@@ -26,7 +25,7 @@ module Stacks::VirtualRabbitMQService
     realservers = {'blue' => realserver_prod_fqdns}
 
     {
-      self.vip_fqdn => {
+      self.vip_fqdn(:prod) => {
         'type' => 'rabbitmq',
         'ports' => @ports,
         'realservers' => realservers

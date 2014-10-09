@@ -8,10 +8,6 @@ class Stacks::QuantAppServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
   end
 
-  def vip_fqdn
-    return @virtual_service.vip_fqdn
-  end
-
   def to_spec
    spec = super
    spec

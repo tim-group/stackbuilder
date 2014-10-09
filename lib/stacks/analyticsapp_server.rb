@@ -9,10 +9,6 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
   end
 
-  def vip_fqdn
-    return @virtual_service.vip_fqdn
-  end
-
   def to_enc()
     {
       'role::analyticsapp_server' => {
