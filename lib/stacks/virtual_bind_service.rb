@@ -39,6 +39,13 @@ module Stacks::VirtualBindService
     end
   end
 
+  def master_server
+    masters = children.reject { |bind_server| !bind_server.master? }
+    raise "No masters were not found! #{children}" if masters.empty?
+    #Only return the first master (multi-master support not implemented)
+    [masters.first.prod_fqdn]
+  end
+
   def to_loadbalancer_config
     prod_realservers = {'blue' => realserver_prod_fqdns}
     mgmt_realservers = {'blue' => realserver_mgmt_fqdns}
