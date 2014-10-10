@@ -18,7 +18,7 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
     }
   end
 
-  def use_storage(datadir, size)
+  def persistent_storage(datadir, size)
 
     @data_directory = datadir
 
