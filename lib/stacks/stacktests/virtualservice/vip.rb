@@ -30,14 +30,14 @@ shared_examples_for "vip" do |virtualservice|
   end
 
   if virtualservice.nat
-    it "#{virtualservice.vip_front_fqdn} can be accessed from the Internetover http" do
+    it "#{virtualservice.vip_fqdn(:front)} can be accessed from the Internetover http" do
       pending("nat boxes need to be auto-built")
       uri = URI.parse("http://#{virtualservice.vip_fqdn(:front)}")
       response = Net::HTTP.get_response(uri)
       response.code.should eql('302')
     end
 
-    it "#{virtualservice.vip_front_fqdn} can be accessed from the Internet over https" do
+    it "#{virtualservice.vip_fqdn(:front)} can be accessed from the Internet over https" do
       pending("nat boxes need to be auto-built")
       request_url = "https://#{virtualservice.vip_fqdn(:front)}"
 
