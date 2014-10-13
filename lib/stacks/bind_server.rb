@@ -51,13 +51,13 @@ class Stacks::BindServer < Stacks::MachineDef
   def to_enc()
     enc = {
       'role::bind_server' => {
-        'role'         => @role,
+        'role'         => @role.to_s,
         'zones'        => zones_fqdn
       },
       'server::default_new_mgmt_net_local' => nil,
     }
-    enc['role::bind_server']['slaves_fqdn'] = @virtual_service.slave_servers if master?
-    enc['role::bind_server']['master_fqdn'] = @virtual_service.master_server if slave?
+    enc['role::bind_server']['master_fqdn'] = @virtual_service.master_server
+    enc['role::bind_server']['slaves_fqdn'] = @virtual_service.slave_servers
     enc
   end
 end

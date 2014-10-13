@@ -14,7 +14,8 @@ describe_stack 'nameserver' do
   host("e1-ns-001.mgmt.space.net.local") do |host|
     host.to_enc['server::default_new_mgmt_net_local'].should be_nil
     host.to_enc['role::bind_server'].should eql({
-      'role'         => :master,
+      'role'         => 'master',
+      'master_fqdn'  => ['e1-ns-001.space.net.local'],
       'slaves_fqdn'  => ['e1-ns-002.space.net.local'],
       'zones'        => [
         'mgmt.space.net.local',
@@ -26,8 +27,9 @@ describe_stack 'nameserver' do
   host("e1-ns-002.mgmt.space.net.local") do |host|
     host.to_enc['server::default_new_mgmt_net_local'].should be_nil
     host.to_enc['role::bind_server'].should eql({
-      'role'         => :slave,
+      'role'         => 'slave',
       'master_fqdn'  => ['e1-ns-001.space.net.local'],
+      'slaves_fqdn'  => ['e1-ns-002.space.net.local'],
       'zones'        => [
         'mgmt.space.net.local',
         'space.net.local',
