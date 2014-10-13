@@ -52,7 +52,8 @@ class Stacks::BindServer < Stacks::MachineDef
     enc = {
       'role::bind_server' => {
         'role'         => @role.to_s,
-        'zones'        => zones_fqdn
+        'zones'        => zones_fqdn,
+        'vip_fqdns'    => [ vip_fqdn(:prod), vip_fqdn(:mgmt)]
       },
       'server::default_new_mgmt_net_local' => nil,
     }
