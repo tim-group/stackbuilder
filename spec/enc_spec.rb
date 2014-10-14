@@ -449,23 +449,28 @@ describe Stacks::DSL do
             'DNAT' => {
               'eg-withnat-vip.front.st.net.local 80' => {
                 'dest_host'  => 'eg-withnat-vip.st.net.local',
-                'dest_port'  => '80'
+                'dest_port'  => '80',
+                'proto'      => 'tcp'
               },
               'eg-withnat-vip.front.st.net.local 443' => {
                 'dest_host'  => 'eg-withnat-vip.st.net.local',
-                'dest_port'  => '443'
+                'dest_port'  => '443',
+                'proto'      => 'tcp'
               },
               'eg-sftp-vip.front.st.net.local 21' => {
                 'dest_host'  => 'eg-sftp-vip.st.net.local',
-                'dest_port'  => '21'
+                'dest_port'  => '21',
+                'proto'      => 'tcp'
               },
               'eg-sftp-vip.front.st.net.local 22' => {
                 'dest_host'  => 'eg-sftp-vip.st.net.local',
-                'dest_port'  => '22'
+                'dest_port'  => '22',
+                'proto'      => 'tcp'
               },
               'eg-sftp-vip.front.st.net.local 2222' => {
                 'dest_host'  => 'eg-sftp-vip.st.net.local',
-                'dest_port'  => '2222'
+                'dest_port'  => '2222',
+                'proto'      => 'tcp'
               }
             }
           },
@@ -488,11 +493,13 @@ describe Stacks::DSL do
          'DNAT' => {
            'sub-blahnat-vip.front.st.net.local 8008' => {
              'dest_host'  => 'sub-blahnat-vip.st.net.local',
-             'dest_port'  => '8008'
+             'dest_port'  => '8008',
+             'proto'      => 'tcp'
            },
             "sub-defaultport-vip.front.st.net.local 8000" => {
               "dest_port"=>"8000",
-              "dest_host"=>"sub-defaultport-vip.st.net.local"
+              "dest_host"=>"sub-defaultport-vip.st.net.local",
+              "proto"    =>"tcp"
            }
          }
     },

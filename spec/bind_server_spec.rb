@@ -2,12 +2,19 @@ require 'stacks/test_framework'
 
 describe_stack 'nameserver' do
   given do
+    stack "nat" do
+      natserver
+    end
+
     stack "nameserver" do
-      virtual_bindserver 'ns'
+      virtual_bindserver 'ns' do
+        enable_nat
+      end
     end
 
     env "e1", :primary_site=>"space" do
       instantiate_stack "nameserver"
+      instantiate_stack "nat"
     end
   end
 
@@ -39,5 +46,10 @@ describe_stack 'nameserver' do
         'space.net.local',
         'front.space.net.local',
     ])
+  end
+   host("e1-nat-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['dest_host'].should eql('e1-ns-vip.space.net.local')
+    host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['dest_port'].should eql('53')
+    host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['proto'].should eql('all')
   end
 end

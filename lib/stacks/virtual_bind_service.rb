@@ -6,6 +6,7 @@ module Stacks::VirtualBindService
   def configure()
     @ports = [53]
     add_vip_network :mgmt
+    @proto = 'all'
   end
 
   def instantiate_machine(name, type, index, environment)

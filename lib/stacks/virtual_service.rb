@@ -64,7 +64,7 @@ module Stacks::VirtualService
     object.configure()
   end
 
-  attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout
+  attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
 
   def configure()
     @ehcache = false
@@ -73,6 +73,7 @@ module Stacks::VirtualService
     @port_map = {}
     @healthcheck_timeout = 10
     @vip_networks = [:prod]
+    @proto = 'tcp'
   end
 
   def to_loadbalancer_config
@@ -144,13 +145,13 @@ module Stacks::VirtualService
     @persistent_ports << port
   end
 
-  def nat_rules
+  def nat_rules()
     rules = []
     @ports.map do |back_port|
       front_port = @port_map[back_port] || back_port
       front_uri = URI.parse("http://#{vip_fqdn(:front)}:#{front_port}")
       prod_uri = URI.parse("http://#{vip_fqdn(:prod)}:#{back_port}")
-      rules << Stacks::Nat.new(front_uri, prod_uri)
+      rules << Stacks::Nat.new(front_uri, prod_uri, @proto)
     end
     rules
   end
