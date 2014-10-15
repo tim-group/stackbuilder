@@ -50,6 +50,7 @@ describe_stack 'nameserver' do
    host("e1-nat-001.mgmt.space.net.local") do |host|
     host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['dest_host'].should eql('e1-ns-vip.space.net.local')
     host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['dest_port'].should eql('53')
-    host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['proto'].should eql('all')
+    host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['tcp'].should eql('true')
+    host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['udp'].should eql('true')
   end
 end

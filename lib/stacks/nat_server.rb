@@ -48,7 +48,8 @@ class Stacks::NatServer < Stacks::MachineDef
         {
           'dest_host' => "#{rule.to.host}",
           'dest_port' => "#{rule.to.port}",
-          'proto'     => "#{rule.proto}"
+          'tcp'       => "#{rule.tcp}",
+          'udp'       => "#{rule.udp}"
         }
       ]
     end]

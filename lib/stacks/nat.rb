@@ -3,11 +3,13 @@ require 'stacks/namespace'
 class Stacks::Nat
   attr_reader :from
   attr_reader :to
-  attr_reader :proto
+  attr_reader :tcp
+  attr_reader :udp
 
-  def initialize(from, to, proto)
+  def initialize(from, to, tcp=true, udp=false)
     @from = from
     @to = to
-    @proto = proto
+    @tcp = tcp
+    @udp = udp
   end
 end
