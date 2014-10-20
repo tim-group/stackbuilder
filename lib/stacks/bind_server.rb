@@ -9,6 +9,7 @@ class Stacks::BindServer < Stacks::MachineDef
     @role = role
     super(base_hostname, [:mgmt,:prod], :primary_site)
     @zones = [:mgmt, :prod, :front]
+    @forwarder_zones = []
     @virtual_service = virtual_service
   end
 
@@ -36,6 +37,15 @@ class Stacks::BindServer < Stacks::MachineDef
     return @virtual_service.vip_fqdn(net)
   end
 
+  def forwarder_zone(fwdr_zone)
+    if fwdr_zone.kind_of?(Array)
+      @forwarder_zones = @forwarder_zones + fwdr_zone
+    else
+      @forwarder_zones << fwdr_zone
+    end
+    @forwarder_zones.uniq!
+  end
+
   def zones_fqdn
     return zones.inject([]) do |zones, zone|
       if zone.eql?(:prod)
@@ -59,6 +69,7 @@ class Stacks::BindServer < Stacks::MachineDef
     }
     enc['role::bind_server']['master_fqdn'] = @virtual_service.master_server
     enc['role::bind_server']['slaves_fqdn'] = @virtual_service.slave_servers
+    enc['role::bind_server']['forwarder_zones'] = @forwarder_zones
     enc
   end
 end
