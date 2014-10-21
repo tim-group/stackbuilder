@@ -26,6 +26,7 @@ class Stacks::MachineDef
     }
     @destroyable = true
     @dont_start = false
+    @routes = []
   end
 
   def children
@@ -116,6 +117,10 @@ class Stacks::MachineDef
     return @storage
   end
 
+  def add_route(route_name)
+    @routes << route_name unless @routes.include? route_name
+  end
+
   def dont_start
     @dont_start = true
   end
@@ -147,7 +152,13 @@ class Stacks::MachineDef
   end
 
   def to_enc
-    return {}
+    enc = {}
+    unless @routes.empty?
+      enc['routes'] = {
+        'to' => @routes
+      }
+    end
+    enc
   end
 
   def qualified_hostname(network)

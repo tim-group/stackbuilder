@@ -97,4 +97,21 @@ describe Stacks::MachineDef do
     machinedef.to_spec[:storage]['/'.to_sym][:persistent].should eql false
     machinedef.to_spec[:storage]['/mnt/data'.to_sym][:persistent].should eql false
   end
+
+  it 'populates routes in the enc if routes are added' do
+    machinedef = Stacks::MachineDef.new("test")
+    machinedef.add_route('mgmt_pg')
+    env = Stacks::Environment.new("noenv", {
+        :primary_site=>"local",
+      }, {}
+    )
+    machinedef.bind_to(env)
+    machinedef.to_enc.should eql({
+      'routes' => {
+        'to' => [
+          'mgmt_pg'
+         ],
+      }
+    })
+  end
 end

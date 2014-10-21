@@ -59,14 +59,15 @@ class Stacks::BindServer < Stacks::MachineDef
 
   public
   def to_enc()
-    enc = {
+    enc = super()
+    enc.merge!({
       'role::bind_server' => {
         'role'         => @role.to_s,
         'zones'        => zones_fqdn,
         'vip_fqdns'    => [ vip_fqdn(:prod), vip_fqdn(:mgmt)]
       },
       'server::default_new_mgmt_net_local' => nil,
-    }
+    })
     enc['role::bind_server']['master_fqdn'] = @virtual_service.master_server
     enc['role::bind_server']['slaves_fqdn'] = @virtual_service.slave_servers
     enc['role::bind_server']['forwarder_zones'] = @forwarder_zones
