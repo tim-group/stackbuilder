@@ -6,20 +6,21 @@ describe_stack 'nameserver' do
       natserver
     end
 
+    stack "lb" do
+      loadbalancer
+    end
+
     stack "nameserver" do
       virtual_bindserver 'ns' do
         enable_nat
-        each_machine do |machine|
-          machine.forwarder_zone([
-            'blah.com'
-          ])
-        end
+        forwarder_zone(['blah.com'])
       end
     end
 
     env "e1", :primary_site=>"space" do
       instantiate_stack "nameserver"
       instantiate_stack "nat"
+      instantiate_stack "lb"
     end
   end
 
@@ -65,5 +66,13 @@ describe_stack 'nameserver' do
     host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['dest_port'].should eql('53')
     host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['tcp'].should eql('true')
     host.to_enc['role::natserver']['rules']['DNAT']['e1-ns-vip.front.space.net.local 53']['udp'].should eql('true')
+  end
+
+  host("e1-lb-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::loadbalancer']['virtual_servers']['e1-ns-vip.space.net.local']['healthchecks'].should include(
+      {"MISC_CHECK"=>"misc_path '/usr/bin/host -4 -W 3 -t A -s apt.mgmt.space.net.local"},
+      {"MISC_CHECK"=>"misc_path '/usr/bin/host -4 -W 3 -t A -s gw-vip.space.net.local"},
+      {"MISC_CHECK"=>"misc_path '/usr/bin/host -4 -W 3 -t A -s gw-vip.front.space.net.local"}
+    )
   end
 end

@@ -1,4 +1,6 @@
 module Stacks::VirtualBindService
+  attr_accessor :forwarder_zones
+
   def self.extended(object)
     object.configure()
   end
@@ -7,6 +9,32 @@ module Stacks::VirtualBindService
     @ports = [53]
     add_vip_network :mgmt
     @udp = true
+    @zones = [:mgmt, :prod, :front]
+    @forwarder_zones = []
+  end
+
+  def zones
+    @zones
+  end
+
+  def forwarder_zone(fwdr_zone)
+    if fwdr_zone.kind_of?(Array)
+      @forwarder_zones = @forwarder_zones + fwdr_zone
+    else
+      @forwarder_zones << fwdr_zone
+    end
+    @forwarder_zones.uniq!
+  end
+
+  def zones_fqdn
+    return zones.inject([]) do |zones, zone|
+      if zone.eql?(:prod)
+        zones << "#{@domain}"
+      else
+        zones << "#{zone.to_s}.#{@domain}"
+      end
+      zones
+    end
   end
 
   def instantiate_machine(name, type, index, environment)
@@ -48,20 +76,33 @@ module Stacks::VirtualBindService
     masters.first.prod_fqdn
   end
 
+  def healthchecks
+    healthchecks = []
+    zones_fqdn.each do |zone|
+      if zone =~ /mgmt/
+        healthchecks << { "MISC_CHECK" =>  "misc_path '/usr/bin/host -4 -W 3 -t A -s apt.#{zone}" }
+      else
+        healthchecks << { "MISC_CHECK" =>  "misc_path '/usr/bin/host -4 -W 3 -t A -s gw-vip.#{zone}" }
+      end
+    end
+    healthchecks
+  end
+
   def to_loadbalancer_config
     prod_realservers = {'blue' => realserver_prod_fqdns}
     mgmt_realservers = {'blue' => realserver_mgmt_fqdns}
-
     {
       self.vip_fqdn(:prod) => {
-        'type' => 'dns',
-        'ports' => @ports,
-        'realservers' => prod_realservers
+        'type'         => 'bind',
+        'ports'        => @ports,
+        'realservers'  => prod_realservers,
+        'healthchecks' => healthchecks
       },
       self.vip_fqdn(:mgmt) => {
-        'type' => 'dns',
-        'ports' => @ports,
-        'realservers' => mgmt_realservers
+        'type'         => 'bind',
+        'ports'        => @ports,
+        'realservers'  => mgmt_realservers,
+        'healthchecks' => healthchecks
       }
     }
   end
