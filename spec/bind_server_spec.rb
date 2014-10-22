@@ -26,6 +26,7 @@ describe_stack 'nameserver' do
   host("e1-ns-001.mgmt.space.net.local") do |host|
     host.to_enc['server::default_new_mgmt_net_local'].should be_nil
     host.to_enc['role::bind_server']['role'].should eql('master')
+    host.to_enc['role::bind_server']['site'].should eql('space')
     host.to_enc['role::bind_server']['master_fqdn'].should eql('e1-ns-001.space.net.local')
     host.to_enc['role::bind_server']['slaves_fqdn'].should eql(['e1-ns-002.space.net.local'])
     host.to_enc['role::bind_server']['vip_fqdns'].should include('e1-ns-vip.mgmt.space.net.local')
@@ -44,6 +45,7 @@ describe_stack 'nameserver' do
   host("e1-ns-002.mgmt.space.net.local") do |host|
     host.to_enc['server::default_new_mgmt_net_local'].should be_nil
     host.to_enc['role::bind_server']['role'].should eql('slave')
+    host.to_enc['role::bind_server']['site'].should eql('space')
     host.to_enc['role::bind_server']['master_fqdn'].should eql('e1-ns-001.space.net.local')
     host.to_enc['role::bind_server']['slaves_fqdn'].should eql(['e1-ns-002.space.net.local'])
     host.to_enc['role::bind_server']['vip_fqdns'].should include('e1-ns-vip.mgmt.space.net.local')

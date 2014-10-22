@@ -63,6 +63,7 @@ class Stacks::BindServer < Stacks::MachineDef
     enc.merge!({
       'role::bind_server' => {
         'role'         => @role.to_s,
+        'site'         => @fabric,
         'zones'        => zones_fqdn,
         'vip_fqdns'    => [ vip_fqdn(:prod), vip_fqdn(:mgmt)]
       },
