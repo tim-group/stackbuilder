@@ -78,6 +78,12 @@ module Stacks::VirtualBindService
 
   def healthchecks
     healthchecks = []
+    healthchecks << {
+      'healthcheck' => 'MISC_CHECK',
+      'arg_style'   => 'PARTICIPATION',
+      'path'        => '/opt/youdevise/keepalived/healthchecks/bin/check_participation.rb',
+      'url_path'    => 'participation'
+    }
     zones_fqdn.each do |zone|
       if zone =~ /mgmt/
         healthchecks << {

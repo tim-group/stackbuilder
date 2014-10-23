@@ -72,7 +72,13 @@ describe_stack 'nameserver' do
     host.to_enc['role::loadbalancer']['virtual_servers']['e1-ns-vip.space.net.local']['healthchecks'].should include(
       {'healthcheck'=>'MISC_CHECK','arg_style'=>'APPEND_HOST','path'=>'/usr/bin/host -4 -W 3 -t A -s apt.mgmt.space.net.local'},
       {'healthcheck'=>'MISC_CHECK','arg_style'=>'APPEND_HOST','path'=>'/usr/bin/host -4 -W 3 -t A -s gw-vip.front.space.net.local'},
-      {'healthcheck'=>'MISC_CHECK','arg_style'=>'APPEND_HOST','path'=>'/usr/bin/host -4 -W 3 -t A -s gw-vip.space.net.local'}
+      {'healthcheck'=>'MISC_CHECK','arg_style'=>'APPEND_HOST','path'=>'/usr/bin/host -4 -W 3 -t A -s gw-vip.space.net.local'},
+      {
+        'healthcheck'=>'MISC_CHECK',
+        'arg_style'  =>'PARTICIPATION',
+        'path'       =>'/opt/youdevise/keepalived/healthchecks/bin/check_participation.rb',
+        'url_path'   =>'participation'
+      }
     )
   end
 end
