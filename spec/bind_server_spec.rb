@@ -77,7 +77,7 @@ describe_stack 'nameserver' do
         'healthcheck'=>'MISC_CHECK',
         'arg_style'  =>'PARTICIPATION',
         'path'       =>'/opt/youdevise/keepalived/healthchecks/bin/check_participation.rb',
-        'url_path'   =>'participation'
+        'url_path'   =>'/participation'
       }
     )
   end
