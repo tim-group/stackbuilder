@@ -80,9 +80,17 @@ module Stacks::VirtualBindService
     healthchecks = []
     zones_fqdn.each do |zone|
       if zone =~ /mgmt/
-        healthchecks << { "MISC_CHECK" =>  "misc_path '/usr/bin/host -4 -W 3 -t A -s apt.#{zone}" }
+        healthchecks << {
+          'healthcheck' => 'MISC_CHECK',
+          'arg_style'   => 'MISC_COMMAND_APPEND_REALSERVER',
+          'command'     => "/usr/bin/host -4 -W 3 -t A -s apt.#{zone}"
+        }
       else
-        healthchecks << { "MISC_CHECK" =>  "misc_path '/usr/bin/host -4 -W 3 -t A -s gw-vip.#{zone}" }
+        healthchecks << {
+          'healthcheck' => 'MISC_CHECK',
+          'arg_style'   => 'MISC_COMMAND_APPEND_REALSERVER',
+          'command'     => "/usr/bin/host -4 -W 3 -t A -s gw-vip.#{zone}"
+        }
       end
     end
     healthchecks
