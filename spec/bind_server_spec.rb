@@ -37,6 +37,16 @@ describe_stack 'nameserver' do
         'space.net.local',
         'front.space.net.local',
     ])
+    host.to_enc['role::bind_server']['dependant_instances'].should include(
+        'e1-ns-001.mgmt.space.net.local',
+        'e1-ns-002.mgmt.space.net.local',
+        'e1-ns-001.space.net.local',
+        'e1-ns-002.space.net.local',
+        'e1-lb-001.mgmt.space.net.local',
+        'e1-lb-002.mgmt.space.net.local',
+        'e1-lb-001.space.net.local',
+        'e1-lb-002.space.net.local'
+    )
     host.to_enc['role::bind_server']['forwarder_zones'].should eql([
       'blah.com'
     ])
@@ -56,6 +66,16 @@ describe_stack 'nameserver' do
         'space.net.local',
         'front.space.net.local',
     ])
+    host.to_enc['role::bind_server']['dependant_instances'].should include(
+        'e1-ns-001.mgmt.space.net.local',
+        'e1-ns-002.mgmt.space.net.local',
+        'e1-ns-001.space.net.local',
+        'e1-ns-002.space.net.local',
+        'e1-lb-001.mgmt.space.net.local',
+        'e1-lb-002.mgmt.space.net.local',
+        'e1-lb-001.space.net.local',
+        'e1-lb-002.space.net.local'
+    )
     host.to_enc['role::bind_server']['forwarder_zones'].should eql([
       'blah.com'
     ])

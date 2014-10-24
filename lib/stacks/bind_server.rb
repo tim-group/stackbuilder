@@ -36,10 +36,11 @@ class Stacks::BindServer < Stacks::MachineDef
     enc = super()
     enc.merge!({
       'role::bind_server' => {
-        'role'         => @role.to_s,
-        'site'         => @fabric,
-        'zones'        => @virtual_service.zones_fqdn,
-        'vip_fqdns'    => [ vip_fqdn(:prod), vip_fqdn(:mgmt)]
+        'role'                => @role.to_s,
+        'site'                => @fabric,
+        'zones'               => @virtual_service.zones_fqdn,
+        'vip_fqdns'           => [ vip_fqdn(:prod), vip_fqdn(:mgmt)],
+        'dependant_instances' => @virtual_service.dependant_instances_including_children([:prod,:mgmt])
       },
       'server::default_new_mgmt_net_local' => nil,
     })
