@@ -70,15 +70,19 @@ class Stacks::MachineSet
   end
 
   private
-  def children_prod_fqdn
-    children.map do |service|
-      service.prod_fqdn
+  def children_fqdn(networks=[:prod])
+    children_fqdns = []
+    networks.each do |network|
+      children.map do |service|
+        children_fqdns << service.qualified_hostname(network)
+      end
     end
+    children_fqdns
   end
 
   public
-  def dependant_instances_including_children
-    dependant_instances.concat(children_prod_fqdn)
+  def dependant_instances_including_children(networks=[:prod])
+    dependant_instances(networks).concat(children_fqdn(networks))
   end
 
   public
@@ -93,12 +97,16 @@ class Stacks::MachineSet
   end
 
   public
-  def dependant_instances
-    (dependant_services.map do |service|
-      service.children
-    end.flatten.map do |instance|
-      instance.prod_fqdn
-    end).sort
+  def dependant_instances(networks=[:prod])
+    dependant_instance_fqdns = []
+    networks.each do |network|
+      dependant_instance_fqdns.concat(dependant_services.map do |service|
+        service.children
+      end.flatten.map do |instance|
+        instance.qualified_hostname(network)
+      end)
+    end
+    dependant_instance_fqdns.sort
   end
 
   public
