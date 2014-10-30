@@ -2,13 +2,14 @@ require 'stacks/namespace'
 require 'stacks/machine_def_container'
 
 class Stacks::Environment
-  attr_reader :name, :options
+  attr_reader :name, :options, :environments
 
   include Stacks::MachineDefContainer
 
-  def initialize(name, options, stack_procs)
+  def initialize(name, options, environments, stack_procs)
     @name = name
     @options = options
+    @environments = environments
     @stack_procs = stack_procs
     @definitions = {}
     @persistent_storage_supported = options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
@@ -46,7 +47,7 @@ class Stacks::Environment
   end
 
   def env(name, options={}, &block)
-    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), @stack_procs)
+    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), environments, @stack_procs)
     @definitions[name].instance_eval(&block) unless block.nil?
   end
 

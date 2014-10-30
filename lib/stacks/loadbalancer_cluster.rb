@@ -15,7 +15,7 @@ module Stacks::LoadBalancerCluster
 
   def depends_on
     virtual_services(Stacks::AbstractVirtualService).map do |machine|
-      machine.name
+      [machine.name, environment.name]
     end
   end
 

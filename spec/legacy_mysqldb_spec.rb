@@ -127,7 +127,7 @@ describe_stack 'should support dependencies' do
     stack 'fr' do
       virtual_appserver 'frapp' do
         self.application = 'futuresroll'
-        self.depends_on = 'frdb'
+        depend_on 'frdb'
       end
     end
     stack 'fr_db' do

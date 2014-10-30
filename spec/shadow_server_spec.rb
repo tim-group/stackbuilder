@@ -7,7 +7,7 @@ describe_stack 'stack-with-dependencies' do
     end
     stack "shadow" do
       shadow_server "oy-mon-001" do
-        self.depends_on = ['rabbitmq']
+        depend_on 'rabbitmq'
         each_machine do |machine|
           machine.hostname = 'oy-mon-001'
           machine.domain = 'oy.net.local'

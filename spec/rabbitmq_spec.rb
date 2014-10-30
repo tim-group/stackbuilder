@@ -8,7 +8,7 @@ describe_stack 'mongodb' do
 
     stack "example" do
       virtual_appserver 'exampleapp' do
-        self.depends_on = ["rabbitmq"]
+        depend_on "rabbitmq"
       end
     end
 

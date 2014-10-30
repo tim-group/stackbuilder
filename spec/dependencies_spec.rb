@@ -21,12 +21,14 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        self.depends_on = ["exampleapp", "exampledb"]
+        self.depend_on "exampleapp"
+        self.depend_on "exampledb"
       end
       virtual_appserver 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        self.depends_on = ["exampleapp", "exampledb"]
+        self.depend_on "exampleapp"
+        self.depend_on "exampledb"
       end
     end
     stack "example_db" do
@@ -103,12 +105,12 @@ describe_stack 'stack with dependencies that does not provide config params when
       virtual_appserver 'configapp' do
         self.groups = ['blue']
         self.application = 'example'
-        self.depends_on = ["exampledb"]
+        self.depend_on "exampledb"
       end
       virtual_appserver 'noconfigapp' do
         self.groups = ['blue']
         self.application = 'example'
-        self.depends_on = ["exampledb"]
+        self.depend_on  "exampledb"
         self.auto_configure_dependencies = false
       end
     end
@@ -138,3 +140,41 @@ describe_stack 'stack with dependencies that does not provide config params when
   end
 end
 
+describe_stack 'stack with cross environment dependencies' do
+  given do
+    stack "example" do
+      virtual_appserver 'noconfigapp' do
+        self.groups = ['blue']
+        self.application = 'example'
+        case environment.name
+        when 'e1'
+          depend_on "noconfigapp", "e2"
+        when 'e2'
+          depend_on "noconfigapp", "e1"
+        end
+        self.auto_configure_dependencies = false
+      end
+    end
+
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "example"
+    end
+
+    env "e2", :primary_site=>"earth" do
+      instantiate_stack "example"
+    end
+  end
+
+  host("e2-noconfigapp-001.mgmt.earth.net.local") do |host|
+    host.to_enc['role::http_app']['dependant_instances'].should eql([
+      'e1-noconfigapp-001.space.net.local',
+      'e1-noconfigapp-002.space.net.local'
+    ])
+  end
+  host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::http_app']['dependant_instances'].should eql([
+      'e2-noconfigapp-001.earth.net.local',
+      'e2-noconfigapp-002.earth.net.local'
+    ])
+  end
+end

@@ -63,7 +63,7 @@ module Stacks::VirtualProxyService
 
   def depends_on
     @proxy_vhosts_lookup.values.map do |vhost|
-      vhost.service
+      [vhost.service, environment.name]
     end
   end
 

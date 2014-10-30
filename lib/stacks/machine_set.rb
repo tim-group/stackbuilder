@@ -12,7 +12,7 @@ class Stacks::MachineSet
   attr_accessor :ports
   attr_accessor :port_map
   attr_accessor :groups
-  attr_accessor :depends_on
+  attr_reader :depends_on
   attr_accessor :auto_configure_dependencies
 
   include Stacks::MachineDefContainer
@@ -26,6 +26,10 @@ class Stacks::MachineSet
     @config_block = config_block
     @depends_on = []
     @auto_configure_dependencies = true
+  end
+
+  def depend_on(dependant, env=environment.name )
+    @depends_on << [dependant,env] unless @depends_on.include? [dependant,env]
   end
 
   def on_bind(&block)
@@ -53,12 +57,12 @@ class Stacks::MachineSet
   private
   def find_virtual_service(service)
     environment.accept do |machine_def|
-      if machine_def.kind_of? Stacks::MachineSet and service.eql? machine_def.name
+      if machine_def.kind_of? Stacks::MachineSet and service.first.eql? machine_def.name and service[1].eql? environment.name
         return machine_def
       end
     end
 
-    raise "Cannot find the service called #{service}"
+    raise "Cannot find the service called #{service.first}"
   end
 
 
@@ -88,9 +92,11 @@ class Stacks::MachineSet
   public
   def dependant_services
     dependants = []
-    environment.accept do |machine_def|
-      if machine_def.kind_of? Stacks::MachineDefContainer and machine_def.respond_to? :depends_on and machine_def.depends_on.include?(self.name)
-        dependants.push machine_def
+    environment.environments.each do |name, env|
+      env.accept do |machine_def|
+        if machine_def.kind_of? Stacks::MachineDefContainer and machine_def.respond_to? :depends_on and machine_def.depends_on.include?([self.name, environment.name])
+          dependants.push machine_def
+        end
       end
     end
     dependants
