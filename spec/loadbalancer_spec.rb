@@ -34,7 +34,7 @@ describe_stack 'lb' do
       },
         "healthcheck_timeout"=>10
     })
-    host.to_enc['role::loadbalancer']['virtual_servers']['routes'].should eql({
+    host.to_enc['routes'].should eql({
       "to"=>["mgmt_pg_from_mgmt_oy"]
     })
     host.to_specs.shift[:qualified_hostnames].should eql({
