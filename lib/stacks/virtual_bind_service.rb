@@ -37,6 +37,14 @@ module Stacks::VirtualBindService
     end
   end
 
+  def master_zones_fqdn
+    zones_fqdn
+  end
+
+  def slave_zones_fqdn
+    zones_fqdn
+  end
+
   def instantiate_machine(name, type, index, environment)
     server_name = "#{name}-#{index}"
     server = @type.new(server_name, self, type, index, &@config_block)

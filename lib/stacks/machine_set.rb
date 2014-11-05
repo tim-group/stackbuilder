@@ -90,6 +90,17 @@ class Stacks::MachineSet
   end
 
   public
+  def dependant_instances_including_children_excluding_lb(networks=[:prod])
+    dependant_instances(networks, exclude_loadbalancers(dependant_services)).concat(children_fqdn(networks)).sort
+  end
+
+  public
+  def exclude_loadbalancers(dependants)
+    dependants.reject { |machine_def| machine_def.type == Stacks::LoadBalancer }
+  end
+
+
+  public
   def dependant_services
     dependants = []
     environment.environments.each do |name, env|
@@ -103,10 +114,10 @@ class Stacks::MachineSet
   end
 
   public
-  def dependant_instances(networks=[:prod])
+  def dependant_instances(networks=[:prod], dependants=dependant_services)
     dependant_instance_fqdns = []
     networks.each do |network|
-      dependant_instance_fqdns.concat(dependant_services.map do |service|
+      dependant_instance_fqdns.concat(dependants.map do |service|
         service.children
       end.flatten.map do |instance|
         instance.qualified_hostname(network)

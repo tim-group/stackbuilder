@@ -36,12 +36,12 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def dependant_zones
-    environment.environments.each do |name,env|
-      env.accept do |machine_def|
-        if machine_def.kind_of? Stacks::BindServer and machine.master?
-        end
-      end
-    end
+#    environment.environments.each do |name,env|
+#      env.accept do |machine_def|
+#        if machine_def.kind_of? Stacks::BindServer and machine.master?
+#        end
+#      end
+#    end
 #    @virtual_service.dependant_services.each do |serv|
 #      puts "#{serv.class.ancestors.join(',')}"
 #    end
@@ -49,20 +49,17 @@ class Stacks::BindServer < Stacks::MachineDef
 
   public
   def to_enc()
-    dependant_zones
+    #dependant_zones
     enc = super()
     enc.merge!({
       'role::bind_server' => {
-        'role'                => @role.to_s,
-        'site'                => @fabric,
-        'zones'               => @virtual_service.zones_fqdn,
         'vip_fqdns'           => [ vip_fqdn(:prod), vip_fqdn(:mgmt)],
-        'dependant_instances' => @virtual_service.dependant_instances_including_children([:prod,:mgmt])
+        'dependant_instances' => @virtual_service.dependant_instances_including_children_excluding_lb([:mgmt])
       },
       'server::default_new_mgmt_net_local' => nil,
     })
-    enc['role::bind_server']['master_fqdn'] = @virtual_service.master_server
-    enc['role::bind_server']['slaves_fqdn'] = @virtual_service.slave_servers
+    enc['role::bind_server']['master_zones'] = @virtual_service.master_zones_fqdn if master?
+    enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn if slave?
     enc['role::bind_server']['forwarder_zones'] = @virtual_service.forwarder_zones
     enc
   end
