@@ -31,8 +31,25 @@ class Stacks::BindServer < Stacks::MachineDef
     return @virtual_service.vip_fqdn(net)
   end
 
+  def slave_from(env)
+    @virtual_service.depend_on('ns', env)
+  end
+
+  def dependant_zones
+    environment.environments.each do |name,env|
+      env.accept do |machine_def|
+        if machine_def.kind_of? Stacks::BindServer and machine.master?
+        end
+      end
+    end
+#    @virtual_service.dependant_services.each do |serv|
+#      puts "#{serv.class.ancestors.join(',')}"
+#    end
+  end
+
   public
   def to_enc()
+    dependant_zones
     enc = super()
     enc.merge!({
       'role::bind_server' => {

@@ -125,5 +125,15 @@ class Stacks::MachineSet
     end
     config
   end
+  public
+  def dependency_zone_config
+    config = {}
+    if @auto_configure_dependencies
+      resolve_virtual_services(depends_on).each do |dependency|
+        config.merge! dependency.config_params(self)
+      end
+    end
+    config
+  end
 
 end
