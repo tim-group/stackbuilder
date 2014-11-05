@@ -90,23 +90,23 @@ class Stacks::MachineSet
   end
 
   public
-  def dependant_instances_including_children_excluding_lb(networks=[:prod])
-    dependant_instances(networks, exclude_loadbalancers(dependant_services)).concat(children_fqdn(networks)).sort
+  def dependant_instances_including_children_reject_type(type, networks=[:prod])
+    dependant_instances(networks, reject_type(dependant_services, type)).concat(children_fqdn(networks)).sort
   end
 
   public
-  def dependant_instances_lb_only(networks=[:prod])
-    dependant_instances(networks, only_loadbalancers(dependant_services)).sort
+  def dependant_instances_accept_type(type, networks=[:prod])
+    dependant_instances(networks, accept_type(dependant_services, type)).sort
   end
 
   public
-  def exclude_loadbalancers(dependants)
-    dependants.reject { |machine_def| machine_def.type == Stacks::LoadBalancer }
+  def reject_type(dependants, type)
+    dependants.reject { |machine_def| machine_def.type == type }
   end
 
   public
-  def only_loadbalancers(dependants)
-    dependants.reject { |machine_def| machine_def.type != Stacks::LoadBalancer }
+  def accept_type(dependants, type)
+    dependants.reject { |machine_def| machine_def.type != type }
   end
 
 

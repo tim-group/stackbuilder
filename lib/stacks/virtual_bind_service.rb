@@ -42,7 +42,7 @@ module Stacks::VirtualBindService
   end
 
   def slave_zones_fqdn
-    zones_fqdn
+    { master_server.mgmt_fqdn => master_server.zones_fqdn } #mgmt or prod fqdn?
   end
 
   def instantiate_machine(name, type, index, environment)
@@ -81,7 +81,7 @@ module Stacks::VirtualBindService
     masters = children.reject { |bind_server| !bind_server.master? }
     raise "No masters were not found! #{children}" if masters.empty?
     #Only return the first master (multi-master support not implemented)
-    masters.first.prod_fqdn
+    masters.first
   end
 
   def healthchecks
