@@ -95,8 +95,18 @@ class Stacks::MachineSet
   end
 
   public
+  def dependant_instances_lb_only(networks=[:prod])
+    dependant_instances(networks, only_loadbalancers(dependant_services)).sort
+  end
+
+  public
   def exclude_loadbalancers(dependants)
     dependants.reject { |machine_def| machine_def.type == Stacks::LoadBalancer }
+  end
+
+  public
+  def only_loadbalancers(dependants)
+    dependants.reject { |machine_def| machine_def.type != Stacks::LoadBalancer }
   end
 
 

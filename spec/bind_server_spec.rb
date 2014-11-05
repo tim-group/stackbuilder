@@ -55,8 +55,8 @@ describe_stack 'nameserver' do
     ])
     host.to_enc['role::bind_server']['participation_dependant_instances'].should eql([
         'oy-lb-001.mgmt.oy.net.local',
-        'oy-lb-002.mgmt.oy.net.local',
         'oy-lb-001.oy.net.local',
+        'oy-lb-002.mgmt.oy.net.local',
         'oy-lb-002.oy.net.local'
     ])
     host.to_enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])

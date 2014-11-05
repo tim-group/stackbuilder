@@ -54,7 +54,8 @@ class Stacks::BindServer < Stacks::MachineDef
     enc.merge!({
       'role::bind_server' => {
         'vip_fqdns'           => [ vip_fqdn(:prod), vip_fqdn(:mgmt)],
-        'dependant_instances' => @virtual_service.dependant_instances_including_children_excluding_lb([:mgmt])
+        'dependant_instances' => @virtual_service.dependant_instances_including_children_excluding_lb([:mgmt]), #should be mgmt and prod?,
+        'participation_dependant_instances' => @virtual_service.dependant_instances_lb_only([:mgmt,:prod])
       },
       'server::default_new_mgmt_net_local' => nil,
     })
