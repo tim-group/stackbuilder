@@ -55,10 +55,12 @@ class Stacks::MachineSet
   end
 
   private
-  def find_virtual_service(service)
-    environment.accept do |machine_def|
-      if machine_def.kind_of? Stacks::MachineSet and service.first.eql? machine_def.name and service[1].eql? environment.name
-        return machine_def
+  def find_virtual_service(service, environments=[environment])
+    environments.each do |env|
+      env.accept do |machine_def|
+        if machine_def.kind_of? Stacks::MachineSet and service.first.eql? machine_def.name and service[1].eql? env.name
+          return machine_def
+        end
       end
     end
 
@@ -67,9 +69,9 @@ class Stacks::MachineSet
 
 
   private
-  def resolve_virtual_services(dependencies)
+  def resolve_virtual_services(dependencies, environments=[environment])
     dependencies.map do |dependency|
-      find_virtual_service(dependency)
+      find_virtual_service(dependency, environments)
     end
   end
 
@@ -159,14 +161,8 @@ class Stacks::MachineSet
     config
   end
   public
-  def dependency_zone_config
-    config = {}
-    if @auto_configure_dependencies
-      resolve_virtual_services(depends_on).each do |dependency|
-        config.merge! dependency.config_params(self)
-      end
-    end
-    config
+  def dependency_zone_config(environments)
+    resolve_virtual_services(depends_on, environments)
   end
 
 end

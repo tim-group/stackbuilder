@@ -41,7 +41,8 @@ module Stacks::VirtualBindService
     zones_fqdn
   end
 
-  def slave_zones_fqdn
+  def slave_zones_fqdn(machine_def)
+    return nil if machine_def == master_server
     { master_server.mgmt_fqdn => master_server.zones_fqdn } #mgmt or prod fqdn?
   end
 

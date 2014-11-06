@@ -40,20 +40,20 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def dependant_zones
-#    environment.environments.each do |name,env|
-#      env.accept do |machine_def|
-#        if machine_def.kind_of? Stacks::BindServer and machine.master?
-#        end
-#      end
-#    end
-#    @virtual_service.dependant_services.each do |serv|
-#      puts "#{serv.class.ancestors.join(',')}"
-#    end
+    zones = nil
+    @virtual_service.dependency_zone_config(environment.environments.values).each do |serv|
+      serv.children.each do |child_machine_def|
+        if child_machine_def.kind_of? Stacks::BindServer and child_machine_def.master?
+          zones = {} if zones.nil?
+          zones[child_machine_def.mgmt_fqdn] = child_machine_def.virtual_service.master_zones_fqdn
+        end
+      end
+    end
+    zones
   end
 
   public
   def to_enc()
-    #dependant_zones
     enc = super()
     enc.merge!({
       'role::bind_server' => {
@@ -63,7 +63,12 @@ class Stacks::BindServer < Stacks::MachineDef
       'server::default_new_mgmt_net_local' => nil,
     })
     enc['role::bind_server']['master_zones'] = @virtual_service.master_zones_fqdn if master?
-    enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn if slave?
+    enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn(self)
+    if enc['role::bind_server']['slave_zones'].nil?
+      enc['role::bind_server']['slave_zones'] = dependant_zones
+    else
+      enc['role::bind_server']['slave_zones'].merge! dependant_zones unless dependant_zones.nil?
+    end
 
 
     enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type(Stacks::LoadBalancer, [:mgmt]) if master?
