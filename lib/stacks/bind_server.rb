@@ -66,8 +66,9 @@ class Stacks::BindServer < Stacks::MachineDef
     enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn if slave?
 
 
-    enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type(Stacks::LoadBalancer, [:mgmt]) if master? #should be mgmt and prod?
+    enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type(Stacks::LoadBalancer, [:mgmt]) if master?
 
+    enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type_and_different_env(Stacks::LoadBalancer, [:mgmt]) if slave?
 
     enc['role::bind_server']['forwarder_zones'] = @virtual_service.forwarder_zones
     enc

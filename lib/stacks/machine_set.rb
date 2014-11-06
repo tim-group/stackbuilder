@@ -95,8 +95,20 @@ class Stacks::MachineSet
   end
 
   public
+  def dependant_instances_including_children_reject_type_and_different_env(type, networks=[:prod])
+    dependants = reject_type(dependant_services, type)
+    dependants = reject_env(dependants, environment)
+    dependant_instances(networks, dependants).concat(children_fqdn(networks)).sort
+  end
+
+  public
   def dependant_instances_accept_type(type, networks=[:prod])
     dependant_instances(networks, accept_type(dependant_services, type)).sort
+  end
+
+  public
+  def reject_env(dependants, env)
+    dependants.reject { |machine_def| machine_def.environment.name != env.name  }
   end
 
   public
