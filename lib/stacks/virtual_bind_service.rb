@@ -41,6 +41,41 @@ module Stacks::VirtualBindService
     zones_fqdn
   end
 
+  def all_dependencies(machine_def)
+    # bind servers that
+    all_dep_instances = accept_type(dependant_services, Stacks::BindServer)
+    #all_dep_instances.each { |something|
+    #  puts something.children_fqdn
+    #}
+
+    #puts depends_on
+#    if !machine_def.master? and !machine_def.slave?
+    #    oy1 master not reject
+    #    oy2 slave  reject
+    #    pg1 master slave not reject
+    #    pg2 slave  reject
+
+    if !machine_def.master?
+      all_dep_instances.reject! { |dep_machineset|
+        dep_machineset.environment.name != machine_def.environment.name
+      }
+    end
+
+    networks = [:mgmt]
+    all_dep_instance_fqdns = to_fqdn(all_dep_instances,networks)
+
+   # if false
+     #puts dependant_instances_including_children_reject_type_and_different_env(Stacks::LoadBalancer, networks)
+   # else
+      #puts dependant_instances_including_children_reject_type(Stacks::LoadBalancer, networks)
+    #  puts reverse_this_shit.size
+   # end
+
+    all_dep_instance_fqdns.concat(dependant_instances_including_children_reject_type_and_different_env(Stacks::LoadBalancer, networks))
+
+    all_dep_instance_fqdns.sort
+  end
+
   def slave_zones_fqdn(machine_def)
     return nil if machine_def == master_server
     { master_server.mgmt_fqdn => master_server.zones_fqdn } #mgmt or prod fqdn?

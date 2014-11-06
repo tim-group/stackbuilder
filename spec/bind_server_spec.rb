@@ -18,6 +18,8 @@ describe_stack 'nameserver' do
           case environment.name
           when 'pg'
             machine.slave_from 'oy'
+    #      when 'oy'
+    #        machine.slave_from 'pg'
           end
         end
       end
@@ -106,6 +108,7 @@ describe_stack 'nameserver' do
         'pg-ns-001.mgmt.pg.net.local',
         'pg-ns-002.mgmt.pg.net.local',
         'oy-ns-001.mgmt.oy.net.local',
+        'oy-ns-002.mgmt.oy.net.local', #i should not be here
     ])
     host.to_enc['role::bind_server']['participation_dependant_instances'].should eql([
         'pg-lb-001.mgmt.pg.net.local',

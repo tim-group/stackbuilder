@@ -75,7 +75,7 @@ class Stacks::MachineSet
     end
   end
 
-  private
+  public
   def children_fqdn(networks=[:prod])
     children_fqdns = []
     networks.each do |network|
@@ -84,6 +84,19 @@ class Stacks::MachineSet
       end
     end
     children_fqdns
+  end
+
+  public
+  def to_fqdn(machine_sets, networks=[:prod])
+    fqdns = []
+    networks.each do |network|
+      machine_sets.map do |machine_set|
+        machine_set.children.map do |machine_def|
+          fqdns << machine_def.qualified_hostname(network)
+        end
+      end
+    end
+    fqdns
   end
 
   public
@@ -123,6 +136,19 @@ class Stacks::MachineSet
     dependants.reject { |machine_def| machine_def.type != type }
   end
 
+  public
+  def reverse_this_shit
+    my_depends_on = depends_on
+    dependants = []
+    environment.environments.each do |name, env|
+      env.accept do |machine_def|
+        if machine_def.kind_of? Stacks::MachineDefContainer and machine_def.respond_to? :depends_on and machine_def.name == my_depends_on[0] and machine_def.environment.name == my_depends_on[1]
+          dependants.push machine_def
+        end
+      end
+    end
+    dependants
+  end
 
   public
   def dependant_services

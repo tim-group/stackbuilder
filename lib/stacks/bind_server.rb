@@ -9,6 +9,7 @@ class Stacks::BindServer < Stacks::MachineDef
     @role = role
     super(base_hostname, [:mgmt,:prod], :primary_site)
     @virtual_service = virtual_service
+    @slaving = false
   end
 
   def role
@@ -20,8 +21,12 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def slave?
-    @role == :slave
+    @role == :slave or @slaving
   end
+
+#  def slaving?
+#    @slaving
+#  end
 
   def bind_to(environment)
     super(environment)
@@ -36,6 +41,7 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def slave_from(env)
+    @slaving = true
     @virtual_service.depend_on('ns', env)
   end
 
@@ -54,6 +60,7 @@ class Stacks::BindServer < Stacks::MachineDef
 
   public
   def to_enc()
+
     enc = super()
     enc.merge!({
       'role::bind_server' => {
@@ -71,9 +78,9 @@ class Stacks::BindServer < Stacks::MachineDef
     end
 
 
-    enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type(Stacks::LoadBalancer, [:mgmt]) if master?
+#    enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type(Stacks::LoadBalancer, [:mgmt]) if master?
 
-    enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type_and_different_env(Stacks::LoadBalancer, [:mgmt]) if slave?
+    enc['role::bind_server']['dependant_instances'] = @virtual_service.all_dependencies(self)
 
     enc['role::bind_server']['forwarder_zones'] = @virtual_service.forwarder_zones
     enc
