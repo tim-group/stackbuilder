@@ -40,92 +40,95 @@ describe_stack 'nameserver' do
 
   # Master
   host("oy-ns-001.mgmt.oy.net.local") do |host|
-    host.to_enc['server::default_new_mgmt_net_local'].should be_nil
-    host.to_enc['role::bind_server']['master_zones'].should eql([
+    enc = host.to_enc
+    enc['server::default_new_mgmt_net_local'].should be_nil
+    enc['role::bind_server']['master_zones'].should eql([
         'mgmt.oy.net.local',
         'oy.net.local',
         'front.oy.net.local',
     ])
-    host.to_enc['role::bind_server']['slave_zones'].should be_nil
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
-    host.to_enc['role::bind_server']['dependant_instances'].should eql([
-        'oy-ns-001.mgmt.oy.net.local',
+    enc['role::bind_server']['slave_zones'].should be_nil
+    enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
+    enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
+    enc['role::bind_server']['dependant_instances'].should eql([
+        # 'oy-ns-001.mgmt.oy.net.local', # why was this here?
         'oy-ns-002.mgmt.oy.net.local',
         'pg-ns-001.mgmt.pg.net.local',
         'pg-ns-002.mgmt.pg.net.local'
     ])
-    host.to_enc['role::bind_server']['participation_dependant_instances'].should eql([
+    enc['role::bind_server']['participation_dependant_instances'].should eql([
         'oy-lb-001.mgmt.oy.net.local',
         'oy-lb-001.oy.net.local',
         'oy-lb-002.mgmt.oy.net.local',
         'oy-lb-002.oy.net.local'
     ])
-    host.to_enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
+    enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
   # BIND SLAVE
   host("oy-ns-002.mgmt.oy.net.local") do |host|
-    host.to_enc['server::default_new_mgmt_net_local'].should be_nil
-    host.to_enc['role::bind_server']['master_zones'].should be_nil
-    host.to_enc['role::bind_server']['slave_zones'].should eql({
+    enc = host.to_enc
+    enc['server::default_new_mgmt_net_local'].should be_nil
+    enc['role::bind_server']['master_zones'].should be_nil
+    enc['role::bind_server']['slave_zones'].should eql({
       'oy-ns-001.mgmt.oy.net.local' => [
          'mgmt.oy.net.local','oy.net.local','front.oy.net.local'
       ]
     })
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
-    host.to_enc['role::bind_server']['dependant_instances'].should eql([
+    enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
+    enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
+    enc['role::bind_server']['dependant_instances'].should eql([
         'oy-ns-001.mgmt.oy.net.local',
-        'oy-ns-002.mgmt.oy.net.local',
+        # 'oy-ns-002.mgmt.oy.net.local', # why was this here?
     ])
-    host.to_enc['role::bind_server']['participation_dependant_instances'].should eql([
+    enc['role::bind_server']['participation_dependant_instances'].should eql([
         'oy-lb-001.mgmt.oy.net.local',
         'oy-lb-001.oy.net.local',
         'oy-lb-002.mgmt.oy.net.local',
         'oy-lb-002.oy.net.local'
     ])
-    host.to_enc['role::bind_server']['forwarder_zones'].should eql([
+    enc['role::bind_server']['forwarder_zones'].should eql([
       'youdevise.com'
     ])
   end
 
   # PG master will slave from BIND master in OY
   host("pg-ns-001.mgmt.pg.net.local") do |host|
-    host.to_enc['server::default_new_mgmt_net_local'].should be_nil
-    host.to_enc['role::bind_server']['master_zones'].should eql([
+    enc = host.to_enc
+    enc['server::default_new_mgmt_net_local'].should be_nil
+    enc['role::bind_server']['master_zones'].should eql([
       'mgmt.pg.net.local',
       'pg.net.local',
       'front.pg.net.local',
     ])
-    host.to_enc['role::bind_server']['slave_zones'].should eql({
+    enc['role::bind_server']['slave_zones'].should eql({
       'oy-ns-001.mgmt.oy.net.local' => [
          'mgmt.oy.net.local','oy.net.local','front.oy.net.local'
       ]
     })
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
-    host.to_enc['role::bind_server']['dependant_instances'].should eql([
-        'pg-ns-001.mgmt.pg.net.local',
+    enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
+    enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
+    enc['role::bind_server']['dependant_instances'].should eql([
+        # 'pg-ns-001.mgmt.pg.net.local', # why was this here?
         'pg-ns-002.mgmt.pg.net.local',
         'oy-ns-001.mgmt.oy.net.local',
-        'oy-ns-002.mgmt.oy.net.local', #i should not be here
     ])
-    host.to_enc['role::bind_server']['participation_dependant_instances'].should eql([
+    enc['role::bind_server']['participation_dependant_instances'].should eql([
         'pg-lb-001.mgmt.pg.net.local',
-        'pg-lb-002.mgmt.pg.net.local',
         'pg-lb-001.pg.net.local',
+        'pg-lb-002.mgmt.pg.net.local',
         'pg-lb-002.pg.net.local'
     ])
-    host.to_enc['role::bind_server']['forwarder_zones'].should eql([
+    enc['role::bind_server']['forwarder_zones'].should eql([
       'youdevise.com'
     ])
   end
 
   # PG slave will slave from BIND master in OY and PG
   host("pg-ns-002.mgmt.pg.net.local") do |host|
-    host.to_enc['server::default_new_mgmt_net_local'].should be_nil
-    host.to_enc['role::bind_server']['master_zones'].should be_nil
-    host.to_enc['role::bind_server']['slave_zones'].should eql({
+    enc = host.to_enc
+    enc['server::default_new_mgmt_net_local'].should be_nil
+    enc['role::bind_server']['master_zones'].should be_nil
+    enc['role::bind_server']['slave_zones'].should eql({
       'oy-ns-001.mgmt.oy.net.local' => [
          'mgmt.oy.net.local','oy.net.local','front.oy.net.local'
       ],
@@ -133,20 +136,20 @@ describe_stack 'nameserver' do
          'mgmt.pg.net.local','pg.net.local','front.pg.net.local'
       ]
     })
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
-    host.to_enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
-    host.to_enc['role::bind_server']['dependant_instances'].should eql([
+    enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
+    enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
+    enc['role::bind_server']['dependant_instances'].should eql([
         'pg-ns-001.mgmt.pg.net.local',
-        'pg-ns-002.mgmt.pg.net.local',
+        #'pg-ns-002.mgmt.pg.net.local', # why was this here?
         'oy-ns-001.mgmt.oy.net.local',
     ])
-    host.to_enc['role::bind_server']['participation_dependant_instances'].should eql([
+    enc['role::bind_server']['participation_dependant_instances'].should eql([
         'pg-lb-001.mgmt.pg.net.local',
-        'pg-lb-002.mgmt.pg.net.local',
         'pg-lb-001.pg.net.local',
+        'pg-lb-002.mgmt.pg.net.local',
         'pg-lb-002.pg.net.local'
     ])
-    host.to_enc['role::bind_server']['forwarder_zones'].should eql([
+    enc['role::bind_server']['forwarder_zones'].should eql([
       'youdevise.com'
     ])
   end

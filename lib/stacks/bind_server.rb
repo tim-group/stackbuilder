@@ -9,7 +9,6 @@ class Stacks::BindServer < Stacks::MachineDef
     @role = role
     super(base_hostname, [:mgmt,:prod], :primary_site)
     @virtual_service = virtual_service
-    @slaving = false
   end
 
   def role
@@ -21,12 +20,8 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def slave?
-    @role == :slave or @slaving
+    @role == :slave
   end
-
-#  def slaving?
-#    @slaving
-#  end
 
   def bind_to(environment)
     super(environment)
@@ -41,7 +36,6 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def slave_from(env)
-    @slaving = true
     @virtual_service.depend_on('ns', env)
   end
 
@@ -60,6 +54,21 @@ class Stacks::BindServer < Stacks::MachineDef
 
   public
   def to_enc()
+#    puts name
+#    puts "cluster dependant instances"
+#    # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
+#    puts @virtual_service.cluster_dependant_instances(self).join(',')
+#    puts "other dependant instances"
+#    # indirectly related dependant instances (ie. things that say they depend on this service)
+#    puts @virtual_service.dependant_instances_accept_type(Stacks::BindServer,[:mgmt]).map.join(',')
+#    puts "reverse dependencies"
+#    # the reverse dependencies of the 'other dependant instances'
+#    @virtual_service.dependency_zone_config(environment.environments.values).each do |serv|
+#      puts serv.children.map { |child_machine_def|
+#        child_machine_def.mgmt_fqdn if child_machine_def.master?
+#      }.join(',')
+#    end
+#    puts "done"
 
     enc = super()
     enc.merge!({

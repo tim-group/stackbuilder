@@ -42,38 +42,22 @@ module Stacks::VirtualBindService
   end
 
   def all_dependencies(machine_def)
-    # bind servers that
-    all_dep_instances = accept_type(dependant_services, Stacks::BindServer)
-    #all_dep_instances.each { |something|
-    #  puts something.children_fqdn
-    #}
-
-    #puts depends_on
-#    if !machine_def.master? and !machine_def.slave?
-    #    oy1 master not reject
-    #    oy2 slave  reject
-    #    pg1 master slave not reject
-    #    pg2 slave  reject
-
-    if !machine_def.master?
-      all_dep_instances.reject! { |dep_machineset|
-        dep_machineset.environment.name != machine_def.environment.name
+    all_deps = []
+    # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
+    all_deps += cluster_dependant_instances(machine_def)
+    # indirectly related dependant instances (ie. things that say they depend on this service)
+    indirect_deps = dependant_instances_accept_type(Stacks::BindServer,[:mgmt]) if machine_def.master?
+    indirect_deps -= ['', nil] unless indirect_deps.nil?
+    all_deps += indirect_deps unless indirect_deps.nil?
+    # the reverse dependencies of the 'other dependant instances'
+    dependency_zone_config(environment.environments.values).each do |serv|
+      rev_deps = serv.children.map { |child_machine_def|
+        child_machine_def.mgmt_fqdn if child_machine_def.master?
       }
+      rev_deps -= ['', nil] unless rev_deps.nil?
+      all_deps += rev_deps unless rev_deps.nil?
     end
-
-    networks = [:mgmt]
-    all_dep_instance_fqdns = to_fqdn(all_dep_instances,networks)
-
-   # if false
-     #puts dependant_instances_including_children_reject_type_and_different_env(Stacks::LoadBalancer, networks)
-   # else
-      #puts dependant_instances_including_children_reject_type(Stacks::LoadBalancer, networks)
-    #  puts reverse_this_shit.size
-   # end
-
-    all_dep_instance_fqdns.concat(dependant_instances_including_children_reject_type_and_different_env(Stacks::LoadBalancer, networks))
-
-    all_dep_instance_fqdns.sort
+    all_deps
   end
 
   def slave_zones_fqdn(machine_def)
@@ -108,9 +92,16 @@ module Stacks::VirtualBindService
 
   def slave_servers
     slaves = children.inject([]) do |servers, bind_server|
-      servers << bind_server.prod_fqdn unless bind_server.master?
+      servers << bind_server.mgmt_fqdn unless bind_server.master?
       servers
     end
+  end
+
+  def cluster_dependant_instances(machine_def)
+    instances = []
+    instances+=slave_servers if machine_def.master? # for xfer
+    instances << master_server.mgmt_fqdn if machine_def.slave? # for notify
+    instances
   end
 
   def master_server

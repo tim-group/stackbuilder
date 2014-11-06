@@ -186,7 +186,9 @@ class Stacks::MachineSet
     end
     config
   end
+
   public
+  # FIXME: rename this, it's like reverse dependencies nothing to do with zone config
   def dependency_zone_config(environments)
     resolve_virtual_services(depends_on, environments)
   end
