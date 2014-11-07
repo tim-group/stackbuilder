@@ -43,6 +43,19 @@ module Stacks::VirtualBindService
     machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
   end
 
+  def dependant_zones
+    zones = nil
+    virtual_services_that_i_depend_on(depends_on,environment.environments.values).each do |serv|
+      serv.children.each do |child_machine_def|
+        if child_machine_def.kind_of? Stacks::BindServer and child_machine_def.master?
+          zones = {} if zones.nil?
+          zones[child_machine_def.mgmt_fqdn] = child_machine_def.virtual_service.master_zones_fqdn
+        end
+      end
+    end
+    zones
+  end
+
   def master_zones_fqdn
     zones_fqdn
   end
@@ -56,7 +69,7 @@ module Stacks::VirtualBindService
     indirect_deps -= ['', nil] unless indirect_deps.nil?
     all_deps += indirect_deps unless indirect_deps.nil?
     # the reverse dependencies of the 'other dependant instances'
-    dependency_zone_config(environment.environments.values).each do |serv|
+    virtual_services_that_i_depend_on(depends_on, environment.environments.values).each do |serv|
       rev_deps = serv.children.map { |child_machine_def|
         child_machine_def.mgmt_fqdn if child_machine_def.master?
       }

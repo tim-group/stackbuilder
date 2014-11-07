@@ -99,7 +99,7 @@ class Stacks::MachineSet
   end
 
   public
-  def virtual_services
+  def virtual_services(environments=environment.environments)
     virtual_services = []
     environment.environments.each do |name, env|
       env.accept do |virtual_service|
@@ -120,6 +120,19 @@ class Stacks::MachineSet
     virtual_services_that_depend_on_me
   end
 
+  private
+  def find_virtual_service_that_i_depend_on(service, environments=[environment])
+    environments.each do |env|
+      env.accept do |virtual_service|
+        if virtual_service.kind_of? Stacks::MachineSet and service[0].eql? virtual_service.name and service[1].eql? env.name
+          return virtual_service
+        end
+      end
+    end
+    raise "Cannot find service #{depend_on[0]} in #{depend_on[1]}, that I depend_on"
+  end
+
+
   public
   def get_children_for_virtual_services(virtual_services)
     children = []
@@ -129,40 +142,25 @@ class Stacks::MachineSet
     children.flatten
   end
 
-  private
-  def find_virtual_service(service, environments=[environment])
-    environments.each do |env|
-      env.accept do |machine_def|
-        if machine_def.kind_of? Stacks::MachineSet and service.first.eql? machine_def.name and service[1].eql? env.name
-          return machine_def
-        end
-      end
-    end
-
-    raise "Cannot find the service called #{service.first}"
-  end
-
-  private
-  def resolve_virtual_services(dependencies, environments=[environment])
+  private #resolve_virtual_services
+  def virtual_services_that_i_depend_on(dependencies, environments=[environment])
     dependencies.map do |dependency|
-      find_virtual_service(dependency, environments)
+      find_virtual_service_that_i_depend_on(dependency, environments)
     end
-  end
-  public
-  # FIXME: rename this, it's like reverse dependencies nothing to do with zone config
-  def dependency_zone_config(environments)
-    resolve_virtual_services(depends_on, environments)
   end
 
   public
   def dependency_config
     config = {}
     if @auto_configure_dependencies
-      resolve_virtual_services(depends_on).each do |dependency|
+      virtual_services_that_i_depend_on(depends_on).each do |dependency|
         config.merge! dependency.config_params(self)
       end
     end
     config
   end
+
+
+
 
 end

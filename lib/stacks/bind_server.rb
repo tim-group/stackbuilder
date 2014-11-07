@@ -40,16 +40,7 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def dependant_zones
-    zones = nil
-    @virtual_service.dependency_zone_config(environment.environments.values).each do |serv|
-      serv.children.each do |child_machine_def|
-        if child_machine_def.kind_of? Stacks::BindServer and child_machine_def.master?
-          zones = {} if zones.nil?
-          zones[child_machine_def.mgmt_fqdn] = child_machine_def.virtual_service.master_zones_fqdn
-        end
-      end
-    end
-    zones
+    @virtual_service.dependant_zones
   end
 
   public
