@@ -37,20 +37,19 @@ module Stacks::VirtualBindService
     end
   end
 
-  def dependant_bind_machine_defs
+  def bind_servers_that_depend_on_me #dependant_bind_machine_defs
     machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer }
     machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
   end
 
-  def dependant_zones
+  def bind_master_servers_and_zones_that_i_depend_on
     zones = nil
-    virtual_services_that_i_depend_on.each do |serv|
-      serv.children.each do |child_machine_def|
-        if child_machine_def.kind_of? Stacks::BindServer and child_machine_def.master?
-          zones = {} if zones.nil?
-          zones[child_machine_def.mgmt_fqdn] = child_machine_def.virtual_service.master_zones_fqdn
-        end
+    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
+    machine_defs.each do |child_machine_def|
+      if child_machine_def.kind_of? Stacks::BindServer and child_machine_def.master?
+        zones = {} if zones.nil?
+        zones[child_machine_def.mgmt_fqdn] = child_machine_def.virtual_service.master_zones_fqdn
       end
     end
     zones
@@ -65,7 +64,7 @@ module Stacks::VirtualBindService
     # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
     all_deps += cluster_dependant_instances(machine_def)
     # indirectly related dependant instances (ie. things that say they depend on this service)
-    indirect_deps = dependant_bind_machine_defs if machine_def.master?
+    indirect_deps = bind_servers_that_depend_on_me if machine_def.master?
     indirect_deps -= ['', nil] unless indirect_deps.nil?
     all_deps += indirect_deps unless indirect_deps.nil?
     # the reverse dependencies of the 'other dependant instances'

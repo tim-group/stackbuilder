@@ -40,7 +40,7 @@ class Stacks::BindServer < Stacks::MachineDef
   end
 
   def dependant_zones
-    @virtual_service.dependant_zones
+    @virtual_service.bind_master_servers_and_zones_that_i_depend_on
   end
 
   public
