@@ -143,8 +143,8 @@ class Stacks::MachineSet
   end
 
   private #resolve_virtual_services
-  def virtual_services_that_i_depend_on(dependencies, environments=[environment])
-    dependencies.map do |dependency|
+  def virtual_services_that_i_depend_on(environments=[environment])
+    depends_on.map do |dependency|
       find_virtual_service_that_i_depend_on(dependency, environments)
     end
   end
@@ -153,7 +153,7 @@ class Stacks::MachineSet
   def dependency_config
     config = {}
     if @auto_configure_dependencies
-      virtual_services_that_i_depend_on(depends_on).each do |dependency|
+      virtual_services_that_i_depend_on.each do |dependency|
         config.merge! dependency.config_params(self)
       end
     end
