@@ -37,6 +37,12 @@ module Stacks::VirtualBindService
     end
   end
 
+  def dependant_bind_machine_defs
+    machine_defs = get_children_for_virtual_services(dependant_virtual_services)
+    machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer }
+    machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
+  end
+
   def master_zones_fqdn
     zones_fqdn
   end
@@ -46,7 +52,7 @@ module Stacks::VirtualBindService
     # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
     all_deps += cluster_dependant_instances(machine_def)
     # indirectly related dependant instances (ie. things that say they depend on this service)
-    indirect_deps = dependant_instances_accept_type(Stacks::BindServer,[:mgmt]) if machine_def.master?
+    indirect_deps = dependant_bind_machine_defs if machine_def.master?
     indirect_deps -= ['', nil] unless indirect_deps.nil?
     all_deps += indirect_deps unless indirect_deps.nil?
     # the reverse dependencies of the 'other dependant instances'
@@ -62,7 +68,7 @@ module Stacks::VirtualBindService
 
   def slave_zones_fqdn(machine_def)
     return nil if machine_def == master_server
-    { master_server.mgmt_fqdn => master_server.zones_fqdn } #mgmt or prod fqdn?
+    { master_server.mgmt_fqdn => master_server.zones_fqdn }
   end
 
   def instantiate_machine(name, type, index, environment)

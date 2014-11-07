@@ -54,27 +54,11 @@ class Stacks::BindServer < Stacks::MachineDef
 
   public
   def to_enc()
-#    puts name
-#    puts "cluster dependant instances"
-#    # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
-#    puts @virtual_service.cluster_dependant_instances(self).join(',')
-#    puts "other dependant instances"
-#    # indirectly related dependant instances (ie. things that say they depend on this service)
-#    puts @virtual_service.dependant_instances_accept_type(Stacks::BindServer,[:mgmt]).map.join(',')
-#    puts "reverse dependencies"
-#    # the reverse dependencies of the 'other dependant instances'
-#    @virtual_service.dependency_zone_config(environment.environments.values).each do |serv|
-#      puts serv.children.map { |child_machine_def|
-#        child_machine_def.mgmt_fqdn if child_machine_def.master?
-#      }.join(',')
-#    end
-#    puts "done"
-
     enc = super()
     enc.merge!({
       'role::bind_server' => {
         'vip_fqdns'           => [ vip_fqdn(:prod), vip_fqdn(:mgmt)],
-        'participation_dependant_instances' => @virtual_service.dependant_instances_accept_type(Stacks::LoadBalancer, [:mgmt,:prod])
+        'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns([:mgmt,:prod])
       },
       'server::default_new_mgmt_net_local' => nil,
     })
@@ -85,9 +69,6 @@ class Stacks::BindServer < Stacks::MachineDef
     else
       enc['role::bind_server']['slave_zones'].merge! dependant_zones unless dependant_zones.nil?
     end
-
-
-#    enc['role::bind_server']['dependant_instances'] = @virtual_service.dependant_instances_including_children_reject_type(Stacks::LoadBalancer, [:mgmt]) if master?
 
     enc['role::bind_server']['dependant_instances'] = @virtual_service.all_dependencies(self)
 

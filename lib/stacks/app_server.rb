@@ -27,7 +27,7 @@ class Stacks::AppServer < Stacks::MachineDef
         'group' => group,
         'environment' => environment.name,
         'dependencies' => @virtual_service.dependency_config,
-        'dependant_instances' => @virtual_service.dependant_instances,
+        'dependant_instances' => @virtual_service.dependant_machine_def_fqdns,
         'port' => '8000'
       }
     }

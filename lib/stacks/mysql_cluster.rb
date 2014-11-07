@@ -80,6 +80,11 @@ module Stacks::MysqlCluster
     [masters.first.prod_fqdn]
   end
 
+  def dependant_mysql_machine_def_fqdns
+    machine_defs = dependant_machine_defs.concat(children)
+    machine_defs_to_fqdns(machine_defs).sort
+  end
+
   def dependant_children_replication_mysql_rights()
     rights = {
       'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} }
@@ -100,7 +105,7 @@ module Stacks::MysqlCluster
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {}}
     }
-    dependant_services.each do |service|
+    dependant_virtual_services.each do |service|
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].merge!({
           "#{service.application}@#{dependant.prod_fqdn}/#{database_name}" => {

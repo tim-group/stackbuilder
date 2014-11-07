@@ -77,13 +77,18 @@ class Stacks::MachineSet
 
   public
   def children_fqdn(networks=[:prod])
-    children_fqdns = []
+    machine_defs_to_fqdns(children,network)
+  end
+
+  public
+  def machine_defs_to_fqdns(machine_defs, networks=[:prod])
+    fqdns = []
     networks.each do |network|
-      children.map do |service|
-        children_fqdns << service.qualified_hostname(network)
+      machine_defs.map do |machine_def|
+        fqdns << machine_def.qualified_hostname(network)
       end
     end
-    children_fqdns
+    fqdns
   end
 
   public
@@ -101,24 +106,70 @@ class Stacks::MachineSet
 
   public
   def dependant_instances_including_children(networks=[:prod])
-    dependant_instances(networks).concat(children_fqdn(networks))
+#    get_machine_defs_from_virtual_services(dependant_services,networks).concat(children_fqdn(networks))
+    virtual_service_children = get_children_for_virtual_services(dependant_virtual_services)
+    virtual_service_children.concat(children)
+    machine_defs_to_fqdns(virtual_service_children, networks).sort
   end
 
   public
   def dependant_instances_including_children_reject_type(type, networks=[:prod])
-    dependant_instances(networks, reject_type(dependant_services, type)).concat(children_fqdn(networks)).sort
+    #get_machine_defs_from_virtual_services(reject_type(dependant_services, type),networks).concat(children_fqdn(networks)).sort
+
+    virtual_service_children = get_children_for_virtual_services(dependant_virtual_services)
+    virtual_service_children.concat(children)
+    virtual_service_children.reject! { |machine_def| machine_def.class != type }
+    machine_defs_to_fqdns(virtual_service_children, networks).sort
   end
 
   public
   def dependant_instances_including_children_reject_type_and_different_env(type, networks=[:prod])
-    dependants = reject_type(dependant_services, type)
-    dependants = reject_env(dependants, environment)
-    dependant_instances(networks, dependants).concat(children_fqdn(networks)).sort
+    #dependants = reject_type(dependant_services, type)
+    #dependants = reject_env(dependants, environment)
+
+    #get_machine_defs_from_virtual_services(dependants,networks).concat(children_fqdn(networks)).sort
+
+    virtual_service_children = get_children_for_virtual_services(dependant_virtual_services)
+    virtual_service_children.concat(children)
+    virtual_service_children.reject! { |machine_def| machine_def.class != type }
+    virtual_service_children.reject! { |machine_def| machine_def.environment.name == environment.name }
+    machine_defs_to_fqdns(virtual_service_children, networks).sort
   end
 
   public
   def dependant_instances_accept_type(type, networks=[:prod])
-    dependant_instances(networks, accept_type(dependant_services, type)).sort
+    #get_machine_defs_from_virtual_services(accept_type(dependant_virtual_services, type),networks).sort
+    virtual_service_children = get_children_for_virtual_services(dependant_virtual_services)
+    virtual_service_children.reject! { |machine_def| machine_def.class != type }
+    machine_defs_to_fqdns(virtual_service_children, networks).sort
+  end
+
+  public
+  def dependant_load_balancer_machine_defs
+    virtual_service_children = get_children_for_virtual_services(dependant_virtual_services)
+    virtual_service_children.reject! { |machine_def| machine_def.class != Stacks::LoadBalancer }
+    virtual_service_children
+  end
+
+  def dependant_load_balancer_machine_def_fqdns(networks=[:prod])
+    machine_defs_to_fqdns(dependant_load_balancer_machine_defs, networks).sort
+  end
+
+  public
+  def dependant_machine_defs
+    get_children_for_virtual_services(dependant_virtual_services)
+  end
+
+  def dependant_machine_defs_with_children
+    dependant_machine_defs.concat(children)
+  end
+
+  def dependant_machine_def_fqdns(networks=[:prod])
+    machine_defs_to_fqdns(dependant_machine_defs, networks).sort
+  end
+
+  def dependant_machine_def_with_children_fqdns(networks=[:prod])
+    machine_defs_to_fqdns(dependant_machine_defs_with_children, networks).sort
   end
 
   public
@@ -136,45 +187,44 @@ class Stacks::MachineSet
     dependants.reject { |machine_def| machine_def.type != type }
   end
 
+
   public
-  def reverse_this_shit
-    my_depends_on = depends_on
-    dependants = []
+  def virtual_services
+    virtual_services = []
     environment.environments.each do |name, env|
-      env.accept do |machine_def|
-        if machine_def.kind_of? Stacks::MachineDefContainer and machine_def.respond_to? :depends_on and machine_def.name == my_depends_on[0] and machine_def.environment.name == my_depends_on[1]
-          dependants.push machine_def
-        end
+      env.accept do |virtual_service|
+        virtual_services.push virtual_service
       end
     end
-    dependants
+    virtual_services
   end
 
   public
-  def dependant_services
-    dependants = []
-    environment.environments.each do |name, env|
-      env.accept do |machine_def|
-        if machine_def.kind_of? Stacks::MachineDefContainer and machine_def.respond_to? :depends_on and machine_def.depends_on.include?([self.name, environment.name])
-          dependants.push machine_def
-        end
+  def dependant_virtual_services
+    dependant_virtual_services = []
+    virtual_services.each do |virtual_service|
+      if virtual_service.kind_of? Stacks::MachineDefContainer and virtual_service.respond_to? :depends_on and virtual_service.depends_on.include?([self.name, environment.name])
+        dependant_virtual_services.push virtual_service
       end
     end
-    dependants
+    dependant_virtual_services
   end
 
   public
-  def dependant_instances(networks=[:prod], dependants=dependant_services)
-    dependant_instance_fqdns = []
-    networks.each do |network|
-      dependant_instance_fqdns.concat(dependants.map do |service|
-        service.children
-      end.flatten.map do |instance|
-        instance.qualified_hostname(network)
-      end)
-    end
-    dependant_instance_fqdns.sort
+  def get_machine_defs_from_virtual_services(virtual_services, networks=[:prod])
+    virtual_service_children = get_children_for_virtual_services(virtual_services)
+    machine_defs_to_fqdns(virtual_service_children, networks).sort
   end
+
+  public
+  def get_children_for_virtual_services(virtual_services)
+    children = []
+    virtual_services.map do |service|
+      children.concat(service.children)
+    end
+    children.flatten
+  end
+
 
   public
   def dependency_config
