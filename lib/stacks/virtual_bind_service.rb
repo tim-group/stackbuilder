@@ -37,7 +37,7 @@ module Stacks::VirtualBindService
     end
   end
 
-  def bind_servers_that_depend_on_me #dependant_bind_machine_defs
+  def bind_servers_that_depend_on_me
     machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer }
     machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
@@ -46,10 +46,10 @@ module Stacks::VirtualBindService
   def bind_master_servers_and_zones_that_i_depend_on
     zones = nil
     machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
-    machine_defs.each do |child_machine_def|
-      if child_machine_def.kind_of? Stacks::BindServer and child_machine_def.master?
+    machine_defs.each do |machine_def|
+      if machine_def.kind_of? Stacks::BindServer and machine_def.master?
         zones = {} if zones.nil?
-        zones[child_machine_def.mgmt_fqdn] = child_machine_def.virtual_service.master_zones_fqdn
+        zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.master_zones_fqdn
       end
     end
     zones
