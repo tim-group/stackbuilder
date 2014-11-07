@@ -105,7 +105,7 @@ module Stacks::MysqlCluster
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {}}
     }
-    dependant_virtual_services.each do |service|
+    virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].merge!({
           "#{service.application}@#{dependant.prod_fqdn}/#{database_name}" => {

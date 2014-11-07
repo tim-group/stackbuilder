@@ -54,26 +54,6 @@ class Stacks::MachineSet
     {} # parameters for config.properties of apps depending on this service
   end
 
-  private
-  def find_virtual_service(service, environments=[environment])
-    environments.each do |env|
-      env.accept do |machine_def|
-        if machine_def.kind_of? Stacks::MachineSet and service.first.eql? machine_def.name and service[1].eql? env.name
-          return machine_def
-        end
-      end
-    end
-
-    raise "Cannot find the service called #{service.first}"
-  end
-
-
-  private
-  def resolve_virtual_services(dependencies, environments=[environment])
-    dependencies.map do |dependency|
-      find_virtual_service(dependency, environments)
-    end
-  end
 
   public
   def machine_defs_to_fqdns(machine_defs, networks=[:prod])
@@ -88,7 +68,7 @@ class Stacks::MachineSet
 
   public
   def dependant_load_balancer_machine_defs
-    virtual_service_children = get_children_for_virtual_services(dependant_virtual_services)
+    virtual_service_children = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     virtual_service_children.reject! { |machine_def| machine_def.class != Stacks::LoadBalancer }
     virtual_service_children
   end
@@ -100,7 +80,7 @@ class Stacks::MachineSet
 
   public
   def dependant_machine_defs
-    get_children_for_virtual_services(dependant_virtual_services)
+    get_children_for_virtual_services(virtual_services_that_depend_on_me)
   end
 
   public
@@ -130,14 +110,14 @@ class Stacks::MachineSet
   end
 
   public
-  def dependant_virtual_services
-    dependant_virtual_services = []
+  def virtual_services_that_depend_on_me
+    virtual_services_that_depend_on_me = []
     virtual_services.each do |virtual_service|
       if virtual_service.kind_of? Stacks::MachineDefContainer and virtual_service.respond_to? :depends_on and virtual_service.depends_on.include?([self.name, environment.name])
-        dependant_virtual_services.push virtual_service
+        virtual_services_that_depend_on_me.push virtual_service
       end
     end
-    dependant_virtual_services
+    virtual_services_that_depend_on_me
   end
 
   public
@@ -149,6 +129,30 @@ class Stacks::MachineSet
     children.flatten
   end
 
+  private
+  def find_virtual_service(service, environments=[environment])
+    environments.each do |env|
+      env.accept do |machine_def|
+        if machine_def.kind_of? Stacks::MachineSet and service.first.eql? machine_def.name and service[1].eql? env.name
+          return machine_def
+        end
+      end
+    end
+
+    raise "Cannot find the service called #{service.first}"
+  end
+
+  private
+  def resolve_virtual_services(dependencies, environments=[environment])
+    dependencies.map do |dependency|
+      find_virtual_service(dependency, environments)
+    end
+  end
+  public
+  # FIXME: rename this, it's like reverse dependencies nothing to do with zone config
+  def dependency_zone_config(environments)
+    resolve_virtual_services(depends_on, environments)
+  end
 
   public
   def dependency_config
@@ -159,12 +163,6 @@ class Stacks::MachineSet
       end
     end
     config
-  end
-
-  public
-  # FIXME: rename this, it's like reverse dependencies nothing to do with zone config
-  def dependency_zone_config(environments)
-    resolve_virtual_services(depends_on, environments)
   end
 
 end

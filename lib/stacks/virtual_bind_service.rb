@@ -38,7 +38,7 @@ module Stacks::VirtualBindService
   end
 
   def dependant_bind_machine_defs
-    machine_defs = get_children_for_virtual_services(dependant_virtual_services)
+    machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer }
     machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
   end
