@@ -93,6 +93,7 @@ class Stacks::MachineSet
     virtual_service_children
   end
 
+  public
   def dependant_load_balancer_machine_def_fqdns(networks=[:prod])
     machine_defs_to_fqdns(dependant_load_balancer_machine_defs, networks).sort
   end
@@ -102,18 +103,20 @@ class Stacks::MachineSet
     get_children_for_virtual_services(dependant_virtual_services)
   end
 
-  def dependant_machine_defs_with_children
-    dependant_machine_defs.concat(children)
-  end
-
+  public
   def dependant_machine_def_fqdns(networks=[:prod])
     machine_defs_to_fqdns(dependant_machine_defs, networks).sort
   end
 
+  public
+  def dependant_machine_defs_with_children
+    dependant_machine_defs.concat(children)
+  end
+
+  public
   def dependant_machine_def_with_children_fqdns(networks=[:prod])
     machine_defs_to_fqdns(dependant_machine_defs_with_children, networks).sort
   end
-
 
   public
   def virtual_services
