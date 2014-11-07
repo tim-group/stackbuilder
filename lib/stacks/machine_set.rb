@@ -142,8 +142,8 @@ class Stacks::MachineSet
     children.flatten
   end
 
-  private #resolve_virtual_services
-  def virtual_services_that_i_depend_on(environments=[environment])
+  private
+  def virtual_services_that_i_depend_on(environments=environment.environments.values)
     depends_on.map do |dependency|
       find_virtual_service_that_i_depend_on(dependency, environments)
     end
