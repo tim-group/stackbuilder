@@ -129,7 +129,7 @@ class Stacks::MachineSet
         end
       end
     end
-    raise "Cannot find service #{depend_on[0]} in #{depend_on[1]}, that I depend_on"
+    raise "Cannot find service #{service[0]} in #{service[1]}, that I depend_on"
   end
 
 
