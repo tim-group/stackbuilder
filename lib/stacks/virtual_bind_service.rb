@@ -55,14 +55,10 @@ module Stacks::VirtualBindService
     machine_defs.each do |machine_def|
       if machine_def.kind_of? Stacks::BindServer and machine_def.master?
         zones = {} if zones.nil?
-        zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.master_zones_fqdn
+        zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.zones_fqdn
       end
     end
     zones
-  end
-
-  def master_zones_fqdn
-    zones_fqdn
   end
 
   def all_dependencies(machine_def)
@@ -78,7 +74,7 @@ module Stacks::VirtualBindService
 
   def slave_zones_fqdn(machine_def)
     return nil if machine_def == master_server
-    { master_server.mgmt_fqdn => master_server.zones_fqdn }
+    { master_server.mgmt_fqdn => zones_fqdn }
   end
 
   def instantiate_machine(name, type, index, environment)
