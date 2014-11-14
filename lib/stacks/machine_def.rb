@@ -19,7 +19,7 @@ class Stacks::MachineDef
         :prepare     => {
           :method => 'image',
           :options => {
-            :path => '/var/local/images/gold/generic.img'
+            :path => '/var/local/images/gold-precise/generic.img'
           },
         },
       }
@@ -31,6 +31,19 @@ class Stacks::MachineDef
 
   def children
     return []
+  end
+
+  def use_trusty
+    trusty_gold_image = {
+      '/'.to_sym =>  {
+        :prepare     => {
+          :options => {
+            :path => '/var/local/images/gold-trusty/generic.img'
+          },
+        },
+      }
+    }
+    modify_storage(trusty_gold_image)
   end
 
   def needs_signing?
