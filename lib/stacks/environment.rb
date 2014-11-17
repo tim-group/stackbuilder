@@ -47,7 +47,7 @@ class Stacks::Environment
   end
 
   def env(name, options={}, &block)
-    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), environments, @stack_procs)
+    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), @environments, @stack_procs)
     @definitions[name].instance_eval(&block) unless block.nil?
   end
 

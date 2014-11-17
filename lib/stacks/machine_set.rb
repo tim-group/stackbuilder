@@ -117,12 +117,24 @@ class Stacks::MachineSet
         virtual_services_that_depend_on_me.push virtual_service
       end
     end
-    virtual_services_that_depend_on_me
+    virtual_services_that_depend_on_me.uniq
   end
 
   private
-  def find_virtual_service_that_i_depend_on(service, environments=[environment])
-    environments.each do |env|
+  def find_virtual_service_that_i_depend_on(service, e=[environment])
+
+    e_names = []
+    environment.environments.each do |name, env|
+      e_names << env.name
+      env.environments.each do |name,env|
+        e_names << env.name
+      end
+
+    end
+
+    #raise "#{environment.environments['p'].pretty_inspect}"
+    #raise "foo #{e_names.join(',')}"
+    environment.environments.each do |name, env|
       env.accept do |virtual_service|
         if virtual_service.kind_of? Stacks::MachineSet and service[0].eql? virtual_service.name and service[1].eql? env.name
           return virtual_service

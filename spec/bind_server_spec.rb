@@ -18,23 +18,28 @@ describe_stack 'nameserver' do
           case environment.name
           when 'pg'
             machine.slave_from 'oy'
-    #      when 'oy'
+          when 'oy'
     #        machine.slave_from 'pg'
           end
         end
       end
     end
 
-    env "oy", :primary_site=>"oy" do
-      instantiate_stack "nameserver"
-      instantiate_stack "nat"
-      instantiate_stack "lb"
+    env "o", :primary_site=>"oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+        instantiate_stack "nat"
+        instantiate_stack "lb"
+      end
     end
 
-    env "pg", :primary_site=>"pg" do
-      instantiate_stack "nameserver"
-      instantiate_stack "nat"
-      instantiate_stack "lb"
+    env "p", :primary_site=>"pg" do
+
+      env 'pg' do
+        instantiate_stack "nameserver"
+        instantiate_stack "nat"
+        instantiate_stack "lb"
+      end
     end
   end
 
