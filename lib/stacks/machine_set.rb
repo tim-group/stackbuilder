@@ -99,9 +99,9 @@ class Stacks::MachineSet
   end
 
   public
-  def virtual_services(environments=environment.environments)
+  def virtual_services(environments=find_all_environments)
     virtual_services = []
-    environment.environments.each do |name, env|
+    environments.each do |env|
       env.accept do |virtual_service|
         virtual_services.push virtual_service
       end
@@ -121,20 +121,20 @@ class Stacks::MachineSet
   end
 
   private
-  def find_virtual_service_that_i_depend_on(service, e=[environment])
-
-    e_names = []
-    environment.environments.each do |name, env|
-      e_names << env.name
-      env.environments.each do |name,env|
-        e_names << env.name
+  def find_all_environments(environments = environment.environments.values)
+    environment_set = Set.new
+    environments.each do |env|
+      environment_set.add(env)
+      env.children.each do |child|
+        environment_set.merge(find_all_environments(env.children))
       end
-
     end
+    environment_set
+  end
 
-    #raise "#{environment.environments['p'].pretty_inspect}"
-    #raise "foo #{e_names.join(',')}"
-    environment.environments.each do |name, env|
+  private
+  def find_virtual_service_that_i_depend_on(service, environments=[environment])
+    environments.each do |env|
       env.accept do |virtual_service|
         if virtual_service.kind_of? Stacks::MachineSet and service[0].eql? virtual_service.name and service[1].eql? env.name
           return virtual_service
@@ -155,7 +155,7 @@ class Stacks::MachineSet
   end
 
   private
-  def virtual_services_that_i_depend_on(environments=environment.environments.values)
+  def virtual_services_that_i_depend_on(environments=find_all_environments)
     depends_on.map do |dependency|
       find_virtual_service_that_i_depend_on(dependency, environments)
     end
