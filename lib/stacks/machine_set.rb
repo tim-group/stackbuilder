@@ -54,76 +54,125 @@ class Stacks::MachineSet
     {} # parameters for config.properties of apps depending on this service
   end
 
-  private
-  def find_virtual_service(service)
-    environment.accept do |machine_def|
-      if machine_def.kind_of? Stacks::MachineSet and service.first.eql? machine_def.name and service[1].eql? environment.name
-        return machine_def
-      end
-    end
 
-    raise "Cannot find the service called #{service.first}"
-  end
-
-
-  private
-  def resolve_virtual_services(dependencies)
-    dependencies.map do |dependency|
-      find_virtual_service(dependency)
-    end
-  end
-
-  private
-  def children_fqdn(networks=[:prod])
-    children_fqdns = []
+  public
+  def machine_defs_to_fqdns(machine_defs, networks=[:prod])
+    fqdns = []
     networks.each do |network|
-      children.map do |service|
-        children_fqdns << service.qualified_hostname(network)
+      machine_defs.map do |machine_def|
+        fqdns << machine_def.qualified_hostname(network)
       end
     end
-    children_fqdns
+    fqdns
   end
 
   public
-  def dependant_instances_including_children(networks=[:prod])
-    dependant_instances(networks).concat(children_fqdn(networks))
+  def dependant_load_balancer_machine_defs
+    virtual_service_children = get_children_for_virtual_services(virtual_services_that_depend_on_me)
+    virtual_service_children.reject! { |machine_def| machine_def.class != Stacks::LoadBalancer }
+    virtual_service_children
   end
 
   public
-  def dependant_services
-    dependants = []
-    environment.environments.each do |name, env|
-      env.accept do |machine_def|
-        if machine_def.kind_of? Stacks::MachineDefContainer and machine_def.respond_to? :depends_on and machine_def.depends_on.include?([self.name, environment.name])
-          dependants.push machine_def
+  def dependant_load_balancer_machine_def_fqdns(networks=[:prod])
+    machine_defs_to_fqdns(dependant_load_balancer_machine_defs, networks).sort
+  end
+
+  public
+  def dependant_machine_defs
+    get_children_for_virtual_services(virtual_services_that_depend_on_me)
+  end
+
+  public
+  def dependant_machine_def_fqdns(networks=[:prod])
+    machine_defs_to_fqdns(dependant_machine_defs, networks).sort
+  end
+
+  public
+  def dependant_machine_defs_with_children
+    dependant_machine_defs.concat(children)
+  end
+
+  public
+  def dependant_machine_def_with_children_fqdns(networks=[:prod])
+    machine_defs_to_fqdns(dependant_machine_defs_with_children, networks).sort
+  end
+
+  public
+  def virtual_services(environments=find_all_environments)
+    virtual_services = []
+    environments.each do |env|
+      env.accept do |virtual_service|
+        virtual_services.push virtual_service
+      end
+    end
+    virtual_services
+  end
+
+  public
+  def virtual_services_that_depend_on_me
+    virtual_services_that_depend_on_me = []
+    virtual_services.each do |virtual_service|
+      if virtual_service.kind_of? Stacks::MachineDefContainer and virtual_service.respond_to? :depends_on and virtual_service.depends_on.include?([self.name, environment.name])
+        virtual_services_that_depend_on_me.push virtual_service
+      end
+    end
+    virtual_services_that_depend_on_me.uniq
+  end
+
+  private
+  def find_all_environments(environments = environment.environments.values)
+    environment_set = Set.new
+    environments.each do |env|
+      environment_set.add(env)
+      env.children.each do |child|
+        environment_set.merge(find_all_environments(env.children))
+      end
+    end
+    environment_set
+  end
+
+  private
+  def find_virtual_service_that_i_depend_on(service, environments=[environment])
+    environments.each do |env|
+      env.accept do |virtual_service|
+        if virtual_service.kind_of? Stacks::MachineSet and service[0].eql? virtual_service.name and service[1].eql? env.name
+          return virtual_service
         end
       end
     end
-    dependants
+    raise "Cannot find service #{service[0]} in #{service[1]}, that I depend_on"
   end
 
+
   public
-  def dependant_instances(networks=[:prod])
-    dependant_instance_fqdns = []
-    networks.each do |network|
-      dependant_instance_fqdns.concat(dependant_services.map do |service|
-        service.children
-      end.flatten.map do |instance|
-        instance.qualified_hostname(network)
-      end)
+  def get_children_for_virtual_services(virtual_services)
+    children = []
+    virtual_services.map do |service|
+      children.concat(service.children)
     end
-    dependant_instance_fqdns.sort
+    children.flatten
+  end
+
+  private
+  def virtual_services_that_i_depend_on(environments=find_all_environments)
+    depends_on.map do |dependency|
+      find_virtual_service_that_i_depend_on(dependency, environments)
+    end
   end
 
   public
   def dependency_config
     config = {}
     if @auto_configure_dependencies
-      resolve_virtual_services(depends_on).each do |dependency|
+      virtual_services_that_i_depend_on.each do |dependency|
         config.merge! dependency.config_params(self)
       end
     end
     config
   end
+
+
+
 
 end

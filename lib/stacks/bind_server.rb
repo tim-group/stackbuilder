@@ -31,22 +31,33 @@ class Stacks::BindServer < Stacks::MachineDef
     return @virtual_service.vip_fqdn(net)
   end
 
+  def slave_from(env)
+    @virtual_service.depend_on('ns', env)
+  end
+
   public
   def to_enc()
+    dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on
+
     enc = super()
     enc.merge!({
       'role::bind_server' => {
-        'role'                => @role.to_s,
-        'site'                => @fabric,
-        'zones'               => @virtual_service.zones_fqdn,
-        'vip_fqdns'           => [ vip_fqdn(:prod), vip_fqdn(:mgmt)],
-        'dependant_instances' => @virtual_service.dependant_instances_including_children([:prod,:mgmt])
+        'vip_fqdns'                         => [ vip_fqdn(:prod), vip_fqdn(:mgmt)],
+        'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns([:mgmt,:prod]),
+        'dependant_instances'               => @virtual_service.all_dependencies(self),
+        'forwarder_zones'                   => @virtual_service.forwarder_zones,
+        'slave_zones'                       => @virtual_service.slave_zones_fqdn(self)
       },
-      'server::default_new_mgmt_net_local' => nil,
+      'server::default_new_mgmt_net_local'  => nil,
     })
-    enc['role::bind_server']['master_fqdn'] = @virtual_service.master_server
-    enc['role::bind_server']['slaves_fqdn'] = @virtual_service.slave_servers
-    enc['role::bind_server']['forwarder_zones'] = @virtual_service.forwarder_zones
+    enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn if master?
+
+    if enc['role::bind_server']['slave_zones'].nil?
+      enc['role::bind_server']['slave_zones'] = dependant_zones
+    else
+      enc['role::bind_server']['slave_zones'].merge! dependant_zones unless dependant_zones.nil?
+    end
+
     enc
   end
 end

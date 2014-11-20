@@ -37,6 +37,46 @@ module Stacks::VirtualBindService
     end
   end
 
+  def bind_servers_that_depend_on_me
+    machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me)
+    machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer }
+    machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
+  end
+
+  def bind_servers_that_i_depend_on
+    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
+    machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer or !machine_def.master? }
+    machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
+  end
+
+  def bind_master_servers_and_zones_that_i_depend_on
+    zones = nil
+    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
+    machine_defs.each do |machine_def|
+      if machine_def.kind_of? Stacks::BindServer and machine_def.master?
+        zones = {} if zones.nil?
+        zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.zones_fqdn
+      end
+    end
+    zones
+  end
+
+  def all_dependencies(machine_def)
+    all_deps = []
+    # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
+    all_deps += cluster_dependant_instances(machine_def)
+    # indirectly related dependant instances (ie. things that say they depend on this service)
+    indirect_deps = bind_servers_that_depend_on_me if machine_def.master?
+    all_deps += indirect_deps unless indirect_deps.nil?
+    all_deps += bind_servers_that_i_depend_on unless bind_servers_that_i_depend_on.nil?
+    all_deps
+  end
+
+  def slave_zones_fqdn(machine_def)
+    return nil if machine_def == master_server
+    { master_server.mgmt_fqdn => zones_fqdn }
+  end
+
   def instantiate_machine(name, type, index, environment)
     server_name = "#{name}-#{index}"
     server = @type.new(server_name, self, type, index, &@config_block)
@@ -64,16 +104,23 @@ module Stacks::VirtualBindService
 
   def slave_servers
     slaves = children.inject([]) do |servers, bind_server|
-      servers << bind_server.prod_fqdn unless bind_server.master?
+      servers << bind_server.mgmt_fqdn unless bind_server.master?
       servers
     end
+  end
+
+  def cluster_dependant_instances(machine_def)
+    instances = []
+    instances+=slave_servers if machine_def.master? # for xfer
+    instances << master_server.mgmt_fqdn if machine_def.slave? # for notify
+    instances
   end
 
   def master_server
     masters = children.reject { |bind_server| !bind_server.master? }
     raise "No masters were not found! #{children}" if masters.empty?
     #Only return the first master (multi-master support not implemented)
-    masters.first.prod_fqdn
+    masters.first
   end
 
   def healthchecks

@@ -34,11 +34,11 @@ class Stacks::LegacyMysqlDBServer < Stacks::MachineDef
         'datadir'                  => '/mnt/data/mysql'
       }
     }
-
-    if @virtual_service.dependant_instances and ! @virtual_service.dependant_instances.nil? and @virtual_service.dependant_instances != []
+    dependant_instances = @virtual_service.dependant_machine_def_fqdns
+    if dependant_instances and ! dependant_instances.nil? and dependant_instances != []
       enc['role::databaseserver'].merge!({
         'dependencies' => @virtual_service.dependency_config,
-        'dependant_instances' => @virtual_service.dependant_instances,
+        'dependant_instances' => dependant_instances,
       })
       enc.merge!(@virtual_service.dependant_instance_mysql_rights)
     end
