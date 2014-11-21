@@ -1,11 +1,44 @@
 require 'stacks/test_framework'
 
-describe_stack 'nameserver' do
+describe_stack 'nameservers with bi-directional slave_from dependencies' do
   given do
-    stack "nat" do
-      natserver
+    stack "lb" do
+      loadbalancer
     end
 
+    stack "nameserver" do
+      virtual_bindserver 'ns' do
+        enable_nat
+        forwarder_zone(['youdevise.com'])
+        each_machine do |machine|
+          case environment.name
+            when 'pg'
+              machine.slave_from 'oy'
+            when 'oy'
+              machine.slave_from 'pg'
+          end
+        end
+      end
+    end
+
+    env "o", :primary_site=>"oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+        instantiate_stack "lb"
+      end
+    end
+
+    env "p", :primary_site=>"pg" do
+      env 'pg' do
+        instantiate_stack "nameserver"
+        instantiate_stack "lb"
+      end
+    end
+  end
+end
+
+describe_stack 'nameservers with single slave_from dependency' do
+  given do
     stack "lb" do
       loadbalancer
     end
@@ -18,8 +51,6 @@ describe_stack 'nameserver' do
           case environment.name
           when 'pg'
             machine.slave_from 'oy'
-          when 'oy'
-    #        machine.slave_from 'pg'
           end
         end
       end
@@ -28,21 +59,17 @@ describe_stack 'nameserver' do
     env "o", :primary_site=>"oy" do
       env 'oy' do
         instantiate_stack "nameserver"
-        instantiate_stack "nat"
         instantiate_stack "lb"
       end
     end
 
     env "p", :primary_site=>"pg" do
-
       env 'pg' do
         instantiate_stack "nameserver"
-        instantiate_stack "nat"
         instantiate_stack "lb"
       end
     end
   end
-
   # Master
   host("oy-ns-001.mgmt.oy.net.local") do |host|
     enc = host.to_enc
@@ -75,25 +102,18 @@ describe_stack 'nameserver' do
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => [
-         'mgmt.oy.net.local','oy.net.local','front.oy.net.local'
-      ]
+      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local','oy.net.local','front.oy.net.local']
     })
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
-    enc['role::bind_server']['dependant_instances'].should eql([
-        'oy-ns-001.mgmt.oy.net.local',
-        # 'oy-ns-002.mgmt.oy.net.local', # why was this here?
-    ])
+    enc['role::bind_server']['dependant_instances'].should eql(['oy-ns-001.mgmt.oy.net.local'])
     enc['role::bind_server']['participation_dependant_instances'].should eql([
         'oy-lb-001.mgmt.oy.net.local',
         'oy-lb-001.oy.net.local',
         'oy-lb-002.mgmt.oy.net.local',
         'oy-lb-002.oy.net.local'
     ])
-    enc['role::bind_server']['forwarder_zones'].should eql([
-      'youdevise.com'
-    ])
+    enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
 
   # PG master will slave from BIND master in OY
@@ -106,9 +126,7 @@ describe_stack 'nameserver' do
       'front.pg.net.local',
     ])
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => [
-         'mgmt.oy.net.local','oy.net.local','front.oy.net.local'
-      ]
+      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local','oy.net.local','front.oy.net.local']
     })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
@@ -123,9 +141,7 @@ describe_stack 'nameserver' do
         'pg-lb-002.mgmt.pg.net.local',
         'pg-lb-002.pg.net.local'
     ])
-    enc['role::bind_server']['forwarder_zones'].should eql([
-      'youdevise.com'
-    ])
+    enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
 
   # PG slave will slave from BIND master in OY and PG
@@ -154,14 +170,42 @@ describe_stack 'nameserver' do
         'pg-lb-002.mgmt.pg.net.local',
         'pg-lb-002.pg.net.local'
     ])
-    enc['role::bind_server']['forwarder_zones'].should eql([
-      'youdevise.com'
-    ])
+    enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
+end
 
+describe_stack 'nameservers should have working load balancer and nat configuration' do
+  given do
+    stack "nat" do
+      natserver
+    end
 
+    stack "lb" do
+      loadbalancer
+    end
 
+    stack "nameserver" do
+      virtual_bindserver 'ns' do
+        enable_nat
+      end
+    end
 
+    env "o", :primary_site=>"oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+        instantiate_stack "nat"
+        instantiate_stack "lb"
+      end
+    end
+
+    env "p", :primary_site=>"pg" do
+      env 'pg' do
+        instantiate_stack "nameserver"
+        instantiate_stack "nat"
+        instantiate_stack "lb"
+      end
+    end
+  end
 
   host("oy-nat-001.mgmt.oy.net.local") do |host|
     host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['dest_host'].should eql('oy-ns-vip.oy.net.local')
