@@ -125,9 +125,7 @@ class Stacks::MachineSet
     environment_set = Set.new
     environments.each do |env|
       unless environment_set.include? env
-        env.children.each do |child|
-          environment_set.merge(find_all_environments(env.children))
-        end
+        environment_set.merge(env.children)
         environment_set.add(env)
       end
     end
