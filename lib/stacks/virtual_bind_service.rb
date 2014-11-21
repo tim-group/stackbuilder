@@ -62,14 +62,14 @@ module Stacks::VirtualBindService
   end
 
   def all_dependencies(machine_def)
-    all_deps = []
+    all_deps = Set.new
     # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
-    all_deps += cluster_dependant_instances(machine_def)
+    all_deps.merge(cluster_dependant_instances(machine_def))
     # indirectly related dependant instances (ie. things that say they depend on this service)
     indirect_deps = bind_servers_that_depend_on_me if machine_def.master?
-    all_deps += indirect_deps unless indirect_deps.nil?
-    all_deps += bind_servers_that_i_depend_on unless bind_servers_that_i_depend_on.nil?
-    all_deps
+    all_deps.merge(indirect_deps) unless indirect_deps.nil?
+    all_deps.merge(bind_servers_that_i_depend_on) unless bind_servers_that_i_depend_on.nil?
+    all_deps.to_a
   end
 
   def slave_zones_fqdn(machine_def)

@@ -55,12 +55,12 @@ describe_stack 'nameserver' do
     enc['role::bind_server']['slave_zones'].should be_nil
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
-    enc['role::bind_server']['dependant_instances'].should eql([
-        # 'oy-ns-001.mgmt.oy.net.local', # why was this here?
-        'oy-ns-002.mgmt.oy.net.local',
+    enc['role::bind_server']['dependant_instances'].should include(
         'pg-ns-001.mgmt.pg.net.local',
-        'pg-ns-002.mgmt.pg.net.local'
-    ])
+        'pg-ns-002.mgmt.pg.net.local',
+        'oy-ns-002.mgmt.oy.net.local'
+    )
+    enc['role::bind_server']['dependant_instances'].size.should eql(3)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
         'oy-lb-001.mgmt.oy.net.local',
         'oy-lb-001.oy.net.local',
@@ -112,11 +112,11 @@ describe_stack 'nameserver' do
     })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
-    enc['role::bind_server']['dependant_instances'].should eql([
-        # 'pg-ns-001.mgmt.pg.net.local', # why was this here?
+    enc['role::bind_server']['dependant_instances'].should include(
         'pg-ns-002.mgmt.pg.net.local',
-        'oy-ns-001.mgmt.oy.net.local',
-    ])
+        'oy-ns-001.mgmt.oy.net.local'
+    )
+    enc['role::bind_server']['dependant_instances'].size.should eql(2)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
         'pg-lb-001.mgmt.pg.net.local',
         'pg-lb-001.pg.net.local',
@@ -143,11 +143,11 @@ describe_stack 'nameserver' do
     })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
-    enc['role::bind_server']['dependant_instances'].should eql([
+    enc['role::bind_server']['dependant_instances'].should include(
         'pg-ns-001.mgmt.pg.net.local',
-        #'pg-ns-002.mgmt.pg.net.local', # why was this here?
-        'oy-ns-001.mgmt.oy.net.local',
-    ])
+        'oy-ns-001.mgmt.oy.net.local'
+    )
+    enc['role::bind_server']['dependant_instances'].size.should eql(2)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
         'pg-lb-001.mgmt.pg.net.local',
         'pg-lb-001.pg.net.local',
