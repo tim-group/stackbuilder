@@ -190,7 +190,7 @@ describe_stack 'nameservers with single slave_from dependency' do
         'oy.net.local',
         'front.oy.net.local',
     ])
-    enc['role::bind_server']['slave_zones'].should be_nil
+    enc['role::bind_server'].should_not have_key('slave_zones')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
     enc['role::bind_server']['dependant_instances'].should include(

@@ -46,12 +46,12 @@ class Stacks::BindServer < Stacks::MachineDef
         'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns([:mgmt,:prod]),
         'dependant_instances'               => @virtual_service.all_dependencies(self),
         'forwarder_zones'                   => @virtual_service.forwarder_zones,
-        'slave_zones'                       => @virtual_service.slave_zones_fqdn(self)
       },
       'server::default_new_mgmt_net_local'  => nil,
     })
     enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn if master?
 
+    enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn(self) unless @virtual_service.slave_zones_fqdn(self).nil?
     unless dependant_zones.nil?
       if enc['role::bind_server']['slave_zones'].nil?
         enc['role::bind_server']['slave_zones'] = dependant_zones
