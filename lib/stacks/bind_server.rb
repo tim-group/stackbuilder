@@ -52,10 +52,12 @@ class Stacks::BindServer < Stacks::MachineDef
     })
     enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn if master?
 
-    if enc['role::bind_server']['slave_zones'].nil?
-      enc['role::bind_server']['slave_zones'] = dependant_zones
-    else
-      enc['role::bind_server']['slave_zones'].merge! dependant_zones unless dependant_zones.nil?
+    unless dependant_zones.nil?
+      if enc['role::bind_server']['slave_zones'].nil?
+        enc['role::bind_server']['slave_zones'] = dependant_zones
+      else
+        enc['role::bind_server']['slave_zones'].merge! dependant_zones
+      end
     end
 
     enc
