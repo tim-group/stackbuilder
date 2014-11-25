@@ -104,14 +104,20 @@ module Stacks::VirtualBindService
 
   def slave_servers
     slaves = children.inject([]) do |servers, bind_server|
-      servers << bind_server.mgmt_fqdn unless bind_server.master?
+      servers << bind_server unless bind_server.master?
       servers
+    end
+  end
+
+  def slave_servers_as_fqdns
+    slave_servers.map do |bind_server|
+      bind_server.mgmt_fqdn
     end
   end
 
   def cluster_dependant_instances(machine_def)
     instances = []
-    instances+=slave_servers if machine_def.master? # for xfer
+    instances+=slave_servers_as_fqdns if machine_def.master? # for xfer
     instances << master_server.mgmt_fqdn if machine_def.slave? # for notify
     instances
   end

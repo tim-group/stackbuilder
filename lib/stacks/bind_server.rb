@@ -1,5 +1,6 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
+require 'resolv'
 
 class Stacks::BindServer < Stacks::MachineDef
 
@@ -35,7 +36,6 @@ class Stacks::BindServer < Stacks::MachineDef
     @virtual_service.depend_on('ns', env)
   end
 
-  public
   def to_enc()
     dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on
 
@@ -61,5 +61,12 @@ class Stacks::BindServer < Stacks::MachineDef
     end
 
     enc
+  end
+
+  def to_spec
+    spec = super
+    spec[:nameserver] = Resolv.getaddress(@virtual_service.slave_servers.first.mgmt_fqdn) if master?
+    spec[:nameserver] = Resolv.getaddress(@virtual_service.master_server.mgmt_fqdn) unless master?
+    spec
   end
 end

@@ -206,6 +206,8 @@ describe_stack 'nameservers with single slave_from dependency' do
         'oy-lb-002.oy.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
+    Resolv.stub(:getaddress).with('oy-ns-002.mgmt.oy.net.local').and_return('4.3.2.1')
+    host.to_spec[:nameserver].should eql('4.3.2.1')
   end
   # OY Slave - Slaves from OY Master
   host("oy-ns-002.mgmt.oy.net.local") do |host|
@@ -225,6 +227,8 @@ describe_stack 'nameservers with single slave_from dependency' do
         'oy-lb-002.oy.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
+    Resolv.stub(:getaddress).with('oy-ns-001.mgmt.oy.net.local').and_return('1.2.3.4')
+    host.to_spec[:nameserver].should eql('1.2.3.4')
   end
 
   # PG Master - Slaves from OY Master
