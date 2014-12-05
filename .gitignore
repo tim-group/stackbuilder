@@ -6,3 +6,4 @@
 *.swp
 .idea/
 stackbuilder.iml
+/.buildpath
