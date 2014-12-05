@@ -53,10 +53,11 @@ describe 'launch' do
       unallocated_machines.each do |machine|
         host = find_suitable_host_for(machine)
         host.provisionally_allocate(machine)
-    end
+      end
 
-    def to_unlaunched_specs
+      def to_unlaunched_specs
 
+      end
     end
   end
 
