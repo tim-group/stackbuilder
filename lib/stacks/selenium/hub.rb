@@ -1,7 +1,4 @@
-require 'stacks/namespace'
-
-module Stacks::Selenium
-end
+require 'stacks/selenium/namespace'
 
 module Stacks::Selenium::Grid
 
