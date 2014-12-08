@@ -42,10 +42,9 @@ module Stacks::Selenium::Grid
   end
 
   def win(win_version, options)
-    group = options[:group] || ""
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
-      name = "ie#{options[:ie_version]}#{group}-#{index}"
+      name = "ie#{options[:ie_version]}-#{index}"
 
       if win_version == "xp"
         @definitions[name] = Stacks::Selenium::XpNode.new(name, @hub, options)
@@ -58,10 +57,9 @@ module Stacks::Selenium::Grid
   end
 
   def ubuntu(options)
-    group = options[:group] || ""
     options[:instances].times do |i|
       index = sprintf("%03d",i+1)
-      name = "browser#{group}-#{index}"
+      name = "browser-#{index}"
       @definitions[name] = Stacks::Selenium::UbuntuNode.new(name, @hub, options)
     end
   end
