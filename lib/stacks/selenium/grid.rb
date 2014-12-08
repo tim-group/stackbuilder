@@ -1,5 +1,10 @@
 require 'stacks/selenium/namespace'
 
+require 'stacks/selenium/hub'
+require 'stacks/selenium/ubuntu_node'
+require 'stacks/selenium/xp_node'
+require 'stacks/selenium/win7_node'
+
 module Stacks::Selenium::Grid
 
   def self.extended(object)
