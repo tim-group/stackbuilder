@@ -25,6 +25,8 @@ require 'stacks/puppetmaster'
 require 'stacks/quantapp_server'
 require 'stacks/rate_limited_forward_proxy_server'
 require 'stacks/selenium/grid'
+require 'stacks/selenium/hub'
+require 'stacks/selenium/cluster'
 require 'stacks/sensu_server'
 require 'stacks/shadow_server'
 require 'stacks/shadow_server_cluster'
@@ -117,6 +119,15 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::RateLimitedForwardProxyServer, &block)
   end
 
+  def selenium_hub(name = 'hub-001', options = {})
+    @definitions[name] = Stacks::Selenium::Hub.new(name, @definitions, options)
+  end
+
+  def selenium_node_cluster(name='segrid', hub = nil, &block)
+    machineset_with(name, [Stacks::Selenium::Cluster], nil, &block)
+  end
+
+  #legacy
   def segrid(name='segrid', options={}, &block)
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend Stacks::Selenium::Grid
