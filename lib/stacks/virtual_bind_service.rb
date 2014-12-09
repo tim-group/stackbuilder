@@ -8,6 +8,7 @@ module Stacks::VirtualBindService
   def configure()
     @ports = [53]
     add_vip_network :mgmt
+    remove_vip_network :prod
     @udp = true
     @zones = [:mgmt, :prod, :front]
     @forwarder_zones = []
@@ -15,6 +16,10 @@ module Stacks::VirtualBindService
 
   def zones
     @zones
+  end
+
+  def remove_zone(zone)
+    @zones.delete zone
   end
 
   def forwarder_zone(fwdr_zone)

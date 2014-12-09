@@ -65,6 +65,7 @@ module Stacks::VirtualService
   end
 
   attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
+  attr_reader :vip_networks
 
   def configure()
     @ehcache = false
@@ -137,9 +138,14 @@ module Stacks::VirtualService
     @vip_networks << network unless @vip_networks.include? network
   end
 
+  def remove_vip_network(network)
+    @vip_networks.delete network
+  end
+
   def enable_nat
     @nat = true
     add_vip_network :front
+    add_vip_network :prod
   end
 
   def enable_persistence(port)

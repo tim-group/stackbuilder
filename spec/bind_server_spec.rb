@@ -208,6 +208,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
     Resolv.stub(:getaddress).with('oy-ns-002.mgmt.oy.net.local').and_return('4.3.2.1')
     host.to_spec[:nameserver].should eql('4.3.2.1')
+    host.virtual_service.vip_networks.should be_eql [:mgmt, :front, :prod]
   end
   # OY Slave - Slaves from OY Master
   host("oy-ns-002.mgmt.oy.net.local") do |host|
@@ -341,5 +342,44 @@ describe_stack 'nameservers should have working load balancer and nat configurat
         'url_path'   =>'/participation'
       }
     )
+  end
+end
+
+describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
+  given do
+    stack "nameserver" do
+      virtual_bindserver 'ns'
+    end
+
+    env "o", :primary_site=>"oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+      end
+    end
+  end
+
+  host("oy-ns-001.mgmt.oy.net.local") do |host|
+    host.virtual_service.vip_networks.should be_eql [:mgmt]
+  end
+end
+
+describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
+  given do
+    stack "nameserver" do
+      virtual_bindserver 'ns' do
+        remove_zone :front
+        remove_zone :prod
+      end
+    end
+
+    env "o", :primary_site=>"oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+      end
+    end
+  end
+
+  host("oy-ns-001.mgmt.oy.net.local") do |host|
+    host.virtual_service.zones.should be_eql [:mgmt]
   end
 end
