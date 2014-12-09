@@ -9,7 +9,7 @@ module Stacks::Selenium::Cluster
     object.configure()
   end
 
-  attr_accessor :include_hub, :node_definitions
+  attr_accessor :hub, :selenium_version, :nodespecs
 
   def configure()
     @hub = nil
