@@ -142,9 +142,9 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['master'].should eql(true)
     enc_server_role['server_id'].should eql(1)
 
-    enc_rights = host.to_enc['role::mysql_rights']
-    enc_rights['environment'].should eql('testing')
-    enc_rights['database_name'].should eql('mydb')
+    enc_rights = host.to_enc['mysql_rights']
+    enc_rights['mydb']['environment'].should eql('testing')
+    enc_rights['mydb']['database_name'].should eql('mydb')
 
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql({
@@ -166,9 +166,9 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['master'].should eql(false)
     enc_server_role['server_id'].should eql(2)
 
-    enc_rights = host.to_enc['role::mysql_rights']
-    enc_rights['environment'].should eql('testing')
-    enc_rights['database_name'].should eql('mydb')
+    enc_rights = host.to_enc['mysql_rights']
+    enc_rights['mydb']['environment'].should eql('testing')
+    enc_rights['mydb']['database_name'].should eql('mydb')
 
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
