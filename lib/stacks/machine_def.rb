@@ -120,6 +120,10 @@ class Stacks::MachineDef
     end
   end
 
+  def remove_network(net)
+    @networks.delete net
+  end
+
   def recurse_merge(a,b)
     a.merge(b) do |_,x,y|
       (x.is_a?(Hash) && y.is_a?(Hash)) ? recurse_merge(x,y) : y
