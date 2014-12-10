@@ -60,6 +60,18 @@ describe_stack 'selenium' do
   host("e1-hub-001.mgmt.space.net.local") do |host|
     host.to_spec[:template].should eql "sehub"
     host.to_spec[:selenium_version].should eql('2.41.0')
+    host.to_spec[:nodes].should eql([
+      'e1-a-browser-001',
+      'e1-a-browser-002',
+      'e1-a-browser-003',
+      'e1-a-browser-004',
+      'e1-a-browser-005',
+      'e1-a-ie10-001',
+      'e1-a-ie6-001',
+      'e1-a-ie6-002',
+      'e1-a-ie9-001',
+      'e1-a-ie9-002'
+    ])
   end
 
   host("e1-a-ie6-002.mgmt.space.net.local") do |host|

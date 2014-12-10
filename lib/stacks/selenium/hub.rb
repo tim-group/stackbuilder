@@ -13,10 +13,21 @@ class Stacks::Selenium::Hub < Stacks::MachineDef
     super(environment)
   end
 
+  def node_names
+    node_names = @nodes.inject([]) do |hostnames, (name,machine)|
+      hostnames << machine.hostname if machine.kind_of? Stacks::MachineDef
+      machine.children.map {|child_machine|
+        hostnames << child_machine.hostname
+      } if machine.kind_of? Stacks::MachineSet
+      hostnames
+    end
+    node_names.reject!{|name| name==self.name}.sort
+  end
+
   def to_spec
     spec = super
     spec[:template] = "sehub"
-    spec[:nodes] = @nodes.map {|name,node| node.name}.reject{|name,node| name==self.name}.sort
+    spec[:nodes] = node_names
     spec[:selenium_version] = options[:selenium_version] || "2.32.0"
     spec
   end
