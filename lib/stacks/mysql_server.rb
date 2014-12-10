@@ -98,10 +98,12 @@ class Stacks::MysqlServer < Stacks::MachineDef
         enc.merge!(@virtual_service.dependant_instance_mysql_rights)
       end
     end
-    enc['mysql_rights'] = {
-      @virtual_service.database_name => {
-        'environment'   => environment.name,
-        'database_name' => @virtual_service.database_name,
+    enc['role::mysql_multiple_rights'] = {
+      'rights' => {
+        @virtual_service.database_name => {
+          'environment'   => environment.name,
+          'database_name' => @virtual_service.database_name,
+        }
       }
     }
     if master?

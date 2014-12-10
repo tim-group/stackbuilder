@@ -142,7 +142,7 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['master'].should eql(true)
     enc_server_role['server_id'].should eql(1)
 
-    enc_rights = host.to_enc['mysql_rights']
+    enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
     enc_rights['mydb']['environment'].should eql('testing')
     enc_rights['mydb']['database_name'].should eql('mydb')
 
@@ -166,7 +166,7 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['master'].should eql(false)
     enc_server_role['server_id'].should eql(2)
 
-    enc_rights = host.to_enc['mysql_rights']
+    enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
     enc_rights['mydb']['environment'].should eql('testing')
     enc_rights['mydb']['database_name'].should eql('mydb')
 
