@@ -347,6 +347,14 @@ end
 
 describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
   given do
+    stack "nat" do
+      natserver
+    end
+
+    stack "lb" do
+      loadbalancer
+    end
+
     stack "nameserver" do
       virtual_bindserver 'ns'
     end
@@ -354,16 +362,28 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
     env "o", :primary_site=>"oy" do
       env 'oy' do
         instantiate_stack "nameserver"
+        instantiate_stack "nat"
+        instantiate_stack "lb"
       end
     end
   end
 
   host("oy-ns-001.mgmt.oy.net.local") do |host|
     host.virtual_service.vip_networks.should be_eql [:mgmt]
+    host.to_enc['role::bind_server']['vip_fqdns'].should eql(['oy-ns-vip.mgmt.oy.net.local'])
+  end
+
+  host("oy-nat-001.mgmt.oy.net.local") do |host|
+    host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53'].should be_nil
+  end
+
+  host("oy-lb-001.mgmt.oy.net.local") do |host|
+    host.to_enc['role::loadbalancer']['virtual_servers']['oy-ns-vip.oy.net.local'].should be_nil
+    host.to_enc['role::loadbalancer']['virtual_servers']['oy-ns-vip.mgmt.oy.net.local'].should_not be_nil
   end
 end
 
-describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
+describe_stack 'bind servers with zones removed should have the right zone files' do
   given do
     stack "nameserver" do
       virtual_bindserver 'ns' do

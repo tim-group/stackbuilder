@@ -91,14 +91,6 @@ module Stacks::VirtualBindService
     server
   end
 
-  def realserver_prod_fqdns
-    self.realservers.map { |server| server.prod_fqdn }.sort
-  end
-
-  def realserver_mgmt_fqdns
-    self.realservers.map { |server| server.mgmt_fqdn }.sort
-  end
-
   def instantiate_machines(environment)
     i = 0
     index =  sprintf("%03d",i+=1)
@@ -161,21 +153,25 @@ module Stacks::VirtualBindService
   end
 
   def to_loadbalancer_config
-    prod_realservers = {'blue' => realserver_prod_fqdns}
-    mgmt_realservers = {'blue' => realserver_mgmt_fqdns}
-    {
-      self.vip_fqdn(:prod) => {
+    vip_nets = @vip_networks.select do |vip_network|
+      not [:front].include? vip_network
+    end
+    lb_config = {}
+    vip_nets.each do |vip_net|
+      lb_config[vip_fqdn(vip_net)] = {
         'type'         => 'bind',
         'ports'        => @ports,
-        'realservers'  => prod_realservers,
-        'healthchecks' => healthchecks
-      },
-      self.vip_fqdn(:mgmt) => {
-        'type'         => 'bind',
-        'ports'        => @ports,
-        'realservers'  => mgmt_realservers,
+        'realservers'  => {
+          'blue' => realserver_fqdns(vip_net),
+        },
         'healthchecks' => healthchecks
       }
-    }
+    end
+    lb_config
+  end
+
+  private
+  def realserver_fqdns(net)
+    self.realservers.map { |server| server.qualified_hostname(net) }.sort
   end
 end

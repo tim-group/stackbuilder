@@ -40,9 +40,17 @@ class Stacks::BindServer < Stacks::MachineDef
     dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on
 
     enc = super()
+    vip_fqdns = @virtual_service.vip_networks.map do |vip_network|
+      if [:front].include? vip_network
+        nil
+      else
+        vip_fqdn(vip_network)
+      end
+    end
+    vip_fqdns.compact!
     enc.merge!({
       'role::bind_server' => {
-        'vip_fqdns'                         => [ vip_fqdn(:prod), vip_fqdn(:mgmt)],
+        'vip_fqdns'                         => vip_fqdns,
         'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns([:mgmt,:prod]),
         'dependant_instances'               => @virtual_service.all_dependencies(self),
         'forwarder_zones'                   => @virtual_service.forwarder_zones,
