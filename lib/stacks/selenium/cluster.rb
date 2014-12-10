@@ -1,8 +1,9 @@
 require 'stacks/selenium/namespace'
-require 'stacks/machine_def_container'
-require 'stacks/app_server'
-require 'stacks/nat'
-require 'uri'
+
+require 'stacks/selenium/hub'
+require 'stacks/selenium/ubuntu_node'
+require 'stacks/selenium/xp_node'
+require 'stacks/selenium/win7_node'
 
 module Stacks::Selenium::Cluster
   def self.extended(object)
