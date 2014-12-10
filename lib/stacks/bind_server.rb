@@ -75,6 +75,10 @@ class Stacks::BindServer < Stacks::MachineDef
     spec = super
     spec[:nameserver] = Resolv.getaddress(@virtual_service.slave_servers.first.mgmt_fqdn) if master?
     spec[:nameserver] = Resolv.getaddress(@virtual_service.master_server.mgmt_fqdn) unless master?
+    spec[:networks] = @virtual_service.vip_networks.select do |vip_network|
+      not [:front].include? vip_network
+    end
+    spec[:qualified_hostnames] = Hash[spec[:networks].map { |network| [network, qualified_hostname(network)] }]
     spec
   end
 end
