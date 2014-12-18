@@ -115,7 +115,9 @@ module StackBuilder::Allocator::HostPolicies
     required_space_hash = {}
     Proc.new do |host, machine|
       machine[:storage].each do |mount_point, values|
-        required_space_hash[values[:type]] = 0 if !required_space_hash.has_key?(values[:type])
+        required_space_hash[values[:type]] = 0
+      end
+      machine[:storage].each do |mount_point, values|
         required_space_hash[values[:type]] += values[:size].to_f
       end
       storage_without_enough_space = required_space_hash.inject({}) do |result, (type, required_space)|
