@@ -64,6 +64,9 @@ module Stacks::Core::Actions
         has :failure do
           raise "some machines failed to launch"
         end
+        has :unaccounted do
+          raise "some machines were unaccounted for"
+        end
       end
     end
   end
