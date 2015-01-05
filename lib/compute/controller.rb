@@ -87,9 +87,7 @@ class Compute::Controller
 
         specs.map do |spec|
           result = @compute_node_client.launch(host, [spec])
-          if result.nil?
-            @logger.info("#{host} launch #{spec[:hostname]} result: #{sender}: failed to launch")
-          end
+
           result.each do |sender, result_hash|
             if not result_hash[spec[:hostname]].nil?
               result_text = result_hash[spec[:hostname]].first
