@@ -97,7 +97,7 @@ class Compute::Client
   end
 
   def launch(host, specs)
-    invoke :launch, specs, :timeout => 1000, :nodes => [host]
+    invoke :launch, specs, :timeout => 1500, :nodes => [host]
   end
 
   def allocate_ips(host, specs)
