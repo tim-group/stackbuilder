@@ -5,6 +5,7 @@ class Stacks::AppServer < Stacks::MachineDef
 
   attr_reader :environment, :virtual_service
   attr_accessor :group
+  attr_accessor :sso_port, :ajp_port
 
   def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)
@@ -31,6 +32,9 @@ class Stacks::AppServer < Stacks::MachineDef
         'port' => '8000'
       }
     }
+
+    enc['role::http_app']['sso_port'] = @sso_port unless @sso_port.nil?
+    enc['role::http_app']['ajp_port'] = @ajp_port unless @ajp_port.nil?
 
     if @virtual_service.respond_to? :vip_fqdn
       enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod)

@@ -37,3 +37,42 @@ describe_stack 'tim' do
   end
 end
 
+describe_stack 'app with sso port' do
+  given do
+    stack 'app' do
+      standalone_appserver 'testssoapp' do
+        self.application = 'testapp'
+        each_machine do |machine|
+          machine.sso_port = 8444
+        end
+      end
+    end
+    env "e1", { :primary_site=>"space" } do
+      instantiate_stack "app"
+    end
+  end
+
+  host("e1-testssoapp-002.mgmt.space.net.local") do |host|
+    host.to_enc['role::http_app']['sso_port'].should eql 8444
+  end
+end
+
+describe_stack 'app with ajp port' do
+  given do
+    stack 'app' do
+      standalone_appserver 'testajpapp' do
+        self.application = 'testapp'
+        each_machine do |machine|
+          machine.ajp_port = 8444
+        end
+      end
+    end
+    env "e1", { :primary_site=>"space" } do
+      instantiate_stack "app"
+    end
+  end
+
+  host("e1-testajpapp-002.mgmt.space.net.local") do |host|
+    host.to_enc['role::http_app']['ajp_port'].should eql 8444
+  end
+end
