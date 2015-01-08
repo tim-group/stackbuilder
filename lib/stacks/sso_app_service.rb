@@ -19,4 +19,10 @@ module Stacks::SsoAppService
       "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000"
     }
   end
+
+  def to_loadbalancer_config
+    config = lb_config
+    config[self.vip_fqdn(:prod)]['type'] = 'sso_app'
+    config
+  end
 end

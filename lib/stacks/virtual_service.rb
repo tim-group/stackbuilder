@@ -78,7 +78,7 @@ module Stacks::VirtualService
     @udp = false
   end
 
-  def to_loadbalancer_config
+  def lb_config
     fewest_servers_in_a_group = self.realservers.size
     grouped_realservers = self.realservers.group_by do |realserver|
       realserver.group
@@ -103,6 +103,10 @@ module Stacks::VirtualService
         'healthcheck_timeout' => self.healthcheck_timeout
       }
     }
+  end
+
+  def to_loadbalancer_config
+    lb_config
   end
 
   def clazz

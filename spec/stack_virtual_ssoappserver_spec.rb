@@ -20,6 +20,7 @@ describe_stack 'stack.virtual_ssoappserver.to_loadbalancer_config' do
     data['healthcheck_timeout'].should eql(10)
     data['env'].should eql('e1')
     data['app'].should eql('test_application')
+    data['type'].should eql('sso_app')
     data['realservers']['blue'].should eql(["e1-testapp-001.space.net.local", "e1-testapp-002.space.net.local"])
     data['realservers']['green'].should be_nil
   end
