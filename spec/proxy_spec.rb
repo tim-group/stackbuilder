@@ -37,6 +37,7 @@ describe_stack 'exampleproxy' do
   host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
       "role::proxyserver"=>{
+        "environment" => "e1",
         "vhosts"=>{
           "e1-exampleproxy-vip.front.space.net.local"=>{
             "proxy_pass_rules"=>{
@@ -86,7 +87,8 @@ describe_stack 'exampleproxy' do
             "vhost_properties"=>{}
           }
         },
-        "prod_vip_fqdn"=>"e1-exampleproxy-vip.space.net.local"
+        "prod_vip_fqdn"=>"e1-exampleproxy-vip.space.net.local",
+        "environment" => "e1"
       }
     })
   end

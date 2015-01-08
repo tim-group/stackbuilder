@@ -558,6 +558,7 @@ describe Stacks::DSL do
     proxyserver.to_enc.should eql(
       {'role::proxyserver' => {
       'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
+      'environment' => 'env',
       'vhosts'        => {
       'env-refproxy-vip.front.st.net.local' => {
       'application'    => 'MyApp',
