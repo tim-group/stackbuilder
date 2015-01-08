@@ -29,6 +29,7 @@ require 'stacks/selenium/cluster'
 require 'stacks/sensu_server'
 require 'stacks/shadow_server'
 require 'stacks/shadow_server_cluster'
+require 'stacks/sso_app_service'
 require 'stacks/standard_server'
 require 'stacks/virtual_bind_service'
 require 'stacks/virtual_proxy_service'
@@ -52,6 +53,10 @@ class Stacks::Stack
 
   def standalone_appserver(name, &block)
     machineset_with(name, [Stacks::AppService], Stacks::AppServer, &block);
+  end
+
+  def virtual_ssoappserver(name, &block)
+    machineset_with(name, [Stacks::VirtualService, Stacks::SsoAppService], Stacks::AppServer, &block);
   end
 
   def virtual_proxyserver(name, &block)
