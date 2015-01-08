@@ -587,6 +587,46 @@ describe Stacks::DSL do
     )
   end
 
+  it 'generates proxy server enc data with persistent when enable_persistent is specified'  do
+    stack "loadbalancer" do
+      loadbalancer
+    end
+
+    stack "proxyserver" do
+      virtual_proxyserver "proxy" do
+        enable_persistence '443'
+      end
+    end
+
+    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+      instantiate_stack "loadbalancer"
+      instantiate_stack "proxyserver"
+    end
+    loadbalancer = find("st-lb-001.mgmt.st.net.local")
+    loadbalancer.to_enc.should eql(
+      {
+        "role::loadbalancer" => {
+          "virtual_router_id" => 1,
+          "virtual_servers" => {
+            "st-proxy-vip.st.net.local" =>
+            {
+              "type" => "proxy",
+              "ports" => [80, 443],
+              "realservers" => {
+                "blue"=> [
+                  "st-proxy-001.st.net.local",
+                  "st-proxy-002.st.net.local"
+                ]
+              },
+              "persistent_ports" => ["443"],
+            }
+          },
+        }
+      }
+    )
+
+  end
+
   it 'can generate the correct enc data for sftp servers' do
     stack "fabric" do
       virtual_sftpserver 'sftp' do

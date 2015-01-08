@@ -110,12 +110,19 @@ module Stacks::VirtualProxyService
       [group, realserver_fqdns]
     end]
 
+    enc = {
+      'type' => 'proxy',
+      'ports' => @ports,
+      'realservers' => realservers,
+    }
+
+    unless @persistent_ports.empty?
+      persistence = { 'persistent_ports' => @persistent_ports }
+      enc = enc.merge(persistence)
+    end
+
     {
-      self.vip_fqdn(:prod) => {
-        'type' => 'proxy',
-        'ports' => @ports,
-        'realservers' => realservers
-      }
+      self.vip_fqdn(:prod) => enc
     }
   end
 end
