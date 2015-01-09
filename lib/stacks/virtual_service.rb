@@ -65,9 +65,10 @@ module Stacks::VirtualService
   end
 
   attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
-  attr_reader :vip_networks
+  attr_reader :vip_networks, :allowed_hosts
 
   def configure()
+    @allowed_hosts = []
     @ehcache = false
     @nat=false
     @persistent_ports = []
@@ -76,33 +77,6 @@ module Stacks::VirtualService
     @vip_networks = [:prod]
     @tcp = true
     @udp = false
-  end
-
-  def lb_config
-    fewest_servers_in_a_group = self.realservers.size
-    grouped_realservers = self.realservers.group_by do |realserver|
-      realserver.group
-    end
-    num_servers_in_group = {}
-    realservers = Hash[grouped_realservers.map do |group, realservers|
-      fewest_servers_in_a_group = realservers.size unless realservers.size > fewest_servers_in_a_group
-      realserver_fqdns = realservers.map do |realserver|
-        realserver.prod_fqdn
-      end.sort
-      [group, realserver_fqdns]
-    end]
-
-    monitor_warn = fewest_servers_in_a_group == 1 ? 0 : 1
-
-    {
-      self.vip_fqdn(:prod) => {
-        'env' => self.environment.name,
-        'app' => self.application,
-        'realservers' => realservers,
-        'monitor_warn' => monitor_warn,
-        'healthcheck_timeout' => self.healthcheck_timeout
-      }
-    }
   end
 
   def to_loadbalancer_config
@@ -152,6 +126,11 @@ module Stacks::VirtualService
     add_vip_network :prod
   end
 
+  def allow_host(source_host_or_network)
+    @allowed_hosts << source_host_or_network
+    @allowed_hosts.uniq!
+  end
+
   def enable_persistence(port)
     @persistent_ports << port
   end
@@ -169,6 +148,34 @@ module Stacks::VirtualService
 
   def config_params(dependant)
     {}
+  end
+
+  private
+  def lb_config
+    fewest_servers_in_a_group = self.realservers.size
+    grouped_realservers = self.realservers.group_by do |realserver|
+      realserver.group
+    end
+    num_servers_in_group = {}
+    realservers = Hash[grouped_realservers.map do |group, realservers|
+      fewest_servers_in_a_group = realservers.size unless realservers.size > fewest_servers_in_a_group
+      realserver_fqdns = realservers.map do |realserver|
+        realserver.prod_fqdn
+      end.sort
+      [group, realserver_fqdns]
+    end]
+
+    monitor_warn = fewest_servers_in_a_group == 1 ? 0 : 1
+
+    {
+      self.vip_fqdn(:prod) => {
+        'env' => self.environment.name,
+        'app' => self.application,
+        'realservers' => realservers,
+        'monitor_warn' => monitor_warn,
+        'healthcheck_timeout' => self.healthcheck_timeout
+      }
+    }
   end
 
 end

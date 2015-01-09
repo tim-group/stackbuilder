@@ -10,6 +10,7 @@ class Stacks::AppServer < Stacks::MachineDef
   def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
+    @allowed_hosts = []
   end
 
   def bind_to(environment)
@@ -18,6 +19,11 @@ class Stacks::AppServer < Stacks::MachineDef
 
   def vip_fqdn(net)
     return @virtual_service.vip_fqdn(net)
+  end
+
+  def allow_host(source_host_or_network)
+    @allowed_hosts << source_host_or_network
+    @allowed_hosts.uniq!
   end
 
   public
@@ -35,6 +41,10 @@ class Stacks::AppServer < Stacks::MachineDef
 
     enc['role::http_app']['sso_port'] = @sso_port unless @sso_port.nil?
     enc['role::http_app']['ajp_port'] = @ajp_port unless @ajp_port.nil?
+
+    allowed_hosts = @allowed_hosts
+    allowed_hosts = allowed_hosts + @virtual_service.allowed_hosts if @virtual_service.respond_to? :allowed_hosts
+    enc['role::http_app']['allowed_hosts'] = allowed_hosts.uniq.sort unless allowed_hosts.empty?
 
     if @virtual_service.respond_to? :vip_fqdn
       enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod)
@@ -54,6 +64,7 @@ class Stacks::AppServer < Stacks::MachineDef
         enc['role::http_app']['dependencies']['cache.remoteObjectPort'] = "49010"
       end
     end
+
     enc
   end
 end
