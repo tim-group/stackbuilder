@@ -86,6 +86,11 @@ class Compute::Client
   end
 
   def invoke(selector, specs, client_options)
+    # debug information / bkhidhir / 2015-01-12
+    puts selector
+    puts specs
+    puts client_options
+
     mco_client("computenode", client_options) do |mco|
       mco.send(selector, :specs => specs).map do |node|
         if node[:statuscode] != 0
