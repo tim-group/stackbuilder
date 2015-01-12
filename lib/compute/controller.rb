@@ -83,7 +83,7 @@ class Compute::Controller
 
     # debug information / bkhidhir / 2015-01-12
     puts $:
-    puts %x[hostname]
+    puts %x[hostname -f]
     puts %x[apt-cache policy stacks | head -4]
 
     threads = allocation.map do |host, specs|
