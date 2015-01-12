@@ -82,9 +82,9 @@ class Compute::Controller
     grouped_results = []
 
     # debug information / bkhidhir / 2015-01-12
-    puts $:
-    puts %x[hostname -f]
-    puts %x[apt-cache policy stacks | head -4]
+    # puts $:
+    # puts %x[hostname -f]
+    # puts %x[apt-cache policy stacks | head -4]
 
     threads = allocation.map do |host, specs|
       Thread.new(host, specs) do |host, specs|
