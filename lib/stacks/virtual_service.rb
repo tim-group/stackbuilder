@@ -65,10 +65,11 @@ module Stacks::VirtualService
   end
 
   attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
-  attr_reader :vip_networks, :allowed_hosts
+  attr_reader :vip_networks, :allowed_hosts, :included_classes
 
   def configure()
     @allowed_hosts = []
+    @included_classes = []
     @ehcache = false
     @nat=false
     @persistent_ports = []
@@ -129,6 +130,11 @@ module Stacks::VirtualService
   def allow_host(source_host_or_network)
     @allowed_hosts << source_host_or_network
     @allowed_hosts.uniq!
+  end
+
+  def include_class(class_name)
+    @included_classes << class_name
+    @included_classes.uniq!
   end
 
   def enable_persistence(port)
