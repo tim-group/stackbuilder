@@ -69,7 +69,7 @@ module Stacks::VirtualService
 
   def configure()
     @allowed_hosts = []
-    @included_classes = []
+    @included_classes = {}
     @ehcache = false
     @nat=false
     @persistent_ports = []
@@ -132,9 +132,8 @@ module Stacks::VirtualService
     @allowed_hosts.uniq!
   end
 
-  def include_class(class_name)
-    @included_classes << class_name
-    @included_classes.uniq!
+  def include_class(class_name, class_hash = {})
+    @included_classes[class_name] = class_hash
   end
 
   def enable_persistence(port)

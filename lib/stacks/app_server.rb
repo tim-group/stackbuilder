@@ -11,7 +11,7 @@ class Stacks::AppServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
     @allowed_hosts = []
-    @included_classes = []
+    @included_classes = {}
   end
 
   def bind_to(environment)
@@ -27,9 +27,8 @@ class Stacks::AppServer < Stacks::MachineDef
     @allowed_hosts.uniq!
   end
 
-  def include_class(class_name)
-    @included_classes << class_name
-    @included_classes.uniq!
+  def include_class(class_name, class_hash = {})
+    @included_classes[class_name] = class_hash
   end
 
   public
@@ -52,11 +51,8 @@ class Stacks::AppServer < Stacks::MachineDef
     allowed_hosts = allowed_hosts + @virtual_service.allowed_hosts if @virtual_service.respond_to? :allowed_hosts
     enc['role::http_app']['allowed_hosts'] = allowed_hosts.uniq.sort unless allowed_hosts.empty?
 
-    included_classes = @included_classes
-    included_classes = included_classes + @virtual_service.included_classes if @virtual_service.respond_to? :included_classes
-    included_classes.each do |included_class|
-      enc[included_class] = {}
-    end
+    enc.merge! @included_classes
+    enc.merge! @virtual_service.included_classes if @virtual_service.respond_to? :included_classes
 
     if @virtual_service.respond_to? :vip_fqdn
       enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod)

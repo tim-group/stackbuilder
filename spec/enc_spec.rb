@@ -741,7 +741,7 @@ describe Stacks::DSL do
     server.to_enc['role::http_app']['allowed_hosts'].should eql(['1.1.1.1', '2.2.2.2'])
   end
 
-  it 'allows specification of aditional hosts that are allowed to talk to the app or service' do
+  it 'allows specification of additional classes that should be included on the host' do
     stack "mystack" do
       virtual_appserver "x" do
         include_class 'test::puppet::class'
@@ -758,6 +758,25 @@ describe Stacks::DSL do
     server = find("e1-x-001.mgmt.space.net.local")
     server.to_enc.keys.include? 'test::puppet::class'
     server.to_enc.keys.include? 'test::puppet::class2'
+  end
+
+  it 'allows specification of aditional classes with additional parameters that should be included on the host' do
+    stack "mystack" do
+      virtual_appserver "x" do
+        include_class 'test::puppet::class', 'test_key' => 'test_value'
+        each_machine do |machine|
+          include_class 'test::puppet::class2', 'test_key2' => 'test_value2'
+        end
+      end
+    end
+
+    env "e1", :primary_site=>'space' do
+      instantiate_stack "mystack"
+    end
+
+    server = find("e1-x-001.mgmt.space.net.local")
+    server.to_enc['test::puppet::class'].should eql({ 'test_key' => 'test_value' })
+    server.to_enc['test::puppet::class2'].should eql({ 'test_key2' => 'test_value2' })
   end
 
 end
