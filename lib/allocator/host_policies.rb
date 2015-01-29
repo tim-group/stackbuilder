@@ -121,10 +121,13 @@ module StackBuilder::Allocator::HostPolicies
         required_space_hash[values[:type]] += values[:size].to_f
       end
       storage_without_enough_space = required_space_hash.inject({}) do |result, (type, required_space)|
+        puts "#{type}"
+        pp host.storage[type]
         host_storage_type = host.storage[type] rescue nil
         unless host_storage_type.nil?
-          available_space = host_storage_type[:free].to_f
-          if (required_space > host_storage_type[:free].to_f)
+          available_space = KB_to_GB(host_storage_type[:free])
+          puts "#{host.fqdn} - #{type} - #{available_space} - #{required_space}"
+          if (required_space > available_space)
             result[type] = {:available_space => available_space, :required_space => required_space}
           end
         else
@@ -142,5 +145,10 @@ module StackBuilder::Allocator::HostPolicies
       end
       result
     end
+  end
+
+  private
+  def self.KB_to_GB(value)
+    ((value.to_f / (1024*1024) * 100).round / 100.0)
   end
 end
