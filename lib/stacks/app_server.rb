@@ -6,12 +6,14 @@ class Stacks::AppServer < Stacks::MachineDef
   attr_reader :environment, :virtual_service
   attr_accessor :group
   attr_accessor :sso_port, :ajp_port
+  attr_accessor :launch_config
 
   def initialize(virtual_service, index, &block)
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
     @allowed_hosts = []
     @included_classes = {}
+    @launch_config = {}
   end
 
   def bind_to(environment)
@@ -72,6 +74,11 @@ class Stacks::AppServer < Stacks::MachineDef
         enc['role::http_app']['dependencies']['cache.remoteObjectPort'] = "49010"
       end
     end
+
+    unless @launch_config.empty?
+      enc['launch_config'] = @launch_config
+    end
+
 
     enc
   end
