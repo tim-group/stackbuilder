@@ -76,9 +76,8 @@ class Stacks::AppServer < Stacks::MachineDef
     end
 
     unless @launch_config.empty?
-      enc['launch_config'] = @launch_config
+      enc['role::http_app']['launch_config'] = @launch_config
     end
-
 
     enc
   end

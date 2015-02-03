@@ -17,7 +17,7 @@ describe_stack 'test_app_server' do
   end
 
   host("e1-appx-001.mgmt.space.net.local") do |host|
-    host.to_enc['launch_config'].should eql({
+    host.to_enc['role::http_app']['launch_config'].should eql({
       'specify_config_as_system_property' => 'yes'
     })
   end
