@@ -1,9 +1,10 @@
 require 'stacks/test_framework'
-describe_stack 'stack.virtual_ssoappserver.to_loadbalancer_config' do
+describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
   given do
     stack 'test' do
-      virtual_ssoappserver 'testapp' do
+      virtual_appserver 'testapp' do
         enable_ehcache
+        self.sso         = true
         self.application = 'test_application'
         self.instances = 2
       end

@@ -3,11 +3,12 @@ module Stacks::AppService
     object.configure()
   end
 
-  attr_accessor :application, :ehcache
+  attr_accessor :application, :ehcache, :sso
 
   def configure()
     @ehcache = false
     @ports = [8000]
+    @sso = false
   end
 
   def enable_ehcache
@@ -18,5 +19,11 @@ module Stacks::AppService
     config = {
       "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000"
     }
+  end
+
+  def to_loadbalancer_config
+    config = lb_config
+    config[self.vip_fqdn(:prod)]['type'] = 'sso_app' if @sso
+    config
   end
 end
