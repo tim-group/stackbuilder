@@ -3,12 +3,13 @@ module Stacks::AppService
     object.configure()
   end
 
-  attr_accessor :application, :ehcache, :sso
+  attr_accessor :application, :ehcache, :sso, :jvm_args
 
   def configure()
     @ehcache = false
     @ports = [8000]
     @sso = false
+    @jvm_args = nil
   end
 
   def enable_ehcache
@@ -26,4 +27,5 @@ module Stacks::AppService
     config[self.vip_fqdn(:prod)]['type'] = 'sso_app' if @sso
     config
   end
+
 end

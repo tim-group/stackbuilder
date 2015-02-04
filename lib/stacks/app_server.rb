@@ -42,10 +42,11 @@ class Stacks::AppServer < Stacks::MachineDef
         'environment' => environment.name,
         'dependencies' => @virtual_service.dependency_config,
         'dependant_instances' => @virtual_service.dependant_machine_def_fqdns,
-        'port' => '8000'
+        'port' => '8000',
       }
     }
 
+    enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
     enc['role::http_app']['sso_port'] = @sso_port unless @sso_port.nil?
     enc['role::http_app']['ajp_port'] = @ajp_port unless @ajp_port.nil?
 
