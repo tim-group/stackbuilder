@@ -20,6 +20,10 @@ module Stacks::AppService
     @sso = true
   end
 
+  def set_jvm_args(jvm_args)
+    @jvm_args = jvm_args
+  end
+
   def config_params(dependant)
     config = {
       "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000"
