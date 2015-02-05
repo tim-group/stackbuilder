@@ -1,16 +1,12 @@
 class Stacks::Inventory
 
   def initialize(stack_dir)
+    stack_file = "#{stack_dir}/stack.rb"
+    raise "no stack.rb found in #{stack_dir}" unless File.exist? stack_file
+
     @stacks = Object.new
     @stacks.extend Stacks::DSL
-    Dir.glob("#{stack_dir}/*.rb").each do |stack_file|
-      begin
-        @stacks.instance_eval(IO.read("#{stack_dir}/#{stack_file}"), "#{stack_dir}/#{stack_file}")
-      rescue
-        backtrace = $@.join("\n")
-        raise "Unable to instance_eval #{stack_file}\n#{$!}\n#{backtrace}"
-      end
-    end
+    @stacks.instance_eval(IO.read(stack_file), stack_file)
   end
 
   def find(fqdn)
