@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo -n "Running rake spec: "
+OUTPUT=`rake spec 2>&1`
+#>/dev/null 2>&1`
+RC=$?
+if [ $RC -ne 0 ]; then
+  echo "FAIL"
+  echo "$OUTPUT"
+  exit 1
+else
+  echo "OK"
+fi
+
+exit 0
+
