@@ -32,6 +32,7 @@ class Stacks::NatServer < Stacks::MachineDef
   end
 
   def to_enc
+    enc = super
     rules = {}
 
     snat = {
@@ -60,12 +61,12 @@ class Stacks::NatServer < Stacks::MachineDef
     rules.merge! snat
     rules.merge! dnat
 
-    {
+    enc.merge({
       'role::natserver' => {
         'rules' => rules,
         'front_virtual_router_id' => self.virtual_router_ids[:front],
         'prod_virtual_router_id' => self.virtual_router_ids[:prod]
       }
-    }
+    })
   end
 end
