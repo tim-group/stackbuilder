@@ -4,7 +4,8 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
     stack 'test' do
       virtual_appserver 'testapp' do
         enable_ehcache
-        enable_sso
+        enable_sso('8443')
+        enable_ajp('8009')
         self.application = 'test_application'
         self.instances = 2
       end
@@ -24,6 +25,9 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
     data['type'].should eql('sso_app')
     data['realservers']['blue'].should eql(["e1-testapp-001.space.net.local", "e1-testapp-002.space.net.local"])
     data['realservers']['green'].should be_nil
+
+    host.to_enc['role::http_app']['ajp_port'].should eql('8009')
+    host.to_enc['role::http_app']['sso_port'].should eql('8443')
   end
 end
 

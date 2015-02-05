@@ -5,7 +5,6 @@ class Stacks::AppServer < Stacks::MachineDef
 
   attr_reader :environment, :virtual_service
   attr_accessor :group
-  attr_accessor :sso_port, :ajp_port
   attr_accessor :launch_config
 
   def initialize(virtual_service, index, &block)
@@ -46,8 +45,8 @@ class Stacks::AppServer < Stacks::MachineDef
     }
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
-    enc['role::http_app']['sso_port'] = @sso_port unless @sso_port.nil?
-    enc['role::http_app']['ajp_port'] = @ajp_port unless @ajp_port.nil?
+    enc['role::http_app']['sso_port'] = @virtual_service.sso_port unless @virtual_service.sso_port.nil?
+    enc['role::http_app']['ajp_port'] = @virtual_service.ajp_port unless @virtual_service.ajp_port.nil?
 
     allowed_hosts = @allowed_hosts
     allowed_hosts = allowed_hosts + @virtual_service.allowed_hosts if @virtual_service.respond_to? :allowed_hosts

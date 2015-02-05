@@ -3,12 +3,13 @@ module Stacks::AppService
     object.configure()
   end
 
-  attr_accessor :application, :ehcache, :sso, :jvm_args
+  attr_accessor :application, :ehcache, :sso_port, :ajp_port, :jvm_args
 
   def configure()
     @ehcache = false
     @ports = [8000]
-    @sso = false
+    @sso_port = nil
+    @ajp_port = nil
     @jvm_args = nil
   end
 
@@ -16,8 +17,12 @@ module Stacks::AppService
     @ehcache = true
   end
 
-  def enable_sso
-    @sso = true
+  def enable_sso(sso_port='8443')
+    @sso_port = sso_port
+  end
+
+  def enable_ajp(ajp_port='8009')
+    @ajp_port = ajp_port
   end
 
   def set_jvm_args(jvm_args)
@@ -32,7 +37,7 @@ module Stacks::AppService
 
   def to_loadbalancer_config
     config = lb_config
-    config[self.vip_fqdn(:prod)]['type'] = 'sso_app' if @sso
+    config[self.vip_fqdn(:prod)]['type'] = 'sso_app' unless @sso_port.nil?
     config
   end
 
