@@ -5,7 +5,7 @@ class Stacks::Inventory
     @stacks.extend Stacks::DSL
     Dir.glob("#{stack_dir}/*.rb").each do |stack_file|
       begin
-        @stacks.instance_eval(IO.read("#{stack_dir}/#{stack_file}"), "#{stack_dir}/#{stack_file}")
+        @stacks.instance_eval(IO.read(stack_file))
       rescue
         backtrace = $@.join("\n")
         raise "Unable to instance_eval #{stack_file}\n#{$!}\n#{backtrace}"

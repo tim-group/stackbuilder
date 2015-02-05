@@ -7,10 +7,15 @@ describe Stacks::Inventory do
     @stacks_dir = File.dirname(__FILE__) + '/teststack'
   end
 
-  it 'blows up if there is no stacks file in the specified directory' do
+  it 'blows up if a stackbuilder config file contains errors' do
     expect {
-      Stacks::Inventory.new('/dev') # pretty sure that this will exist, and not contain a stack.rb
-    }.to raise_error("no stack.rb found in /dev")
+      Dir.mktmpdir("stacks-test-config") do |dir|
+        File.open("#{dir}/ruby_file_with_errors.rb", 'w') do |file|
+          file.write("burp!")
+        end
+        Stacks::Inventory.new(dir)
+      end
+    }.to raise_error
   end
 
   it 'returns nil when asked to find an unknown node' do
