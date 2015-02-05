@@ -16,6 +16,10 @@ module Stacks::AppService
     @ehcache = true
   end
 
+  def enable_sso
+    @sso = true
+  end
+
   def config_params(dependant)
     config = {
       "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000"

@@ -4,7 +4,7 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
     stack 'test' do
       virtual_appserver 'testapp' do
         enable_ehcache
-        self.sso         = true
+        enable_sso
         self.application = 'test_application'
         self.instances = 2
       end
