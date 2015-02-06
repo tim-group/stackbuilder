@@ -349,6 +349,7 @@ describe Stacks::DSL do
       'role::http_app'=> {
       'application' => 'JavaHttpRef',
       'group' => 'blue',
+      'cluster' => 'ci-appx',
       'vip_fqdn' => 'ci-appx-vip.st.net.local',
       'environment' => 'ci',
       'port'        => '8000',
@@ -373,6 +374,7 @@ describe Stacks::DSL do
       'role::http_app'=> {
       'application' => 'JavaHttpRef',
       'group' => 'blue',
+      'cluster' => 'ci-appx',
       'environment' => 'ci',
       'port'        => '8000',
       'dependencies' => {},

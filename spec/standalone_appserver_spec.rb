@@ -23,6 +23,7 @@ describe_stack 'tim' do
        'role::http_app'=> {
         'application' => 'TIM',
         'group' => 'blue',
+        'cluster'=>'e1-timcyclic',
         'environment' => 'e1',
         'port'        => '8000',
         'dependencies' => {},

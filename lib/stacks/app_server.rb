@@ -38,6 +38,7 @@ class Stacks::AppServer < Stacks::MachineDef
     enc['role::http_app'] = {
       'application' => virtual_service.application,
       'group' => group,
+      'cluster' => availability_group,
       'environment' => environment.name,
       'dependencies' => @virtual_service.dependency_config,
       'dependant_instances' => @virtual_service.dependant_machine_def_fqdns,
