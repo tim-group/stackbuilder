@@ -3,6 +3,21 @@ require 'stacks/test_framework'
 describe_stack 'should default root storage size to 3G' do
   given do
     stack 'demo' do
+      loadbalancer
+    end
+    env "e1", { :primary_site=>"space" } do
+      instantiate_stack "demo"
+    end
+  end
+
+  host("e1-lb-002.mgmt.space.net.local") do |host|
+    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('3G')
+  end
+end
+
+describe_stack 'should default appserver storage size to 5G' do
+  given do
+    stack 'demo' do
       standalone_appserver 'default'
     end
     env "e1", { :primary_site=>"space" } do
@@ -11,9 +26,31 @@ describe_stack 'should default root storage size to 3G' do
   end
 
   host("e1-default-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('3G')
+    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('5G')
   end
 end
+
+describe_stack 'can specify app server system storage size' do
+  given do
+    stack 'demo' do
+      standalone_appserver 'default' do
+        each_machine do |machine|
+          machine.modify_storage({
+            '/' => { :size => '10G' },
+          })
+        end
+      end
+    end
+    env "e1", { :primary_site=>"space" } do
+      instantiate_stack "demo"
+    end
+  end
+
+  host("e1-default-002.mgmt.space.net.local") do |host|
+    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('10G')
+  end
+end
+
 
 describe_stack 'allow additional storage to be specified' do
   given do

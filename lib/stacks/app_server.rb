@@ -13,6 +13,7 @@ class Stacks::AppServer < Stacks::MachineDef
     @allowed_hosts = []
     @included_classes = {}
     @launch_config = {}
+    modify_storage({ '/' => { :size => '5G' } })
   end
 
   def bind_to(environment)
