@@ -24,9 +24,10 @@ class Stacks::ProxyServer < Stacks::MachineDef
       service_resources = Hash[virtual_service.downstream_services()]
       {
         'role::proxyserver' => {
-          'prod_vip_fqdn' => @virtual_service.vip_fqdn(:prod),
-          'vhosts'  => service_resources,
-          'environment' => environment.name
+          'default_ssl_cert' => @virtual_service.cert,
+          'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod),
+          'vhosts'           => service_resources,
+          'environment'      => environment.name
         }
       }
     end

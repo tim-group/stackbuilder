@@ -12,12 +12,14 @@ module Stacks::VirtualProxyService
 
   attr_reader :proxy_vhosts
   attr_reader :proxy_vhosts_lookup
+  attr_reader :cert
 
   def configure()
     @downstream_services = []
     @proxy_vhosts_lookup = {}
     @proxy_vhosts = []
     @ports = [80, 443]
+    @cert = 'wildcard_timgroup_com'
   end
 
 
@@ -61,6 +63,10 @@ module Stacks::VirtualProxyService
     raise "Cannot find the service called #{service}"
   end
 
+  def default_ssl_cert(cert_name)
+    @cert = cert_name
+  end
+
   def depends_on
     @proxy_vhosts_lookup.values.map do |vhost|
       [vhost.service, environment.name]
@@ -92,7 +98,8 @@ module Stacks::VirtualProxyService
         'application' => primary_app.application,
         'proxy_pass_rules' => proxy_pass_rules,
         'type'  => vhost.type,
-        'vhost_properties' => vhost.properties
+        'vhost_properties' => vhost.properties,
+        'cert' => vhost.cert
       }]
     end]
 

@@ -37,6 +37,7 @@ describe_stack 'exampleproxy' do
   host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
       "role::proxyserver"=>{
+        "default_ssl_cert" => 'wildcard_timgroup_com',
         "environment" => "e1",
         "vhosts"=>{
           "e1-exampleproxy-vip.front.space.net.local"=>{
@@ -47,7 +48,8 @@ describe_stack 'exampleproxy' do
             "application"=>"example",
             "redirects"=>[],
             "type"=>"default",
-            "vhost_properties"=>{}
+            "vhost_properties"=>{},
+            "cert" => 'wildcard_timgroup_com',
 
           },
           "e1-exampleproxy-sso-vip.front.space.net.local"=>{
@@ -58,7 +60,8 @@ describe_stack 'exampleproxy' do
             "application"=>"example",
             "redirects"=>[],
             "type"=>"sso",
-            "vhost_properties"=>{}
+            "vhost_properties"=>{},
+            "cert" => 'wildcard_timgroup_com',
           },
           "example.overridden"=>{
             "proxy_pass_rules"=>{
@@ -71,7 +74,8 @@ describe_stack 'exampleproxy' do
             "application"=>"example",
             "redirects"=>[],
             "type"=>"default",
-            "vhost_properties"=>{}
+            "vhost_properties"=>{},
+            "cert" => 'wildcard_timgroup_com',
           },
           "example-sso.overridden"=>{
             "proxy_pass_rules"=>{
@@ -84,12 +88,41 @@ describe_stack 'exampleproxy' do
             "application"=>"example",
             "redirects"=>[],
             "type"=>"sso",
-            "vhost_properties"=>{}
+            "vhost_properties"=>{},
+            "cert" => 'wildcard_timgroup_com',
           }
         },
         "prod_vip_fqdn"=>"e1-exampleproxy-vip.space.net.local",
         "environment" => "e1"
       }
     })
+  end
+end
+
+describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs overriden' do
+  given do
+    stack "exampleproxy" do
+      virtual_proxyserver 'exampleproxy' do
+        default_ssl_cert 'test_cert_change'
+        vhost('exampleapp') do
+          with_cert 'test_vhost_cert_change'
+        end
+      end
+
+      virtual_appserver 'exampleapp' do
+        self.groups = ['blue']
+        self.application = 'example'
+      end
+    end
+
+    env "e1", :primary_site=>"space" do
+      instantiate_stack "exampleproxy"
+    end
+  end
+
+  host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc
+    enc['role::proxyserver']['default_ssl_cert'].should eql('test_cert_change')
+    enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert'].should eql('test_vhost_cert_change')
   end
 end

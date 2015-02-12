@@ -558,34 +558,38 @@ describe Stacks::DSL do
     proxyserver = find("env-refproxy-001.mgmt.st.net.local")
 
     proxyserver.to_enc.should eql(
-      {'role::proxyserver' => {
-      'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
-      'environment' => 'env',
-      'vhosts'        => {
-      'env-refproxy-vip.front.st.net.local' => {
-      'application'    => 'MyApp',
-      'proxy_pass_rules'  => {
-      '/' => "http://env-refapp-vip.st.net.local:8000"
-    },
-      'redirects'      => ['old-example.timgroup.com'],
-      'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
-      'type' => 'default',
-      'vhost_properties'=>{}
-    },
-    'example.timgroup.com' => {
-      'application'    => 'MyOtherApp',
-      'proxy_pass_rules'  => {
-      '/' => "http://env-ref2app-vip.st.net.local:8000",
-      '/resources' => "http://env-downstreamapp-vip.st.net.local:8000"
-    },
-      'redirects'      => [],
-      'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local'],
-      'type' => 'default',
-      'vhost_properties'=>{}
-    }
-    }
-    }
-    }
+      {
+        'role::proxyserver' => {
+          'default_ssl_cert' => 'wildcard_timgroup_com',
+          'prod_vip_fqdn' => 'env-refproxy-vip.st.net.local',
+          'environment' => 'env',
+          'vhosts'        => {
+            'env-refproxy-vip.front.st.net.local' => {
+              'application'    => 'MyApp',
+              'proxy_pass_rules'  => {
+                '/' => "http://env-refapp-vip.st.net.local:8000"
+              },
+              'redirects'      => ['old-example.timgroup.com'],
+             'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
+              'type' => 'default',
+              'vhost_properties'=>{},
+              'cert' => 'wildcard_timgroup_com'
+            },
+            'example.timgroup.com' => {
+              'application'    => 'MyOtherApp',
+              'proxy_pass_rules'  => {
+                '/' => "http://env-ref2app-vip.st.net.local:8000",
+                '/resources' => "http://env-downstreamapp-vip.st.net.local:8000"
+              },
+              'redirects'      => [],
+              'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local'],
+              'type' => 'default',
+              'vhost_properties'=>{},
+              'cert' => 'wildcard_timgroup_com'
+            }
+          }
+        }
+      }
     )
   end
 

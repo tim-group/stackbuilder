@@ -9,6 +9,7 @@ class Stacks::ProxyVHost
   attr_reader :proxy_pass_rules
   attr_reader :properties
   attr_reader :type
+  attr_reader :cert
 
   def initialize(vhost_fqdn, service, type = 'default', &block)
     @vhost_fqdn = vhost_fqdn
@@ -18,6 +19,7 @@ class Stacks::ProxyVHost
     @proxy_pass_rules = {}
     @type = type
     @properties = {}
+    @cert = 'wildcard_timgroup_com'
     self.instance_eval &block
   end
 
@@ -32,10 +34,14 @@ class Stacks::ProxyVHost
   def pass(proxy_pass_rule)
     @proxy_pass_rules.merge!(proxy_pass_rule)
   end
-  
+
+  def with_cert(cert_name)
+    @cert = cert_name
+  end
+
   def vhost_properties(properties)
     @properties.merge!(properties)
   end
-  
+
 end
 
