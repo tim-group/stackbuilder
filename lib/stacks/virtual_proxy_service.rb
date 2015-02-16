@@ -6,25 +6,24 @@ require 'stacks/proxy_vhost'
 require 'uri'
 
 module Stacks::VirtualProxyService
+  attr_reader :cert
+  attr_reader :proxy_vhosts
+  attr_reader :proxy_vhosts_lookup
+
   def self.extended(object)
     object.configure()
   end
 
-  attr_reader :proxy_vhosts
-  attr_reader :proxy_vhosts_lookup
-  attr_reader :cert
-
   def configure()
     @downstream_services = []
     @proxy_vhosts_lookup = {}
-    @proxy_vhosts = []
-    @ports = [80, 443]
-    @cert = 'wildcard_timgroup_com'
+    @proxy_vhosts        = []
+    @ports               = [80, 443]
+    @cert                = 'wildcard_timgroup_com'
   end
 
-
   def vhost(service, options={}, vhost_properties={}, &config_block)
-     key = "#{self.name}.vhost.#{service}.server_name"
+    key = "#{self.name}.vhost.#{service}.server_name"
     _vhost(key, vip_fqdn(:front), vip_fqdn(:prod), service, 'default', options, vhost_properties, &config_block)
   end
 
@@ -37,12 +36,12 @@ module Stacks::VirtualProxyService
   end
 
   def sso_vhost(service, options={}, vhost_properties={}, &config_block)
-     key = "#{self.name}.vhost.#{service}-sso.server_name"
-     _vhost(key, sso_vip_front_fqdn, sso_vip_fqdn, service, 'sso', options, vhost_properties, &config_block)
+    key = "#{self.name}.vhost.#{service}-sso.server_name"
+    _vhost(key, sso_vip_front_fqdn, sso_vip_fqdn, service, 'sso', options, vhost_properties, &config_block)
   end
 
   def _vhost(key, default_vhost_fqdn, alias_fqdn, service, type, options={}, vhost_properties={}, &config_block)
-   if (environment.options.has_key?(key))
+    if (environment.options.has_key?(key))
       proxy_vhost = Stacks::ProxyVHost.new(environment.options[key], service, type, &config_block)
       proxy_vhost.with_alias(default_vhost_fqdn)
     else
@@ -63,7 +62,7 @@ module Stacks::VirtualProxyService
     raise "Cannot find the service called #{service}"
   end
 
-  def default_ssl_cert(cert_name)
+  def set_default_ssl_cert(cert_name)
     @cert = cert_name
   end
 
@@ -79,7 +78,7 @@ module Stacks::VirtualProxyService
     end
 
     duplicates = Hash[vhost_map.select do |key, values|
-      values.size>1
+      values.size > 1
     end]
 
     raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size==0
