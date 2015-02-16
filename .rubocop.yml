@@ -1,0 +1,19 @@
+---
+Metrics/LineLength:
+  Max: 120
+
+# This is just so we don't have to correct a zillion lines
+Style/StringLiterals:
+  Enabled: false
+
+# Ruby 1.8 requirement
+Style/DotPosition:
+  EnforcedStyle: trailing
+
+# Ruby 1.8 requirement
+Style/Lambda:
+  Enabled: false
+
+# Ruby 1.8 requirement
+Style/HashSyntax:
+  EnforcedStyle: hash_rockets
