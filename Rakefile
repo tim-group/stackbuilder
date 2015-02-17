@@ -33,3 +33,8 @@ task :install => [:package] do
   sh "sudo dpkg -i *.deb"
   sh "sudo /etc/init.d/mcollective restart;"
 end
+
+desc "Run lint (Rubocop)"
+task :lint do
+  sh "rubocop"
+end
