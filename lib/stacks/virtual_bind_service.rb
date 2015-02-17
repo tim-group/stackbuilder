@@ -1,4 +1,5 @@
 module Stacks::VirtualBindService
+  attr_reader :zones
   attr_accessor :forwarder_zones
 
   def self.extended(object)
@@ -12,10 +13,6 @@ module Stacks::VirtualBindService
     @udp = true
     @zones = [:mgmt, :prod, :front]
     @forwarder_zones = []
-  end
-
-  def zones
-    @zones
   end
 
   def remove_zone(zone)

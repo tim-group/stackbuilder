@@ -2,9 +2,16 @@ require 'stacks/namespace'
 require 'facter'
 
 class Stacks::MachineDef
+  attr_reader :domain
+  attr_reader :environment
+  attr_reader :fabric
+  attr_reader :hostname
   attr_accessor :availability_group
-  attr_reader :hostname, :domain, :environment
-  attr_accessor :fabric, :networks, :ram, :storage, :vcpus
+  attr_accessor :fabric
+  attr_accessor :networks
+  attr_accessor :ram
+  attr_accessor :storage
+  attr_accessor :vcpus
 
   def initialize(base_hostname, networks = [:mgmt, :prod], location = :primary_site)
     @base_hostname = base_hostname
@@ -60,10 +67,6 @@ class Stacks::MachineDef
 
   def allow_destroy(destroyable = true)
     @destroyable = destroyable
-  end
-
-  def fabric
-    @fabric
   end
 
   def bind_to(environment)

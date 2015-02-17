@@ -3,16 +3,14 @@ require 'stacks/machine_def'
 require 'resolv'
 
 class Stacks::BindServer < Stacks::MachineDef
-  attr_reader :environment, :virtual_service
+  attr_reader :environment
+  attr_reader :role
+  attr_reader :virtual_service
 
   def initialize(base_hostname, virtual_service, role, index, &block)
     @role = role
     super(base_hostname, [:mgmt, :prod], :primary_site)
     @virtual_service = virtual_service
-  end
-
-  def role
-    @role
   end
 
   def master?
