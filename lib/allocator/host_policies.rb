@@ -81,14 +81,14 @@ module StackBuilder::Allocator::HostPolicies
             when :raise_error
               underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
               type = attributes[:type]
-              if !host.storage.has_key?(type)
-                persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
-                persistent_storage_not_found[type] << underscore_name
-              else
+              if host.storage.has_key?(type)
                 unless host.storage[type][:existing_storage].include? underscore_name.to_sym
                   persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
                   persistent_storage_not_found[type] << underscore_name
                 end
+              else
+                persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
+                persistent_storage_not_found[type] << underscore_name
               end
             when :create_new
               # Allow the storage to be created
@@ -121,13 +121,13 @@ module StackBuilder::Allocator::HostPolicies
       end
       storage_without_enough_space = required_space_hash.inject({}) do |result, (type, required_space)|
         host_storage_type = host.storage[type] rescue nil
-        if !host_storage_type.nil?
+        if host_storage_type.nil?
+          result[type] = { :available_space => 0, :required_space => required_space }
+        else
           available_space = KB_to_GB(host_storage_type[:free])
           if required_space > available_space
             result[type] = { :available_space => available_space, :required_space => required_space }
           end
-        else
-          result[type] = { :available_space => 0, :required_space => required_space }
         end
         result
       end
