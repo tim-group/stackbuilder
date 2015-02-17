@@ -28,11 +28,11 @@ describe Support::Callback do
         passed_args = args
       end
     end
-    
+
     callback.invoke(:event, "foo")
     callback.invoke(:event, "bar")
     callback.finish
-    
+
     passed_args.should eql(["foo", "bar"])
   end
 
