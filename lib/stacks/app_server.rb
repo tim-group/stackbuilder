@@ -51,7 +51,7 @@ class Stacks::AppServer < Stacks::MachineDef
     enc['role::http_app']['ajp_port'] = @virtual_service.ajp_port unless @virtual_service.ajp_port.nil?
 
     allowed_hosts = @allowed_hosts
-    allowed_hosts = allowed_hosts + @virtual_service.allowed_hosts if @virtual_service.respond_to? :allowed_hosts
+    allowed_hosts += @virtual_service.allowed_hosts if @virtual_service.respond_to? :allowed_hosts
     enc['role::http_app']['allowed_hosts'] = allowed_hosts.uniq.sort unless allowed_hosts.empty?
 
     enc.merge! @included_classes

@@ -21,7 +21,7 @@ module Stacks::VirtualBindService
 
   def forwarder_zone(fwdr_zone)
     if fwdr_zone.kind_of?(Array)
-      @forwarder_zones = @forwarder_zones + fwdr_zone
+      @forwarder_zones += fwdr_zone
     else
       @forwarder_zones << fwdr_zone
     end
