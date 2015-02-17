@@ -308,3 +308,8 @@ Style/GuardClause:
 # Configuration parameters: Keywords.
 Style/CommentAnnotation:
   Enabled: false
+
+# Offense count: 1
+# Configuration parameters: CountComments.
+Metrics/ClassLength:
+  Max: 170
