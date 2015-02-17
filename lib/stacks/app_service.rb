@@ -17,11 +17,11 @@ module Stacks::AppService
     @ehcache = true
   end
 
-  def enable_sso(sso_port='8443')
+  def enable_sso(sso_port = '8443')
     @sso_port = sso_port
   end
 
-  def enable_ajp(ajp_port='8009')
+  def enable_ajp(ajp_port = '8009')
     @ajp_port = ajp_port
   end
 

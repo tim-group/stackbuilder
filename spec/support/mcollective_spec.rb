@@ -20,7 +20,7 @@ describe Support::MCollective do
         return @@rpcclient
       end
     end
-    Support::MCollective::MCollectiveRPC.rpcclient=@mock_rpcclient
+    Support::MCollective::MCollectiveRPC.rpcclient = @mock_rpcclient
 
     def async_fork_and_return(&block)
       return Support::Forking::Future.new(&block)
@@ -60,7 +60,7 @@ describe Support::MCollective do
 
   it 'can be pre-injected with a list of hosts to discover' do
     my_nodes = ["1", "2", "3"]
-    @mock_rpcclient.should_receive(:discover).with({:nodes => my_nodes})
+    @mock_rpcclient.should_receive(:discover).with({ :nodes => my_nodes })
     mco_client("blah", :nodes => my_nodes) do |mco|
     end
   end

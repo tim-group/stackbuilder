@@ -14,14 +14,14 @@ class Stacks::Selenium::Hub < Stacks::MachineDef
   end
 
   def node_names
-    node_names = @nodes.inject([]) do |hostnames, (name,machine)|
+    node_names = @nodes.inject([]) do |hostnames, (name, machine)|
       hostnames << machine.hostname if machine.kind_of? Stacks::MachineDef
       machine.children.map {|child_machine|
         hostnames << child_machine.hostname
       } if machine.kind_of? Stacks::MachineSet
       hostnames
     end
-    node_names.reject!{|name| name==self.name}.sort
+    node_names.reject! { |name| name == self.name }.sort
   end
 
   def to_spec

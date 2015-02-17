@@ -22,7 +22,7 @@ module Stacks::VirtualRabbitMQService
   end
 
   def to_loadbalancer_config
-    realservers = {'blue' => realserver_prod_fqdns}
+    realservers = { 'blue' => realserver_prod_fqdns }
 
     {
       self.vip_fqdn(:prod) => {

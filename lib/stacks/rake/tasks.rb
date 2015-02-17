@@ -99,8 +99,8 @@ namespace :sbx do
   def ram_stats_to_string(ram_stats)
     used = ram_stats[:allocated_ram]
     total = ram_stats[:host_ram]
-    used_percentage = "#{(used.to_f/total.to_f*100).round.to_s.rjust(3)}%" rescue 0
-    {'memory(GB)'.to_sym => "#{used}/#{total} #{used_percentage}"}
+    used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s.rjust(3)}%" rescue 0
+    { 'memory(GB)'.to_sym => "#{used}/#{total} #{used_percentage}" }
   end
 
 
@@ -109,7 +109,7 @@ namespace :sbx do
       arch = value_hash[:arch]
       used = value_hash[:used]
       total = value_hash[:total]
-      used_percentage = "#{(used.to_f/total.to_f*100).round.to_s}%" rescue 0
+      used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s}%" rescue 0
       stats["#{storage_type}(GB)".to_sym] = "#{arch.to_s}: #{used.to_s}/#{total.to_s} #{used_percentage.to_s}"
       stats
     end
@@ -131,7 +131,7 @@ namespace :sbx do
       end
       order
     end
-    order.select {|header| !header.nil? }
+    order.select { |header| !header.nil? }
   end
 
   def tabulate(data)
@@ -169,7 +169,7 @@ namespace :sbx do
  end
 
   def KB_to_GB(value)
-    ((value.to_f / (1024*1024) * 100).round / 100.0)
+    ((value.to_f / (1024 * 1024) * 100).round / 100.0)
   end
 
   def convert_hash_values_from_KB_to_GB(result_hash)
@@ -216,7 +216,7 @@ namespace :sbx do
 
     rogue_machines = hosts.hosts.map do |host|
       host.allocated_machines
-    end.flatten().reject {|vm| vm[:in_model]}
+    end.flatten().reject { |vm| vm[:in_model] }
 
     pp rogue_machines
   end
@@ -248,10 +248,10 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision=> ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
+      task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
 
       desc "perform a clean followed by a provision"
-      task :reprovision=> ['clean', 'provision']
+      task :reprovision => ['clean', 'provision']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -445,7 +445,7 @@ namespace :sbx do
           end
 
           success = mco_client("puppetd") do |mco|
-            engine = PuppetRoll::Engine.new({:concurrency => 5}, [], hosts, PuppetRoll::Client.new(hosts, mco))
+            engine = PuppetRoll::Engine.new({ :concurrency => 5 }, [], hosts, PuppetRoll::Client.new(hosts, mco))
             engine.execute()
             pp engine.get_report()
             engine.successful?
@@ -553,7 +553,7 @@ namespace :sbx do
           mco.fact_filter "domain=/(st|ci)/"
           results = {}
           hosts.each do |host|
-            mco.domainxml(:domain=>host) do |result|
+            mco.domainxml(:domain => host) do |result|
               xml = result[:body][:data][:xml]
               sender = result[:senderid]
               if not xml.nil?
@@ -580,8 +580,8 @@ namespace :sbx do
             if child_machine_def.kind_of? Stacks::AppService
               app_service = child_machine_def
               factory = Orc::Factory.new(
-                :application=>app_service.application,
-                :environment=>app_service.environment.name
+                :application => app_service.application,
+                :environment => app_service.environment.name
               )
               factory.cmdb_git.update
               factory.engine.resolve()

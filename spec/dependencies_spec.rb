@@ -38,7 +38,7 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "example"
       instantiate_stack "example_db"
       instantiate_stack "loadbalancer"
@@ -57,7 +57,7 @@ describe_stack 'stack-with-dependencies' do
   end
 
   host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::proxyserver"]["vhosts"]["e1-exampleproxy-vip.front.space.net.local"]["proxy_pass_rules"].should eql({"/"=>"http://e1-exampleapp-vip.space.net.local:8000"})
+    host.to_enc["role::proxyserver"]["vhosts"]["e1-exampleproxy-vip.front.space.net.local"]["proxy_pass_rules"].should eql({ "/" => "http://e1-exampleapp-vip.space.net.local:8000" })
   end
 
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
@@ -110,7 +110,7 @@ describe_stack 'stack with dependencies that does not provide config params when
       virtual_appserver 'noconfigapp' do
         self.groups = ['blue']
         self.application = 'example'
-        self.depend_on  "exampledb"
+        self.depend_on "exampledb"
         self.auto_configure_dependencies = false
       end
     end
@@ -121,7 +121,7 @@ describe_stack 'stack with dependencies that does not provide config params when
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "example"
       instantiate_stack "example_db"
     end
@@ -156,11 +156,11 @@ describe_stack 'stack with cross environment dependencies' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "example"
     end
 
-    env "e2", :primary_site=>"earth" do
+    env "e2", :primary_site => "earth" do
       instantiate_stack "example"
     end
   end

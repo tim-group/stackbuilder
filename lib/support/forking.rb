@@ -11,7 +11,7 @@ module Support::Forking
     end
   end
 
-  def async_fork_and_return(options={}, &block)
+  def async_fork_and_return(options = {}, &block)
     read, write = IO.pipe
     pid = fork do
       begin
@@ -21,7 +21,7 @@ module Support::Forking
       rescue Exception => e
         exception = e
       end
-      Marshal.dump({:result => result, :exception => exception}, write)
+      Marshal.dump({ :result => result, :exception => exception }, write)
     end
     write.close
 
@@ -29,7 +29,7 @@ module Support::Forking
       serialized_result = read.read
       Process.waitpid(pid)
       result = Marshal.load(serialized_result)
-      raise result[:exception] unless result[:exception]==nil
+      raise result[:exception] unless result[:exception] == nil
       result[:result]
     end
   end

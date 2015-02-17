@@ -7,7 +7,7 @@ describe_stack 'debrepo' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "debrepo"
     end
   end
@@ -37,7 +37,7 @@ describe_stack 'debrepo without a cname' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "debrepo"
     end
   end

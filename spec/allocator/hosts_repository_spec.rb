@@ -21,15 +21,15 @@ describe StackBuilder::Allocator::HostRepository do
 
   it 'creates a Hosts object with corresponding Host objects' do
     env = test_env_with_refstack
-    machines = env.flatten.map {|machine| machine.hostname}
+    machines = env.flatten.map { |machine| machine.hostname }
 
     compute_node_client = double
     n = 5
     result = {}
     n.times do |i|
       result["h#{i}"] = {
-        :active_domains=>machines,
-        :inactive_domains=>[]
+        :active_domains => machines,
+        :inactive_domains => []
       }
     end
 
@@ -38,30 +38,30 @@ describe StackBuilder::Allocator::HostRepository do
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
     :machine_repo => self,
-    :preference_functions=>preference_functions,
+    :preference_functions => preference_functions,
     :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_current("t")
     hosts.hosts.size.should eql(n)
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)
-      host.machines.should eql(env.flatten.map {|machine| machine.to_specs}.flatten)
+      host.machines.should eql(env.flatten.map { |machine| machine.to_specs }.flatten)
     end
   end
 
   it 'includes missing machine specs for machines that do not exist in the model' do
     env = test_env_with_refstack
-    machines = env.flatten.map {|machine| machine.hostname}
-    machine_specs = env.flatten.map {|machine| machine.to_specs}.flatten
+    machines = env.flatten.map { |machine| machine.hostname }
+    machine_specs = env.flatten.map { |machine| machine.to_specs }.flatten
     machines << "roguemachine"
-    machine_specs << {:hostname => "roguemachine", :in_model=>false}
+    machine_specs << { :hostname => "roguemachine", :in_model => false }
     compute_node_client = double
     n = 5
     result = {}
     n.times do |i|
       result["h#{i}"] = {
-        :active_domains=>machines,
-        :inactive_domains=>[]
+        :active_domains => machines,
+        :inactive_domains => []
       }
     end
 
@@ -70,7 +70,7 @@ describe StackBuilder::Allocator::HostRepository do
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
     :machine_repo => self,
-    :preference_functions=>preference_functions,
+    :preference_functions => preference_functions,
     :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_current("t")

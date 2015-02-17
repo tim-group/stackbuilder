@@ -9,7 +9,7 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config' do
       end
     end
 
-    env "e1", :primary_site=>"space", :lb_virtual_router_id=>66 do
+    env "e1", :primary_site => "space", :lb_virtual_router_id => 66 do
       instantiate_stack "fr"
     end
   end

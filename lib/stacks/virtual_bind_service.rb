@@ -85,7 +85,7 @@ module Stacks::VirtualBindService
   def instantiate_machine(name, type, index, environment)
     server_name = "#{name}-#{index}"
     server = @type.new(server_name, self, type, index, &@config_block)
-    server.group = groups[i%groups.size] if server.respond_to?(:group)
+    server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
     @definitions[server_name] = server
     server
@@ -93,9 +93,9 @@ module Stacks::VirtualBindService
 
   def instantiate_machines(environment)
     i = 0
-    index =  sprintf("%03d",i+=1)
+    index =  sprintf("%03d", i += 1)
     instantiate_machine(name, :master, index, environment)
-    index =  sprintf("%03d",i+=1)
+    index =  sprintf("%03d", i += 1)
     instantiate_machine(name, :slave, index, environment)
   end
 
@@ -114,7 +114,7 @@ module Stacks::VirtualBindService
 
   def cluster_dependant_instances(machine_def)
     instances = []
-    instances+=slave_servers_as_fqdns if machine_def.master? # for xfer
+    instances += slave_servers_as_fqdns if machine_def.master? # for xfer
     instances << master_server.mgmt_fqdn if machine_def.slave? # for notify
     instances
   end

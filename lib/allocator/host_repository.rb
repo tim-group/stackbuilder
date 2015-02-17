@@ -23,7 +23,7 @@ class StackBuilder::Allocator::HostRepository
       all_domains.each do |vm_hostname|
         vm_object = machine_repo.find_by_hostname(vm_hostname)
         if vm_object.nil?
-          vms << {:hostname => vm_hostname, :in_model => false}
+          vms << { :hostname => vm_hostname, :in_model => false }
         else
           vms << vm_object.to_spec
         end

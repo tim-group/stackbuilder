@@ -64,7 +64,7 @@ module Support::MCollectivePuppet
     callback.finish
   end
 
-  def wait_for_complete(machine_fqdns, timeout=3600, &block)
+  def wait_for_complete(machine_fqdns, timeout = 3600, &block)
     start_time = now
     callback = Support::Callback.new(&block)
 
@@ -132,7 +132,7 @@ module Support::MCollectivePuppet
     end]
   end
 
-  def puppetca(machine_fqdn=nil, &block)
+  def puppetca(machine_fqdn = nil, &block)
 
     puppetmaster = nil
 

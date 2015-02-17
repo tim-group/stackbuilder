@@ -27,9 +27,9 @@ class Stacks::Environment
     return @primary_site != @secondary_site
   end
 
-  def cross_site_routing(fabric, network='prod')
+  def cross_site_routing(fabric, network = 'prod')
     raise "Un-supported cross site routing network #{network}" if network != 'prod'
-    site = (fabric == @primary_site)? @secondary_site : @primary_site
+    site = (fabric == @primary_site) ? @secondary_site : @primary_site
     {
       "networking::routing::to_site" => {
          'network' => network,
@@ -46,7 +46,7 @@ class Stacks::Environment
     @every_machine_destroyable
   end
 
-  def env(name, options={}, &block)
+  def env(name, options = {}, &block)
     @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), @environments, @stack_procs)
     @definitions[name].instance_eval(&block) unless block.nil?
   end

@@ -28,8 +28,8 @@ class Stacks::MachineSet
     @auto_configure_dependencies = true
   end
 
-  def depend_on(dependant, env=environment.name)
-    @depends_on << [dependant,env] unless @depends_on.include? [dependant,env]
+  def depend_on(dependant, env = environment.name)
+    @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
   end
 
   def on_bind(&block)
@@ -56,7 +56,7 @@ class Stacks::MachineSet
 
 
   public
-  def machine_defs_to_fqdns(machine_defs, networks=[:prod])
+  def machine_defs_to_fqdns(machine_defs, networks = [:prod])
     fqdns = []
     networks.each do |network|
       machine_defs.map do |machine_def|
@@ -74,7 +74,7 @@ class Stacks::MachineSet
   end
 
   public
-  def dependant_load_balancer_machine_def_fqdns(networks=[:prod])
+  def dependant_load_balancer_machine_def_fqdns(networks = [:prod])
     machine_defs_to_fqdns(dependant_load_balancer_machine_defs, networks).sort
   end
 
@@ -84,7 +84,7 @@ class Stacks::MachineSet
   end
 
   public
-  def dependant_machine_def_fqdns(networks=[:prod])
+  def dependant_machine_def_fqdns(networks = [:prod])
     machine_defs_to_fqdns(dependant_machine_defs, networks).sort
   end
 
@@ -94,12 +94,12 @@ class Stacks::MachineSet
   end
 
   public
-  def dependant_machine_def_with_children_fqdns(networks=[:prod])
+  def dependant_machine_def_with_children_fqdns(networks = [:prod])
     machine_defs_to_fqdns(dependant_machine_defs_with_children, networks).sort
   end
 
   public
-  def virtual_services(environments=find_all_environments)
+  def virtual_services(environments = find_all_environments)
     virtual_services = []
     environments.each do |env|
       env.accept do |virtual_service|
@@ -133,7 +133,7 @@ class Stacks::MachineSet
   end
 
   private
-  def find_virtual_service_that_i_depend_on(service, environments=[environment])
+  def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|
       env.accept do |virtual_service|
         if virtual_service.kind_of? Stacks::MachineSet and service[0].eql? virtual_service.name and service[1].eql? env.name
@@ -155,7 +155,7 @@ class Stacks::MachineSet
   end
 
   private
-  def virtual_services_that_i_depend_on(environments=find_all_environments)
+  def virtual_services_that_i_depend_on(environments = find_all_environments)
     depends_on.map do |dependency|
       find_virtual_service_that_i_depend_on(dependency, environments)
     end

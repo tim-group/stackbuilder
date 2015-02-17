@@ -6,7 +6,7 @@ require 'puppet/indirector/node/plain'
 class Puppet::Node::Stacks < Puppet::Indirector::Plain
   desc "generates the necessary wiring for all nodes in a stack."
 
-  def initialize(stacks_inventory=Stacks::Inventory.new('/etc/stacks'), delegate=Puppet::Node::Plain.new)
+  def initialize(stacks_inventory = Stacks::Inventory.new('/etc/stacks'), delegate = Puppet::Node::Plain.new)
     @stacks_inventory = stacks_inventory
     @delegate = delegate
   end

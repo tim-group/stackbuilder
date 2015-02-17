@@ -6,7 +6,7 @@ describe_stack 'logstash' do
       logstash
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "logstash"
     end
   end
@@ -15,6 +15,6 @@ describe_stack 'logstash' do
     host.to_enc.should eql({
       'role::logstash_server' => {
         'environment' => "e1"
-      }})
+      } })
   end
 end

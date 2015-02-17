@@ -8,14 +8,14 @@ require 'set'
 
 class Compute::Allocation
   def initialize(audit)
-    @current_allocation = Hash[audit.map do |key,value|
-      active_hosts = !value.nil?? value[:active_domains] : []
+    @current_allocation = Hash[audit.map do |key, value|
+      active_hosts = !value.nil? ? value[:active_domains] : []
       [key, active_hosts]
     end]
   end
 
   def create_vm_to_host_map
-    Hash[@current_allocation.reject { |host,vms| vms.nil? }.map do |host, vms|
+    Hash[@current_allocation.reject { |host, vms| vms.nil? }.map do |host, vms|
       vms.map do |vm|
         [vm, host]
       end
@@ -32,7 +32,7 @@ class Compute::Allocation
 
     new_allocation = {}
 
-    specs.sort_by {|spec|spec[:hostname]}.each do |spec|
+    specs.sort_by { |spec| spec[:hostname] }.each do |spec|
       unless (vms_to_host_map.include?(spec[:hostname]))
         host = hosts[h.modulo(hosts.size)]
         add_to_allocation(new_allocation, host, spec)
@@ -45,7 +45,7 @@ class Compute::Allocation
 
   private
   def add_to_allocation(new_allocation, host, spec)
-    new_allocation[host].nil? ? new_allocation[host] = []: false
+    new_allocation[host].nil? ? new_allocation[host] = [] : false
     new_allocation[host] << spec
   end
 end
@@ -59,13 +59,13 @@ class Compute::Controller
 
   def enable_notify(specs)
     specs.each do |spec|
-      pp @nagsrv_client.toggle_notify('enable-notify',spec[:qualified_hostnames][:mgmt])
+      pp @nagsrv_client.toggle_notify('enable-notify', spec[:qualified_hostnames][:mgmt])
     end
   end
 
   def disable_notify(specs)
     specs.each do |spec|
-      pp @nagsrv_client.toggle_notify('disable-notify',spec[:qualified_hostnames][:mgmt])
+      pp @nagsrv_client.toggle_notify('disable-notify', spec[:qualified_hostnames][:mgmt])
     end
   end
 
@@ -106,15 +106,15 @@ class Compute::Controller
           end
         end
 
-        final_result = grouped.map do |key,value|
-          [key,value]
+        final_result = grouped.map do |key, value|
+          [key, value]
         end
 
         grouped_results << final_result
       end
     end
 
-    threads.each {|t| t.join}
+    threads.each { |t| t.join }
 
     all_specs = allocation.map do |host, specs|
       specs
@@ -156,7 +156,7 @@ class Compute::Controller
 
     flattened_results = results.map do |host, vms|
       vms.map do |vm, result|
-        [vm, {:result => result, :host => host}]
+        [vm, { :result => result, :host => host }]
       end
     end.flatten_hashes
 
@@ -228,7 +228,7 @@ class Compute::Controller
     callback = Support::Callback.new(&block)
 
     non_destroyable_specs, destroyable_specs = all_specs.partition do
-      |spec | spec[:disallow_destroy]
+      |spec| spec[:disallow_destroy]
     end
 
     destroyable_spec_results = clean_destroyable_vms(destroyable_specs)

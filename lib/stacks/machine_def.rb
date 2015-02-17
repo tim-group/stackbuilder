@@ -6,7 +6,7 @@ class Stacks::MachineDef
   attr_reader :hostname, :domain, :environment
   attr_accessor :fabric, :networks, :ram, :storage, :vcpus
 
-  def initialize(base_hostname, networks = [:mgmt,:prod], location = :primary_site)
+  def initialize(base_hostname, networks = [:mgmt, :prod], location = :primary_site)
     @base_hostname = base_hostname
     @networks = networks
     @location = location
@@ -58,7 +58,7 @@ class Stacks::MachineDef
     true
   end
 
-  def allow_destroy(destroyable=true)
+  def allow_destroy(destroyable = true)
     @destroyable = destroyable
   end
 
@@ -82,7 +82,7 @@ class Stacks::MachineDef
 
   def disable_persistent_storage
     @storage.each do |mount_point, values|
-       modify_storage({mount_point.to_sym => { :persistent => false }})
+       modify_storage({ mount_point.to_sym => { :persistent => false } })
     end
   end
 
@@ -124,9 +124,9 @@ class Stacks::MachineDef
     @networks.delete net
   end
 
-  def recurse_merge(a,b)
-    a.merge(b) do |_,x,y|
-      (x.is_a?(Hash) && y.is_a?(Hash)) ? recurse_merge(x,y) : y
+  def recurse_merge(a, b)
+    a.merge(b) do |_, x, y|
+      (x.is_a?(Hash) && y.is_a?(Hash)) ? recurse_merge(x, y) : y
     end
   end
 

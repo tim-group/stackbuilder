@@ -6,7 +6,7 @@ describe_stack 'analytics' do
       analyticsapp
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "analytics"
     end
   end

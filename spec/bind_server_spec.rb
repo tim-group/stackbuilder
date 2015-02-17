@@ -21,14 +21,14 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       end
     end
 
-    env "o", :primary_site=>"oy" do
+    env "o", :primary_site => "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
       end
     end
 
-    env "p", :primary_site=>"pg" do
+    env "p", :primary_site => "pg" do
       env 'pg' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
@@ -46,7 +46,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
         'front.oy.net.local',
     ])
     enc['role::bind_server']['slave_zones'].should eql({
-      'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local','pg.net.local','front.pg.net.local']
+      'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local']
     })
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
@@ -70,8 +70,8 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local','oy.net.local','front.oy.net.local'],
-      'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local','pg.net.local','front.pg.net.local']
+      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'],
+      'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local']
     })
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
@@ -99,7 +99,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       'front.pg.net.local',
     ])
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local','oy.net.local','front.oy.net.local']
+      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
     })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
@@ -125,10 +125,10 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
       'oy-ns-001.mgmt.oy.net.local' => [
-         'mgmt.oy.net.local','oy.net.local','front.oy.net.local'
+         'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'
       ],
       'pg-ns-001.mgmt.pg.net.local' => [
-         'mgmt.pg.net.local','pg.net.local','front.pg.net.local'
+         'mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local'
       ]
     })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
@@ -167,14 +167,14 @@ describe_stack 'nameservers with single slave_from dependency' do
       end
     end
 
-    env "o", :primary_site=>"oy" do
+    env "o", :primary_site => "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
       end
     end
 
-    env "p", :primary_site=>"pg" do
+    env "p", :primary_site => "pg" do
       env 'pg' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
@@ -216,7 +216,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local','oy.net.local','front.oy.net.local']
+      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
     })
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
@@ -242,7 +242,7 @@ describe_stack 'nameservers with single slave_from dependency' do
       'front.pg.net.local',
     ])
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local','oy.net.local','front.oy.net.local']
+      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
     })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
@@ -267,10 +267,10 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
       'oy-ns-001.mgmt.oy.net.local' => [
-         'mgmt.oy.net.local','oy.net.local','front.oy.net.local'
+         'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'
       ],
       'pg-ns-001.mgmt.pg.net.local' => [
-         'mgmt.pg.net.local','pg.net.local','front.pg.net.local'
+         'mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local'
       ]
     })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
@@ -311,7 +311,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
       end
     end
 
-    env "o", :primary_site=>"oy" do
+    env "o", :primary_site => "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "nat"
@@ -319,7 +319,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
       end
     end
 
-    env "p", :primary_site=>"pg" do
+    env "p", :primary_site => "pg" do
       env 'pg' do
         instantiate_stack "nameserver"
         instantiate_stack "nat"
@@ -337,14 +337,14 @@ describe_stack 'nameservers should have working load balancer and nat configurat
 
   host("oy-lb-001.mgmt.oy.net.local") do |host|
     host.to_enc['role::loadbalancer']['virtual_servers']['oy-ns-vip.oy.net.local']['healthchecks'].should include(
-      {'healthcheck'=>'MISC_CHECK','arg_style'=>'APPEND_HOST','path'=>'/usr/bin/host -4 -W 3 -t A -s apt.mgmt.oy.net.local'},
-      {'healthcheck'=>'MISC_CHECK','arg_style'=>'APPEND_HOST','path'=>'/usr/bin/host -4 -W 3 -t A -s gw-vip.front.oy.net.local'},
-      {'healthcheck'=>'MISC_CHECK','arg_style'=>'APPEND_HOST','path'=>'/usr/bin/host -4 -W 3 -t A -s gw-vip.oy.net.local'},
+      { 'healthcheck' => 'MISC_CHECK', 'arg_style' => 'APPEND_HOST', 'path' => '/usr/bin/host -4 -W 3 -t A -s apt.mgmt.oy.net.local' },
+      { 'healthcheck' => 'MISC_CHECK', 'arg_style' => 'APPEND_HOST', 'path' => '/usr/bin/host -4 -W 3 -t A -s gw-vip.front.oy.net.local' },
+      { 'healthcheck' => 'MISC_CHECK', 'arg_style' => 'APPEND_HOST', 'path' => '/usr/bin/host -4 -W 3 -t A -s gw-vip.oy.net.local' },
       {
-        'healthcheck'=>'MISC_CHECK',
-        'arg_style'  =>'PARTICIPATION',
-        'path'       =>'/opt/youdevise/keepalived/healthchecks/bin/check_participation.rb',
-        'url_path'   =>'/participation'
+        'healthcheck' => 'MISC_CHECK',
+        'arg_style' => 'PARTICIPATION',
+        'path' => '/opt/youdevise/keepalived/healthchecks/bin/check_participation.rb',
+        'url_path' => '/participation'
       }
     )
   end
@@ -368,7 +368,7 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
       end
     end
 
-    env "o", :primary_site=>"oy" do
+    env "o", :primary_site => "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "nat"
@@ -381,7 +381,7 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
     host.virtual_service.vip_networks.should be_eql [:mgmt]
     host.to_enc['role::bind_server']['vip_fqdns'].should eql(['oy-ns-vip.mgmt.oy.net.local'])
     host.to_spec[:networks].should eql([:mgmt])
-    host.to_spec[:qualified_hostnames].should be_eql({:mgmt => 'oy-ns-001.mgmt.oy.net.local'})
+    host.to_spec[:qualified_hostnames].should be_eql({ :mgmt => 'oy-ns-001.mgmt.oy.net.local' })
   end
 
   host("oy-nat-001.mgmt.oy.net.local") do |host|
@@ -403,7 +403,7 @@ describe_stack 'bind servers with zones removed should have the right zone files
       end
     end
 
-    env "o", :primary_site=>"oy" do
+    env "o", :primary_site => "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
       end

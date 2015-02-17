@@ -28,7 +28,7 @@ module Stacks::LegacyMysqlCluster
 
   def dependant_instance_mysql_rights()
     rights = {
-      'mysql_hacks::application_rights_wrapper' => { 'rights' => {}}
+      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
     }
     virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|

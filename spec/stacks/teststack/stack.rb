@@ -2,7 +2,7 @@
 
 stack "ststack" do
   virtual_appserver "stapp" do
-    self.application='JavaHttpRef'
+    self.application = 'JavaHttpRef'
   end
 end
 

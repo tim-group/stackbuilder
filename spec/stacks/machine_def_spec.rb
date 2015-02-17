@@ -5,7 +5,7 @@ describe Stacks::MachineDef do
 
   it 'produces x.net.local for the prod network' do
     machinedef = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("env", {:primary_site=>"st"}, {}, {})
+    env = Stacks::Environment.new("env", { :primary_site => "st" }, {}, {})
     machinedef.bind_to(env)
     machinedef.prod_fqdn.should eql("env-test.st.net.local")
   end
@@ -25,7 +25,7 @@ describe Stacks::MachineDef do
     end
 
     machinedef = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("env", {:primary_site=>"local"}, {}, {})
+    env = Stacks::Environment.new("env", { :primary_site => "local" }, {}, {})
     machinedef.bind_to(env)
     machinedef.hostname.should include('OWNER-FACT-NOT-FOUND')
 
@@ -46,7 +46,7 @@ describe Stacks::MachineDef do
     end
 
     machinedef = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("env", {:primary_site=>"local"}, {}, {})
+    env = Stacks::Environment.new("env", { :primary_site => "local" }, {}, {})
     machinedef.bind_to(env)
     machinedef.hostname.should include('testusername')
     machinedef.hostname.should_not include('OWNER-FACT-NOT-FOUND')
@@ -55,7 +55,7 @@ describe Stacks::MachineDef do
 
   it 'should be destroyable by default' do
     machinedef = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("noenv", { :primary_site=>"local" }, {}, {})
+    env = Stacks::Environment.new("noenv", { :primary_site => "local" }, {}, {})
     machinedef.bind_to(env)
     machinedef.destroyable?.should eql true
     machinedef.to_spec[:disallow_destroy].should eql nil
@@ -63,7 +63,7 @@ describe Stacks::MachineDef do
 
   it 'should allow destroyable to be overriden' do
     machinedef = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("noenv", { :primary_site=>"local" }, {}, {})
+    env = Stacks::Environment.new("noenv", { :primary_site => "local" }, {}, {})
     machinedef.bind_to(env)
     machinedef.allow_destroy(false)
     machinedef.destroyable?.should eql false
@@ -73,8 +73,8 @@ describe Stacks::MachineDef do
   it 'should allow environment to override destroyable' do
     machinedef = Stacks::MachineDef.new("test")
     env = Stacks::Environment.new("noenv", {
-      :primary_site=>"local",
-      :every_machine_destroyable=>true
+      :primary_site => "local",
+      :every_machine_destroyable => true
     }, {}, {})
     machinedef.bind_to(env)
     machinedef.allow_destroy(false)
@@ -89,7 +89,7 @@ describe Stacks::MachineDef do
       '/mnt/data'.to_sym => { :persistent => true }
     })
     env = Stacks::Environment.new("noenv", {
-        :primary_site=>"local",
+        :primary_site => "local",
         :persistent_storage_supported => false
        }, {}, {}
     )
@@ -102,7 +102,7 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new("test")
     machinedef.add_route('mgmt_pg')
     env = Stacks::Environment.new("noenv", {
-        :primary_site=>"local",
+        :primary_site => "local",
       }, {}, {}
     )
     machinedef.bind_to(env)

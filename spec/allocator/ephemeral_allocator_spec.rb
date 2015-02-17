@@ -9,12 +9,12 @@ describe StackBuilder::Allocator::EphemeralAllocator do
 
   it 'provides lists of already allocated and newly allocated hosts' do
     candidate_machine = {
-      :hostname=>"candidate_machine",
+      :hostname => "candidate_machine",
       :fabric => "f1"
     }
 
     candidate_machine_2 = {
-      :hostname=>"candidate_machine_2",
+      :hostname => "candidate_machine_2",
       :fabric => "f2"
     }
 
@@ -39,9 +39,9 @@ describe StackBuilder::Allocator::EphemeralAllocator do
 
     allocation_result = allocator.allocate([candidate_machine, candidate_machine_2, existing_machine])
 
-    allocation_result[:already_allocated].should eql({existing_machine => 'h1'})
+    allocation_result[:already_allocated].should eql({ existing_machine => 'h1' })
     allocation_result[:newly_allocated].should eql(
-      {'h1' => [candidate_machine],
+      { 'h1' => [candidate_machine],
        'h2' => [candidate_machine_2]
     })
   end

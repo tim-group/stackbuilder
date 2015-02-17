@@ -8,7 +8,7 @@ class Stacks::BindServer < Stacks::MachineDef
 
   def initialize(base_hostname, virtual_service, role, index, &block)
     @role = role
-    super(base_hostname, [:mgmt,:prod], :primary_site)
+    super(base_hostname, [:mgmt, :prod], :primary_site)
     @virtual_service = virtual_service
   end
 

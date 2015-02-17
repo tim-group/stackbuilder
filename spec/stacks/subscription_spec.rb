@@ -5,7 +5,7 @@ describe Subscription do
 
   RSpec::Matchers.define :have_messages_for_hosts do |expected|
     match do |actual|
-      actual_hosts = actual.map {|hash| hash["host"]}
+      actual_hosts = actual.map { |hash| hash["host"] }
       expected == actual_hosts
     end
   end
@@ -16,30 +16,30 @@ describe Subscription do
 
   it 'waits for all hosts to check-in' do
     topic = random_topic
-    subscription = Subscription.new(:pop_timeout=>1)
+    subscription = Subscription.new(:pop_timeout => 1)
     subscription.start(topic)
 
     threads = []
     threads << Thread.new {
-      subscription.stomp.publish("/topic/#{topic}", {"host"=>"a"}.to_json)
-      subscription.stomp.publish("/topic/#{topic}", {"host"=>"b"}.to_json)
+      subscription.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
+      subscription.stomp.publish("/topic/#{topic}", { "host" => "b" }.to_json)
     }
 
-    events = subscription.wait_for_hosts(topic, ["a","b"])
-    events.responses.should have_messages_for_hosts(["a","b"])
+    events = subscription.wait_for_hosts(topic, ["a", "b"])
+    events.responses.should have_messages_for_hosts(["a", "b"])
   end
 
   it 'returns anyway after the timeout with some results missing' do
     topic = random_topic
-    subscription = Subscription.new(:pop_timeout=>1)
+    subscription = Subscription.new(:pop_timeout => 1)
     subscription.start(topic)
 
     threads = []
     threads << Thread.new {
-      subscription.stomp.publish("/topic/#{topic}", {"host"=>"a"}.to_json)
+      subscription.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
     }
 
-    events = subscription.wait_for_hosts(topic, ["a","b"])
+    events = subscription.wait_for_hosts(topic, ["a", "b"])
     events.responses.should have_messages_for_hosts(["a"])
   end
 
@@ -47,13 +47,13 @@ describe Subscription do
     topic = random_topic
     topic2 = random_topic
 
-    subscription2 = Subscription.new(:pop_timeout=>1)
+    subscription2 = Subscription.new(:pop_timeout => 1)
     subscription2.start([topic, topic2])
 
     threads = []
     threads << Thread.new {
-      subscription2.stomp.publish("/topic/#{topic}", {"host"=>"a"}.to_json)
-      subscription2.stomp.publish("/topic/#{topic2}", {"host"=>"a"}.to_json)
+      subscription2.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
+      subscription2.stomp.publish("/topic/#{topic2}", { "host" => "a" }.to_json)
     }
 
     subscription2.wait_for_hosts(topic, ["a"]).responses.should have_messages_for_hosts(["a"])
@@ -63,13 +63,13 @@ describe Subscription do
   it 'correctly shows: successful, failed and unknowns' do
     topic = random_topic
 
-    subscription = Subscription.new(:pop_timeout=>1)
+    subscription = Subscription.new(:pop_timeout => 1)
     subscription.start([topic])
 
     threads = []
     threads << Thread.new {
-      subscription.stomp.publish("/topic/#{topic}", {"host"=>"a", "status"=>"changed"}.to_json)
-      subscription.stomp.publish("/topic/#{topic}", {"host"=>"b", "status"=>"failed"}.to_json)
+      subscription.stomp.publish("/topic/#{topic}", { "host" => "a", "status" => "changed" }.to_json)
+      subscription.stomp.publish("/topic/#{topic}", { "host" => "b", "status" => "failed" }.to_json)
     }
 
     result = subscription.wait_for_hosts(topic, ["a", "b", "c"])

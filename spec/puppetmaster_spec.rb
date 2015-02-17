@@ -5,7 +5,7 @@ describe_stack 'basic dev puppetmaster' do
     stack 'puppetmaster' do
       puppetmaster 'basic'
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "puppetmaster"
     end
   end
@@ -16,8 +16,8 @@ describe_stack 'basic dev puppetmaster' do
     })
     host.to_specs.first[:template].should eql('puppetmaster')
     host.to_specs.first[:cnames].should eql({
-      :mgmt=>{
-        "puppet"=>"e1-basic-001.mgmt.space.net.local"
+      :mgmt => {
+        "puppet" => "e1-basic-001.mgmt.space.net.local"
       }
     })
   end
@@ -34,7 +34,7 @@ describe_stack 'basic dev puppetmaster without cname' do
       end
 
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "puppetmaster"
     end
   end

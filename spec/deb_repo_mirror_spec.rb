@@ -7,7 +7,7 @@ describe_stack 'debrepomirror' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "debrepomirror"
     end
   end
@@ -18,7 +18,7 @@ describe_stack 'debrepomirror' do
     })
 
     host.to_specs.shift[:cnames].should eql({
-      :mgmt => {'deb-transitional' => 'e1-debrepomirror-001.mgmt.space.net.local'}
+      :mgmt => { 'deb-transitional' => 'e1-debrepomirror-001.mgmt.space.net.local' }
     })
 
   end
@@ -34,7 +34,7 @@ describe_stack 'debrepomirror without cname' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "debrepomirror"
     end
   end

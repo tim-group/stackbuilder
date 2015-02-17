@@ -8,15 +8,15 @@ module Support
   module Nagios
 
     class Service
-      def initialize(options={})
+      def initialize(options = {})
         @service = options[:service] ||  Nagios::Service::Http.new(options)
       end
 
-      def schedule_downtime(machines, duration=600, &block)
+      def schedule_downtime(machines, duration = 600, &block)
         callback = Support::Callback.new(&block)
         machines.each do |machine|
           response = @service.schedule_downtime(machine, duration)
-          callback.invoke :success, {:machine => machine.hostname, :result => response}
+          callback.invoke :success, { :machine => machine.hostname, :result => response }
         end
       end
 
@@ -24,7 +24,7 @@ module Support
         callback = Support::Callback.new(&block)
         machines.each do |machine|
           response = @service.cancel_downtime(machine)
-          callback.invoke :success, {:machine => machine.hostname, :result => response}
+          callback.invoke :success, { :machine => machine.hostname, :result => response }
         end
       end
 
@@ -66,7 +66,7 @@ module Support
       def process_response(response)
         result = nil
         begin
-          if response.code !='200'
+          if response.code != '200'
             result = "Failed: HTTP response code was #{response.code}"
           else
             json = JSON.parse(response.body)
@@ -86,10 +86,10 @@ module Support
         return @nagios_servers[fabric] rescue nil
       end
 
-      def modify_downtime(action, machine, duration=nil)
+      def modify_downtime(action, machine, duration = nil)
         body = { "host" => machine.mgmt_fqdn }
         body["duration"] = duration unless duration.nil?
-        header = {'Content-Type' =>'application/json' }
+        header = { 'Content-Type' => 'application/json' }
         nagios_server = get_nagios_server_for_fabric(machine.fabric)
         return "skipping #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_server.nil?
         url = "http://#{nagios_server}:#{@nagios_api_port}/#{action}_downtime"
@@ -97,7 +97,7 @@ module Support
         return "#{nagios_server} = #{process_response(response)}"
       end
 
-      def schedule_downtime(machine, duration=600)
+      def schedule_downtime(machine, duration = 600)
         modify_downtime('schedule', machine, duration)
       end
 

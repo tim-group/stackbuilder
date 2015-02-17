@@ -22,7 +22,7 @@ module Stacks::VirtualProxyService
     @cert                = 'wildcard_timgroup_com'
   end
 
-  def vhost(service, options={}, vhost_properties={}, &config_block)
+  def vhost(service, options = {}, vhost_properties = {}, &config_block)
     key = "#{self.name}.vhost.#{service}.server_name"
     _vhost(key, vip_fqdn(:front), vip_fqdn(:prod), service, 'default', options, vhost_properties, &config_block)
   end
@@ -35,12 +35,12 @@ module Stacks::VirtualProxyService
     "#{environment.name}-#{name}-sso-vip.#{@domain}"
   end
 
-  def sso_vhost(service, options={}, vhost_properties={}, &config_block)
+  def sso_vhost(service, options = {}, vhost_properties = {}, &config_block)
     key = "#{self.name}.vhost.#{service}-sso.server_name"
     _vhost(key, sso_vip_front_fqdn, sso_vip_fqdn, service, 'sso', options, vhost_properties, &config_block)
   end
 
-  def _vhost(key, default_vhost_fqdn, alias_fqdn, service, type, options={}, vhost_properties={}, &config_block)
+  def _vhost(key, default_vhost_fqdn, alias_fqdn, service, type, options = {}, vhost_properties = {}, &config_block)
     if (environment.options.has_key?(key))
       proxy_vhost = Stacks::ProxyVHost.new(environment.options[key], service, type, &config_block)
       proxy_vhost.with_alias(default_vhost_fqdn)
@@ -81,7 +81,7 @@ module Stacks::VirtualProxyService
       values.size > 1
     end]
 
-    raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size==0
+    raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size == 0
 
     return Hash[@proxy_vhosts_lookup.values.map do |vhost|
       primary_app = find_virtual_service(vhost.service)

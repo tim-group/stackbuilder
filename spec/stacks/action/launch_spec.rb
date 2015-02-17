@@ -24,7 +24,7 @@ describe 'launch' do
     end
   end
 
-  def test_env_with_refstack(env='test')
+  def test_env_with_refstack(env = 'test')
     test_env
     find_environment(env)
   end
@@ -37,7 +37,7 @@ describe 'launch' do
 
   def host_repo_with_hosts(
       n,
-      preference_functions=standard_preference_functions,
+      preference_functions = standard_preference_functions,
       &block)
 
     compute_node_client = double
@@ -45,36 +45,36 @@ describe 'launch' do
     result = {}
     n.times do |i|
       result["h#{i}"] = {
-        :active_vms=>[]
+        :active_vms => []
       }
     end
 
     compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repox = StackBuilder::Allocator::HostRepository.new(
-    :preference_functions=>preference_functions,
+    :preference_functions => preference_functions,
     :compute_node_client => compute_node_client)
 
     host_repo = double
     hosts = []
     n.times do |i|
-      host = StackBuilder::Allocator::Host.new("h#{i+1}")
-      block.call(host,i) unless block.nil?
+      host = StackBuilder::Allocator::Host.new("h#{i + 1}")
+      block.call(host, i) unless block.nil?
       hosts << host
     end
 
-    host_repo.stub(:find_current).and_return(StackBuilder::Allocator::Hosts.new(:hosts=>hosts, :preference_functions=>preference_functions))
+    host_repo.stub(:find_current).and_return(StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions))
     host_repo
   end
 
   xit 'gives me a list of machines that are already launched' do
     env = test_env_with_refstack
     hx = StackBuilder::Allocator::Host.new("hx")
-    hx.allocated_machines=env.flatten
+    hx.allocated_machines = env.flatten
     hosts = StackBuilder::Allocator::Hosts.new(:hosts => [hx])
 
     Hash[hosts.allocated_machines(env.flatten).map do |machine, host|
-      [machine.mgmt_fqdn,host.fqdn]
+      [machine.mgmt_fqdn, host.fqdn]
     end].should eql({
       "test-refapp-001.mgmt.t.net.local" => "hx",
       "test-refapp-002.mgmt.t.net.local" => "hx"
@@ -84,11 +84,11 @@ describe 'launch' do
   xit 'gives me a list of machines that are going to be launched' do
     env = test_env_with_refstack
     hx = StackBuilder::Allocator::Host.new("hx")
-    hosts = StackBuilder::Allocator::Hosts.new(:hosts => [hx], :preference_functions=>[])
+    hosts = StackBuilder::Allocator::Hosts.new(:hosts => [hx], :preference_functions => [])
 
     hosts.allocate(env.flatten)
     Hash[hosts.new_machine_allocation().map do |machine, host|
-      [machine.mgmt_fqdn,host.fqdn]
+      [machine.mgmt_fqdn, host.fqdn]
     end].should eql({
       "test-refapp-001.mgmt.t.net.local" => "hx",
       "test-refapp-002.mgmt.t.net.local" => "hx"
@@ -104,7 +104,7 @@ describe 'launch' do
     compute_controller = double
     services = Stacks::Core::Services.new(
       :host_repo => host_repo_with_hosts(3),
-      :compute_controller=> compute_controller
+      :compute_controller => compute_controller
     )
 
     compute_controller.should_receive(:launch_raw).with(
@@ -118,12 +118,12 @@ describe 'launch' do
   xit 'will not allocate machines that are already allocated' do
     env = test_env_with_refstack
     compute_controller = double
-    host_repo = host_repo_with_hosts(2) do |host,i|
+    host_repo = host_repo_with_hosts(2) do |host, i|
       host.allocated_machines << find("test-refapp-001.mgmt.t.net.local")
     end
     services = Stacks::Core::Services.new(
     :host_repo => host_repo,
-    :compute_controller=> compute_controller)
+    :compute_controller => compute_controller)
 
     compute_controller.should_receive(:launch_raw).with(
     "h1" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
@@ -137,7 +137,7 @@ describe 'launch' do
     compute_controller = double
 
     chooseh3 = Proc.new do |host|
-      if host.fqdn =~/h3/
+      if host.fqdn =~ /h3/
         0
       else
         1
@@ -148,7 +148,7 @@ describe 'launch' do
 
     services = Stacks::Core::Services.new(
     :host_repo => host_repo,
-    :compute_controller=> compute_controller)
+    :compute_controller => compute_controller)
 
     compute_controller.should_receive(:launch_raw).with(
     "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
@@ -169,7 +169,7 @@ describe 'launch' do
 
     services = Stacks::Core::Services.new(
     :host_repo => host_repo,
-    :compute_controller=> compute_controller)
+    :compute_controller => compute_controller)
 
     compute_controller.should_receive(:launch_raw).with(
     "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
@@ -184,13 +184,13 @@ describe 'launch' do
     compute_controller = double
     host_repo = host_repo_with_hosts(3) do |host, i|
       host.add_policy do |host, machine|
-        { :passed => host.fqdn =~ /not here/, :reason => "r#{host.fqdn}"}
+        { :passed => host.fqdn =~ /not here/, :reason => "r#{host.fqdn}" }
       end
     end
 
     services = Stacks::Core::Services.new(
     :host_repo => host_repo,
-    :compute_controller=> compute_controller)
+    :compute_controller => compute_controller)
 
     expect {
       get_action("launch").call(services, env)

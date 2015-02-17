@@ -6,11 +6,11 @@ class Stacks::MysqlServer < Stacks::MachineDef
   attr_accessor :master
 
   def initialize(base_hostname, virtual_service, role, index, &block)
-    @master = (role == :master)? true : false
-    @backup = (role == :backup)? true : false
+    @master = (role == :master) ? true : false
+    @backup = (role == :backup) ? true : false
     location = backup? ? (:secondary_site) : (:primary_site)
 
-    super(base_hostname, [:mgmt,:prod], location)
+    super(base_hostname, [:mgmt, :prod], location)
     @virtual_service = virtual_service
     @ram = '4194304' # 4GB
     @vcpus = '2'
@@ -35,11 +35,11 @@ class Stacks::MysqlServer < Stacks::MachineDef
   end
 
   def backup_size(size)
-    modify_storage({'/mnt/storage' => { :size => size }}) if @backup
+    modify_storage({ '/mnt/storage' => { :size => size } }) if @backup
   end
 
   def data_size(size)
-    modify_storage({'/mnt/data' => { :size => size }})
+    modify_storage({ '/mnt/data' => { :size => size } })
   end
 
   def create_persistent_storage_override
@@ -68,7 +68,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
   end
 
   def server_id
-    @virtual_service.children.index(self) +1
+    @virtual_service.children.index(self) + 1
   end
 
   def to_enc()

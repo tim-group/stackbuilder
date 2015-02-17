@@ -84,13 +84,13 @@ class Stacks::Factory
   end
 
   def dns_service()
-    @dns_service ||= StackBuilder::DNS::BasicDNSService.new(:logger=>logger)
+    @dns_service ||= StackBuilder::DNS::BasicDNSService.new(:logger => logger)
   end
 
   def host_repository()
     @host_repository ||= StackBuilder::Allocator::HostRepository.new(
       :machine_repo => inventory,
-      :preference_functions=>preference_functions,
+      :preference_functions => preference_functions,
       :policies => policies,
       :compute_node_client => compute_node_client,
       :logger => logger

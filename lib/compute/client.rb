@@ -6,7 +6,7 @@ class Compute::Client
   include Support::MCollective
 
   def get_fact(fact, hosts)
-    fact_response = mco_client('rpcutil',:nodes=>hosts) do |mco|
+    fact_response = mco_client('rpcutil', :nodes => hosts) do |mco|
       result = mco.get_fact(:fact => fact)
       result.map do |resp|
         [resp[:sender], { fact.to_sym => resp[:data][:value] }]
@@ -28,10 +28,10 @@ class Compute::Client
 
     raise "unable to find any compute nodes" if hosts.empty?
 
-    response = mco_client("libvirt", :nodes=>hosts) do |mco|
+    response = mco_client("libvirt", :nodes => hosts) do |mco|
       result = mco.hvinfo()
       result.map do |hv|
-        raise "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode]==0
+        raise "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
         [hv[:sender], hv[:data]]
       end
     end
@@ -54,7 +54,7 @@ class Compute::Client
         result.map do |resp|
           # FIXME: Once all compute nodes have new storage config, renable this
           #raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
-          [resp[:sender], {:storage => resp[:data]}]
+          [resp[:sender], { :storage => resp[:data] }]
         end
       end
 
@@ -122,6 +122,6 @@ class Compute::Client
   end
 
   def remove_cnames(host, spec)
-    invoke :remove_cnames, spec,:nodes => [host]
+    invoke :remove_cnames, spec, :nodes => [host]
   end
 end

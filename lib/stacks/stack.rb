@@ -63,7 +63,7 @@ class Stacks::Stack
     machineset_with(name, [Stacks::VirtualService, Stacks::VirtualSftpService], Stacks::SftpServer, &block)
   end
 
-  def virtual_rabbitmqserver(name='rabbitmq', &block)
+  def virtual_rabbitmqserver(name = 'rabbitmq', &block)
     machineset_with(name, [Stacks::VirtualService, Stacks::VirtualRabbitMQService], Stacks::RabbitMQServer, &block)
   end
 
@@ -75,31 +75,31 @@ class Stacks::Stack
     machineset_with(name, [Stacks::ShadowServerCluster], Stacks::ShadowServer, &block)
   end
 
-  def mongodb(name='mongodb', &block)
+  def mongodb(name = 'mongodb', &block)
     machineset_with(name, [Stacks::MongoDBCluster], Stacks::MongoDBServer, &block)
   end
 
-  def mysql_cluster(name='mysqldb', &block)
+  def mysql_cluster(name = 'mysqldb', &block)
     machineset_with(name, [Stacks::MysqlCluster], Stacks::MysqlServer, &block)
   end
 
-  def legacy_mysqldb(name='mysqldb', &block)
+  def legacy_mysqldb(name = 'mysqldb', &block)
     machineset_with(name, [Stacks::LegacyMysqlCluster], Stacks::LegacyMysqlDBServer, &block)
   end
 
-  def logstash(name='logstash', &block)
+  def logstash(name = 'logstash', &block)
     machineset_with(name, [], Stacks::LogstashServer, &block)
   end
 
-  def analyticsapp(name='analyticsapp', &block)
+  def analyticsapp(name = 'analyticsapp', &block)
     machineset_with(name, [], Stacks::AnalyticsAppServer, &block)
   end
 
-  def fmanalyticsapp(name='fmanalyticsapp', &block)
+  def fmanalyticsapp(name = 'fmanalyticsapp', &block)
     machineset_with(name, [], Stacks::FmAnalyticsAppServer, &block)
   end
 
-  def puppetmaster(name="puppetmaster", &block)
+  def puppetmaster(name = "puppetmaster", &block)
     machineset_with(name, [], Stacks::PuppetMaster, &block)
   end
 
@@ -115,7 +115,7 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::ElasticSearchNode, &block)
   end
 
-  def rate_limited_forward_proxy(name='rate_limited_forward_proxy', &block)
+  def rate_limited_forward_proxy(name = 'rate_limited_forward_proxy', &block)
     machineset_with(name, [], Stacks::RateLimitedForwardProxyServer, &block)
   end
 
@@ -123,7 +123,7 @@ class Stacks::Stack
     @definitions[name] = Stacks::Selenium::Hub.new(name, @definitions, options)
   end
 
-  def selenium_node_cluster(name='segrid', hub = nil, &block)
+  def selenium_node_cluster(name = 'segrid', hub = nil, &block)
     machineset_with(name, [Stacks::Selenium::Cluster], nil, &block)
   end
 
@@ -144,11 +144,11 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::CiSlave, &block)
   end
 
-  def quantapp(name='quantapp', &block)
+  def quantapp(name = 'quantapp', &block)
     machineset_with(name, [], Stacks::QuantAppServer, &block)
   end
 
-  def sensu(name='sensu', &block)
+  def sensu(name = 'sensu', &block)
     machineset_with(name, [], Stacks::SensuServer, &block)
   end
 
@@ -165,7 +165,7 @@ class Stacks::Stack
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend(Stacks::MachineGroup)
     extends.each { |e| machineset.extend(e) }
-    machineset.type=type
-    @definitions[name]=machineset
+    machineset.type = type
+    @definitions[name] = machineset
   end
 end

@@ -5,7 +5,7 @@ describe_stack 'should default root storage size to 3G' do
     stack 'demo' do
       loadbalancer
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "demo"
     end
   end
@@ -20,7 +20,7 @@ describe_stack 'should default appserver storage size to 5G' do
     stack 'demo' do
       standalone_appserver 'default'
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "demo"
     end
   end
@@ -41,7 +41,7 @@ describe_stack 'can specify app server system storage size' do
         end
       end
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "demo"
     end
   end
@@ -63,7 +63,7 @@ describe_stack 'allow additional storage to be specified' do
         end
       end
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "demo"
     end
   end
@@ -104,7 +104,7 @@ describe_stack 'allow all existing storage options to be modified' do
         end
       end
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "demo"
     end
   end
@@ -136,7 +136,7 @@ describe_stack 'allow persistence to be set' do
         end
       end
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "demo"
     end
   end

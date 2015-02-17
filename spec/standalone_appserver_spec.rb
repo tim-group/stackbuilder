@@ -13,17 +13,17 @@ describe_stack 'tim' do
         end
       end
     end
-    env "e1", { :primary_site=>"space", :tim_instances=>2 } do
+    env "e1", { :primary_site => "space", :tim_instances => 2 } do
       instantiate_stack "tim"
     end
   end
 
   host("e1-timcyclic-001.mgmt.space.net.local") do |host|
      host.to_enc.should eql({
-       'role::http_app'=> {
+       'role::http_app' => {
         'application' => 'TIM',
         'group' => 'blue',
-        'cluster'=>'e1-timcyclic',
+        'cluster' => 'e1-timcyclic',
         'environment' => 'e1',
         'port'        => '8000',
         'dependencies' => {},
@@ -46,7 +46,7 @@ describe_stack 'app with sso port' do
         enable_sso('8444')
       end
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "app"
     end
   end
@@ -64,7 +64,7 @@ describe_stack 'app with ajp port' do
         enable_ajp('8444')
       end
     end
-    env "e1", { :primary_site=>"space" } do
+    env "e1", { :primary_site => "space" } do
       instantiate_stack "app"
     end
   end

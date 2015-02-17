@@ -18,20 +18,20 @@ class Subscription
     end
 
     def passed
-      @responses.reject {|response| response["status"] == "failed"}.map {|response| response["host"]}
+      @responses.reject { |response| response["status"] == "failed" }.map { |response| response["host"] }
     end
 
     def failed
-      @responses.select {|response| response["status"] == "failed"}.map {|response| response["host"]}
+      @responses.select { |response| response["status"] == "failed" }.map { |response| response["host"] }
     end
 
     def unaccounted_for
-      responded = @responses.map {|response| response["host"]}
+      responded = @responses.map { |response| response["host"] }
       (@all - responded)
     end
 
     def all
-      result= {}
+      result = {}
 
       passed.each do |vm|
         result[vm] = "success"
@@ -100,7 +100,7 @@ class Subscription
     return_results = []
     message = nil
 
-    while(not is_all_accounted_for(return_results, hosts) and not timed_out(start_time, timeout))
+    while (not is_all_accounted_for(return_results, hosts) and not timed_out(start_time, timeout))
       begin
         Timeout::timeout(@pop_timeout) do
           message = @queues[topic].pop()
@@ -118,8 +118,8 @@ class Subscription
 
   private
   def is_all_accounted_for(results, hosts)
-    accounted_for = results.map {|hash| hash["host"]}
-    (hosts-accounted_for).empty?
+    accounted_for = results.map { |hash| hash["host"] }
+    (hosts - accounted_for).empty?
   end
 
   def timed_out(start_time, timeout)

@@ -80,16 +80,16 @@ module Support
       return MCollectiveFabricRunner.new(options)
     end
 
-    def mco_client(name, options={}, &block)
+    def mco_client(name, options = {}, &block)
       return async_mco_client(name, options, &block).value
     end
 
-    def async_mco_client(name, options={}, &block)
+    def async_mco_client(name, options = {}, &block)
       async_fork_and_return do
         runner = create_fabric_runner(options)
         client = runner.new_client(name)
         nodes = options[:nodes] || []
-        nodes.empty? ? client.discover(): client.discover(:nodes => nodes)
+        nodes.empty? ? client.discover() : client.discover(:nodes => nodes)
         retval = block.call(client)
         client.disconnect
         retval

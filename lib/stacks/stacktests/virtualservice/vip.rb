@@ -16,9 +16,9 @@ shared_examples_for "vip" do |virtualservice|
 
       logger.debug("executing vip test for #{virtualservice.vip_fqdn} test on #{node_to_execute_from}")
 
-      data = mco_client("nettest",:nodes=>[node_to_execute_from]) do |mco|
-        result = mco.connect(:fqdn=>virtualservice.vip_fqdn(:prod), :port=>"#{port}")[0]
-        raise "error attempting to connect to vip #{virtualservice.vip_fqdn(:prod)}" if result[:statuscode]!=0
+      data = mco_client("nettest", :nodes => [node_to_execute_from]) do |mco|
+        result = mco.connect(:fqdn => virtualservice.vip_fqdn(:prod), :port => "#{port}")[0]
+        raise "error attempting to connect to vip #{virtualservice.vip_fqdn(:prod)}" if result[:statuscode] != 0
         result[:data]
       end
       data[:connect].should eql("Connected")
@@ -48,7 +48,7 @@ shared_examples_for "vip" do |virtualservice|
 
       request = Net::HTTP::Get.new(request_url)
 
-      response = http.start {|http| http.request(request)}
+      response = http.start { |http| http.request(request) }
       response.code.should eql('200')
     end
   end

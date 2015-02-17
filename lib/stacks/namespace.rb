@@ -13,7 +13,7 @@ module Stacks
       object.environments = {}
     end
 
-    def stack(name,&block)
+    def stack(name, &block)
       @stack_procs[name] = Proc.new do |environment|
         stack =  Stacks::Stack.new(name)
         stack.instance_eval(&block)

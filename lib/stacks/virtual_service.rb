@@ -21,7 +21,7 @@ module Stacks::VirtualService
     @allowed_hosts = []
     @included_classes = {}
     @ehcache = false
-    @nat=false
+    @nat = false
     @persistent_ports = []
     @port_map = {}
     @healthcheck_timeout = 10

@@ -21,17 +21,17 @@ describe Stacks::DSL do
       natserver
     end
 
-    env "parent", :primary_site=>"st", :secondary_site=>"bs" do
-      env "e1", :lb_virtual_router_id=>1,
-        :nat_front_virtual_router_id=>40,
-        :nat_prod_virtual_router_id=>41,
-        :primary_site=>"space" do
+    env "parent", :primary_site => "st", :secondary_site => "bs" do
+      env "e1", :lb_virtual_router_id => 1,
+        :nat_front_virtual_router_id => 40,
+        :nat_prod_virtual_router_id => 41,
+        :primary_site => "space" do
         instantiate_stack "fabric"
         end
 
-      env "e2", :lb_virtual_router_id=>2,
-        :nat_front_virtual_router_id=>42,
-        :nat_prod_virtual_router_id=>43 do
+      env "e2", :lb_virtual_router_id => 2,
+        :nat_front_virtual_router_id => 42,
+        :nat_prod_virtual_router_id => 43 do
         instantiate_stack "fabric"
         end
     end
@@ -48,7 +48,7 @@ describe Stacks::DSL do
     stack "fabric" do
       loadbalancer
     end
-    env "rah", :primary_site=>"st", :secondary_site=>"bs" do
+    env "rah", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "fabric"
     end
     find("rah-lb-001.mgmt.st.net.local").should_not be_nil
@@ -66,13 +66,13 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+    env "st", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "loadbalancer"
       instantiate_stack "sftp"
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
-      {"role::loadbalancer"=>{"virtual_servers"=>{"st-sftp-vip.st.net.local"=>{"type"=>"sftp", "realservers"=>{"blue"=>["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"]},"monitor_warn"=>0, "persistent_ports"=>['21']}}, "virtual_router_id"=>1}}
+      { "role::loadbalancer" => { "virtual_servers" => { "st-sftp-vip.st.net.local" => { "type" => "sftp", "realservers" => { "blue" => ["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"] }, "monitor_warn" => 0, "persistent_ports" => ['21'] } }, "virtual_router_id" => 1 } }
     )
 
   end
@@ -93,31 +93,25 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+    env "st", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "fabric"
       instantiate_stack "twoapp"
       instantiate_stack "oneapp"
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
-      {"role::loadbalancer"=>
-        {"virtual_router_id"=>1,
-          "virtual_servers"=>
-        {"st-twoapp-vip.st.net.local"=>
-          { "healthcheck_timeout" => 10,
-            "realservers"=>
-            {"blue"=>["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]},
-              "env"=>"st",
-              "app"=>nil,
-              "monitor_warn"=>1},
-         "st-oneapp-vip.st.net.local"=>
-            { "healthcheck_timeout" => 10,
-              "realservers"=>
-              {"green"=>["st-oneapp-002.st.net.local"],
-                "blue"=>["st-oneapp-001.st.net.local"]},
-                "env"=>"st",
-                "app"=>nil,
-                "monitor_warn"=>0,
+      { "role::loadbalancer" =>         { "virtual_router_id" => 1,
+          "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
+            "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
+              "env" => "st",
+              "app" => nil,
+              "monitor_warn" => 1 },
+         "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
+              "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
+                "blue" => ["st-oneapp-001.st.net.local"] },
+                "env" => "st",
+                "app" => nil,
+                "monitor_warn" => 0,
               }
         }
         }
@@ -141,31 +135,25 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+    env "st", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "fabric"
       instantiate_stack "twoapp"
       instantiate_stack "oneapp"
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
-      {"role::loadbalancer"=>
-        {"virtual_router_id"=>1,
-          "virtual_servers"=>
-        {"st-twoapp-vip.st.net.local"=>
-          { "healthcheck_timeout" => 10,
-            "realservers"=>
-            {"blue"=>["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]},
-              "env"=>"st",
-              "app"=>nil,
-              "monitor_warn"=>1},
-         "st-oneapp-vip.st.net.local"=>
-            { "healthcheck_timeout" => 10,
-              "realservers"=>
-              {"green"=>["st-oneapp-002.st.net.local"],
-                "blue"=>["st-oneapp-001.st.net.local"]},
-                "env"=>"st",
-                "app"=>nil,
-                "monitor_warn"=>0,
+      { "role::loadbalancer" =>         { "virtual_router_id" => 1,
+          "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
+            "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
+              "env" => "st",
+              "app" => nil,
+              "monitor_warn" => 1 },
+         "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
+              "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
+                "blue" => ["st-oneapp-001.st.net.local"] },
+                "env" => "st",
+                "app" => nil,
+                "monitor_warn" => 0,
                 "healthcheck_timeout" => 999
               }
         }
@@ -188,15 +176,15 @@ describe Stacks::DSL do
 
     stack "blah" do
       virtual_appserver "appx" do
-        self.application="JavaHttpRef"
-        self.groups = ['blue','green']
+        self.application = "JavaHttpRef"
+        self.groups = ['blue', 'green']
       end
       virtual_appserver "app2x" do
-        self.application="MySuperCoolApp"
+        self.application = "MySuperCoolApp"
       end
     end
 
-    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+    env "st", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "fabric"
       env "ci" do
         instantiate_stack "fabric"
@@ -220,7 +208,7 @@ describe Stacks::DSL do
 
       'env' => 'ci2',
       'app' => 'JavaHttpRef',
-      'monitor_warn'=>0,
+      'monitor_warn' => 0,
       'healthcheck_timeout' => 10,
 
       'realservers' => {
@@ -235,7 +223,7 @@ describe Stacks::DSL do
       'ci2-app2x-vip.st.net.local' => {
       'env' => 'ci2',
       'app' => 'MySuperCoolApp',
-      'monitor_warn'=>1,
+      'monitor_warn' => 1,
       'healthcheck_timeout' => 10,
 
       'realservers' => {
@@ -247,7 +235,7 @@ describe Stacks::DSL do
     },
       'ci2-myproxy-vip.st.net.local' => {
       'type'        => 'proxy',
-      'ports'=>[80, 443],
+      'ports' => [80, 443],
       'realservers' => {
       'blue' => [
         'ci2-myproxy-001.st.net.local',
@@ -257,7 +245,7 @@ describe Stacks::DSL do
     },
       'st-sftp-vip.st.net.local' => {
       'type'        => 'sftp',
-      'monitor_warn'=> 0,
+      'monitor_warn' => 0,
       'persistent_ports'  => [],
       'realservers' => {
       'blue' => [
@@ -266,30 +254,30 @@ describe Stacks::DSL do
     ]
     }
     }
-    }}})
+    } } })
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
     ci_loadbalancer.to_enc.should eql({
-      'role::loadbalancer' =>{
+      'role::loadbalancer' => {
       'virtual_router_id' => 1,
       'virtual_servers' => {
       'ci-appx-vip.st.net.local' => {
         'healthcheck_timeout' => 10,
-        'monitor_warn'=>0,
+        'monitor_warn' => 0,
         'env' => 'ci',
         'app' => 'JavaHttpRef',
         'realservers' => {
           'blue' => [
             'ci-appx-001.st.net.local'
           ],
-          'green'=> [
+          'green' => [
              'ci-appx-002.st.net.local'
     ]
     }
     },
       'ci-app2x-vip.st.net.local' => {
          'healthcheck_timeout' => 10,
-         'monitor_warn'=>1,
+         'monitor_warn' => 1,
         'env' => 'ci',
       'app' => 'MySuperCoolApp',
       'realservers' => {
@@ -301,7 +289,7 @@ describe Stacks::DSL do
     },
       'ci-sftp-vip.st.net.local' => {
       'type'        => 'sftp',
-      'monitor_warn'=> 0,
+      'monitor_warn' => 0,
       'persistent_ports'  => [],
       'realservers' => {
       'blue' => [
@@ -318,12 +306,12 @@ describe Stacks::DSL do
   it 'round robins the groups foreach instance' do
     stack "blah" do
       virtual_appserver "appx" do
-        self.instances=4
-        self.application="JavaHttpRef"
-        self.groups=['blue', 'green']
+        self.instances = 4
+        self.application = "JavaHttpRef"
+        self.groups = ['blue', 'green']
       end
     end
-    env "ci", :primary_site=>"st" do
+    env "ci", :primary_site => "st" do
       instantiate_stack "blah"
     end
 
@@ -336,17 +324,17 @@ describe Stacks::DSL do
   it 'generates app server configuration appropriately' do
     stack "blah" do
       virtual_appserver "appx" do
-        self.application="JavaHttpRef"
+        self.application = "JavaHttpRef"
       end
     end
 
-    env "ci", :primary_site=>"st", :secondary_site=>"bs" do
+    env "ci", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "blah"
     end
 
     server = find("ci-appx-001.mgmt.st.net.local")
     server.to_enc.should eql({
-      'role::http_app'=> {
+      'role::http_app' => {
       'application' => 'JavaHttpRef',
       'group' => 'blue',
       'cluster' => 'ci-appx',
@@ -355,23 +343,23 @@ describe Stacks::DSL do
       'port'        => '8000',
       'dependencies' => {},
       'dependant_instances' => []
-    }})
+    } })
   end
 
   it 'generates app servers that are not part of a virtual service' do
     stack "blah" do
       standalone_appserver "appx" do
-        self.application="JavaHttpRef"
+        self.application = "JavaHttpRef"
       end
     end
 
-    env "ci", :primary_site=>"st", :secondary_site=>"bs" do
+    env "ci", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "blah"
     end
 
     server = find("ci-appx-001.mgmt.st.net.local")
     server.to_enc.should eql({
-      'role::http_app'=> {
+      'role::http_app' => {
       'application' => 'JavaHttpRef',
       'group' => 'blue',
       'cluster' => 'ci-appx',
@@ -379,7 +367,7 @@ describe Stacks::DSL do
       'port'        => '8000',
       'dependencies' => {},
       'dependant_instances' => []
-    }})
+    } })
   end
 
 
@@ -393,12 +381,12 @@ describe Stacks::DSL do
       end
     end
 
-    env "eg", :primary_site=>"st", :secondary_site=>"bs" do
+    env "eg", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "es"
     end
 
     eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
-    eg_es.to_enc.should eql({ 'role::elasticsearch_node' => { "cluster_nodes"=>["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"]}})
+    eg_es.to_enc.should eql({ 'role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"] } })
   end
 
   it 'configures NAT boxes to NAT incoming public IPs' do
@@ -418,7 +406,7 @@ describe Stacks::DSL do
       natserver
       virtual_appserver 'blahnat' do
         enable_nat
-        self.ports=[8008]
+        self.ports = [8008]
       end
     end
 
@@ -430,7 +418,7 @@ describe Stacks::DSL do
     end
 
 
-    env "eg", :primary_site=>"st", :secondary_site=>"bs" do
+    env "eg", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "frontexample"
       env "sub" do
         instantiate_stack "example2"
@@ -501,14 +489,14 @@ describe Stacks::DSL do
            'sub-blahnat-vip.front.st.net.local 8008' => {
              'dest_host'  => 'sub-blahnat-vip.st.net.local',
              'dest_port'  => '8008',
-              "tcp"      =>"true",
-              "udp"      =>"false"
+              "tcp" => "true",
+              "udp" => "false"
            },
             "sub-defaultport-vip.front.st.net.local 8000" => {
-              "dest_port"=>"8000",
-              "dest_host"=>"sub-defaultport-vip.st.net.local",
-              "tcp"      =>"true",
-              "udp"      =>"false"
+              "dest_port" => "8000",
+              "dest_host" => "sub-defaultport-vip.st.net.local",
+              "tcp" => "true",
+              "udp" => "false"
            }
          }
     },
@@ -521,7 +509,7 @@ describe Stacks::DSL do
 
   it 'throws an error if we try and instantiate a stack that isnt defined' do
     expect {
-      env "myold", :primary_site=>"x", :secondary_site=>"y" do
+      env "myold", :primary_site => "x", :secondary_site => "y" do
       instantiate_stack "no-exist"
       end
     }.to raise_error "no stack found 'no-exist'"
@@ -530,11 +518,11 @@ describe Stacks::DSL do
   it 'generates proxyserver enc data' do
     stack "ref" do
       virtual_appserver "refapp" do
-        self.application="MyApp"
+        self.application = "MyApp"
       end
 
       virtual_appserver "ref2app" do
-        self.application="MyOtherApp"
+        self.application = "MyOtherApp"
       end
 
       virtual_appserver "downstreamapp" do
@@ -551,7 +539,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "env", :primary_site=>"st", "refproxy.vhost.ref2app.server_name"=>"example.timgroup.com" do
+    env "env", :primary_site => "st", "refproxy.vhost.ref2app.server_name" => "example.timgroup.com" do
       instantiate_stack "ref"
     end
 
@@ -572,7 +560,7 @@ describe Stacks::DSL do
               'redirects'      => ['old-example.timgroup.com'],
              'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
               'type' => 'default',
-              'vhost_properties'=>{},
+              'vhost_properties' => {},
               'cert' => 'wildcard_timgroup_com'
             },
             'example.timgroup.com' => {
@@ -584,7 +572,7 @@ describe Stacks::DSL do
               'redirects'      => [],
               'aliases'        => ['env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local'],
               'type' => 'default',
-              'vhost_properties'=>{},
+              'vhost_properties' => {},
               'cert' => 'wildcard_timgroup_com'
             }
           }
@@ -604,7 +592,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary_site=>"st", :secondary_site=>"bs" do
+    env "st", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "loadbalancer"
       instantiate_stack "proxyserver"
     end
@@ -619,7 +607,7 @@ describe Stacks::DSL do
               "type" => "proxy",
               "ports" => [80, 443],
               "realservers" => {
-                "blue"=> [
+                "blue" => [
                   "st-proxy-001.st.net.local",
                   "st-proxy-002.st.net.local"
                 ]
@@ -639,7 +627,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "rah", :primary_site=>"st", :secondary_site=>"bs" do
+    env "rah", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "fabric"
     end
 
@@ -672,11 +660,11 @@ describe Stacks::DSL do
       natserver
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "mystack"
     end
 
-    find_environment("e1").flatten.map { |m| m.name }.should eql(["e1-lb-001","e1-lb-002","e1-nat-001","e1-nat-002"])
+    find_environment("e1").flatten.map { |m| m.name }.should eql(["e1-lb-001", "e1-lb-002", "e1-nat-001", "e1-nat-002"])
   end
 
   it 'can build forward proxy servers' do
@@ -684,7 +672,7 @@ describe Stacks::DSL do
       rate_limited_forward_proxy 's3proxy'
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "mystack"
     end
 
@@ -702,7 +690,7 @@ describe Stacks::DSL do
       virtual_sftpserver "sx"
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "mystack"
     end
 
@@ -718,7 +706,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "e1", :primary_site=>'space' do
+    env "e1", :primary_site => 'space' do
       instantiate_stack "mystack"
     end
 
@@ -739,7 +727,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "e1", :primary_site=>'space' do
+    env "e1", :primary_site => 'space' do
       instantiate_stack "mystack"
     end
 
@@ -757,7 +745,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "e1", :primary_site=>'space' do
+    env "e1", :primary_site => 'space' do
       instantiate_stack "mystack"
     end
 
@@ -776,7 +764,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "e1", :primary_site=>'space' do
+    env "e1", :primary_site => 'space' do
       instantiate_stack "mystack"
     end
 

@@ -10,7 +10,7 @@ module Stacks::Gold
     on_bind do
     end
 
-    on_bind do |m,environment|
+    on_bind do |m, environment|
       @environment = environment
       self.instance_eval(&@config_block)
       bind_children(environment)
@@ -103,7 +103,7 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
           :shrink_after_unmount => true,
         }
       }
-    }})
+    } })
   end
 
   def bind_to(environment)

@@ -14,7 +14,7 @@ module Stacks::VirtualSftpService
 
   def configure()
     @downstream_services = []
-    @ports = [21,22,2222]
+    @ports = [21, 22, 2222]
   end
 
   def to_loadbalancer_config

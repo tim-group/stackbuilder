@@ -9,7 +9,7 @@ describe_stack 'should provide a single instance mode to be backwards compatible
       end
     end
 
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -25,7 +25,7 @@ describe_stack 'should provide the correct cross routing enc data' do
       mysql_cluster "frdb"
     end
 
-    env "testing", :primary_site=>"pg", :secondary_site=>"oy" do
+    env "testing", :primary_site => "pg", :secondary_site => "oy" do
       instantiate_stack "mysql"
     end
   end
@@ -57,7 +57,7 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
       mysql_cluster "frdb"
     end
 
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -88,7 +88,7 @@ describe_stack 'should default to disallow destory' do
       mysql_cluster "spoondb"
     end
 
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -108,7 +108,7 @@ describe_stack 'should allow destroy to be overwritten' do
         end
       end
     end
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -128,7 +128,7 @@ describe_stack 'should provide correct enc data' do
         end
       end
     end
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -198,7 +198,7 @@ describe_stack 'should allow storage options to be overwritten' do
        self.backup_size('29G')
       end
     end
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -217,7 +217,7 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
       mysql_cluster "mydb" do
       end
     end
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -235,7 +235,7 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
       mysql_cluster "mydb" do
       end
     end
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -269,7 +269,7 @@ describe_stack 'should support dependencies' do
       end
     end
 
-    env "testing", :primary_site=>"space", :secondary_site=>"earth" do
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "fr"
       instantiate_stack "fr_db"
       instantiate_stack "hr"
@@ -281,7 +281,7 @@ describe_stack 'should support dependencies' do
     host.to_enc['role::mysql_server']['dependencies'].should eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['dependant_instances'].should_not include('testing-frapp-001.space.net.local','testing-frapp-002.space.net.local')
+    host.to_enc['role::mysql_server']['dependant_instances'].should_not include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
     host.to_enc['role::mysql_server']['dependencies'].should eql({})
   end
 end

@@ -11,7 +11,7 @@ class StackBuilder::Allocator::Host
   attr_reader :preference_functions
   attr_accessor :policies
 
-  def initialize(fqdn, args = {:preference_functions=>[], :policies=>[], :ram=>'0', :storage=>{}})
+  def initialize(fqdn, args = { :preference_functions => [], :policies => [], :ram => '0', :storage => {} })
     @provisionally_allocated_machines = []
     @fqdn = fqdn
     @allocated_machines = []
@@ -40,7 +40,7 @@ class StackBuilder::Allocator::Host
   end
 
   def can_allocate(machine_hash)
-    result = { :allocatable => true, :reasons => []}
+    result = { :allocatable => true, :reasons => [] }
     relevant_policies(machine_hash[:fabric]).each do |policy|
       policy_result = policy.call(self, machine_hash)
       if (policy_result[:passed] != true)

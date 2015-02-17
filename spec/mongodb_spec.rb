@@ -23,15 +23,15 @@ describe_stack 'mongodb' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "mongo"
     end
 
-    env "latest", :primary_site=>"space" do
+    env "latest", :primary_site => "space" do
       instantiate_stack "mongo"
       instantiate_stack "mongo_arbiter"
     end
-    env "prodbackup", :primary_site=>"space" do
+    env "prodbackup", :primary_site => "space" do
       instantiate_stack "mongo_backup"
     end
   end
@@ -53,7 +53,7 @@ describe_stack 'mongodb' do
 
   host("prodbackup-mongodb-001.mgmt.space.net.local") do |host|
     host.to_enc['role::mongodb_server']['application'].should eql("myapp")
-    host.to_enc['mongodb::backup'].should eql({'ensure' => 'present'})
+    host.to_enc['mongodb::backup'].should eql({ 'ensure' => 'present' })
     host.to_enc['mongodb::users']['environment'].should eql('prodbackup')
   end
 end

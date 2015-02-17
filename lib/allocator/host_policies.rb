@@ -80,7 +80,7 @@ module StackBuilder::Allocator::HostPolicies
           if persistent
             case on_storage_not_found
             when :raise_error
-              underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/','_').gsub(/_$/, '')}"
+              underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
               type = attributes[:type]
               unless host.storage.has_key?(type)
                 persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
@@ -125,10 +125,10 @@ module StackBuilder::Allocator::HostPolicies
         unless host_storage_type.nil?
           available_space = KB_to_GB(host_storage_type[:free])
           if (required_space > available_space)
-            result[type] = {:available_space => available_space, :required_space => required_space}
+            result[type] = { :available_space => available_space, :required_space => required_space }
           end
         else
-          result[type] = {:available_space => 0, :required_space => required_space}
+          result[type] = { :available_space => 0, :required_space => required_space }
         end
         result
       end
@@ -137,7 +137,7 @@ module StackBuilder::Allocator::HostPolicies
         sorted_keys = storage_without_enough_space.keys.sort
         result = {
             :passed => false,
-            :reason => "Insufficient disk space (required: #{sorted_keys.collect{|key| storage_without_enough_space[key][:required_space]}.join(',') }G available: #{sorted_keys.collect{|key| storage_without_enough_space[key][:available_space]}.join(',')}G)"
+            :reason => "Insufficient disk space (required: #{sorted_keys.collect { |key| storage_without_enough_space[key][:required_space] }.join(',') }G available: #{sorted_keys.collect { |key| storage_without_enough_space[key][:available_space] }.join(',')}G)"
         }
       end
       result
@@ -146,6 +146,6 @@ module StackBuilder::Allocator::HostPolicies
 
   private
   def self.KB_to_GB(value)
-    ((value.to_f / (1024*1024) * 100).round / 100.0)
+    ((value.to_f / (1024 * 1024) * 100).round / 100.0)
   end
 end

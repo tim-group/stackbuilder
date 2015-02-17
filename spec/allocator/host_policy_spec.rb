@@ -4,11 +4,11 @@ require 'allocator/host_policies'
 describe StackBuilder::Allocator::HostPolicies do
   def test_env_with_refstack
    return [{
-      :hostname=>"refapp1",
-      :availability_group=>"refapp"
-    },{
-      :hostname=>"refapp2",
-      :availability_group=>"refapp"
+      :hostname => "refapp1",
+      :availability_group => "refapp"
+    }, {
+      :hostname => "refapp2",
+      :availability_group => "refapp"
     }]
   end
 
@@ -29,15 +29,15 @@ describe StackBuilder::Allocator::HostPolicies do
 
   it 'allows allocation if the availability group is unset' do
     machine = double
-    running_machine= double
+    running_machine = double
 
     machine = {
-      :hostname=>"host1",
+      :hostname => "host1",
       :availability_group => nil
     }
 
     running_machine = {
-      :hostname=>"host2",
+      :hostname => "host2",
       :availability_group => nil
     }
 
@@ -49,7 +49,7 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'allows allocations where the host ram is sufficient' do
 
     candidate_machine = {
-      :hostname=>"candidate_machine",
+      :hostname => "candidate_machine",
       :ram => 2097152
     }
 
@@ -72,7 +72,7 @@ describe StackBuilder::Allocator::HostPolicies do
 
   it 'rejects allocations where the host ram is insufficient due to host reserve' do
     candidate_machine = {
-      :hostname=>"candidate_machine",
+      :hostname => "candidate_machine",
       :ram => 2097152
     }
 
@@ -95,7 +95,7 @@ describe StackBuilder::Allocator::HostPolicies do
 
   it 'rejects allocations where the host ram is insufficient' do
     candidate_machine = {
-      :hostname=>"candidate_machine",
+      :hostname => "candidate_machine",
       :ram => 2097152
     }
 
@@ -118,7 +118,7 @@ describe StackBuilder::Allocator::HostPolicies do
 
   it 'rejects allocations where the host provisioning has been disabled' do
     candidate_machine = {
-      :hostname=>"candidate_machine",
+      :hostname => "candidate_machine",
       :ram => 2097152
     }
 
@@ -141,15 +141,15 @@ describe StackBuilder::Allocator::HostPolicies do
 
 
   it 'rejects allocations where the host has no defined storage types' do
-    machine = {:storage => {:mount_point => {:type => "something"}}}
+    machine = { :storage => { :mount_point => { :type => "something" } } }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {})
     StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy().call(h1, machine)[:passed].should eql(false)
 
   end
 
   it 'accepts allocations where the host has no defined storage types' do
-    machine = {:storage => {:mount_point => {:type => "LVS"}}}
-    h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"LVS" => {"some_key" => "value"}})
+    machine = { :storage => { :mount_point => { :type => "LVS" } } }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "LVS" => { "some_key" => "value" } })
     StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy().call(h1, machine)[:passed].should eql(true)
   end
 
@@ -167,7 +167,7 @@ describe StackBuilder::Allocator::HostPolicies do
     }
     host_storage = {
       'os' => {
-        :existing_storage => { }
+        :existing_storage => {}
       },
       'data' => {
         :existing_storage => { 'test-db-001_var_lib_mysql'.to_sym => 1.00 }
@@ -192,10 +192,10 @@ describe StackBuilder::Allocator::HostPolicies do
     }
     host_storage = {
       :os => {
-        :existing_storage => { }
+        :existing_storage => {}
       },
       :data => {
-        :existing_storage => { }
+        :existing_storage => {}
       }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
@@ -204,8 +204,8 @@ describe StackBuilder::Allocator::HostPolicies do
   end
 
   it 'rejects overallocated disks' do
-    machine = {:storage => {:mount_point => {:type => "LVS", :size => "5G"}}}
-    h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"LVS" => {:free => "2000000"}})
+    machine = { :storage => { :mount_point => { :type => "LVS", :size => "5G" } } }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "LVS" => { :free => "2000000" } })
 
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy().call(h1, machine)[:passed].should eql(false)
   end
@@ -213,17 +213,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'rejects overallocated disks for same type' do
     machine = {
       :storage => {
-        '/foo'.to_sym      => {:type => 'data', :size => "10G"},
-        '/mnt/data'.to_sym => {:type => 'data', :size => "10G"}
+        '/foo'.to_sym      => { :type => 'data', :size => "10G" },
+        '/mnt/data'.to_sym => { :type => 'data', :size => "10G" }
       }
     }
-    h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"data" => {:free => "15000000"}})
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "data" => { :free => "15000000" } })
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy().call(h1, machine)[:passed].should eql(false)
   end
 
   it 'accepts disk space it can allocate' do
-    machine = {:storage => {:mount_point => {:type => "LVS", :size => "2G"}}}
-    h1 = StackBuilder::Allocator::Host.new("h1", :storage => {"LVS" => {:free => "5000000"}})
+    machine = { :storage => { :mount_point => { :type => "LVS", :size => "2G" } } }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "LVS" => { :free => "5000000" } })
 
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy().call(h1, machine)[:passed].should eql(true)
   end

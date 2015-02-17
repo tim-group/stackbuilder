@@ -18,7 +18,7 @@ describe Support::Forking do
 
   it 'throws an exception it a mistake was made' do
     expect do
-      async_fork_and_return(:broker=>"dev-puppet", :timeout=>4).value do
+      async_fork_and_return(:broker => "dev-puppet", :timeout => 4).value do
         provisio
       end.value
     end.to raise_error

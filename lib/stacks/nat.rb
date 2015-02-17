@@ -6,7 +6,7 @@ class Stacks::Nat
   attr_reader :tcp
   attr_reader :udp
 
-  def initialize(from, to, tcp=true, udp=false)
+  def initialize(from, to, tcp = true, udp = false)
     @from = from
     @to = to
     @tcp = tcp

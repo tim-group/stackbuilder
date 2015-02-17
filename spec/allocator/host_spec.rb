@@ -7,7 +7,7 @@ describe StackBuilder::Allocator::Host do
   it 'selects only relevant policies when storage is nil' do
 
 
-    h1 = StackBuilder::Allocator::Host.new("h1", {:policies => Stacks::Factory.new.policies})
+    h1 = StackBuilder::Allocator::Host.new("h1", { :policies => Stacks::Factory.new.policies })
     h1.relevant_policies("latest").length.should eql(4)
 
   end

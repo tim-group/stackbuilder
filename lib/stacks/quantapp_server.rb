@@ -15,7 +15,7 @@ class Stacks::QuantAppServer < Stacks::MachineDef
 
   def to_enc()
     {
-      'role::quantapp_server' => { }
+      'role::quantapp_server' => {}
     }
   end
 end

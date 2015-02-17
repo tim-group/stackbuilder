@@ -11,16 +11,16 @@ describe_stack 'jenkins' do
       end
     end
 
-    env "e1", :primary_site=>"space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "jenkins"
     end
   end
 
   host("e1-jenkinsslave-002.mgmt.space.net.local") do |host|
     host.should have_ancestory(
-      ["e1","jenkins", "jenkinsslave", "jenkinsslave-002"])
+      ["e1", "jenkins", "jenkinsslave", "jenkinsslave-002"])
 
-      host.to_enc.should eql({'role::cinode_precise' => {}})
+      host.to_enc.should eql({ 'role::cinode_precise' => {} })
   end
 
 end

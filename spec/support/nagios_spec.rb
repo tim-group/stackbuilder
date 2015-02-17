@@ -16,10 +16,10 @@ describe Support::Nagios::Service do
 
   before do
     @mock_service = MockService.new
-    @test = Support::Nagios::Service.new({:service => @mock_service})
+    @test = Support::Nagios::Service.new({ :service => @mock_service })
     @test_machine1 = Stacks::MachineDef.new("test1")
     @test_machine2 = Stacks::MachineDef.new("test2")
-    env = Stacks::Environment.new("env", {:primary_site=>"oy"}, {}, {})
+    env = Stacks::Environment.new("env", { :primary_site => "oy" }, {}, {})
     @test_machine1.bind_to(env)
     @test_machine2.bind_to(env)
     @test_machines = [@test_machine1, @test_machine2]
@@ -55,7 +55,7 @@ describe Support::Nagios::Service::Http do
 
   class NagiosServiceHttpTest  < WebTestFramework::SimpleTest
 
-    def invoke_test_server_with_fixture_and_create_service(fixture_file, port='5152')
+    def invoke_test_server_with_fixture_and_create_service(fixture_file, port = '5152')
         setup_test_server_with_fixture(fixture_file)
         Support::Nagios::Service::Http.new({
           :nagios_servers => {
@@ -74,7 +74,7 @@ describe Support::Nagios::Service::Http do
   before do
     @test = NagiosServiceHttpTest.new('', 5152)
     @test_machine = Stacks::MachineDef.new("test")
-    @env = Stacks::Environment.new("env", {:primary_site=>"oy"}, {}, {})
+    @env = Stacks::Environment.new("env", { :primary_site => "oy" }, {}, {})
     @test_machine.bind_to(@env)
   end
 
@@ -109,7 +109,7 @@ describe Support::Nagios::Service::Http do
 
   it 'should return no nagios server for fabric' do
     test_machine_in_me = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("env", {:primary_site=>"me"}, {}, {})
+    env = Stacks::Environment.new("env", { :primary_site => "me" }, {}, {})
     test_machine_in_me.bind_to(env)
     service = @test.invoke_test_server_with_fixture_and_create_service('downtime_cancelled_none_found')
     service.cancel_downtime(test_machine_in_me).should eql('skipping env-test - No nagios server found for me')

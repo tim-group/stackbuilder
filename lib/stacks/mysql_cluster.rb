@@ -22,7 +22,7 @@ module Stacks::MysqlCluster
     server_name = "#{name}-#{index}"
     server_name = "#{name}#{type.to_s}-#{index}" if type == :backup
     server = @type.new(server_name, self, type, index, &@config_block)
-    server.group = groups[i%groups.size] if server.respond_to?(:group)
+    server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
     @definitions[server_name] = server
     server
@@ -31,16 +31,16 @@ module Stacks::MysqlCluster
   def instantiate_machines(environment)
     i = 0
     @master_instances.times do
-      index = sprintf("%03d",i+=1)
+      index = sprintf("%03d", i += 1)
       instantiate_machine(name, :master, index, environment)
     end
     @slave_instances.times do
-      index = sprintf("%03d",i+=1)
+      index = sprintf("%03d", i += 1)
       instantiate_machine(name, :slave, index, environment)
     end
     i = 0
     @backup_instances.times do
-      index = sprintf("%03d",i+=1)
+      index = sprintf("%03d", i += 1)
       instantiate_machine(name, :backup, index, environment)
     end
   end
@@ -103,7 +103,7 @@ module Stacks::MysqlCluster
 
   def dependant_instance_mysql_rights()
     rights = {
-      'mysql_hacks::application_rights_wrapper' => { 'rights' => {}}
+      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
     }
     virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|
