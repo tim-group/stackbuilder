@@ -36,5 +36,5 @@ end
 
 desc "Run lint (Rubocop)"
 task :lint do
-  sh "rubocop"
+  sh "/var/lib/gems/1.9.1/bin/rubocop"
 end
