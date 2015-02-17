@@ -106,8 +106,8 @@ namespace :sbx do
       arch = value_hash[:arch]
       used = value_hash[:used]
       total = value_hash[:total]
-      used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s}%" rescue 0
-      stats["#{storage_type}(GB)".to_sym] = "#{arch.to_s}: #{used.to_s}/#{total.to_s} #{used_percentage.to_s}"
+      used_percentage = "#{(used.to_f / total.to_f * 100).round}%" rescue 0
+      stats["#{storage_type}(GB)".to_sym] = "#{arch}: #{used}/#{total} #{used_percentage}"
       stats
     end
   end

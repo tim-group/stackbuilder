@@ -59,11 +59,6 @@ Lint/RescueException:
 Lint/ShadowingOuterLocalVariable:
   Enabled: false
 
-# Offense count: 14
-# Cop supports --auto-correct.
-Lint/StringConversionInInterpolation:
-  Enabled: false
-
 # Offense count: 67
 # Cop supports --auto-correct.
 Lint/UnusedBlockArgument:

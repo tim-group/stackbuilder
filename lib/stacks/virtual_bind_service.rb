@@ -33,7 +33,7 @@ module Stacks::VirtualBindService
       if zone.eql?(:prod)
         zones << "#{@domain}"
       else
-        zones << "#{zone.to_s}.#{@domain}"
+        zones << "#{zone}.#{@domain}"
       end
       zones
     end
