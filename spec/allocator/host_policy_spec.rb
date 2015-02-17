@@ -49,17 +49,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'allows allocations where the host ram is sufficient' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '8388608') # 8GB
@@ -72,17 +72,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'rejects allocations where the host ram is insufficient due to host reserve' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '8388607') # 1 byte under 8GB
@@ -95,17 +95,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'rejects allocations where the host ram is insufficient' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304') # 4GB
@@ -118,17 +118,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'rejects allocations where the host provisioning has been disabled' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2097152
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304', :allocation_disabled => true) # 4GB

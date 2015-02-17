@@ -231,11 +231,6 @@ Style/NilComparison:
 Style/Not:
   Enabled: false
 
-# Offense count: 18
-# Cop supports --auto-correct.
-Style/NumericLiterals:
-  MinDigits: 8
-
 # Offense count: 2
 # Configuration parameters: NamePrefix, NamePrefixBlacklist.
 Style/PredicateName:

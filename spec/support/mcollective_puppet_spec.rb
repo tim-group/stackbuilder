@@ -221,7 +221,7 @@ describe Support::MCollectivePuppet do
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
 
-    @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
+    @callouts.should_receive(:now).ordered.and_return(1_000_000) # timed_out
 
     @callback.should_receive(:timed_out).with('vm2.test.net.local', 'running').ordered
 
@@ -274,7 +274,7 @@ describe Support::MCollectivePuppet do
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
 
-    @callouts.should_receive(:now).ordered.and_return(1000000) # timed_out
+    @callouts.should_receive(:now).ordered.and_return(1_000_000) # timed_out
 
     @callback.should_receive(:timed_out).with('vm2.test.net.local', 'unaccounted for').ordered
 
