@@ -172,7 +172,7 @@ namespace :sbx do
     gb_hash = result_hash.each.inject({}) do |result, (key, value)|
       if value.is_a?(Hash)
         result[key] = convert_hash_values_from_KB_to_GB(value)
-      elsif value.is_a?(String) or value.is_a?(Symbol)
+      elsif value.is_a?(String) || value.is_a?(Symbol)
         result[key] = value
       else
         result[key] = KB_to_GB(value).to_f.floor
@@ -421,7 +421,7 @@ namespace :sbx do
             logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
           end
 
-          if not run_result.all_passed?
+          if !run_result.all_passed?
             fail("Puppet runs have timed out or failed, see above for details")
           end
         end
@@ -545,7 +545,7 @@ namespace :sbx do
             mco.domainxml(:domain => host) do |result|
               xml = result[:body][:data][:xml]
               sender = result[:senderid]
-              if not xml.nil?
+              if !xml.nil?
                 matches = /type='vnc' port='(\-?\d+)'/.match(xml)
                 raise "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
                 raise "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" if matches.captures.empty?
