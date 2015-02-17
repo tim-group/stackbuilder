@@ -118,12 +118,6 @@ Metrics/PerceivedComplexity:
 Style/AccessorMethodName:
   Enabled: false
 
-# Offense count: 54
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/AndOr:
-  Enabled: false
-
 # Offense count: 16
 # Cop supports --auto-correct.
 Style/Blocks:
@@ -219,11 +213,6 @@ Style/NegatedIf:
 # Offense count: 6
 # Configuration parameters: EnforcedStyle, MinBodyLength, SupportedStyles.
 Style/Next:
-  Enabled: false
-
-# Offense count: 30
-# Cop supports --auto-correct.
-Style/Not:
   Enabled: false
 
 # Offense count: 2

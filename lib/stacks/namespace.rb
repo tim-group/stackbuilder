@@ -30,7 +30,7 @@ module Stacks
     def find_by_hostname(hostname)
       node = nil
       accept do |machine_def|
-        if machine_def.respond_to? :hostname and machine_def.hostname == hostname
+        if machine_def.respond_to?(:hostname) && machine_def.hostname == hostname
           node = machine_def
         end
       end
@@ -40,7 +40,7 @@ module Stacks
     def find(fqdn)
       node = nil
       accept do |machine_def|
-        if machine_def.respond_to? :mgmt_fqdn and machine_def.mgmt_fqdn == fqdn
+        if machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == fqdn
           node = machine_def
         end
       end
@@ -57,7 +57,7 @@ module Stacks
       return_environment = nil
       env_names = Set.new
       accept do |node|
-        if node.kind_of?(Stacks::Environment) and node.name == environment_name
+        if node.kind_of?(Stacks::Environment) && node.name == environment_name
           raise "Duplicate environment detected: #{node.name}\nPlease check the stacks config to ensure you dont have two environments called '#{node.name}'." if env_names.include?("#{node.name}")
           env_names  << "#{node.name}"
           return_environment = node

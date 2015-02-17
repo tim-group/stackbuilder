@@ -11,7 +11,7 @@ shared_examples_for "nrpe" do |machine|
     fail("no nrpe checks executed on host #{machine.mgmt_fqdn}")
   end
 
-  unless commands.nil? or commands[0].nil?
+  unless commands.nil? || commands[0].nil?
     commands[0].each do |command, command_result|
       it "#{command}" do
         if (command_result[:exitcode] != 0)

@@ -95,7 +95,7 @@ class Compute::Controller
           result = @compute_node_client.launch(host, [spec])
 
           result.each do |sender, result_hash|
-            if not result_hash[spec[:hostname]].nil?
+            if !result_hash[spec[:hostname]].nil?
               result_text = result_hash[spec[:hostname]].first
             else
               result_text = "nil"

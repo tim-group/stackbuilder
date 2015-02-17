@@ -18,7 +18,7 @@ class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
     spec = super
     spec[:template] = "senode"
 
-    if not hub.nil?
+    if !hub.nil?
       spec[:selenium_hub_host] = hub.mgmt_fqdn
     end
     spec[:selenium_version] = options[:selenium_version] || "2.32.0"

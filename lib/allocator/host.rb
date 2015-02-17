@@ -56,10 +56,10 @@ class StackBuilder::Allocator::Host
       use_policy = true
       if fabric == "local"
         use_policy = false if policy.to_s == StackBuilder::Allocator::HostPolicies.ha_group.to_s
-      elsif @storage.nil? or @storage == {}
+      elsif @storage.nil? || @storage == {}
         proc1 = StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy
         proc2 = StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy
-        if policy.to_s == proc1.to_s or policy.to_s == proc2.to_s
+        if policy.to_s == proc1.to_s || policy.to_s == proc2.to_s
           use_policy = false
         end
       end

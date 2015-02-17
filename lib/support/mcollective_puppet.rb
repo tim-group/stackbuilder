@@ -15,7 +15,7 @@ module Support::MCollectivePuppet
     needs_signing = machines_fqdns.clone.to_set
 
     start_time = now
-    while not needs_signing.empty? and not timed_out(start_time, timeout)
+    while !needs_signing.empty? && !timed_out(start_time, timeout)
       all_requests = puppetca() do |mco|
         mco.list.map do |response|
           response[:data][:requests]
@@ -68,7 +68,7 @@ module Support::MCollectivePuppet
     callback = Support::Callback.new(&block)
 
     fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
-    while not (undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }).empty? and not timed_out(start_time, timeout)
+    while !(undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }).empty? && !timed_out(start_time, timeout)
       old_fates = fates.clone
       undecided_statuses = puppetd_status(undecided.keys)
       fates.merge!(undecided_statuses)
@@ -118,7 +118,7 @@ module Support::MCollectivePuppet
     return "stopping" if resources.nil?
     failed = resources["failed"]
     failed_to_restart = resources["failed_to_restart"]
-    return "stopping" if failed.nil? or failed_to_restart.nil?
+    return "stopping" if failed.nil? || failed_to_restart.nil?
     (failed == 0 && failed_to_restart == 0) ? "passed" : "failed"
   end
 

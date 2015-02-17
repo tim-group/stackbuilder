@@ -49,14 +49,14 @@ class Subscription
     end
 
     def all_passed?
-      (unaccounted_for.empty? and failed.empty?)
+      (unaccounted_for.empty? && failed.empty?)
     end
   end
 
   def self.create_client()
     configfile = MCollective::Util.config_file_for_user
 
-    if not @@loaded
+    if !@@loaded
       MCollective::Config.instance.loadconfig(configfile)
       @@loaded = true
     end
@@ -71,7 +71,7 @@ class Subscription
   def self.create_stomp()
     configfile = MCollective::Util.config_file_for_user
 
-    if not @@loaded
+    if !@@loaded
       MCollective::Config.instance.loadconfig(configfile)
       @@loaded = true
     end
@@ -99,7 +99,7 @@ class Subscription
     return_results = []
     message = nil
 
-    while not is_all_accounted_for(return_results, hosts) and not timed_out(start_time, timeout)
+    while !is_all_accounted_for(return_results, hosts) && !timed_out(start_time, timeout)
       begin
         Timeout::timeout(@pop_timeout) do
           message = @queues[topic].pop()

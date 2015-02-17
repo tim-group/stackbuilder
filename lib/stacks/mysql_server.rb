@@ -88,7 +88,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
     dependant_instances = @virtual_service.dependant_machine_def_with_children_fqdns
     dependant_instances.delete prod_fqdn
 
-    if dependant_instances and !dependant_instances.nil? and dependant_instances != []
+    if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::mysql_server'].merge!({
                                          'dependencies' => @virtual_service.dependency_config,
                                          'dependant_instances' => dependant_instances

@@ -20,7 +20,7 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
     spec[:template] = "win7boot"
     spec[:gold_image_url] = options[:gold_image] # TODO: delete me
 
-    if not hub.nil?
+    if !hub.nil?
       spec[:selenium_hub_host] = hub.mgmt_fqdn
     end
     spec[:selenium_version] = options[:selenium_version] || "2.32.0" # TODO: Remove default once refstack has been updated to pass in :ie_version

@@ -47,7 +47,7 @@ module Stacks::VirtualBindService
 
   def bind_servers_that_i_depend_on
     machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
-    machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer or !machine_def.master? }
+    machine_defs.reject! { |machine_def| machine_def.class != Stacks::BindServer || !machine_def.master? }
     machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
   end
 
@@ -55,7 +55,7 @@ module Stacks::VirtualBindService
     zones = nil
     machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
     machine_defs.each do |machine_def|
-      if machine_def.kind_of? Stacks::BindServer and machine_def.master?
+      if machine_def.kind_of?(Stacks::BindServer) && machine_def.master?
         zones = {} if zones.nil?
         zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.zones_fqdn
       end
@@ -149,7 +149,7 @@ module Stacks::VirtualBindService
 
   def to_loadbalancer_config
     vip_nets = @vip_networks.select do |vip_network|
-      not [:front].include? vip_network
+      ![:front].include? vip_network
     end
     lb_config = {}
     vip_nets.each do |vip_net|

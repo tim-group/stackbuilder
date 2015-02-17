@@ -23,7 +23,7 @@ class Stacks::Environment
   end
 
   def cross_site_routing_required?
-    return false if @primary_site.nil? or @secondary_site.nil?
+    return false if @primary_site.nil? || @secondary_site.nil?
     @primary_site != @secondary_site
   end
 

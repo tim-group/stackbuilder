@@ -121,7 +121,7 @@ class Stacks::MachineSet
   def virtual_services_that_depend_on_me
     virtual_services_that_depend_on_me = []
     virtual_services.each do |virtual_service|
-      if virtual_service.kind_of? Stacks::MachineDefContainer and virtual_service.respond_to? :depends_on and virtual_service.depends_on.include?([name, environment.name])
+      if virtual_service.kind_of?(Stacks::MachineDefContainer) && virtual_service.respond_to?(:depends_on) && virtual_service.depends_on.include?([name, environment.name])
         virtual_services_that_depend_on_me.push virtual_service
       end
     end
@@ -146,7 +146,7 @@ class Stacks::MachineSet
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|
       env.accept do |virtual_service|
-        if virtual_service.kind_of? Stacks::MachineSet and service[0].eql? virtual_service.name and service[1].eql? env.name
+        if virtual_service.kind_of?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) && service[1].eql?(env.name)
           return virtual_service
         end
       end
