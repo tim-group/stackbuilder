@@ -14,8 +14,8 @@ module Support
     class MCollectiveFabricRunner
       def initialize(options)
         if options.has_key? :key
-          ::MCollective::PluginManager.clear()
-          @config = ::MCollective::Config.instance()
+          ::MCollective::PluginManager.clear
+          @config = ::MCollective::Config.instance
           config_file = options[:config_file] || "/etc/mcollective/client.cfg"
           @config.loadconfig(config_file)
           ENV.delete('MCOLLECTIVE_SSL_PRIVATE')
@@ -62,7 +62,7 @@ module Support
         ENV.delete('MCOLLECTIVE_SSL_PRIVATE') unless key.nil?
         ENV.delete('MCOLLECTIVE_SSL_PUBLIC') unless key.nil?
 
-        @config = ::MCollective::Config.instance()
+        @config = ::MCollective::Config.instance
         @config.loadconfig(config_file)
 
         @config.pluginconf["stomp.pool.host1"] = broker unless broker.nil?
@@ -89,7 +89,7 @@ module Support
         runner = create_fabric_runner(options)
         client = runner.new_client(name)
         nodes = options[:nodes] || []
-        nodes.empty? ? client.discover() : client.discover(:nodes => nodes)
+        nodes.empty? ? client.discover : client.discover(:nodes => nodes)
         retval = block.call(client)
         client.disconnect
         retval

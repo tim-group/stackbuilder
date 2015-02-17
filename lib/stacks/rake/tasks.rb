@@ -80,7 +80,7 @@ def sbtask(name, &block)
   task name do |task|
     logger.start task.name
     begin
-      block.call()
+      block.call
     rescue Exception => e
       logger.failed(name)
       raise e
@@ -90,7 +90,7 @@ def sbtask(name, &block)
   end
 end
 
-@@subscription = Subscription.new()
+@@subscription = Subscription.new
 @@subscription.start(["provision.*", "puppet_status"])
 
 namespace :sbx do
@@ -210,7 +210,7 @@ namespace :sbx do
   task :find_rogue do
     hosts = @factory.host_repository.find_current("local")
 
-    rogue_machines = hosts.hosts.map(&:allocated_machines).flatten().reject { |vm| vm[:in_model] }
+    rogue_machines = hosts.hosts.map(&:allocated_machines).flatten.reject { |vm| vm[:in_model] }
 
     pp rogue_machines
   end
@@ -435,8 +435,8 @@ namespace :sbx do
 
           success = mco_client("puppetd") do |mco|
             engine = PuppetRoll::Engine.new({ :concurrency => 5 }, [], hosts, PuppetRoll::Client.new(hosts, mco))
-            engine.execute()
-            pp engine.get_report()
+            engine.execute
+            pp engine.get_report
             engine.successful?
           end
 
@@ -568,7 +568,7 @@ namespace :sbx do
                 :environment => app_service.environment.name
               )
               factory.cmdb_git.update
-              factory.engine.resolve()
+              factory.engine.resolve
             end
           end
         end

@@ -11,7 +11,7 @@ module Stacks::VirtualService
   include Stacks::AbstractVirtualService
 
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto

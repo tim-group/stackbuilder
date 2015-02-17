@@ -17,7 +17,7 @@ module Support::Forking
       begin
         result = nil
         exception = nil
-        result = block.call()
+        result = block.call
       rescue Exception => e
         exception = e
       end

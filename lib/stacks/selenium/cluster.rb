@@ -7,7 +7,7 @@ require 'stacks/selenium/win7_node'
 
 module Stacks::Selenium::Cluster
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   attr_accessor :hub, :selenium_version, :nodespecs

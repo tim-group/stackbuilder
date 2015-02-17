@@ -6,7 +6,7 @@ require 'uri'
 
 module Stacks::MachineGroup
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   def configure()

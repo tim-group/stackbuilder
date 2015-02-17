@@ -70,8 +70,8 @@ class Stacks::Factory
 
   def preference_functions()
     @preference_functions ||= [
-      StackBuilder::Allocator::HostPreference.fewest_machines(),
-      StackBuilder::Allocator::HostPreference.alphabetical_fqdn()
+      StackBuilder::Allocator::HostPreference.fewest_machines,
+      StackBuilder::Allocator::HostPreference.alphabetical_fqdn
     ]
   end
 
@@ -80,7 +80,7 @@ class Stacks::Factory
   end
 
   def compute_node_client()
-    @compute_node_client ||= Compute::Client.new()
+    @compute_node_client ||= Compute::Client.new
   end
 
   def dns_service()

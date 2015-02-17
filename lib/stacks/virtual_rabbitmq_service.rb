@@ -6,7 +6,7 @@ require 'uri'
 
 module Stacks::VirtualRabbitMQService
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   attr_reader :proxy_vhosts

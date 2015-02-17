@@ -3,7 +3,7 @@ module Stacks::VirtualBindService
   attr_accessor :forwarder_zones
 
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   def configure()

@@ -31,7 +31,7 @@ describe 'launch' do
 
   def standard_preference_functions
     [
-      StackBuilder::Allocator::HostPreference.fewest_machines(),
+      StackBuilder::Allocator::HostPreference.fewest_machines,
       StackBuilder::Allocator::HostPreference.alphabetical_fqdn]
   end
 
@@ -87,7 +87,7 @@ describe 'launch' do
     hosts = StackBuilder::Allocator::Hosts.new(:hosts => [hx], :preference_functions => [])
 
     hosts.allocate(env.flatten)
-    Hash[hosts.new_machine_allocation().map do |machine, host|
+    Hash[hosts.new_machine_allocation.map do |machine, host|
       [machine.mgmt_fqdn, host.fqdn]
     end].should eql({
                       "test-refapp-001.mgmt.t.net.local" => "hx",

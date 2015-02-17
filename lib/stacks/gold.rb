@@ -3,7 +3,7 @@ require 'stacks/namespace'
 
 module Stacks::Gold
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   def configure()

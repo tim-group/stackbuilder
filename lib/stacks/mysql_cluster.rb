@@ -6,7 +6,7 @@ require 'uri'
 
 module Stacks::MysqlCluster
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances

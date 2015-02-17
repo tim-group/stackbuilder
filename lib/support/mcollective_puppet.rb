@@ -16,7 +16,7 @@ module Support::MCollectivePuppet
 
     start_time = now
     while !needs_signing.empty? && !timed_out(start_time, timeout)
-      all_requests = puppetca() do |mco|
+      all_requests = puppetca do |mco|
         mco.list.map do |response|
           response[:data][:requests]
         end
@@ -25,7 +25,7 @@ module Support::MCollectivePuppet
       ready_to_sign = all_requests.intersection(needs_signing)
 
       ready_to_sign.each do |machine_fqdn|
-        signed = puppetca() do |mco|
+        signed = puppetca do |mco|
           mco.sign(:certname => machine_fqdn).select do |response|
             response[:statuscode] == 0
           end.size > 0

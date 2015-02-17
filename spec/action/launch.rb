@@ -4,7 +4,7 @@ describe 'launch' do
     attr_accessor :machine_repo
 
     def find_current
-      result = audit()
+      result = audit
       result.each.each do |vm|
         machine_repo.find(vm)
       end
@@ -61,9 +61,9 @@ describe 'launch' do
   end
 
   action 'launch' do |services, machine_def|
-    hosts = services.host_repo.find_current()
+    hosts = services.host_repo.find_current
     hosts.allocate(machine_def.flatten)
-    specs = hosts.to_unlaunched_specs()
+    specs = hosts.to_unlaunched_specs
     services.compute_controller.launch(specs)
   end
 
@@ -72,8 +72,8 @@ describe 'launch' do
       virtual_app_service "refapp"
     end
 
-    actions.services.host_repo = double()
-    actions.services.compute_controller = double()
+    actions.services.host_repo = double
+    actions.services.compute_controller = double
 
     run_action "launch", machine_def
   end

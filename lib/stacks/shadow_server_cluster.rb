@@ -8,6 +8,6 @@ module Stacks::ShadowServerCluster
   end
 
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 end

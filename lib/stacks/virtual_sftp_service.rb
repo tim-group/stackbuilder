@@ -9,7 +9,7 @@ module Stacks::VirtualSftpService
   attr_reader :proxy_vhosts_lookup
 
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   def configure()

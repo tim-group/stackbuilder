@@ -84,7 +84,7 @@ class Subscription
   end
 
   def start(topics)
-    @stomp = Subscription.create_client()
+    @stomp = Subscription.create_client
     topics.each do |topic|
       @queues[topic] = Queue.new
       @stomp.subscribe("/topic/#{topic}") do |msg|
@@ -102,7 +102,7 @@ class Subscription
     while !is_all_accounted_for(return_results, hosts) && !timed_out(start_time, timeout)
       begin
         Timeout::timeout(@pop_timeout) do
-          message = @queues[topic].pop()
+          message = @queues[topic].pop
         end
         parsed_message = JSON.parse(message.body)
         if hosts.include?(parsed_message["host"])

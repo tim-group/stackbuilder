@@ -11,7 +11,7 @@ module Stacks::VirtualProxyService
   attr_reader :proxy_vhosts_lookup
 
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   def configure()

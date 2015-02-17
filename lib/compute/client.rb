@@ -28,7 +28,7 @@ class Compute::Client
     raise "unable to find any compute nodes" if hosts.empty?
 
     response = mco_client("libvirt", :nodes => hosts) do |mco|
-      result = mco.hvinfo()
+      result = mco.hvinfo
       result.map do |hv|
         raise "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
         [hv[:sender], hv[:data]]
@@ -49,7 +49,7 @@ class Compute::Client
     response = nil
     begin
       response = mco_client("computenodestorage", :nodes => hosts) do |mco|
-        result = mco.details()
+        result = mco.details
         result.map do |resp|
           # FIXME: Once all compute nodes have new storage config, renable this
           # raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
@@ -77,7 +77,7 @@ class Compute::Client
 
   def find_hosts(fabric)
     mco_client("computenode", :fabric => fabric) do |mco|
-      mco.discover.sort()
+      mco.discover.sort
     end
   end
 

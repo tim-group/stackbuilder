@@ -8,7 +8,7 @@ shared_examples_for "vip" do |virtualservice|
   virtualservice.ports do |port|
     it "can connect to #{virtualservice.vip_fqdn(:prod)} ... on #{port}" do
       if (virtualservice.fabric == "local")
-        node_to_execute_from = Facter["fqdn"].value()
+        node_to_execute_from = Facter["fqdn"].value
       else
         node_to_execute_from = "#{virtualservice.environment.name}-lb-001.mgmt.#{virtualservice.fabric}.net.local"
       end

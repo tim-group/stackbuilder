@@ -5,7 +5,7 @@ describe Support::Callback do
     event_called = false
     callback = Support::Callback.new do
       on :event do |arg|
-        arg.blah()
+        arg.blah
         event_called = true
       end
     end

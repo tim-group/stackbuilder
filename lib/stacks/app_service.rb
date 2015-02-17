@@ -1,6 +1,6 @@
 module Stacks::AppService
   def self.extended(object)
-    object.configure()
+    object.configure
   end
 
   attr_accessor :application, :ehcache, :sso_port, :ajp_port, :jvm_args

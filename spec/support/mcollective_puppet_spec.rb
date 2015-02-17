@@ -9,7 +9,7 @@ class Support::MCollectivePuppet_Test
   end
 
   def puppetca(&block)
-    @callouts.puppetca()
+    @callouts.puppetca
     block.call(@mco)
   end
 
@@ -19,7 +19,7 @@ class Support::MCollectivePuppet_Test
   end
 
   def now
-    @callouts.now()
+    @callouts.now
   end
 end
 
