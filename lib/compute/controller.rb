@@ -227,8 +227,8 @@ class Compute::Controller
   def clean(all_specs, &block)
     callback = Support::Callback.new(&block)
 
-    non_destroyable_specs, destroyable_specs = all_specs.partition do
-      |spec| spec[:disallow_destroy]
+    non_destroyable_specs, destroyable_specs = all_specs.partition do |spec|
+                                                 spec[:disallow_destroy]
     end
 
     destroyable_spec_results = clean_destroyable_vms(destroyable_specs)

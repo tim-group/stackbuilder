@@ -315,11 +315,6 @@ Style/MethodName:
 Style/MultilineBlockChain:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/MultilineBlockLayout:
-  Enabled: false
-
 # Offense count: 22
 # Cop supports --auto-correct.
 Style/NegatedIf:
