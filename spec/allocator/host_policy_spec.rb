@@ -3,13 +3,13 @@ require 'allocator/host_policies'
 
 describe StackBuilder::Allocator::HostPolicies do
   def test_env_with_refstack
-   return [{
-      :hostname => "refapp1",
-      :availability_group => "refapp"
-    }, {
-      :hostname => "refapp2",
-      :availability_group => "refapp"
-    }]
+    return [{
+       :hostname => "refapp1",
+       :availability_group => "refapp"
+     }, {
+       :hostname => "refapp2",
+       :availability_group => "refapp"
+     }]
   end
 
   it 'allows allocations that have no machine of the same group to the same host' do

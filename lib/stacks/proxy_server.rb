@@ -19,7 +19,7 @@ class Stacks::ProxyServer < Stacks::MachineDef
 
   def to_enc
     if @disable_enc
-     {}
+      {}
     else
       service_resources = Hash[virtual_service.downstream_services()]
       {

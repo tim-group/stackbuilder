@@ -44,10 +44,10 @@ module Support
 
       def apply_fabric_filter(mco, fabric)
         if fabric == "local"
-            ENV['FACTERLIB'] = "/var/lib/puppet/lib/facter:/var/lib/puppet/facts"
-            if (Facter.value('owner') != "")
-              mco.fact_filter "owner", Facter.value('owner')
-            end
+          ENV['FACTERLIB'] = "/var/lib/puppet/lib/facter:/var/lib/puppet/facts"
+          if (Facter.value('owner') != "")
+            mco.fact_filter "owner", Facter.value('owner')
+          end
         else
           mco.fact_filter "domain", "mgmt.#{fabric}.net.local"
         end

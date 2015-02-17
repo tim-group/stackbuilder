@@ -39,7 +39,7 @@ class Stacks::Environment
   end
 
   def persistent_storage_supported?
-     @persistent_storage_supported
+    @persistent_storage_supported
   end
 
   def every_machine_destroyable?

@@ -103,9 +103,9 @@ describe_stack 'should allow destroy to be overwritten' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
-       each_machine do |machine|
-          machine.allow_destroy()
-        end
+        each_machine do |machine|
+           machine.allow_destroy()
+         end
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -122,10 +122,10 @@ describe_stack 'should provide correct enc data' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
-       self.database_name = "mydb"
-       each_machine do |machine|
-          machine.allow_destroy()
-        end
+        self.database_name = "mydb"
+        each_machine do |machine|
+           machine.allow_destroy()
+         end
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -173,29 +173,29 @@ describe_stack 'should provide correct enc data' do
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
   end
- host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
-    enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['backup'].should eql(true)
-    enc_server_role['config'].should eql({})
-    enc_server_role['database_name'].should eql('mydb')
-    enc_server_role['datadir'].should eql('/mnt/data/mysql')
-    enc_server_role['environment'].should eql('testing')
-    enc_server_role['master'].should eql(false)
-    enc_server_role['server_id'].should eql(3)
+  host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
+     enc_server_role = host.to_enc['role::mysql_server']
+     enc_server_role['backup'].should eql(true)
+     enc_server_role['config'].should eql({})
+     enc_server_role['database_name'].should eql('mydb')
+     enc_server_role['datadir'].should eql('/mnt/data/mysql')
+     enc_server_role['environment'].should eql('testing')
+     enc_server_role['master'].should eql(false)
+     enc_server_role['server_id'].should eql(3)
 
-    host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
-    host.to_enc.should_not include('mysql_hacks::application_rights_wrapper')
-  end
+     host.to_enc.should include('server::default_new_mgmt_net_local')
+     host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
+     host.to_enc.should_not include('mysql_hacks::application_rights_wrapper')
+   end
 end
 
 describe_stack 'should allow storage options to be overwritten' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
-       self.database_name = "mydb"
-       self.data_size('14G')
-       self.backup_size('29G')
+        self.database_name = "mydb"
+        self.data_size('14G')
+        self.backup_size('29G')
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do

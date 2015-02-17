@@ -119,9 +119,9 @@ namespace :sbx do
     order = headers.inject([]) do |order, header|
       case header
        when :fqdn
-          order.insert(0, header)
+         order.insert(0, header)
        when :vms
-          order.insert(1, header)
+         order.insert(1, header)
         when 'memory(GB)'.to_sym
           order.insert(2, header)
         when 'os(GB)'.to_sym
@@ -416,23 +416,23 @@ namespace :sbx do
 
         desc "wait for puppet to complete its run on these machines"
         sbtask :wait do
-          start_time = Time.now
-          hosts = []
-          machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to?(:mgmt_fqdn)
-              hosts << child_machine_def.mgmt_fqdn
-            end
-          end
+         start_time = Time.now
+         hosts = []
+         machine_def.accept do |child_machine_def|
+           if child_machine_def.respond_to?(:mgmt_fqdn)
+             hosts << child_machine_def.mgmt_fqdn
+           end
+         end
 
-          run_result = @@subscription.wait_for_hosts("puppet_status", hosts, 5400)
+         run_result = @@subscription.wait_for_hosts("puppet_status", hosts, 5400)
 
-          run_result.all.each do |vm, status|
-            logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
-          end
+         run_result.all.each do |vm, status|
+           logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
+         end
 
-          if not run_result.all_passed?
-            fail("Puppet runs have timed out or failed, see above for details")
-          end
+         if not run_result.all_passed?
+           fail("Puppet runs have timed out or failed, see above for details")
+         end
        end
 
         desc "run Puppet on these machines"

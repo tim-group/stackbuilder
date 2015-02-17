@@ -56,18 +56,18 @@ describe Support::Nagios::Service::Http do
   class NagiosServiceHttpTest  < WebTestFramework::SimpleTest
 
     def invoke_test_server_with_fixture_and_create_service(fixture_file, port = '5152')
-        setup_test_server_with_fixture(fixture_file)
-        Support::Nagios::Service::Http.new({
-          :nagios_servers => {
-            'oy' => 'localhost',
-            'pg' => 'localhost',
-           },
-          :nagios_api_port => 5152
-       })
+      setup_test_server_with_fixture(fixture_file)
+      Support::Nagios::Service::Http.new({
+        :nagios_servers => {
+          'oy' => 'localhost',
+          'pg' => 'localhost',
+         },
+        :nagios_api_port => 5152
+     })
     end
 
     def fixture_path
-        File.join(File.dirname(__FILE__), "fixtures")
+      File.join(File.dirname(__FILE__), "fixtures")
     end
   end
 

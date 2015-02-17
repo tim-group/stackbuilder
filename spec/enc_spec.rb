@@ -26,13 +26,13 @@ describe Stacks::DSL do
         :nat_front_virtual_router_id => 40,
         :nat_prod_virtual_router_id => 41,
         :primary_site => "space" do
-        instantiate_stack "fabric"
+          instantiate_stack "fabric"
         end
 
       env "e2", :lb_virtual_router_id => 2,
         :nat_front_virtual_router_id => 42,
         :nat_prod_virtual_router_id => 43 do
-        instantiate_stack "fabric"
+          instantiate_stack "fabric"
         end
     end
 
@@ -510,7 +510,7 @@ describe Stacks::DSL do
   it 'throws an error if we try and instantiate a stack that isnt defined' do
     expect {
       env "myold", :primary_site => "x", :secondary_site => "y" do
-      instantiate_stack "no-exist"
+        instantiate_stack "no-exist"
       end
     }.to raise_error "no stack found 'no-exist'"
   end
@@ -634,23 +634,23 @@ describe Stacks::DSL do
     find("rah-sftp-001.mgmt.st.net.local").should_not be_nil
     find("rah-sftp-002.mgmt.st.net.local").should_not be_nil
 
-     find("rah-sftp-001.mgmt.st.net.local").to_enc.should eql(
-       {
-         'role::sftpserver' => {
-           'vip_fqdn' => 'rah-sftp-vip.st.net.local',
-           'env' => 'rah'
-         }
-       }
-     )
+    find("rah-sftp-001.mgmt.st.net.local").to_enc.should eql(
+      {
+        'role::sftpserver' => {
+          'vip_fqdn' => 'rah-sftp-vip.st.net.local',
+          'env' => 'rah'
+        }
+      }
+    )
 
-     find("rah-sftp-002.mgmt.st.net.local").to_enc.should eql(
-       {
-         'role::sftpserver' => {
-           'vip_fqdn' => 'rah-sftp-vip.st.net.local',
-           'env' => 'rah'
-         }
-       }
-     )
+    find("rah-sftp-002.mgmt.st.net.local").to_enc.should eql(
+      {
+        'role::sftpserver' => {
+          'vip_fqdn' => 'rah-sftp-vip.st.net.local',
+          'env' => 'rah'
+        }
+      }
+    )
 
   end
 

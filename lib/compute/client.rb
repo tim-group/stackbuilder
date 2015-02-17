@@ -17,7 +17,7 @@ class Compute::Client
 
   def merge_attributes_by_fqdn(source_hash, target_hash)
     source_hash.each do |fqdn, attr|
-        target_hash[fqdn] = attr.merge(target_hash[fqdn])
+      target_hash[fqdn] = attr.merge(target_hash[fqdn])
     end
     target_hash
   end

@@ -25,15 +25,15 @@ module Stacks::Gold
   end
 
   def win(win_version, app_version, options)
-      name = "#{win_version}-#{app_version}-gold"
-      options[:master_image_file] = "#{win_version}-#{app_version}-master.img"
+    name = "#{win_version}-#{app_version}-gold"
+    options[:master_image_file] = "#{win_version}-#{app_version}-master.img"
 
-      @definitions[name] = Stacks::Gold::WinNode.new(name, win_version, options)
+    @definitions[name] = Stacks::Gold::WinNode.new(name, win_version, options)
   end
 
   def ubuntu(ubuntu_version)
-      name = "ubuntu-#{ubuntu_version}-gold"
-      @definitions[name] = Stacks::Gold::UbuntuNode.new(name, ubuntu_version)
+    name = "ubuntu-#{ubuntu_version}-gold"
+    @definitions[name] = Stacks::Gold::UbuntuNode.new(name, ubuntu_version)
   end
 end
 

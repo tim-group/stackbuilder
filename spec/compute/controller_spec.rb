@@ -206,38 +206,38 @@ describe Compute::Controller do
   end
 
   it 'launchraw command works' do
-    specs = {
-      "myhost" => [
-        {
-          :hostname => "vm1",
-          :fabric => "st",
-          :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
-        },
-        {
-          :hostname => "vm2",
-          :fabric => "st",
-          :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
-        }
-      ]
-    }
+   specs = {
+     "myhost" => [
+       {
+         :hostname => "vm1",
+         :fabric => "st",
+         :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
+       },
+       {
+         :hostname => "vm2",
+         :fabric => "st",
+         :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
+       }
+     ]
+   }
 
 #    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
 
-    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).and_return([["myhost", { "vm1" => ["success", "o noes"] }]])
-    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", { "vm2" => ["success", "yes"] }]])
+   @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).and_return([["myhost", { "vm1" => ["success", "o noes"] }]])
+   @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", { "vm2" => ["success", "yes"] }]])
 
-    result = []
+   result = []
 
-    @logger.should_receive(:info).with("myhost launch vm1 result: myhost: success")
-    @logger.should_receive(:info).with("myhost launch vm2 result: myhost: success")
-    @compute_controller.launch_raw(specs) do
-      on :success do |row|
-        result << row
-      end
-    end
-    pp result
+   @logger.should_receive(:info).with("myhost launch vm1 result: myhost: success")
+   @logger.should_receive(:info).with("myhost launch vm2 result: myhost: success")
+   @compute_controller.launch_raw(specs) do
+     on :success do |row|
+       result << row
+     end
+   end
+   pp result
 
-    result.should eql([["vm1", "o noes"], ["vm2", "yes"]])
+   result.should eql([["vm1", "o noes"], ["vm2", "yes"]])
  end
 
 

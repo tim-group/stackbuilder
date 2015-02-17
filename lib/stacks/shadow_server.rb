@@ -17,7 +17,7 @@ class Stacks::ShadowServer < Stacks::MachineDef
   end
 
   def to_enc
-   {}
+    {}
   end
 
   def to_spec

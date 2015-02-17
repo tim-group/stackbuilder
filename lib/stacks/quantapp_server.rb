@@ -9,8 +9,8 @@ class Stacks::QuantAppServer < Stacks::MachineDef
   end
 
   def to_spec
-   spec = super
-   spec
+    spec = super
+    spec
   end
 
   def to_enc()

@@ -14,7 +14,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
     @virtual_router_id = environment.options[:lb_virtual_router_id] || 1
   end
 
- def to_enc
+  def to_enc
     enc = super()
     virtual_services_hash = {}
     @virtual_service.virtual_services(Stacks::AbstractVirtualService).map do |virtual_service|
@@ -25,5 +25,5 @@ class Stacks::LoadBalancer < Stacks::MachineDef
       'virtual_servers' => virtual_services_hash
     }
     enc
-  end
+   end
 end

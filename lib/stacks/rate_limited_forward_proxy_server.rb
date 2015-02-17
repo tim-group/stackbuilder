@@ -7,9 +7,9 @@ class Stacks::RateLimitedForwardProxyServer < Stacks::MachineDef
     self
   end
 
- def bind_to(environment)
+  def bind_to(environment)
     super(environment)
-  end
+   end
 
   def to_enc
     {

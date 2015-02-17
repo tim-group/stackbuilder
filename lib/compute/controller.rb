@@ -228,7 +228,7 @@ class Compute::Controller
     callback = Support::Callback.new(&block)
 
     non_destroyable_specs, destroyable_specs = all_specs.partition do |spec|
-                                                 spec[:disallow_destroy]
+      spec[:disallow_destroy]
     end
 
     destroyable_spec_results = clean_destroyable_vms(destroyable_specs)
@@ -247,19 +247,19 @@ class Compute::Controller
   end
 
   private
-    def clean_destroyable_vms(destroyable_specs)
-      fabrics = destroyable_specs.group_by { |spec| spec[:fabric] }
-      grouped_results = fabrics.map do |fabric, specs|
-        @compute_node_client.clean(fabric, specs)
-      end
-      grouped_results
+  def clean_destroyable_vms(destroyable_specs)
+    fabrics = destroyable_specs.group_by { |spec| spec[:fabric] }
+    grouped_results = fabrics.map do |fabric, specs|
+      @compute_node_client.clean(fabric, specs)
     end
+    grouped_results
+  end
 
-    def fail_non_destroyable_vms(non_destroyable_specs, callback)
-      non_destroyable_specs.each do |spec|
-        @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, please specify machine.allow_destroy(true)")
-        raise "#{spec[:hostname]} is not destroyable"
-      end
+  def fail_non_destroyable_vms(non_destroyable_specs, callback)
+    non_destroyable_specs.each do |spec|
+      @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, please specify machine.allow_destroy(true)")
+      raise "#{spec[:hostname]} is not destroyable"
     end
+  end
 
 end

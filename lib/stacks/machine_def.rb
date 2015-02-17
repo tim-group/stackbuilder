@@ -82,7 +82,7 @@ class Stacks::MachineDef
 
   def disable_persistent_storage
     @storage.each do |mount_point, values|
-       modify_storage({ mount_point.to_sym => { :persistent => false } })
+      modify_storage({ mount_point.to_sym => { :persistent => false } })
     end
   end
 
@@ -112,11 +112,11 @@ class Stacks::MachineDef
 
   def modify_storage(storage_modifications)
     storage_modifications.each do |mount_point, values|
-       if @storage[mount_point.to_sym].nil?
-         @storage[mount_point.to_sym] = values
-       else
-         @storage[mount_point.to_sym] = recurse_merge(@storage[mount_point.to_sym], values)
-       end
+      if @storage[mount_point.to_sym].nil?
+        @storage[mount_point.to_sym] = values
+      else
+        @storage[mount_point.to_sym] = recurse_merge(@storage[mount_point.to_sym], values)
+      end
     end
   end
 
