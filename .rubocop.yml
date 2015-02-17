@@ -345,12 +345,6 @@ Style/Not:
 Style/NumericLiterals:
   MinDigits: 8
 
-# Offense count: 32
-# Cop supports --auto-correct.
-# Configuration parameters: AllowSafeAssignment.
-Style/ParenthesesAroundCondition:
-  Enabled: false
-
 # Offense count: 2
 # Configuration parameters: NamePrefix, NamePrefixBlacklist.
 Style/PredicateName:

@@ -8,7 +8,7 @@ shared_examples_for "nrpe" do |machine|
     results
   end
 
-  if (commands.empty?)
+  if commands.empty?
     fail("no nrpe checks executed on host #{machine.mgmt_fqdn}")
   end
 

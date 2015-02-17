@@ -51,7 +51,7 @@ module StackBuilder::Allocator::HostPolicies
       result = { :passed => true }
       # FIXME: unwrap from unless once all compute nodes have storage config
       unless host.storage.nil?
-        if (missing_storage_types.any?)
+        if missing_storage_types.any?
           unique_missing_storage_types = Set.new(missing_storage_types).to_a
           result = {
               :passed => false,
@@ -124,7 +124,7 @@ module StackBuilder::Allocator::HostPolicies
         host_storage_type = host.storage[type] rescue nil
         unless host_storage_type.nil?
           available_space = KB_to_GB(host_storage_type[:free])
-          if (required_space > available_space)
+          if required_space > available_space
             result[type] = { :available_space => available_space, :required_space => required_space }
           end
         else
@@ -133,7 +133,7 @@ module StackBuilder::Allocator::HostPolicies
         result
       end
       result = { :passed => true }
-      if (!storage_without_enough_space.empty?)
+      if !storage_without_enough_space.empty?
         sorted_keys = storage_without_enough_space.keys.sort
         result = {
             :passed => false,

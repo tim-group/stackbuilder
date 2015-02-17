@@ -79,7 +79,7 @@ class StackBuilder::Allocator::Hosts
 
     return_map = {}
     allocated_machines.each do |machine, host|
-      return_map[host] = [] unless (return_map[host])
+      return_map[host] = [] unless return_map[host]
       return_map[host] << machine
     end
 

@@ -136,17 +136,17 @@ module Support::MCollectivePuppet
 
     puppetmaster = nil
 
-    if (machine_fqdn =~ /mgmt.st.net.local/)
+    if machine_fqdn =~ /mgmt.st.net.local/
       puppetmaster = "st-puppetmaster-001.mgmt.st.net.local"
-    elsif (machine_fqdn =~ /mgmt.oy.net.local/)
+    elsif machine_fqdn =~ /mgmt.oy.net.local/
       puppetmaster = "antarctica.oyldn.youdevise.com"
-    elsif (machine_fqdn =~ /mgmt.pg.net.local/)
+    elsif machine_fqdn =~ /mgmt.pg.net.local/
       puppetmaster = "australia.pgldn.youdevise.com"
-    elsif (machine_fqdn =~ /mgmt.ci.net.local/)
+    elsif machine_fqdn =~ /mgmt.ci.net.local/
       puppetmaster = "ldn-puppet-001.youdevise.com"
     end
 
-    if (puppetmaster.nil?)
+    if puppetmaster.nil?
       mco_client("puppetca", &block)
     else
       mco_client("puppetca", :nodes => [puppetmaster], &block)

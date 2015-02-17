@@ -33,7 +33,7 @@ class Compute::Allocation
     new_allocation = {}
 
     specs.sort_by { |spec| spec[:hostname] }.each do |spec|
-      unless (vms_to_host_map.include?(spec[:hostname]))
+      unless vms_to_host_map.include?(spec[:hostname])
         host = hosts[h.modulo(hosts.size)]
         add_to_allocation(new_allocation, host, spec)
         h += 1
