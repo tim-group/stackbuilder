@@ -35,5 +35,4 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
 
     spec
   end
-
 end

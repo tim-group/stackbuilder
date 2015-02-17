@@ -32,8 +32,8 @@ class Stacks::Environment
     site = (fabric == @primary_site) ? @secondary_site : @primary_site
     {
       "networking::routing::to_site" => {
-         'network' => network,
-         'site'    => site,
+        'network' => network,
+        'site'    => site,
       }
     }
   end

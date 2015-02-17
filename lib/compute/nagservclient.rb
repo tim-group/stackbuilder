@@ -2,7 +2,6 @@ require 'compute/namespace'
 require 'mcollective'
 require 'support/mcollective'
 
-
 class Compute::NagsrvClient
   include Support::MCollective
 

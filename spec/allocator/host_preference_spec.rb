@@ -29,5 +29,4 @@ describe StackBuilder::Allocator::HostPreference do
     hosts = [h3, h1, h2]
     hosts.sort_by { |host| [preference_function.call(host), host.fqdn] }.map { |host| host.fqdn }.should eql(["h2", "h3", "h1"])
   end
-
 end

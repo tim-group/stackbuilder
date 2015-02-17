@@ -18,7 +18,6 @@ class Stacks::NatServer < Stacks::MachineDef
   def find_nat_rules
     rules = []
     environment.accept do |node|
-
       if (node.environment == nil)
         puts node.name
       end
@@ -62,11 +61,11 @@ class Stacks::NatServer < Stacks::MachineDef
     rules.merge! dnat
 
     enc.merge({
-      'role::natserver' => {
-        'rules' => rules,
-        'front_virtual_router_id' => self.virtual_router_ids[:front],
-        'prod_virtual_router_id' => self.virtual_router_ids[:prod]
-      }
-    })
+                'role::natserver' => {
+                  'rules' => rules,
+                  'front_virtual_router_id' => self.virtual_router_ids[:front],
+                  'prod_virtual_router_id' => self.virtual_router_ids[:prod]
+                }
+              })
   end
 end

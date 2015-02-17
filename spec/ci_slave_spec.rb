@@ -22,5 +22,4 @@ describe_stack 'jenkins' do
 
     host.to_enc.should eql({ 'role::cinode_precise' => {} })
   end
-
 end

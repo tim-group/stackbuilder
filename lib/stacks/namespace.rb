@@ -37,7 +37,6 @@ module Stacks
       node
     end
 
-
     def find(fqdn)
       node = nil
       accept do |machine_def|

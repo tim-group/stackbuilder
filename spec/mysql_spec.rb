@@ -1,7 +1,6 @@
 require 'stacks/test_framework'
 
 describe_stack 'should provide a single instance mode to be backwards compatible with old mysqldb code' do
-
   given do
     stack "mysql" do
       mysql_cluster "frdb" do
@@ -32,26 +31,25 @@ describe_stack 'should provide the correct cross routing enc data' do
 
   host("testing-frdb-001.mgmt.pg.net.local") do |host|
     host.to_enc['networking::routing::to_site'].should eql({
-      'network' => 'prod',
-      'site'    => 'oy'
-    })
+                                                             'network' => 'prod',
+                                                             'site'    => 'oy'
+                                                           })
   end
   host("testing-frdb-002.mgmt.pg.net.local") do |host|
     host.to_enc['networking::routing::to_site'].should eql({
-      'network' => 'prod',
-      'site'    => 'oy'
-    })
+                                                             'network' => 'prod',
+                                                             'site'    => 'oy'
+                                                           })
   end
   host("testing-frdbbackup-001.mgmt.oy.net.local") do |host|
     host.to_enc['networking::routing::to_site'].should eql({
-      'network' => 'prod',
-      'site'    => 'pg'
-    })
+                                                             'network' => 'prod',
+                                                             'site'    => 'pg'
+                                                           })
   end
 end
 
 describe_stack 'should provide 3 mysql servers by default, one is a master' do
-
   given do
     stack "mysql" do
       mysql_cluster "frdb"
@@ -82,7 +80,6 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
 end
 
 describe_stack 'should default to disallow destory' do
-
   given do
     stack "mysql" do
       mysql_cluster "spoondb"
@@ -148,13 +145,13 @@ describe_stack 'should provide correct enc data' do
 
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql({
-      'replicant@testing-mydb-002.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-      },
-      'replicant@testing-mydbbackup-001.earth.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-      }
-    })
+                                                                                  'replicant@testing-mydb-002.space.net.local' => {
+                                                                                    'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+                                                                                  },
+                                                                                  'replicant@testing-mydbbackup-001.earth.net.local' => {
+                                                                                    'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+                                                                                  }
+                                                                                })
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
@@ -226,7 +223,6 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql '10G'
   end
-
 end
 
 describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do

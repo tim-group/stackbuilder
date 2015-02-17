@@ -2,7 +2,6 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::AppServer < Stacks::MachineDef
-
   attr_reader :environment, :virtual_service
   attr_accessor :group
   attr_accessor :launch_config
@@ -34,6 +33,7 @@ class Stacks::AppServer < Stacks::MachineDef
   end
 
   public
+
   def to_enc()
     enc = super
     enc['role::http_app'] = {

@@ -47,6 +47,7 @@ class Subscription
 
       result
     end
+
     def all_passed?
       return (unaccounted_for.empty? and failed.empty?)
     end
@@ -67,7 +68,6 @@ class Subscription
                       config.pluginconf['rabbitmq.pool.1.port'])
   end
 
-
   def self.create_stomp()
     configfile = MCollective::Util.config_file_for_user
 
@@ -82,7 +82,6 @@ class Subscription
                           config.pluginconf['rabbitmq.pool.1.host'],
                           config.pluginconf['rabbitmq.pool.1.port'])
   end
-
 
   def start(topics)
     @stomp = Subscription.create_client()
@@ -117,6 +116,7 @@ class Subscription
   end
 
   private
+
   def is_all_accounted_for(results, hosts)
     accounted_for = results.map { |hash| hash["host"] }
     (hosts - accounted_for).empty?
@@ -126,5 +126,4 @@ class Subscription
     now = Time.now
     return (now - start_time) > timeout
   end
-
 end

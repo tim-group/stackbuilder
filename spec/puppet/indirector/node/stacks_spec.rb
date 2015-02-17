@@ -2,7 +2,6 @@ require 'puppet'
 require 'puppet/indirector/node/stacks'
 
 describe Puppet::Node::Stacks do
-
   before :each do
     @stacks_inventory = double('stacks_inventory')
     @delegate = double('delegate')
@@ -50,5 +49,4 @@ describe Puppet::Node::Stacks do
     # it is super-shitty that this is tested by reproducing the entire config, but Puppet::Node::Stacks does not lend itself to mocking this
     result.classes.should eql({ "role::http_app" => { "application" => "JavaHttpRef" } })
   end
-
 end

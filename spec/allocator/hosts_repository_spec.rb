@@ -37,9 +37,9 @@ describe StackBuilder::Allocator::HostRepository do
     compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
-    :machine_repo => self,
-    :preference_functions => preference_functions,
-    :compute_node_client => compute_node_client)
+      :machine_repo => self,
+      :preference_functions => preference_functions,
+      :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_current("t")
     hosts.hosts.size.should eql(n)
@@ -69,9 +69,9 @@ describe StackBuilder::Allocator::HostRepository do
     compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
-    :machine_repo => self,
-    :preference_functions => preference_functions,
-    :compute_node_client => compute_node_client)
+      :machine_repo => self,
+      :preference_functions => preference_functions,
+      :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_current("t")
     hosts.hosts.size.should eql(n)

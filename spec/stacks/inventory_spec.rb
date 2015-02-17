@@ -2,7 +2,6 @@ require 'stacks/environment'
 require 'stacks/inventory'
 
 describe Stacks::Inventory do
-
   before :each do
     @stacks_dir = File.dirname(__FILE__) + '/teststack'
   end
@@ -37,5 +36,4 @@ describe Stacks::Inventory do
     result.domain.should eql("space.net.local")
     result.vip_fqdn(:prod).should eql("te-stapp-vip.space.net.local")
   end
-
 end

@@ -40,5 +40,4 @@ module Stacks::AppService
     config[self.vip_fqdn(:prod)]['type'] = 'sso_app' unless @sso_port.nil?
     config
   end
-
 end

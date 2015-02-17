@@ -5,7 +5,6 @@ require 'stacks/standalone_server'
 require 'pp'
 
 describe Stacks::DSL do
-
   before do
     extend Stacks::DSL
     stack "blah" do
@@ -45,26 +44,26 @@ describe Stacks::DSL do
     end
 
     environments["ci"]["fabric"].to_specs.should eql([{
-      :hostname => "ci-puppetmaster-001",
-      :bling => true,
-      :domain => "st.net.local",
-      :qualified_hostnames => { :mgmt => "ci-puppetmaster-001.mgmt.st.net.local", :prod => "ci-puppetmaster-001.st.net.local" },
-      :networks => [:mgmt, :prod],
-      :fabric => "st",
-      :ram => "2097152",
-      :storage => {
-        :/ => {
-          :type => "os",
-          :size => "3G",
-          :prepare => {
-            :method => "image",
-            :options => {
-              :path => "/var/local/images/gold-precise/generic.img"
-            }
-          }
-        }
-      }
-    }])
+                                                       :hostname => "ci-puppetmaster-001",
+                                                       :bling => true,
+                                                       :domain => "st.net.local",
+                                                       :qualified_hostnames => { :mgmt => "ci-puppetmaster-001.mgmt.st.net.local", :prod => "ci-puppetmaster-001.st.net.local" },
+                                                       :networks => [:mgmt, :prod],
+                                                       :fabric => "st",
+                                                       :ram => "2097152",
+                                                       :storage => {
+                                                         :/ => {
+                                                           :type => "os",
+                                                           :size => "3G",
+                                                           :prepare => {
+                                                             :method => "image",
+                                                             :options => {
+                                                               :path => "/var/local/images/gold-precise/generic.img"
+                                                             }
+                                                           }
+                                                         }
+                                                       }
+                                                     }])
   end
 
   it 'can find sub environments' do

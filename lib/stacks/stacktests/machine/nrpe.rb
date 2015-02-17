@@ -1,5 +1,4 @@
 shared_examples_for "nrpe" do |machine|
-
   commands = mco_client("nrpe", :nodes => [machine.mgmt_fqdn]) do |mco|
     results = []
     mco.runallcommands().each do |resp|

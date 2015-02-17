@@ -23,5 +23,4 @@ describe Support::Forking do
       end.value
     end.to raise_error
   end
-
 end

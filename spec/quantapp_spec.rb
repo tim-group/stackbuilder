@@ -14,8 +14,8 @@ describe_stack 'quant' do
 
   host("e1-quantapp-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
-      'role::quantapp_server' => {
-      } })
+                             'role::quantapp_server' => {
+                             } })
     host.to_specs.shift[:ram].should eql('2097152')
   end
 end

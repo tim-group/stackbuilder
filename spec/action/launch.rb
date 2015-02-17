@@ -12,7 +12,6 @@ describe 'launch' do
     end
   end
 
-
   class Host
     attr_accessor :allocated_machines
     attr_accessor :provisionally_allocated_machines
@@ -40,6 +39,7 @@ describe 'launch' do
     attr_accessor :hosts
 
     private
+
     def find_suitable_host_for(machine)
       candidate_hosts = hosts.reject do |host|
         !host.can_allocate(host)
@@ -56,7 +56,6 @@ describe 'launch' do
       end
 
       def to_unlaunched_specs
-
       end
     end
   end
@@ -78,5 +77,4 @@ describe 'launch' do
 
     run_action "launch", machine_def
   end
-
 end

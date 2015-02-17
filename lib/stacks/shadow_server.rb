@@ -2,7 +2,6 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::ShadowServer < Stacks::MachineDef
-
   attr_reader :environment, :virtual_service
   attr_accessor :group, :hostname, :domain
 
@@ -26,5 +25,4 @@ class Stacks::ShadowServer < Stacks::MachineDef
   def needs_poll_signing?
     false
   end
-
 end

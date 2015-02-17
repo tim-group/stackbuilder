@@ -4,12 +4,12 @@ require 'allocator/host_policies'
 describe StackBuilder::Allocator::HostPolicies do
   def test_env_with_refstack
     return [{
-       :hostname => "refapp1",
-       :availability_group => "refapp"
-     }, {
-       :hostname => "refapp2",
-       :availability_group => "refapp"
-     }]
+      :hostname => "refapp1",
+      :availability_group => "refapp"
+    }, {
+      :hostname => "refapp2",
+      :availability_group => "refapp"
+    }]
   end
 
   it 'allows allocations that have no machine of the same group to the same host' do
@@ -47,7 +47,6 @@ describe StackBuilder::Allocator::HostPolicies do
   end
 
   it 'allows allocations where the host ram is sufficient' do
-
     candidate_machine = {
       :hostname => "candidate_machine",
       :ram => 2097152
@@ -139,12 +138,10 @@ describe StackBuilder::Allocator::HostPolicies do
     StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy().call(h1, candidate_machine)[:passed].should eql(false)
   end
 
-
   it 'rejects allocations where the host has no defined storage types' do
     machine = { :storage => { :mount_point => { :type => "something" } } }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {})
     StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy().call(h1, machine)[:passed].should eql(false)
-
   end
 
   it 'accepts allocations where the host has no defined storage types' do
@@ -175,7 +172,6 @@ describe StackBuilder::Allocator::HostPolicies do
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
     StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy().call(h1, machine)[:passed].should eql(true)
-
   end
 
   it 'rejects allocations where the hosts persistant storage does not exist on this computenode' do
@@ -200,7 +196,6 @@ describe StackBuilder::Allocator::HostPolicies do
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
     StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy().call(h1, machine)[:passed].should eql(false)
-
   end
 
   it 'rejects overallocated disks' do
@@ -227,5 +222,4 @@ describe StackBuilder::Allocator::HostPolicies do
 
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy().call(h1, machine)[:passed].should eql(true)
   end
-
 end

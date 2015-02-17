@@ -42,5 +42,4 @@ class Stacks::ProxyVHost
   def vhost_properties(properties)
     @properties.merge!(properties)
   end
-
 end

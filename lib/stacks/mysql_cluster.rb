@@ -92,10 +92,10 @@ module Stacks::MysqlCluster
     children.each do |dependant|
       unless dependant.master?
         rights['mysql_hacks::replication_rights_wrapper']['rights'].merge!({
-          "replicant@#{dependant.prod_fqdn}" => {
-            'password_hiera_key'  => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password"
-          }
-        })
+                                                                             "replicant@#{dependant.prod_fqdn}" => {
+                                                                               'password_hiera_key'  => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password"
+                                                                             }
+                                                                           })
       end
     end
     rights
@@ -108,10 +108,10 @@ module Stacks::MysqlCluster
     virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].merge!({
-          "#{service.application}@#{dependant.prod_fqdn}/#{database_name}" => {
-            'password_hiera_key'  => "enc/#{service.environment.name}/#{service.application}/mysql_password"
-          }
-        })
+                                                                             "#{service.application}@#{dependant.prod_fqdn}/#{database_name}" => {
+                                                                               'password_hiera_key'  => "enc/#{service.environment.name}/#{service.application}/mysql_password"
+                                                                             }
+                                                                           })
       end
     end
     rights
@@ -126,5 +126,4 @@ module Stacks::MysqlCluster
       "db.#{@database_name}.password_hiera_key" => "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
     }
   end
-
 end

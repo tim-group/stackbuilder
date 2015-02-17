@@ -101,7 +101,6 @@ module Stacks::VirtualProxyService
         'cert' => vhost.cert
       }]
     end]
-
   end
 
   def to_loadbalancer_config

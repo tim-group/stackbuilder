@@ -12,16 +12,15 @@ describe_stack 'basic dev puppetmaster' do
 
   host("e1-basic-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
-      'role::dev_puppetmaster' => {}
-    })
+                             'role::dev_puppetmaster' => {}
+                           })
     host.to_specs.first[:template].should eql('puppetmaster')
     host.to_specs.first[:cnames].should eql({
-      :mgmt => {
-        "puppet" => "e1-basic-001.mgmt.space.net.local"
-      }
-    })
+                                              :mgmt => {
+                                                "puppet" => "e1-basic-001.mgmt.space.net.local"
+                                              }
+                                            })
   end
-
 end
 
 describe_stack 'basic dev puppetmaster without cname' do
@@ -32,7 +31,6 @@ describe_stack 'basic dev puppetmaster without cname' do
           machine.cnames = {}
         end
       end
-
     end
     env "e1", { :primary_site => "space" } do
       instantiate_stack "puppetmaster"
@@ -41,10 +39,9 @@ describe_stack 'basic dev puppetmaster without cname' do
 
   host("e1-pm-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql({
-      'role::dev_puppetmaster' => {}
-    })
+                             'role::dev_puppetmaster' => {}
+                           })
     host.to_specs.first[:template].should eql('puppetmaster')
     host.to_specs.first[:cnames].should eql({})
   end
-
 end

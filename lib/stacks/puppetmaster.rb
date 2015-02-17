@@ -1,7 +1,6 @@
 require 'stacks/namespace'
 
 class Stacks::PuppetMaster < Stacks::MachineDef
-
   attr_accessor :cnames
   def initialize(machineset, index, &block)
     super(machineset.name + "-" + index, [:mgmt])
@@ -23,7 +22,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
       :template            => 'puppetmaster',
       :cnames              => {
         :mgmt =>  {
-         'puppet' => "#{qualified_hostname(:mgmt)}"
+          'puppet' => "#{qualified_hostname(:mgmt)}"
         }
       },
     }
@@ -31,5 +30,4 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     specs.merge!(puppetmaster_special)
     specs
   end
-
 end

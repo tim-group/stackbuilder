@@ -1,7 +1,6 @@
 require 'stacks/environment'
 
 describe Stacks::NatServer do
-
   it 'has access to the front, prod and mgmt networks' do
     class Group
       attr_accessor :name

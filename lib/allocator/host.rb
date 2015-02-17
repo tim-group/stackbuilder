@@ -20,7 +20,6 @@ class StackBuilder::Allocator::Host
     @ram = args[:ram]
     @storage = args[:storage]
     @allocation_disabled = args[:allocation_disabled] || false
-
   end
 
   def machines

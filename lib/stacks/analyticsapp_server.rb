@@ -2,7 +2,6 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::AnalyticsAppServer < Stacks::MachineDef
-
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     @data_directory  = false
@@ -12,14 +11,13 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
   def to_enc()
     {
       'role::analyticsapp_server' => {
-         'datadir'     => @data_directory,
-         'environment' => environment.name,
+        'datadir'     => @data_directory,
+        'environment' => environment.name,
       }
     }
   end
 
   def persistent_storage(datadir, size)
-
     @data_directory = datadir
 
     storage = {
@@ -31,7 +29,5 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
       }
     }
     modify_storage(storage)
-
   end
-
 end

@@ -44,6 +44,7 @@ class Compute::Allocation
   end
 
   private
+
   def add_to_allocation(new_allocation, host, spec)
     new_allocation[host].nil? ? new_allocation[host] = [] : false
     new_allocation[host] << spec
@@ -247,6 +248,7 @@ class Compute::Controller
   end
 
   private
+
   def clean_destroyable_vms(destroyable_specs)
     fabrics = destroyable_specs.group_by { |spec| spec[:fabric] }
     grouped_results = fabrics.map do |fabric, specs|
@@ -261,5 +263,4 @@ class Compute::Controller
       raise "#{spec[:hostname]} is not destroyable"
     end
   end
-
 end

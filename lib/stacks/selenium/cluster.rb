@@ -46,5 +46,4 @@ module Stacks::Selenium::Cluster
       instantiate_node nodespec
     end
   end
-
 end

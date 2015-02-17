@@ -1,7 +1,6 @@
 require 'compute/controller'
 
 describe Compute::Controller do
-
   before :each do
     @compute_node_client = double
     @logger = double
@@ -39,12 +38,12 @@ describe Compute::Controller do
 
   it 'allocates to a remote fabric' do
     @compute_node_client.stub(:audit_hosts).with("st").and_return({
-      "st-kvm-001.mgmt.st.net.local" => { :active_hosts => [] }
-    })
+                                                                    "st-kvm-001.mgmt.st.net.local" => { :active_hosts => [] }
+                                                                  })
 
     @compute_node_client.stub(:audit_hosts).with("bs").and_return({
-      "bs-kvm-001.mgmt.bs.net.local" => { :active_hosts => [] }
-    })
+                                                                    "bs-kvm-001.mgmt.bs.net.local" => { :active_hosts => [] }
+                                                                  })
 
     specs = [{
       :hostname => "vm1",
@@ -60,23 +59,23 @@ describe Compute::Controller do
     allocations = @compute_controller.allocate(specs)
 
     allocations.should eql({
-      "st-kvm-001.mgmt.st.net.local" => [specs[0], specs[1]],
-      "bs-kvm-001.mgmt.bs.net.local" => [specs[2]],
-    })
+                             "st-kvm-001.mgmt.st.net.local" => [specs[0], specs[1]],
+                             "bs-kvm-001.mgmt.bs.net.local" => [specs[2]],
+                           })
   end
 
   it 'doesnt allocate the same machine twice' do
     @compute_node_client.stub(:audit_hosts).with("st").and_return({
-      "st-kvm-001.mgmt.st.net.local" => {
-      :active_domains => []
-    },
-      "st-kvm-002.mgmt.st.net.local" => {
-      :active_domains => ["vm0"]
-    },
-      "st-kvm-003.mgmt.st.net.local" => {
-      :active_domains => []
-    }
-    })
+                                                                    "st-kvm-001.mgmt.st.net.local" => {
+                                                                      :active_domains => []
+                                                                    },
+                                                                    "st-kvm-002.mgmt.st.net.local" => {
+                                                                      :active_domains => ["vm0"]
+                                                                    },
+                                                                    "st-kvm-003.mgmt.st.net.local" => {
+                                                                      :active_domains => []
+                                                                    }
+                                                                  })
 
     specs = [
       { :hostname => "vm0", :fabric => "st" },
@@ -89,33 +88,33 @@ describe Compute::Controller do
     allocations = @compute_controller.allocate(specs)
 
     allocations.should eql({
-      "st-kvm-001.mgmt.st.net.local" => [specs[1], specs[4]],
-      "st-kvm-002.mgmt.st.net.local" => [specs[2]],
-      "st-kvm-003.mgmt.st.net.local" => [specs[3]],
-    })
+                             "st-kvm-001.mgmt.st.net.local" => [specs[1], specs[4]],
+                             "st-kvm-002.mgmt.st.net.local" => [specs[2]],
+                             "st-kvm-003.mgmt.st.net.local" => [specs[3]],
+                           })
   end
 
   it 'allocates by slicing specs' do
     @compute_node_client.stub(:audit_hosts).with("st").and_return({
-      "st-kvm-001.mgmt.st.net.local" => {
-      :active_domains => []
-    },
-      "st-kvm-002.mgmt.st.net.local" => {
-      :active_domains => []
-    },
-      "st-kvm-003.mgmt.st.net.local" => {
-      :active_domains => []
-    }
-    })
+                                                                    "st-kvm-001.mgmt.st.net.local" => {
+                                                                      :active_domains => []
+                                                                    },
+                                                                    "st-kvm-002.mgmt.st.net.local" => {
+                                                                      :active_domains => []
+                                                                    },
+                                                                    "st-kvm-003.mgmt.st.net.local" => {
+                                                                      :active_domains => []
+                                                                    }
+                                                                  })
 
     @compute_node_client.stub(:audit_hosts).with("bs").and_return({
-      "bs-kvm-001.mgmt.bs.net.local" => {
-      :active_domains => []
-    },
-      "bs-kvm-002.mgmt.bs.net.local" => {
-      :active_domains => []
-    }
-    })
+                                                                    "bs-kvm-001.mgmt.bs.net.local" => {
+                                                                      :active_domains => []
+                                                                    },
+                                                                    "bs-kvm-002.mgmt.bs.net.local" => {
+                                                                      :active_domains => []
+                                                                    }
+                                                                  })
 
     specs = [
       { :hostname => "vm0", :fabric => "st" },
@@ -131,12 +130,12 @@ describe Compute::Controller do
     allocations = @compute_controller.allocate(specs)
 
     allocations.should eql({
-      "st-kvm-001.mgmt.st.net.local" => [specs[0], specs[3]],
-      "st-kvm-002.mgmt.st.net.local" => [specs[1], specs[4]],
-      "st-kvm-003.mgmt.st.net.local" => [specs[2]],
-      "bs-kvm-001.mgmt.bs.net.local" => [specs[5], specs[7]],
-      "bs-kvm-002.mgmt.bs.net.local" => [specs[6]],
-    })
+                             "st-kvm-001.mgmt.st.net.local" => [specs[0], specs[3]],
+                             "st-kvm-002.mgmt.st.net.local" => [specs[1], specs[4]],
+                             "st-kvm-003.mgmt.st.net.local" => [specs[2]],
+                             "bs-kvm-001.mgmt.bs.net.local" => [specs[5], specs[7]],
+                             "bs-kvm-002.mgmt.bs.net.local" => [specs[6]],
+                           })
   end
 
   it 'launches the vms on the allocated hosts' do
@@ -163,10 +162,10 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
     },
              {
-             :hostname => "vm2",
-             :fabric => "st",
-             :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
-           }]
+               :hostname => "vm2",
+               :fabric => "st",
+               :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
+             }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", { "vm1" => ["success", "yay"] }]])
     @compute_node_client.should_receive(:launch).with("myhost", [specs[0]])
@@ -240,14 +239,13 @@ describe Compute::Controller do
     result.should eql([["vm1", "o noes"], ["vm2", "yes"]])
   end
 
-
   it 'calls back if any launchraw command failed' do
     specs = {
       "myhost" => [{
-      :hostname => "vm1",
-      :fabric => "st",
-      :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
-    }] }
+        :hostname => "vm1",
+        :fabric => "st",
+        :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
+      }] }
 
     @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", { "vm1" => ["failed", "o noes"] }]])
 
@@ -424,5 +422,4 @@ describe Compute::Controller do
     successful.should eql([["vm1", "success"]])
     failures.should eql [["vm2", "failed"]]
   end
-
 end

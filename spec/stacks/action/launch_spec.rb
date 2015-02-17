@@ -52,8 +52,8 @@ describe 'launch' do
     compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repox = StackBuilder::Allocator::HostRepository.new(
-    :preference_functions => preference_functions,
-    :compute_node_client => compute_node_client)
+      :preference_functions => preference_functions,
+      :compute_node_client => compute_node_client)
 
     host_repo = double
     hosts = []
@@ -76,9 +76,9 @@ describe 'launch' do
     Hash[hosts.allocated_machines(env.flatten).map do |machine, host|
       [machine.mgmt_fqdn, host.fqdn]
     end].should eql({
-      "test-refapp-001.mgmt.t.net.local" => "hx",
-      "test-refapp-002.mgmt.t.net.local" => "hx"
-    })
+                      "test-refapp-001.mgmt.t.net.local" => "hx",
+                      "test-refapp-002.mgmt.t.net.local" => "hx"
+                    })
   end
 
   xit 'gives me a list of machines that are going to be launched' do
@@ -90,13 +90,12 @@ describe 'launch' do
     Hash[hosts.new_machine_allocation().map do |machine, host|
       [machine.mgmt_fqdn, host.fqdn]
     end].should eql({
-      "test-refapp-001.mgmt.t.net.local" => "hx",
-      "test-refapp-002.mgmt.t.net.local" => "hx"
-    })
+                      "test-refapp-001.mgmt.t.net.local" => "hx",
+                      "test-refapp-002.mgmt.t.net.local" => "hx"
+                    })
   end
 
   xit 'will allocate machines to machines in the correct fabric' do
-
   end
 
   xit 'will allocate and launch a bunch of machines' do
@@ -108,8 +107,8 @@ describe 'launch' do
     )
 
     compute_controller.should_receive(:launch_raw).with(
-    "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
-    "h2" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+      "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
+      "h2" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
 
     get_action("launch").call(services, env)
@@ -122,11 +121,11 @@ describe 'launch' do
       host.allocated_machines << find("test-refapp-001.mgmt.t.net.local")
     end
     services = Stacks::Core::Services.new(
-    :host_repo => host_repo,
-    :compute_controller => compute_controller)
+      :host_repo => host_repo,
+      :compute_controller => compute_controller)
 
     compute_controller.should_receive(:launch_raw).with(
-    "h1" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+      "h1" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
 
     get_action("launch").call(services, env)
@@ -147,12 +146,12 @@ describe 'launch' do
     host_repo = host_repo_with_hosts(3, [chooseh3])
 
     services = Stacks::Core::Services.new(
-    :host_repo => host_repo,
-    :compute_controller => compute_controller)
+      :host_repo => host_repo,
+      :compute_controller => compute_controller)
 
     compute_controller.should_receive(:launch_raw).with(
-    "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
-             find("test-refapp-002.mgmt.t.net.local").to_spec]
+      "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
+               find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
 
     get_action("launch").call(services, env)
@@ -168,12 +167,12 @@ describe 'launch' do
     end
 
     services = Stacks::Core::Services.new(
-    :host_repo => host_repo,
-    :compute_controller => compute_controller)
+      :host_repo => host_repo,
+      :compute_controller => compute_controller)
 
     compute_controller.should_receive(:launch_raw).with(
-    "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
-    "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
+      "h1" => [find("test-refapp-001.mgmt.t.net.local").to_spec],
+      "h3" => [find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
 
     get_action("launch").call(services, env)
@@ -189,12 +188,11 @@ describe 'launch' do
     end
 
     services = Stacks::Core::Services.new(
-    :host_repo => host_repo,
-    :compute_controller => compute_controller)
+      :host_repo => host_repo,
+      :compute_controller => compute_controller)
 
     expect {
       get_action("launch").call(services, env)
     }.to raise_error("unable to allocate test-refapp-001 due to policy violation:\n  unable to allocate to h1 because it is [rh1]\n  unable to allocate to h2 because it is [rh2]\n  unable to allocate to h3 because it is [rh3]")
   end
-
 end

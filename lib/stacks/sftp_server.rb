@@ -1,7 +1,6 @@
 require 'stacks/namespace'
 
 class Stacks::SftpServer < Stacks::MachineDef
-
   attr_reader :virtual_service
 
   def initialize(virtual_service, index)

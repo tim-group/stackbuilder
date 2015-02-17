@@ -2,7 +2,6 @@ require 'allocator/namespace'
 require 'allocator/policy_helpers'
 
 module StackBuilder::Allocator::HostPolicies
-
   def self.ha_group()
     Proc.new do |host, machine_spec|
       result = { :passed => true }
@@ -54,8 +53,8 @@ module StackBuilder::Allocator::HostPolicies
         if missing_storage_types.any?
           unique_missing_storage_types = Set.new(missing_storage_types).to_a
           result = {
-              :passed => false,
-              :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} available: #{host.storage.keys.sort.join(',')})"
+            :passed => false,
+            :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} available: #{host.storage.keys.sort.join(',')})"
           }
         end
       end
@@ -136,8 +135,8 @@ module StackBuilder::Allocator::HostPolicies
       if !storage_without_enough_space.empty?
         sorted_keys = storage_without_enough_space.keys.sort
         result = {
-            :passed => false,
-            :reason => "Insufficient disk space (required: #{sorted_keys.collect { |key| storage_without_enough_space[key][:required_space] }.join(',') }G available: #{sorted_keys.collect { |key| storage_without_enough_space[key][:available_space] }.join(',')}G)"
+          :passed => false,
+          :reason => "Insufficient disk space (required: #{sorted_keys.collect { |key| storage_without_enough_space[key][:required_space] }.join(',') }G available: #{sorted_keys.collect { |key| storage_without_enough_space[key][:available_space] }.join(',')}G)"
         }
       end
       result
@@ -145,6 +144,7 @@ module StackBuilder::Allocator::HostPolicies
   end
 
   private
+
   def self.KB_to_GB(value)
     ((value.to_f / (1024 * 1024) * 100).round / 100.0)
   end

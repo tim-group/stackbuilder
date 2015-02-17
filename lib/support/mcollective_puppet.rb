@@ -50,7 +50,6 @@ module Support::MCollectivePuppet
     callback = Support::Callback.new(&block)
     machines_fqdns.each do |machine_fqdn|
       puppetca(machine_fqdn) do |mco|
-
         cleaned = mco.clean(:certname => machine_fqdn).select do |response|
           response[:statuscode] == 0
         end.size > 0
@@ -133,7 +132,6 @@ module Support::MCollectivePuppet
   end
 
   def puppetca(machine_fqdn = nil, &block)
-
     puppetmaster = nil
 
     if machine_fqdn =~ /mgmt.st.net.local/
@@ -165,5 +163,4 @@ module Support::MCollectivePuppet
   def now
     return Time.now
   end
-
 end

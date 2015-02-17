@@ -4,7 +4,6 @@ require "net/https"
 require "net/http"
 require "uri"
 
-
 shared_examples_for "vip" do |virtualservice|
   virtualservice.ports do |port|
     it "can connect to #{virtualservice.vip_fqdn(:prod)} ... on #{port}" do

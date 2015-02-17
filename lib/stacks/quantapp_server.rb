@@ -2,7 +2,6 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::QuantAppServer < Stacks::MachineDef
-
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)

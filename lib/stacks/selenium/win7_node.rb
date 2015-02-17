@@ -33,5 +33,4 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
 
     spec
   end
-
 end

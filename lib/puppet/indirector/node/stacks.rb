@@ -23,5 +23,4 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
     end
     return node
   end
-
 end

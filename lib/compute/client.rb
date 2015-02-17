@@ -22,7 +22,6 @@ class Compute::Client
     target_hash
   end
 
-
   def audit_hosts(fabric)
     hosts = find_hosts(fabric)
 
@@ -62,7 +61,6 @@ class Compute::Client
     rescue
     end
 
-
     # FIXME:
     # Once all computenodes have new storage config, unwrap this code
     # from unless
@@ -75,8 +73,6 @@ class Compute::Client
     end
 
     libvirt_response_hash
-
-
   end
 
   def find_hosts(fabric)

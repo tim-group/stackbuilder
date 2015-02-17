@@ -6,7 +6,6 @@ describe_stack 'stack-with-dependencies' do
       loadbalancer
     end
     stack "example" do
-
       virtual_proxyserver 'exampleproxy' do
         vhost('exampleapp') do
         end
@@ -47,12 +46,12 @@ describe_stack 'stack-with-dependencies' do
 
   host("e1-lb-001.mgmt.space.net.local") do |host|
     host.to_enc["role::loadbalancer"]["virtual_servers"]["e1-exampleapp-vip.space.net.local"]["realservers"]["blue"].should eql([
-     "e1-exampleapp-001.space.net.local",
-     "e1-exampleapp-002.space.net.local"
+      "e1-exampleapp-001.space.net.local",
+      "e1-exampleapp-002.space.net.local"
     ])
     host.to_enc["role::loadbalancer"]["virtual_servers"]["e1-exampleapp2-vip.space.net.local"]["realservers"]["blue"].should eql([
-     "e1-exampleapp2-001.space.net.local",
-     "e1-exampleapp2-002.space.net.local"
+      "e1-exampleapp2-001.space.net.local",
+      "e1-exampleapp2-002.space.net.local"
     ])
   end
 
@@ -62,8 +61,8 @@ describe_stack 'stack-with-dependencies' do
 
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
     host.to_enc["role::http_app"]["dependant_instances"].should eql([
-        'e1-lb-001.space.net.local',
-        'e1-lb-002.space.net.local'
+      'e1-lb-001.space.net.local',
+      'e1-lb-002.space.net.local'
     ])
     deps = host.to_enc["role::http_app"]["dependencies"]
     deps["db.example.database"].should eql("example")
@@ -89,19 +88,17 @@ describe_stack 'stack-with-dependencies' do
       "e1-exampleapp2-002.space.net.local"
     ])
     host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']['example2@e1-exampleapp2-001.space.net.local/example'].should eql({
-      'password_hiera_key' => 'enc/e1/example2/mysql_password',
-    })
+                                                                                                                                         'password_hiera_key' => 'enc/e1/example2/mysql_password',
+                                                                                                                                       })
     host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']['example2@e1-exampleapp2-002.space.net.local/example'].should eql({
-      'password_hiera_key' => 'enc/e1/example2/mysql_password',
-    })
+                                                                                                                                         'password_hiera_key' => 'enc/e1/example2/mysql_password',
+                                                                                                                                       })
   end
-
 end
 
 describe_stack 'stack with dependencies that does not provide config params when specified ' do
   given do
     stack "example" do
-
       virtual_appserver 'configapp' do
         self.groups = ['blue']
         self.application = 'example'
@@ -129,11 +126,11 @@ describe_stack 'stack with dependencies that does not provide config params when
 
   host("e1-configapp-001.mgmt.space.net.local") do |host|
     host.to_enc["role::http_app"]["dependencies"].should eql({
-       "db.example.database"           => "example",
-       "db.example.hostname"           => "e1-exampledb-001.space.net.local",
-       "db.example.password_hiera_key" => "enc/e1/example/mysql_password",
-       "db.example.username"           => "example",
-    })
+                                                               "db.example.database"           => "example",
+                                                               "db.example.hostname"           => "e1-exampledb-001.space.net.local",
+                                                               "db.example.password_hiera_key" => "enc/e1/example/mysql_password",
+                                                               "db.example.username"           => "example",
+                                                             })
   end
   host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
     host.to_enc["role::http_app"]["dependencies"].should eql({})

@@ -5,7 +5,6 @@ require 'stacks/nat'
 require 'uri'
 
 module Stacks::LoadBalancerCluster
-
   def self.extended(object)
     object.configure()
   end

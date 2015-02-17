@@ -5,7 +5,6 @@ require 'pp'
 require 'matchers/server_matcher'
 
 describe Stacks::DSL do
-
   before do
     extend Stacks::DSL
     class Resolv::DNS
@@ -74,7 +73,6 @@ describe Stacks::DSL do
     loadbalancer.to_enc.should eql(
       { "role::loadbalancer" => { "virtual_servers" => { "st-sftp-vip.st.net.local" => { "type" => "sftp", "realservers" => { "blue" => ["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"] }, "monitor_warn" => 0, "persistent_ports" => ['21'] } }, "virtual_router_id" => 1 } }
     )
-
   end
 
   it 'generates load balancer enc data with the correct warn_level based on fewest number of servers in a group'  do
@@ -84,7 +82,6 @@ describe Stacks::DSL do
 
     stack "twoapp" do
       virtual_appserver "twoapp"
-
     end
 
     stack "oneapp" do
@@ -162,7 +159,6 @@ describe Stacks::DSL do
     )
   end
 
-
   it 'can generate the load balancer spec for a sub environment' do
     stack "fabric" do
       loadbalancer
@@ -200,107 +196,107 @@ describe Stacks::DSL do
     st_loadbalancer = find("st-lb-001.mgmt.st.net.local")
     st_loadbalancer.to_enc.should eql(
       {
-      'role::loadbalancer' => {
-      'virtual_router_id' => 1,
-      'virtual_servers' => {
-      'ci2-appx-vip.st.net.local' => {
-      # 'type'        => 'app',
+        'role::loadbalancer' => {
+          'virtual_router_id' => 1,
+          'virtual_servers' => {
+            'ci2-appx-vip.st.net.local' => {
+              # 'type'        => 'app',
 
-      'env' => 'ci2',
-      'app' => 'JavaHttpRef',
-      'monitor_warn' => 0,
-      'healthcheck_timeout' => 10,
+              'env' => 'ci2',
+              'app' => 'JavaHttpRef',
+              'monitor_warn' => 0,
+              'healthcheck_timeout' => 10,
 
-      'realservers' => {
-      'blue' => [
-        'ci2-appx-001.st.net.local'
-    ],
-      'green' => [
-        'ci2-appx-002.st.net.local'
-    ]
-    }
-    },
-      'ci2-app2x-vip.st.net.local' => {
-      'env' => 'ci2',
-      'app' => 'MySuperCoolApp',
-      'monitor_warn' => 1,
-      'healthcheck_timeout' => 10,
+              'realservers' => {
+                'blue' => [
+                  'ci2-appx-001.st.net.local'
+                ],
+                'green' => [
+                  'ci2-appx-002.st.net.local'
+                ]
+              }
+            },
+            'ci2-app2x-vip.st.net.local' => {
+              'env' => 'ci2',
+              'app' => 'MySuperCoolApp',
+              'monitor_warn' => 1,
+              'healthcheck_timeout' => 10,
 
-      'realservers' => {
-      'blue' => [
-        'ci2-app2x-001.st.net.local',
-        'ci2-app2x-002.st.net.local'
-    ]
-    }
-    },
-      'ci2-myproxy-vip.st.net.local' => {
-      'type'        => 'proxy',
-      'ports' => [80, 443],
-      'realservers' => {
-      'blue' => [
-        'ci2-myproxy-001.st.net.local',
-        'ci2-myproxy-002.st.net.local'
-    ]
-    }
-    },
-      'st-sftp-vip.st.net.local' => {
-      'type'        => 'sftp',
-      'monitor_warn' => 0,
-      'persistent_ports'  => [],
-      'realservers' => {
-      'blue' => [
-        'st-sftp-001.st.net.local',
-        'st-sftp-002.st.net.local'
-    ]
-    }
-    }
-    } } })
+              'realservers' => {
+                'blue' => [
+                  'ci2-app2x-001.st.net.local',
+                  'ci2-app2x-002.st.net.local'
+                ]
+              }
+            },
+            'ci2-myproxy-vip.st.net.local' => {
+              'type'        => 'proxy',
+              'ports' => [80, 443],
+              'realservers' => {
+                'blue' => [
+                  'ci2-myproxy-001.st.net.local',
+                  'ci2-myproxy-002.st.net.local'
+                ]
+              }
+            },
+            'st-sftp-vip.st.net.local' => {
+              'type'        => 'sftp',
+              'monitor_warn' => 0,
+              'persistent_ports'  => [],
+              'realservers' => {
+                'blue' => [
+                  'st-sftp-001.st.net.local',
+                  'st-sftp-002.st.net.local'
+                ]
+              }
+            }
+          } } })
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
     ci_loadbalancer.to_enc.should eql({
-      'role::loadbalancer' => {
-      'virtual_router_id' => 1,
-      'virtual_servers' => {
-      'ci-appx-vip.st.net.local' => {
-        'healthcheck_timeout' => 10,
-        'monitor_warn' => 0,
-        'env' => 'ci',
-        'app' => 'JavaHttpRef',
-        'realservers' => {
-          'blue' => [
-            'ci-appx-001.st.net.local'
-          ],
-          'green' => [
-             'ci-appx-002.st.net.local'
-    ]
-    }
-    },
-      'ci-app2x-vip.st.net.local' => {
-         'healthcheck_timeout' => 10,
-         'monitor_warn' => 1,
-         'env' => 'ci',
-         'app' => 'MySuperCoolApp',
-         'realservers' => {
-      'blue' => [
-        'ci-app2x-001.st.net.local',
-        'ci-app2x-002.st.net.local'
-    ]
-    }
-    },
-      'ci-sftp-vip.st.net.local' => {
-      'type'        => 'sftp',
-      'monitor_warn' => 0,
-      'persistent_ports'  => [],
-      'realservers' => {
-      'blue' => [
-        'ci-sftp-001.st.net.local',
-        'ci-sftp-002.st.net.local'
-    ]
-    }
-    }
-    }
-    }
-    })
+                                        'role::loadbalancer' => {
+                                          'virtual_router_id' => 1,
+                                          'virtual_servers' => {
+                                            'ci-appx-vip.st.net.local' => {
+                                              'healthcheck_timeout' => 10,
+                                              'monitor_warn' => 0,
+                                              'env' => 'ci',
+                                              'app' => 'JavaHttpRef',
+                                              'realservers' => {
+                                                'blue' => [
+                                                  'ci-appx-001.st.net.local'
+                                                ],
+                                                'green' => [
+                                                  'ci-appx-002.st.net.local'
+                                                ]
+                                              }
+                                            },
+                                            'ci-app2x-vip.st.net.local' => {
+                                              'healthcheck_timeout' => 10,
+                                              'monitor_warn' => 1,
+                                              'env' => 'ci',
+                                              'app' => 'MySuperCoolApp',
+                                              'realservers' => {
+                                                'blue' => [
+                                                  'ci-app2x-001.st.net.local',
+                                                  'ci-app2x-002.st.net.local'
+                                                ]
+                                              }
+                                            },
+                                            'ci-sftp-vip.st.net.local' => {
+                                              'type'        => 'sftp',
+                                              'monitor_warn' => 0,
+                                              'persistent_ports'  => [],
+                                              'realservers' => {
+                                                'blue' => [
+                                                  'ci-sftp-001.st.net.local',
+                                                  'ci-sftp-002.st.net.local'
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      })
   end
 
   it 'round robins the groups foreach instance' do
@@ -334,16 +330,16 @@ describe Stacks::DSL do
 
     server = find("ci-appx-001.mgmt.st.net.local")
     server.to_enc.should eql({
-      'role::http_app' => {
-      'application' => 'JavaHttpRef',
-      'group' => 'blue',
-      'cluster' => 'ci-appx',
-      'vip_fqdn' => 'ci-appx-vip.st.net.local',
-      'environment' => 'ci',
-      'port'        => '8000',
-      'dependencies' => {},
-      'dependant_instances' => []
-    } })
+                               'role::http_app' => {
+                                 'application' => 'JavaHttpRef',
+                                 'group' => 'blue',
+                                 'cluster' => 'ci-appx',
+                                 'vip_fqdn' => 'ci-appx-vip.st.net.local',
+                                 'environment' => 'ci',
+                                 'port'        => '8000',
+                                 'dependencies' => {},
+                                 'dependant_instances' => []
+                               } })
   end
 
   it 'generates app servers that are not part of a virtual service' do
@@ -359,17 +355,16 @@ describe Stacks::DSL do
 
     server = find("ci-appx-001.mgmt.st.net.local")
     server.to_enc.should eql({
-      'role::http_app' => {
-      'application' => 'JavaHttpRef',
-      'group' => 'blue',
-      'cluster' => 'ci-appx',
-      'environment' => 'ci',
-      'port'        => '8000',
-      'dependencies' => {},
-      'dependant_instances' => []
-    } })
+                               'role::http_app' => {
+                                 'application' => 'JavaHttpRef',
+                                 'group' => 'blue',
+                                 'cluster' => 'ci-appx',
+                                 'environment' => 'ci',
+                                 'port'        => '8000',
+                                 'dependencies' => {},
+                                 'dependant_instances' => []
+                               } })
   end
-
 
   it 'returns nil if asked for a machine that does not exist' do
     find("no-exist").should eql(nil)
@@ -416,7 +411,6 @@ describe Stacks::DSL do
         enable_nat
       end
     end
-
 
     env "eg", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "frontexample"
@@ -478,32 +472,32 @@ describe Stacks::DSL do
     sub_nat = find("sub-nat-001.mgmt.st.net.local")
     sub_nat.to_enc.should eql(
       {
-      'role::natserver' => {
-      'rules' => {
-        'SNAT' => {
-          'prod' => {
-            'to_source' => 'nat-vip.front.st.net.local'
-           }
-         },
-        'DNAT' => {
-           'sub-blahnat-vip.front.st.net.local 8008' => {
-             'dest_host'  => 'sub-blahnat-vip.st.net.local',
-             'dest_port'  => '8008',
-             "tcp" => "true",
-             "udp" => "false"
-           },
-           "sub-defaultport-vip.front.st.net.local 8000" => {
-              "dest_port" => "8000",
-              "dest_host" => "sub-defaultport-vip.st.net.local",
-              "tcp" => "true",
-              "udp" => "false"
-           }
-         }
-    },
-      'prod_virtual_router_id' => 106,
-      'front_virtual_router_id' => 105
-    }
-    }
+        'role::natserver' => {
+          'rules' => {
+            'SNAT' => {
+              'prod' => {
+                'to_source' => 'nat-vip.front.st.net.local'
+              }
+            },
+            'DNAT' => {
+              'sub-blahnat-vip.front.st.net.local 8008' => {
+                'dest_host'  => 'sub-blahnat-vip.st.net.local',
+                'dest_port'  => '8008',
+                "tcp" => "true",
+                "udp" => "false"
+              },
+              "sub-defaultport-vip.front.st.net.local 8000" => {
+                "dest_port" => "8000",
+                "dest_host" => "sub-defaultport-vip.st.net.local",
+                "tcp" => "true",
+                "udp" => "false"
+              }
+            }
+          },
+          'prod_virtual_router_id' => 106,
+          'front_virtual_router_id' => 105
+        }
+      }
     )
   end
 
@@ -618,7 +612,6 @@ describe Stacks::DSL do
         }
       }
     )
-
   end
 
   it 'can generate the correct enc data for sftp servers' do
@@ -651,7 +644,6 @@ describe Stacks::DSL do
         }
       }
     )
-
   end
 
   it 'can be converted to an array of machine_defs (actual machines)' do
@@ -677,8 +669,8 @@ describe Stacks::DSL do
     end
 
     find("e1-s3proxy-001.mgmt.space.net.local").to_enc.should eql({
-      'role::rate_limited_forward_proxy' => {}
-    })
+                                                                    'role::rate_limited_forward_proxy' => {}
+                                                                  })
 
     find("e1-s3proxy-001.mgmt.space.net.local").networks.should eql([:mgmt, :prod])
   end
@@ -772,5 +764,4 @@ describe Stacks::DSL do
     server.to_enc['test::puppet::class'].should eql({ 'test_key' => 'test_value' })
     server.to_enc['test::puppet::class2'].should eql({ 'test_key2' => 'test_value2' })
   end
-
 end

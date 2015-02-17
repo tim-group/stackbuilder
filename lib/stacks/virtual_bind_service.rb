@@ -171,6 +171,7 @@ module Stacks::VirtualBindService
   end
 
   private
+
   def realserver_fqdns(net)
     self.realservers.map { |server| server.qualified_hostname(net) }.sort
   end

@@ -90,19 +90,16 @@ def sbtask(name, &block)
   end
 end
 
-
 @@subscription = Subscription.new()
 @@subscription.start(["provision.*", "puppet_status"])
 
 namespace :sbx do
-
   def ram_stats_to_string(ram_stats)
     used = ram_stats[:allocated_ram]
     total = ram_stats[:host_ram]
     used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s.rjust(3)}%" rescue 0
     { 'memory(GB)'.to_sym => "#{used}/#{total} #{used_percentage}" }
   end
-
 
   def storage_stats_to_string(storage_stats)
     storage_stats.inject({}) do |stats, (storage_type, value_hash)|
@@ -139,7 +136,6 @@ namespace :sbx do
     include Collimator
     require 'set'
     all_headers = data.inject(Set.new) do |all_headers, (fqdn, header)|
-
       all_headers.merge(header.keys)
       all_headers
     end
@@ -224,7 +220,6 @@ namespace :sbx do
   require 'set'
   machine_names = Set.new
   environment.accept do |machine_def|
-
     namespace machine_def.name.to_sym do
       RSpec::Core::Runner.disable_autorun!
       raise "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. Look for a stack that has the same name as the server being created.\neg.\n stack '#{machine_def.name}' do\n  app '#{machine_def.name}" if machine_names.include?("#{machine_def.environment.name}:#{machine_def.name}")
@@ -357,7 +352,6 @@ namespace :sbx do
         logger.info "all nodes found in mcollective #{hosts.size}"
       end
 
-
       def timed_out(start_time, timeout)
         return (now - start_time) > timeout
       end
@@ -412,7 +406,6 @@ namespace :sbx do
             end
           end
         end
-
 
         desc "wait for puppet to complete its run on these machines"
         sbtask :wait do
@@ -477,7 +470,6 @@ namespace :sbx do
             end
           end
         end
-
       end
 
       desc "clean away all traces of these machines"
@@ -541,7 +533,6 @@ namespace :sbx do
         end
       end
 
-
       sbtask :showvnc do
         hosts = []
         machine_def.accept do |child|
@@ -575,7 +566,6 @@ namespace :sbx do
       namespace :orc do
         desc "deploys the up2date version of the artifact according to the cmdb using orc"
         sbtask :resolve do
-
           machine_def.accept do |child_machine_def|
             if child_machine_def.kind_of? Stacks::AppService
               app_service = child_machine_def

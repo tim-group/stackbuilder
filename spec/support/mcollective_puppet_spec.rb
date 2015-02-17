@@ -21,11 +21,9 @@ class Support::MCollectivePuppet_Test
   def now
     @callouts.now()
   end
-
 end
 
 describe Support::MCollectivePuppet do
-
   before :each do
     @callouts = double
     @mco = double
@@ -282,5 +280,4 @@ describe Support::MCollectivePuppet do
 
     @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
   end
-
 end

@@ -24,7 +24,6 @@ module Stacks::Core::Actions
           services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
         end
       end
-
     end
 
     object.action 'launch' do |services, machine_def|

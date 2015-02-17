@@ -15,7 +15,6 @@ module Stacks::Gold
       self.instance_eval(&@config_block)
       bind_children(environment)
     end
-
   end
 
   def bind_children(environment)
@@ -37,7 +36,6 @@ module Stacks::Gold
   end
 end
 
-
 class Stacks::Gold::WinNode < Stacks::MachineDef
   attr_reader :options
 
@@ -54,28 +52,28 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
   def to_spec
     spec = super
     modify_storage({ '/'.to_sym => {
-      :prepare => {
-        :options => {
-          :create_in_fstab => false,
-          :path   => "#{options[:master_location]}#{options[:master_image_file]}",
-          :resize => false,
-        }
-      }
-    } })
+                     :prepare => {
+                       :options => {
+                         :create_in_fstab => false,
+                         :path   => "#{options[:master_location]}#{options[:master_image_file]}",
+                         :resize => false,
+                       }
+                     }
+                   } })
     case @win_version
     when 'win7'
       modify_storage({ '/'.to_sym => {
-        :size => '15G'
-      } })
+                       :size => '15G'
+                     } })
     when 'xp'
       modify_storage({ '/'.to_sym => {
-        :size => '8G',
-        :prepare => {
-          :options => {
-            :virtio => false
-          }
-        }
-      } })
+                       :size => '8G',
+                       :prepare => {
+                         :options => {
+                           :virtio => false
+                         }
+                       }
+                     } })
     else
       raise "Unkown version of Windows: #{win_version}"
     end
@@ -85,7 +83,6 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
   end
 end
 
-
 class Stacks::Gold::UbuntuNode < Stacks::MachineDef
   attr_reader :options
 
@@ -94,16 +91,16 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
     @ubuntu_version = ubuntu_version
     @options = options
     modify_storage({ '/'.to_sym => {
-      :prepare => {
-        :method =>  'format',
-        :options => {
-          :resize => false,
-          :create_in_fstab => false,
-          :type => 'ext4',
-          :shrink_after_unmount => true,
-        }
-      }
-    } })
+                     :prepare => {
+                       :method =>  'format',
+                       :options => {
+                         :resize => false,
+                         :create_in_fstab => false,
+                         :type => 'ext4',
+                         :shrink_after_unmount => true,
+                       }
+                     }
+                   } })
   end
 
   def bind_to(environment)
@@ -117,5 +114,4 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
     spec[:storage]['/'.to_sym][:prepare][:options].delete(:path)
     spec
   end
-
 end

@@ -136,6 +136,7 @@ class Stacks::Stack
   def debrepo(name, &block)
     machineset_with(name, [], Stacks::DebRepo, &block)
   end
+
   def debrepo_mirror(name, &block)
     machineset_with(name, [], Stacks::DebRepoMirror, &block)
   end
@@ -161,6 +162,7 @@ class Stacks::Stack
   end
 
   private
+
   def machineset_with(name, extends, type, &block)
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend(Stacks::MachineGroup)

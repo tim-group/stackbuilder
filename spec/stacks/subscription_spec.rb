@@ -2,7 +2,6 @@ require 'stacks/subscription'
 require 'securerandom'
 
 describe Subscription do
-
   RSpec::Matchers.define :have_messages_for_hosts do |expected|
     match do |actual|
       actual_hosts = actual.map { |hash| hash["host"] }
@@ -79,11 +78,10 @@ describe Subscription do
     result.unaccounted_for.should eql(["c"])
 
     result.all.should eql({
-      "a" => "success",
-      "b" =>  "failed",
-      "c" =>  "unaccounted_for"
-    })
+                            "a" => "success",
+                            "b" =>  "failed",
+                            "c" =>  "unaccounted_for"
+                          })
     result.all_passed?.should eql(false)
   end
-
 end

@@ -104,5 +104,4 @@ describe_stack 'selenium' do
     host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
     host.to_spec[:selenium_version].should eql '2.41.0'
   end
-
 end

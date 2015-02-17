@@ -106,6 +106,7 @@ module Stacks::VirtualService
   end
 
   private
+
   def lb_config
     fewest_servers_in_a_group = self.realservers.size
     grouped_realservers = self.realservers.group_by do |realserver|
@@ -132,5 +133,4 @@ module Stacks::VirtualService
       }
     }
   end
-
 end

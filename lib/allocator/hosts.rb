@@ -15,6 +15,7 @@ class StackBuilder::Allocator::Hosts
   end
 
   public
+
   def do_allocation(specs)
     allocated_machines = Hash[hosts.map do |host|
       host.allocated_machines.map do |machine|
@@ -33,6 +34,7 @@ class StackBuilder::Allocator::Hosts
   end
 
   private
+
   def find_suitable_host_for(machine)
     allocation_denials = []
 
@@ -56,6 +58,7 @@ class StackBuilder::Allocator::Hosts
   end
 
   private
+
   def unallocated_machines(machines)
     allocated_machines = []
     hosts.each do |host|
@@ -68,6 +71,7 @@ class StackBuilder::Allocator::Hosts
   end
 
   public
+
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
 
@@ -85,5 +89,4 @@ class StackBuilder::Allocator::Hosts
 
     return_map
   end
-
 end

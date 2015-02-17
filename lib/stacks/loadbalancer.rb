@@ -1,7 +1,6 @@
 require 'stacks/namespace'
 
 class Stacks::LoadBalancer < Stacks::MachineDef
-
   attr_accessor :virtual_router_id
 
   def initialize(virtual_service, index, &block)

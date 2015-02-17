@@ -6,7 +6,6 @@ require 'stacks/namespace'
 
 module Support
   module Nagios
-
     class Service
       def initialize(options = {})
         @service = options[:service] ||  Nagios::Service::Http.new(options)
@@ -27,7 +26,6 @@ module Support
           callback.invoke :success, { :machine => machine.hostname, :result => response }
         end
       end
-
     end
 
     class Service::Http

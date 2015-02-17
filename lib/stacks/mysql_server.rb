@@ -2,7 +2,6 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::MysqlServer < Stacks::MachineDef
-
   attr_accessor :master
 
   def initialize(base_hostname, virtual_service, role, index, &block)
@@ -44,15 +43,15 @@ class Stacks::MysqlServer < Stacks::MachineDef
 
   def create_persistent_storage_override
     modify_storage({
-      '/mnt/data' => {
-         :persistence_options => { :on_storage_not_found => :create_new }
-      }
-    })
+                     '/mnt/data' => {
+                       :persistence_options => { :on_storage_not_found => :create_new }
+                     }
+                   })
     modify_storage({
-      '/mnt/storage' => {
-         :persistence_options => { :on_storage_not_found => :create_new }
-      }
-    }) if backup?
+                     '/mnt/storage' => {
+                       :persistence_options => { :on_storage_not_found => :create_new }
+                     }
+                   }) if backup?
   end
 
   def master?
@@ -91,9 +90,9 @@ class Stacks::MysqlServer < Stacks::MachineDef
 
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::mysql_server'].merge!({
-        'dependencies' => @virtual_service.dependency_config,
-        'dependant_instances' => dependant_instances,
-      })
+                                         'dependencies' => @virtual_service.dependency_config,
+                                         'dependant_instances' => dependant_instances,
+                                       })
       unless backup?
         enc.merge!(@virtual_service.dependant_instance_mysql_rights)
       end
@@ -111,5 +110,4 @@ class Stacks::MysqlServer < Stacks::MachineDef
     end
     enc
   end
-
 end

@@ -2,7 +2,6 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::LegacyMysqlDBServer < Stacks::MachineDef
-
   def initialize(virtual_service, index, &block)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
@@ -22,7 +21,6 @@ class Stacks::LegacyMysqlDBServer < Stacks::MachineDef
     @destroyable = false
   end
 
-
   def to_enc()
     enc = {
       'role::databaseserver' => {
@@ -37,12 +35,11 @@ class Stacks::LegacyMysqlDBServer < Stacks::MachineDef
     dependant_instances = @virtual_service.dependant_machine_def_fqdns
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::databaseserver'].merge!({
-        'dependencies' => @virtual_service.dependency_config,
-        'dependant_instances' => dependant_instances,
-      })
+                                           'dependencies' => @virtual_service.dependency_config,
+                                           'dependant_instances' => dependant_instances,
+                                         })
       enc.merge!(@virtual_service.dependant_instance_mysql_rights)
     end
     enc
   end
-
 end

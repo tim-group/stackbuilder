@@ -1,7 +1,6 @@
 require 'stacks/environment'
 
 describe 'Stacks::VirtualService' do
-
   before do
     extend Stacks::DSL
   end
@@ -17,8 +16,8 @@ describe 'Stacks::VirtualService' do
 
     vip_spec = find('env-myvs-001.mgmt.mars.net.local').virtual_service.to_vip_spec
     vip_spec[:qualified_hostnames].should eql({
-      :prod => 'env-myvs-vip.mars.net.local'
-    })
+                                                :prod => 'env-myvs-vip.mars.net.local'
+                                              })
   end
 
   it 'provides the both front and prod vips when if enable_nat is turned on' do
@@ -34,9 +33,9 @@ describe 'Stacks::VirtualService' do
 
     vip_spec = find('env-myvs-001.mgmt.mars.net.local').virtual_service.to_vip_spec
     vip_spec[:qualified_hostnames].should eql({
-      :prod  => 'env-myvs-vip.mars.net.local',
-      :front => 'env-myvs-vip.front.mars.net.local'
-    })
+                                                :prod  => 'env-myvs-vip.mars.net.local',
+                                                :front => 'env-myvs-vip.front.mars.net.local'
+                                              })
   end
 
   it 'allows a virtual service to add a vip on additional networks' do
@@ -52,8 +51,8 @@ describe 'Stacks::VirtualService' do
 
     vip_spec = find('env-myvs-001.mgmt.mars.net.local').virtual_service.to_vip_spec
     vip_spec[:qualified_hostnames].should eql({
-      :prod => 'env-myvs-vip.mars.net.local',
-      :mgmt => 'env-myvs-vip.mgmt.mars.net.local'
-    })
+                                                :prod => 'env-myvs-vip.mars.net.local',
+                                                :mgmt => 'env-myvs-vip.mgmt.mars.net.local'
+                                              })
   end
 end

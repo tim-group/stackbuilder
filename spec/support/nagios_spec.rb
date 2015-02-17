@@ -4,7 +4,6 @@ require 'support/nagios'
 
 describe Support::Nagios::Service do
   class MockService
-
     def schedule_downtime(machine, duration)
       "OK"
     end
@@ -48,22 +47,19 @@ describe Support::Nagios::Service do
     end
     success.should eql 2
   end
-
 end
 
 describe Support::Nagios::Service::Http do
-
   class NagiosServiceHttpTest  < WebTestFramework::SimpleTest
-
     def invoke_test_server_with_fixture_and_create_service(fixture_file, port = '5152')
       setup_test_server_with_fixture(fixture_file)
       Support::Nagios::Service::Http.new({
-        :nagios_servers => {
-          'oy' => 'localhost',
-          'pg' => 'localhost',
-         },
-        :nagios_api_port => 5152
-     })
+                                           :nagios_servers => {
+                                             'oy' => 'localhost',
+                                             'pg' => 'localhost',
+                                           },
+                                           :nagios_api_port => 5152
+                                         })
     end
 
     def fixture_path
@@ -114,5 +110,4 @@ describe Support::Nagios::Service::Http do
     service = @test.invoke_test_server_with_fixture_and_create_service('downtime_cancelled_none_found')
     service.cancel_downtime(test_machine_in_me).should eql('skipping env-test - No nagios server found for me')
   end
-
 end

@@ -41,26 +41,26 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     enc = host.to_enc
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should eql([
-        'mgmt.oy.net.local',
-        'oy.net.local',
-        'front.oy.net.local',
+      'mgmt.oy.net.local',
+      'oy.net.local',
+      'front.oy.net.local',
     ])
     enc['role::bind_server']['slave_zones'].should eql({
-      'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local']
-    })
+                                                         'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local']
+                                                       })
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
     enc['role::bind_server']['dependant_instances'].should include(
-        'pg-ns-001.mgmt.pg.net.local',
-        'pg-ns-002.mgmt.pg.net.local',
-        'oy-ns-002.mgmt.oy.net.local'
+      'pg-ns-001.mgmt.pg.net.local',
+      'pg-ns-002.mgmt.pg.net.local',
+      'oy-ns-002.mgmt.oy.net.local'
     )
     enc['role::bind_server']['dependant_instances'].size.should eql(3)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'oy-lb-001.mgmt.oy.net.local',
-        'oy-lb-001.oy.net.local',
-        'oy-lb-002.mgmt.oy.net.local',
-        'oy-lb-002.oy.net.local'
+      'oy-lb-001.mgmt.oy.net.local',
+      'oy-lb-001.oy.net.local',
+      'oy-lb-002.mgmt.oy.net.local',
+      'oy-lb-002.oy.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
@@ -70,9 +70,9 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'],
-      'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local']
-    })
+                                                         'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'],
+                                                         'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local']
+                                                       })
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
     enc['role::bind_server']['dependant_instances'].should include(
@@ -81,10 +81,10 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     )
     enc['role::bind_server']['dependant_instances'].size.should eql(2)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'oy-lb-001.mgmt.oy.net.local',
-        'oy-lb-001.oy.net.local',
-        'oy-lb-002.mgmt.oy.net.local',
-        'oy-lb-002.oy.net.local'
+      'oy-lb-001.mgmt.oy.net.local',
+      'oy-lb-001.oy.net.local',
+      'oy-lb-002.mgmt.oy.net.local',
+      'oy-lb-002.oy.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
@@ -99,21 +99,21 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       'front.pg.net.local',
     ])
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
-    })
+                                                         'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
+                                                       })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
     enc['role::bind_server']['dependant_instances'].should include(
-        'pg-ns-002.mgmt.pg.net.local',
-        'oy-ns-001.mgmt.oy.net.local',
-        'oy-ns-002.mgmt.oy.net.local'
+      'pg-ns-002.mgmt.pg.net.local',
+      'oy-ns-001.mgmt.oy.net.local',
+      'oy-ns-002.mgmt.oy.net.local'
     )
     enc['role::bind_server']['dependant_instances'].size.should eql(3)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'pg-lb-001.mgmt.pg.net.local',
-        'pg-lb-001.pg.net.local',
-        'pg-lb-002.mgmt.pg.net.local',
-        'pg-lb-002.pg.net.local'
+      'pg-lb-001.mgmt.pg.net.local',
+      'pg-lb-001.pg.net.local',
+      'pg-lb-002.mgmt.pg.net.local',
+      'pg-lb-002.pg.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
@@ -124,25 +124,25 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => [
-         'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'
-      ],
-      'pg-ns-001.mgmt.pg.net.local' => [
-         'mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local'
-      ]
-    })
+                                                         'oy-ns-001.mgmt.oy.net.local' => [
+                                                           'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'
+                                                         ],
+                                                         'pg-ns-001.mgmt.pg.net.local' => [
+                                                           'mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local'
+                                                         ]
+                                                       })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
     enc['role::bind_server']['dependant_instances'].should include(
-        'pg-ns-001.mgmt.pg.net.local',
-        'oy-ns-001.mgmt.oy.net.local'
+      'pg-ns-001.mgmt.pg.net.local',
+      'oy-ns-001.mgmt.oy.net.local'
     )
     enc['role::bind_server']['dependant_instances'].size.should eql(2)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'pg-lb-001.mgmt.pg.net.local',
-        'pg-lb-001.pg.net.local',
-        'pg-lb-002.mgmt.pg.net.local',
-        'pg-lb-002.pg.net.local'
+      'pg-lb-001.mgmt.pg.net.local',
+      'pg-lb-001.pg.net.local',
+      'pg-lb-002.mgmt.pg.net.local',
+      'pg-lb-002.pg.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
@@ -186,24 +186,24 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc = host.to_enc
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should eql([
-        'mgmt.oy.net.local',
-        'oy.net.local',
-        'front.oy.net.local',
+      'mgmt.oy.net.local',
+      'oy.net.local',
+      'front.oy.net.local',
     ])
     enc['role::bind_server'].should_not have_key('slave_zones')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
     enc['role::bind_server']['dependant_instances'].should include(
-        'pg-ns-001.mgmt.pg.net.local',
-        'pg-ns-002.mgmt.pg.net.local',
-        'oy-ns-002.mgmt.oy.net.local'
+      'pg-ns-001.mgmt.pg.net.local',
+      'pg-ns-002.mgmt.pg.net.local',
+      'oy-ns-002.mgmt.oy.net.local'
     )
     enc['role::bind_server']['dependant_instances'].size.should eql(3)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'oy-lb-001.mgmt.oy.net.local',
-        'oy-lb-001.oy.net.local',
-        'oy-lb-002.mgmt.oy.net.local',
-        'oy-lb-002.oy.net.local'
+      'oy-lb-001.mgmt.oy.net.local',
+      'oy-lb-001.oy.net.local',
+      'oy-lb-002.mgmt.oy.net.local',
+      'oy-lb-002.oy.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
     Resolv.stub(:getaddress).with('oy-ns-002.mgmt.oy.net.local').and_return('4.3.2.1')
@@ -216,16 +216,16 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
-    })
+                                                         'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
+                                                       })
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.oy.net.local')
     enc['role::bind_server']['dependant_instances'].should eql(['oy-ns-001.mgmt.oy.net.local'])
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'oy-lb-001.mgmt.oy.net.local',
-        'oy-lb-001.oy.net.local',
-        'oy-lb-002.mgmt.oy.net.local',
-        'oy-lb-002.oy.net.local'
+      'oy-lb-001.mgmt.oy.net.local',
+      'oy-lb-001.oy.net.local',
+      'oy-lb-002.mgmt.oy.net.local',
+      'oy-lb-002.oy.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
     Resolv.stub(:getaddress).with('oy-ns-001.mgmt.oy.net.local').and_return('1.2.3.4')
@@ -242,20 +242,20 @@ describe_stack 'nameservers with single slave_from dependency' do
       'front.pg.net.local',
     ])
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
-    })
+                                                         'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
+                                                       })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
     enc['role::bind_server']['dependant_instances'].should include(
-        'pg-ns-002.mgmt.pg.net.local',
-        'oy-ns-001.mgmt.oy.net.local'
+      'pg-ns-002.mgmt.pg.net.local',
+      'oy-ns-001.mgmt.oy.net.local'
     )
     enc['role::bind_server']['dependant_instances'].size.should eql(2)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'pg-lb-001.mgmt.pg.net.local',
-        'pg-lb-001.pg.net.local',
-        'pg-lb-002.mgmt.pg.net.local',
-        'pg-lb-002.pg.net.local'
+      'pg-lb-001.mgmt.pg.net.local',
+      'pg-lb-001.pg.net.local',
+      'pg-lb-002.mgmt.pg.net.local',
+      'pg-lb-002.pg.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
   end
@@ -266,32 +266,32 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::bind_server']['master_zones'].should be_nil
     enc['role::bind_server']['slave_zones'].should eql({
-      'oy-ns-001.mgmt.oy.net.local' => [
-         'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'
-      ],
-      'pg-ns-001.mgmt.pg.net.local' => [
-         'mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local'
-      ]
-    })
+                                                         'oy-ns-001.mgmt.oy.net.local' => [
+                                                           'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'
+                                                         ],
+                                                         'pg-ns-001.mgmt.pg.net.local' => [
+                                                           'mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local'
+                                                         ]
+                                                       })
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.mgmt.pg.net.local')
     enc['role::bind_server']['vip_fqdns'].should include('pg-ns-vip.pg.net.local')
     enc['role::bind_server']['dependant_instances'].should include(
-        'pg-ns-001.mgmt.pg.net.local',
-        'oy-ns-001.mgmt.oy.net.local'
+      'pg-ns-001.mgmt.pg.net.local',
+      'oy-ns-001.mgmt.oy.net.local'
     )
     enc['role::bind_server']['dependant_instances'].size.should eql(2)
     enc['role::bind_server']['participation_dependant_instances'].should eql([
-        'pg-lb-001.mgmt.pg.net.local',
-        'pg-lb-001.pg.net.local',
-        'pg-lb-002.mgmt.pg.net.local',
-        'pg-lb-002.pg.net.local'
+      'pg-lb-001.mgmt.pg.net.local',
+      'pg-lb-001.pg.net.local',
+      'pg-lb-002.mgmt.pg.net.local',
+      'pg-lb-002.pg.net.local'
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
     host.to_spec[:networks].should be_eql([:mgmt, :prod])
     host.to_spec[:qualified_hostnames].should eql({
-      :prod => 'pg-ns-002.pg.net.local',
-      :mgmt => 'pg-ns-002.mgmt.pg.net.local',
-    })
+                                                    :prod => 'pg-ns-002.pg.net.local',
+                                                    :mgmt => 'pg-ns-002.mgmt.pg.net.local',
+                                                  })
   end
 end
 

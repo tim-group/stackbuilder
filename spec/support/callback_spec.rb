@@ -1,7 +1,6 @@
 require 'support/callback'
 
 describe Support::Callback do
-
   it 'allows callbacks to be passed in and executed by the subject code' do
     event_called = false
     callback = Support::Callback.new do
@@ -35,5 +34,4 @@ describe Support::Callback do
 
     passed_args.should eql(["foo", "bar"])
   end
-
 end

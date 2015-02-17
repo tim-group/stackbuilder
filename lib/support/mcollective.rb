@@ -13,7 +13,6 @@ module Support
 
     class MCollectiveFabricRunner
       def initialize(options)
-
         if options.has_key? :key
           ::MCollective::PluginManager.clear()
           @config = ::MCollective::Config.instance()
@@ -76,6 +75,7 @@ module Support
     end
 
     private
+
     def create_fabric_runner(options)
       return MCollectiveFabricRunner.new(options)
     end

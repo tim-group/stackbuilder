@@ -26,5 +26,4 @@ describe_stack 'stack-with-dependencies' do
       'oy-mon-001.oy.net.local'
     ])
   end
-
 end

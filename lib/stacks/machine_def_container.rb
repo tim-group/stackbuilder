@@ -49,5 +49,4 @@ module Stacks::MachineDefContainer
   def [](key)
     return @definitions[key]
   end
-
 end

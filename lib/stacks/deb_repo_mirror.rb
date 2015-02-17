@@ -2,7 +2,6 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::DebRepoMirror < Stacks::MachineDef
-
   attr_accessor :cnames
   def initialize(virtual_service, index)
     @virtual_service = virtual_service

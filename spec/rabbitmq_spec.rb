@@ -25,5 +25,4 @@ describe_stack 'mongodb' do
     host.to_enc['role::rabbitmq_server']['dependencies'].should eql({})
     host.to_enc.has_key?('server::default_new_mgmt_net_local').should eql true
   end
-
 end

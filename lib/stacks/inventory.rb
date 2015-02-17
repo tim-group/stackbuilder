@@ -1,5 +1,4 @@
 class Stacks::Inventory
-
   def initialize(stack_dir)
     @stacks = Object.new
     @stacks.extend Stacks::DSL
@@ -24,5 +23,4 @@ class Stacks::Inventory
   def find_environment(name)
     return @stacks.find_environment(name)
   end
-
 end

@@ -33,7 +33,6 @@ end
 module Stacks::Matchers
   RSpec::Matchers.define :have_ancestory do |expected_ancestory|
     match do |server|
-
       traversal = stacks.environments[expected_ancestory.shift]
 
       expected_ancestory.each do |ancestor|

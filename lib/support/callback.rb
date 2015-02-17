@@ -40,5 +40,4 @@ class Support::Callback
       end
     end
   end
-
 end

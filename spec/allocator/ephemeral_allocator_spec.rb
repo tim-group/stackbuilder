@@ -45,5 +45,4 @@ describe StackBuilder::Allocator::EphemeralAllocator do
         'h2' => [candidate_machine_2]
     })
   end
-
 end

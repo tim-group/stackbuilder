@@ -1,7 +1,6 @@
 require 'allocator/namespace'
 
 class StackBuilder::Allocator::EphemeralAllocator
-
   def initialize(options)
     @host_repository = options[:host_repository]
   end
