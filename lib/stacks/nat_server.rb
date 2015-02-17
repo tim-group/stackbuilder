@@ -18,9 +18,7 @@ class Stacks::NatServer < Stacks::MachineDef
   def find_nat_rules
     rules = []
     environment.accept do |node|
-      if node.environment.nil?
-        puts node.name
-      end
+      puts node.name if node.environment.nil?
       unless node.environment.contains_node_of_type?(Stacks::NatServer) && environment != node.environment
         if node.respond_to? :nat
           rules =  rules.concat node.nat_rules if node.nat

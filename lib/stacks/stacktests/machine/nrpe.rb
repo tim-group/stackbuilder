@@ -14,9 +14,7 @@ shared_examples_for "nrpe" do |machine|
   unless commands.nil? || commands[0].nil?
     commands[0].each do |command, command_result|
       it "#{command}" do
-        if (command_result[:exitcode] != 0)
-          fail(command_result[:output])
-        end
+        fail(command_result[:output]) if command_result[:exitcode] != 0
       end
     end
   end

@@ -43,9 +43,7 @@ module Stacks::MachineGroup
     @instances.times do |i|
       index = sprintf("%03d", i + 1)
       @definitions["#{name}-#{index}"] = server = @type.new(self, index, &@config_block)
-      if server.respond_to?(:group)
-        server.group = groups[i % groups.size]
-      end
+      server.group = groups[i % groups.size] if server.respond_to?(:group)
 
       if server.respond_to?(:availability_group)
         server.availability_group = availability_group(environment)

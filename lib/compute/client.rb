@@ -89,9 +89,7 @@ class Compute::Client
 
     mco_client("computenode", client_options) do |mco|
       mco.send(selector, :specs => specs).map do |node|
-        if node[:statuscode] != 0
-          raise node[:statusmsg]
-        end
+        raise node[:statusmsg] if node[:statuscode] != 0
         [node.results[:sender], node.results[:data]]
       end
     end

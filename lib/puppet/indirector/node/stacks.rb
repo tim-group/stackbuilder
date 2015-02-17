@@ -16,9 +16,7 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
     machine = @stacks_inventory.find(request.key)
     if machine
       classes = machine.to_enc
-      if classes
-        node.classes = classes
-      end
+      node.classes = classes if classes
       node.parameters['logicalenv'] = machine.environment.name
     end
     node

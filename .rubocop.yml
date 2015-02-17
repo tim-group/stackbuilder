@@ -177,11 +177,6 @@ Style/FormatString:
 Style/GuardClause:
   Enabled: false
 
-# Offense count: 15
-# Configuration parameters: MaxLineLength.
-Style/IfUnlessModifier:
-  Enabled: false
-
 # Offense count: 65
 # Cop supports --auto-correct.
 Style/MethodCallParentheses:

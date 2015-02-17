@@ -22,9 +22,7 @@ module Stacks::MachineDefContainer
   def flatten
     list = []
     accept do |m|
-      if m.respond_to?(:to_spec)
-        list << m
-      end
+      list << m if m.respond_to?(:to_spec)
     end
     list
   end

@@ -270,9 +270,7 @@ namespace :sbx do
         hosts.hosts.each do |host|
           pp host.fqdn
           host.allocated_machines.each do |machine|
-            unless machine.nil?
-              puts "\t #{machine.mgmt_fqdn}"
-            end
+            puts "\t #{machine.mgmt_fqdn}" unless machine.nil?
           end
         end
       end
@@ -534,9 +532,7 @@ namespace :sbx do
       sbtask :showvnc do
         hosts = []
         machine_def.accept do |child|
-          if child.kind_of? Stacks::MachineDef
-            hosts << child.name
-          end
+          hosts << child.name if child.kind_of? Stacks::MachineDef
         end
         mco_client("libvirt") do |mco|
           mco.fact_filter "domain=/(st|ci)/"
