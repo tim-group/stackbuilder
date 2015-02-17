@@ -81,7 +81,7 @@ module StackBuilder::Allocator::HostPolicies
             when :raise_error
               underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
               type = attributes[:type]
-              unless host.storage.has_key?(type)
+              if !host.storage.has_key?(type)
                 persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
                 persistent_storage_not_found[type] << underscore_name
               else
@@ -121,7 +121,7 @@ module StackBuilder::Allocator::HostPolicies
       end
       storage_without_enough_space = required_space_hash.inject({}) do |result, (type, required_space)|
         host_storage_type = host.storage[type] rescue nil
-        unless host_storage_type.nil?
+        if !host_storage_type.nil?
           available_space = KB_to_GB(host_storage_type[:free])
           if required_space > available_space
             result[type] = { :available_space => available_space, :required_space => required_space }
