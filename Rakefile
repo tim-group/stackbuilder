@@ -6,8 +6,8 @@ require 'rspec/core/rake_task'
 require 'fpm'
 
 desc "Run specs"
-RSpec::Core::RakeTask.new() do |t|
-  t.rspec_opts = %w[--color]
+RSpec::Core::RakeTask.new do |t|
+  t.rspec_opts = %w(--color)
   t.pattern = "spec/**/*_spec.rb"
 end
 
@@ -25,7 +25,8 @@ task :package do
   sh "mkdir -p build/usr/local/bin"
   sh "cp bin/* build/usr/local/bin"
 
-  sh "fpm -s dir -t deb --architecture all -C build --name stacks --version #{version} --deb-pre-depends rubygem-collimator"
+  sh "fpm -s dir -t deb --architecture all -C build --name stacks "\
+     "--version #{version} --deb-pre-depends rubygem-collimator"
 end
 
 desc "Create a debian package"
