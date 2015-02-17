@@ -32,7 +32,7 @@ describe_stack 'lb' do
       "realservers" => {
         "blue" => ["e1-frapp-001.space.net.local", "e1-frapp-002.space.net.local"]
       },
-        "healthcheck_timeout" => 10
+      "healthcheck_timeout" => 10
     })
     host.to_enc['routes'].should eql({
       "to" => ["mgmt_pg_from_mgmt_oy"]

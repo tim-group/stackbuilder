@@ -23,17 +23,17 @@ describe Stacks::DSL do
 
     env "parent", :primary_site => "st", :secondary_site => "bs" do
       env "e1", :lb_virtual_router_id => 1,
-        :nat_front_virtual_router_id => 40,
-        :nat_prod_virtual_router_id => 41,
-        :primary_site => "space" do
-          instantiate_stack "fabric"
-        end
+                :nat_front_virtual_router_id => 40,
+                :nat_prod_virtual_router_id => 41,
+                :primary_site => "space" do
+        instantiate_stack "fabric"
+      end
 
       env "e2", :lb_virtual_router_id => 2,
-        :nat_front_virtual_router_id => 42,
-        :nat_prod_virtual_router_id => 43 do
-          instantiate_stack "fabric"
-        end
+                :nat_front_virtual_router_id => 42,
+                :nat_prod_virtual_router_id => 43 do
+        instantiate_stack "fabric"
+      end
     end
 
     find("e1-lb-001.mgmt.space.net.local").virtual_router_id.should eql(1)
@@ -101,17 +101,17 @@ describe Stacks::DSL do
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
       { "role::loadbalancer" =>         { "virtual_router_id" => 1,
-          "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
-            "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
-              "env" => "st",
-              "app" => nil,
-              "monitor_warn" => 1 },
-         "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
-              "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
-                "blue" => ["st-oneapp-001.st.net.local"] },
-                "env" => "st",
-                "app" => nil,
-                "monitor_warn" => 0,
+                                          "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
+                                                                                                                     "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
+                                                                                                                     "env" => "st",
+                                                                                                                     "app" => nil,
+                                                                                                                     "monitor_warn" => 1 },
+                                                                         "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
+                                                                                                                       "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
+                                                                                                                                                        "blue" => ["st-oneapp-001.st.net.local"] },
+                                                                                                                       "env" => "st",
+                                                                                                                       "app" => nil,
+                                                                                                                       "monitor_warn" => 0,
               }
         }
         }
@@ -143,18 +143,18 @@ describe Stacks::DSL do
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
       { "role::loadbalancer" =>         { "virtual_router_id" => 1,
-          "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
-            "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
-              "env" => "st",
-              "app" => nil,
-              "monitor_warn" => 1 },
-         "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
-              "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
-                "blue" => ["st-oneapp-001.st.net.local"] },
-                "env" => "st",
-                "app" => nil,
-                "monitor_warn" => 0,
-                "healthcheck_timeout" => 999
+                                          "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
+                                                                                                                     "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
+                                                                                                                     "env" => "st",
+                                                                                                                     "app" => nil,
+                                                                                                                     "monitor_warn" => 1 },
+                                                                         "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
+                                                                                                                       "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
+                                                                                                                                                        "blue" => ["st-oneapp-001.st.net.local"] },
+                                                                                                                       "env" => "st",
+                                                                                                                       "app" => nil,
+                                                                                                                       "monitor_warn" => 0,
+                                                                                                                       "healthcheck_timeout" => 999
               }
         }
         }
@@ -278,9 +278,9 @@ describe Stacks::DSL do
       'ci-app2x-vip.st.net.local' => {
          'healthcheck_timeout' => 10,
          'monitor_warn' => 1,
-        'env' => 'ci',
-      'app' => 'MySuperCoolApp',
-      'realservers' => {
+         'env' => 'ci',
+         'app' => 'MySuperCoolApp',
+         'realservers' => {
       'blue' => [
         'ci-app2x-001.st.net.local',
         'ci-app2x-002.st.net.local'
@@ -485,14 +485,14 @@ describe Stacks::DSL do
             'to_source' => 'nat-vip.front.st.net.local'
            }
          },
-         'DNAT' => {
+        'DNAT' => {
            'sub-blahnat-vip.front.st.net.local 8008' => {
              'dest_host'  => 'sub-blahnat-vip.st.net.local',
              'dest_port'  => '8008',
-              "tcp" => "true",
-              "udp" => "false"
+             "tcp" => "true",
+             "udp" => "false"
            },
-            "sub-defaultport-vip.front.st.net.local 8000" => {
+           "sub-defaultport-vip.front.st.net.local 8000" => {
               "dest_port" => "8000",
               "dest_host" => "sub-defaultport-vip.st.net.local",
               "tcp" => "true",
@@ -558,7 +558,7 @@ describe Stacks::DSL do
                 '/' => "http://env-refapp-vip.st.net.local:8000"
               },
               'redirects'      => ['old-example.timgroup.com'],
-             'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
+              'aliases'        => ['example.timgroup.com', 'env-refproxy-vip.st.net.local'],
               'type' => 'default',
               'vhost_properties' => {},
               'cert' => 'wildcard_timgroup_com'

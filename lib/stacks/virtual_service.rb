@@ -58,8 +58,8 @@ module Stacks::VirtualService
     {
       :hostname => "#{environment.name}-#{name}",
       :fabric => @fabric,
-        :networks => @vip_networks,
-        :qualified_hostnames => qualified_hostnames
+      :networks => @vip_networks,
+      :qualified_hostnames => qualified_hostnames
     }
   end
 

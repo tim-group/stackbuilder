@@ -17,7 +17,7 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
         'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns.map { |fqdn| fqdn.split('.')[0] },
         'vip_fqdn' => vip_fqdn(:prod),
        },
-       'server::default_new_mgmt_net_local' => nil
+      'server::default_new_mgmt_net_local' => nil
     }
     dependant_instances = @virtual_service.dependant_machine_def_fqdns
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []

@@ -15,7 +15,7 @@ class Stacks::MongoDBServer < Stacks::MachineDef
       'role::mongodb_server' => {
         'application' => @virtual_service.application
        },
-       'mongodb::users' => {
+      'mongodb::users' => {
          'environment' => environment.name
        },
     }
