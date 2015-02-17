@@ -3,7 +3,7 @@ require 'stacks/factory'
 
 describe StackBuilder::Allocator::Host do
 
-#FIXME: Remove this test once storage exists for all nodes
+  # FIXME: Remove this test once storage exists for all nodes
   it 'selects only relevant policies when storage is nil' do
 
 

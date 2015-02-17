@@ -204,7 +204,7 @@ describe Stacks::DSL do
       'virtual_router_id' => 1,
       'virtual_servers' => {
       'ci2-appx-vip.st.net.local' => {
-      #'type'        => 'app',
+      # 'type'        => 'app',
 
       'env' => 'ci2',
       'app' => 'JavaHttpRef',

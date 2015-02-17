@@ -11,6 +11,6 @@ RSpec::Matchers.define :be_in_group do |expected_group|
   failure_message_for_should_not do |actual|
   end
 
-#  description do
-#  end
+  #  description do
+  #  end
 end

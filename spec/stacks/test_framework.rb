@@ -43,11 +43,11 @@ module Stacks::Matchers
       traversal.should eql(server)
     end
 
-    #failure_message_for_should do |server|
-    #end
+    # failure_message_for_should do |server|
+    # end
 
-    #failure_message_for_should_not do |actual|
-    #end
+    # failure_message_for_should_not do |actual|
+    # end
   end
 end
 

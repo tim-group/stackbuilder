@@ -174,7 +174,7 @@ describe Compute::Controller do
     already_active = []
     @compute_controller.launch(specs) do
       on :unaccounted do
-        #fail "no machines should be unaccounted for"
+        # fail "no machines should be unaccounted for"
       end
       on :already_active do |vm|
         already_active << vm
@@ -221,7 +221,7 @@ describe Compute::Controller do
      ]
    }
 
-#    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
+   #    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
 
    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).and_return([["myhost", { "vm1" => ["success", "o noes"] }]])
    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", { "vm2" => ["success", "yes"] }]])

@@ -122,7 +122,7 @@ module Stacks::VirtualBindService
   def master_server
     masters = children.reject { |bind_server| !bind_server.master? }
     raise "No masters were not found! #{children}" if masters.empty?
-    #Only return the first master (multi-master support not implemented)
+    # Only return the first master (multi-master support not implemented)
     masters.first
   end
 

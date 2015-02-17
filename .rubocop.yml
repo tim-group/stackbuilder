@@ -186,16 +186,6 @@ Style/ClassVars:
 Style/ColonMethodCall:
   Enabled: false
 
-# Offense count: 6
-# Configuration parameters: Keywords.
-Style/CommentAnnotation:
-  Enabled: false
-
-# Offense count: 3
-# Cop supports --auto-correct.
-Style/CommentIndentation:
-  Enabled: false
-
 # Offense count: 92
 # Cop supports --auto-correct.
 Style/DefWithParentheses:
@@ -283,11 +273,6 @@ Style/IndentArray:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/IndentHash:
-  Enabled: false
-
-# Offense count: 22
-# Cop supports --auto-correct.
-Style/LeadingCommentSpace:
   Enabled: false
 
 # Offense count: 106

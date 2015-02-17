@@ -16,7 +16,7 @@ class StackBuilder::Allocator::Host
     @fqdn = fqdn
     @allocated_machines = []
     @policies = args[:policies]
-    @preference_functions = [] #args[:preference_functions]
+    @preference_functions = [] # args[:preference_functions]
     @ram = args[:ram]
     @storage = args[:storage]
     @allocation_disabled = args[:allocation_disabled] || false

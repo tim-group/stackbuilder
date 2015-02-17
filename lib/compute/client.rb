@@ -53,7 +53,7 @@ class Compute::Client
         result = mco.details()
         result.map do |resp|
           # FIXME: Once all compute nodes have new storage config, renable this
-          #raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
+          # raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
           [resp[:sender], { :storage => resp[:data] }]
         end
       end
