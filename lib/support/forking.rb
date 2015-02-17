@@ -29,7 +29,7 @@ module Support::Forking
       serialized_result = read.read
       Process.waitpid(pid)
       result = Marshal.load(serialized_result)
-      raise result[:exception] unless result[:exception] == nil
+      raise result[:exception] unless result[:exception].nil?
       result[:result]
     end
   end

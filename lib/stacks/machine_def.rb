@@ -94,7 +94,7 @@ class Stacks::MachineDef
       $LOAD_PATH << '/var/lib/puppet/lib'
     end
     Facter.loadfacts
-    if Facter.value('owner') == nil
+    if Facter.value('owner').nil?
       'OWNER-FACT-NOT-FOUND'
     else
       Facter.value 'owner'
