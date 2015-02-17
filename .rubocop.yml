@@ -393,3 +393,8 @@ Style/WordArray:
 # Configuration parameters: MinBodyLength.
 Style/GuardClause:
   Enabled: false
+
+# Offense count: 3
+# Configuration parameters: Keywords.
+Style/CommentAnnotation:
+  Enabled: false
