@@ -92,7 +92,7 @@ module Support
         return "skipping #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_server.nil?
         url = "http://#{nagios_server}:#{@nagios_api_port}/#{action}_downtime"
         response = http_request(url, body.to_json, header)
-        return "#{nagios_server} = #{process_response(response)}"
+        "#{nagios_server} = #{process_response(response)}"
       end
 
       def schedule_downtime(machine, duration = 600)

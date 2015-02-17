@@ -9,7 +9,7 @@ class Stacks::SftpServer < Stacks::MachineDef
   end
 
   def vip_fqdn(net)
-    return @virtual_service.vip_fqdn(net)
+    @virtual_service.vip_fqdn(net)
   end
 
   def to_enc

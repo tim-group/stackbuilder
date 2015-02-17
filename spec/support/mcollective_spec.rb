@@ -8,7 +8,7 @@ describe Support::MCollective do
     @mock_rpcclient = double
     class Support::MCollective::MCollectiveRPC
       def self.mco_options
-        return @@mco_options
+        @@mco_options
       end
 
       def self.rpcclient=(rpcclient)
@@ -17,13 +17,13 @@ describe Support::MCollective do
 
       def rpcclient(name, options)
         @@mco_options = options
-        return @@rpcclient
+        @@rpcclient
       end
     end
     Support::MCollective::MCollectiveRPC.rpcclient = @mock_rpcclient
 
     def async_fork_and_return(&block)
-      return Support::Forking::Future.new(&block)
+      Support::Forking::Future.new(&block)
     end
 
     @mock_rpcclient.should_receive(:disconnect)

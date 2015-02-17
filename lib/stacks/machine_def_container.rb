@@ -9,7 +9,7 @@ module Stacks::MachineDefContainer
 
   def children
     # pretend we have a sorted dictionary
-    return @definitions.sort.map do |k, v| v end
+    @definitions.sort.map do |k, v| v end
   end
 
   def accept(&block)
@@ -37,14 +37,14 @@ module Stacks::MachineDefContainer
   end
 
   def clazz
-    return "container"
+    "container"
   end
 
   def to_specs
-    return self.children.map(&:to_specs).flatten
+    self.children.map(&:to_specs).flatten
   end
 
   def [](key)
-    return @definitions[key]
+    @definitions[key]
   end
 end

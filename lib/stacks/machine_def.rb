@@ -37,7 +37,7 @@ class Stacks::MachineDef
   end
 
   def children
-    return []
+    []
   end
 
   def use_trusty
@@ -106,11 +106,11 @@ class Stacks::MachineDef
   end
 
   def flatten
-    return [self]
+    [self]
   end
 
   def name
-    return hostname
+    hostname
   end
 
   def modify_storage(storage_modifications)
@@ -134,7 +134,7 @@ class Stacks::MachineDef
   end
 
   def storage
-    return @storage
+    @storage
   end
 
   def add_route(route_name)
@@ -191,14 +191,14 @@ class Stacks::MachineDef
   end
 
   def prod_fqdn
-    return qualified_hostname(:prod)
+    qualified_hostname(:prod)
   end
 
   def mgmt_fqdn
-    return qualified_hostname(:mgmt)
+    qualified_hostname(:mgmt)
   end
 
   def clazz
-    return "machine"
+    "machine"
   end
 end

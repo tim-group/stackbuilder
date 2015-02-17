@@ -81,7 +81,7 @@ module Stacks::VirtualProxyService
 
     raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size == 0
 
-    return Hash[@proxy_vhosts_lookup.values.map do |vhost|
+    Hash[@proxy_vhosts_lookup.values.map do |vhost|
       primary_app = find_virtual_service(vhost.service)
       proxy_pass_rules = Hash[vhost.proxy_pass_rules.map do |path, service|
         [path, "http://#{find_virtual_service(service).vip_fqdn(:prod)}:8000"]

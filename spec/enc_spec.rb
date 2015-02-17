@@ -9,7 +9,7 @@ describe Stacks::DSL do
     extend Stacks::DSL
     class Resolv::DNS
       def getaddress(url)
-        return "1.1.1.1"
+        "1.1.1.1"
       end
     end
   end

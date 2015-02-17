@@ -64,7 +64,7 @@ module Stacks
         end
       end
 
-      return return_environment
+      return_environment
     end
   end
 end

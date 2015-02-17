@@ -2,7 +2,7 @@ require 'support/namespace'
 
 class Hash
   def hash_select(&block)
-    return Hash[select(&block)]
+    Hash[select(&block)]
   end
 end
 
@@ -119,7 +119,7 @@ module Support::MCollectivePuppet
     failed = resources["failed"]
     failed_to_restart = resources["failed_to_restart"]
     return "stopping" if failed.nil? or failed_to_restart.nil?
-    return (failed == 0 && failed_to_restart == 0) ? "passed" : "failed"
+    (failed == 0 && failed_to_restart == 0) ? "passed" : "failed"
   end
 
   def puppetd_query(selector, fqdns, &block)
@@ -156,11 +156,11 @@ module Support::MCollectivePuppet
   end
 
   def timed_out(start_time, timeout)
-    return (now - start_time) > timeout
+    (now - start_time) > timeout
   end
 
   # factor out the clock so it's mockable in tests
   def now
-    return Time.now
+    Time.now
   end
 end

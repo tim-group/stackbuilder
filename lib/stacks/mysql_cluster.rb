@@ -52,7 +52,7 @@ module Stacks::MysqlCluster
   end
 
   def clazz
-    return 'mysqlcluster'
+    'mysqlcluster'
   end
 
   def data_size(size)

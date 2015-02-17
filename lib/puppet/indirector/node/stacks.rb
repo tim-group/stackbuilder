@@ -21,6 +21,6 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
       end
       node.parameters['logicalenv'] = machine.environment.name
     end
-    return node
+    node
   end
 end

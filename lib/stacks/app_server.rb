@@ -20,7 +20,7 @@ class Stacks::AppServer < Stacks::MachineDef
   end
 
   def vip_fqdn(net)
-    return @virtual_service.vip_fqdn(net)
+    @virtual_service.vip_fqdn(net)
   end
 
   def allow_host(source_host_or_network)

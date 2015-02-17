@@ -3,7 +3,7 @@ require 'allocator/host_policies'
 
 describe StackBuilder::Allocator::HostPolicies do
   def test_env_with_refstack
-    return [{
+    [{
       :hostname => "refapp1",
       :availability_group => "refapp"
     }, {

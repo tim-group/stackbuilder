@@ -18,7 +18,7 @@ module Stacks::LegacyMysqlCluster
   end
 
   def clazz
-    return 'mysqlcluster'
+    'mysqlcluster'
   end
 
   def mysqldb_server

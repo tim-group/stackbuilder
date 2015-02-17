@@ -35,11 +35,11 @@ module Stacks::VirtualService
   end
 
   def clazz
-    return 'virtualservice'
+    'virtualservice'
   end
 
   def realservers
-    return @definitions.values
+    @definitions.values
   end
 
   def vip_fqdn(net)

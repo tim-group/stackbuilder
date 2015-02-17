@@ -29,7 +29,7 @@ module Stacks::VirtualBindService
   end
 
   def zones_fqdn
-    return zones.inject([]) do |zones, zone|
+    zones.inject([]) do |zones, zone|
       if zone.eql?(:prod)
         zones << "#{@domain}"
       else

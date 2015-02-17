@@ -27,7 +27,7 @@ class StackBuilder::Allocator::Hosts
       !specs.include?(machine)
     end
 
-    return {
+    {
       :already_allocated => already_allocated,
       :newly_allocated => allocate(specs)
     }
@@ -67,7 +67,7 @@ class StackBuilder::Allocator::Hosts
       end
     end
 
-    return machines - allocated_machines
+    machines - allocated_machines
   end
 
   public

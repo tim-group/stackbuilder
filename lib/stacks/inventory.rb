@@ -13,14 +13,14 @@ class Stacks::Inventory
   end
 
   def find(fqdn)
-    return @stacks.find(fqdn)
+    @stacks.find(fqdn)
   end
 
   def find_by_hostname(hostname)
-    return @stacks.find_by_hostname(hostname)
+    @stacks.find_by_hostname(hostname)
   end
 
   def find_environment(name)
-    return @stacks.find_environment(name)
+    @stacks.find_environment(name)
   end
 end

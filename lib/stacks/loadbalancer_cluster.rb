@@ -29,6 +29,6 @@ module Stacks::LoadBalancerCluster
   end
 
   def clazz
-    return 'loadbalancercluster'
+    'loadbalancercluster'
   end
 end

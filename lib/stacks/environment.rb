@@ -19,12 +19,12 @@ class Stacks::Environment
   end
 
   def environment
-    return self
+    self
   end
 
   def cross_site_routing_required?
     return false if @primary_site.nil? or @secondary_site.nil?
-    return @primary_site != @secondary_site
+    @primary_site != @secondary_site
   end
 
   def cross_site_routing(fabric, network = 'prod')
@@ -63,6 +63,6 @@ class Stacks::Environment
     accept do |node|
       found = true if node.kind_of?(clazz)
     end
-    return found
+    found
   end
 end

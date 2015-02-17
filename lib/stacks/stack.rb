@@ -158,7 +158,7 @@ class Stacks::Stack
   end
 
   def [](key)
-    return @definitions[key]
+    @definitions[key]
   end
 
   private

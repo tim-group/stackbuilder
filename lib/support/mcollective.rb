@@ -77,11 +77,11 @@ module Support
     private
 
     def create_fabric_runner(options)
-      return MCollectiveFabricRunner.new(options)
+      MCollectiveFabricRunner.new(options)
     end
 
     def mco_client(name, options = {}, &block)
-      return async_mco_client(name, options, &block).value
+      async_mco_client(name, options, &block).value
     end
 
     def async_mco_client(name, options = {}, &block)

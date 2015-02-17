@@ -179,7 +179,7 @@ namespace :sbx do
       end
       result
     end
-    return gb_hash
+    gb_hash
   end
 
   def stats_for(host)
@@ -351,11 +351,11 @@ namespace :sbx do
       end
 
       def timed_out(start_time, timeout)
-        return (now - start_time) > timeout
+        (now - start_time) > timeout
       end
 
       def now
-        return Time.now
+        Time.now
       end
 
       namespace :puppet do

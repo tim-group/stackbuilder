@@ -7,7 +7,7 @@ module Support::Forking
     end
 
     def value
-      return @block.call
+      @block.call
     end
   end
 

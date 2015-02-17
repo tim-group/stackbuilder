@@ -142,11 +142,11 @@ class Compute::Controller
       end
     end
 
-    return allocation
+    allocation
   end
 
   def resolve(specs)
-    return Hash[specs.map do |spec|
+    Hash[specs.map do |spec|
       qualified_hostname = spec[:qualified_hostnames][:mgmt]
       [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
     end]

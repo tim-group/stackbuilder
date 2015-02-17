@@ -30,7 +30,7 @@ describe 'launch' do
   end
 
   def standard_preference_functions
-    return [
+    [
       StackBuilder::Allocator::HostPreference.fewest_machines(),
       StackBuilder::Allocator::HostPreference.alphabetical_fqdn]
   end

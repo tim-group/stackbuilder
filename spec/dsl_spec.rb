@@ -34,7 +34,7 @@ describe Stacks::DSL do
           specs.each do |spec|
             spec[:bling] = true
           end
-          return specs
+          specs
         end
       end
     end

@@ -49,7 +49,7 @@ class Subscription
     end
 
     def all_passed?
-      return (unaccounted_for.empty? and failed.empty?)
+      (unaccounted_for.empty? and failed.empty?)
     end
   end
 
@@ -112,7 +112,7 @@ class Subscription
         puts e
       end
     end
-    return WaitResponse.new(hosts, return_results)
+    WaitResponse.new(hosts, return_results)
   end
 
   private
@@ -124,6 +124,6 @@ class Subscription
 
   def timed_out(start_time, timeout)
     now = Time.now
-    return (now - start_time) > timeout
+    (now - start_time) > timeout
   end
 end
