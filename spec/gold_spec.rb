@@ -6,9 +6,9 @@ describe_stack 'gold image' do
         ubuntu 'precise'
         ubuntu 'trusty'
         win 'xp', 'ie7',
-          :master_location => 'http://imageserver.net.local/master/precise/'
+            :master_location => 'http://imageserver.net.local/master/precise/'
         win 'win7', 'ie9',
-          :master_location => 'http://imageserver.net.local/master/precise/'
+            :master_location => 'http://imageserver.net.local/master/precise/'
       end
     end
 

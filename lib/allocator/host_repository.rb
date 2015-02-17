@@ -30,11 +30,11 @@ class StackBuilder::Allocator::HostRepository
       end
 
       host = StackBuilder::Allocator::Host.new(fqdn,
-        :preference_functions => preference_functions,
-        :policies => policies,
-        :ram => attr[:memory],
-        :storage => attr[:storage],
-        :allocation_disabled => attr[:allocation_disabled]
+                                               :preference_functions => preference_functions,
+                                               :policies => policies,
+                                               :ram => attr[:memory],
+                                               :storage => attr[:storage],
+                                               :allocation_disabled => attr[:allocation_disabled]
       )
 
       host.allocated_machines = vms
