@@ -13,7 +13,7 @@ module Stacks::MachineGroup
     on_bind do |machineset, environment|
       @environment = environment
       configure_domain_name(environment)
-      self.instance_eval(&@config_block) unless @config_block.nil?
+      instance_eval(&@config_block) unless @config_block.nil?
       instantiate_machines(environment)
       bind_children(environment)
     end
@@ -36,7 +36,7 @@ module Stacks::MachineGroup
   end
 
   def availability_group(environment)
-    environment.name + "-" + self.name
+    environment.name + "-" + name
   end
 
   def instantiate_machines(environment)

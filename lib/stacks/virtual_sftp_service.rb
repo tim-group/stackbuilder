@@ -18,7 +18,7 @@ module Stacks::VirtualSftpService
   end
 
   def to_loadbalancer_config
-    grouped_realservers = self.realservers.group_by do |realserver|
+    grouped_realservers = realservers.group_by do |realserver|
       'blue'
     end
 
@@ -28,7 +28,7 @@ module Stacks::VirtualSftpService
     end]
 
     {
-      self.vip_fqdn(:prod) => {
+      vip_fqdn(:prod) => {
         'monitor_warn' => 0, # FIXME: When adding server redundancy
         'type'         => 'sftp',
         'realservers'  => realservers,

@@ -71,7 +71,7 @@ module Stacks::Core::Actions
   end
 
   def self.included(object)
-    self.extended(object)
+    extended(object)
   end
 
   def action(name, &block)

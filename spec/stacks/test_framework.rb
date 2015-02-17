@@ -55,6 +55,6 @@ def describe_stack(name, &block)
     extend Stacks::TestFramework
     extend RSpec::Matchers
     extend Stacks::Matchers
-    self.instance_eval(&block)
+    instance_eval(&block)
   end
 end

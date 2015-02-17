@@ -4,7 +4,7 @@ describe_stack 'should provide a single instance mode to be backwards compatible
   given do
     stack "mysql" do
       mysql_cluster "frdb" do
-        self.single_instance
+        single_instance
       end
     end
 
@@ -187,8 +187,8 @@ describe_stack 'should allow storage options to be overwritten' do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.database_name = "mydb"
-        self.data_size('14G')
-        self.backup_size('29G')
+        data_size('14G')
+        backup_size('29G')
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do

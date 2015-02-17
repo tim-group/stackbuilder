@@ -246,11 +246,6 @@ Style/PredicateName:
 Style/Proc:
   Enabled: false
 
-# Offense count: 82
-# Cop supports --auto-correct.
-Style/RedundantSelf:
-  Enabled: false
-
 # Offense count: 18
 Style/RescueModifier:
   Enabled: false

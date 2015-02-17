@@ -37,7 +37,7 @@ module Stacks::AppService
 
   def to_loadbalancer_config
     config = lb_config
-    config[self.vip_fqdn(:prod)]['type'] = 'sso_app' unless @sso_port.nil?
+    config[vip_fqdn(:prod)]['type'] = 'sso_app' unless @sso_port.nil?
     config
   end
 end

@@ -23,7 +23,7 @@ module Stacks::VirtualProxyService
   end
 
   def vhost(service, options = {}, vhost_properties = {}, &config_block)
-    key = "#{self.name}.vhost.#{service}.server_name"
+    key = "#{name}.vhost.#{service}.server_name"
     _vhost(key, vip_fqdn(:front), vip_fqdn(:prod), service, 'default', options, vhost_properties, &config_block)
   end
 
@@ -36,7 +36,7 @@ module Stacks::VirtualProxyService
   end
 
   def sso_vhost(service, options = {}, vhost_properties = {}, &config_block)
-    key = "#{self.name}.vhost.#{service}-sso.server_name"
+    key = "#{name}.vhost.#{service}-sso.server_name"
     _vhost(key, sso_vip_front_fqdn, sso_vip_fqdn, service, 'sso', options, vhost_properties, &config_block)
   end
 
@@ -102,7 +102,7 @@ module Stacks::VirtualProxyService
   end
 
   def to_loadbalancer_config
-    grouped_realservers = self.realservers.group_by do |realserver|
+    grouped_realservers = realservers.group_by do |realserver|
       'blue'
     end
 
@@ -123,7 +123,7 @@ module Stacks::VirtualProxyService
     end
 
     {
-      self.vip_fqdn(:prod) => enc
+      vip_fqdn(:prod) => enc
     }
   end
 end

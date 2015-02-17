@@ -20,7 +20,7 @@ class Stacks::LoadBalancer < Stacks::MachineDef
       virtual_services_hash.merge! virtual_service.to_loadbalancer_config
     end
     enc['role::loadbalancer'] = {
-      'virtual_router_id' => self.virtual_router_id,
+      'virtual_router_id' => virtual_router_id,
       'virtual_servers' => virtual_services_hash
     }
     enc

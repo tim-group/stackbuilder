@@ -66,7 +66,7 @@ class Stacks::AppServer < Stacks::MachineDef
         child.qualified_hostname(:prod)
       end
 
-      peers.delete self.qualified_hostname(:prod)
+      peers.delete qualified_hostname(:prod)
 
       unless peers == []
         enc['role::http_app']['dependencies']['cache.enabled'] = "true"

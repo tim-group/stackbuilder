@@ -20,7 +20,7 @@ class Stacks::ProxyVHost
     @type = type
     @properties = {}
     @cert = 'wildcard_timgroup_com'
-    self.instance_eval &block
+    instance_eval &block
   end
 
   def with_alias(alias_fqdn)

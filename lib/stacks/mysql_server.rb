@@ -86,7 +86,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
     dependant_instances = @virtual_service.dependant_machine_def_with_children_fqdns
-    dependant_instances.delete self.prod_fqdn
+    dependant_instances.delete prod_fqdn
 
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::mysql_server'].merge!({

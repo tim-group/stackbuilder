@@ -20,14 +20,14 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        self.depend_on "exampleapp"
-        self.depend_on "exampledb"
+        depend_on "exampleapp"
+        depend_on "exampledb"
       end
       virtual_appserver 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        self.depend_on "exampleapp"
-        self.depend_on "exampledb"
+        depend_on "exampleapp"
+        depend_on "exampledb"
       end
     end
     stack "example_db" do
@@ -102,12 +102,12 @@ describe_stack 'stack with dependencies that does not provide config params when
       virtual_appserver 'configapp' do
         self.groups = ['blue']
         self.application = 'example'
-        self.depend_on "exampledb"
+        depend_on "exampledb"
       end
       virtual_appserver 'noconfigapp' do
         self.groups = ['blue']
         self.application = 'example'
-        self.depend_on "exampledb"
+        depend_on "exampledb"
         self.auto_configure_dependencies = false
       end
     end
