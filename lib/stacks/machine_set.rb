@@ -28,7 +28,7 @@ class Stacks::MachineSet
     @auto_configure_dependencies = true
   end
 
-  def depend_on(dependant, env=environment.name )
+  def depend_on(dependant, env=environment.name)
     @depends_on << [dependant,env] unless @depends_on.include? [dependant,env]
   end
 
