@@ -1,4 +1,8 @@
 ---
+AllCops:
+  Exclude:
+    - 'build/**/*'
+
 Metrics/LineLength:
   Max: 120
 
@@ -503,3 +507,8 @@ Style/UnlessElse:
 # Configuration parameters: WordRegex.
 Style/WordArray:
   MinSize: 3
+
+# Offense count: 4
+# Configuration parameters: MinBodyLength.
+Style/GuardClause:
+  Enabled: false

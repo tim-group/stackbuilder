@@ -5,7 +5,7 @@ class Support::Callback
     @blocks = {}
     @summary_blocks = {}
     @summary_args = Hash.new { |h, k| h[k] = [] }
-    if block:
+    if block
       instance_eval(&block)
     end
   end
