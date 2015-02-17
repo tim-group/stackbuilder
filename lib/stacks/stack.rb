@@ -48,11 +48,11 @@ class Stacks::Stack
   end
 
   def virtual_appserver(name, &block)
-    machineset_with(name, [Stacks::VirtualService, Stacks::AppService], Stacks::AppServer, &block);
+    machineset_with(name, [Stacks::VirtualService, Stacks::AppService], Stacks::AppServer, &block)
   end
 
   def standalone_appserver(name, &block)
-    machineset_with(name, [Stacks::AppService], Stacks::AppServer, &block);
+    machineset_with(name, [Stacks::AppService], Stacks::AppServer, &block)
   end
 
   def virtual_proxyserver(name, &block)
@@ -68,7 +68,7 @@ class Stacks::Stack
   end
 
   def virtual_bindserver(name, &block)
-    machineset_with(name, [Stacks::VirtualService, Stacks::VirtualBindService], Stacks::BindServer, &block);
+    machineset_with(name, [Stacks::VirtualService, Stacks::VirtualBindService], Stacks::BindServer, &block)
   end
 
   def shadow_server(name, &block)
