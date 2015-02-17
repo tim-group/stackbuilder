@@ -115,7 +115,7 @@ class Compute::Controller
       end
     end
 
-    threads.each { |t| t.join }
+    threads.each(&:join)
 
     all_specs = allocation.map do |host, specs|
       specs

@@ -104,9 +104,7 @@ module Stacks::VirtualBindService
   end
 
   def slave_servers_as_fqdns
-    slave_servers.map do |bind_server|
-      bind_server.mgmt_fqdn
-    end
+    slave_servers.map(&:mgmt_fqdn)
   end
 
   def cluster_dependant_instances(machine_def)

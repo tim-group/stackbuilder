@@ -68,9 +68,7 @@ module Stacks::MysqlCluster
   end
 
   def create_persistent_storage_override
-    each_machine do |machine|
-      machine.create_persistent_storage_override
-    end
+    each_machine(&:create_persistent_storage_override)
   end
 
   def master_servers

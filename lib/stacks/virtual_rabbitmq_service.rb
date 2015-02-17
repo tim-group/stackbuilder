@@ -18,7 +18,7 @@ module Stacks::VirtualRabbitMQService
   end
 
   def realserver_prod_fqdns
-    self.realservers.map { |server| server.prod_fqdn }.sort
+    self.realservers.map(&:prod_fqdn).sort
   end
 
   def to_loadbalancer_config

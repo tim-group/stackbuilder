@@ -41,9 +41,7 @@ module Stacks::MachineDefContainer
   end
 
   def to_specs
-    return self.children.map do |child|
-      child.to_specs
-    end.flatten
+    return self.children.map(&:to_specs).flatten
   end
 
   def [](key)

@@ -73,9 +73,7 @@ module Stacks::VirtualProxyService
   end
 
   def downstream_services
-    vhost_map = @proxy_vhosts_lookup.values.group_by do |proxy_vhost|
-      proxy_vhost.vhost_fqdn
-    end
+    vhost_map = @proxy_vhosts_lookup.values.group_by(&:vhost_fqdn)
 
     duplicates = Hash[vhost_map.select do |key, values|
       values.size > 1
@@ -109,9 +107,7 @@ module Stacks::VirtualProxyService
     end
 
     realservers = Hash[grouped_realservers.map do |group, realservers|
-      realserver_fqdns = realservers.map do |realserver|
-        realserver.prod_fqdn
-      end.sort
+      realserver_fqdns = realservers.map(&:prod_fqdn).sort
       [group, realserver_fqdns]
     end]
 

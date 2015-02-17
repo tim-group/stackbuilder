@@ -21,7 +21,7 @@ describe StackBuilder::Allocator::HostRepository do
 
   it 'creates a Hosts object with corresponding Host objects' do
     env = test_env_with_refstack
-    machines = env.flatten.map { |machine| machine.hostname }
+    machines = env.flatten.map(&:hostname)
 
     compute_node_client = double
     n = 5
@@ -45,14 +45,14 @@ describe StackBuilder::Allocator::HostRepository do
     hosts.hosts.size.should eql(n)
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)
-      host.machines.should eql(env.flatten.map { |machine| machine.to_specs }.flatten)
+      host.machines.should eql(env.flatten.map(&:to_specs).flatten)
     end
   end
 
   it 'includes missing machine specs for machines that do not exist in the model' do
     env = test_env_with_refstack
-    machines = env.flatten.map { |machine| machine.hostname }
-    machine_specs = env.flatten.map { |machine| machine.to_specs }.flatten
+    machines = env.flatten.map(&:hostname)
+    machine_specs = env.flatten.map(&:to_specs).flatten
     machines << "roguemachine"
     machine_specs << { :hostname => "roguemachine", :in_model => false }
     compute_node_client = double

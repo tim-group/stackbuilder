@@ -210,9 +210,7 @@ namespace :sbx do
   task :find_rogue do
     hosts = @factory.host_repository.find_current("local")
 
-    rogue_machines = hosts.hosts.map do |host|
-      host.allocated_machines
-    end.flatten().reject { |vm| vm[:in_model] }
+    rogue_machines = hosts.hosts.map(&:allocated_machines).flatten().reject { |vm| vm[:in_model] }
 
     pp rogue_machines
   end
@@ -326,7 +324,7 @@ namespace :sbx do
 
       desc "free IPs"
       sbtask :free_ips do
-        all_specs = machine_def.flatten.map { |m| m.to_spec }
+        all_specs = machine_def.flatten.map(&:to_spec)
         @factory.services.dns.free(all_specs)
       end
 

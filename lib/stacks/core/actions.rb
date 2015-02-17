@@ -12,7 +12,7 @@ module Stacks::Core::Actions
 
     object.action 'allocate' do |services, machine_def|
       machines = machine_def.flatten
-      machine_specs = machine_def.flatten.map { |machine| machine.to_spec }
+      machine_specs = machine_def.flatten.map(&:to_spec)
       allocation_results = services.allocator.allocate(machine_specs)
 
       allocation_results[:already_allocated].each do |machine, host|
@@ -28,7 +28,7 @@ module Stacks::Core::Actions
 
     object.action 'launch' do |services, machine_def|
       machines = machine_def.flatten
-      machine_specs = machine_def.flatten.map { |machine| machine.to_spec }
+      machine_specs = machine_def.flatten.map(&:to_spec)
       machines.each do |machine|
         if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
           raise "cannot instantiate machines in local site without owner fact"

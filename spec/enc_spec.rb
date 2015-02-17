@@ -656,7 +656,7 @@ describe Stacks::DSL do
       instantiate_stack "mystack"
     end
 
-    find_environment("e1").flatten.map { |m| m.name }.should eql(["e1-lb-001", "e1-lb-002", "e1-nat-001", "e1-nat-002"])
+    find_environment("e1").flatten.map(&:name).should eql(["e1-lb-001", "e1-lb-002", "e1-nat-001", "e1-nat-002"])
   end
 
   it 'can build forward proxy servers' do
