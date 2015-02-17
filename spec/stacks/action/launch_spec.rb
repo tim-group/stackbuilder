@@ -74,7 +74,7 @@ describe 'launch' do
     hosts = StackBuilder::Allocator::Hosts.new(:hosts => [hx])
 
     Hash[hosts.allocated_machines(env.flatten).map do |machine, host|
-      [ machine.mgmt_fqdn,host.fqdn]
+      [machine.mgmt_fqdn,host.fqdn]
     end].should eql({
       "test-refapp-001.mgmt.t.net.local" => "hx",
       "test-refapp-002.mgmt.t.net.local" => "hx"
@@ -88,7 +88,7 @@ describe 'launch' do
 
     hosts.allocate(env.flatten)
     Hash[hosts.new_machine_allocation().map do |machine, host|
-      [ machine.mgmt_fqdn,host.fqdn]
+      [machine.mgmt_fqdn,host.fqdn]
     end].should eql({
       "test-refapp-001.mgmt.t.net.local" => "hx",
       "test-refapp-002.mgmt.t.net.local" => "hx"

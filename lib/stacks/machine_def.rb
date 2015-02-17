@@ -165,7 +165,7 @@ class Stacks::MachineDef
 
   # DEPRECATED for flatten / accept interface, remove me!
   def to_specs
-    [ to_spec ]
+    [to_spec]
   end
 
   def to_enc
