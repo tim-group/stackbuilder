@@ -19,15 +19,15 @@ class Stacks::MysqlServer < Stacks::MachineDef
       '/mnt/data' => {
         :type       => 'data',
         :size       => '10G',
-        :persistent => true,
+        :persistent => true
       }
     }
     backup_storage = {
       '/mnt/storage' => {
         :type       => 'data',
         :size       => '10G',
-        :persistent => true,
-      },
+        :persistent => true
+      }
     }
     modify_storage(storage)
     modify_storage(backup_storage) if @backup
@@ -79,9 +79,9 @@ class Stacks::MysqlServer < Stacks::MachineDef
         'datadir'                  => '/mnt/data/mysql',
         'environment'              => environment.name,
         'master'                   => master?,
-        'server_id'                => server_id,
+        'server_id'                => server_id
       },
-      'server::default_new_mgmt_net_local' => nil,
+      'server::default_new_mgmt_net_local' => nil
     }
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
@@ -91,7 +91,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::mysql_server'].merge!({
                                          'dependencies' => @virtual_service.dependency_config,
-                                         'dependant_instances' => dependant_instances,
+                                         'dependant_instances' => dependant_instances
                                        })
       unless backup?
         enc.merge!(@virtual_service.dependant_instance_mysql_rights)
@@ -101,7 +101,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
       'rights' => {
         @virtual_service.database_name => {
           'environment'   => environment.name,
-          'database_name' => @virtual_service.database_name,
+          'database_name' => @virtual_service.database_name
         }
       }
     }

@@ -43,7 +43,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     enc['role::bind_server']['master_zones'].should eql([
       'mgmt.oy.net.local',
       'oy.net.local',
-      'front.oy.net.local',
+      'front.oy.net.local'
     ])
     enc['role::bind_server']['slave_zones'].should eql({
                                                          'pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local']
@@ -96,7 +96,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     enc['role::bind_server']['master_zones'].should eql([
       'mgmt.pg.net.local',
       'pg.net.local',
-      'front.pg.net.local',
+      'front.pg.net.local'
     ])
     enc['role::bind_server']['slave_zones'].should eql({
                                                          'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
@@ -188,7 +188,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc['role::bind_server']['master_zones'].should eql([
       'mgmt.oy.net.local',
       'oy.net.local',
-      'front.oy.net.local',
+      'front.oy.net.local'
     ])
     enc['role::bind_server'].should_not have_key('slave_zones')
     enc['role::bind_server']['vip_fqdns'].should include('oy-ns-vip.mgmt.oy.net.local')
@@ -239,7 +239,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     enc['role::bind_server']['master_zones'].should eql([
       'mgmt.pg.net.local',
       'pg.net.local',
-      'front.pg.net.local',
+      'front.pg.net.local'
     ])
     enc['role::bind_server']['slave_zones'].should eql({
                                                          'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local']
@@ -290,7 +290,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     host.to_spec[:networks].should be_eql([:mgmt, :prod])
     host.to_spec[:qualified_hostnames].should eql({
                                                     :prod => 'pg-ns-002.pg.net.local',
-                                                    :mgmt => 'pg-ns-002.mgmt.pg.net.local',
+                                                    :mgmt => 'pg-ns-002.mgmt.pg.net.local'
                                                   })
   end
 end

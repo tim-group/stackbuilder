@@ -65,7 +65,7 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
     host.backup?.should eql false
     host.to_enc['role::mysql_server']['dependant_instances'].should eql([
       'testing-frdb-002.space.net.local',
-      'testing-frdbbackup-001.earth.net.local',
+      'testing-frdbbackup-001.earth.net.local'
     ])
   end
   host("testing-frdb-002.mgmt.space.net.local") do |host|

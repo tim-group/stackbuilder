@@ -56,7 +56,7 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
                        :options => {
                          :create_in_fstab => false,
                          :path   => "#{options[:master_location]}#{options[:master_image_file]}",
-                         :resize => false,
+                         :resize => false
                        }
                      }
                    } })
@@ -97,7 +97,7 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
                          :resize => false,
                          :create_in_fstab => false,
                          :type => 'ext4',
-                         :shrink_after_unmount => true,
+                         :shrink_after_unmount => true
                        }
                      }
                    } })

@@ -36,7 +36,7 @@ class Stacks::LegacyMysqlDBServer < Stacks::MachineDef
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::databaseserver'].merge!({
                                            'dependencies' => @virtual_service.dependency_config,
-                                           'dependant_instances' => dependant_instances,
+                                           'dependant_instances' => dependant_instances
                                          })
       enc.merge!(@virtual_service.dependant_instance_mysql_rights)
     end

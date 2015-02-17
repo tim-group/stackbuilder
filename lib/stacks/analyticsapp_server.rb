@@ -12,7 +12,7 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
     {
       'role::analyticsapp_server' => {
         'datadir'     => @data_directory,
-        'environment' => environment.name,
+        'environment' => environment.name
       }
     }
   end

@@ -179,7 +179,7 @@ describe Support::MCollectivePuppet do
       { :sender => 'vm3.test.net.local', :data => { :status => 'stopped' } },
       { :sender => 'vm4.test.net.local', :data => { :status => 'stopped' } },
       { :sender => 'vm5.test.net.local', :data => { :status => 'stopped' } },
-      { :sender => 'vm6.test.net.local', :data => { :status => 'stopped' } },
+      { :sender => 'vm6.test.net.local', :data => { :status => 'stopped' } }
     ])
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered

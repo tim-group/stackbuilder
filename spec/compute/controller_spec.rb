@@ -60,7 +60,7 @@ describe Compute::Controller do
 
     allocations.should eql({
                              "st-kvm-001.mgmt.st.net.local" => [specs[0], specs[1]],
-                             "bs-kvm-001.mgmt.bs.net.local" => [specs[2]],
+                             "bs-kvm-001.mgmt.bs.net.local" => [specs[2]]
                            })
   end
 
@@ -90,7 +90,7 @@ describe Compute::Controller do
     allocations.should eql({
                              "st-kvm-001.mgmt.st.net.local" => [specs[1], specs[4]],
                              "st-kvm-002.mgmt.st.net.local" => [specs[2]],
-                             "st-kvm-003.mgmt.st.net.local" => [specs[3]],
+                             "st-kvm-003.mgmt.st.net.local" => [specs[3]]
                            })
   end
 
@@ -124,7 +124,7 @@ describe Compute::Controller do
       { :hostname => "vm4", :fabric => "st" },
       { :hostname => "vm5", :fabric => "bs" },
       { :hostname => "vm6", :fabric => "bs" },
-      { :hostname => "vm7", :fabric => "bs" },
+      { :hostname => "vm7", :fabric => "bs" }
     ]
 
     allocations = @compute_controller.allocate(specs)
@@ -134,7 +134,7 @@ describe Compute::Controller do
                              "st-kvm-002.mgmt.st.net.local" => [specs[1], specs[4]],
                              "st-kvm-003.mgmt.st.net.local" => [specs[2]],
                              "bs-kvm-001.mgmt.bs.net.local" => [specs[5], specs[7]],
-                             "bs-kvm-002.mgmt.bs.net.local" => [specs[6]],
+                             "bs-kvm-002.mgmt.bs.net.local" => [specs[6]]
                            })
   end
 

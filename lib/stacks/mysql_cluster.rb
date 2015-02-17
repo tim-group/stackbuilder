@@ -123,7 +123,7 @@ module Stacks::MysqlCluster
       "db.#{@database_name}.hostname"           => master_servers.join(','),
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => dependant.application,
-      "db.#{@database_name}.password_hiera_key" => "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
+      "db.#{@database_name}.password_hiera_key" => "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
     }
   end
 end

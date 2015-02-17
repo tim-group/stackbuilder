@@ -48,7 +48,7 @@ module Stacks::LegacyMysqlCluster
       "db.#{@database_name}.hostname"           => mysqldb_server.prod_fqdn,
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => "#{dependant.application}",
-      "db.#{@database_name}.password_hiera_key" => "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
+      "db.#{@database_name}.password_hiera_key" => "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
     }
   end
 end

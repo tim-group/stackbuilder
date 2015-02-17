@@ -283,12 +283,6 @@ Style/SpecialGlobalVars:
 Style/SymbolProc:
   Enabled: false
 
-# Offense count: 94
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleForMultiline, SupportedStyles.
-Style/TrailingComma:
-  Enabled: false
-
 # Offense count: 25
 # Cop supports --auto-correct.
 # Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.

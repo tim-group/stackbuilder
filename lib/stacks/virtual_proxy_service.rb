@@ -118,7 +118,7 @@ module Stacks::VirtualProxyService
     enc = {
       'type' => 'proxy',
       'ports' => @ports,
-      'realservers' => realservers,
+      'realservers' => realservers
     }
 
     unless @persistent_ports.empty?

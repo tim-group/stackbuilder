@@ -12,7 +12,7 @@ module StackBuilder::Allocator::PolicyHelpers
         :host_ram => host_ram,
         :host_reserve_ram => host_reserve_ram,
         :allocated_ram => allocated_ram,
-        :available_ram => available_ram,
+        :available_ram => available_ram
       }
     end
     result

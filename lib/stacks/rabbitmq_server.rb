@@ -15,7 +15,7 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
     enc = {
       'role::rabbitmq_server' => {
         'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns.map { |fqdn| fqdn.split('.')[0] },
-        'vip_fqdn' => vip_fqdn(:prod),
+        'vip_fqdn' => vip_fqdn(:prod)
       },
       'server::default_new_mgmt_net_local' => nil
     }
@@ -23,7 +23,7 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
     if dependant_instances and !dependant_instances.nil? and dependant_instances != []
       enc['role::rabbitmq_server'].merge!({
                                             'dependant_instances' => dependant_instances,
-                                            'dependencies' => @virtual_service.dependency_config,
+                                            'dependencies' => @virtual_service.dependency_config
                                           })
     end
     enc

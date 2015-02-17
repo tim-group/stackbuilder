@@ -97,7 +97,7 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new("test")
     machinedef.add_route('mgmt_pg')
     env = Stacks::Environment.new("noenv", {
-                                    :primary_site => "local",
+                                    :primary_site => "local"
                                   }, {}, {}
     )
     machinedef.bind_to(env)
@@ -105,7 +105,7 @@ describe Stacks::MachineDef do
                                    'routes' => {
                                      'to' => [
                                        'mgmt_pg'
-                                     ],
+                                     ]
                                    }
                                  })
   end

@@ -16,7 +16,7 @@ class Stacks::SftpServer < Stacks::MachineDef
     {
       'role::sftpserver' => {
         'vip_fqdn' => vip_fqdn(:prod),
-        'env' => environment.name,
+        'env' => environment.name
       }
     }
   end

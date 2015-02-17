@@ -49,7 +49,7 @@ describe_stack 'exampleproxy' do
                                    "redirects" => [],
                                    "type" => "default",
                                    "vhost_properties" => {},
-                                   "cert" => 'wildcard_timgroup_com',
+                                   "cert" => 'wildcard_timgroup_com'
 
                                  },
                                  "e1-exampleproxy-sso-vip.front.space.net.local" => {
@@ -61,7 +61,7 @@ describe_stack 'exampleproxy' do
                                    "redirects" => [],
                                    "type" => "sso",
                                    "vhost_properties" => {},
-                                   "cert" => 'wildcard_timgroup_com',
+                                   "cert" => 'wildcard_timgroup_com'
                                  },
                                  "example.overridden" => {
                                    "proxy_pass_rules" => {
@@ -75,7 +75,7 @@ describe_stack 'exampleproxy' do
                                    "redirects" => [],
                                    "type" => "default",
                                    "vhost_properties" => {},
-                                   "cert" => 'wildcard_timgroup_com',
+                                   "cert" => 'wildcard_timgroup_com'
                                  },
                                  "example-sso.overridden" => {
                                    "proxy_pass_rules" => {
@@ -89,7 +89,7 @@ describe_stack 'exampleproxy' do
                                    "redirects" => [],
                                    "type" => "sso",
                                    "vhost_properties" => {},
-                                   "cert" => 'wildcard_timgroup_com',
+                                   "cert" => 'wildcard_timgroup_com'
                                  }
                                },
                                "prod_vip_fqdn" => "e1-exampleproxy-vip.space.net.local",

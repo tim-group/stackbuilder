@@ -39,7 +39,7 @@ describe_stack 'lb' do
                                      })
     host.to_specs.shift[:qualified_hostnames].should eql({
                                                            :mgmt => "e1-lb-002.mgmt.space.net.local",
-                                                           :prod => "e1-lb-002.space.net.local",
+                                                           :prod => "e1-lb-002.space.net.local"
                                                          })
     host.to_specs.shift[:availability_group].should eql('e1-lb')
     host.to_specs.shift[:networks].should eql([:mgmt, :prod])

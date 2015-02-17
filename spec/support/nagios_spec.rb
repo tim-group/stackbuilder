@@ -56,7 +56,7 @@ describe Support::Nagios::Service::Http do
       Support::Nagios::Service::Http.new({
                                            :nagios_servers => {
                                              'oy' => 'localhost',
-                                             'pg' => 'localhost',
+                                             'pg' => 'localhost'
                                            },
                                            :nagios_api_port => 5152
                                          })

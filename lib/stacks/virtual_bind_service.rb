@@ -162,7 +162,7 @@ module Stacks::VirtualBindService
         'type'         => 'bind',
         'ports'        => @ports,
         'realservers'  => {
-          'blue' => realserver_fqdns(vip_net),
+          'blue' => realserver_fqdns(vip_net)
         },
         'healthchecks' => healthchecks
       }

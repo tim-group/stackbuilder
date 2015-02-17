@@ -16,7 +16,7 @@ class Stacks::MongoDBServer < Stacks::MachineDef
       },
       'mongodb::users' => {
         'environment' => environment.name
-      },
+      }
     }
     enc['mongodb::backup'] = { 'ensure' => 'present' } if @backup
     enc

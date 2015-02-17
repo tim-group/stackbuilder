@@ -15,7 +15,7 @@ describe_stack 'analytics' do
     host.to_enc.should eql({
                              'role::analyticsapp_server' => {
                                'datadir'     => false,
-                               'environment' => 'e1',
+                               'environment' => 'e1'
                              }
                            })
   end

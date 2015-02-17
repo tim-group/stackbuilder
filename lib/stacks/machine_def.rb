@@ -20,8 +20,8 @@ class Stacks::MachineDef
           :method => 'image',
           :options => {
             :path => '/var/local/images/gold-precise/generic.img'
-          },
-        },
+          }
+        }
       }
     }
     @destroyable = true
@@ -39,8 +39,8 @@ class Stacks::MachineDef
         :prepare     => {
           :options => {
             :path => '/var/local/images/gold-trusty/generic.img'
-          },
-        },
+          }
+        }
       }
     }
     modify_storage(trusty_gold_image)

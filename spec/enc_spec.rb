@@ -108,7 +108,7 @@ describe Stacks::DSL do
                                                                                                                                                         "blue" => ["st-oneapp-001.st.net.local"] },
                                                                                                                        "env" => "st",
                                                                                                                        "app" => nil,
-                                                                                                                       "monitor_warn" => 0,
+                                                                                                                       "monitor_warn" => 0
               }
         }
         }
@@ -606,9 +606,9 @@ describe Stacks::DSL do
                   "st-proxy-002.st.net.local"
                 ]
               },
-              "persistent_ports" => ["443"],
+              "persistent_ports" => ["443"]
             }
-          },
+          }
         }
       }
     )

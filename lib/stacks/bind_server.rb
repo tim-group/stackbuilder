@@ -52,9 +52,9 @@ class Stacks::BindServer < Stacks::MachineDef
                    'vip_fqdns'                         => vip_fqdns,
                    'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns(@networks),
                    'dependant_instances'               => @virtual_service.all_dependencies(self),
-                   'forwarder_zones'                   => @virtual_service.forwarder_zones,
+                   'forwarder_zones'                   => @virtual_service.forwarder_zones
                  },
-                 'server::default_new_mgmt_net_local'  => nil,
+                 'server::default_new_mgmt_net_local'  => nil
                })
     enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn if master?
 

@@ -24,7 +24,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
         :mgmt =>  {
           'puppet' => "#{qualified_hostname(:mgmt)}"
         }
-      },
+      }
     }
     puppetmaster_special[:cnames] = cnames unless cnames.nil?
     specs.merge!(puppetmaster_special)
