@@ -11,21 +11,21 @@ module Stacks::Core::Actions
     object.actions = {}
 
     object.action 'allocate' do |services, machine_def|
-     machines = machine_def.flatten
-     machine_specs = machine_def.flatten.map { |machine| machine.to_spec }
-     allocation_results = services.allocator.allocate(machine_specs)
+      machines = machine_def.flatten
+      machine_specs = machine_def.flatten.map { |machine| machine.to_spec }
+      allocation_results = services.allocator.allocate(machine_specs)
 
-     allocation_results[:already_allocated].each do |machine, host|
-       services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}")
-     end
+      allocation_results[:already_allocated].each do |machine, host|
+        services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}")
+      end
 
-     allocation_results[:newly_allocated].each do |host, machines|
-       machines.each do |machine|
-         services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
-       end
-     end
+      allocation_results[:newly_allocated].each do |host, machines|
+        machines.each do |machine|
+          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
+        end
+      end
 
-   end
+    end
 
     object.action 'launch' do |services, machine_def|
       machines = machine_def.flatten

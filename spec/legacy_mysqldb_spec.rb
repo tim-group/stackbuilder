@@ -24,8 +24,8 @@ describe_stack 'should allow destroy to be overwritten' do
     stack "mysql" do
       legacy_mysqldb "mydb" do
         each_machine do |machine|
-           machine.allow_destroy()
-         end
+          machine.allow_destroy()
+        end
       end
     end
     env "testing", :primary_site => "space" do
@@ -44,8 +44,8 @@ describe_stack 'should provide correct enc data' do
       legacy_mysqldb "mydb" do
         self.database_name = "mydb"
         each_machine do |machine|
-           machine.allow_destroy()
-         end
+          machine.allow_destroy()
+        end
       end
     end
     env "testing", :primary_site => "space" do
@@ -68,11 +68,11 @@ describe_stack 'should allow storage options to be overwritten' do
       legacy_mysqldb "mydb" do
         self.database_name = "mydb"
         each_machine do |machine|
-           machine.modify_storage({
-             '/'              => { :size => '5G' },
-             '/var/lib/mysql' => { :type => 'data', :size => '10G' },
-           })
-         end
+          machine.modify_storage({
+            '/'              => { :size => '5G' },
+            '/var/lib/mysql' => { :type => 'data', :size => '10G' },
+          })
+        end
       end
     end
     env "testing", :primary_site => "space" do
