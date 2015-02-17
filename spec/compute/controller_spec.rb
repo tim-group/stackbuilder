@@ -162,11 +162,11 @@ describe Compute::Controller do
       :fabric => "st",
       :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
     },
-      {
-      :hostname => "vm2",
-      :fabric => "st",
-      :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
-    }]
+             {
+             :hostname => "vm2",
+             :fabric => "st",
+             :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
+           }]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", { "vm1" => ["success", "yay"] }]])
     @compute_node_client.should_receive(:launch).with("myhost", [specs[0]])

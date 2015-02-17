@@ -152,7 +152,7 @@ describe 'launch' do
 
     compute_controller.should_receive(:launch_raw).with(
     "h3" => [find("test-refapp-001.mgmt.t.net.local").to_spec,
-      find("test-refapp-002.mgmt.t.net.local").to_spec]
+             find("test-refapp-002.mgmt.t.net.local").to_spec]
     )
 
     get_action("launch").call(services, env)
