@@ -30,4 +30,3 @@ class Stacks::DebRepo < Stacks::MachineDef
     specs
   end
 end
-

@@ -17,4 +17,3 @@ class Stacks::RateLimitedForwardProxyServer < Stacks::MachineDef
     }
   end
 end
-

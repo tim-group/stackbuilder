@@ -30,5 +30,3 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
     host.to_enc['role::http_app']['sso_port'].should eql('8443')
   end
 end
-
-

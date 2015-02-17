@@ -23,4 +23,3 @@ class Stacks::MongoDBServer < Stacks::MachineDef
     enc
   end
 end
-

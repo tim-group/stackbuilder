@@ -16,4 +16,3 @@ class Stacks::LogstashServer < Stacks::MachineDef
     }
   end
 end
-

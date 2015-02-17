@@ -48,5 +48,3 @@ describe_stack 'lb' do
   end
 
 end
-
-

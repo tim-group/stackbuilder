@@ -125,4 +125,3 @@ class Compute::Client
     invoke :remove_cnames, spec,:nodes => [host]
   end
 end
-

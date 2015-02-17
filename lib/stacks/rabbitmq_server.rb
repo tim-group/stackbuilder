@@ -29,4 +29,3 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
     enc
   end
 end
-

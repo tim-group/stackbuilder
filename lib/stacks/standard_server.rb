@@ -14,4 +14,3 @@ class Stacks::StandardServer < Stacks::MachineDef
     }
   end
 end
-

@@ -19,4 +19,3 @@ class Stacks::QuantAppServer < Stacks::MachineDef
     }
   end
 end
-

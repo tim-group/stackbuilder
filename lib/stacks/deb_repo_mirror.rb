@@ -23,4 +23,3 @@ class Stacks::DebRepoMirror < Stacks::MachineDef
     specs
   end
 end
-

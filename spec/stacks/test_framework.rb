@@ -59,5 +59,3 @@ def describe_stack(name, &block)
     self.instance_eval(&block)
   end
 end
-
-

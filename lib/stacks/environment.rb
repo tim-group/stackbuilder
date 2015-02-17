@@ -66,4 +66,3 @@ class Stacks::Environment
     return found
   end
 end
-

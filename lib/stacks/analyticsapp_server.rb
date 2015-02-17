@@ -35,4 +35,3 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
   end
 
 end
-

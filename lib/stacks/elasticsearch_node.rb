@@ -21,4 +21,3 @@ class Stacks::ElasticSearchNode < Stacks::MachineDef
     }
   end
 end
-

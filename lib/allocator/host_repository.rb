@@ -44,4 +44,3 @@ class StackBuilder::Allocator::HostRepository
     StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions, :logger => @logger)
   end
 end
-

@@ -113,4 +113,3 @@ class Stacks::MysqlServer < Stacks::MachineDef
   end
 
 end
-

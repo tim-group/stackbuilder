@@ -44,4 +44,3 @@ class Stacks::ProxyVHost
   end
 
 end
-

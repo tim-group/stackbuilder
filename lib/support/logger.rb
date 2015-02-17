@@ -23,5 +23,3 @@ class Support::RakeFormatter
     msg
   end
 end
-
-

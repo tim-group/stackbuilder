@@ -46,4 +46,3 @@ class Stacks::LegacyMysqlDBServer < Stacks::MachineDef
   end
 
 end
-

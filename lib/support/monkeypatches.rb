@@ -3,5 +3,3 @@ class Array
     Hash[*self.map(&:to_a).flatten]
   end
 end
-
-

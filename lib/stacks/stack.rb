@@ -169,4 +169,3 @@ class Stacks::Stack
     @definitions[name]=machineset
   end
 end
-

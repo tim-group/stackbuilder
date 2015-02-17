@@ -14,4 +14,3 @@ class Stacks::FmAnalyticsAppServer < Stacks::MachineDef
     }
   end
 end
-

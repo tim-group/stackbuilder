@@ -21,4 +21,3 @@ class Stacks::CiSlave < Stacks::MachineDef
     }
   end
 end
-

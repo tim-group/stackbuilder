@@ -53,5 +53,3 @@ module Stacks::MachineGroup
     end
   end
 end
-
-

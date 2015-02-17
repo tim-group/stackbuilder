@@ -24,5 +24,3 @@ describe_stack 'jenkins' do
   end
 
 end
-
-

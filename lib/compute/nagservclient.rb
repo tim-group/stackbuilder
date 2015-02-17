@@ -18,4 +18,3 @@ require 'support/mcollective'
      end
    end
  end
-
