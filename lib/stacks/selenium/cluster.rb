@@ -12,7 +12,7 @@ module Stacks::Selenium::Cluster
 
   attr_accessor :hub, :selenium_version, :nodespecs
 
-  def configure()
+  def configure
     @hub = nil
     @selenium_version = '2.32.0'
     @nodespecs = []

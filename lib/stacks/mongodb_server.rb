@@ -9,7 +9,7 @@ class Stacks::MongoDBServer < Stacks::MachineDef
     @backup = false
   end
 
-  def to_enc()
+  def to_enc
     enc = {
       'role::mongodb_server' => {
         'application' => @virtual_service.application

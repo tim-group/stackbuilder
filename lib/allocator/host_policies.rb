@@ -2,7 +2,7 @@ require 'allocator/namespace'
 require 'allocator/policy_helpers'
 
 module StackBuilder::Allocator::HostPolicies
-  def self.ha_group()
+  def self.ha_group
     Proc.new do |host, machine_spec|
       result = { :passed => true }
       if machine_spec[:availability_group]

@@ -12,7 +12,7 @@ class Stacks::QuantAppServer < Stacks::MachineDef
     spec
   end
 
-  def to_enc()
+  def to_enc
     {
       'role::quantapp_server' => {}
     }

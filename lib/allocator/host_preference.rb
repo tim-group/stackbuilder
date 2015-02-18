@@ -1,21 +1,21 @@
 require 'allocator/namespace'
 
 module StackBuilder::Allocator::HostPreference
-  def self.fewest_machines()
+  def self.fewest_machines
     Proc.new do |host|
       host.machines.size
     end
   end
 
-  def self.alphabetical_fqdn()
+  def self.alphabetical_fqdn
     Proc.new do |host|
       host.fqdn
     end
   end
 
-  def self.most_available_ram()
+  def self.most_available_ram
   end
 
-  def self.most_available_disk()
+  def self.most_available_disk
   end
 end

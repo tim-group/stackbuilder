@@ -12,7 +12,7 @@ module Stacks::VirtualSftpService
     object.configure
   end
 
-  def configure()
+  def configure
     @downstream_services = []
     @ports = [21, 22, 2222]
   end

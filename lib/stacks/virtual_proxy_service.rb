@@ -14,7 +14,7 @@ module Stacks::VirtualProxyService
     object.configure
   end
 
-  def configure()
+  def configure
     @downstream_services = []
     @proxy_vhosts_lookup = {}
     @proxy_vhosts        = []

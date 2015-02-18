@@ -17,7 +17,7 @@ module Stacks::VirtualService
   attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
   attr_reader :vip_networks, :allowed_hosts, :included_classes
 
-  def configure()
+  def configure
     @allowed_hosts = []
     @included_classes = {}
     @ehcache = false
@@ -90,7 +90,7 @@ module Stacks::VirtualService
     @persistent_ports << port
   end
 
-  def nat_rules()
+  def nat_rules
     rules = []
     @ports.map do |back_port|
       front_port = @port_map[back_port] || back_port

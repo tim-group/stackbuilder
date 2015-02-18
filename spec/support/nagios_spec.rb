@@ -1,4 +1,4 @@
-$: << File.join(File.dirname(__FILE__), "..")
+$LOAD_PATH << File.join(File.dirname(__FILE__), "..")
 require 'web-test-framework'
 require 'support/nagios'
 

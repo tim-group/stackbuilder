@@ -6,7 +6,7 @@ module Stacks::VirtualBindService
     object.configure
   end
 
-  def configure()
+  def configure
     @ports = [53]
     add_vip_network :mgmt
     remove_vip_network :prod

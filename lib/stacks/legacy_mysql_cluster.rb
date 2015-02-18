@@ -11,7 +11,7 @@ module Stacks::LegacyMysqlCluster
 
   attr_accessor :database_name, :application, :instances
 
-  def configure()
+  def configure
     @database_name = ''
     @application = false
     @instances = 1
@@ -26,7 +26,7 @@ module Stacks::LegacyMysqlCluster
     mysqldb_server = children.first
   end
 
-  def dependant_instance_mysql_rights()
+  def dependant_instance_mysql_rights
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
     }

@@ -8,7 +8,7 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
   end
 
-  def to_enc()
+  def to_enc
     {
       'role::analyticsapp_server' => {
         'datadir'     => @data_directory,

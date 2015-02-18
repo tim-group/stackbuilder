@@ -12,7 +12,7 @@ module Stacks::VirtualRabbitMQService
   attr_reader :proxy_vhosts
   attr_reader :proxy_vhosts_lookup
 
-  def configure()
+  def configure
     @downstream_services = []
     @ports = [5672]
   end

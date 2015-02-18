@@ -13,7 +13,7 @@ class Stacks::StandaloneServer < Stacks::MachineDef
     super(environment)
   end
 
-  def to_spec()
+  def to_spec
     spec = super()
     spec.delete(:availability_group)
     spec

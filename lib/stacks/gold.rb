@@ -6,7 +6,7 @@ module Stacks::Gold
     object.configure
   end
 
-  def configure()
+  def configure
     on_bind do
     end
 

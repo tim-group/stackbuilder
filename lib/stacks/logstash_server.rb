@@ -7,7 +7,7 @@ class Stacks::LogstashServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
   end
 
-  def to_enc()
+  def to_enc
     {
       'role::logstash_server' => {
         'environment' => environment.name

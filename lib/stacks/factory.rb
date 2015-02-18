@@ -17,7 +17,7 @@ require 'stacks/core/services'
 require 'stacks/namespace'
 
 class Stacks::Factory
-  def logger()
+  def logger
     return @log unless @log.nil?
 
     @log = Logger.new STDOUT
@@ -53,11 +53,11 @@ class Stacks::Factory
     @log
   end
 
-  def inventory()
+  def inventory
     @inventory ||= Stacks::Inventory.new('.')
   end
 
-  def policies()
+  def policies
     @policies ||= [
       StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy,
       StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy,
@@ -68,26 +68,26 @@ class Stacks::Factory
     ]
   end
 
-  def preference_functions()
+  def preference_functions
     @preference_functions ||= [
       StackBuilder::Allocator::HostPreference.fewest_machines,
       StackBuilder::Allocator::HostPreference.alphabetical_fqdn
     ]
   end
 
-  def compute_controller()
+  def compute_controller
     @compute_controller ||= Compute::Controller.new
   end
 
-  def compute_node_client()
+  def compute_node_client
     @compute_node_client ||= Compute::Client.new
   end
 
-  def dns_service()
+  def dns_service
     @dns_service ||= StackBuilder::DNS::BasicDNSService.new(:logger => logger)
   end
 
-  def host_repository()
+  def host_repository
     @host_repository ||= StackBuilder::Allocator::HostRepository.new(
       :machine_repo => inventory,
       :preference_functions => preference_functions,
@@ -97,11 +97,11 @@ class Stacks::Factory
     )
   end
 
-  def allocator()
+  def allocator
     StackBuilder::Allocator::EphemeralAllocator.new(:host_repository => host_repository)
   end
 
-  def services()
+  def services
     @services ||= Stacks::Core::Services.new(
       :compute_controller => compute_controller,
       :allocator => allocator,

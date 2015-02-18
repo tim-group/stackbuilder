@@ -11,7 +11,7 @@ module Stacks::MysqlCluster
 
   attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances
 
-  def configure()
+  def configure
     @database_name = ''
     @master_instances = 1
     @slave_instances = 1
@@ -83,7 +83,7 @@ module Stacks::MysqlCluster
     machine_defs_to_fqdns(machine_defs).sort
   end
 
-  def dependant_children_replication_mysql_rights()
+  def dependant_children_replication_mysql_rights
     rights = {
       'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} }
     }
@@ -99,7 +99,7 @@ module Stacks::MysqlCluster
     rights
   end
 
-  def dependant_instance_mysql_rights()
+  def dependant_instance_mysql_rights
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
     }

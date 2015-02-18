@@ -35,7 +35,7 @@ class Compute::Client
       end
     end
 
-    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
+    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
 
     response_hash = Hash[response]
     allocation_disabled_fact_hash = Hash[get_fact('allocation_disabled', hosts)]
@@ -57,7 +57,7 @@ class Compute::Client
         end
       end
 
-      raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map do |x| x[0] end.join(', ')})" unless hosts.size == response.size
+      raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
     rescue
     end
 

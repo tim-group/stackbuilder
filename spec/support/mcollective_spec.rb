@@ -59,7 +59,7 @@ describe Support::MCollective do
   end
 
   it 'can be pre-injected with a list of hosts to discover' do
-    my_nodes = ["1", "2", "3"]
+    my_nodes = %w(1 2 3)
     @mock_rpcclient.should_receive(:discover).with({ :nodes => my_nodes })
     mco_client("blah", :nodes => my_nodes) do |mco|
     end

@@ -9,7 +9,7 @@ module Stacks::LoadBalancerCluster
     object.configure
   end
 
-  def configure()
+  def configure
   end
 
   def depends_on

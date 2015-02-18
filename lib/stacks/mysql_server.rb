@@ -70,7 +70,7 @@ class Stacks::MysqlServer < Stacks::MachineDef
     @virtual_service.children.index(self) + 1
   end
 
-  def to_enc()
+  def to_enc
     enc = {
       'role::mysql_server' => {
         'backup'                   => backup?,

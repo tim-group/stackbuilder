@@ -1,5 +1,5 @@
-$: << File.join(File.dirname(__FILE__), "..", "lib")
-$: << '/opt/orctool/lib'
+$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib")
+$LOAD_PATH << '/opt/orctool/lib'
 require 'orc/util/option_parser'
 require 'rake'
 require 'pp'
@@ -244,7 +244,7 @@ namespace :sbx do
       task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
 
       desc "perform a clean followed by a provision"
-      task :reprovision => ['clean', 'provision']
+      task :reprovision => %w(clean provision)
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -473,7 +473,7 @@ namespace :sbx do
       # removing their puppet cert, otherwise we have a race condition
       task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
       desc "frees up ip and vip allocation of these machines"
-      task :free_ip_allocation => ['free_ips', 'free_vips']
+      task :free_ip_allocation => %w(free_ips free_vips)
 
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new

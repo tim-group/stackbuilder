@@ -7,7 +7,7 @@ class Stacks::FmAnalyticsAppServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
   end
 
-  def to_enc()
+  def to_enc
     {
       'role::fmanalyticsapp_server' => {}
     }

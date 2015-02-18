@@ -19,13 +19,13 @@ describe Subscription do
     subscription.start(topic)
 
     threads = []
-    threads << Thread.new {
+    threads << Thread.new do
       subscription.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
       subscription.stomp.publish("/topic/#{topic}", { "host" => "b" }.to_json)
-    }
+    end
 
-    events = subscription.wait_for_hosts(topic, ["a", "b"])
-    events.responses.should have_messages_for_hosts(["a", "b"])
+    events = subscription.wait_for_hosts(topic, %w(a b))
+    events.responses.should have_messages_for_hosts(%w(a b))
   end
 
   it 'returns anyway after the timeout with some results missing' do
@@ -34,11 +34,11 @@ describe Subscription do
     subscription.start(topic)
 
     threads = []
-    threads << Thread.new {
+    threads << Thread.new do
       subscription.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
-    }
+    end
 
-    events = subscription.wait_for_hosts(topic, ["a", "b"])
+    events = subscription.wait_for_hosts(topic, %w(a b))
     events.responses.should have_messages_for_hosts(["a"])
   end
 
@@ -50,10 +50,10 @@ describe Subscription do
     subscription2.start([topic, topic2])
 
     threads = []
-    threads << Thread.new {
+    threads << Thread.new do
       subscription2.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
       subscription2.stomp.publish("/topic/#{topic2}", { "host" => "a" }.to_json)
-    }
+    end
 
     subscription2.wait_for_hosts(topic, ["a"]).responses.should have_messages_for_hosts(["a"])
     subscription2.wait_for_hosts(topic2, ["a"]).responses.should have_messages_for_hosts(["a"])
@@ -66,12 +66,12 @@ describe Subscription do
     subscription.start([topic])
 
     threads = []
-    threads << Thread.new {
+    threads << Thread.new do
       subscription.stomp.publish("/topic/#{topic}", { "host" => "a", "status" => "changed" }.to_json)
       subscription.stomp.publish("/topic/#{topic}", { "host" => "b", "status" => "failed" }.to_json)
-    }
+    end
 
-    result = subscription.wait_for_hosts(topic, ["a", "b", "c"])
+    result = subscription.wait_for_hosts(topic, %w(a b c))
 
     result.passed.should eql(["a"])
     result.failed.should eql(["b"])

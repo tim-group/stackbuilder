@@ -9,7 +9,7 @@ module Stacks::MachineGroup
     object.configure
   end
 
-  def configure()
+  def configure
     on_bind do |machineset, environment|
       @environment = environment
       configure_domain_name(environment)

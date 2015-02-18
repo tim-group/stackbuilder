@@ -53,7 +53,7 @@ class Subscription
     end
   end
 
-  def self.create_client()
+  def self.create_client
     configfile = MCollective::Util.config_file_for_user
 
     if !@@loaded
@@ -68,7 +68,7 @@ class Subscription
                       config.pluginconf['rabbitmq.pool.1.port'])
   end
 
-  def self.create_stomp()
+  def self.create_stomp
     configfile = MCollective::Util.config_file_for_user
 
     if !@@loaded

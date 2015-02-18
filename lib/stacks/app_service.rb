@@ -5,7 +5,7 @@ module Stacks::AppService
 
   attr_accessor :application, :ehcache, :sso_port, :ajp_port, :jvm_args
 
-  def configure()
+  def configure
     @ehcache = false
     @ports = [8000]
     @sso_port = nil

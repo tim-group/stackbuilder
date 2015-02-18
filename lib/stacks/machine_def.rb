@@ -89,7 +89,7 @@ class Stacks::MachineDef
     end
   end
 
-  def owner_fact()
+  def owner_fact
     unless $LOAD_PATH.include?('/var/lib/puppet/lib')
       $LOAD_PATH << '/var/lib/puppet/lib'
     end

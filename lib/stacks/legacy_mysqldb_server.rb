@@ -21,7 +21,7 @@ class Stacks::LegacyMysqlDBServer < Stacks::MachineDef
     @destroyable = false
   end
 
-  def to_enc()
+  def to_enc
     enc = {
       'role::databaseserver' => {
         'environment'              => environment.name,

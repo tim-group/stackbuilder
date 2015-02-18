@@ -3,7 +3,7 @@ require 'stacks/machine_def_container'
 require 'uri'
 
 module Stacks::ShadowServerCluster
-  def configure()
+  def configure
     @instances = 1
   end
 

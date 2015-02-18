@@ -34,7 +34,7 @@ class Stacks::AppServer < Stacks::MachineDef
 
   public
 
-  def to_enc()
+  def to_enc
     enc = super
     enc['role::http_app'] = {
       'application' => virtual_service.application,

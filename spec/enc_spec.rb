@@ -86,7 +86,7 @@ describe Stacks::DSL do
 
     stack "oneapp" do
       virtual_appserver "oneapp" do
-        self.groups = ['blue', 'green']
+        self.groups = %w(blue green)
       end
     end
 
@@ -127,7 +127,7 @@ describe Stacks::DSL do
 
     stack "oneapp" do
       virtual_appserver "oneapp" do
-        self.groups = ['blue', 'green']
+        self.groups = %w(blue green)
         self.healthcheck_timeout = 999
       end
     end
@@ -173,7 +173,7 @@ describe Stacks::DSL do
     stack "blah" do
       virtual_appserver "appx" do
         self.application = "JavaHttpRef"
-        self.groups = ['blue', 'green']
+        self.groups = %w(blue green)
       end
       virtual_appserver "app2x" do
         self.application = "MySuperCoolApp"
@@ -304,7 +304,7 @@ describe Stacks::DSL do
       virtual_appserver "appx" do
         self.instances = 4
         self.application = "JavaHttpRef"
-        self.groups = ['blue', 'green']
+        self.groups = %w(blue green)
       end
     end
     env "ci", :primary_site => "st" do
@@ -502,11 +502,11 @@ describe Stacks::DSL do
   end
 
   it 'throws an error if we try and instantiate a stack that isnt defined' do
-    expect {
+    expect do
       env "myold", :primary_site => "x", :secondary_site => "y" do
         instantiate_stack "no-exist"
       end
-    }.to raise_error "no stack found 'no-exist'"
+    end.to raise_error "no stack found 'no-exist'"
   end
 
   it 'generates proxyserver enc data' do

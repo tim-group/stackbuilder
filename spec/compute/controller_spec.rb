@@ -15,9 +15,9 @@ describe Compute::Controller do
       { :hostname => "vm2" }
     ]
 
-    expect {
+    expect do
       @compute_controller.allocate(specs)
-    }.to raise_error("unable to find any suitable compute nodes")
+    end.to raise_error("unable to find any suitable compute nodes")
   end
 
   it 'allocates to the local fabric' do
@@ -147,7 +147,7 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", { "vm1" => ["success", "yay"] }]])
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", { "vm1" => %w(success yay) }]])
     @compute_node_client.should_receive(:launch).with("myhost", specs)
 
     @compute_controller.launch(specs)
@@ -167,7 +167,7 @@ describe Compute::Controller do
                :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
              }]
 
-    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", { "vm1" => ["success", "yay"] }]])
+    @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", { "vm1" => %w(success yay) }]])
     @compute_node_client.should_receive(:launch).with("myhost", [specs[0]])
 
     already_active = []
@@ -223,7 +223,7 @@ describe Compute::Controller do
     #    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
 
     @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).and_return([["myhost", { "vm1" => ["success", "o noes"] }]])
-    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", { "vm2" => ["success", "yes"] }]])
+    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", { "vm2" => %w(success yes) }]])
 
     result = []
 
@@ -236,7 +236,7 @@ describe Compute::Controller do
     end
     pp result
 
-    result.should eql([["vm1", "o noes"], ["vm2", "yes"]])
+    result.should eql([["vm1", "o noes"], %w(vm2 yes)])
   end
 
   it 'calls back if any launchraw command failed' do
@@ -295,7 +295,7 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:launch).and_return([["myhost", { "vm1" => ["success", "yay"] }]])
+    @compute_node_client.stub(:launch).and_return([["myhost", { "vm1" => %w(success yay) }]])
 
     unaccounted = []
     @compute_controller.launch(specs) do
@@ -318,7 +318,7 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => ["success", "yay"] }], ["host2", { "vm2" => ["success", "hey"] }]])
+    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => %w(success yay) }], ["host2", { "vm2" => %w(success hey) }]])
 
     successful = []
     @compute_controller.clean(specs) do
@@ -327,7 +327,7 @@ describe Compute::Controller do
       end
     end
 
-    successful.should eql([["vm1", "yay"], ["vm2", "hey"]])
+    successful.should eql([%w(vm1 yay), %w(vm2 hey)])
   end
 
   it 'unaccounted for vms (when clean is called) will be reported' do
@@ -341,7 +341,7 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:clean).and_return([["myhost", { "vm1" => ["success", "yay"] }]])
+    @compute_node_client.stub(:clean).and_return([["myhost", { "vm1" => %w(success yay) }]])
 
     unaccounted = []
     @compute_controller.clean(specs) do
@@ -364,7 +364,7 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => ["failed", "o noes"] }], ["host2", { "vm2" => ["success", "yay"] }]])
+    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => ["failed", "o noes"] }], ["host2", { "vm2" => %w(success yay) }]])
 
     failures = []
     @compute_controller.clean(specs) do
@@ -389,7 +389,7 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:clean).with("st", [specs[1]]).and_return([["st", { "vm2" => ["success", "yay"] }]])
+    @compute_node_client.stub(:clean).with("st", [specs[1]]).and_return([["st", { "vm2" => %w(success yay) }]])
 
     failures = []
     expect { @compute_controller.clean(specs) }.to raise_error
@@ -419,7 +419,7 @@ describe Compute::Controller do
       end
     end
 
-    successful.should eql([["vm1", "success"]])
-    failures.should eql [["vm2", "failed"]]
+    successful.should eql([%w(vm1 success)])
+    failures.should eql [%w(vm2 failed)]
   end
 end

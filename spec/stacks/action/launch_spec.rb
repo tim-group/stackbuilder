@@ -191,8 +191,8 @@ describe 'launch' do
       :host_repo => host_repo,
       :compute_controller => compute_controller)
 
-    expect {
+    expect do
       get_action("launch").call(services, env)
-    }.to raise_error("unable to allocate test-refapp-001 due to policy violation:\n  unable to allocate to h1 because it is [rh1]\n  unable to allocate to h2 because it is [rh2]\n  unable to allocate to h3 because it is [rh3]")
+    end.to raise_error("unable to allocate test-refapp-001 due to policy violation:\n  unable to allocate to h1 because it is [rh1]\n  unable to allocate to h2 because it is [rh2]\n  unable to allocate to h3 because it is [rh3]")
   end
 end

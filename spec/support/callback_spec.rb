@@ -32,6 +32,6 @@ describe Support::Callback do
     callback.invoke(:event, "bar")
     callback.finish
 
-    passed_args.should eql(["foo", "bar"])
+    passed_args.should eql(%w(foo bar))
   end
 end

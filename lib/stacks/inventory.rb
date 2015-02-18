@@ -6,8 +6,8 @@ class Stacks::Inventory
       begin
         @stacks.instance_eval(IO.read(stack_file))
       rescue
-        backtrace = $@.join("\n")
-        raise "Unable to instance_eval #{stack_file}\n#{$!}\n#{backtrace}"
+        backtrace = $ERROR_POSITION.join("\n")
+        raise "Unable to instance_eval #{stack_file}\n#{$ERROR_INFO}\n#{backtrace}"
       end
     end
   end
