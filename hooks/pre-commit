@@ -11,9 +11,16 @@ else
 fi
 
 if which rubocop > /dev/null; then
+	# check only touched files
+	tmpdir=$(mktemp -d pre-commit.XXXXXXXXXX)
+	trap "rm -rf $tmpdir" EXIT
+
+	git diff --cached --name-only --diff-filter=ACM \
+	 | git checkout-index --stdin --prefix=$tmpdir/
+
 	# rake lint is configured to work with Jenkins
 	# here we run rubocop with no arguments for interactive use
-	rubocop || exit 1
+	rubocop $tmpdir/ || exit 1
 else
 	echo "[31mrubocop not found[0m" >&2
 	exit 1
