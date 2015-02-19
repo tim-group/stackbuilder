@@ -1,16 +1,20 @@
-#!/bin/bash
+#!/bin/sh
 
 echo -n "Running rake spec: "
-OUTPUT=`rake spec 2>&1`
-#>/dev/null 2>&1`
-RC=$?
-if [ $RC -ne 0 ]; then
-  echo "FAIL"
-  echo "$OUTPUT"
-  exit 1
+SPEC_OUTPUT=`rake spec 2>&1`
+if [ $? -ne 0 ]; then
+	echo "[31mFAIL[0m" >&2
+	echo "$SPEC_OUTPUT" >&2
+	exit 1
 else
-  echo "OK"
+	echo "[32mOK[0m"
 fi
 
-exit 0
-
+if which rubocop > /dev/null; then
+	# rake lint is configured to work with Jenkins
+	# here we run rubocop with no arguments for interactive use
+	rubocop || exit 1
+else
+	echo "[31mrubocop not found[0m" >&2
+	exit 1
+fi
