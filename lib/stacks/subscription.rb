@@ -56,7 +56,7 @@ class Subscription
   def self.create_client
     configfile = MCollective::Util.config_file_for_user
 
-    if !@@loaded
+    unless @@loaded
       MCollective::Config.instance.loadconfig(configfile)
       @@loaded = true
     end
@@ -71,7 +71,7 @@ class Subscription
   def self.create_stomp
     configfile = MCollective::Util.config_file_for_user
 
-    if !@@loaded
+    unless @@loaded
       MCollective::Config.instance.loadconfig(configfile)
       @@loaded = true
     end

@@ -419,7 +419,7 @@ namespace :sbx do
             logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
           end
 
-          if !run_result.all_passed?
+          unless run_result.all_passed?
             fail("Puppet runs have timed out or failed, see above for details")
           end
         end
@@ -541,7 +541,7 @@ namespace :sbx do
             mco.domainxml(:domain => host) do |result|
               xml = result[:body][:data][:xml]
               sender = result[:senderid]
-              if !xml.nil?
+              unless xml.nil?
                 matches = /type='vnc' port='(\-?\d+)'/.match(xml)
                 raise "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
                 raise "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" if matches.captures.empty?

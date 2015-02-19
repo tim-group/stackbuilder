@@ -7,14 +7,14 @@ describe Stacks::Inventory do
   end
 
   it 'blows up if a stackbuilder config file contains errors' do
-    expect {
+    expect do
       Dir.mktmpdir("stacks-test-config") do |dir|
         File.open("#{dir}/ruby_file_with_errors.rb", 'w') do |file|
           file.write("burp!")
         end
         Stacks::Inventory.new(dir)
       end
-    }.to raise_error
+    end.to raise_error
   end
 
   it 'returns nil when asked to find an unknown node' do

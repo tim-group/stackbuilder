@@ -158,7 +158,7 @@ class Stacks::MachineDef
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }
 
-    spec[:disallow_destroy] = true if !@destroyable
+    spec[:disallow_destroy] = true unless @destroyable
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:storage] = storage

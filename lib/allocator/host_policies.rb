@@ -71,7 +71,7 @@ module StackBuilder::Allocator::HostPolicies
       result = { :passed => true }
 
       persistent_storage_not_found = {}
-      if !host.storage.nil?
+      unless host.storage.nil?
         machine[:storage].each do |mount_point, attributes|
           persistent = attributes[:persistent]
           persistence_options = attributes[:persistence_options] rescue {}
@@ -132,7 +132,7 @@ module StackBuilder::Allocator::HostPolicies
         result
       end
       result = { :passed => true }
-      if !storage_without_enough_space.empty?
+      unless storage_without_enough_space.empty?
         sorted_keys = storage_without_enough_space.keys.sort
         result = {
           :passed => false,

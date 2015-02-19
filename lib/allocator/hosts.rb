@@ -42,7 +42,7 @@ class StackBuilder::Allocator::Hosts
 
     candidate_hosts = hosts.reject do |host|
       allocation_check_result = host.can_allocate(machine)
-      if !allocation_check_result[:allocatable]
+      unless allocation_check_result[:allocatable]
         reasons = allocation_check_result[:reasons]
         reason_message = reasons.empty? ? 'unsuitable for an unknown reason' : allocation_check_result[:reasons].join("; ")
         @logger.debug("Allocating #{machine[:hostname]} -- skipping #{host.fqdn} - #{reasons.size} reasons:\n          * #{reason_message}") unless @logger.nil?
