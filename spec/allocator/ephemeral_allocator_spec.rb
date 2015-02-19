@@ -39,10 +39,9 @@ describe StackBuilder::Allocator::EphemeralAllocator do
 
     allocation_result = allocator.allocate([candidate_machine, candidate_machine_2, existing_machine])
 
-    allocation_result[:already_allocated].should eql({ existing_machine => 'h1' })
+    allocation_result[:already_allocated].should eql(existing_machine => 'h1')
     allocation_result[:newly_allocated].should eql(
-      { 'h1' => [candidate_machine],
-        'h2' => [candidate_machine_2]
-    })
+      'h1' => [candidate_machine],
+      'h2' => [candidate_machine_2])
   end
 end

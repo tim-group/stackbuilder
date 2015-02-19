@@ -23,7 +23,7 @@ describe Stacks::DSL do
     appx.to_specs.shift[:domain].should eql('st.net.local')
     appx.to_specs.shift[:fabric].should eql('st')
     appx.to_specs.shift[:availability_group].should eql('ci-appx')
-    appx.to_specs.shift[:qualified_hostnames].should eql({ :mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local" })
+    appx.to_specs.shift[:qualified_hostnames].should eql(:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local")
   end
 
   it 'can make an arbitrary specd machine' do

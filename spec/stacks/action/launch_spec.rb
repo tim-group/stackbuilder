@@ -75,10 +75,8 @@ describe 'launch' do
 
     Hash[hosts.allocated_machines(env.flatten).map do |machine, host|
       [machine.mgmt_fqdn, host.fqdn]
-    end].should eql({
-                      "test-refapp-001.mgmt.t.net.local" => "hx",
-                      "test-refapp-002.mgmt.t.net.local" => "hx"
-                    })
+    end].should eql("test-refapp-001.mgmt.t.net.local" => "hx",
+                    "test-refapp-002.mgmt.t.net.local" => "hx")
   end
 
   xit 'gives me a list of machines that are going to be launched' do
@@ -89,10 +87,8 @@ describe 'launch' do
     hosts.allocate(env.flatten)
     Hash[hosts.new_machine_allocation.map do |machine, host|
       [machine.mgmt_fqdn, host.fqdn]
-    end].should eql({
-                      "test-refapp-001.mgmt.t.net.local" => "hx",
-                      "test-refapp-002.mgmt.t.net.local" => "hx"
-                    })
+    end].should eql("test-refapp-001.mgmt.t.net.local" => "hx",
+                    "test-refapp-002.mgmt.t.net.local" => "hx")
   end
 
   xit 'will allocate machines to machines in the correct fabric' do

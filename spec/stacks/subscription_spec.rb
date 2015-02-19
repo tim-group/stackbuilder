@@ -77,11 +77,9 @@ describe Subscription do
     result.failed.should eql(["b"])
     result.unaccounted_for.should eql(["c"])
 
-    result.all.should eql({
-                            "a" => "success",
-                            "b" =>  "failed",
-                            "c" =>  "unaccounted_for"
-                          })
+    result.all.should eql("a" => "success",
+                          "b" =>  "failed",
+                          "c" =>  "unaccounted_for")
     result.all_passed?.should eql(false)
   end
 end

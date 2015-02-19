@@ -34,23 +34,19 @@ class Stacks::MysqlServer < Stacks::MachineDef
   end
 
   def backup_size(size)
-    modify_storage({ '/mnt/storage' => { :size => size } }) if @backup
+    modify_storage('/mnt/storage' => { :size => size }) if @backup
   end
 
   def data_size(size)
-    modify_storage({ '/mnt/data' => { :size => size } })
+    modify_storage('/mnt/data' => { :size => size })
   end
 
   def create_persistent_storage_override
-    modify_storage({
-                     '/mnt/data' => {
-                       :persistence_options => { :on_storage_not_found => :create_new }
-                     }
+    modify_storage('/mnt/data' => {
+                     :persistence_options => { :on_storage_not_found => :create_new }
                    })
-    modify_storage({
-                     '/mnt/storage' => {
-                       :persistence_options => { :on_storage_not_found => :create_new }
-                     }
+    modify_storage('/mnt/storage' => {
+                     :persistence_options => { :on_storage_not_found => :create_new }
                    }) if backup?
   end
 
@@ -89,10 +85,8 @@ class Stacks::MysqlServer < Stacks::MachineDef
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::mysql_server'].merge!({
-                                         'dependencies' => @virtual_service.dependency_config,
-                                         'dependant_instances' => dependant_instances
-                                       })
+      enc['role::mysql_server'].merge!('dependencies' => @virtual_service.dependency_config,
+                                       'dependant_instances' => dependant_instances)
       unless backup?
         enc.merge!(@virtual_service.dependant_instance_mysql_rights)
       end

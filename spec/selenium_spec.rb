@@ -3,7 +3,7 @@ describe_stack 'selenium' do
   given do
     stack "segrid" do
       selenium_version = "2.41.0"
-      hub = selenium_hub('hub-001', { :selenium_version => selenium_version })
+      hub = selenium_hub('hub-001', :selenium_version => selenium_version)
       selenium_node_cluster "a" do
         self.hub = hub
         self.selenium_version = selenium_version

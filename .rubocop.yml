@@ -35,15 +35,6 @@ Style/Proc:
 # versions of RuboCop, may require this file to be generated again.
 
 # Offense count: 1
-Lint/AmbiguousOperator:
-  Enabled: false
-
-# Offense count: 4
-# Configuration parameters: AlignWith, SupportedStyles.
-Lint/DefEndAlignment:
-  Enabled: false
-
-# Offense count: 1
 Lint/HandleExceptions:
   Enabled: false
 
@@ -53,16 +44,6 @@ Lint/RescueException:
 
 # Offense count: 17
 Lint/ShadowingOuterLocalVariable:
-  Enabled: false
-
-# Offense count: 41
-# Cop supports --auto-correct.
-Lint/UnusedBlockArgument:
-  Enabled: false
-
-# Offense count: 45
-# Cop supports --auto-correct.
-Lint/UnusedMethodArgument:
   Enabled: false
 
 # Offense count: 12
@@ -96,28 +77,12 @@ Metrics/LineLength:
 Metrics/MethodLength:
   Max: 52
 
-# Offense count: 1
-# Configuration parameters: CountKeywordArgs.
-Metrics/ParameterLists:
-  Max: 8
-
 # Offense count: 8
 Metrics/PerceivedComplexity:
   Max: 12
 
 # Offense count: 3
 Style/AccessorMethodName:
-  Enabled: false
-
-# Offense count: 130
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/BracesAroundHashParameters:
-  Enabled: false
-
-# Offense count: 7
-# Configuration parameters: IndentWhenRelativeTo, SupportedStyles, IndentOneStep.
-Style/CaseIndentation:
   Enabled: false
 
 # Offense count: 1
@@ -144,16 +109,6 @@ Style/ClassVars:
 Style/ColonMethodCall:
   Enabled: false
 
-# Offense count: 3
-# Configuration parameters: Keywords.
-Style/CommentAnnotation:
-  Enabled: false
-
-# Offense count: 9
-# Cop supports --auto-correct.
-Style/DeprecatedHashMethods:
-  Enabled: false
-
 # Offense count: 103
 Style/Documentation:
   Enabled: false
@@ -167,18 +122,9 @@ Style/EachWithObject:
 Style/FormatString:
   Enabled: false
 
-# Offense count: 2
-# Configuration parameters: MinBodyLength.
-Style/GuardClause:
-  Enabled: false
-
 # Offense count: 3
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/MethodName:
-  Enabled: false
-
-# Offense count: 1
-Style/MultilineBlockChain:
   Enabled: false
 
 # Offense count: 3
@@ -199,6 +145,28 @@ Style/RescueModifier:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/SignalException:
+  Enabled: false
+
+##################################
+### refactor
+##################################
+# Offense count: 1
+# Configuration parameters: CountKeywordArgs.
+Metrics/ParameterLists:
+  Max: 8
+
+# Offense count: 41
+# Cop supports --auto-correct.
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+# Offense count: 45
+# Cop supports --auto-correct.
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+# Offense count: 1
+Style/MultilineBlockChain:
   Enabled: false
 
 # Offense count: 13

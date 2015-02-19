@@ -76,16 +76,16 @@ class Stacks::MachineDef
     suffix = 'net.local'
     @domain = "#{@fabric}.#{suffix}"
     case @fabric
-      when 'local'
-        @domain = "dev.#{suffix}"
-        @hostname = "#{@hostname}-#{owner_fact}"
+    when 'local'
+      @domain = "dev.#{suffix}"
+      @hostname = "#{@hostname}-#{owner_fact}"
     end
     raise "domain must not contain mgmt" if @domain =~ /mgmt\./
   end
 
   def disable_persistent_storage
     @storage.each do |mount_point, values|
-      modify_storage({ mount_point.to_sym => { :persistent => false } })
+      modify_storage(mount_point.to_sym => { :persistent => false })
     end
   end
 

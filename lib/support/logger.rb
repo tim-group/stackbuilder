@@ -2,7 +2,7 @@ require 'logger'
 require 'support/namespace'
 
 class Support::RakeFormatter
-  @@interactive = $stdout.tty? || ENV.has_key?("BUILD_NUMBER")
+  @@interactive = $stdout.tty? || ENV.key?("BUILD_NUMBER")
   @@format = @@interactive ? "\t\e[1m[%s]\e[0m %s\n" : "\t[%s] %s\n"
   attr_accessor :datetime_format
 

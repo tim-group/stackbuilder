@@ -30,22 +30,16 @@ describe_stack 'should provide the correct cross routing enc data' do
   end
 
   host("testing-frdb-001.mgmt.pg.net.local") do |host|
-    host.to_enc['networking::routing::to_site'].should eql({
-                                                             'network' => 'prod',
-                                                             'site'    => 'oy'
-                                                           })
+    host.to_enc['networking::routing::to_site'].should eql('network' => 'prod',
+                                                           'site'    => 'oy')
   end
   host("testing-frdb-002.mgmt.pg.net.local") do |host|
-    host.to_enc['networking::routing::to_site'].should eql({
-                                                             'network' => 'prod',
-                                                             'site'    => 'oy'
-                                                           })
+    host.to_enc['networking::routing::to_site'].should eql('network' => 'prod',
+                                                           'site'    => 'oy')
   end
   host("testing-frdbbackup-001.mgmt.oy.net.local") do |host|
-    host.to_enc['networking::routing::to_site'].should eql({
-                                                             'network' => 'prod',
-                                                             'site'    => 'pg'
-                                                           })
+    host.to_enc['networking::routing::to_site'].should eql('network' => 'prod',
+                                                           'site'    => 'pg')
   end
 end
 
@@ -140,13 +134,11 @@ describe_stack 'should provide correct enc data' do
     enc_rights['mydb']['database_name'].should eql('mydb')
 
     host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql({
-                                                                                  'replicant@testing-mydb-002.space.net.local' => {
-                                                                                    'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-                                                                                  },
-                                                                                  'replicant@testing-mydbbackup-001.earth.net.local' => {
-                                                                                    'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-                                                                                  }
+    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql('replicant@testing-mydb-002.space.net.local' => {
+                                                                                  'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+                                                                                },
+                                                                                'replicant@testing-mydbbackup-001.earth.net.local' => {
+                                                                                  'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
                                                                                 })
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|

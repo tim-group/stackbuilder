@@ -62,10 +62,8 @@ describe_stack 'should allow storage options to be overwritten' do
       legacy_mysqldb "mydb" do
         self.database_name = "mydb"
         each_machine do |machine|
-          machine.modify_storage({
-                                   '/'              => { :size => '5G' },
-                                   '/var/lib/mysql' => { :type => 'data', :size => '10G' }
-                                 })
+          machine.modify_storage('/'              => { :size => '5G' },
+                                 '/var/lib/mysql' => { :type => 'data', :size => '10G' })
         end
       end
     end

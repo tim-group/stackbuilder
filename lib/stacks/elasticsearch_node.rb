@@ -11,7 +11,7 @@ class Stacks::ElasticSearchNode < Stacks::MachineDef
 
   def bind_to(environment)
     super(environment)
-   end
+  end
 
   def to_enc
     {

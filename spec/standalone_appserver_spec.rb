@@ -9,26 +9,24 @@ describe_stack 'tim' do
         each_machine do |machine|
           machine.ram = '14680064'
           machine.vcpus = '8'
-          machine.modify_storage({ '/'.to_sym => { :size => '10G' } })
+          machine.modify_storage('/'.to_sym => { :size => '10G' })
         end
       end
     end
-    env "e1", { :primary_site => "space", :tim_instances => 2 } do
+    env "e1", :primary_site => "space", :tim_instances => 2 do
       instantiate_stack "tim"
     end
   end
 
   host("e1-timcyclic-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql({
-                             'role::http_app' => {
-                               'application' => 'TIM',
-                               'group' => 'blue',
-                               'cluster' => 'e1-timcyclic',
-                               'environment' => 'e1',
-                               'port'        => '8000',
-                               'dependencies' => {},
-                               'dependant_instances' => []
-                             }
+    host.to_enc.should eql('role::http_app' => {
+                             'application' => 'TIM',
+                             'group' => 'blue',
+                             'cluster' => 'e1-timcyclic',
+                             'environment' => 'e1',
+                             'port'        => '8000',
+                             'dependencies' => {},
+                             'dependant_instances' => []
                            })
   end
   host("e1-timcyclic-002.mgmt.space.net.local") do |host|
@@ -46,7 +44,7 @@ describe_stack 'app with sso port' do
         enable_sso('8444')
       end
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "app"
     end
   end
@@ -64,7 +62,7 @@ describe_stack 'app with ajp port' do
         enable_ajp('8444')
       end
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "app"
     end
   end

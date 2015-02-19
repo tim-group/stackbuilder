@@ -21,10 +21,8 @@ class Stacks::RabbitMQServer < Stacks::MachineDef
     }
     dependant_instances = @virtual_service.dependant_machine_def_fqdns
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::rabbitmq_server'].merge!({
-                                            'dependant_instances' => dependant_instances,
-                                            'dependencies' => @virtual_service.dependency_config
-                                          })
+      enc['role::rabbitmq_server'].merge!('dependant_instances' => dependant_instances,
+                                          'dependencies' => @virtual_service.dependency_config)
     end
     enc
   end

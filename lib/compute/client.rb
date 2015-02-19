@@ -43,9 +43,8 @@ class Compute::Client
 
     libvirt_response_hash = Hash[response_hash]
 
-    # FIXME:
-    # Once all computenodes have new storage config, unwrap this code
-    # from begin/rescue
+    # FIXME: Once all computenodes have new storage config, unwrap this
+    # code from begin/rescue
     response = nil
     begin
       response = mco_client("computenodestorage", :nodes => hosts) do |mco|
@@ -61,9 +60,8 @@ class Compute::Client
     rescue
     end
 
-    # FIXME:
-    # Once all computenodes have new storage config, unwrap this code
-    # from unless
+    # FIXME: Once all computenodes have new storage config, unwrap this
+    # code from unless
     unless response.nil?
       storage_response_hash = Hash[response]
 

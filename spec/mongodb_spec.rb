@@ -53,7 +53,7 @@ describe_stack 'mongodb' do
 
   host("prodbackup-mongodb-001.mgmt.space.net.local") do |host|
     host.to_enc['role::mongodb_server']['application'].should eql("myapp")
-    host.to_enc['mongodb::backup'].should eql({ 'ensure' => 'present' })
+    host.to_enc['mongodb::backup'].should eql('ensure' => 'present')
     host.to_enc['mongodb::users']['environment'].should eql('prodbackup')
   end
 end

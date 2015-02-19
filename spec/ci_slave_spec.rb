@@ -5,7 +5,7 @@ describe_stack 'jenkins' do
       cislave 'jenkinsslave' do
         each_machine do |machine|
           machine.vcpus = '8'
-          machine.modify_storage({ '/'.to_sym => { :size => '10G' } })
+          machine.modify_storage('/'.to_sym => { :size => '10G' })
           machine.ram = '8000'
         end
       end
@@ -20,6 +20,6 @@ describe_stack 'jenkins' do
     host.should have_ancestory(
       ["e1", "jenkins", "jenkinsslave", "jenkinsslave-002"])
 
-    host.to_enc.should eql({ 'role::cinode_precise' => {} })
+    host.to_enc.should eql('role::cinode_precise' => {})
   end
 end

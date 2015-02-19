@@ -15,7 +15,7 @@ describe Support::Nagios::Service do
 
   before do
     @mock_service = MockService.new
-    @test = Support::Nagios::Service.new({ :service => @mock_service })
+    @test = Support::Nagios::Service.new(:service => @mock_service)
     @test_machine1 = Stacks::MachineDef.new("test1")
     @test_machine2 = Stacks::MachineDef.new("test2")
     env = Stacks::Environment.new("env", { :primary_site => "oy" }, {}, {})
@@ -53,13 +53,11 @@ describe Support::Nagios::Service::Http do
   class NagiosServiceHttpTest  < WebTestFramework::SimpleTest
     def invoke_test_server_with_fixture_and_create_service(fixture_file, port = '5152')
       setup_test_server_with_fixture(fixture_file)
-      Support::Nagios::Service::Http.new({
-                                           :nagios_servers => {
-                                             'oy' => 'localhost',
-                                             'pg' => 'localhost'
-                                           },
-                                           :nagios_api_port => 5152
-                                         })
+      Support::Nagios::Service::Http.new(:nagios_servers => {
+                                           'oy' => 'localhost',
+                                           'pg' => 'localhost'
+                                         },
+                                         :nagios_api_port => 5152)
     end
 
     def fixture_path

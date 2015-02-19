@@ -17,9 +17,7 @@ describe_stack 'test_app_server' do
   end
 
   host("e1-appx-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app']['launch_config'].should eql({
-                                                                'specify_config_as_system_property' => 'yes'
-                                                              })
+    host.to_enc['role::http_app']['launch_config'].should eql('specify_config_as_system_property' => 'yes')
   end
 end
 
@@ -37,7 +35,7 @@ describe_stack 'test_app_server should default to no jvm args' do
   end
 
   host("e1-appx-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app'].has_key?('jvm_args').should eql(false)
+    host.to_enc['role::http_app'].key?('jvm_args').should eql(false)
   end
 end
 

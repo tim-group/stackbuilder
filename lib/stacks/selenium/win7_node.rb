@@ -8,7 +8,7 @@ class Stacks::Selenium::Win7Node < Stacks::MachineDef
     super(base_hostname, [:mgmt])
     @hub = hub
     @options = options
-    modify_storage({ '/'.to_sym => { :size => '15G' } })
+    modify_storage('/'.to_sym => { :size => '15G' })
   end
 
   def bind_to(environment)

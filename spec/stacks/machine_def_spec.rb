@@ -79,10 +79,8 @@ describe Stacks::MachineDef do
 
   it 'should disable persistent if the environment does not support it' do
     machinedef = Stacks::MachineDef.new("test")
-    machinedef.modify_storage({
-                                '/'.to_sym         => { :persistent => true },
-                                '/mnt/data'.to_sym => { :persistent => true }
-                              })
+    machinedef.modify_storage('/'.to_sym         => { :persistent => true },
+                              '/mnt/data'.to_sym => { :persistent => true })
     env = Stacks::Environment.new("noenv", {
                                     :primary_site => "local",
                                     :persistent_storage_supported => false
@@ -101,12 +99,10 @@ describe Stacks::MachineDef do
                                   }, {}, {}
     )
     machinedef.bind_to(env)
-    machinedef.to_enc.should eql({
-                                   'routes' => {
-                                     'to' => [
-                                       'mgmt_pg'
-                                     ]
-                                   }
+    machinedef.to_enc.should eql('routes' => {
+                                   'to' => [
+                                     'mgmt_pg'
+                                   ]
                                  })
   end
 end

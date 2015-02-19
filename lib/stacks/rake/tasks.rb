@@ -35,7 +35,7 @@ config.color_enabled = true
 ENV['CI_REPORTS'] = 'build/spec/reports/'
 
 ####
-# TODO:
+# TODO
 # general:
 #         use logging
 #         push stuff back out of here
@@ -115,16 +115,16 @@ namespace :sbx do
   def order(headers)
     order = headers.inject([]) do |order, header|
       case header
-       when :fqdn
-         order.insert(0, header)
-       when :vms
-         order.insert(1, header)
-        when 'memory(GB)'.to_sym
-          order.insert(2, header)
-        when 'os(GB)'.to_sym
-          order.insert(3, header)
-        else
-          order.push(header)
+      when :fqdn
+        order.insert(0, header)
+      when :vms
+        order.insert(1, header)
+      when 'memory(GB)'.to_sym
+        order.insert(2, header)
+      when 'os(GB)'.to_sym
+        order.insert(3, header)
+      else
+        order.push(header)
       end
       order
     end
@@ -144,7 +144,7 @@ namespace :sbx do
       row = ordered_headers.inject([]) do |row_values, header|
         value = data_values[header] || ""
         width = value.size > header.to_s.size ? value.size : header.to_s.size
-        if !ordered_header_widths.has_key?(header)
+        if !ordered_header_widths.key?(header)
           ordered_header_widths[header] = width
         else
           ordered_header_widths[header] = width if ordered_header_widths[header] < width
@@ -162,7 +162,7 @@ namespace :sbx do
       Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
     end
     Table.tabulate
- end
+  end
 
   def KB_to_GB(value)
     ((value.to_f / (1024 * 1024) * 100).round / 100.0)

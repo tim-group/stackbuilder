@@ -23,6 +23,6 @@ describe_stack 'mongodb' do
     host.to_enc['role::rabbitmq_server']['cluster_nodes'].should eql(['e1-rabbitmq-001', 'e1-rabbitmq-002'])
     host.to_enc['role::rabbitmq_server']['dependant_instances'].should eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
     host.to_enc['role::rabbitmq_server']['dependencies'].should eql({})
-    host.to_enc.has_key?('server::default_new_mgmt_net_local').should eql true
+    host.to_enc.key?('server::default_new_mgmt_net_local').should eql true
   end
 end

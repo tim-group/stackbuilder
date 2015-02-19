@@ -41,7 +41,7 @@ module Stacks::VirtualProxyService
   end
 
   def _vhost(key, default_vhost_fqdn, alias_fqdn, service, type, options = {}, vhost_properties = {}, &config_block)
-    if environment.options.has_key?(key)
+    if environment.options.key?(key)
       proxy_vhost = Stacks::ProxyVHost.new(environment.options[key], service, type, &config_block)
       proxy_vhost.with_alias(default_vhost_fqdn)
     else

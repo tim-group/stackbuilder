@@ -13,7 +13,7 @@ module Support
 
     class MCollectiveFabricRunner
       def initialize(options)
-        if options.has_key? :key
+        if options.key? :key
           ::MCollective::PluginManager.clear
           @config = ::MCollective::Config.instance
           config_file = options[:config_file] || "/etc/mcollective/client.cfg"
@@ -27,7 +27,7 @@ module Support
         @options = options
         @mco_options = ::MCollective::Util.default_options
         @mco_options[:disctimeout] = 5 # Facter can take aaages to respond
-        @mco_options[:timeout] = options[:timeout] if options.has_key?(:timeout)
+        @mco_options[:timeout] = options[:timeout] if options.key?(:timeout)
       end
 
       def new_client(name)
@@ -35,9 +35,7 @@ module Support
         # debug information / bkhidhir / 2015-01-12
         # puts @mco_options
         # puts client.inspect
-        if @options.has_key?(:fabric)
-          apply_fabric_filter client, @options[:fabric]
-        end
+        apply_fabric_filter client, @options[:fabric] if @options.key?(:fabric)
         client
       end
 

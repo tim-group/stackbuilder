@@ -32,10 +32,8 @@ module Stacks::LegacyMysqlCluster
     }
     virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|
-        rights['mysql_hacks::application_rights_wrapper']['rights'].merge!({
-                                                                             "#{service.application}@#{dependant.prod_fqdn}/#{database_name}" => {
-                                                                               'password_hiera_key'  => "enc/#{service.environment.name}/#{service.application}/mysql_password"
-                                                                             }
+        rights['mysql_hacks::application_rights_wrapper']['rights'].merge!("#{service.application}@#{dependant.prod_fqdn}/#{database_name}" => {
+                                                                             'password_hiera_key'  => "enc/#{service.environment.name}/#{service.application}/mysql_password"
                                                                            })
       end
     end

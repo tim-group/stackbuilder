@@ -24,5 +24,5 @@ class Stacks::LoadBalancer < Stacks::MachineDef
       'virtual_servers' => virtual_services_hash
     }
     enc
-   end
+  end
 end

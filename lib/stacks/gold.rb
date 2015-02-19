@@ -51,7 +51,7 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
 
   def to_spec
     spec = super
-    modify_storage({ '/'.to_sym => {
+    modify_storage('/'.to_sym => {
                      :prepare => {
                        :options => {
                          :create_in_fstab => false,
@@ -59,21 +59,21 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
                          :resize => false
                        }
                      }
-                   } })
+                   })
     case @win_version
     when 'win7'
-      modify_storage({ '/'.to_sym => {
+      modify_storage('/'.to_sym => {
                        :size => '15G'
-                     } })
+                     })
     when 'xp'
-      modify_storage({ '/'.to_sym => {
+      modify_storage('/'.to_sym => {
                        :size => '8G',
                        :prepare => {
                          :options => {
                            :virtio => false
                          }
                        }
-                     } })
+                     })
     else
       raise "Unkown version of Windows: #{win_version}"
     end
@@ -90,7 +90,7 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
     super(base_hostname, [:mgmt])
     @ubuntu_version = ubuntu_version
     @options = options
-    modify_storage({ '/'.to_sym => {
+    modify_storage('/'.to_sym => {
                      :prepare => {
                        :method =>  'format',
                        :options => {
@@ -100,7 +100,7 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
                          :shrink_after_unmount => true
                        }
                      }
-                   } })
+                   })
   end
 
   def bind_to(environment)

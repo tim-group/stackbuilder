@@ -13,15 +13,11 @@ describe_stack 'debrepo' do
   end
 
   host("e1-debrepo-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql({
-                             'role::deb_repo' => {}
-                           })
+    host.to_enc.should eql('role::deb_repo' => {})
 
-    host.to_specs.shift[:cnames].should eql({
-                                              :mgmt => {
-                                                'aptly-master'     => 'e1-debrepo-001.mgmt.space.net.local',
-                                                'deb-transitional' => 'e1-debrepo-001.mgmt.space.net.local'
-                                              }
+    host.to_specs.shift[:cnames].should eql(:mgmt => {
+                                              'aptly-master'     => 'e1-debrepo-001.mgmt.space.net.local',
+                                              'deb-transitional' => 'e1-debrepo-001.mgmt.space.net.local'
                                             })
   end
 end

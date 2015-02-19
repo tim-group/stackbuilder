@@ -5,7 +5,7 @@ describe_stack 'should default root storage size to 3G' do
     stack 'demo' do
       loadbalancer
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "demo"
     end
   end
@@ -20,7 +20,7 @@ describe_stack 'should default appserver storage size to 5G' do
     stack 'demo' do
       standalone_appserver 'default'
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "demo"
     end
   end
@@ -35,13 +35,11 @@ describe_stack 'can specify app server system storage size' do
     stack 'demo' do
       standalone_appserver 'default' do
         each_machine do |machine|
-          machine.modify_storage({
-                                   '/' => { :size => '10G' }
-                                 })
+          machine.modify_storage('/' => { :size => '10G' })
         end
       end
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "demo"
     end
   end
@@ -56,13 +54,11 @@ describe_stack 'allow additional storage to be specified' do
     stack 'demo' do
       standalone_appserver 'mysqldb' do
         each_machine do |machine|
-          machine.modify_storage({
-                                   '/var/lib/mysql' => { :type => 'data', :size => '50G' }
-                                 })
+          machine.modify_storage('/var/lib/mysql' => { :type => 'data', :size => '50G' })
         end
       end
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "demo"
     end
   end
@@ -78,32 +74,30 @@ describe_stack 'allow all existing storage options to be modified' do
     stack 'demo' do
       standalone_appserver 'mysqldb' do
         each_machine do |machine|
-          machine.modify_storage({
-                                   '/'              => {
-                                     :type => 'wizzy',
-                                     :size => '5G',
-                                     :prepare => {
-                                       :method => 'image',
-                                       :options => {
-                                         :path => '/var/local/images/gold/duck.img'
-                                       }
+          machine.modify_storage('/'              => {
+                                   :type => 'wizzy',
+                                   :size => '5G',
+                                   :prepare => {
+                                     :method => 'image',
+                                     :options => {
+                                       :path => '/var/local/images/gold/duck.img'
                                      }
-                                   },
-                                   '/var/lib/mysql' => {
-                                     :type => 'data',
-                                     :size => '500G',
-                                     :prepare => {
-                                       :method => 'format',
-                                       :options => {
-                                         :type => 'ext4'
-                                       }
+                                   }
+                                 },
+                                 '/var/lib/mysql' => {
+                                   :type => 'data',
+                                   :size => '500G',
+                                   :prepare => {
+                                     :method => 'format',
+                                     :options => {
+                                       :type => 'ext4'
                                      }
                                    }
                                  })
         end
       end
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "demo"
     end
   end
@@ -125,17 +119,15 @@ describe_stack 'allow persistence to be set' do
     stack 'demo' do
       standalone_appserver 'mysqldb' do
         each_machine do |machine|
-          machine.modify_storage({
-                                   '/var/lib/mysql' => {
-                                     :type       => 'data',
-                                     :size       => '500G',
-                                     :persistent => true
-                                   }
+          machine.modify_storage('/var/lib/mysql' => {
+                                   :type       => 'data',
+                                   :size       => '500G',
+                                   :persistent => true
                                  })
         end
       end
     end
-    env "e1", { :primary_site => "space" } do
+    env "e1", :primary_site => "space" do
       instantiate_stack "demo"
     end
   end
