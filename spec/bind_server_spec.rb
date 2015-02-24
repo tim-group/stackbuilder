@@ -396,3 +396,24 @@ describe_stack 'bind servers with zones removed should have the right zone files
     host.virtual_service.zones.should be_eql [:mgmt]
   end
 end
+
+describe_stack 'test @slave_instances = 2' do
+  given do
+    stack "nameserver" do
+      virtual_bindserver 'ns' do
+        self.slave_instances = 2
+      end
+    end
+
+    env "o", :primary_site => "oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+      end
+    end
+  end
+
+  host("oy-ns-003.mgmt.oy.net.local") do |host|
+    enc = host.to_enc
+    enc['role::bind_server']['slave_zones'].should eql('oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'])
+  end
+end

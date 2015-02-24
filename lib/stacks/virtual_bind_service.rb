@@ -1,6 +1,7 @@
 module Stacks::VirtualBindService
   attr_reader :zones
   attr_accessor :forwarder_zones
+  attr_accessor :slave_instances
 
   def self.extended(object)
     object.configure
@@ -13,6 +14,7 @@ module Stacks::VirtualBindService
     @udp = true
     @zones = [:mgmt, :prod, :front]
     @forwarder_zones = []
+    @slave_instances = 1
   end
 
   def remove_zone(zone)
@@ -90,10 +92,11 @@ module Stacks::VirtualBindService
 
   def instantiate_machines(environment)
     i = 0
-    index =  sprintf("%03d", i += 1)
-    instantiate_machine(name, :master, index, environment)
-    index =  sprintf("%03d", i += 1)
-    instantiate_machine(name, :slave, index, environment)
+
+    instantiate_machine(name, :master, sprintf("%03d", i += 1), environment)
+    @slave_instances.times do
+      instantiate_machine(name, :slave, sprintf("%03d", i += 1), environment)
+    end
   end
 
   def slave_servers
