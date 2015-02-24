@@ -1,3 +1,5 @@
+require "English"
+
 class Stacks::Inventory
   def initialize(stack_dir)
     @stacks = Object.new
