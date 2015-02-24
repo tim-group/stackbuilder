@@ -160,17 +160,11 @@ module Stacks::VirtualBindService
         'type'         => 'bind',
         'ports'        => @ports,
         'realservers'  => {
-          'blue' => realserver_fqdns(vip_net)
+          'blue' => realservers.map { |server| server.qualified_hostname(vip_net) }.sort
         },
         'healthchecks' => healthchecks
       }
     end
     lb_config
-  end
-
-  private
-
-  def realserver_fqdns(net)
-    realservers.map { |server| server.qualified_hostname(net) }.sort
   end
 end
