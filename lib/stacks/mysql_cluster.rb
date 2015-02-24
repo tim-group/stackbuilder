@@ -31,17 +31,15 @@ module Stacks::MysqlCluster
   def instantiate_machines(environment)
     i = 0
     @master_instances.times do
-      index = sprintf("%03d", i += 1)
-      instantiate_machine(name, :master, index, environment)
+      instantiate_machine(name, :master, sprintf("%03d", i += 1), environment)
     end
     @slave_instances.times do
-      index = sprintf("%03d", i += 1)
-      instantiate_machine(name, :slave, index, environment)
+      instantiate_machine(name, :slave, sprintf("%03d", i += 1), environment)
     end
+
     i = 0
     @backup_instances.times do
-      index = sprintf("%03d", i += 1)
-      instantiate_machine(name, :backup, index, environment)
+      instantiate_machine(name, :backup, sprintf("%03d", i += 1), environment)
     end
   end
 
