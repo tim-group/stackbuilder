@@ -18,7 +18,7 @@ describe Support::Forking do
 
   it 'throws an exception if a mistake was made' do
     expect do
-      async_fork_and_return().value do
+      async_fork_and_return.value do
         provisio # syntax error
       end.value
     end.to raise_error
