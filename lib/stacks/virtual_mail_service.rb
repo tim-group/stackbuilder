@@ -20,7 +20,7 @@ module Stacks::VirtualMailService
         'ports'        => @ports,
         'realservers'  => {
           'blue' => realservers.map { |server| server.qualified_hostname(vip_net) }.sort
-        },
+        }
       }
     end
     lb_config
