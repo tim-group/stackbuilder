@@ -24,7 +24,7 @@ class StackBuilder::DNS::BasicDNSService
     method = "#{type}_ips".to_sym
     computecontroller = Compute::Controller.new
     computecontroller.send(method, specs) do
-      on :success do |vm, msg|
+      on :success do |vm|
         logger.info "#{vm} #{type} IP successfully"
       end
       on :failure do |vm, msg|
@@ -43,7 +43,7 @@ class StackBuilder::DNS::BasicDNSService
     method = "#{type}_cnames".to_sym
     computecontroller = Compute::Controller.new
     computecontroller.send(method, specs) do
-      on :success do |vm, msg|
+      on :success do |vm|
         logger.info "#{vm} #{type} CNAME successfully"
       end
       on :failure do |vm, msg|

@@ -4,11 +4,11 @@ require 'support/nagios'
 
 describe Support::Nagios::Service do
   class MockService
-    def schedule_downtime(machine, duration)
+    def schedule_downtime(_machine, _duration)
       "OK"
     end
 
-    def cancel_downtime(machine)
+    def cancel_downtime(_machine)
       "OK"
     end
   end
@@ -51,7 +51,7 @@ end
 
 describe Support::Nagios::Service::Http do
   class NagiosServiceHttpTest  < WebTestFramework::SimpleTest
-    def invoke_test_server_with_fixture_and_create_service(fixture_file, port = '5152')
+    def invoke_test_server_with_fixture_and_create_service(fixture_file)
       setup_test_server_with_fixture(fixture_file)
       Support::Nagios::Service::Http.new(:nagios_servers => {
                                            'oy' => 'localhost',

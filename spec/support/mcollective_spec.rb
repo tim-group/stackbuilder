@@ -15,7 +15,7 @@ describe Support::MCollective do
         @@rpcclient = rpcclient
       end
 
-      def rpcclient(name, options)
+      def rpcclient(_name, options)
         @@mco_options = options
         @@rpcclient
       end
@@ -39,30 +39,26 @@ describe Support::MCollective do
   it 'applies a filter so that only machines in the fabric are addressed' do
     @mock_rpcclient.should_receive(:discover).with(no_args)
     @mock_rpcclient.should_receive(:fact_filter).with("domain", "mgmt.st.net.local")
-    mco_client("blah", :fabric => "st") do |mco|
-    end
+    mco_client("blah", :fabric => "st")
   end
 
   it 'applies a filter so that only local machines are addressed' do
     @mock_rpcclient.should_receive(:discover).with(no_args).ordered
     @mock_rpcclient.should_receive(:fact_filter).with("owner", Facter.value('owner'))
-    mco_client("blah", :fabric => "local") do |mco|
-    end
+    mco_client("blah", :fabric => "local")
   end
 
   it 'uses a timeout if supplied' do
     @mock_rpcclient.should_receive(:discover).with(no_args).ordered
     @mock_rpcclient.should_receive(:fact_filter).with("owner", Facter.value('owner'))
-    mco_client("blah", :fabric => "local", :timeout => 44) do |mco|
-    end
+    mco_client("blah", :fabric => "local", :timeout => 44)
     Support::MCollective::MCollectiveRPC.mco_options[:options][:timeout].should eql(44)
   end
 
   it 'can be pre-injected with a list of hosts to discover' do
     my_nodes = %w(1 2 3)
     @mock_rpcclient.should_receive(:discover).with(:nodes => my_nodes)
-    mco_client("blah", :nodes => my_nodes) do |mco|
-    end
+    mco_client("blah", :nodes => my_nodes)
   end
 
   it 'switch the mco key to use' do

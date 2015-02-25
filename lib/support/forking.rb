@@ -11,7 +11,7 @@ module Support::Forking
     end
   end
 
-  def async_fork_and_return(options = {}, &block)
+  def async_fork_and_return(&block)
     read, write = IO.pipe
     pid = fork do
       begin
