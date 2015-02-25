@@ -1,6 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/analyticsapp_server'
 require 'stacks/app_service'
+require 'stacks/bind_server'
 require 'stacks/ci_slave'
 require 'stacks/deb_repo'
 require 'stacks/deb_repo_mirror'
@@ -15,23 +16,24 @@ require 'stacks/logstash_server'
 require 'stacks/machine_def_container'
 require 'stacks/machine_group'
 require 'stacks/machine_set'
+require 'stacks/mail_server'
 require 'stacks/mongodb_cluster'
 require 'stacks/mongodb_server'
 require 'stacks/mysql_cluster'
 require 'stacks/mysql_server'
-require 'stacks/bind_server'
 require 'stacks/nat_server'
 require 'stacks/proxy_server'
 require 'stacks/puppetmaster'
 require 'stacks/quantapp_server'
 require 'stacks/rate_limited_forward_proxy_server'
-require 'stacks/selenium/hub'
 require 'stacks/selenium/cluster'
+require 'stacks/selenium/hub'
 require 'stacks/sensu_server'
 require 'stacks/shadow_server'
 require 'stacks/shadow_server_cluster'
 require 'stacks/standard_server'
 require 'stacks/virtual_bind_service'
+require 'stacks/virtual_mail_service'
 require 'stacks/virtual_proxy_service'
 require 'stacks/virtual_rabbitmq_service'
 require 'stacks/virtual_service'
@@ -69,6 +71,10 @@ class Stacks::Stack
 
   def virtual_bindserver(name, &block)
     machineset_with(name, [Stacks::VirtualService, Stacks::VirtualBindService], Stacks::BindServer, &block)
+  end
+
+  def virtual_mailserver(name, &block)
+    machineset_with(name, [Stacks::VirtualService, Stacks::VirtualMailService], Stacks::MailServer, &block)
   end
 
   def shadow_server(name, &block)
