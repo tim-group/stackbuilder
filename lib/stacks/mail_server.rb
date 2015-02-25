@@ -29,7 +29,7 @@ class Stacks::MailServer < Stacks::MachineDef
     enc.merge!('role::mail_server2' => {
                  'allowed_hosts'       => @virtual_service.allowed_hosts,
                  'vip_fqdns'           => vip_fqdns,
-                 'vip_networks'        => @virtual_service.vip_networks.map { |vip_network| vip_network.to_s },
+                 'vip_networks'        => @virtual_service.vip_networks.map(&:to_s),
                  'dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns(@virtual_service.vip_networks),
                  'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns(@virtual_service.vip_networks)
                },

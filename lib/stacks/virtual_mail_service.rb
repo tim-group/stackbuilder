@@ -21,7 +21,6 @@ module Stacks::VirtualMailService
         'realservers'  => {
           'blue' => realservers.map { |server| server.qualified_hostname(vip_net) }.sort
         },
-        #'healthchecks' => healthchecks
       }
     end
     lb_config
