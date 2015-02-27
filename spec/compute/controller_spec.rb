@@ -218,7 +218,6 @@ describe Compute::Controller do
         result << row
       end
     end
-    pp result
 
     result.should eql([["vm1", "o noes"], %w(vm2 yes)])
   end
