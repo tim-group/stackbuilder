@@ -16,9 +16,8 @@ class Support::RakeFormatter
 
   def msg2str(msg)
     if @@interactive
-      msg = msg.gsub(/success/, "\e[32msuccess\e[0m")
-      msg = msg.gsub(/successful/, "\e[32msuccessful\e[0m")
-      msg = msg.gsub(/failed/, "\e[31mfailed\e[0m")
+      msg = msg.gsub(/(success\w*)/, "\e[32m\\1\e[0m")
+      msg = msg.gsub(/(fail\w*)/, "\e[31m\\1\e[0m")
     end
     msg
   end
