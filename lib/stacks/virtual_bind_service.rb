@@ -83,7 +83,7 @@ module Stacks::VirtualBindService
 
   def instantiate_machine(name, type, index, environment)
     server_name = "#{name}-#{index}"
-    server = @type.new(server_name, self, type, index, &@config_block)
+    server = @type.new(server_name, self, type)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
     @definitions[server_name] = server

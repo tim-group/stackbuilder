@@ -4,9 +4,6 @@ module Stacks::MachineDefContainer
   attr_reader :definitions
   attr_reader :environment
 
-  def self.included(object)
-  end
-
   def children
     # pretend we have a sorted dictionary
     @definitions.sort.map { |k, v| v }

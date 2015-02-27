@@ -3,7 +3,7 @@ require 'stacks/machine_def'
 
 class Stacks::ElasticSearchNode < Stacks::MachineDef
   attr_reader :machine_set
-  def initialize(server_group, index, &block)
+  def initialize(server_group, index)
     @machine_set = server_group
     super(server_group.name + "-" + index, [:prod, :mgmt])
     self

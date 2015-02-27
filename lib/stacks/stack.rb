@@ -129,7 +129,7 @@ class Stacks::Stack
     @definitions[name] = Stacks::Selenium::Hub.new(name, @definitions, options)
   end
 
-  def selenium_node_cluster(name = 'segrid', hub = nil, &block)
+  def selenium_node_cluster(name = 'segrid', &block)
     machineset_with(name, [Stacks::Selenium::Cluster], nil, &block)
   end
 

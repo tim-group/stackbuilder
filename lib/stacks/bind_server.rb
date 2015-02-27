@@ -7,7 +7,7 @@ class Stacks::BindServer < Stacks::MachineDef
   attr_reader :role
   attr_reader :virtual_service
 
-  def initialize(base_hostname, virtual_service, role, index, &block)
+  def initialize(base_hostname, virtual_service, role)
     @role = role
     super(base_hostname, [:mgmt, :prod], :primary_site)
     @virtual_service = virtual_service
