@@ -5,7 +5,7 @@ class Stacks::ShadowServer < Stacks::MachineDef
   attr_reader :environment, :virtual_service
   attr_accessor :group, :hostname, :domain
 
-  def initialize(virtual_service, index, &block)
+  def initialize(virtual_service, _index)
     super(virtual_service.name)
     @virtual_service = virtual_service
     @storage = {}

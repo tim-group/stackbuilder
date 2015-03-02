@@ -42,7 +42,7 @@ module Stacks::MachineGroup
   def instantiate_machines(environment)
     @instances.times do |i|
       index = sprintf("%03d", i + 1)
-      @definitions["#{name}-#{index}"] = server = @type.new(self, index, &@config_block)
+      @definitions["#{name}-#{index}"] = server = @type.new(self, index)
       server.group = groups[i % groups.size] if server.respond_to?(:group)
 
       if server.respond_to?(:availability_group)

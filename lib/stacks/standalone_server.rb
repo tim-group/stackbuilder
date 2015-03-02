@@ -4,7 +4,7 @@ require 'stacks/machine_def'
 class Stacks::StandaloneServer < Stacks::MachineDef
   attr_reader :environment
 
-  def initialize(base_hostname, location, &block)
+  def initialize(base_hostname, &block)
     super(base_hostname)
     block.call unless block.nil?
   end

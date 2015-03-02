@@ -2,7 +2,7 @@ require 'stacks/namespace'
 
 class Stacks::PuppetMaster < Stacks::MachineDef
   attr_accessor :cnames
-  def initialize(machineset, index, &block)
+  def initialize(machineset, index)
     super(machineset.name + "-" + index, [:mgmt])
   end
 

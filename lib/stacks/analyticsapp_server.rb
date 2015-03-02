@@ -2,7 +2,7 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::AnalyticsAppServer < Stacks::MachineDef
-  def initialize(virtual_service, index, &block)
+  def initialize(virtual_service, index)
     @virtual_service = virtual_service
     @data_directory  = false
     super(virtual_service.name + "-" + index)

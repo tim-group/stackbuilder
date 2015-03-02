@@ -3,7 +3,7 @@ require 'stacks/machine_def'
 
 class Stacks::MongoDBServer < Stacks::MachineDef
   attr_accessor :backup
-  def initialize(virtual_service, index, &block)
+  def initialize(virtual_service, index)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
     @backup = false

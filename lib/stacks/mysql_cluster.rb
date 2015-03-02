@@ -21,7 +21,7 @@ module Stacks::MysqlCluster
   def instantiate_machine(name, type, index, environment)
     server_name = "#{name}-#{index}"
     server_name = "#{name}#{type}-#{index}" if type == :backup
-    server = @type.new(server_name, self, type, index, &@config_block)
+    server = @type.new(server_name, self, type)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
     @definitions[server_name] = server

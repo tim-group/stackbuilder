@@ -4,7 +4,7 @@ require 'stacks/machine_def'
 class Stacks::MysqlServer < Stacks::MachineDef
   attr_accessor :master
 
-  def initialize(base_hostname, virtual_service, role, index, &block)
+  def initialize(base_hostname, virtual_service, role)
     @master = (role == :master) ? true : false
     @backup = (role == :backup) ? true : false
     location = backup? ? (:secondary_site) : (:primary_site)

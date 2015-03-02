@@ -2,7 +2,7 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::CiSlave < Stacks::MachineDef
-  def initialize(server_group, index, &block)
+  def initialize(server_group, index)
     super(server_group.name + "-" + index, [:mgmt])
     self
   end

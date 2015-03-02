@@ -28,7 +28,7 @@ describe Stacks::DSL do
 
   it 'can make an arbitrary specd machine' do
     stack "fabric" do
-      @definitions["puppetmaster"] = Stacks::StandaloneServer.new("puppetmaster-001", :primary_site) do
+      @definitions["puppetmaster"] = Stacks::StandaloneServer.new("puppetmaster-001") do
         def to_specs
           specs = super
           specs.each do |spec|
