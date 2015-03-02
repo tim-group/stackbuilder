@@ -6,6 +6,9 @@ AllCops:
 Metrics/LineLength:
   Max: 120
 
+Style/FormatString:
+  EnforcedStyle: sprintf
+
 # This is just so we don't have to correct a zillion lines
 Style/StringLiterals:
   Enabled: false
@@ -115,11 +118,6 @@ Style/Documentation:
 
 # Offense count: 12
 Style/EachWithObject:
-  Enabled: false
-
-# Offense count: 8
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/FormatString:
   Enabled: false
 
 # Offense count: 3
