@@ -207,12 +207,28 @@ namespace :sbx do
     tabulate(details_for(hosts.hosts))
   end
 
+  # find nodes that are either allocated but not defined or defined but not allocated
   task :find_rogue do
-    hosts = @factory.host_repository.find_current("local")
+    # iterate over all environments, find out all defined machines
+    all_defined_machines = []
+    environment.environments.each do |_envname, env|
+      all_defined_machines += env.flatten.map { |vm| vm.hostname }
+    end
 
-    rogue_machines = hosts.hosts.map(&:allocated_machines).flatten.reject { |vm| vm[:in_model] }
+    # iterate over all sites, find out all allocated machines
+    all_allocated_machines = []
+    %w(lon oy pg st ci).each do |site|
+      puts "polling #{site}..."
+      all_allocated_machines += @factory.host_repository.find_current(site).hosts.map(&:allocated_machines).flatten.map { |vm| vm[:hostname] }
+    end
 
-    pp rogue_machines
+    rogue1 = all_defined_machines - all_allocated_machines
+    puts "defined, but not allocated (%d):" % rogue1.size
+    rogue1.each { |node| puts "  #{node}" }
+
+    rogue2 = all_allocated_machines - all_defined_machines
+    puts "allocated, but not defined (%d):" % rogue2.size
+    rogue2.each { |node| puts "  #{node}" }
   end
 
   require 'set'
