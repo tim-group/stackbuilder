@@ -212,7 +212,7 @@ namespace :sbx do
     # iterate over all environments, find out all defined machines
     all_defined_machines = []
     environment.environments.each do |_envname, env|
-      all_defined_machines += env.flatten.map { |vm| vm.hostname }
+      all_defined_machines += env.flatten.map(&:hostname)
     end
 
     # iterate over all sites, find out all allocated machines
@@ -223,11 +223,11 @@ namespace :sbx do
     end
 
     rogue1 = all_defined_machines - all_allocated_machines
-    puts "defined, but not allocated (%d):" % rogue1.size
+    puts sprintf("defined, but not allocated (%d):", rogue1.size)
     rogue1.each { |node| puts "  #{node}" }
 
     rogue2 = all_allocated_machines - all_defined_machines
-    puts "allocated, but not defined (%d):" % rogue2.size
+    puts sprintf("allocated, but not defined (%d):", rogue2.size)
     rogue2.each { |node| puts "  #{node}" }
   end
 
