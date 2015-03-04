@@ -101,7 +101,7 @@ module StackBuilder::Allocator::HostPolicies
         unless persistent_storage_not_found.empty?
           result = {
             :passed => false,
-            :reason => "Persistent storage not present for type #{reasons.join(',')}"
+            :reason => "Persistent storage not present for type \"#{reasons.join(',')}\""
           }
         end
 
