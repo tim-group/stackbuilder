@@ -14,12 +14,10 @@ class Stacks::SftpServer < Stacks::MachineDef
 
   def to_enc
     enc = super
-    enc.merge!({
-      'role::sftpserver' => {
-        'vip_fqdn' => vip_fqdn(:prod),
-        'env' => environment.name
-      }
-    })
+    enc.merge!('role::sftpserver' => {
+                 'vip_fqdn' => vip_fqdn(:prod),
+                 'env' => environment.name
+               })
     enc
   end
 end
