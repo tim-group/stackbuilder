@@ -34,10 +34,15 @@ class Stacks::MachineDef
     @destroyable = true
     @dont_start = false
     @routes = []
+    @included_classes = {}
   end
 
   def children
     []
+  end
+
+  def include_class(class_name, class_hash = {})
+    @included_classes[class_name] = class_hash
   end
 
   def use_trusty
@@ -173,6 +178,8 @@ class Stacks::MachineDef
 
   def to_enc
     enc = {}
+    enc.merge! @included_classes
+    enc.merge! @virtual_service.included_classes if @virtual_service and @virtual_service.respond_to? :included_classes
     unless @routes.empty?
       enc['routes'] = {
         'to' => @routes

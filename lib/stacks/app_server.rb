@@ -10,7 +10,6 @@ class Stacks::AppServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
     @allowed_hosts = []
-    @included_classes = {}
     @launch_config = {}
     modify_storage('/' => { :size => '5G' })
   end
@@ -26,10 +25,6 @@ class Stacks::AppServer < Stacks::MachineDef
   def allow_host(source_host_or_network)
     @allowed_hosts << source_host_or_network
     @allowed_hosts.uniq!
-  end
-
-  def include_class(class_name, class_hash = {})
-    @included_classes[class_name] = class_hash
   end
 
   public
@@ -53,9 +48,6 @@ class Stacks::AppServer < Stacks::MachineDef
     allowed_hosts = @allowed_hosts
     allowed_hosts += @virtual_service.allowed_hosts if @virtual_service.respond_to? :allowed_hosts
     enc['role::http_app']['allowed_hosts'] = allowed_hosts.uniq.sort unless allowed_hosts.empty?
-
-    enc.merge! @included_classes
-    enc.merge! @virtual_service.included_classes if @virtual_service.respond_to? :included_classes
 
     if @virtual_service.respond_to? :vip_fqdn
       enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod)
