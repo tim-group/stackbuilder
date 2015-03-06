@@ -116,13 +116,15 @@ namespace :sbx do
     order = headers.inject([]) do |order, header|
       case header
       when :fqdn
-        order.insert(0, header)
+        order[0] = header
       when :vms
-        order.insert(1, header)
+        order[1] = header
       when 'memory(GB)'.to_sym
-        order.insert(2, header)
+        order[2] = header
       when 'os(GB)'.to_sym
-        order.insert(3, header)
+        order[3] = header
+      when 'data(GB)'.to_sym
+        order[4] = header
       else
         order.push(header)
       end
@@ -131,7 +133,7 @@ namespace :sbx do
     order.select { |header| !header.nil? }
   end
 
-  def tabulate(data)
+  def tabulate(data, table_header = "")
     require 'collimator'
     include Collimator
     require 'set'
@@ -139,11 +141,12 @@ namespace :sbx do
       all_headers.merge(header.keys)
       all_headers
     end
+
     ordered_headers = order(all_headers)
-    ordered_header_widths = data.inject({}) do |ordered_header_widths, (fqdn, data_values)|
+    ordered_header_widths = data.sort.inject({}) do |ordered_header_widths, (fqdn, data_values)|
       row = ordered_headers.inject([]) do |row_values, header|
         value = data_values[header] || ""
-        width = value.size > header.to_s.size ? value.size : header.to_s.size
+        width = value.size > header.to_s.size ? value.size + 1 : header.to_s.size + 1
         if !ordered_header_widths.key?(header)
           ordered_header_widths[header] = width
         else
@@ -156,7 +159,7 @@ namespace :sbx do
       ordered_header_widths
     end
 
-    Table.header("")
+    Table.header(table_header)
     ordered_headers.each do |header|
       width = ordered_header_widths[header] rescue header.to_s.size
       Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
@@ -204,7 +207,7 @@ namespace :sbx do
   desc 'Print a report of KVM host CPU/Storage/Memory allocation'
   task :audit_host_machines do
     hosts = @factory.host_repository.find_current(environment.options[:primary_site])
-    tabulate(details_for(hosts.hosts))
+    tabulate(details_for(hosts.hosts), "KVM host machines audit")
   end
 
   # find nodes that are either allocated but not defined or defined but not allocated
