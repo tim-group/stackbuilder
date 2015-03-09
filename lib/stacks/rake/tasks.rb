@@ -211,7 +211,7 @@ namespace :sbx do
     tabulate(details_for(hosts.hosts), "KVM host machines audit")
   end
 
-  # find nodes that are either allocated but not defined or defined but not allocated
+  desc 'find nodes that are either allocated but not defined or defined but not allocated'
   task :find_rogue do
     # iterate over all environments, find out all defined machines
     all_defined_machines = []
