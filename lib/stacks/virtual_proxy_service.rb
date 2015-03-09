@@ -29,9 +29,16 @@ module Stacks::VirtualProxyService
 
   def vhost2(fqdn, service, &config_block)
     proxy_vhost = Stacks::ProxyVHost.new(fqdn, service, &config_block)
+
     if proxy_vhost.add_default_aliases == true
-      proxy_vhost.aliases << vip_fqdn(:front)
-      proxy_vhost.aliases << vip_fqdn(:prod)
+      case proxy_vhost.type
+      when 'default'
+        proxy_vhost.aliases << vip_fqdn(:front)
+        proxy_vhost.aliases << vip_fqdn(:prod)
+      when 'sso'
+        proxy_vhost.aliases << "#{environment.name}-#{name}-sso-vip.front.#{@domain}"
+        proxy_vhost.aliases << "#{environment.name}-#{name}-sso-vip.#{@domain}"
+      end
     end
     key = "#{fqdn}-#{name}-#{service}"
     @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
