@@ -7,6 +7,7 @@ require 'yaml'
 require 'rubygems'
 require 'stacks/environment'
 require 'stacks/inventory'
+require 'support/zamls'
 require 'support/mcollective'
 require 'support/mcollective_puppet'
 require 'support/nagios'
@@ -255,7 +256,7 @@ namespace :sbx do
       if machine_def.respond_to? :to_enc
         desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
         task :to_enc do
-          puts machine_def.to_enc.to_yaml
+          puts ZAMLS.to_zamls(machine_def.to_enc)
         end
       end
 
