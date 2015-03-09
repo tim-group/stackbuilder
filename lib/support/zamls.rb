@@ -1,3 +1,4 @@
+# rubocop:disable all
 # This file is a copy of /usr/lib/ruby/vendor_ruby/puppet/util/zaml.rb with the following modifications:
 # * renamed 'ZAML' to 'ZAMLS', 'ZAML_ESCAPES' to 'ZAMLS_ESCAPES' and 'to_zaml' to 'to_zamls'
 # * made to_zamls on a Hash sort the output.
