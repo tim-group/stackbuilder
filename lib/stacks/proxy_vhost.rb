@@ -10,6 +10,7 @@ class Stacks::ProxyVHost
   attr_reader :properties
   attr_reader :type
   attr_reader :cert
+  attr_accessor :add_default_aliases
 
   def initialize(vhost_fqdn, service, type = 'default', &block)
     @vhost_fqdn = vhost_fqdn
@@ -19,6 +20,7 @@ class Stacks::ProxyVHost
     @proxy_pass_rules = {}
     @type = type
     @properties = {}
+    @add_default_aliases = true
     @cert = 'wildcard_timgroup_com'
     instance_eval(&block) if block
   end
