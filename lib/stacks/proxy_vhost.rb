@@ -13,15 +13,16 @@ class Stacks::ProxyVHost
   attr_reader :vhost_fqdn
 
   def initialize(vhost_fqdn, service, type = 'default', &block)
-    @vhost_fqdn = vhost_fqdn
-    @service = service
-    @aliases = []
-    @redirects = []
-    @proxy_pass_rules = {}
-    @type = type
-    @properties = {}
     @add_default_aliases = true
+    @aliases = []
     @cert = 'wildcard_timgroup_com'
+    @properties = {}
+    @proxy_pass_rules = {}
+    @redirects = []
+    @service = service
+    @type = type
+    @vhost_fqdn = vhost_fqdn
+
     instance_eval(&block) if block
   end
 
