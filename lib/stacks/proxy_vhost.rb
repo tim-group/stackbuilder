@@ -2,14 +2,14 @@ require 'stacks/namespace'
 require 'uri'
 
 class Stacks::ProxyVHost
-  attr_reader :aliases
+  attr_accessor :aliases
   attr_reader :vhost_fqdn
   attr_reader :service
   attr_reader :redirects
   attr_reader :proxy_pass_rules
   attr_reader :properties
   attr_reader :type
-  attr_reader :cert
+  attr_accessor :cert
   attr_accessor :add_default_aliases
 
   def initialize(vhost_fqdn, service, type = 'default', &block)
@@ -25,6 +25,7 @@ class Stacks::ProxyVHost
     instance_eval(&block) if block
   end
 
+  # XXX remove once all vhost entries in stackbuilder-config have switched to 'aliases <<'
   def with_alias(alias_fqdn)
     @aliases << alias_fqdn
   end
@@ -37,10 +38,16 @@ class Stacks::ProxyVHost
     @proxy_pass_rules.merge!(proxy_pass_rule)
   end
 
+  # XXX remove once all vhost entries in stackbuilder-config have switched to 'cert ='
   def with_cert(cert_name)
     @cert = cert_name
   end
 
+  def add_properties(properties)
+    @properties.merge!(properties)
+  end
+
+  # XXX remove once all vhost entries in stackbuilder-config have switched to 'add_properties()'
   def vhost_properties(properties)
     @properties.merge!(properties)
   end
