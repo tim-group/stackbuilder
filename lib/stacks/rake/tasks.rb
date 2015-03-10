@@ -255,12 +255,12 @@ namespace :sbx do
 
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_specs do
-        puts machine_def.to_specs.to_yaml
+        puts ZAMLS.to_zamls(machine_def.to_specs)
       end
 
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_vip_spec do
-        puts machine_def.to_vip_spec.to_yaml
+        puts ZAMLS.to_zamls(machine_def.to_vip_spec)
       end
 
       if machine_def.respond_to? :to_enc
