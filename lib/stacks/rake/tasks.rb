@@ -211,6 +211,16 @@ namespace :sbx do
     tabulate(details_for(hosts.hosts), "KVM host machines audit")
   end
 
+  desc 'run to_enc on all nodes'
+  task :dump_enc do
+    environment.environments.sort.each do |envname, env|
+      puts sprintf("=== %s ===", envname)
+      env.flatten.each do |stack|
+        puts ZAMLS.to_zamls(stack.to_enc)
+      end
+    end
+  end
+
   desc 'find nodes that are either allocated but not defined or defined but not allocated'
   task :find_rogue do
     # iterate over all environments, find out all defined machines
