@@ -75,7 +75,8 @@ class Stacks::MysqlServer < Stacks::MachineDef
         'datadir'                  => '/mnt/data/mysql',
         'environment'              => environment.name,
         'master'                   => master?,
-        'server_id'                => server_id
+        'server_id'                => server_id,
+        'charset'                  => @virtual_service.charset
       },
       'server::default_new_mgmt_net_local' => nil
     }

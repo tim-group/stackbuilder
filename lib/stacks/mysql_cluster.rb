@@ -9,13 +9,14 @@ module Stacks::MysqlCluster
     object.configure
   end
 
-  attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances
+  attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances, :charset
 
   def configure
     @database_name = ''
     @master_instances = 1
     @slave_instances = 1
     @backup_instances = 1
+    @charset = 'utf8'
   end
 
   def instantiate_machine(name, type, index, environment)
