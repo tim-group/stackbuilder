@@ -71,7 +71,7 @@ describe Stacks::DSL do
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
-      "role::loadbalancer" => { "virtual_servers" => { "st-sftp-vip.st.net.local" => { "type" => "sftp", "realservers" => { "blue" => ["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"] }, "monitor_warn" => 0, "persistent_ports" => ['21'] } }, "virtual_router_id" => 1 }
+      "role::loadbalancer" => { "virtual_servers" => { "st-sftp-vip.st.net.local" => { "type" => "sftp", "realservers" => { "blue" => ["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"] }, "persistent_ports" => ['21'] } }, "virtual_router_id" => 1 }
     )
   end
 
@@ -238,7 +238,6 @@ describe Stacks::DSL do
           },
           'st-sftp-vip.st.net.local' => {
             'type'        => 'sftp',
-            'monitor_warn' => 0,
             'persistent_ports'  => [],
             'realservers' => {
               'blue' => [
@@ -281,7 +280,6 @@ describe Stacks::DSL do
                                           },
                                           'ci-sftp-vip.st.net.local' => {
                                             'type'        => 'sftp',
-                                            'monitor_warn' => 0,
                                             'persistent_ports'  => [],
                                             'realservers' => {
                                               'blue' => [
