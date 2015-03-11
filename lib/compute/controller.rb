@@ -162,9 +162,6 @@ class Compute::Controller
     end.flatten_hashes
 
     all_specs.each do |spec|
-      unless spec.is_a?(Hash)
-      end
-
       vm = spec[:hostname]
       result = flattened_results[vm]
       if result.nil?
