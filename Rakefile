@@ -20,8 +20,11 @@ task :package do
   sh "rm -f *.deb *.gem"
   sh "rm -rf build/"
 
+  # XXX compatible with both 1.8 and 1.9 during the transition period
   sh "mkdir -p build/usr/local/lib/site_ruby/1.8"
   sh "cp -r lib/* build/usr/local/lib/site_ruby/1.8"
+  sh "mkdir -p build/usr/local/lib/site_ruby/1.9.1"
+  sh "cp -r lib/* build/usr/local/lib/site_ruby/1.9.1"
   sh "mkdir -p build/usr/local/bin"
   sh "cp bin/* build/usr/local/bin"
 
