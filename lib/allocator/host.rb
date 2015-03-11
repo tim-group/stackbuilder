@@ -51,16 +51,27 @@ class StackBuilder::Allocator::Host
   end
 
   # FIXME: Remove this once all machines have new config
+  # XXX: Make sure if "all machines have new config" and remove this
   def relevant_policies(fabric)
     @policies.select do |policy|
       use_policy = true
       if fabric == "local"
-        use_policy = false if policy.to_s == StackBuilder::Allocator::HostPolicies.ha_group.to_s
+        if RUBY_VERSION[0,3] == '1.8'
+          use_policy = false if policy.to_s == StackBuilder::Allocator::HostPolicies.ha_group.to_s
+        else
+          use_policy = false if policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == StackBuilder::Allocator::HostPolicies.ha_group.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@')
+        end
       elsif @storage.nil? || @storage == {}
         proc1 = StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy
         proc2 = StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy
-        if policy.to_s == proc1.to_s || policy.to_s == proc2.to_s
-          use_policy = false
+        if RUBY_VERSION[0,3] == '1.8'
+          if policy.to_s == proc1.to_s || policy.to_s == proc2.to_s
+            use_policy = false
+          end
+        else
+          if policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == proc1.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') || policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == proc2.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@')
+            use_policy = false
+          end
         end
       end
       use_policy
