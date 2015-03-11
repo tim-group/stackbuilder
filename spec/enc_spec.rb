@@ -372,7 +372,12 @@ describe Stacks::DSL do
     end
 
     eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
-    eg_es.to_enc.should eql('role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"] })
+    # XXX fix once ruby 1.8 is no more
+    if RUBY_VERSION =~ /^1\.9\./
+      eg_es.to_enc.should eql('role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-001.st.net.local", "eg-elasticsearch-002.st.net.local"] })
+    else
+      eg_es.to_enc.should eql('role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"] })
+    end
   end
 
   it 'configures NAT boxes to NAT incoming public IPs' do
