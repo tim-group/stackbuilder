@@ -350,12 +350,12 @@ class String
   # sequences deliberately rather than dealing with characters.
   # The method may or may not return a new instance.
   if String.method_defined?(:encoding)
-    ASCII_ENCODING = Encoding.find("ASCII-8BIT")
+    ASCII_ENCODING_ZAMLS = Encoding.find("ASCII-8BIT")
     def to_ascii8bit
-      if self.encoding == ASCII_ENCODING
+      if self.encoding == ASCII_ENCODING_ZAMLS
         self
       else
-        self.dup.force_encoding(ASCII_ENCODING)
+        self.dup.force_encoding(ASCII_ENCODING_ZAMLS)
       end
     end
   else

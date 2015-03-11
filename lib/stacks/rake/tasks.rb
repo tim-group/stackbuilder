@@ -11,9 +11,7 @@ require 'support/zamls'
 require 'support/mcollective'
 require 'support/mcollective_puppet'
 require 'support/nagios'
-require 'set' # ci/reporter/rspec should require this but doesn't
 
-require 'ci/reporter/rspec'
 require 'set'
 require 'rspec'
 require 'compute/controller'

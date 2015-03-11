@@ -1,3 +1,5 @@
+$LOAD_PATH << File.join(File.dirname(__FILE__), "../..") # root dir, for silence_spec_output XXX maybe this can be done better
+
 require 'silence_spec_output'
 require 'stacks/subscription'
 require 'securerandom'
