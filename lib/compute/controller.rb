@@ -207,7 +207,7 @@ class Compute::Controller
       @compute_node_client.send(selector, host, allocated_specs)
     end
 
-    dispatch_results(allocated_specs, grouped_results, callback)
+    dispatch_results(allocated_specs.flatten, grouped_results, callback)
   end
 
   def launch(all_specs, &block)
