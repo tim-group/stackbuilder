@@ -17,7 +17,7 @@ describe Subscription do
   it 'waits for all hosts to check-in' do
     topic = random_topic
     subscription = Subscription.new(:pop_timeout => 1)
-    subscription.start(topic)
+    subscription.start([topic])
 
     threads = []
     threads << Thread.new do
@@ -32,7 +32,7 @@ describe Subscription do
   it 'returns anyway after the timeout with some results missing' do
     topic = random_topic
     subscription = Subscription.new(:pop_timeout => 1)
-    subscription.start(topic)
+    subscription.start([topic])
 
     threads = []
     threads << Thread.new do
