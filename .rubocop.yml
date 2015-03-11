@@ -68,7 +68,7 @@ Metrics/ClassLength:
 
 # Offense count: 9
 Metrics/CyclomaticComplexity:
-  Max: 12
+  Max: 15
 
 # Offense count: 161
 # Configuration parameters: AllowURI, URISchemes.
@@ -82,7 +82,7 @@ Metrics/MethodLength:
 
 # Offense count: 8
 Metrics/PerceivedComplexity:
-  Max: 12
+  Max: 15
 
 # Offense count: 3
 Style/AccessorMethodName:

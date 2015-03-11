@@ -373,7 +373,7 @@ describe Stacks::DSL do
 
     eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
     # XXX fix once ruby 1.8 is no more
-    if RUBY_VERSION[0,3] == '1.8'
+    if RUBY_VERSION[0, 3] == '1.8'
       eg_es.to_enc.should eql('role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"] })
     else
       eg_es.to_enc.should eql('role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-001.st.net.local", "eg-elasticsearch-002.st.net.local"] })
