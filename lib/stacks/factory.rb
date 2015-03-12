@@ -18,13 +18,13 @@ require 'stacks/namespace'
 class Stacks::Factory
   def logger
     return @log unless @log.nil?
-    interactive = $stdout.tty? || ENV.key?("BUILD_NUMBER")
+    @@interactive = $stdout.tty? || ENV.key?("BUILD_NUMBER")
 
     @log = Logger.new STDOUT
     @log.instance_eval do
       def start(task)
         @start_time = Time.now
-        if interactive
+        if @@interactive
           puts "\e[1m\e[34m:#{task}\e[0m"
         else
           puts ":#{task}"
@@ -33,7 +33,7 @@ class Stacks::Factory
 
       def failed(task)
         @elapsed = Time.now - @start_time
-        if interactive
+        if @@interactive
           puts "\n\e[1m\e[31m:#{task} failed in #{@elapsed}\e[0m\n"
         else
           puts "\n:#{task} failed in #{@elapsed}\n"
@@ -42,7 +42,7 @@ class Stacks::Factory
 
       def passed(task)
         @elapsed = Time.now - @start_time
-        if interactive
+        if @@interactive
           puts "\n\e[1m\e[32m:#{task} passed in #{@elapsed}s\e[0m\n"
         else
           puts "\n:#{task} passed in #{@elapsed}s\n"
