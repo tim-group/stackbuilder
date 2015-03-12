@@ -28,9 +28,6 @@ describe StackBuilder::Allocator::HostPolicies do
   end
 
   it 'allows allocation if the availability group is unset' do
-    machine = double
-    running_machine = double
-
     machine = {
       :hostname => "host1",
       :availability_group => nil

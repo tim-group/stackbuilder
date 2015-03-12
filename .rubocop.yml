@@ -13,6 +13,10 @@ Style/FormatString:
 Style/StringLiterals:
   Enabled: false
 
+# Ruby 1.8 does't have each_with_object()
+Style/EachWithObject:
+  Enabled: false
+
 # Ruby 1.8 requirement
 Style/DotPosition:
   EnforcedStyle: trailing
@@ -47,10 +51,6 @@ Lint/RescueException:
 
 # Offense count: 17
 Lint/ShadowingOuterLocalVariable:
-  Enabled: false
-
-# Offense count: 12
-Lint/UselessAssignment:
   Enabled: false
 
 # Offense count: 34
@@ -114,10 +114,6 @@ Style/ColonMethodCall:
 
 # Offense count: 103
 Style/Documentation:
-  Enabled: false
-
-# Offense count: 12
-Style/EachWithObject:
   Enabled: false
 
 # Offense count: 3

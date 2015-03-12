@@ -8,7 +8,7 @@ describe 'launch' do
       result.each.each do |vm|
         machine_repo.find(vm)
       end
-      host = Host.new(:allocated_machines => nil, :policies => nil, :preferences => nil)
+      Host.new(:allocated_machines => nil, :policies => nil, :preferences => nil)
     end
   end
 

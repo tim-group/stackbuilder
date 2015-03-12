@@ -23,7 +23,7 @@ module Stacks::LegacyMysqlCluster
 
   def mysqldb_server
     raise 'MySQL cluster does not currently support more than 1 server' if children.size > 1
-    mysqldb_server = children.first
+    children.first
   end
 
   def dependant_instance_mysql_rights

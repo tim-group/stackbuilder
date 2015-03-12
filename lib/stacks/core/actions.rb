@@ -11,7 +11,6 @@ module Stacks::Core::Actions
     object.actions = {}
 
     object.action 'allocate' do |services, machine_def|
-      machines = machine_def.flatten
       machine_specs = machine_def.flatten.map(&:to_spec)
       allocation_results = services.allocator.allocate(machine_specs)
 

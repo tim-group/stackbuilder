@@ -53,7 +53,7 @@ module Stacks::VirtualService
 
   def to_vip_spec
     qualified_hostnames = Hash[@vip_networks.map do |network|
-      pair = [network, vip_fqdn(network)]
+      [network, vip_fqdn(network)]
     end]
     {
       :hostname => "#{environment.name}-#{name}",
@@ -110,7 +110,6 @@ module Stacks::VirtualService
   def lb_config
     fewest_servers_in_a_group = realservers.size
     grouped_realservers = realservers.group_by(&:group)
-    num_servers_in_group = {}
     realservers = Hash[grouped_realservers.map do |group, realservers|
       fewest_servers_in_a_group = realservers.size unless realservers.size > fewest_servers_in_a_group
       realserver_fqdns = realservers.map(&:prod_fqdn).sort

@@ -374,7 +374,6 @@ describe Compute::Controller do
 
     @compute_node_client.stub(:clean).with("st", [specs[1]]).and_return([["st", { "vm2" => %w(success yay) }]])
 
-    failures = []
     expect { @compute_controller.clean(specs) }.to raise_error
   end
 

@@ -30,9 +30,7 @@ module Stacks::AppService
   end
 
   def config_params(dependant)
-    config = {
-      "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000"
-    }
+    { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000" }
   end
 
   def to_loadbalancer_config

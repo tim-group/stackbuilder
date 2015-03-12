@@ -100,7 +100,7 @@ module Stacks::VirtualBindService
   end
 
   def slave_servers
-    slaves = children.inject([]) do |servers, bind_server|
+    children.inject([]) do |servers, bind_server|
       servers << bind_server unless bind_server.master?
       servers
     end
