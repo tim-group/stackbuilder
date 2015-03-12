@@ -1,3 +1,4 @@
+# XXX is this file ever used?
 require 'logger'
 require 'support/namespace'
 
