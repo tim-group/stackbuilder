@@ -602,34 +602,6 @@ describe Stacks::DSL do
     )
   end
 
-  it 'can generate the correct enc data for sftp servers' do
-    stack "fabric" do
-      virtual_sftpserver 'sftp' do
-      end
-    end
-
-    env "rah", :primary_site => "st", :secondary_site => "bs" do
-      instantiate_stack "fabric"
-    end
-
-    find("rah-sftp-001.mgmt.st.net.local").should_not be_nil
-    find("rah-sftp-002.mgmt.st.net.local").should_not be_nil
-
-    find("rah-sftp-001.mgmt.st.net.local").to_enc.should eql(
-      'role::sftpserver' => {
-        'vip_fqdn' => 'rah-sftp-vip.st.net.local',
-        'env' => 'rah'
-      }
-    )
-
-    find("rah-sftp-002.mgmt.st.net.local").to_enc.should eql(
-      'role::sftpserver' => {
-        'vip_fqdn' => 'rah-sftp-vip.st.net.local',
-        'env' => 'rah'
-      }
-    )
-  end
-
   it 'can be converted to an array of machine_defs (actual machines)' do
     stack "mystack" do
       loadbalancer
