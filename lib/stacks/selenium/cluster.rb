@@ -10,11 +10,12 @@ module Stacks::Selenium::Cluster
     object.configure
   end
 
-  attr_accessor :hub, :selenium_version, :nodespecs
+  attr_accessor :hub, :selenium_version, :firefox_version, :nodespecs
 
   def configure
     @hub = nil
     @selenium_version = '2.32.0'
+    @firefox_version = nil
     @nodespecs = []
   end
 
@@ -24,7 +25,8 @@ module Stacks::Selenium::Cluster
       case nodespec[:type]
       when "ubuntu"
         node_name = "#{name}-browser-#{index}"
-        @definitions[node_name] = Stacks::Selenium::UbuntuNode.new(node_name, @hub, :selenium_version => @selenium_version)
+        @definitions[node_name] = Stacks::Selenium::UbuntuNode.new(node_name, @hub, :selenium_version => @selenium_version,
+                                                                                    :firefox_version => @firefox_version)
       when "winxp"
         node_name = "#{name}-ie#{nodespec[:ie_version]}-#{index}"
         @definitions[node_name] = Stacks::Selenium::XpNode.new(node_name, @hub, :selenium_version => @selenium_version,

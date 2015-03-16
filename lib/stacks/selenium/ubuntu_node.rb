@@ -19,6 +19,7 @@ class Stacks::Selenium::UbuntuNode < Stacks::MachineDef
     spec[:template] = "senode"
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?
     spec[:selenium_version] = options[:selenium_version] || "2.32.0"
+    spec[:firefox_version] = options[:firefox_version]
 
     spec
   end

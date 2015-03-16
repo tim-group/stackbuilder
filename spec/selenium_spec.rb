@@ -7,6 +7,7 @@ describe_stack 'selenium' do
       selenium_node_cluster "a" do
         self.hub = hub
         self.selenium_version = selenium_version
+        self.firefox_version = "36.0+build2-0ubuntu0.12.04.5"
         self.nodespecs = [
           { :type => "ubuntu", :instances => 5 },
           { :type => "winxp",  :instances => 2,  :ie_version => "6",  :gold_image => "file:///var/local/images/dev-sxp-gold.img" },
@@ -103,5 +104,6 @@ describe_stack 'selenium' do
     host.to_spec[:template].should eql("senode")
     host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
     host.to_spec[:selenium_version].should eql '2.41.0'
+    host.to_spec[:firefox_version].should eql '36.0+build2-0ubuntu0.12.04.5'
   end
 end
