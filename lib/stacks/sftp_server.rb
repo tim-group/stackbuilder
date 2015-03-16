@@ -16,7 +16,8 @@ class Stacks::SftpServer < Stacks::MachineDef
     enc = super
     enc.merge!('role::sftpserver' => {
                  'vip_fqdn' => vip_fqdn(:prod),
-                 'env' => environment.name
+                 'env' => environment.name,
+                 'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns([:prod])
                })
     enc
   end
