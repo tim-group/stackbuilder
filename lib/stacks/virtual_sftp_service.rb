@@ -30,6 +30,7 @@ module Stacks::VirtualSftpService
     {
       vip_fqdn(:prod) => {
         'type'         => 'sftp',
+        'ports'        => @ports,
         'realservers'  => realservers,
         'persistent_ports'  => @persistent_ports
       }
