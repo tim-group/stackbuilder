@@ -22,6 +22,7 @@ require 'stacks/mongodb_server'
 require 'stacks/mysql_cluster'
 require 'stacks/mysql_server'
 require 'stacks/nat_server'
+require 'stacks/pentaho'
 require 'stacks/proxy_server'
 require 'stacks/puppetmaster'
 require 'stacks/quantapp_server'
@@ -149,6 +150,10 @@ class Stacks::Stack
 
   def cislave(name, &block)
     machineset_with(name, [], Stacks::CiSlave, &block)
+  end
+
+  def pentaho(name = 'pentaho', &block)
+    machineset_with(name, [Stacks::AppService], Stacks::Pentaho, &block)
   end
 
   def quantapp(name = 'quantapp', &block)
