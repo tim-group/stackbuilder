@@ -19,15 +19,14 @@ describe_stack 'tim' do
   end
 
   host("e1-timcyclic-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('role::http_app' => {
-                             'application' => 'TIM',
-                             'group' => 'blue',
-                             'cluster' => 'e1-timcyclic',
-                             'environment' => 'e1',
-                             'port'        => '8000',
-                             'dependencies' => {},
-                             'dependant_instances' => []
-                           })
+    enc = host.to_enc
+    enc['role::http_app']['application'].should eql('TIM')
+    enc['role::http_app']['group'].should eql('blue')
+    enc['role::http_app']['cluster'].should eql('e1-timcyclic')
+    enc['role::http_app']['environment'].should eql('e1')
+    enc['role::http_app']['port'].should eql('8000')
+    enc['role::http_app']['dependencies'].should eql({})
+    enc['role::http_app']['dependant_instances'].should eql([])
   end
   host("e1-timcyclic-002.mgmt.space.net.local") do |host|
     host.to_specs.shift[:ram].should eql '14680064'
