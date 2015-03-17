@@ -3,7 +3,7 @@ describe 'launch' do
   class HostRepository
     attr_accessor :machine_repo
 
-    def find_current
+    def find_compute_nodes
       result = audit
       result.each.each do |vm|
         machine_repo.find(vm)
@@ -61,7 +61,7 @@ describe 'launch' do
   end
 
   action 'launch' do |services, machine_def|
-    hosts = services.host_repo.find_current
+    hosts = services.host_repo.find_compute_nodes
     hosts.allocate(machine_def.flatten)
     specs = hosts.to_unlaunched_specs
     services.compute_controller.launch(specs)

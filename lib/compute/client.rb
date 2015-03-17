@@ -22,8 +22,9 @@ class Compute::Client
     target_hash
   end
 
-  def audit_hosts(fabric)
-    hosts = find_hosts(fabric)
+  # audit_domains is not enabled by default, as it takes significant time to complete
+  def audit_hosts(fabric, audit_domains = false)
+    hosts = discover_compute_nodes(fabric)
 
     raise "unable to find any compute nodes" if hosts.empty?
 
@@ -31,7 +32,19 @@ class Compute::Client
       result = mco.hvinfo
       result.map do |hv|
         raise "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
-        [hv[:sender], hv[:data]]
+
+        domains = Hash[]
+        if audit_domains
+          # XXX is there a better way to get the fqdn?
+          domain_name = hv[:sender].gsub(/^[^.]*\.mgmt\./, "")
+          (hv[:data][:active_domains] + hv[:data][:inactive_domains]).each do |d|
+            mco.domaininfo(:domain => d).map do |di|
+              domains[d + "." + domain_name] = di[:data] if di[:statusmsg] == "OK"
+            end
+          end
+        end
+
+        [hv[:sender], hv[:data].merge(:domains => domains)]
       end
     end
 
@@ -73,7 +86,7 @@ class Compute::Client
     libvirt_response_hash
   end
 
-  def find_hosts(fabric)
+  def discover_compute_nodes(fabric)
     mco_client("computenode", :fabric => fabric) do |mco|
       mco.discover.sort
     end

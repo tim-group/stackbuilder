@@ -32,8 +32,8 @@ describe StackBuilder::Allocator::EphemeralAllocator do
     f2_hosts = StackBuilder::Allocator::Hosts.new(:hosts => [h2], :preference_functions => [])
 
     host_repository = double
-    host_repository.stub(:find_current).with("f1").and_return(hosts)
-    host_repository.stub(:find_current).with("f2").and_return(f2_hosts)
+    host_repository.stub(:find_compute_nodes).with("f1").and_return(hosts)
+    host_repository.stub(:find_compute_nodes).with("f2").and_return(f2_hosts)
 
     allocator = StackBuilder::Allocator::EphemeralAllocator.new(:host_repository => host_repository)
 

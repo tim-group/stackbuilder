@@ -14,8 +14,8 @@ class StackBuilder::Allocator::HostRepository
     @logger = args[:logger]
   end
 
-  def find_current(fabric)
-    result = @compute_node_client.audit_hosts(fabric)
+  def find_compute_nodes(fabric, audit_domains = false)
+    result = @compute_node_client.audit_hosts(fabric, audit_domains)
     hosts = []
     result.each do |fqdn, attr|
       vms = []
@@ -38,6 +38,7 @@ class StackBuilder::Allocator::HostRepository
       )
 
       host.allocated_machines = vms
+      host.domains = attr[:domains]
       hosts << host
     end
 

@@ -41,7 +41,7 @@ describe StackBuilder::Allocator::HostRepository do
       :preference_functions => preference_functions,
       :compute_node_client => compute_node_client)
 
-    hosts = host_repo.find_current("t")
+    hosts = host_repo.find_compute_nodes("t")
     hosts.hosts.size.should eql(n)
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)
@@ -73,7 +73,7 @@ describe StackBuilder::Allocator::HostRepository do
       :preference_functions => preference_functions,
       :compute_node_client => compute_node_client)
 
-    hosts = host_repo.find_current("t")
+    hosts = host_repo.find_compute_nodes("t")
     hosts.hosts.size.should eql(n)
     hosts.hosts.each do |host|
       host.preference_functions.should eql(preference_functions)

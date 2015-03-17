@@ -205,7 +205,7 @@ namespace :sbx do
 
   desc 'Print a report of KVM host CPU/Storage/Memory allocation'
   task :audit_host_machines do
-    hosts = @factory.host_repository.find_current(environment.options[:primary_site])
+    hosts = @factory.host_repository.find_compute_nodes(environment.options[:primary_site])
     tabulate(details_for(hosts.hosts), "KVM host machines audit")
   end
 
@@ -219,28 +219,110 @@ namespace :sbx do
     end
   end
 
-  desc 'find nodes that are either allocated but not defined or defined but not allocated'
-  task :find_rogue do
-    # iterate over all environments, find out all defined machines
-    all_defined_machines = []
-    environment.environments.each do |_envname, env|
-      all_defined_machines += env.flatten.map(&:hostname)
+  def get_defined_machines(environment)
+    puts "parsing stackbuilder-config..."
+    hostnames = []
+    machines = []
+    environment.environments.each do |envname, env|
+      machines += env.flatten.map(&:to_spec).select { |x| x.class != NilClass } # XXX oy-mon-001 is a ShadowServer and to_spec returns NilClass
+      hostnames += env.flatten.map(&:hostname) # XXX cannot just get hostname from defined_machines, as they don't include oy-mon-001
     end
+    [hostnames, machines]
+  end
 
-    # iterate over all sites, find out all allocated machines
-    all_allocated_machines = []
-    %w(lon oy pg st ci).each do |site|
+  def get_allocated_machines
+    hostnames = []
+    domains = Hash[]
+    storage = Hash[]
+    # %w(st).each do |site|
+    %w(oy lon pg st ci).each do |site|
       puts "polling #{site}..."
-      all_allocated_machines += @factory.host_repository.find_current(site).hosts.map(&:allocated_machines).flatten.map { |vm| vm[:hostname] }
+      compute_nodes = @factory.host_repository.find_compute_nodes(site, true).hosts
+      hostnames += compute_nodes.map(&:allocated_machines).flatten.map { |vm| vm[:hostname] }
+      domains.merge!(compute_nodes.map(&:domains).reduce({}, :merge))
+      storage[site] = compute_nodes.map(&:storage) # list of hashes, don't merge in case there are duplicates
     end
+    [hostnames, domains, storage]
+  end
 
-    rogue1 = all_defined_machines - all_allocated_machines
+  def rogue_check_allocation(defined_hostnames, allocated_hostnames)
+    rogue1 = defined_hostnames - allocated_hostnames
     puts sprintf("defined, but not allocated (%d):", rogue1.size)
     rogue1.each { |node| puts "  #{node}" }
 
-    rogue2 = all_allocated_machines - all_defined_machines
+    rogue2 = allocated_hostnames - defined_hostnames
     puts sprintf("allocated, but not defined (%d):", rogue2.size)
     rogue2.each { |node| puts "  #{node}" }
+  end
+
+  def rogue_check_resources(defined_machines, allocated_domains)
+    puts "checking vm properties..."
+    allocated_domains.each do |afqdn, adata|
+      dhost = defined_machines.detect { |dh| sprintf("%s.%s", dh[:hostname], dh[:domain]) == afqdn }
+      if !dhost.nil?
+        if dhost[:vcpus].to_i != adata[:vcpus]
+          if dhost[:vcpus].to_i != 0
+            puts sprintf("  %s.%s: defined cpus: %d; reality: %d", dhost[:hostname], dhost[:domain], dhost[:vcpus], adata[:vcpus])
+            # else
+            # XXX how to figure out the default value?
+          end
+        end
+
+        if dhost[:ram].to_i != adata[:memory]
+          if dhost[:ram].to_i != 0
+            puts sprintf("  %s.%s: defined memory: %d; reality: %d", dhost[:hostname], dhost[:domain], dhost[:ram], adata[:memory])
+            # else
+            # XXX how to figure out the default value?
+          end
+        end
+      end
+    end
+  end
+
+  # XXX incomplete, too many special cases. return to this once everything is migrated to NNI
+  def rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
+    puts "checking missing or misallocated storage..."
+    defined_machines.each do |dhost|
+      dhost[:storage].each do |mount_point, p|
+        if allocated_storage[dhost[:fabric]].nil?
+          puts "  fabric \"#{dhost[:fabric]}\" has no storage allocated at all"
+          next
+        end
+
+        astorage = []
+        allocation_name = dhost[:hostname] + mount_point.to_s.gsub('/', '_').gsub(/_$/, '')
+        allocated_storage[dhost[:fabric]].each do |as|
+          if as[p[:type]].nil?
+            puts "  #{dhost[:hostname]}: no storage type \"#{p[:type]}\" on fabric \"#{dhost[:fabric]}\" allocated"
+            next
+          end
+          a = as[p[:type]][:existing_storage][allocation_name.to_sym]
+          astorage << a if !a.nil?
+        end
+
+        if astorage.size != 1
+          puts "  #{dhost[:hostname]}: storage \"#{allocation_name}\" found on #{astorage.size} compute nodes"
+          next
+        end
+
+        astorage_size = astorage[0]
+        psize = p[:size].to_i * 1024 * 1024 * 1024 / 1000
+        if astorage_size.to_i != psize
+          puts "  #{dhost[:hostname]}: size mismatch for storage \"#{allocation_name}\", is \"#{astorage_size}\", should be \"#{psize}\""
+          next
+        end
+      end
+    end
+  end
+
+  desc 'find inconsistency between stackbuilder-config and reality'
+  task :find_rogue do
+    defined_hostnames, defined_machines = get_defined_machines(environment)
+    allocated_hostnames, allocated_domains, _allocated_storage = get_allocated_machines
+
+    rogue_check_allocation(defined_hostnames, allocated_hostnames)
+    rogue_check_resources(defined_machines, allocated_domains)
+    # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
   end
 
   require 'set'
@@ -285,7 +367,7 @@ namespace :sbx do
       end
 
       sbtask :blah do
-        hosts = @factory.host_repository.find_current("st")
+        hosts = @factory.host_repository.find_compute_nodes("st")
         hosts.allocated_machines(machine_def.flatten).map do |machine, host|
           logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
         end
@@ -293,7 +375,7 @@ namespace :sbx do
 
       desc "new hosts model auditing"
       sbtask :audit_hosts do
-        hosts = @factory.host_repository.find_current("st")
+        hosts = @factory.host_repository.find_compute_nodes("st")
         hosts.allocate(machine_def.flatten)
         hosts.hosts.each do |host|
           pp host.fqdn

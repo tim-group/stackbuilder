@@ -10,6 +10,7 @@ class StackBuilder::Allocator::Host
   attr_reader :storage
   attr_reader :preference_functions
   attr_accessor :policies
+  attr_accessor :domains # set externally
 
   def initialize(fqdn, args = { :preference_functions => [], :policies => [], :ram => '0', :storage => {} })
     @provisionally_allocated_machines = []
@@ -20,6 +21,7 @@ class StackBuilder::Allocator::Host
     @ram = args[:ram]
     @storage = args[:storage]
     @allocation_disabled = args[:allocation_disabled] || false
+    @domains = Hash
   end
 
   def machines
