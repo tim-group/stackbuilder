@@ -27,6 +27,14 @@ class Stacks::AppServer < Stacks::MachineDef
     @allowed_hosts.uniq!
   end
 
+  def dependency_config_sftp_servers_only
+    @virtual_service.dependency_config.reject { |key, value| key != 'sftp_servers' }
+  end
+
+  def dependency_config_excluding_sftp_servers
+    @virtual_service.dependency_config.reject! { |key, value| key == 'sftp_servers' }
+  end
+
   public
 
   def to_enc
@@ -56,14 +64,12 @@ class Stacks::AppServer < Stacks::MachineDef
     # FIXME: It is less than ideal having to use the same dependency mechanism for
     # ideas position exports as the app server itself.
     # The hash returned by dependency_config leaks into the role::http_app as
-    # 'dependencies', however the app does not even use these.
-    # This is due to lsyncd co-habibating on the app server.
-    # There is no real alternative at present.
+    # 'dependencies', we therefore strip these out to avoid complications.
+    # Likewise we strip an non-sftp servers and see them to idea_positions_exports::appserver
     #
     if @virtual_service.idea_positions_exports
-      enc.merge!(
-        'idea_positions_exports::appserver' => @virtual_service.dependency_config
-                )
+      enc['role::http_app']['dependencies'] = dependency_config_excluding_sftp_servers
+      enc.merge!('idea_positions_exports::appserver' => dependency_config_sftp_servers_only)
     end
 
     if @virtual_service.ehcache

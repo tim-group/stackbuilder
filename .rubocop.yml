@@ -171,3 +171,7 @@ Style/MultilineBlockChain:
 # Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.
 Style/TrivialAccessors:
   Enabled: false
+
+# Offense count: 1
+Metrics/AbcSize:
+  Max: 65

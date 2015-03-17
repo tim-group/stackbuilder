@@ -7,6 +7,14 @@ describe_stack 'tim' do
       end
     end
 
+    stack 'timflow' do
+      virtual_appserver 'timflowapp' do
+        self.application = 'TIMFlow'
+        self.instances = 1
+        self.groups = ['blue']
+      end
+    end
+
     stack 'tim' do
       standalone_appserver 'timcyclic' do
         self.application = 'TIM'
@@ -18,11 +26,13 @@ describe_stack 'tim' do
           machine.modify_storage('/'.to_sym => { :size => '10G' })
         end
         depend_on 'sftp'
+        depend_on 'timflowapp'
       end
     end
     env "e1", :primary_site => "space", :tim_instances => 2 do
       instantiate_stack "tim"
       instantiate_stack "secureftp"
+      instantiate_stack "timflow"
     end
   end
 
@@ -33,15 +43,14 @@ describe_stack 'tim' do
     enc['role::http_app']['cluster'].should eql('e1-timcyclic')
     enc['role::http_app']['environment'].should eql('e1')
     enc['role::http_app']['port'].should eql('8000')
-    enc['role::http_app']['dependencies']['sftp_servers'].should include(
-      'e1-sftp-001.mgmt.space.net.local',
-      'e1-sftp-002.mgmt.space.net.local'
-    )
+    enc['role::http_app']['dependencies']['timflow.url'].should eql('http://e1-timflowapp-vip.space.net.local:8000')
+    enc['role::http_app']['dependencies'].key?('sftp_servers').should eql(false)
     enc['role::http_app']['dependant_instances'].should eql([])
     enc['idea_positions_exports::appserver']['sftp_servers'].should include(
       'e1-sftp-001.mgmt.space.net.local',
       'e1-sftp-002.mgmt.space.net.local'
     )
+    enc['idea_positions_exports::appserver'].key?('timflow.url').should eql(false)
   end
   host("e1-timcyclic-002.mgmt.space.net.local") do |host|
     host.to_specs.shift[:ram].should eql '14680064'
