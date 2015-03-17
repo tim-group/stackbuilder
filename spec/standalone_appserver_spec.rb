@@ -2,19 +2,27 @@ require 'stacks/test_framework'
 
 describe_stack 'tim' do
   given do
+    stack "secureftp" do
+      virtual_sftpserver 'sftp' do
+      end
+    end
+
     stack 'tim' do
       standalone_appserver 'timcyclic' do
         self.application = 'TIM'
         self.instances = environment.options[:tim_instances] || 1
+        self.idea_positions_exports = true
         each_machine do |machine|
           machine.ram = '14680064'
           machine.vcpus = '8'
           machine.modify_storage('/'.to_sym => { :size => '10G' })
         end
+        depend_on 'sftp'
       end
     end
     env "e1", :primary_site => "space", :tim_instances => 2 do
       instantiate_stack "tim"
+      instantiate_stack "secureftp"
     end
   end
 
@@ -25,8 +33,15 @@ describe_stack 'tim' do
     enc['role::http_app']['cluster'].should eql('e1-timcyclic')
     enc['role::http_app']['environment'].should eql('e1')
     enc['role::http_app']['port'].should eql('8000')
-    enc['role::http_app']['dependencies'].should eql({})
+    enc['role::http_app']['dependencies']['sftp_servers'].should include(
+      'e1-sftp-001.mgmt.space.net.local',
+      'e1-sftp-002.mgmt.space.net.local'
+    )
     enc['role::http_app']['dependant_instances'].should eql([])
+    enc['idea_positions_exports::appserver']['sftp_servers'].should include(
+      'e1-sftp-001.mgmt.space.net.local',
+      'e1-sftp-002.mgmt.space.net.local'
+    )
   end
   host("e1-timcyclic-002.mgmt.space.net.local") do |host|
     host.to_specs.shift[:ram].should eql '14680064'
