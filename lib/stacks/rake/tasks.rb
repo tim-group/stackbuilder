@@ -306,6 +306,12 @@ namespace :sbx do
         end
 
         astorage_size = astorage[0]
+        psize = p[:size].to_i * 1024 * 1024
+        if astorage_size.to_i == psize
+          puts "  #{dhost[:hostname]}: size for storage \"#{allocation_name}\" is \"#{astorage_size}\", expected \"#{psize * 1024 / 1000}\" -- was this vm created manually?"
+          next
+        end
+
         psize = p[:size].to_i * 1024 * 1024 * 1024 / 1000
         if astorage_size.to_i != psize
           puts "  #{dhost[:hostname]}: size mismatch for storage \"#{allocation_name}\", is \"#{astorage_size}\", should be \"#{psize}\""
@@ -318,11 +324,11 @@ namespace :sbx do
   desc 'find inconsistency between stackbuilder-config and reality'
   task :find_rogue do
     defined_hostnames, defined_machines = get_defined_machines(environment)
-    allocated_hostnames, allocated_domains, _allocated_storage = get_allocated_machines
+    allocated_hostnames, allocated_domains, allocated_storage = get_allocated_machines
 
     rogue_check_allocation(defined_hostnames, allocated_hostnames)
     rogue_check_resources(defined_machines, allocated_domains)
-    # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
+    rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
   end
 
   require 'set'
