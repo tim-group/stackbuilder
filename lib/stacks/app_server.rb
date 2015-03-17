@@ -32,13 +32,13 @@ class Stacks::AppServer < Stacks::MachineDef
   def to_enc
     enc = super
     enc['role::http_app'] = {
-      'application' => virtual_service.application,
-      'group' => group,
-      'cluster' => availability_group,
-      'environment' => environment.name,
-      'dependencies' => @virtual_service.dependency_config,
+      'application'         => virtual_service.application,
+      'group'               => group,
+      'cluster'             => availability_group,
+      'environment'         => environment.name,
+      'dependencies'        => @virtual_service.dependency_config,
       'dependant_instances' => @virtual_service.dependant_machine_def_fqdns,
-      'port' => '8000'
+      'port'                => '8000'
     }
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
@@ -51,6 +51,19 @@ class Stacks::AppServer < Stacks::MachineDef
 
     if @virtual_service.respond_to? :vip_fqdn
       enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod)
+    end
+
+    # FIXME: It is less than ideal having to use the same dependency mechanism for
+    # ideas position exports as the app server itself.
+    # The hash returned by dependency_config leaks into the role::http_app as
+    # 'dependencies', however the app does not even use these.
+    # This is due to lsyncd co-habibating on the app server.
+    # There is no real alternative at present.
+    #
+    if @virtual_service.idea_positions_exports
+      enc.merge!(
+        'idea_positions_exports::appserver' => @virtual_service.dependency_config
+                )
     end
 
     if @virtual_service.ehcache

@@ -3,7 +3,7 @@ module Stacks::AppService
     object.configure
   end
 
-  attr_accessor :application, :ehcache, :sso_port, :ajp_port, :jvm_args
+  attr_accessor :application, :ehcache, :sso_port, :ajp_port, :jvm_args, :idea_positions_exports
 
   def configure
     @ehcache = false
@@ -11,6 +11,7 @@ module Stacks::AppService
     @sso_port = nil
     @ajp_port = nil
     @jvm_args = nil
+    @idea_positions_exports = false
   end
 
   def enable_ehcache
