@@ -1,6 +1,6 @@
 require 'support/mcollective_puppet'
 
-# probably the wrong way to do this
+# XXX probably the wrong way to do this
 class Support::MCollectivePuppet_Test
   include Support::MCollectivePuppet
   def initialize(callouts, mco)
