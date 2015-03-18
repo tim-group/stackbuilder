@@ -132,16 +132,12 @@ module Support::MCollectivePuppet
   end
 
   def puppetca(machine_fqdn = nil, &block)
-    puppetmaster = nil
-
-    if machine_fqdn =~ /mgmt.st.net.local/
-      puppetmaster = "st-puppetmaster-001.mgmt.st.net.local"
-    elsif machine_fqdn =~ /mgmt.oy.net.local/
-      puppetmaster = "antarctica.oyldn.youdevise.com"
-    elsif machine_fqdn =~ /mgmt.pg.net.local/
-      puppetmaster = "australia.pgldn.youdevise.com"
-    elsif machine_fqdn =~ /mgmt.ci.net.local/
-      puppetmaster = "ldn-puppet-001.youdevise.com"
+    puppetmaster = case machine_fqdn
+    when /\.mgmt\.st\.net\.local$/ then "st-puppetmaster-001.mgmt.st.net.local"
+    when /\.mgmt\.oy\.net\.local$/ then "antarctica.oyldn.youdevise.com"
+    when /\.mgmt\.pg\.net\.local$/ then "australia.pgldn.youdevise.com"
+    when /\.mgmt\.ci\.net\.local$/ then "ldn-puppet-001.youdevise.com"
+    else nil
     end
 
     if puppetmaster.nil?
