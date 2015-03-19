@@ -1,7 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
 
-class Stacks::AnalyticsAppServer < Stacks::MachineDef
+class Stacks::FmAnalyticsAnalysisServer < Stacks::MachineDef
   def initialize(virtual_service, index)
     @virtual_service = virtual_service
     @data_directory  = false
@@ -10,7 +10,7 @@ class Stacks::AnalyticsAppServer < Stacks::MachineDef
 
   def to_enc
     {
-      'role::analyticsapp_server' => {
+      'role::fmanalyticsanalysis' => {
         'datadir'     => @data_directory,
         'environment' => environment.name
       }

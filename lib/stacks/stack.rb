@@ -1,12 +1,12 @@
 require 'stacks/namespace'
-require 'stacks/analyticsapp_server'
 require 'stacks/app_service'
 require 'stacks/bind_server'
 require 'stacks/ci_slave'
 require 'stacks/deb_repo'
 require 'stacks/deb_repo_mirror'
 require 'stacks/elasticsearch_node'
-require 'stacks/fmanalyticsapp_server'
+require 'stacks/fmanalyticsanalysis_server'
+require 'stacks/fmanalyticsreporting_server'
 require 'stacks/gold'
 require 'stacks/legacy_mysql_cluster'
 require 'stacks/legacy_mysqldb_server'
@@ -98,12 +98,12 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::LogstashServer, &block)
   end
 
-  def analyticsapp(name = 'analyticsapp', &block)
-    machineset_with(name, [], Stacks::AnalyticsAppServer, &block)
+  def fmanalyticsanalysis(name = 'fmanalyticsanalysis', &block)
+    machineset_with(name, [], Stacks::FmAnalyticsAnalysisServer, &block)
   end
 
-  def fmanalyticsapp(name = 'fmanalyticsapp', &block)
-    machineset_with(name, [], Stacks::FmAnalyticsAppServer, &block)
+  def fmanalyticsreporting(name = 'fmanalyticsreporting', &block)
+    machineset_with(name, [], Stacks::FmAnalyticsReportingServer, &block)
   end
 
   def puppetmaster(name = "puppetmaster", &block)

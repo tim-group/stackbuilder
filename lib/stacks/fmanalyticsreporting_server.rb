@@ -1,7 +1,7 @@
 require 'stacks/namespace'
 require 'stacks/machine_def'
 
-class Stacks::FmAnalyticsAppServer < Stacks::MachineDef
+class Stacks::FmAnalyticsReportingServer < Stacks::MachineDef
   def initialize(virtual_service, index)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
@@ -9,7 +9,7 @@ class Stacks::FmAnalyticsAppServer < Stacks::MachineDef
 
   def to_enc
     {
-      'role::fmanalyticsapp_server' => {}
+      'role::fmanalyticsreporting_server' => {}
     }
   end
 end

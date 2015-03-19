@@ -3,7 +3,7 @@ require 'stacks/test_framework'
 describe_stack 'analytics' do
   given do
     stack "analytics" do
-      analyticsapp
+      fmanalyticsanalysis
     end
 
     env "e1", :primary_site => "space" do
@@ -11,8 +11,8 @@ describe_stack 'analytics' do
     end
   end
 
-  host("e1-analyticsapp-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('role::analyticsapp_server' => {
+  host("e1-fmanalyticsanalysis-001.mgmt.space.net.local") do |host|
+    host.to_enc.should eql('role::fmanalyticsanalysis' => {
                              'datadir'     => false,
                              'environment' => 'e1'
                            })
