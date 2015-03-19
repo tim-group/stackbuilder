@@ -12,7 +12,7 @@ describe_stack 'analytics' do
   end
 
   host("e1-fmanalyticsanalysis-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('role::fmanalyticsanalysis' => {
+    host.to_enc.should eql('role::fmanalyticsanalysis_server' => {
                              'datadir'     => false,
                              'environment' => 'e1'
                            })

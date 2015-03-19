@@ -10,7 +10,7 @@ class Stacks::FmAnalyticsAnalysisServer < Stacks::MachineDef
 
   def to_enc
     {
-      'role::fmanalyticsanalysis' => {
+      'role::fmanalyticsanalysis_server' => {
         'datadir'     => @data_directory,
         'environment' => environment.name
       }
