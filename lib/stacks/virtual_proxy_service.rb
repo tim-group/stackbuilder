@@ -27,11 +27,16 @@ module Stacks::VirtualProxyService
     _vhost(key, vip_fqdn(:front), vip_fqdn(:prod), service, 'default', vhost_properties, &config_block)
   end
 
+  def vhost3(service, fqdn = nil, &config_block)
+    vhost2(fqdn, service, &config_block)
+  end
+
   def vhost2(fqdn, service, &config_block)
+    fqdn = vip_fqdn(:front) if !fqdn
     proxy_vhost = Stacks::ProxyVHost.new(fqdn, service, &config_block)
 
     if proxy_vhost.add_default_aliases == true
-      proxy_vhost.aliases << vip_fqdn(:front)
+      proxy_vhost.aliases << vip_fqdn(:front) if fqdn != vip_fqdn(:front)
       proxy_vhost.aliases << vip_fqdn(:prod)
     end
     key = "#{fqdn}-#{name}-#{service}"
