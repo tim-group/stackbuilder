@@ -1,5 +1,7 @@
+# Used by spec to keep the output clean.
+
 # Redirects stderr and stdout to /dev/null.
-def spec_silence_output
+def silence_output
   @orig_stderr = $stderr
   @orig_stdout = $stdout
 
@@ -8,7 +10,7 @@ def spec_silence_output
 end
 
 # Replace stdout and stderr so anything else is output correctly.
-def spec_enable_output
+def enable_output
   $stderr = @orig_stderr
   $stdout = @orig_stdout
   @orig_stderr = nil
