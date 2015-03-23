@@ -1,6 +1,7 @@
 *.deb
 /pkg
 /.project
+/tags
 /build
 *~
 *.swp

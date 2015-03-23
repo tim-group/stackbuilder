@@ -5,6 +5,11 @@ require 'fileutils'
 require 'rspec/core/rake_task'
 require 'fpm'
 
+desc "Generate CTags"
+task :ctags do
+  sh "ctags -R --exclude=.git --exclude=build ."
+end
+
 desc "Run specs"
 RSpec::Core::RakeTask.new do |t|
   t.rspec_opts = %w(--color)
