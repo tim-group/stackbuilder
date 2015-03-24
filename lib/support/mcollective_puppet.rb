@@ -10,7 +10,7 @@ module Support::MCollectivePuppet
   include Support::MCollective
 
   def ca_sign(machines_fqdns, &block)
-    timeout = 360
+    timeout = 450
     callback = Support::Callback.new(&block)
     needs_signing = machines_fqdns.clone.to_set
 
