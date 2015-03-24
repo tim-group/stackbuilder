@@ -152,7 +152,7 @@ class Stacks::Stack
     machineset_with(name, [], Stacks::CiSlave, &block)
   end
 
-  def pentaho_server(name = 'pentaho', &block)
+  def pentaho_server(name = 'pentaho_server', &block)
     machineset_with(name, [Stacks::AppService], Stacks::PentahoServer, &block)
   end
 
