@@ -12,6 +12,7 @@ module Stacks::AppService
     @ajp_port = nil
     @jvm_args = nil
     @idea_positions_exports = false
+    @disable_http_lb_hack = false
   end
 
   def enable_ehcache
@@ -26,6 +27,10 @@ module Stacks::AppService
     @ajp_port = ajp_port
   end
 
+  def disable_http_lb_hack
+    @disable_http_lb_hack = true
+  end
+
   def set_jvm_args(jvm_args)
     @jvm_args = jvm_args
   end
@@ -36,7 +41,13 @@ module Stacks::AppService
 
   def to_loadbalancer_config
     config = lb_config
-    config[vip_fqdn(:prod)]['type'] = 'sso_app' unless @sso_port.nil?
+    unless @sso_port.nil?
+      if @disable_http_lb_hack
+        config[vip_fqdn(:prod)]['type'] = 'sso_app'
+      else
+        config[vip_fqdn(:prod)]['type'] = 'http_and_sso_app'
+      end
+    end
     config
   end
 end
