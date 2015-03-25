@@ -114,18 +114,12 @@ namespace :sbx do
   def order(headers)
     order = headers.inject([]) do |order, header|
       case header
-      when :fqdn
-        order[0] = header
-      when :vms
-        order[1] = header
-      when 'memory(GB)'.to_sym
-        order[2] = header
-      when 'os(GB)'.to_sym
-        order[3] = header
-      when 'data(GB)'.to_sym
-        order[4] = header
-      else
-        order.push(header)
+      when :fqdn                then order[0] = header
+      when :vms                 then order[1] = header
+      when 'memory(GB)'.to_sym  then order[2] = header
+      when 'os(GB)'.to_sym      then order[3] = header
+      when 'data(GB)'.to_sym    then order[4] = header
+      else order.push(header)
       end
       order
     end
