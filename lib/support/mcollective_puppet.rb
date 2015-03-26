@@ -131,6 +131,7 @@ module Support::MCollectivePuppet
     end]
   end
 
+  # XXX the machine_fqdn argument might need to be removed if moving puppet to a vm
   def puppetca(machine_fqdn = nil, &block)
     puppetmaster = case machine_fqdn
                    when /\.mgmt\.st\.net\.local$/ then "st-puppetmaster-001.mgmt.st.net.local"
