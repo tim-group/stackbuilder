@@ -4,7 +4,10 @@ class Stacks::Inventory
   def initialize(stack_dir)
     @stacks = Object.new
     @stacks.extend Stacks::DSL
-    Dir.glob("#{stack_dir}/*.rb").each do |stack_file|
+    files = Dir.glob("#{stack_dir}/*.rb").sort +
+            Dir.glob("#{stack_dir}/stacks/*.rb").sort +
+            Dir.glob("#{stack_dir}/envs/*.rb").sort
+    files.each do |stack_file|
       begin
         @stacks.instance_eval(IO.read(stack_file))
       rescue
