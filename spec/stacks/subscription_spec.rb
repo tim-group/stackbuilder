@@ -1,4 +1,4 @@
-require 'support/silence_output'
+require 'spec_helper'
 require 'stacks/subscription'
 require 'securerandom'
 
@@ -39,9 +39,7 @@ describe Subscription do
       subscription.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
     end
 
-    silence_output
     events = subscription.wait_for_hosts(topic, %w(a b))
-    enable_output
     events.responses.should have_messages_for_hosts(["a"])
   end
 
@@ -74,9 +72,7 @@ describe Subscription do
       subscription.stomp.publish("/topic/#{topic}", { "host" => "b", "status" => "failed" }.to_json)
     end
 
-    silence_output
     result = subscription.wait_for_hosts(topic, %w(a b c))
-    enable_output
 
     result.passed.should eql(["a"])
     result.failed.should eql(["b"])
