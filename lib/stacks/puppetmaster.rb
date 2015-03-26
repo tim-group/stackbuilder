@@ -7,7 +7,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
   def initialize(machineset, index)
     super(machineset.name + "-" + index, [:mgmt])
 
-    # /etc/puppet takes over 15GB as of 25.03.2015
+    # the puppet repo takes over 15GB as of 25.03.2015
     modify_storage('/' => { :size => '25G' })
 
     @puppetmaster_role = 'dev'
