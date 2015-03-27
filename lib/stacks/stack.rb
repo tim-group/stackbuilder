@@ -39,6 +39,7 @@ require 'stacks/virtual_proxy_service'
 require 'stacks/virtual_rabbitmq_service'
 require 'stacks/virtual_service'
 require 'stacks/virtual_sftp_service'
+require 'stacks/shiny_server'
 
 class Stacks::Stack
   attr_reader :name
@@ -162,6 +163,10 @@ class Stacks::Stack
 
   def sensu(name = 'sensu', &block)
     machineset_with(name, [], Stacks::SensuServer, &block)
+  end
+
+  def shiny(name = 'shiny', &block)
+    machineset_with(name, [], Stacks::ShinyServer, &block)
   end
 
   def standard(name, &block)
