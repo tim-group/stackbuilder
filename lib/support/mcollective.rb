@@ -32,9 +32,6 @@ module Support
 
       def new_client(name)
         client = @rpc.rpcclient(name, :options => @mco_options)
-        # debug information / bkhidhir / 2015-01-12
-        # puts @mco_options
-        # puts client.inspect
         apply_fabric_filter client, @options[:fabric] if @options.key?(:fabric)
         client
       end
