@@ -6,7 +6,7 @@ module Stacks::MachineDefContainer
 
   def children
     # pretend we have a sorted dictionary
-    @definitions.sort.map { |k, v| v }
+    @definitions.sort.map { |_k, v| v }
   end
 
   def accept(&block)
