@@ -50,31 +50,6 @@ module Stacks::VirtualProxyService
     @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
   end
 
-  def sso_vip_front_fqdn
-    "#{environment.name}-#{name}-sso-vip.front.#{@domain}"
-  end
-
-  def sso_vip_fqdn
-    "#{environment.name}-#{name}-sso-vip.#{@domain}"
-  end
-
-  def sso_vhost(service, vhost_properties = {}, &config_block)
-    key = "#{name}.vhost.#{service}-sso.server_name"
-    _vhost(key, sso_vip_front_fqdn, sso_vip_fqdn, service, 'sso', vhost_properties, &config_block)
-  end
-
-  def _vhost(key, default_vhost_fqdn, alias_fqdn, service, type, vhost_properties = {}, &config_block)
-    if environment.options.key?(key)
-      proxy_vhost = Stacks::ProxyVHost.new(environment.options[key], service, type, &config_block)
-      proxy_vhost.with_alias(default_vhost_fqdn)
-    else
-      proxy_vhost = Stacks::ProxyVHost.new(default_vhost_fqdn, service, type, &config_block)
-    end
-    proxy_vhost.with_alias(alias_fqdn)
-    proxy_vhost.vhost_properties(vhost_properties)
-    @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
-  end
-
   def find_virtual_service(service, environment_name = environment.name)
     environment.environments[environment_name].accept do |machine_def|
       if machine_def.kind_of?(Stacks::AbstractVirtualService) && service.eql?(machine_def.name)

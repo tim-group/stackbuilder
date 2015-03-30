@@ -6,11 +6,7 @@ describe_stack 'exampleproxy' do
       virtual_proxyserver 'exampleproxy' do
         vhost('exampleapp') do
         end
-        sso_vhost('exampleapp') do
-        end
         vhost('exampleapp2', 'example.overridden') do
-        end
-        sso_vhost('exampleapp2') do
         end
         enable_nat
         self.ports = [80, 443, 8443]
@@ -27,8 +23,7 @@ describe_stack 'exampleproxy' do
       end
     end
 
-    env "e1", :primary_site => "space",
-              'exampleproxy.vhost.exampleapp2-sso.server_name' => 'example-sso.overridden' do
+    env "e1", :primary_site => "space" do
       instantiate_stack "exampleproxy"
     end
   end
@@ -50,17 +45,6 @@ describe_stack 'exampleproxy' do
                                  "cert" => 'wildcard_timgroup_com'
 
                                },
-                               "e1-exampleproxy-sso-vip.front.space.net.local" => {
-                                 "proxy_pass_rules" => {
-                                   "/" => "http://e1-exampleapp-vip.space.net.local:8000"
-                                 },
-                                 "aliases" => ["e1-exampleproxy-sso-vip.space.net.local"],
-                                 "application" => "example",
-                                 "redirects" => [],
-                                 "type" => "sso",
-                                 "vhost_properties" => {},
-                                 "cert" => 'wildcard_timgroup_com'
-                               },
                                "example.overridden" => {
                                  "proxy_pass_rules" => {
                                    "/" => "http://e1-exampleapp2-vip.space.net.local:8000"
@@ -72,20 +56,6 @@ describe_stack 'exampleproxy' do
                                  "application" => "example",
                                  "redirects" => [],
                                  "type" => "default",
-                                 "vhost_properties" => {},
-                                 "cert" => 'wildcard_timgroup_com'
-                               },
-                               "example-sso.overridden" => {
-                                 "proxy_pass_rules" => {
-                                   "/" => "http://e1-exampleapp2-vip.space.net.local:8000"
-                                 },
-                                 "aliases" => [
-                                   "e1-exampleproxy-sso-vip.front.space.net.local",
-                                   "e1-exampleproxy-sso-vip.space.net.local"
-                                 ],
-                                 "application" => "example",
-                                 "redirects" => [],
-                                 "type" => "sso",
                                  "vhost_properties" => {},
                                  "cert" => 'wildcard_timgroup_com'
                                }
