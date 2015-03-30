@@ -51,7 +51,7 @@ module Stacks::VirtualProxyService
   end
 
   def find_virtual_service(service, environment_name = environment.name)
-    environment.environments[environment_name].accept do |machine_def|
+    find_environment(environment_name).accept do |machine_def|
       if machine_def.kind_of?(Stacks::AbstractVirtualService) && service.eql?(machine_def.name)
         return machine_def
       end

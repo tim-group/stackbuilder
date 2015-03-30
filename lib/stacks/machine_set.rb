@@ -141,6 +141,17 @@ class Stacks::MachineSet
     environment_set
   end
 
+  def find_environment(environment_name, environments = environment.environments.values)
+    env = find_all_environments(environments).select do |environment|
+      environment.name == environment_name
+    end
+    if env.size == 1
+      return env.first
+    else
+      raise "Cannot find environment '#{environment_name}'"
+    end
+  end
+
   private
 
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
