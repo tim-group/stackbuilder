@@ -466,13 +466,27 @@ describe Stacks::DSL do
           with_redirect "old-example.timgroup.com"
         end
         vhost("ref2app") do
-          pass "/resources" => "downstreamapp"
+          add_pass_rule "/resources", :service => "downstreamapp"
+        end
+      end
+    end
+
+    stack 'ref2' do
+      virtual_appserver "refapp3" do
+      end
+      virtual_proxyserver "refproxy2" do
+        vhost("refapp3") do
+          add_pass_rule "/somewhere", :service => "downstreamapp", :environment => 'env'
         end
       end
     end
 
     env "env", :primary_site => "st", "refproxy.vhost.ref2app.server_name" => "example.timgroup.com" do
       instantiate_stack "ref"
+    end
+
+    env "env2", :primary_site => "st", "refproxy2.vhost.refapp3.server_name" => "example2.timgroup.com" do
+      instantiate_stack "ref2"
     end
 
     proxyserver = find("env-refproxy-001.mgmt.st.net.local")
@@ -509,6 +523,10 @@ describe Stacks::DSL do
         }
       }
     )
+
+    proxyserver = find("env2-refproxy2-001.mgmt.st.net.local")
+    enc = proxyserver.to_enc['role::proxyserver']
+    enc['vhosts']['example2.timgroup.com']['proxy_pass_rules']['/somewhere'].should eql 'http://env-downstreamapp-vip.st.net.local:8000'
   end
 
   it 'generates proxy server enc data with persistent when enable_persistent is specified'  do

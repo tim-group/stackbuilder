@@ -36,13 +36,8 @@ class Stacks::ProxyVHost
     @redirects << redirect_fqdn
   end
 
-  def add_pass_rule(proxy_pass_rule)
-    @proxy_pass_rules.merge!(proxy_pass_rule)
-  end
-
-  # XXX remove once all vhost entries in stackbuilder-config have switched to 'add_pass_rule()'
-  def pass(proxy_pass_rule)
-    @proxy_pass_rules.merge!(proxy_pass_rule)
+  def add_pass_rule(path, config_hash)
+    @proxy_pass_rules[path] = config_hash
   end
 
   # XXX remove once all vhost entries in stackbuilder-config have switched to 'cert ='

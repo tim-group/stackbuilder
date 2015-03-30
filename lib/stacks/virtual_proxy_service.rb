@@ -68,8 +68,8 @@ module Stacks::VirtualProxyService
     @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
   end
 
-  def find_virtual_service(service)
-    environment.accept do |machine_def|
+  def find_virtual_service(service, environment_name = environment.name)
+    environment.environments[environment_name].accept do |machine_def|
       if machine_def.kind_of?(Stacks::AbstractVirtualService) && service.eql?(machine_def.name)
         return machine_def
       end
@@ -98,9 +98,16 @@ module Stacks::VirtualProxyService
     raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size == 0
 
     Hash[@proxy_vhosts_lookup.values.map do |vhost|
+      # FIXME: the default proxy pass can't hand off to a service in a different environment
+      # This is fine right now, but as soon as something like some proxy's in the shared environment
+      # need to hand off to a service in another environment, we're stuffed until this is fixed
       primary_app = find_virtual_service(vhost.service)
-      proxy_pass_rules = Hash[vhost.proxy_pass_rules.map do |path, service|
-        [path, "http://#{find_virtual_service(service).vip_fqdn(:prod)}:8000"]
+      proxy_pass_rules = Hash[vhost.proxy_pass_rules.map do |path, config_hash|
+        if config_hash.key? :environment
+          [path, "http://#{find_virtual_service(config_hash[:service], config_hash[:environment]).vip_fqdn(:prod)}:8000"]
+        else
+          [path, "http://#{find_virtual_service(config_hash[:service]).vip_fqdn(:prod)}:8000"]
+        end
       end]
 
       proxy_pass_rules['/'] = "http://#{primary_app.vip_fqdn(:prod)}:8000"
