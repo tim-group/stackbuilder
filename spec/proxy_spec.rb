@@ -70,7 +70,7 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
   given do
     stack "exampleproxy" do
       virtual_proxyserver 'exampleproxy' do
-        set_default_ssl_cert 'test_cert_change'
+        @cert = 'test_cert_change'
         vhost('exampleapp') do
           with_cert 'test_vhost_cert_change'
         end

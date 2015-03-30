@@ -34,22 +34,6 @@ module Stacks::VirtualProxyService
     @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
   end
 
-  def vhost3(service, fqdn = nil, &config_block)
-    vhost2(fqdn, service, &config_block)
-  end
-
-  def vhost2(fqdn, service, &config_block)
-    fqdn = vip_fqdn(:front) if !fqdn
-    proxy_vhost = Stacks::ProxyVHost.new(fqdn, service, &config_block)
-
-    if proxy_vhost.add_default_aliases == true
-      proxy_vhost.aliases << vip_fqdn(:front) if fqdn != vip_fqdn(:front)
-      proxy_vhost.aliases << vip_fqdn(:prod)
-    end
-    key = "#{fqdn}-#{name}-#{service}"
-    @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
-  end
-
   def find_virtual_service(service, environment_name = environment.name)
     find_environment(environment_name).accept do |machine_def|
       if machine_def.kind_of?(Stacks::AbstractVirtualService) && service.eql?(machine_def.name)
