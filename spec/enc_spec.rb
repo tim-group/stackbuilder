@@ -461,11 +461,11 @@ describe Stacks::DSL do
       end
 
       virtual_proxyserver "refproxy" do
-        vhost("refapp") do
-          with_alias "example.timgroup.com"
+        vhost('refapp') do
+          @aliases << 'example.timgroup.com'
           with_redirect "old-example.timgroup.com"
         end
-        vhost("ref2app") do
+        vhost('ref2app', 'example.timgroup.com') do
           add_pass_rule "/resources", :service => "downstreamapp"
         end
       end
@@ -475,17 +475,17 @@ describe Stacks::DSL do
       virtual_appserver "refapp3" do
       end
       virtual_proxyserver "refproxy2" do
-        vhost("refapp3") do
+        vhost('refapp3', 'example2.timgroup.com') do
           add_pass_rule "/somewhere", :service => "downstreamapp", :environment => 'env'
         end
       end
     end
 
-    env "env", :primary_site => "st", "refproxy.vhost.ref2app.server_name" => "example.timgroup.com" do
+    env "env", :primary_site => "st" do
       instantiate_stack "ref"
     end
 
-    env "env2", :primary_site => "st", "refproxy2.vhost.refapp3.server_name" => "example2.timgroup.com" do
+    env "env2", :primary_site => "st" do
       instantiate_stack "ref2"
     end
 

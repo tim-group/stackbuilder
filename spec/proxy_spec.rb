@@ -8,7 +8,7 @@ describe_stack 'exampleproxy' do
         end
         sso_vhost('exampleapp') do
         end
-        vhost('exampleapp2') do
+        vhost('exampleapp2', 'example.overridden') do
         end
         sso_vhost('exampleapp2') do
         end
@@ -28,7 +28,6 @@ describe_stack 'exampleproxy' do
     end
 
     env "e1", :primary_site => "space",
-              'exampleproxy.vhost.exampleapp2.server_name' => 'example.overridden',
               'exampleproxy.vhost.exampleapp2-sso.server_name' => 'example-sso.overridden' do
       instantiate_stack "exampleproxy"
     end
