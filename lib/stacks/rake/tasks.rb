@@ -487,6 +487,7 @@ namespace :sbx do
         end
 
         desc "sign outstanding Puppet certificate signing requests for these machines"
+
         sbtask :poll_sign do
           puppet_certs_to_sign = []
           machine_def.accept do |child_machine_def|
