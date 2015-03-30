@@ -17,6 +17,10 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     false
   end
 
+  def needs_poll_signing?
+    false
+  end
+
   def to_enc
     puppet_role = case @puppetmaster_role
                   when 'dev'  then 'role::dev_puppetmaster'
