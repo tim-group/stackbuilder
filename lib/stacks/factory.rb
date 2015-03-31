@@ -33,10 +33,11 @@ class Stacks::Factory
 
       def failed(task)
         @elapsed = Time.now - @start_time
+        e = sprintf("%.2f", @elapsed)
         if @@interactive
-          puts "\n\e[1m\e[31m:#{task} failed in #{@elapsed}\e[0m\n"
+          puts "\n\e[1m\e[31m:#{task} failed in #{e}\e[0m\n"
         else
-          puts "\n:#{task} failed in #{@elapsed}\n"
+          puts "\n:#{task} failed in #{e}\n"
         end
       end
 
