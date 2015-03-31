@@ -29,6 +29,7 @@ class Stacks::MachineSet
   end
 
   def depend_on(dependant, env = environment.name)
+    fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
   end
 
@@ -121,8 +122,12 @@ class Stacks::MachineSet
   def virtual_services_that_depend_on_me
     virtual_services_that_depend_on_me = []
     virtual_services.each do |virtual_service|
-      if virtual_service.kind_of?(Stacks::MachineDefContainer) && virtual_service.respond_to?(:depends_on) && virtual_service.depends_on.include?([name, environment.name])
-        virtual_services_that_depend_on_me.push virtual_service
+      if virtual_service.kind_of?(Stacks::MachineDefContainer)
+        if virtual_service.respond_to?(:depends_on)
+          if virtual_service.depends_on.include?([name, environment.name])
+            virtual_services_that_depend_on_me.push virtual_service
+          end
+        end
       end
     end
     virtual_services_that_depend_on_me.uniq
