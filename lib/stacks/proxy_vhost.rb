@@ -35,11 +35,6 @@ class Stacks::ProxyVHost
     @proxy_pass_rules[path] = config_hash
   end
 
-  # XXX remove once all vhost entries in stackbuilder-config have switched to 'cert ='
-  def with_cert(cert_name)
-    @cert = cert_name
-  end
-
   def add_properties(properties)
     @properties.merge!(properties)
   end
