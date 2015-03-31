@@ -26,11 +26,6 @@ class Stacks::ProxyVHost
     instance_eval(&block) if block
   end
 
-  # XXX remove once all vhost entries in stackbuilder-config have switched to 'aliases <<'
-  def with_alias(alias_fqdn)
-    @aliases << alias_fqdn
-  end
-
   # XXX looks like this method is never used
   def with_redirect(redirect_fqdn)
     @redirects << redirect_fqdn
