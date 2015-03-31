@@ -38,9 +38,4 @@ class Stacks::ProxyVHost
   def add_properties(properties)
     @properties.merge!(properties)
   end
-
-  # XXX remove once all vhost entries in stackbuilder-config have switched to 'add_properties()'
-  def vhost_properties(properties)
-    @properties.merge!(properties)
-  end
 end
