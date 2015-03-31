@@ -1,6 +1,3 @@
-require 'stacks/namespace'
-require 'uri'
-
 class Stacks::ProxyVHost
   attr_accessor :add_default_aliases
   attr_accessor :aliases
