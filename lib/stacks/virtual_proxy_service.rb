@@ -22,9 +22,9 @@ module Stacks::VirtualProxyService
     @cert                = 'wildcard_timgroup_com'
   end
 
-  def vhost(service, fqdn = nil, &config_block)
+  def vhost(service, fqdn = nil, service_environment_name = environment.name, &config_block)
     fqdn = vip_fqdn(:front) if !fqdn
-    proxy_vhost = Stacks::ProxyVHost.new(fqdn, service, &config_block)
+    proxy_vhost = Stacks::ProxyVHost.new(self, fqdn, service, service_environment_name, &config_block)
 
     if proxy_vhost.add_default_aliases == true
       proxy_vhost.aliases << vip_fqdn(:front) if fqdn != vip_fqdn(:front)
@@ -32,6 +32,7 @@ module Stacks::VirtualProxyService
     end
     key = "#{fqdn}-#{name}-#{service}"
     @proxy_vhosts << @proxy_vhosts_lookup[key] = proxy_vhost
+    proxy_vhost.add_pass_rule('/', :service => service, :environment => service_environment_name)
   end
 
   def find_virtual_service(service, environment_name = environment.name)
@@ -48,12 +49,6 @@ module Stacks::VirtualProxyService
     @cert = cert_name
   end
 
-  def depends_on
-    @proxy_vhosts_lookup.values.map do |vhost|
-      [vhost.service, environment.name]
-    end
-  end
-
   def downstream_services
     vhost_map = @proxy_vhosts_lookup.values.group_by(&:vhost_fqdn)
 
@@ -64,10 +59,7 @@ module Stacks::VirtualProxyService
     raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size == 0
 
     Hash[@proxy_vhosts_lookup.values.map do |vhost|
-      # FIXME: the default proxy pass can't hand off to a service in a different environment
-      # This is fine right now, but as soon as something like some proxy's in the shared environment
-      # need to hand off to a service in another environment, we're stuffed until this is fixed
-      primary_app = find_virtual_service(vhost.service)
+      primary_app = find_virtual_service(vhost.service, vhost.environment)
       proxy_pass_rules = Hash[vhost.proxy_pass_rules.map do |path, config_hash|
         if config_hash.key? :environment
           [path, "http://#{find_virtual_service(config_hash[:service], config_hash[:environment]).vip_fqdn(:prod)}:8000"]
@@ -75,8 +67,6 @@ module Stacks::VirtualProxyService
           [path, "http://#{find_virtual_service(config_hash[:service]).vip_fqdn(:prod)}:8000"]
         end
       end]
-
-      proxy_pass_rules['/'] = "http://#{primary_app.vip_fqdn(:prod)}:8000"
 
       [vhost.vhost_fqdn, {
         'aliases' => vhost.aliases,

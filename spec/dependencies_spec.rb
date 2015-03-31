@@ -169,3 +169,61 @@ describe_stack 'stack with cross environment dependencies' do
     ])
   end
 end
+
+describe_stack 'stack with sub environment dependencies' do
+  given do
+    stack "blondin" do
+      virtual_appserver 'blondinapp' do
+        self.groups = ['blue']
+        self.application = 'Blondin'
+      end
+    end
+
+    stack 'funds' do
+      virtual_appserver 'fundsuserapp' do
+        self.groups = ['blue']
+        self.application = 'tfunds'
+        self.ports = [8443]
+        enable_ajp('8009')
+        enable_sso('8443')
+        disable_http_lb_hack
+      end
+    end
+
+    stack 'funds_proxy' do
+      virtual_proxyserver 'fundsproxy' do
+        @cert = 'wildcard_youdevise_com'
+        case environment.name
+        when 'shared'
+          vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
+            @cert = 'wildcard_timgroup_com'
+            add_properties 'is_hip' => true
+            add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
+          end
+        end
+        enable_nat
+      end
+    end
+
+    env 'shared',
+        :primary_site => 'oy',
+        :secondary_site => 'oy',
+        :lb_virtual_router_id => 27 do
+
+      instantiate_stack 'funds_proxy'
+
+      env 'mirror',
+          :timcyclic_instances => 1,
+          :lb_virtual_router_id => 21 do
+
+        instantiate_stack 'funds'
+        instantiate_stack 'blondin'
+      end
+    end
+  end
+  host("mirror-blondinapp-001.mgmt.oy.net.local") do |host|
+    host.to_enc['role::http_app']['dependant_instances'].should include(
+      'shared-fundsproxy-001.oy.net.local',
+      'shared-fundsproxy-002.oy.net.local')
+  end
+end

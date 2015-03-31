@@ -8,8 +8,9 @@ class Stacks::ProxyVHost
   attr_reader :service
   attr_reader :type
   attr_reader :vhost_fqdn
+  attr_reader :environment
 
-  def initialize(vhost_fqdn, service, type = 'default', &block)
+  def initialize(virtual_proxy_service, vhost_fqdn, service, environment, type = 'default', &block)
     @add_default_aliases = true
     @aliases = []
     @cert = 'wildcard_timgroup_com'
@@ -19,6 +20,8 @@ class Stacks::ProxyVHost
     @service = service
     @type = type
     @vhost_fqdn = vhost_fqdn
+    @environment = environment
+    @virtual_proxy_service = virtual_proxy_service
 
     instance_eval(&block) if block
   end
@@ -30,6 +33,11 @@ class Stacks::ProxyVHost
 
   def add_pass_rule(path, config_hash)
     @proxy_pass_rules[path] = config_hash
+    if config_hash.key? :environment
+      @virtual_proxy_service.depend_on config_hash[:service], config_hash[:environment]
+    else
+      @virtual_proxy_service.depend_on config_hash[:service]
+    end
   end
 
   def add_properties(properties)
