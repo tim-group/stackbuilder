@@ -93,3 +93,52 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
     enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert'].should eql('test_vhost_cert_change')
   end
 end
+
+describe_stack 'proxy pass rules without an environment default to the environment set (if any) of the vhost' do
+  given do
+    stack 'funds_proxy' do
+      virtual_proxyserver 'fundsproxy' do
+        @cert = 'wildcard_youdevise_com'
+        vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
+          @cert = 'wildcard_timgroup_com'
+          add_properties 'is_hip' => true
+          add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
+          add_pass_rule "/HIP/blah", :service => "blondinapp", :environment => 'latest'
+          add_pass_rule "/HIP/blah2", :service => "blondinapp", :environment => 'shared'
+          add_pass_rule "/HIP/blah3", :service => "blondinapp"
+        end
+        enable_nat
+      end
+    end
+    stack 'funds' do
+      virtual_appserver 'blondinapp' do
+        self.groups = ['blue']
+        self.application = 'Blondin'
+      end
+
+      virtual_appserver 'fundsuserapp' do
+        self.groups = ['blue']
+        self.application = 'tfunds'
+        self.ports = [8443]
+      end
+    end
+    env 'shared', :primary_site => 'oy' do
+      instantiate_stack 'funds_proxy'
+      instantiate_stack 'funds'
+
+      env 'mirror' do
+        instantiate_stack 'funds'
+      end
+      env 'latest' do
+        instantiate_stack 'funds'
+      end
+    end
+  end
+  host('shared-fundsproxy-001.mgmt.oy.net.local') do |host|
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/'] = 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/resources'] = 'http://mirror-fundsuserapp-vip.oy.net.local:8000/HIP/resources'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah'] = 'http://latest-fundsuserapp-vip.oy.net.local:8000/HIP/blah'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah2'] = 'http://shared-fundsuserapp-vip.oy.net.local:8000/HIP/blah2'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah3'] = 'http://mirror-fundsuserapp-vip.oy.net.local:8000/HIP/blah3'
+  end
+end
