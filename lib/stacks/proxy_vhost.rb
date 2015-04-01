@@ -36,7 +36,7 @@ class Stacks::ProxyVHost
     if config_hash.key? :environment
       @virtual_proxy_service.depend_on config_hash[:service], config_hash[:environment]
     else
-      @virtual_proxy_service.depend_on config_hash[:service]
+      @virtual_proxy_service.depend_on config_hash[:service], @environment
     end
   end
 

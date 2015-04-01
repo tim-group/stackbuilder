@@ -135,10 +135,10 @@ describe_stack 'proxy pass rules without an environment default to the environme
     end
   end
   host('shared-fundsproxy-001.mgmt.oy.net.local') do |host|
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/'] = 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/resources'] = 'http://mirror-fundsuserapp-vip.oy.net.local:8000/HIP/resources'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah'] = 'http://latest-fundsuserapp-vip.oy.net.local:8000/HIP/blah'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah2'] = 'http://shared-fundsuserapp-vip.oy.net.local:8000/HIP/blah2'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah3'] = 'http://mirror-fundsuserapp-vip.oy.net.local:8000/HIP/blah3'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/'].should eql 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/resources'].should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah'].should eql 'http://latest-blondinapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah2'].should eql 'http://shared-blondinapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah3'].should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
   end
 end

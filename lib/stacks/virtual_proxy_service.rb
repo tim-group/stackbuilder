@@ -64,7 +64,7 @@ module Stacks::VirtualProxyService
         if config_hash.key? :environment
           [path, "http://#{find_virtual_service(config_hash[:service], config_hash[:environment]).vip_fqdn(:prod)}:8000"]
         else
-          [path, "http://#{find_virtual_service(config_hash[:service]).vip_fqdn(:prod)}:8000"]
+          [path, "http://#{find_virtual_service(config_hash[:service], vhost.environment).vip_fqdn(:prod)}:8000"]
         end
       end]
 
