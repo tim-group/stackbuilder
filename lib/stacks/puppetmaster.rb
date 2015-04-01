@@ -25,7 +25,6 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     puppet_role = case @puppetmaster_role
                   when 'dev'  then 'role::dev_puppetmaster'
                   when 'prod' then 'role::prod_puppetmaster'
-                  when 'prod2' then 'role::prod_puppetmaster2'
                   else raise "unknown puppetmaster_role #{puppetmaster_role} for stack PuppetMaster"
     end
     {
