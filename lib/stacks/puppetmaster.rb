@@ -30,7 +30,9 @@ class Stacks::PuppetMaster < Stacks::MachineDef
                   else raise "unknown puppetmaster_role #{puppetmaster_role} for stack PuppetMaster"
     end
     {
-      puppet_role => { 'primary' => @primary }
+      puppet_role => {
+        'primary' => @primary
+      }
     }
   end
 
