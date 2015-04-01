@@ -11,6 +11,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     modify_storage('/' => { :size => '25G' })
 
     @puppetmaster_role = 'dev'
+    @primary = index == 1 ? true : false
   end
 
   def needs_signing?
@@ -24,11 +25,11 @@ class Stacks::PuppetMaster < Stacks::MachineDef
   def to_enc
     puppet_role = case @puppetmaster_role
                   when 'dev'  then 'role::dev_puppetmaster'
-                  when 'prod' then 'role::prod_puppetmaster'
+                  when 'prod' then 'role::prod_puppetmaster2'
                   else raise "unknown puppetmaster_role #{puppetmaster_role} for stack PuppetMaster"
     end
     {
-      puppet_role => {}
+      puppet_role => { 'primary' => @primary }
     }
   end
 
