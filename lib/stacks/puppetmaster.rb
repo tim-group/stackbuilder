@@ -11,6 +11,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     modify_storage('/' => { :size => '25G' })
 
     @puppetmaster_role = 'dev'
+    @primary = index == "001"
   end
 
   def needs_signing?
@@ -28,8 +29,10 @@ class Stacks::PuppetMaster < Stacks::MachineDef
                   when 'prod2' then 'role::prod_puppetmaster2'
                   else raise "unknown puppetmaster_role #{puppetmaster_role} for stack PuppetMaster"
     end
+    # dev ignores this parameter, this is only for consistency
+    @primary = false if @puppetmaster_role == 'dev'
     {
-      puppet_role => {}
+      puppet_role => { 'primary' => @primary }
     }
   end
 
