@@ -9,6 +9,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
 
     # the puppet repo takes over 15GB as of 25.03.2015
     modify_storage('/' => { :size => '25G' })
+    @vcpus = '2'
 
     @puppetmaster_role = 'dev'
     @primary = index == "001"
