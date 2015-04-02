@@ -23,20 +23,10 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     false
   end
 
-  # XXX mmazurek clean up
   def to_enc
-    puppet_role = case @puppetmaster_role
-                  when 'dev'  then 'role::dev_puppetmaster'
-                  when 'prod' then 'role::prod_puppetmaster'
-                  when 'prod2' then 'role::prod_puppetmaster2'
-                  else raise "unknown puppetmaster_role #{puppetmaster_role} for stack PuppetMaster"
-    end
-    # dev ignores this parameter, this is only for consistency
-    @primary = false if @puppetmaster_role == 'dev'
     {
       # declared in 01_stacks.pp. don't use enc, as it causes a duplicate
-      # declaration error
-      # puppet_role => { 'primary' => @primary }
+      # declaration error. this is for bootstrapping reasons
     }
   end
 

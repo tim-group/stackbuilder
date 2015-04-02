@@ -11,7 +11,7 @@ describe_stack 'basic dev puppetmaster' do
   end
 
   host("e1-basic-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('role::dev_puppetmaster' => { 'primary' => false })
+    host.to_enc.should eql({})
     host.to_specs.first[:template].should eql('puppetmaster')
     host.to_specs.first[:cnames].should eql(:mgmt => {
                                               "puppet" => "e1-basic-001.mgmt.space.net.local"
@@ -34,7 +34,7 @@ describe_stack 'basic dev puppetmaster without cname' do
   end
 
   host("e1-pm-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('role::dev_puppetmaster' => { 'primary' => false })
+    host.to_enc.should eql({})
     host.to_specs.first[:template].should eql('puppetmaster')
     host.to_specs.first[:cnames].should eql({})
   end
