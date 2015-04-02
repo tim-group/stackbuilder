@@ -12,7 +12,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     @vcpus = '2'
 
     @puppetmaster_role = 'dev'
-    @primary = index == "001"
+    @primary = index == '001'
   end
 
   def needs_signing?
@@ -23,6 +23,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     false
   end
 
+  # XXX mmazurek clean up
   def to_enc
     puppet_role = case @puppetmaster_role
                   when 'dev'  then 'role::dev_puppetmaster'
@@ -33,7 +34,9 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     # dev ignores this parameter, this is only for consistency
     @primary = false if @puppetmaster_role == 'dev'
     {
-      puppet_role => { 'primary' => @primary }
+      # declared in 01_stacks.pp. don't use enc, as it causes a duplicate
+      # declaration error
+      # puppet_role => { 'primary' => @primary }
     }
   end
 
