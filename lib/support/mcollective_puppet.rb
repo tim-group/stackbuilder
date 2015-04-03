@@ -134,16 +134,16 @@ module Support::MCollectivePuppet
   # XXX the machine_fqdn argument might need to be removed if moving puppet to a vm
   def puppetca(machine_fqdn = nil, &block)
     puppetmaster = case machine_fqdn
-                   when /\.mgmt\.st\.net\.local$/ then "st-puppetmaster-001.mgmt.st.net.local"
-                   when /\.mgmt\.oy\.net\.local$/ then "antarctica.oyldn.youdevise.com"
-                   when /\.mgmt\.pg\.net\.local$/ then "australia.pgldn.youdevise.com"
-                   when /\.mgmt\.ci\.net\.local$/ then "ldn-puppet-001.youdevise.com"
+                   when /\.mgmt\.st\.net\.local$/ then ["st-puppetmaster-001.mgmt.st.net.local", "staging-puppetmaster-001.mgmt.st.net.local"]
+                   when /\.mgmt\.oy\.net\.local$/ then ["antarctica.oyldn.youdevise.com"]
+                   when /\.mgmt\.pg\.net\.local$/ then ["australia.pgldn.youdevise.com"]
+                   when /\.mgmt\.ci\.net\.local$/ then ["ldn-puppet-001.youdevise.com"]
     end
 
     if puppetmaster.nil?
       mco_client("puppetca", &block)
     else
-      mco_client("puppetca", :nodes => [puppetmaster], &block)
+      mco_client("puppetca", :nodes => puppetmaster, &block)
     end
   end
 
