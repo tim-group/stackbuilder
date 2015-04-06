@@ -20,8 +20,8 @@ module Support::MCollectivePuppet
         r = []
         s = []
         mco.list.each do |response|
-          r += response[:data][:requests]
-          s += response[:data][:signed]
+          r += response[:data][:requests] if !response[:data][:requests].nil?
+          s += response[:data][:signed] if !response[:data][:signed].nil?
         end
         [r.to_set, s.to_set]
       end
