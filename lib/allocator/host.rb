@@ -71,7 +71,10 @@ class StackBuilder::Allocator::Host
             use_policy = false
           end
         else
-          if policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == proc1.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') || policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == proc2.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@')
+          # XXX this thing right here checks if two policies are equal.
+          # this is really nasty and needs to be done differently
+          if policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == proc1.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') ||
+             policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == proc2.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@')
             use_policy = false
           end
         end

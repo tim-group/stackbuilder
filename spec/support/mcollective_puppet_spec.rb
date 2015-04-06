@@ -144,11 +144,14 @@ describe Support::MCollectivePuppet do
     @callback.should_receive(:failed).with('vm1.test.net.local').ordered
     @callback.should_receive(:failed).with('vm2.test.net.local').ordered
 
-    @mcollective_puppet.wait_for_complete(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"], &wait_for_complete_callback)
+    @mcollective_puppet.wait_for_complete(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"],
+                                          &wait_for_complete_callback)
   end
 
   it 'considers a machine to be still running if it is stopped but returns a hollow last run summary' do
-    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"]).ordered
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local",
+                                             "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local",
+                                             "vm7.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       { :sender => 'vm1.test.net.local', :data => { :status => 'stopped' } },
       { :sender => 'vm2.test.net.local', :data => { :status => 'stopped' } },
@@ -159,7 +162,9 @@ describe Support::MCollectivePuppet do
       { :sender => 'vm7.test.net.local', :data => { :status => 'stopped' } }
     ])
 
-    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"]).ordered
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local",
+                                             "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local",
+                                             "vm7.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
       { :sender => 'vm1.test.net.local', :data => nil },
       { :sender => 'vm2.test.net.local', :data => {} },
@@ -172,7 +177,8 @@ describe Support::MCollectivePuppet do
 
     @callback.should_receive(:passed).with('vm7.test.net.local').ordered
 
-    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local",
+                                             "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
       { :sender => 'vm1.test.net.local', :data => { :status => 'stopped' } },
       { :sender => 'vm2.test.net.local', :data => { :status => 'stopped' } },
@@ -182,7 +188,8 @@ describe Support::MCollectivePuppet do
       { :sender => 'vm6.test.net.local', :data => { :status => 'stopped' } }
     ])
 
-    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
+    @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local",
+                                             "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
       { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
       { :sender => 'vm2.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
@@ -199,7 +206,9 @@ describe Support::MCollectivePuppet do
     @callback.should_receive(:passed).with('vm5.test.net.local').ordered
     @callback.should_receive(:passed).with('vm6.test.net.local').ordered
 
-    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local", "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local", "vm7.test.net.local"], &wait_for_complete_callback)
+    @mcollective_puppet.wait_for_complete(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local",
+                                           "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local",
+                                           "vm7.test.net.local"], &wait_for_complete_callback)
   end
 
   it 'reports an error if machines are still running when the time runs out' do

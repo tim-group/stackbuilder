@@ -134,9 +134,11 @@ module StackBuilder::Allocator::HostPolicies
       result = { :passed => true }
       unless storage_without_enough_space.empty?
         sorted_keys = storage_without_enough_space.keys.sort
+        required = sorted_keys.collect { |key| storage_without_enough_space[key][:required_space] }.join(',')
+        available = sorted_keys.collect { |key| storage_without_enough_space[key][:available_space] }.join(',')
         result = {
           :passed => false,
-          :reason => "Insufficient disk space (required: #{sorted_keys.collect { |key| storage_without_enough_space[key][:required_space] }.join(',') }G available: #{sorted_keys.collect { |key| storage_without_enough_space[key][:available_space] }.join(',')}G)"
+          :reason => "Insufficient disk space (required: #{required}G available: #{available}G)"
         }
       end
       result

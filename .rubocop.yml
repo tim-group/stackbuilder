@@ -11,7 +11,7 @@ Metrics/ParameterLists:
   Max: 8
 
 Metrics/LineLength:
-  Max: 120
+  Max: 180 # 120
 
 Metrics/BlockNesting:
   Max: 6
@@ -23,10 +23,6 @@ Metrics/ClassLength:
 # Offense count: 9
 Metrics/CyclomaticComplexity:
   Max: 15
-
-# Configuration parameters: AllowURI, URISchemes.
-Metrics/LineLength:
-  Max: 318
 
 # Configuration parameters: CountComments.
 Metrics/MethodLength:

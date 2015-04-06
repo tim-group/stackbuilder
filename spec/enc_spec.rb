@@ -72,7 +72,8 @@ describe Stacks::DSL do
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     enc = loadbalancer.to_enc
     enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['type'].should eql('sftp')
-    enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['realservers']['blue'].should eql(["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"])
+    enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['realservers']['blue'].should \
+      eql(["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"])
     enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['persistent_ports'].should eql(['21'])
     enc['role::loadbalancer']['virtual_router_id'].should eql(1)
   end
@@ -99,21 +100,29 @@ describe Stacks::DSL do
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
-      "role::loadbalancer" =>         { "virtual_router_id" => 1,
-                                        "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
-                                                                                                                   "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
-                                                                                                                   "env" => "st",
-                                                                                                                   "app" => nil,
-                                                                                                                   "monitor_warn" => 1 },
-                                                                       "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
-                                                                                                                     "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
-                                                                                                                                                      "blue" => ["st-oneapp-001.st.net.local"] },
-                                                                                                                     "env" => "st",
-                                                                                                                     "app" => nil,
-                                                                                                                     "monitor_warn" => 0
-              }
+      "role::loadbalancer" => {
+        "virtual_router_id" => 1,
+        "virtual_servers" => {
+          "st-twoapp-vip.st.net.local" => {
+            "healthcheck_timeout" => 10,
+            "realservers" => {
+              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
+            },
+            "env" => "st",
+            "app" => nil,
+            "monitor_warn" => 1 },
+          "st-oneapp-vip.st.net.local" => {
+            "healthcheck_timeout" => 10,
+            "realservers" => {
+              "green" => ["st-oneapp-002.st.net.local"],
+              "blue" => ["st-oneapp-001.st.net.local"]
+            },
+            "env" => "st",
+            "app" => nil,
+            "monitor_warn" => 0
+          }
         }
-        }
+      }
     )
   end
 
@@ -140,22 +149,31 @@ describe Stacks::DSL do
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
     loadbalancer.to_enc.should eql(
-      "role::loadbalancer" =>         { "virtual_router_id" => 1,
-                                        "virtual_servers" =>         { "st-twoapp-vip.st.net.local" =>           { "healthcheck_timeout" => 10,
-                                                                                                                   "realservers" =>             { "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"] },
-                                                                                                                   "env" => "st",
-                                                                                                                   "app" => nil,
-                                                                                                                   "monitor_warn" => 1 },
-                                                                       "st-oneapp-vip.st.net.local" =>             { "healthcheck_timeout" => 10,
-                                                                                                                     "realservers" =>               { "green" => ["st-oneapp-002.st.net.local"],
-                                                                                                                                                      "blue" => ["st-oneapp-001.st.net.local"] },
-                                                                                                                     "env" => "st",
-                                                                                                                     "app" => nil,
-                                                                                                                     "monitor_warn" => 0,
-                                                                                                                     "healthcheck_timeout" => 999
-              }
+      "role::loadbalancer" => {
+        "virtual_router_id" => 1,
+        "virtual_servers" => {
+          "st-twoapp-vip.st.net.local" => {
+            "healthcheck_timeout" => 10,
+            "realservers" => {
+              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
+            },
+            "env" => "st",
+            "app" => nil,
+            "monitor_warn" => 1
+          },
+          "st-oneapp-vip.st.net.local" => {
+            "healthcheck_timeout" => 10,
+            "realservers" => {
+              "green" => ["st-oneapp-002.st.net.local"],
+              "blue" => ["st-oneapp-001.st.net.local"]
+            },
+            "env" => "st",
+            "app" => nil,
+            "monitor_warn" => 0,
+            "healthcheck_timeout" => 999
+          }
         }
-        }
+      }
     )
   end
 
@@ -199,22 +217,30 @@ describe Stacks::DSL do
     st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['env'].should eql('ci2')
     st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['app'].should eql('JavaHttpRef')
     st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['monitor_warn'].should eql(0)
-    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['healthcheck_timeout'].should eql(10)
-    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['realservers']['blue'].should eql(['ci2-appx-001.st.net.local'])
-    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['realservers']['green'].should eql(['ci2-appx-002.st.net.local'])
+    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['healthcheck_timeout'].should \
+      eql(10)
+    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['realservers']['blue'].should \
+      eql(['ci2-appx-001.st.net.local'])
+    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-appx-vip.st.net.local']['realservers']['green'].should \
+      eql(['ci2-appx-002.st.net.local'])
 
     st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['env'].should eql('ci2')
-    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['app'].should eql('MySuperCoolApp')
+    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['app'].should \
+      eql('MySuperCoolApp')
     st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['monitor_warn'].should eql(1)
-    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['healthcheck_timeout'].should eql(10)
-    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['realservers']['blue'].should eql(['ci2-app2x-001.st.net.local', 'ci2-app2x-002.st.net.local'])
+    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['healthcheck_timeout'].should \
+      eql(10)
+    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-app2x-vip.st.net.local']['realservers']['blue'].should \
+      eql(['ci2-app2x-001.st.net.local', 'ci2-app2x-002.st.net.local'])
 
     st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-myproxy-vip.st.net.local']['type'].should eql('proxy')
     st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-myproxy-vip.st.net.local']['ports'].should eql([80, 443])
-    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-myproxy-vip.st.net.local']['realservers']['blue'].should eql(['ci2-myproxy-001.st.net.local', 'ci2-myproxy-002.st.net.local'])
+    st_lb_enc['role::loadbalancer']['virtual_servers']['ci2-myproxy-vip.st.net.local']['realservers']['blue'].should \
+      eql(['ci2-myproxy-001.st.net.local', 'ci2-myproxy-002.st.net.local'])
 
     st_lb_enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['type'].should eql('sftp')
-    st_lb_enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['realservers']['blue'].should eql(["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"])
+    st_lb_enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['realservers']['blue'].should \
+      eql(["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"])
     st_lb_enc['role::loadbalancer']['virtual_servers']['st-sftp-vip.st.net.local']['persistent_ports'].should eql([])
 
     ci_loadbalancer = find("ci-lb-001.mgmt.st.net.local")
@@ -223,18 +249,24 @@ describe Stacks::DSL do
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['env'].should eql('ci')
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['app'].should eql('JavaHttpRef')
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['monitor_warn'].should eql(0)
-    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['healthcheck_timeout'].should eql(10)
-    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['realservers']['blue'].should eql(['ci-appx-001.st.net.local'])
-    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['realservers']['green'].should eql(['ci-appx-002.st.net.local'])
+    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['healthcheck_timeout'].should \
+      eql(10)
+    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['realservers']['blue'].should \
+      eql(['ci-appx-001.st.net.local'])
+    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-appx-vip.st.net.local']['realservers']['green'].should \
+      eql(['ci-appx-002.st.net.local'])
 
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-app2x-vip.st.net.local']['env'].should eql('ci')
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-app2x-vip.st.net.local']['app'].should eql('MySuperCoolApp')
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-app2x-vip.st.net.local']['monitor_warn'].should eql(1)
-    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-app2x-vip.st.net.local']['healthcheck_timeout'].should eql(10)
-    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-app2x-vip.st.net.local']['realservers']['blue'].should eql(['ci-app2x-001.st.net.local', 'ci-app2x-002.st.net.local'])
+    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-app2x-vip.st.net.local']['healthcheck_timeout'].should \
+      eql(10)
+    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-app2x-vip.st.net.local']['realservers']['blue'].should \
+      eql(['ci-app2x-001.st.net.local', 'ci-app2x-002.st.net.local'])
 
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-sftp-vip.st.net.local']['type'].should eql('sftp')
-    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-sftp-vip.st.net.local']['realservers']['blue'].should eql(["ci-sftp-001.st.net.local", "ci-sftp-002.st.net.local"])
+    ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-sftp-vip.st.net.local']['realservers']['blue'].should \
+      eql(["ci-sftp-001.st.net.local", "ci-sftp-002.st.net.local"])
     ci_lb_enc['role::loadbalancer']['virtual_servers']['ci-sftp-vip.st.net.local']['persistent_ports'].should eql([])
   end
 
@@ -320,9 +352,15 @@ describe Stacks::DSL do
     eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
     # XXX fix once ruby 1.8 is no more
     if RUBY_VERSION[0, 3] == '1.8'
-      eg_es.to_enc.should eql('role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-002.st.net.local", "eg-elasticsearch-001.st.net.local"] })
+      eg_es.to_enc.should eql('role::elasticsearch_node' => {
+                                "cluster_nodes" => ["eg-elasticsearch-002.st.net.local",
+                                                    "eg-elasticsearch-001.st.net.local"]
+                              })
     else
-      eg_es.to_enc.should eql('role::elasticsearch_node' => { "cluster_nodes" => ["eg-elasticsearch-001.st.net.local", "eg-elasticsearch-002.st.net.local"] })
+      eg_es.to_enc.should eql('role::elasticsearch_node' => {
+                                "cluster_nodes" => ["eg-elasticsearch-001.st.net.local",
+                                                    "eg-elasticsearch-002.st.net.local"]
+                              })
     end
   end
 
@@ -526,7 +564,8 @@ describe Stacks::DSL do
 
     proxyserver = find("env2-refproxy2-001.mgmt.st.net.local")
     enc = proxyserver.to_enc['role::proxyserver']
-    enc['vhosts']['example2.timgroup.com']['proxy_pass_rules']['/somewhere'].should eql 'http://env-downstreamapp-vip.st.net.local:8000'
+    enc['vhosts']['example2.timgroup.com']['proxy_pass_rules']['/somewhere'].should \
+      eql 'http://env-downstreamapp-vip.st.net.local:8000'
   end
 
   it 'generates proxy server enc data with persistent when enable_persistent is specified'  do
