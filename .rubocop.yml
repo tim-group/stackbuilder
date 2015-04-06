@@ -56,10 +56,6 @@ Lint/RescueException:
 Lint/ShadowingOuterLocalVariable:
   Enabled: false
 
-# Offense count: 34
-Metrics/AbcSize:
-  Max: 64
-
 # Offense count: 1
 Metrics/BlockNesting:
   Max: 6
@@ -129,11 +125,6 @@ Style/MethodName:
 Style/Next:
   Enabled: false
 
-# Offense count: 1
-# Configuration parameters: NamePrefix, NamePrefixBlacklist.
-Style/PredicateName:
-  Enabled: false
-
 # Offense count: 9
 Style/RescueModifier:
   Enabled: false
@@ -157,11 +148,9 @@ Style/MultilineBlockChain:
   Enabled: false
 
 # Offense count: 13
-# Cop supports --auto-correct.
 # Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.
 Style/TrivialAccessors:
   Enabled: false
 
-# Offense count: 1
 Metrics/AbcSize:
   Max: 65

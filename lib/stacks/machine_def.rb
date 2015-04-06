@@ -138,10 +138,6 @@ class Stacks::MachineDef
     end
   end
 
-  def storage
-    @storage
-  end
-
   def add_route(route_name)
     @routes << route_name unless @routes.include? route_name
   end

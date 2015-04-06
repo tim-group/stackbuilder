@@ -99,7 +99,7 @@ class Subscription
     return_results = []
     message = nil
 
-    while !is_all_accounted_for(return_results, hosts) && !timed_out(start_time, timeout)
+    while !all_accounted_for?(return_results, hosts) && !timed_out(start_time, timeout)
       begin
         Timeout::timeout(@pop_timeout) do
           message = @queues[topic].pop
@@ -117,7 +117,7 @@ class Subscription
 
   private
 
-  def is_all_accounted_for(results, hosts)
+  def all_accounted_for?(results, hosts)
     accounted_for = results.map { |hash| hash["host"] }
     (hosts - accounted_for).empty?
   end
