@@ -617,7 +617,7 @@ namespace :sbx do
           on :success do |response_hash|
             logger.info "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
           end
-          on :failed do |response|
+          on :failed do |response_hash|
             logger.info "failed to schedule #{downtime_secs} seconds downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
           end
         end
