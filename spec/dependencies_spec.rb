@@ -209,13 +209,11 @@ describe_stack 'stack with sub environment dependencies' do
         :primary_site => 'oy',
         :secondary_site => 'oy',
         :lb_virtual_router_id => 27 do
-
       instantiate_stack 'funds_proxy'
 
       env 'mirror',
           :timcyclic_instances => 1,
           :lb_virtual_router_id => 21 do
-
         instantiate_stack 'funds'
         instantiate_stack 'blondin'
       end
