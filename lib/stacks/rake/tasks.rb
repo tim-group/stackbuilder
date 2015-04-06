@@ -510,6 +510,9 @@ namespace :sbx do
             on :unaccounted do |machine|
               logger.warn "cert not signed for #{machine} (unaccounted for)"
             end
+            on :already_signed do |machine|
+              logger.warn "cert for #{machine} already signed, skipping"
+            end
           end
         end
 

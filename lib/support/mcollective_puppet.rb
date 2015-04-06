@@ -16,13 +16,21 @@ module Support::MCollectivePuppet
 
     start_time = now
     while !needs_signing.empty? && !timed_out(start_time, timeout)
-      all_requests = puppetca do |mco|
-        mco.list.map do |response|
-          response[:data][:requests]
+      requests, signed = puppetca do |mco|
+        r = []
+        s = []
+        mco.list.each do |response|
+          r += response[:data][:requests]
+          s += response[:data][:signed]
         end
-      end.flatten.to_set
+        [r.to_set, s.to_set]
+      end
 
-      ready_to_sign = all_requests.intersection(needs_signing)
+      needs_signing.intersection(signed).each do |machine_fqdn|
+        callback.invoke :already_signed, machine_fqdn
+      end
+      needs_signing -= signed
+      ready_to_sign = requests.intersection(needs_signing)
 
       ready_to_sign.each do |machine_fqdn|
         signed = puppetca do |mco|
