@@ -14,7 +14,7 @@ class Stacks::Selenium::Hub < Stacks::MachineDef
   end
 
   def node_names
-    node_names = @nodes.inject([]) do |hostnames, (name, machine)|
+    node_names = @nodes.inject([]) do |hostnames, (_name, machine)|
       hostnames << machine.hostname if machine.kind_of? Stacks::MachineDef
       machine.children.map do|child_machine|
         hostnames << child_machine.hostname

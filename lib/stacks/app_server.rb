@@ -28,11 +28,11 @@ class Stacks::AppServer < Stacks::MachineDef
   end
 
   def dependency_config_sftp_servers_only
-    @virtual_service.dependency_config.reject { |key, value| key != 'sftp_servers' }
+    @virtual_service.dependency_config.reject { |key, _value| key != 'sftp_servers' }
   end
 
   def dependency_config_excluding_sftp_servers
-    @virtual_service.dependency_config.reject! { |key, value| key == 'sftp_servers' }
+    @virtual_service.dependency_config.reject! { |key, _value| key == 'sftp_servers' }
   end
 
   public

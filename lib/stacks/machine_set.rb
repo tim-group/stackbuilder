@@ -51,7 +51,7 @@ class Stacks::MachineSet
     end
   end
 
-  def config_params(dependant)
+  def config_params(_dependant)
     {} # parameters for config.properties of apps depending on this service
   end
 

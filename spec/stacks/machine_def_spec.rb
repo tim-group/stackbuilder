@@ -17,7 +17,7 @@ describe Stacks::MachineDef do
       def self.loadfacts
       end
 
-      def self.value(value)
+      def self.value(_value)
         nil
       end
     end
@@ -36,7 +36,7 @@ describe Stacks::MachineDef do
       def self.loadfacts
       end
 
-      def self.value(value)
+      def self.value(_value)
         'testusername'
       end
     end

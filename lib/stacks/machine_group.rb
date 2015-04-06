@@ -10,7 +10,7 @@ module Stacks::MachineGroup
   end
 
   def configure
-    on_bind do |machineset, environment|
+    on_bind do |_machineset, environment|
       @environment = environment
       configure_domain_name(environment)
       instance_eval(&@config_block) unless @config_block.nil?

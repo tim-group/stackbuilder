@@ -236,7 +236,7 @@ describe Compute::Controller do
 
     @logger.should_receive(:info).with("myhost launch vm1 result: myhost: failed")
     @compute_controller.launch_raw(specs) do
-      on :failure do |vm, msg|
+      on :failure do |_vm, msg|
         failure = msg
       end
     end
@@ -257,7 +257,7 @@ describe Compute::Controller do
 
     failure = nil
     @compute_controller.launch(specs) do
-      on :failure do |vm, msg|
+      on :failure do |_vm, msg|
         failure = msg
       end
     end

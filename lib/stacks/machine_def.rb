@@ -89,7 +89,7 @@ class Stacks::MachineDef
   end
 
   def disable_persistent_storage
-    @storage.each do |mount_point, values|
+    @storage.each do |mount_point, _values|
       modify_storage(mount_point.to_sym => { :persistent => false })
     end
   end

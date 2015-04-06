@@ -11,7 +11,7 @@ class Support::RakeFormatter
     @@interactive
   end
 
-  def call(severity, time, progname, msg)
+  def call(severity, _time, _progname, msg)
     sprintf(@@format, severity.clone.downcase!, msg2str(msg))
   end
 

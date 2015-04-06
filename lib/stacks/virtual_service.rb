@@ -101,7 +101,7 @@ module Stacks::VirtualService
     rules
   end
 
-  def config_params(dependant)
+  def config_params(_dependant)
     {}
   end
 

@@ -15,7 +15,7 @@ class Compute::Allocation
   end
 
   def create_vm_to_host_map
-    Hash[@current_allocation.reject { |host, vms| vms.nil? }.map do |host, vms|
+    Hash[@current_allocation.reject { |_host, vms| vms.nil? }.map do |host, vms|
       vms.map do |vm|
         [vm, host]
       end
@@ -74,7 +74,7 @@ class Compute::Controller
   def audit(specs)
     fabrics = specs.group_by { |spec| spec[:fabric] }
 
-    fabrics.each do |fabric, specs|
+    fabrics.each do |fabric, _specs|
       pp @compute_node_client.audit_hosts(fabric)
     end
   end
@@ -112,7 +112,7 @@ class Compute::Controller
 
     threads.each(&:join)
 
-    all_specs = allocation.map do |host, specs|
+    all_specs = allocation.map do |_host, specs|
       specs
     end.flatten
 
@@ -188,7 +188,7 @@ class Compute::Controller
 
     allocated_specs = []
 
-    allocation.each do |host, specs|
+    allocation.each do |_host, specs|
       allocated_specs << specs
     end
 
@@ -249,7 +249,7 @@ class Compute::Controller
     grouped_results
   end
 
-  def fail_non_destroyable_vms(non_destroyable_specs, callback)
+  def fail_non_destroyable_vms(non_destroyable_specs, _callback)
     non_destroyable_specs.each do |spec|
       @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, please specify machine.allow_destroy(true)")
       raise "#{spec[:hostname]} is not destroyable"

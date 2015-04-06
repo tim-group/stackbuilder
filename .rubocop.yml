@@ -152,16 +152,6 @@ Style/SignalException:
 Metrics/ParameterLists:
   Max: 8
 
-# Offense count: 41
-# Cop supports --auto-correct.
-Lint/UnusedBlockArgument:
-  Enabled: false
-
-# Offense count: 45
-# Cop supports --auto-correct.
-Lint/UnusedMethodArgument:
-  Enabled: false
-
 # Offense count: 1
 Style/MultilineBlockChain:
   Enabled: false

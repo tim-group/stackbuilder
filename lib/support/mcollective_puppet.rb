@@ -76,11 +76,11 @@ module Support::MCollectivePuppet
     callback = Support::Callback.new(&block)
 
     fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
-    while !(undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }).empty? && !timed_out(start_time, timeout)
+    while !(undecided = fates.hash_select { |_, v| v != "passed" && v != "failed" }).empty? && !timed_out(start_time, timeout)
       old_fates = fates.clone
       undecided_statuses = puppetd_status(undecided.keys)
       fates.merge!(undecided_statuses)
-      stopped_statuses = undecided_statuses.hash_select { |k, v| v == "stopped" }
+      stopped_statuses = undecided_statuses.hash_select { |_, v| v == "stopped" }
       stopped_results = puppetd_last_run_summary_processed(stopped_statuses.keys)
       stopped_results.sort.each do |machine_fqdn, result|
         if result == "passed"
@@ -98,7 +98,7 @@ module Support::MCollectivePuppet
       end
     end
 
-    undecided = fates.hash_select { |k, v| v != "passed" && v != "failed" }
+    undecided = fates.hash_select { |_, v| v != "passed" && v != "failed" }
     undecided.sort.each do |machine_fqdn, result|
       callback.invoke(:timed_out, [machine_fqdn, result])
     end

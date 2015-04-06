@@ -50,7 +50,7 @@ module Stacks::Core::Actions
         on :allocated do |vm, host|
           services.logger.info "#{vm} allocated to #{host}"
         end
-        on :success do |vm, msg|
+        on :success do |vm, _msg|
           services.logger.info "#{vm} launched successfully"
         end
         on :failure do |vm, msg|

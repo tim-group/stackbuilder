@@ -20,7 +20,7 @@ describe 'launch' do
       # merge allocated and provisionally_allocated
     end
 
-    def provisionally_allocate(machine)
+    def provisionally_allocate(_machine)
     end
 
     def can_allocate(machine)
@@ -40,7 +40,7 @@ describe 'launch' do
 
     private
 
-    def find_suitable_host_for(machine)
+    def find_suitable_host_for(_machine)
       candidate_hosts = hosts.reject do |host|
         !host.can_allocate(host)
       end.order_by utility

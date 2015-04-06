@@ -52,9 +52,7 @@ module Stacks::VirtualProxyService
   def downstream_services
     vhost_map = @proxy_vhosts_lookup.values.group_by(&:vhost_fqdn)
 
-    duplicates = Hash[vhost_map.select do |key, values|
-      values.size > 1
-    end]
+    duplicates = Hash[vhost_map.select { |_key, values| values.size > 1 }]
 
     raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size == 0
 
@@ -81,7 +79,7 @@ module Stacks::VirtualProxyService
   end
 
   def to_loadbalancer_config
-    grouped_realservers = realservers.group_by do |realserver|
+    grouped_realservers = realservers.group_by do |_|
       'blue'
     end
 

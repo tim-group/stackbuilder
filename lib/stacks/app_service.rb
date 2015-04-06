@@ -35,7 +35,7 @@ module Stacks::AppService
     @jvm_args = jvm_args
   end
 
-  def config_params(dependant)
+  def config_params(_dependant)
     { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000" }
   end
 

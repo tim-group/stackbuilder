@@ -1,4 +1,3 @@
-
 require 'stacks/namespace'
 
 module Stacks::Gold
@@ -10,7 +9,7 @@ module Stacks::Gold
     on_bind do
     end
 
-    on_bind do |m, environment|
+    on_bind do |_machineset, environment|
       @environment = environment
       instance_eval(&@config_block)
       bind_children(environment)

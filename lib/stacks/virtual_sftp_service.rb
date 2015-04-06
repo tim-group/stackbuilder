@@ -24,7 +24,7 @@ module Stacks::VirtualSftpService
   end
 
   def to_loadbalancer_config
-    grouped_realservers = realservers.group_by do |realserver|
+    grouped_realservers = realservers.group_by do |_|
       'blue'
     end
 

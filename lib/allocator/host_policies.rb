@@ -17,7 +17,7 @@ module StackBuilder::Allocator::HostPolicies
   end
 
   def self.allocation_temporarily_disabled_policy
-    Proc.new do |host, machine|
+    Proc.new do |host, _machine|
       result = { :passed => true }
       result = { :passed => false, :reason => "Allocation disabled" } if host.allocation_disabled
       result
@@ -41,7 +41,7 @@ module StackBuilder::Allocator::HostPolicies
 
   def self.ensure_defined_storage_types_policy
     Proc.new do |host, machine|
-      missing_storage_types = machine[:storage].inject([]) do |result, (mount_point, values)|
+      missing_storage_types = machine[:storage].inject([]) do |result, (_mount_point, values)|
         # FIXME: remove the rescue once all compute nodes have storage config
         host_storage_type = host.storage[values[:type]] rescue nil
         result << values[:type] if host_storage_type.nil?
@@ -62,7 +62,7 @@ module StackBuilder::Allocator::HostPolicies
     end
   end
 
-  def self.check_storage_exists(mount_point)
+  def self.check_storage_exists(_mount_point)
     false
   end
 
@@ -113,10 +113,10 @@ module StackBuilder::Allocator::HostPolicies
   def self.do_not_overallocate_disk_policy
     required_space_hash = {}
     Proc.new do |host, machine|
-      machine[:storage].each do |mount_point, values|
+      machine[:storage].each do |_mount_point, values|
         required_space_hash[values[:type]] = 0
       end
-      machine[:storage].each do |mount_point, values|
+      machine[:storage].each do |_mount_point, values|
         required_space_hash[values[:type]] += values[:size].to_f
       end
       storage_without_enough_space = required_space_hash.inject({}) do |result, (type, required_space)|

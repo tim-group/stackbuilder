@@ -80,7 +80,7 @@ class StackBuilder::Allocator::Host
     end
   end
 
-  def preference(machine_hash)
+  def preference(_machine_hash)
     @preference_functions.map do |function|
       function.call(self)
     end

@@ -43,7 +43,7 @@ module Stacks::Selenium::Cluster
     end
   end
 
-  def instantiate_machines(environment)
+  def instantiate_machines(_environment)
     @nodespecs.each do |nodespec|
       instantiate_node nodespec
     end

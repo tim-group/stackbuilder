@@ -22,7 +22,7 @@ module Stacks::TestFramework
     end
   end
 
-  def model(desc, &block)
+  def model(_desc, &block)
     subject = @subject
     it '#{desc}' do
       block.call(subject)

@@ -8,8 +8,8 @@ describe Stacks::DSL do
   before do
     extend Stacks::DSL
     class Resolv::DNS
-      def getaddress(url)
-        "1.1.1.1"
+      def getaddress(_url)
+        '1.1.1.1'
       end
     end
   end
@@ -631,7 +631,7 @@ describe Stacks::DSL do
     stack "mystack" do
       virtual_appserver "x" do
         allow_host '1.1.1.1'
-        each_machine do |machine|
+        each_machine do |_machine|
           allow_host '2.2.2.2'
         end
       end
@@ -649,7 +649,7 @@ describe Stacks::DSL do
     stack "mystack" do
       virtual_appserver "x" do
         include_class 'test::puppet::class'
-        each_machine do |machine|
+        each_machine do |_machine|
           include_class 'test::puppet::class2'
         end
       end
@@ -668,7 +668,7 @@ describe Stacks::DSL do
     stack "mystack" do
       virtual_appserver "x" do
         include_class 'test::puppet::class', 'test_key' => 'test_value'
-        each_machine do |machine|
+        each_machine do |_machine|
           include_class 'test::puppet::class2', 'test_key2' => 'test_value2'
         end
       end

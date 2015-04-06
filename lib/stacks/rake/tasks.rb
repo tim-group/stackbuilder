@@ -130,13 +130,13 @@ namespace :sbx do
     require 'collimator'
     include Collimator
     require 'set'
-    all_headers = data.inject(Set.new) do |all_headers, (fqdn, header)|
+    all_headers = data.inject(Set.new) do |all_headers, (_fqdn, header)|
       all_headers.merge(header.keys)
       all_headers
     end
 
     ordered_headers = order(all_headers)
-    ordered_header_widths = data.sort.inject({}) do |ordered_header_widths, (fqdn, data_values)|
+    ordered_header_widths = data.sort.inject({}) do |ordered_header_widths, (_fqdn, data_values)|
       row = ordered_headers.inject([]) do |row_values, header|
         value = data_values[header] || ""
         width = value.size > header.to_s.size ? value.size + 1 : header.to_s.size + 1
@@ -217,7 +217,7 @@ namespace :sbx do
     puts "parsing stackbuilder-config..."
     hostnames = []
     machines = []
-    environment.environments.each do |envname, env|
+    environment.environments.each do |_envname, env|
       machines += env.flatten.map(&:to_spec).select { |x| x.class != NilClass } # XXX oy-mon-001 is a ShadowServer and to_spec returns NilClass
       hostnames += env.flatten.map(&:hostname) # XXX cannot just get hostname from defined_machines, as they don't include oy-mon-001
     end
@@ -274,7 +274,7 @@ namespace :sbx do
   end
 
   # XXX incomplete, too many special cases. return to this once everything is migrated to NNI
-  def rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
+  def rogue_check_missing_storage(defined_machines, allocated_storage, _allocated_hostnames)
     puts "checking missing or misallocated storage..."
     defined_machines.each do |dhost|
       dhost[:storage].each do |mount_point, p|

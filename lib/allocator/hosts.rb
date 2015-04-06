@@ -23,7 +23,7 @@ class StackBuilder::Allocator::Hosts
       end
     end.flatten(1)]
 
-    already_allocated = allocated_machines.reject do |machine, host|
+    already_allocated = allocated_machines.reject do |machine, _host|
       !specs.include?(machine)
     end
 
