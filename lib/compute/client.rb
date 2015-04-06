@@ -29,8 +29,7 @@ class Compute::Client
     raise "unable to find any compute nodes" if hosts.empty?
 
     response = mco_client("libvirt", :nodes => hosts) do |mco|
-      result = mco.hvinfo
-      result.map do |hv|
+      mco.hvinfo.map do |hv|
         raise "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
         domains = Hash[]

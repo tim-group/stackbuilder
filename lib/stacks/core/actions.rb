@@ -7,6 +7,7 @@ require 'stacks/core/namespace'
 
 module Stacks::Core::Actions
   attr_accessor :actions
+  # rubocop:disable Metrics/MethodLength
   def self.extended(object)
     object.actions = {}
 
@@ -68,6 +69,7 @@ module Stacks::Core::Actions
       end
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   def self.included(object)
     extended(object)

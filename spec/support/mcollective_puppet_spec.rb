@@ -1,7 +1,7 @@
 require 'support/mcollective_puppet'
 
 # XXX probably the wrong way to do this
-class Support::MCollectivePuppet_Test
+class Support::MCollectivePuppetTest
   include Support::MCollectivePuppet
   def initialize(callouts, mco)
     @callouts = callouts
@@ -27,7 +27,7 @@ describe Support::MCollectivePuppet do
   before :each do
     @callouts = double
     @mco = double
-    @mcollective_puppet = Support::MCollectivePuppet_Test.new(@callouts, @mco)
+    @mcollective_puppet = Support::MCollectivePuppetTest.new(@callouts, @mco)
     @callback = double
 
     @callouts.should_receive(:now).any_number_of_times do

@@ -3,8 +3,38 @@ AllCops:
   Exclude:
     - 'build/**/*'
 
+Metrics/AbcSize:
+  Max: 65
+
+# Configuration parameters: CountKeywordArgs.
+Metrics/ParameterLists:
+  Max: 8
+
 Metrics/LineLength:
   Max: 120
+
+Metrics/BlockNesting:
+  Max: 6
+
+# Configuration parameters: CountComments.
+Metrics/ClassLength:
+  Max: 180
+
+# Offense count: 9
+Metrics/CyclomaticComplexity:
+  Max: 15
+
+# Configuration parameters: AllowURI, URISchemes.
+Metrics/LineLength:
+  Max: 318
+
+# Configuration parameters: CountComments.
+Metrics/MethodLength:
+  Max: 40
+
+Metrics/PerceivedComplexity:
+  Max: 15
+
 
 Style/FormatString:
   EnforcedStyle: sprintf
@@ -16,6 +46,7 @@ Style/NegatedIf:
 Style/StringLiterals:
   Enabled: false
 
+# XXX ruby 1.8 compatibility
 # Ruby 1.8 does't have each_with_object()
 Style/EachWithObject:
   Enabled: false
@@ -56,39 +87,8 @@ Lint/RescueException:
 Lint/ShadowingOuterLocalVariable:
   Enabled: false
 
-# Offense count: 1
-Metrics/BlockNesting:
-  Max: 6
-
-# Offense count: 3
-# Configuration parameters: CountComments.
-Metrics/ClassLength:
-  Max: 180
-
-# Offense count: 9
-Metrics/CyclomaticComplexity:
-  Max: 15
-
-# Offense count: 161
-# Configuration parameters: AllowURI, URISchemes.
-Metrics/LineLength:
-  Max: 318
-
-# Offense count: 65
-# Configuration parameters: CountComments.
-Metrics/MethodLength:
-  Max: 52
-
-# Offense count: 8
-Metrics/PerceivedComplexity:
-  Max: 15
-
 # Offense count: 3
 Style/AccessorMethodName:
-  Enabled: false
-
-# Offense count: 1
-Style/ClassAndModuleCamelCase:
   Enabled: false
 
 # Offense count: 82
@@ -135,14 +135,6 @@ Style/RescueModifier:
 Style/SignalException:
   Enabled: false
 
-##################################
-### refactor
-##################################
-# Offense count: 1
-# Configuration parameters: CountKeywordArgs.
-Metrics/ParameterLists:
-  Max: 8
-
 # Offense count: 1
 Style/MultilineBlockChain:
   Enabled: false
@@ -151,6 +143,3 @@ Style/MultilineBlockChain:
 # Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.
 Style/TrivialAccessors:
   Enabled: false
-
-Metrics/AbcSize:
-  Max: 65
