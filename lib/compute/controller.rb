@@ -251,7 +251,8 @@ class Compute::Controller
 
   def fail_non_destroyable_vms(non_destroyable_specs, _callback)
     non_destroyable_specs.each do |spec|
-      @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, please specify machine.allow_destroy(true)")
+      @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, " \
+        "please specify machine.allow_destroy(true)")
       raise "#{spec[:hostname]} is not destroyable"
     end
   end

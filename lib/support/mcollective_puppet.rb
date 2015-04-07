@@ -76,7 +76,8 @@ module Support::MCollectivePuppet
     callback = Support::Callback.new(&block)
 
     fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
-    while !(undecided = fates.hash_select { |_, v| v != "passed" && v != "failed" }).empty? && !timed_out(start_time, timeout)
+    while !(undecided = fates.hash_select { |_, v| v != "passed" && v != "failed" }).empty? &&
+          !timed_out(start_time, timeout)
       old_fates = fates.clone
       undecided_statuses = puppetd_status(undecided.keys)
       fates.merge!(undecided_statuses)
@@ -119,7 +120,8 @@ module Support::MCollectivePuppet
   end
 
   def result_for_summary(data)
-    # the agent returns malformed data in a short window between a run finishing and the state file being updated, so treat that as not yet stopped
+    # the agent returns malformed data in a short window between a run finishing
+    # and the state file being updated, so treat that as not yet stopped
     return "stopping" if data.nil?
     return "stopping" if data[:summary].nil?
     resources = data[:summary]["resources"]
@@ -142,7 +144,8 @@ module Support::MCollectivePuppet
   # XXX the machine_fqdn argument might need to be removed if moving puppet to a vm
   def puppetca(machine_fqdn = nil, &block)
     puppetmaster = case machine_fqdn
-                   when /\.mgmt\.st\.net\.local$/ then ["st-puppetmaster-001.mgmt.st.net.local", "staging-puppetmaster-001.mgmt.st.net.local"]
+                   when /\.mgmt\.st\.net\.local$/ then ["st-puppetmaster-001.mgmt.st.net.local",
+                                                        "staging-puppetmaster-001.mgmt.st.net.local"]
                    when /\.mgmt\.oy\.net\.local$/ then ["antarctica.oyldn.youdevise.com"]
                    when /\.mgmt\.pg\.net\.local$/ then ["australia.pgldn.youdevise.com"]
                    when /\.mgmt\.ci\.net\.local$/ then ["ldn-puppet-001.youdevise.com"]

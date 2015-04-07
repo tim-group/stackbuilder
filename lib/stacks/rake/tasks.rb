@@ -218,8 +218,10 @@ namespace :sbx do
     hostnames = []
     machines = []
     environment.environments.each do |_envname, env|
-      machines += env.flatten.map(&:to_spec).select { |x| x.class != NilClass } # XXX oy-mon-001 is a ShadowServer and to_spec returns NilClass
-      hostnames += env.flatten.map(&:hostname) # XXX cannot just get hostname from defined_machines, as they don't include oy-mon-001
+      # XXX oy-mon-001 is a ShadowServer and to_spec returns NilClass
+      machines += env.flatten.map(&:to_spec).select { |x| x.class != NilClass }
+      # XXX cannot just get hostname from defined_machines, as they don't include oy-mon-001
+      hostnames += env.flatten.map(&:hostname)
     end
     [hostnames, machines]
   end
@@ -256,7 +258,8 @@ namespace :sbx do
       if !dhost.nil?
         if dhost[:vcpus].to_i != adata[:vcpus]
           if dhost[:vcpus].to_i != 0
-            puts sprintf("  %s.%s: defined cpus: %d; reality: %d", dhost[:hostname], dhost[:domain], dhost[:vcpus], adata[:vcpus])
+            puts sprintf("  %s.%s: defined cpus: %d; reality: %d", dhost[:hostname], dhost[:domain],
+                         dhost[:vcpus], adata[:vcpus])
             # else
             # XXX how to figure out the default value?
           end
@@ -264,7 +267,8 @@ namespace :sbx do
 
         if dhost[:ram].to_i != adata[:memory]
           if dhost[:ram].to_i != 0
-            puts sprintf("  %s.%s: defined memory: %d; reality: %d", dhost[:hostname], dhost[:domain], dhost[:ram], adata[:memory])
+            puts sprintf("  %s.%s: defined memory: %d; reality: %d", dhost[:hostname], dhost[:domain],
+                         dhost[:ram], adata[:memory])
             # else
             # XXX how to figure out the default value?
           end
@@ -302,13 +306,15 @@ namespace :sbx do
         astorage_size = astorage[0]
         psize = p[:size].to_i * 1024 * 1024
         if astorage_size.to_i == psize
-          puts "  #{dhost[:hostname]}: size for storage \"#{allocation_name}\" is \"#{astorage_size}\", expected \"#{psize * 1024 / 1000}\" -- was this vm created manually?"
+          puts "  #{dhost[:hostname]}: size for storage \"#{allocation_name}\" is \"#{astorage_size}\", expected " \
+            "\"#{psize * 1024 / 1000}\" -- was this vm created manually?"
           next
         end
 
         psize = p[:size].to_i * 1024 * 1024 * 1024 / 1000
         if astorage_size.to_i != psize
-          puts "  #{dhost[:hostname]}: size mismatch for storage \"#{allocation_name}\", is \"#{astorage_size}\", should be \"#{psize}\""
+          puts "  #{dhost[:hostname]}: size mismatch for storage \"#{allocation_name}\", is \"#{astorage_size}\", " \
+            "should be \"#{psize}\""
           next
         end
       end
@@ -355,7 +361,8 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
+      task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait',
+                          'orc:resolve', 'cancel_downtime']
 
       desc "perform a clean followed by a provision"
       task :reprovision => %w(clean provision)
@@ -619,10 +626,12 @@ namespace :sbx do
         downtime_secs = 1800 # 1800 = 30 mins
         nagios_helper.schedule_downtime(hosts, downtime_secs) do
           on :success do |response_hash|
-            logger.info "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+            logger.info "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
+              "result: #{response_hash[:result]}"
           end
           on :failed do |response_hash|
-            logger.info "failed to schedule #{downtime_secs} seconds downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+            logger.info "failed to schedule #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
+              "result: #{response_hash[:result]}"
           end
         end
       end
@@ -638,7 +647,8 @@ namespace :sbx do
         nagios_helper = Support::Nagios::Service.new
         nagios_helper.cancel_downtime(hosts) do
           on :success do |response_hash|
-            logger.info "successfully cancelled downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+            logger.info "successfully cancelled downtime for #{response_hash[:machine]} " \
+              "result: #{response_hash[:result]}"
           end
           on :failed do |response_hash|
             logger.info "failed to cancel downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
@@ -661,7 +671,8 @@ namespace :sbx do
               unless xml.nil?
                 matches = /type='vnc' port='(\-?\d+)'/.match(xml)
                 raise "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
-                raise "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" if matches.captures.empty?
+                raise "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
+                  if matches.captures.empty?
                 results[host] = {
                   :host => sender,
                   :port => matches.captures.first

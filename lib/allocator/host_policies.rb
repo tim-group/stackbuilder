@@ -7,8 +7,12 @@ module StackBuilder::Allocator::HostPolicies
       result = { :passed => true }
       if machine_spec[:availability_group]
         host.machines.each do |allocated_machine|
-          if allocated_machine[:availability_group] && machine_spec[:availability_group] == allocated_machine[:availability_group]
-            result = { :passed => false, :reason => "Availability group violation (already running #{allocated_machine[:hostname]})" }
+          if allocated_machine[:availability_group] &&
+             machine_spec[:availability_group] == allocated_machine[:availability_group]
+            result = {
+              :passed => false,
+              :reason => "Availability group violation (already running #{allocated_machine[:hostname]})"
+            }
           end
         end
       end
@@ -32,7 +36,8 @@ module StackBuilder::Allocator::HostPolicies
       if host_ram_stats[:available_ram] < Integer(machine[:ram])
         result = {
           :passed => false,
-          :reason => "Insufficient memory (required: #{machine[:ram]} KiB available: #{host_ram_stats[:available_ram]} KiB)"
+          :reason => "Insufficient memory (required: #{machine[:ram]} KiB " \
+                     "available: #{host_ram_stats[:available_ram]} KiB)"
         }
       end
       result
@@ -54,7 +59,8 @@ module StackBuilder::Allocator::HostPolicies
           unique_missing_storage_types = Set.new(missing_storage_types).to_a
           result = {
             :passed => false,
-            :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} available: #{host.storage.keys.sort.join(',')})"
+            :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} " \
+                       "available: #{host.storage.keys.sort.join(',')})"
           }
         end
       end

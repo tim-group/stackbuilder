@@ -37,9 +37,11 @@ describe Compute::Controller do
   end
 
   it 'allocates to a remote fabric' do
-    @compute_node_client.stub(:audit_hosts).with("st").and_return("st-kvm-001.mgmt.st.net.local" => { :active_hosts => [] })
+    @compute_node_client.stub(:audit_hosts).with("st").and_return("st-kvm-001.mgmt.st.net.local" =>
+                                                                  { :active_hosts => [] })
 
-    @compute_node_client.stub(:audit_hosts).with("bs").and_return("bs-kvm-001.mgmt.bs.net.local" => { :active_hosts => [] })
+    @compute_node_client.stub(:audit_hosts).with("bs").and_return("bs-kvm-001.mgmt.bs.net.local" =>
+                                                                  { :active_hosts => [] })
 
     specs = [{
       :hostname => "vm1",
@@ -204,10 +206,13 @@ describe Compute::Controller do
       ]
     }
 
-    #    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
+    #    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).
+    #      and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
 
-    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).and_return([["myhost", { "vm1" => ["success", "o noes"] }]])
-    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).and_return([["myhost", { "vm2" => %w(success yes) }]])
+    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).
+      and_return([["myhost", { "vm1" => ["success", "o noes"] }]])
+    @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).
+      and_return([["myhost", { "vm2" => %w(success yes) }]])
 
     result = []
 
@@ -230,7 +235,8 @@ describe Compute::Controller do
         :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
       }] }
 
-    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).and_return([["myhost", { "vm1" => ["failed", "o noes"] }]])
+    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).
+      and_return([["myhost", { "vm1" => ["failed", "o noes"] }]])
 
     failure = nil
 
@@ -301,7 +307,8 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => %w(success yay) }], ["host2", { "vm2" => %w(success hey) }]])
+    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => %w(success yay) }],
+                                                  ["host2", { "vm2" => %w(success hey) }]])
 
     successful = []
     @compute_controller.clean(specs) do
@@ -347,7 +354,8 @@ describe Compute::Controller do
       :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
     }]
 
-    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => ["failed", "o noes"] }], ["host2", { "vm2" => %w(success yay) }]])
+    @compute_node_client.stub(:clean).and_return([["host1", { "vm1" => ["failed", "o noes"] }],
+                                                  ["host2", { "vm2" => %w(success yay) }]])
 
     failures = []
     @compute_controller.clean(specs) do

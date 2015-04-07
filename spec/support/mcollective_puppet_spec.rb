@@ -59,8 +59,14 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm2.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -78,7 +84,10 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -90,7 +99,10 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm2.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm2.test.net.local').ordered
@@ -115,8 +127,14 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm2.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -135,9 +153,18 @@ describe Support::MCollectivePuppet do
 
     @callouts.should_receive(:puppetd).with(["vm0.test.net.local", "vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm0.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 1, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm2.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 1 } } } }
+      {
+        :sender => 'vm0.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 1, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 1 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm0.test.net.local').ordered
@@ -168,11 +195,26 @@ describe Support::MCollectivePuppet do
     @mco.should_receive(:last_run_summary).ordered.and_return([
       { :sender => 'vm1.test.net.local', :data => nil },
       { :sender => 'vm2.test.net.local', :data => {} },
-      { :sender => 'vm3.test.net.local', :data => { :summary => { 'resources' => nil } } }, # this is the only one which actually occurs, but there's no kill like overkill
-      { :sender => 'vm4.test.net.local', :data => { :summary => { 'resources' => {} } } },
-      { :sender => 'vm5.test.net.local', :data => { :summary => { 'resources' => { 'failed' => nil, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm6.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => nil } } } },
-      { :sender => 'vm7.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm3.test.net.local',
+        :data => { :summary => { 'resources' => nil } }
+      }, # this is the only one which actually occurs, but there's no kill like overkill
+      {
+        :sender => 'vm4.test.net.local',
+        :data => { :summary => { 'resources' => {} } }
+      },
+      {
+        :sender => 'vm5.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => nil, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm6.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => nil } } }
+      },
+      {
+        :sender => 'vm7.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm7.test.net.local').ordered
@@ -191,12 +233,30 @@ describe Support::MCollectivePuppet do
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local", "vm3.test.net.local",
                                              "vm4.test.net.local", "vm5.test.net.local", "vm6.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm2.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm3.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm4.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm5.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } },
-      { :sender => 'vm6.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm3.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm4.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm5.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      },
+      {
+        :sender => 'vm6.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -219,13 +279,22 @@ describe Support::MCollectivePuppet do
     @callouts.should_receive(:now).ordered.and_return(1) # timed_out
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :status => 'stopped' } },
-      { :sender => 'vm2.test.net.local', :data => { :status => 'running' } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :status => 'stopped' }
+      },
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :status => 'running' }
+      }
     ])
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
@@ -240,24 +309,36 @@ describe Support::MCollectivePuppet do
   it 'accounts for machines even if they do not appear at first' do
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :status => 'stopped' } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :status => 'stopped' }
+      }
     ])
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered
 
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
-      { :sender => 'vm2.test.net.local', :data => { :status => 'stopped' } }
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :status => 'stopped' }
+      }
     ])
 
     @callouts.should_receive(:puppetd).with(["vm2.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm2.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm2.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm2.test.net.local').ordered
@@ -273,12 +354,18 @@ describe Support::MCollectivePuppet do
     @callouts.should_receive(:now).ordered.and_return(1) # timed_out
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local", "vm2.test.net.local"]).ordered
     @mco.should_receive(:status).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :status => 'stopped' } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :status => 'stopped' }
+      }
     ])
 
     @callouts.should_receive(:puppetd).with(["vm1.test.net.local"]).ordered
     @mco.should_receive(:last_run_summary).ordered.and_return([
-      { :sender => 'vm1.test.net.local', :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } } }
+      {
+        :sender => 'vm1.test.net.local',
+        :data => { :summary => { 'resources' => { 'failed' => 0, 'failed_to_restart' => 0 } } }
+      }
     ])
 
     @callback.should_receive(:passed).with('vm1.test.net.local').ordered

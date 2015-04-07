@@ -162,7 +162,8 @@ class Stacks::MachineSet
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|
       env.accept do |virtual_service|
-        if virtual_service.kind_of?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) && service[1].eql?(env.name)
+        if virtual_service.kind_of?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) &&
+           service[1].eql?(env.name)
           return virtual_service
         end
       end

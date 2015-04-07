@@ -15,7 +15,8 @@ describe_stack 'debrepomirror' do
   host("e1-debrepomirror-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql('role::deb_repo_mirror' => {})
 
-    host.to_specs.shift[:cnames].should eql(:mgmt => { 'deb-transitional' => 'e1-debrepomirror-001.mgmt.space.net.local' })
+    host.to_specs.shift[:cnames].
+      should eql(:mgmt => { 'deb-transitional' => 'e1-debrepomirror-001.mgmt.space.net.local' })
   end
 end
 

@@ -21,7 +21,8 @@ class Stacks::Selenium::XpNode < Stacks::MachineDef
     spec[:kvm_template] = 'kvm_no_virtio'
     spec[:gold_image_url] = options[:gold_image] # TODO: delete me
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?
-    spec[:selenium_version] = options[:selenium_version] || "2.32.0" # TODO: Remove default once refstack has been updated to pass in :ie_version
+    # TODO: Remove default once refstack has been updated to pass in :ie_version
+    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
     spec[:ie_version] = options[:ie_version]
     spec[:storage]['/'.to_sym][:prepare] = {} if spec[:storage]['/'.to_sym][:prepare].nil?
     spec[:storage]['/'.to_sym][:prepare][:options] = {} if spec[:storage]['/'.to_sym][:prepare][:options].nil?

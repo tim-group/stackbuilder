@@ -46,7 +46,8 @@ describe Puppet::Node::Stacks do
     node.parameters['logicalenv'].should eql('testenv')
 
     result.should eql(node)
-    # it is super-shitty that this is tested by reproducing the entire config, but Puppet::Node::Stacks does not lend itself to mocking this
+    # it is super-shitty that this is tested by reproducing the entire config,
+    # but Puppet::Node::Stacks does not lend itself to mocking this
     result.classes.should eql("role::http_app" => { "application" => "JavaHttpRef" })
   end
 end

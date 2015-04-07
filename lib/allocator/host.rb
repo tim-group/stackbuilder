@@ -61,7 +61,10 @@ class StackBuilder::Allocator::Host
         if RUBY_VERSION[0, 3] == '1.8'
           use_policy = false if policy.to_s == StackBuilder::Allocator::HostPolicies.ha_group.to_s
         else
-          use_policy = false if policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') == StackBuilder::Allocator::HostPolicies.ha_group.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@')
+          if policy.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@') ==
+             StackBuilder::Allocator::HostPolicies.ha_group.to_s.gsub(/^(#<Proc:0x)[0-9a-f]+@/, '\1@')
+            use_policy = false
+          end
         end
       elsif @storage.nil? || @storage == {}
         proc1 = StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy

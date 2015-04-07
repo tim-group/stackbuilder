@@ -30,8 +30,10 @@ class Stacks::MailServer < Stacks::MachineDef
                  'allowed_hosts'       => @virtual_service.allowed_hosts,
                  'vip_fqdns'           => vip_fqdns,
                  'vip_networks'        => @virtual_service.vip_networks.map(&:to_s),
-                 'dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns(@virtual_service.vip_networks),
-                 'participation_dependant_instances' => @virtual_service.dependant_load_balancer_machine_def_fqdns(@virtual_service.vip_networks)
+                 'dependant_instances' =>
+                   @virtual_service.dependant_load_balancer_machine_def_fqdns(@virtual_service.vip_networks),
+                 'participation_dependant_instances' =>
+                   @virtual_service.dependant_load_balancer_machine_def_fqdns(@virtual_service.vip_networks)
                },
                'server::default_new_mgmt_net_local' => nil)
     enc

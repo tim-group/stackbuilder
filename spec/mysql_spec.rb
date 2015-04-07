@@ -134,12 +134,14 @@ describe_stack 'should provide correct enc data' do
     enc_rights['mydb']['database_name'].should eql('mydb')
 
     host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql('replicant@testing-mydb-002.space.net.local' => {
-                                                                                  'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-                                                                                },
-                                                                                'replicant@testing-mydbbackup-001.earth.net.local' => {
-                                                                                  'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-                                                                                })
+    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
+      'replicant@testing-mydb-002.space.net.local' => {
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+      },
+      'replicant@testing-mydbbackup-001.earth.net.local' => {
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+      }
+    )
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
@@ -261,11 +263,13 @@ describe_stack 'should support dependencies' do
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['dependant_instances'].should include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
+    host.to_enc['role::mysql_server']['dependant_instances'].
+      should include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
     host.to_enc['role::mysql_server']['dependencies'].should eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['dependant_instances'].should_not include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
+    host.to_enc['role::mysql_server']['dependant_instances'].
+      should_not include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
     host.to_enc['role::mysql_server']['dependencies'].should eql({})
   end
 end

@@ -11,7 +11,7 @@ Metrics/ParameterLists:
   Max: 8
 
 Metrics/LineLength:
-  Max: 180 # 120
+  Max: 120
 
 Metrics/BlockNesting:
   Max: 6
@@ -26,7 +26,7 @@ Metrics/CyclomaticComplexity:
 
 # Configuration parameters: CountComments.
 Metrics/MethodLength:
-  Max: 40
+  Max: 45
 
 Metrics/PerceivedComplexity:
   Max: 15

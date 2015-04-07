@@ -93,7 +93,8 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql '10G'
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found].should eql :raise_error
+    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found].
+      should eql :raise_error
   end
 end
 
@@ -145,7 +146,8 @@ describe_stack 'should support dependencies' do
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['dependant_instances'].should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
+    host.to_enc['role::databaseserver']['dependant_instances'].
+      should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
     host.to_enc['role::databaseserver']['dependencies'].should eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|

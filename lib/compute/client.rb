@@ -25,7 +25,6 @@ class Compute::Client
   # audit_domains is not enabled by default, as it takes significant time to complete
   def audit_hosts(fabric, audit_domains = false)
     hosts = discover_compute_nodes(fabric)
-
     raise "unable to find any compute nodes" if hosts.empty?
 
     response = mco_client("libvirt", :nodes => hosts) do |mco|
@@ -47,7 +46,8 @@ class Compute::Client
       end
     end
 
-    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
+    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+      "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
 
     response_hash = Hash[response]
     allocation_disabled_fact_hash = Hash[get_fact('allocation_disabled', hosts)]
@@ -55,25 +55,25 @@ class Compute::Client
 
     libvirt_response_hash = Hash[response_hash]
 
-    # FIXME: Once all computenodes have new storage config, unwrap this
-    # code from begin/rescue
+    # FIXME: Once all computenodes have new storage config, unwrap this code from begin/rescue
     response = nil
     begin
       response = mco_client("computenodestorage", :nodes => hosts) do |mco|
         result = mco.details
         result.map do |resp|
           # FIXME: Once all compute nodes have new storage config, renable this
-          # raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" unless resp[:statuscode]==0
+          # raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
+          #   unless resp[:statuscode]==0
           [resp[:sender], { :storage => resp[:data] }]
         end
       end
 
-      raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from (#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
+      raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+        "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
     rescue
     end
 
-    # FIXME: Once all computenodes have new storage config, unwrap this
-    # code from unless
+    # FIXME: Once all computenodes have new storage config, unwrap this code from unless
     unless response.nil?
       storage_response_hash = Hash[response]
 

@@ -12,8 +12,10 @@ class Stacks::Environment
     @environments = environments
     @stack_procs = stack_procs
     @definitions = {}
-    @persistent_storage_supported = options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
-    @every_machine_destroyable = options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
+    @persistent_storage_supported =
+      options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
+    @every_machine_destroyable =
+      options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
     @primary_site = options[:primary_site] rescue nil
     @secondary_site = options[:secondary_site] rescue nil
   end

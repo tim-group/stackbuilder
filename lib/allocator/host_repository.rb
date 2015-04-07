@@ -34,14 +34,15 @@ class StackBuilder::Allocator::HostRepository
                                                :policies => policies,
                                                :ram => attr[:memory],
                                                :storage => attr[:storage],
-                                               :allocation_disabled => attr[:allocation_disabled]
-      )
+                                               :allocation_disabled => attr[:allocation_disabled])
 
       host.allocated_machines = vms
       host.domains = attr[:domains]
       hosts << host
     end
 
-    StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions, :logger => @logger)
+    StackBuilder::Allocator::Hosts.new(:hosts => hosts,
+                                       :preference_functions => preference_functions,
+                                       :logger => @logger)
   end
 end

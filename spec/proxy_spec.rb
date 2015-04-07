@@ -90,7 +90,8 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
   host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
     enc = host.to_enc
     enc['role::proxyserver']['default_ssl_cert'].should eql('test_cert_change')
-    enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert'].should eql('test_vhost_cert_change')
+    enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert'].
+      should eql('test_vhost_cert_change')
   end
 end
 
@@ -135,10 +136,15 @@ describe_stack 'proxy pass rules without an environment default to the environme
     end
   end
   host('shared-fundsproxy-001.mgmt.oy.net.local') do |host|
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/'].should eql 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/resources'].should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah'].should eql 'http://latest-blondinapp-vip.oy.net.local:8000'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah2'].should eql 'http://shared-blondinapp-vip.oy.net.local:8000'
-    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah3'].should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/'].
+      should eql 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/resources'].
+      should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah'].
+      should eql 'http://latest-blondinapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah2'].
+      should eql 'http://shared-blondinapp-vip.oy.net.local:8000'
+    host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']['/HIP/blah3'].
+      should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
   end
 end
