@@ -36,7 +36,7 @@ class Stacks::PuppetMaster < Stacks::MachineDef
     puppetmaster_special = {
       :template            => 'puppetmaster',
       :cnames              => {
-        :mgmt =>  {
+        :mgmt => {
           'puppet' => "#{qualified_hostname(:mgmt)}"
         }
       }
