@@ -255,23 +255,23 @@ namespace :sbx do
     puts "checking vm properties..."
     allocated_domains.each do |afqdn, adata|
       dhost = defined_machines.detect { |dh| sprintf("%s.%s", dh[:hostname], dh[:domain]) == afqdn }
-      if !dhost.nil?
-        if dhost[:vcpus].to_i != adata[:vcpus]
-          if dhost[:vcpus].to_i != 0
-            puts sprintf("  %s.%s: defined cpus: %d; reality: %d", dhost[:hostname], dhost[:domain],
-                         dhost[:vcpus], adata[:vcpus])
-            # else
-            # XXX how to figure out the default value?
-          end
-        end
+      next if dhost.nil?
 
-        if dhost[:ram].to_i != adata[:memory]
-          if dhost[:ram].to_i != 0
-            puts sprintf("  %s.%s: defined memory: %d; reality: %d", dhost[:hostname], dhost[:domain],
-                         dhost[:ram], adata[:memory])
-            # else
-            # XXX how to figure out the default value?
-          end
+      if dhost[:vcpus].to_i != adata[:vcpus]
+        if dhost[:vcpus].to_i != 0
+          puts sprintf("  %s.%s: defined cpus: %d; reality: %d", dhost[:hostname], dhost[:domain],
+                       dhost[:vcpus], adata[:vcpus])
+          # else
+          # XXX how to figure out the default value?
+        end
+      end
+
+      if dhost[:ram].to_i != adata[:memory]
+        if dhost[:ram].to_i != 0
+          puts sprintf("  %s.%s: defined memory: %d; reality: %d", dhost[:hostname], dhost[:domain],
+                       dhost[:ram], adata[:memory])
+          # else
+          # XXX how to figure out the default value?
         end
       end
     end
