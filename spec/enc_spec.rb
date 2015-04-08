@@ -350,18 +350,10 @@ describe Stacks::DSL do
     end
 
     eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
-    # XXX fix once ruby 1.8 is no more
-    if RUBY_VERSION[0, 3] == '1.8'
-      eg_es.to_enc.should eql('role::elasticsearch_node' => {
-                                "cluster_nodes" => ["eg-elasticsearch-002.st.net.local",
-                                                    "eg-elasticsearch-001.st.net.local"]
-                              })
-    else
-      eg_es.to_enc.should eql('role::elasticsearch_node' => {
-                                "cluster_nodes" => ["eg-elasticsearch-001.st.net.local",
-                                                    "eg-elasticsearch-002.st.net.local"]
-                              })
-    end
+    eg_es.to_enc['role::elasticsearch_node']['cluster_nodes'].should include(
+      'eg-elasticsearch-002.st.net.local',
+      'eg-elasticsearch-001.st.net.local')
+    eg_es.to_enc['role::elasticsearch_node']['cluster_nodes'].size.should eql(2)
   end
 
   it 'configures NAT boxes to NAT incoming public IPs' do
@@ -615,7 +607,7 @@ describe Stacks::DSL do
       instantiate_stack "mystack"
     end
 
-    find_environment("e1").flatten.map(&:name).should eql(["e1-lb-001", "e1-lb-002", "e1-nat-001", "e1-nat-002"])
+    find_environment("e1").flatten.map(&:name).should include("e1-lb-001", "e1-lb-002", "e1-nat-001", "e1-nat-002")
   end
 
   it 'can build forward proxy servers' do
@@ -643,9 +635,9 @@ describe Stacks::DSL do
       instantiate_stack "mystack"
     end
 
-    find_environment("e1")["mystack"]["x"]["x-001"].availability_group.should eql("e1-x")
-    find_environment("e1")["mystack"]["px"]["px-001"].availability_group.should eql("e1-px")
-    find_environment("e1")["mystack"]["sx"]["sx-001"].availability_group.should eql("e1-sx")
+    find("e1-x-001.mgmt.space.net.local").availability_group.should eql("e1-x")
+    find("e1-px-001.mgmt.space.net.local").availability_group.should eql("e1-px")
+    find("e1-sx-001.mgmt.space.net.local").availability_group.should eql("e1-sx")
   end
 
   it 'adds ehcache settings to the enc if enable_ehcache is set inside a virtual_appserver' do
