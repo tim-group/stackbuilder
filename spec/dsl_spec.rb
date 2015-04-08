@@ -19,11 +19,12 @@ describe Stacks::DSL do
   it 'binds to configuration from the environment' do
     appx = environments["ci"]["blah"]["appx"]
     appx.to_specs.size.should eql 2
-    appx.to_specs.shift[:hostname].should eql('ci-appx-001')
-    appx.to_specs.shift[:domain].should eql('st.net.local')
-    appx.to_specs.shift[:fabric].should eql('st')
-    appx.to_specs.shift[:availability_group].should eql('ci-appx')
-    appx.to_specs.shift[:qualified_hostnames].
+    spec = find("ci-appx-001.mgmt.st.net.local").to_spec
+    spec[:hostname].should eql('ci-appx-001')
+    spec[:domain].should eql('st.net.local')
+    spec[:fabric].should eql('st')
+    spec[:availability_group].should eql('ci-appx')
+    spec[:qualified_hostnames].
       should eql(:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local")
   end
 
