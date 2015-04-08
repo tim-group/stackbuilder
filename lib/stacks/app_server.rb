@@ -6,8 +6,8 @@ class Stacks::AppServer < Stacks::MachineDef
   attr_accessor :group
   attr_accessor :launch_config
 
-  def initialize(virtual_service, index)
-    super(virtual_service.name + "-" + index)
+  def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)
+    super(virtual_service.name + "-" + index, networks, location)
     @virtual_service = virtual_service
     @allowed_hosts = []
     @launch_config = {}
