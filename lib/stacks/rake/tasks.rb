@@ -182,7 +182,7 @@ namespace :sbx do
     ram_stats = convert_hash_values_from_KB_to_GB(StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host))
     storage_stats = convert_hash_values_from_KB_to_GB(StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host))
     vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
-    merge  = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats)]
+    merge = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats)]
     merged_stats = Hash[*merge.map(&:to_a).flatten]
 
     merged_stats[:fqdn] = host.fqdn
