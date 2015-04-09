@@ -126,7 +126,37 @@ namespace :sbx do
     order.select { |header| !header.nil? }
   end
 
-  def tabulate(data, table_header = "")
+  @total = Hash.new(0)
+  @total_str = lambda { |a, b| sprintf("%d/%d %2.0f%%", a, b, 100.0 * a / b) }
+  def kvm_hosts_tabulate_sum_totals(header, value)
+    return 0 if value.size == 0
+
+    total_width = 0
+    case header.to_s
+    when 'vms'
+      @total[:vms] += value.to_i
+      total_width = @total[:vms].to_s.size
+    when 'memory(GB)'
+      re = /^(\d+)\/(\d+)/.match(value)
+      @total[:mem_used] += re[1].to_i
+      @total[:mem_avail] += re[2].to_i
+      total_width = @total_str.call(@total[:mem_used], @total[:mem_avail]).to_s.size
+    when 'os(GB)'
+      re = /^\w+: (\d+)\/(\d+)/.match(value)
+      @total[:os_used] += re[1].to_i
+      @total[:os_avail] += re[2].to_i
+      total_width = @total_str.call(@total[:os_used], @total[:os_avail]).to_s.size
+    when 'data(GB)'
+      re = /^\w+: (\d+)\/(\d+)/.match(value)
+      @total[:data_used] += re[1].to_i
+      @total[:data_avail] += re[2].to_i
+      total_width = @total_str.call(@total[:data_used], @total[:data_avail]).to_s.size
+    end
+    total_width + 1
+  end
+
+  # XXX output not very pretty, percentages not aligned
+  def kvm_hosts_tabulate(data)
     require 'collimator'
     include Collimator
     require 'set'
@@ -139,7 +169,11 @@ namespace :sbx do
     ordered_header_widths = data.sort.inject({}) do |ordered_header_widths, (_fqdn, data_values)|
       row = ordered_headers.inject([]) do |row_values, header|
         value = data_values[header] || ""
+
+        # determine greatest width
+        total_width = kvm_hosts_tabulate_sum_totals(header, value)
         width = value.size > header.to_s.size ? value.size + 1 : header.to_s.size + 1
+        width = total_width > width ? total_width : width
         if !ordered_header_widths.key?(header)
           ordered_header_widths[header] = width
         else
@@ -151,8 +185,17 @@ namespace :sbx do
       Table.row(row)
       ordered_header_widths
     end
+    total_list = [
+      "total",
+      "#{@total[:vms]}",
+      @total_str.call(@total[:mem_used], @total[:mem_avail]),
+      @total_str.call(@total[:os_used], @total[:os_avail])
+    ]
+    # data(GB) not present in env=dev
+    total_list.push(@total_str.call(@total[:data_used], @total[:data_avail])) if @total[:data_avail] > 0
+    Table.row(total_list)
 
-    Table.header(table_header)
+    Table.header("KVM host machines audit")
     ordered_headers.each do |header|
       width = ordered_header_widths[header] rescue header.to_s.size
       Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
@@ -200,7 +243,7 @@ namespace :sbx do
   desc 'Print a report of KVM host CPU/Storage/Memory allocation'
   task :audit_host_machines do
     hosts = @factory.host_repository.find_compute_nodes(environment.options[:primary_site])
-    tabulate(details_for(hosts.hosts), "KVM host machines audit")
+    kvm_hosts_tabulate(details_for(hosts.hosts))
   end
 
   desc 'run to_enc on all nodes'
