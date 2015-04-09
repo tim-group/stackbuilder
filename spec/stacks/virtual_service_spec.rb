@@ -61,4 +61,22 @@ describe 'Stacks::VirtualService' do
       )
     end
   end
+
+  describe_stack 'allows creation of secondary servers' do
+    given do
+      stack "funds" do
+        virtual_appserver 'fundsapp' do
+          self.instances = 1
+          enable_secondary_site
+        end
+      end
+
+      env 'env', :primary_site => 'mars', :secondary_site => 'jupiter' do
+        instantiate_stack 'funds'
+      end
+    end
+
+    host_should_exist('env-fundsapp-001.mgmt.mars.net.local')
+    host_should_exist('env-fundsapp-001.mgmt.jupiter.net.local')
+  end
 end
