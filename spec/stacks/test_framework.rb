@@ -22,30 +22,29 @@ module Stacks::TestFramework
     end
   end
 
-  def host_should_exist(fqdn)
-    host_exist?(fqdn, true)
-  end
-
-  def host_should_not_exist(fqdn)
-    host_exist?(fqdn, false)
-  end
-
-  def host_exist?(fqdn, value)
+  def it_stack(desc, &block)
     subject = @subject
-    it "host #{fqdn} existance should eql #{value}" do
-      subject.exist?(fqdn).should eql value
-    end
-  end
-
-  def model(_desc, &block)
-    subject = @subject
-    it '#{desc}' do
+    it "stack #{desc}" do
       block.call(subject)
     end
   end
 end
 
 module Stacks::Matchers
+  RSpec::Matchers.define :have_host do |fqdn|
+    match do |stacks|
+      stacks.exist?(fqdn)
+    end
+
+    failure_message_for_should do
+      "Expected to have host: #{fqdn}"
+    end
+
+    failure_message_for_should_not do
+      "Expected to not have host: #{fqdn}"
+    end
+  end
+
   RSpec::Matchers.define :have_ancestory do |expected_ancestory|
     match do |server|
       traversal = stacks.environments[expected_ancestory.shift]

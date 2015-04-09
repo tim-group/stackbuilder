@@ -17,7 +17,7 @@ describe_stack 'gold image' do
     end
   end
 
-  model("contains an environment on every node in the tree") do |root|
+  it_stack("contains an environment on every node in the tree") do |root|
     root.accept do |node|
       node.environment.should_not eql(nil)
     end

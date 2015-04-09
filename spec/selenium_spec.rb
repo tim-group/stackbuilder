@@ -67,13 +67,13 @@ describe_stack 'selenium' do
     end
   end
 
-  model("contains an environment on every node in the tree") do |root|
+  it_stack("contains an environment on every node in the tree") do |root|
     root.accept do |node|
       node.environment.should_not eql(nil)
     end
   end
 
-  model("does not create a hub when you do not define one") do |root|
+  it_stack("does not create a hub when you do not define one") do |root|
     root.find('qa-hub-001.mgmt.space.net.local').should be_nil
   end
 
