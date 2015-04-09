@@ -54,7 +54,7 @@ describe Stacks::DSL do
     find("rah-lb-002.mgmt.st.net.local").should_not be_nil
   end
 
-  it 'generates load balancer enc data with persistent when enable_persistent is specified'  do
+  it 'generates load balancer enc data with persistent when enable_persistent is specified' do
     stack "loadbalancer" do
       loadbalancer
     end
