@@ -70,7 +70,9 @@ class Compute::Client
 
       raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
         "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
+      # rubocop:disable Lint/HandleExceptions
     rescue
+      # rubocop:enable Lint/HandleExceptions
     end
 
     # FIXME: Once all computenodes have new storage config, unwrap this code from unless
