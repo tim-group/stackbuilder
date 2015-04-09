@@ -15,7 +15,6 @@ module Stacks::VirtualService
   end
 
   attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
-  attr_accessor :enable_secondary_site
   attr_reader :vip_networks, :allowed_hosts, :included_classes
 
   def configure
@@ -29,7 +28,6 @@ module Stacks::VirtualService
     @vip_networks = [:prod]
     @tcp = true
     @udp = false
-    @enable_secondary_site = false
   end
 
   def instantiate_machines(environment)
@@ -86,10 +84,6 @@ module Stacks::VirtualService
     @nat = true
     add_vip_network :front
     add_vip_network :prod
-  end
-
-  def enable_secondary_site
-    @enable_secondary_site = true
   end
 
   def allow_host(source_host_or_network)

@@ -13,6 +13,7 @@ class Stacks::MachineSet
   attr_accessor :port_map
   attr_accessor :groups
   attr_reader :depends_on
+  attr_reader :enable_secondary_site
   attr_accessor :auto_configure_dependencies
 
   include Stacks::MachineDefContainer
@@ -26,11 +27,16 @@ class Stacks::MachineSet
     @config_block = config_block
     @depends_on = []
     @auto_configure_dependencies = true
+    @enable_secondary_site = false
   end
 
   def depend_on(dependant, env = environment.name)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
+  end
+
+  def enable_secondary_site
+    @enable_secondary_site = true
   end
 
   def on_bind(&block)
