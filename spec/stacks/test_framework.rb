@@ -22,6 +22,21 @@ module Stacks::TestFramework
     end
   end
 
+  def host_should_exist(fqdn)
+    host_exist?(fqdn, true)
+  end
+
+  def host_should_not_exist(fqdn)
+    host_exist?(fqdn, false)
+  end
+
+  def host_exist?(fqdn, value)
+    subject = @subject
+    it "host #{fqdn} existance should eql #{value}" do
+      subject.exist?(fqdn).should eql value
+    end
+  end
+
   def model(_desc, &block)
     subject = @subject
     it '#{desc}' do

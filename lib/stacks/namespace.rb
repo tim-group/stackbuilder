@@ -47,6 +47,16 @@ module Stacks
       node
     end
 
+    def exist?(fqdn)
+      found = false
+      accept do |machine_def|
+        if machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == fqdn
+          found = true
+        end
+      end
+      found
+    end
+
     def accept(&block)
       environments.values.each do |env|
         env.accept(&block)
