@@ -78,7 +78,7 @@ describe Stacks::DSL do
     enc['role::loadbalancer']['virtual_router_id'].should eql(1)
   end
 
-  it 'generates load balancer enc data with the correct warn_level based on fewest number of servers in a group'  do
+  it 'generates load balancer enc data with the correct warn_level based on fewest number of servers in a group' do
     stack "fabric" do
       loadbalancer
     end
