@@ -3,6 +3,7 @@ require 'stacks/machine_def_container'
 require 'stacks/app_server'
 require 'stacks/nat'
 require 'uri'
+require 'securerandom'
 
 module Stacks::MachineGroup
   def self.extended(object)
@@ -41,13 +42,42 @@ module Stacks::MachineGroup
 
   def instantiate_machines(environment)
     @instances.times do |i|
-      index = sprintf("%03d", i + 1)
-      @definitions["#{name}-#{index}"] = server = @type.new(self, index)
-      server.group = groups[i % groups.size] if server.respond_to?(:group)
-
-      if server.respond_to?(:availability_group)
-        server.availability_group = availability_group(environment)
-      end
+      @definitions[random_name] = instantiate_machine(i, environment)
     end
+  end
+
+  def random_name
+    SecureRandom.hex(20)
+  end
+
+  def default_networks
+    [:mgmt, :prod]
+  end
+
+  def default_site
+    :primary_site
+  end
+
+  def instantiate_machine(i, environment, networks = default_networks, location = default_site)
+    index = sprintf("%03d", i + 1)
+    server = nil
+    # FIXME: Temporary fix - Remove me when all stacks have a 4 param or use the default constructor.
+    # Not all stacks classes have a constructor that will take all 4 variables.
+    # Maintain backwards compatibility by checking the arity of the constructor.
+    # If the method expects a fixed number of arguments, this number is its arity.
+    # If the method expects a variable number of arguments, its arity is the additive inverse of its parameter count
+    # An arity >= 0 indicates a fixed number of parameters
+    # An arity < 0 indicates a variable number of parameters.
+    # Digested from source: http://readruby.io/methods
+    if @type.instance_method(:initialize).arity == -3
+      server = @type.new(self, index, networks, location)
+    else
+      server = @type.new(self, index)
+    end
+    server.group = groups[i % groups.size] if server.respond_to?(:group)
+    if server.respond_to?(:availability_group)
+      server.availability_group = availability_group(environment)
+    end
+    server
   end
 end

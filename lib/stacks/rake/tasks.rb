@@ -334,9 +334,15 @@ namespace :sbx do
   require 'set'
   machine_names = Set.new
   environment.accept do |machine_def|
-    namespace machine_def.name.to_sym do
+    if machine_def.respond_to?(:mgmt_fqdn)
+      rake_task_name = machine_def.mgmt_fqdn.to_sym
+    else
+      rake_task_name = machine_def.name.to_sym
+    end
+
+    namespace rake_task_name do
       RSpec::Core::Runner.disable_autorun!
-      if machine_names.include?("#{machine_def.environment.name}:#{machine_def.name}")
+      if machine_names.include?(rake_task_name)
         raise "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. " \
           "Look for a stack that has the same name as the server being created.\neg.\n" \
           " stack '#{machine_def.name}' do\n  app '#{machine_def.name}'"
