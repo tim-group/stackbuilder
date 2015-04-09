@@ -17,9 +17,6 @@ describe_stack 'jenkins' do
   end
 
   host("e1-jenkinsslave-002.mgmt.space.net.local") do |host|
-    host.should have_ancestory(
-      ["e1", "jenkins", "jenkinsslave", "jenkinsslave-002"])
-
     host.to_enc.should eql('role::cinode_precise' => {})
   end
 end
