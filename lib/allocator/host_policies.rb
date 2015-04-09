@@ -130,7 +130,7 @@ module StackBuilder::Allocator::HostPolicies
         if host_storage_type.nil?
           result[type] = { :available_space => 0, :required_space => required_space }
         else
-          available_space = KB_to_GB(host_storage_type[:free])
+          available_space = kb_to_gb(host_storage_type[:free])
           if required_space > available_space
             result[type] = { :available_space => available_space, :required_space => required_space }
           end
@@ -153,7 +153,7 @@ module StackBuilder::Allocator::HostPolicies
 
   private
 
-  def self.KB_to_GB(value)
+  def self.kb_to_gb(value)
     ((value.to_f / (1024 * 1024) * 100).round / 100.0)
   end
 end

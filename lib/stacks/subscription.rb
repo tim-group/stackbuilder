@@ -101,7 +101,7 @@ class Subscription
 
     while !all_accounted_for?(return_results, hosts) && !timed_out(start_time, timeout)
       begin
-        Timeout::timeout(@pop_timeout) do
+        Timeout.timeout(@pop_timeout) do
           message = @queues[topic].pop
         end
         parsed_message = JSON.parse(message.body)

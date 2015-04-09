@@ -160,18 +160,18 @@ namespace :sbx do
     Table.tabulate
   end
 
-  def KB_to_GB(value)
+  def kb_to_gb(value)
     ((value.to_f / (1024 * 1024) * 100).round / 100.0)
   end
 
-  def convert_hash_values_from_KB_to_GB(result_hash)
+  def convert_hash_values_from_kb_to_gb(result_hash)
     gb_hash = result_hash.each.inject({}) do |result, (key, value)|
       if value.is_a?(Hash)
-        result[key] = convert_hash_values_from_KB_to_GB(value)
+        result[key] = convert_hash_values_from_kb_to_gb(value)
       elsif value.is_a?(String) || value.is_a?(Symbol)
         result[key] = value
       else
-        result[key] = KB_to_GB(value).to_f.floor
+        result[key] = kb_to_gb(value).to_f.floor
       end
       result
     end
@@ -179,8 +179,8 @@ namespace :sbx do
   end
 
   def stats_for(host)
-    ram_stats = convert_hash_values_from_KB_to_GB(StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host))
-    storage_stats = convert_hash_values_from_KB_to_GB(StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host))
+    ram_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host))
+    storage_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host))
     vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
     merge = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats)]
     merged_stats = Hash[*merge.map(&:to_a).flatten]

@@ -38,6 +38,9 @@ Style/FormatString:
 Style/NegatedIf:
   Enabled: false
 
+Style/MultilineBlockChain:
+  Enabled: false
+
 # This is just so we don't have to correct a zillion lines
 Style/StringLiterals:
   Enabled: false
@@ -102,11 +105,6 @@ Style/ClassCheck:
 Style/ClassVars:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/ColonMethodCall:
-  Enabled: false
-
 # Offense count: 103
 Style/Documentation:
   Enabled: false
@@ -129,10 +127,6 @@ Style/RescueModifier:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/SignalException:
-  Enabled: false
-
-# Offense count: 1
-Style/MultilineBlockChain:
   Enabled: false
 
 # Offense count: 13
