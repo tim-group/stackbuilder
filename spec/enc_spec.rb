@@ -126,7 +126,7 @@ describe Stacks::DSL do
     )
   end
 
-  it 'generates load balancer enc data with the a different healthcheck_timeout if specified'  do
+  it 'generates load balancer enc data with the a different healthcheck_timeout if specified' do
     stack "fabric" do
       loadbalancer
     end
