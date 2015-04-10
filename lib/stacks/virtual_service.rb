@@ -15,10 +15,9 @@ module Stacks::VirtualService
   end
 
   attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
-  attr_reader :vip_networks, :allowed_hosts, :included_classes
+  attr_reader :vip_networks, :included_classes
 
   def configure
-    @allowed_hosts = []
     @included_classes = {}
     @ehcache = false
     @nat = false
@@ -84,11 +83,6 @@ module Stacks::VirtualService
     @nat = true
     add_vip_network :front
     add_vip_network :prod
-  end
-
-  def allow_host(source_host_or_network)
-    @allowed_hosts << source_host_or_network
-    @allowed_hosts.uniq!
   end
 
   def include_class(class_name, class_hash = {})

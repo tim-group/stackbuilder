@@ -12,6 +12,7 @@ class Stacks::MachineSet
   attr_accessor :ports
   attr_accessor :port_map
   attr_accessor :groups
+  attr_reader :allowed_hosts
   attr_reader :depends_on
   attr_reader :enable_secondary_site
   attr_accessor :auto_configure_dependencies
@@ -28,11 +29,17 @@ class Stacks::MachineSet
     @depends_on = []
     @auto_configure_dependencies = true
     @enable_secondary_site = false
+    @allowed_hosts = []
   end
 
   def depend_on(dependant, env = environment.name)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
+  end
+
+  def allow_host(source_host_or_network)
+    @allowed_hosts << source_host_or_network
+    @allowed_hosts.uniq!
   end
 
   def enable_secondary_site
