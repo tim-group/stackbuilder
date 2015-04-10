@@ -87,6 +87,18 @@ class Stacks::AppServer < Stacks::MachineDef
       end
     end
 
+    if @virtual_service.enable_tomcat_session_replication
+      peers = @virtual_service.children.map do |child|
+        child.qualified_hostname(:prod)
+      end
+
+      peers.delete qualified_hostname(:prod)
+
+      enc['role::http_app']['dependencies']['cluster.enabled'] ='true'
+      enc['role::http_app']['dependencies']['cluster.receiver.address'] = qualified_hostname(:prod)
+      enc['role::http_app']['dependencies']['cluster.members'] = "#{peers.sort.join(',')}"
+    end
+
     unless @launch_config.empty?
       enc['role::http_app']['launch_config'] = @launch_config
     end

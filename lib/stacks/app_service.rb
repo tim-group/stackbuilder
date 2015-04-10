@@ -4,6 +4,7 @@ module Stacks::AppService
   end
 
   attr_accessor :application, :ehcache, :sso_port, :ajp_port, :jvm_args, :idea_positions_exports
+  attr_accessor :enable_tomcat_session_replication
 
   def configure
     @ehcache = false
@@ -13,6 +14,7 @@ module Stacks::AppService
     @jvm_args = nil
     @idea_positions_exports = false
     @disable_http_lb_hack = false
+    @enable_tomcat_session_replication = false
   end
 
   def enable_ehcache
@@ -25,6 +27,10 @@ module Stacks::AppService
 
   def enable_ajp(ajp_port = '8009')
     @ajp_port = ajp_port
+  end
+
+  def enable_tomcat_session_replication
+    @enable_tomcat_session_replication = true
   end
 
   def disable_http_lb_hack

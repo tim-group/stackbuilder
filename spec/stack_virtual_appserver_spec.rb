@@ -24,3 +24,38 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config' do
     data['realservers']['green'].should be_nil
   end
 end
+
+describe_stack 'enabling tomcat session replication creates the right enc' do
+  given do
+    stack 'funds' do
+      virtual_appserver 'fundsuserapp' do
+        enable_tomcat_session_replication
+        self.application = 'tfunds'
+        self.instances = 3
+      end
+    end
+
+    env "e1", :primary_site => "space", :lb_virtual_router_id => 66 do
+      instantiate_stack "funds"
+    end
+  end
+
+  host("e1-fundsuserapp-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc
+    enc['role::http_app']['dependencies']['cluster.enabled'].should eql('true')
+    enc['role::http_app']['dependencies']['cluster.members'].should eql('e1-fundsuserapp-002.space.net.local,e1-fundsuserapp-003.space.net.local')
+    enc['role::http_app']['dependencies']['cluster.receiver.address'].should eql('e1-fundsuserapp-001.space.net.local')
+  end
+  host("e1-fundsuserapp-002.mgmt.space.net.local") do |host|
+    enc = host.to_enc
+    enc['role::http_app']['dependencies']['cluster.enabled'].should eql('true')
+    enc['role::http_app']['dependencies']['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-003.space.net.local')
+    enc['role::http_app']['dependencies']['cluster.receiver.address'].should eql('e1-fundsuserapp-002.space.net.local')
+  end
+  host("e1-fundsuserapp-003.mgmt.space.net.local") do |host|
+    enc = host.to_enc
+    enc['role::http_app']['dependencies']['cluster.enabled'].should eql('true')
+    enc['role::http_app']['dependencies']['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-002.space.net.local')
+    enc['role::http_app']['dependencies']['cluster.receiver.address'].should eql('e1-fundsuserapp-003.space.net.local')
+  end
+end
