@@ -5,7 +5,7 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib")
 require 'puppet'
 require 'puppet/indirector/node/stacks'
 
-raise "Usage: puppet_enc FQDN..." if ARGV.empty?
+fail "Usage: puppet_enc FQDN..." if ARGV.empty?
 
 node = Puppet::Node::Stacks.new
 

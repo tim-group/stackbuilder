@@ -22,7 +22,7 @@ module Stacks::VirtualBindService
   end
 
   def forwarder_zone(fwdr_zone)
-    if fwdr_zone.kind_of?(Array)
+    if fwdr_zone.is_a?(Array)
       @forwarder_zones += fwdr_zone
     else
       @forwarder_zones << fwdr_zone
@@ -57,7 +57,7 @@ module Stacks::VirtualBindService
     zones = nil
     machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
     machine_defs.each do |machine_def|
-      if machine_def.kind_of?(Stacks::BindServer) && machine_def.master?
+      if machine_def.is_a?(Stacks::BindServer) && machine_def.master?
         zones = {} if zones.nil?
         zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.zones_fqdn
       end
@@ -119,7 +119,7 @@ module Stacks::VirtualBindService
 
   def master_server
     masters = children.reject { |bind_server| !bind_server.master? }
-    raise "No masters were not found! #{children}" if masters.empty?
+    fail "No masters were not found! #{children}" if masters.empty?
     # Only return the first master (multi-master support not implemented)
     masters.first
   end

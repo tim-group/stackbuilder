@@ -46,9 +46,7 @@ module Support
         request.body = body
         http = Net::HTTP.new(resolv_host_for_uri(uri), uri.port)
         http.use_ssl = true if uri.scheme == 'https'
-        response = http.start  do |http|
-          http.request(request)
-        end
+        response = http.start { |h| h.request(request) }
         response
       end
 

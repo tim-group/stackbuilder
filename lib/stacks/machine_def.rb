@@ -85,7 +85,7 @@ class Stacks::MachineDef
       @domain = "dev.#{suffix}"
       @hostname = "#{@hostname}-#{owner_fact}"
     end
-    raise "domain must not contain mgmt" if @domain =~ /mgmt\./
+    fail "domain must not contain mgmt" if @domain =~ /mgmt\./
   end
 
   def disable_persistent_storage
@@ -167,7 +167,7 @@ class Stacks::MachineDef
     spec
   end
 
-  # DEPRECATED for flatten / accept interface, remove me!
+  # XXX DEPRECATED for flatten / accept interface, remove me!
   def to_specs
     [to_spec]
   end
@@ -185,7 +185,7 @@ class Stacks::MachineDef
   end
 
   def qualified_hostname(network)
-    raise "no such network '#{network}'" unless @networks.include?(network)
+    fail "no such network '#{network}'" unless @networks.include?(network)
     if network.eql?(:prod)
       return "#{@hostname}.#{@domain}"
     else

@@ -25,11 +25,11 @@ class Compute::Client
   # audit_domains is not enabled by default, as it takes significant time to complete
   def audit_hosts(fabric, audit_domains = false)
     hosts = discover_compute_nodes(fabric)
-    raise "unable to find any compute nodes" if hosts.empty?
+    fail "unable to find any compute nodes" if hosts.empty?
 
     response = mco_client("libvirt", :nodes => hosts) do |mco|
       mco.hvinfo.map do |hv|
-        raise "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
+        fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
         domains = Hash[]
         if audit_domains
@@ -46,7 +46,7 @@ class Compute::Client
       end
     end
 
-    raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+    fail "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
       "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
 
     response_hash = Hash[response]
@@ -62,13 +62,13 @@ class Compute::Client
         result = mco.details
         result.map do |resp|
           # FIXME: Once all compute nodes have new storage config, renable this
-          # raise "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
+          # fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
           #   unless resp[:statuscode]==0
           [resp[:sender], { :storage => resp[:data] }]
         end
       end
 
-      raise "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+      fail "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
         "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
       # rubocop:disable Lint/HandleExceptions
     rescue
@@ -96,7 +96,7 @@ class Compute::Client
   def invoke(selector, specs, client_options)
     mco_client("computenode", client_options) do |mco|
       mco.send(selector, :specs => specs).map do |node|
-        raise node[:statusmsg] if node[:statuscode] != 0
+        fail node[:statusmsg] if node[:statuscode] != 0
         [node.results[:sender], node.results[:data]]
       end
     end

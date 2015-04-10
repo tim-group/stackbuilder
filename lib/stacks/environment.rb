@@ -30,7 +30,7 @@ class Stacks::Environment
   end
 
   def cross_site_routing(fabric, network = 'prod')
-    raise "Un-supported cross site routing network #{network}" if network != 'prod'
+    fail "Un-supported cross site routing network #{network}" if network != 'prod'
     site = (fabric == @primary_site) ? @secondary_site : @primary_site
     {
       "networking::routing::to_site" => {
@@ -55,7 +55,7 @@ class Stacks::Environment
 
   def instantiate_stack(stack_name)
     factory = @stack_procs[stack_name]
-    raise "no stack found '#{stack_name}'" if factory.nil?
+    fail "no stack found '#{stack_name}'" if factory.nil?
     instantiated_stack = factory.call(self)
     @definitions[instantiated_stack.name] = instantiated_stack
   end
@@ -63,7 +63,7 @@ class Stacks::Environment
   def contains_node_of_type?(clazz)
     found = false
     accept do |node|
-      found = true if node.kind_of?(clazz)
+      found = true if node.is_a?(clazz)
     end
     found
   end

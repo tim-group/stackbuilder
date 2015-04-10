@@ -59,7 +59,7 @@ class Stacks::MachineSet
   def each_machine(&block)
     on_bind do
       accept do |machine|
-        block.call(machine) if machine.kind_of? Stacks::MachineDef
+        block.call(machine) if machine.is_a? Stacks::MachineDef
       end
     end
   end
@@ -135,7 +135,7 @@ class Stacks::MachineSet
   def virtual_services_that_depend_on_me
     virtual_services_that_depend_on_me = []
     virtual_services.each do |virtual_service|
-      if virtual_service.kind_of?(Stacks::MachineDefContainer)
+      if virtual_service.is_a?(Stacks::MachineDefContainer)
         if virtual_service.respond_to?(:depends_on)
           if virtual_service.depends_on.include?([name, environment.name])
             virtual_services_that_depend_on_me.push virtual_service
@@ -166,7 +166,7 @@ class Stacks::MachineSet
     if env.size == 1
       return env.first
     else
-      raise "Cannot find environment '#{environment_name}'"
+      fail "Cannot find environment '#{environment_name}'"
     end
   end
 
@@ -175,13 +175,13 @@ class Stacks::MachineSet
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|
       env.accept do |virtual_service|
-        if virtual_service.kind_of?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) &&
+        if virtual_service.is_a?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) &&
            service[1].eql?(env.name)
           return virtual_service
         end
       end
     end
-    raise "Cannot find service #{service[0]} in #{service[1]}, that I depend_on"
+    fail "Cannot find service #{service[0]} in #{service[1]}, that I depend_on"
   end
 
   public

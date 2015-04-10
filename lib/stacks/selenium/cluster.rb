@@ -41,7 +41,7 @@ module Stacks::Selenium::Cluster
                                                                  :gold_image => nodespec[:gold_image],
                                                                  :ie_version => nodespec[:ie_version])
       else
-        raise "unknown Selenium node type"
+        fail "unknown Selenium node type"
       end
     end
   end

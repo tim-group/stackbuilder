@@ -25,7 +25,7 @@ class Compute::Allocation
   def allocate(specs)
     hosts = @current_allocation.keys.sort
 
-    raise "unable to find any suitable compute nodes" if hosts.empty?
+    fail "unable to find any suitable compute nodes" if hosts.empty?
 
     h = 0
     vms_to_host_map = create_vm_to_host_map
@@ -82,23 +82,19 @@ class Compute::Controller
   def launch_raw(allocation, &block)
     grouped_results = []
 
-    threads = allocation.map do |host, specs|
-      Thread.new(host, specs) do |host, specs|
+    threads = allocation.map do |ahost, aspecs|
+      Thread.new(ahost, aspecs) do |host, specs|
         grouped = {}
 
         specs.map do |spec|
           result = @compute_node_client.launch(host, [spec])
 
           result.each do |sender, result_hash|
-            if !result_hash[spec[:hostname]].nil?
-              result_text = result_hash[spec[:hostname]].first
-            else
-              result_text = "nil"
-            end
+            result_text = result_hash[spec[:hostname]].nil? ? 'nil' : result_hash[spec[:hostname]].first
             @logger.info("#{host} launch #{spec[:hostname]} result: #{sender}: #{result_text}")
 
             grouped[sender] = {} if grouped[sender].nil?
-            grouped[sender] = grouped[sender].merge(result_hash)
+            grouped[sender].merge!(result_hash)
           end
         end
 
@@ -126,13 +122,13 @@ class Compute::Controller
 
     allocation = {}
 
-    fabrics.each do |fabric, specs|
+    fabrics.each do |fabric, fspecs|
       if fabric == "local"
         localhost = Socket.gethostbyname(Socket.gethostname).first
-        allocation[localhost] = specs
+        allocation[localhost] = fspecs
       else
         audit = @compute_node_client.audit_hosts(fabric)
-        new_allocation = Compute::Allocation.new(audit).allocate(specs)
+        new_allocation = Compute::Allocation.new(audit).allocate(fspecs)
         allocation = allocation.merge(new_allocation)
       end
     end
@@ -198,8 +194,8 @@ class Compute::Controller
       callback.invoke :already_active, vm[:hostname]
     end
 
-    grouped_results = allocation.map do |host, allocated_specs|
-      @compute_node_client.send(selector, host, allocated_specs)
+    grouped_results = allocation.map do |host, aspecs|
+      @compute_node_client.send(selector, host, aspecs)
     end
 
     dispatch_results(allocated_specs.flatten, grouped_results, callback)
@@ -253,7 +249,7 @@ class Compute::Controller
     non_destroyable_specs.each do |spec|
       @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, " \
         "please specify machine.allow_destroy(true)")
-      raise "#{spec[:hostname]} is not destroyable"
+      fail "#{spec[:hostname]} is not destroyable"
     end
   end
 end

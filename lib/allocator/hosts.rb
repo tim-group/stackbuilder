@@ -8,7 +8,7 @@ class StackBuilder::Allocator::Hosts
     @hosts = args[:hosts]
     @logger = args[:logger]
 
-    raise 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
+    fail 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
     hosts.each do |host|
       host.set_preference_functions(args[:preference_functions])
     end
@@ -38,7 +38,7 @@ class StackBuilder::Allocator::Hosts
   def find_suitable_host_for(machine)
     allocation_denials = []
 
-    raise "Unable to allocate #{machine[:hostname]} as there are no hosts available" if hosts.empty?
+    fail "Unable to allocate #{machine[:hostname]} as there are no hosts available" if hosts.empty?
 
     candidate_hosts = hosts.reject do |host|
       allocation_check_result = host.can_allocate(machine)
@@ -59,7 +59,7 @@ class StackBuilder::Allocator::Hosts
     end
 
     if candidate_hosts.empty?
-      raise "Unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}"
+      fail "Unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}"
     end
     candidate_hosts.sort_by do |host|
       host.preference(machine)

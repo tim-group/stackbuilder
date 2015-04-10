@@ -15,10 +15,10 @@ class Stacks::Selenium::Hub < Stacks::MachineDef
 
   def node_names
     node_names = @nodes.inject([]) do |hostnames, (_name, machine)|
-      hostnames << machine.hostname if machine.kind_of? Stacks::MachineDef
+      hostnames << machine.hostname if machine.is_a? Stacks::MachineDef
       machine.children.map do|child_machine|
         hostnames << child_machine.hostname
-      end if machine.kind_of? Stacks::MachineSet
+      end if machine.is_a? Stacks::MachineSet
       hostnames
     end
     node_names.reject! { |name| name == self.name }.sort

@@ -28,9 +28,9 @@ module Stacks::VirtualSftpService
       'blue'
     end
 
-    realservers = Hash[grouped_realservers.map do |group, realservers|
-      realserver_fqdns = realservers.map(&:prod_fqdn).sort
-      [group, realserver_fqdns]
+    realservers = Hash[grouped_realservers.map do |group, grealservers|
+      grealserver_fqdns = grealservers.map(&:prod_fqdn).sort
+      [group, grealserver_fqdns]
     end]
 
     {

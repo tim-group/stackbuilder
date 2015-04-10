@@ -112,7 +112,7 @@ namespace :sbx do
   end
 
   def order(headers)
-    order = headers.inject([]) do |order, header|
+    headers.inject([]) do |order, header|
       case header
       when :fqdn                then order[0] = header
       when :vms                 then order[1] = header
@@ -122,8 +122,7 @@ namespace :sbx do
       else order.push(header)
       end
       order
-    end
-    order.select { |header| !header.nil? }
+    end.select { |header| !header.nil? }
   end
 
   @total = Hash.new(0)
@@ -160,13 +159,11 @@ namespace :sbx do
     require 'collimator'
     include Collimator
     require 'set'
-    all_headers = data.inject(Set.new) do |all_headers, (_fqdn, header)|
-      all_headers.merge(header.keys)
-      all_headers
-    end
+
+    all_headers = data.inject(Set.new) { |acc, (_fqdn, header)| acc.merge(header.keys) }
 
     ordered_headers = order(all_headers)
-    ordered_header_widths = data.sort.inject({}) do |ordered_header_widths, (_fqdn, data_values)|
+    header_widths = data.sort.inject({}) do |ordered_header_widths, (_fqdn, data_values)|
       row = ordered_headers.inject([]) do |row_values, header|
         value = data_values[header] || ""
 
@@ -197,7 +194,7 @@ namespace :sbx do
 
     Table.header("KVM host machines audit")
     ordered_headers.each do |header|
-      width = ordered_header_widths[header] rescue header.to_s.size
+      width = header_widths[header] rescue header.to_s.size
       Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
     end
     Table.tabulate
@@ -386,7 +383,7 @@ namespace :sbx do
     namespace rake_task_name do
       RSpec::Core::Runner.disable_autorun!
       if machine_names.include?(rake_task_name)
-        raise "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. " \
+        fail "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. " \
           "Look for a stack that has the same name as the server being created.\neg.\n" \
           " stack '#{machine_def.name}' do\n  app '#{machine_def.name}'"
       end
@@ -708,7 +705,7 @@ namespace :sbx do
       sbtask :showvnc do
         hosts = []
         machine_def.accept do |child|
-          hosts << child.name if child.kind_of? Stacks::MachineDef
+          hosts << child.name if child.is_a? Stacks::MachineDef
         end
         mco_client("libvirt") do |mco|
           mco.fact_filter "domain=/(st|ci)/"
@@ -719,8 +716,8 @@ namespace :sbx do
               sender = result[:senderid]
               unless xml.nil?
                 matches = /type='vnc' port='(\-?\d+)'/.match(xml)
-                raise "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
-                raise "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
+                fail "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
+                fail "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
                   if matches.captures.empty?
                 results[host] = {
                   :host => sender,
@@ -738,7 +735,7 @@ namespace :sbx do
         desc "deploys the up2date version of the artifact according to the cmdb using orc"
         sbtask :resolve do
           machine_def.accept do |child_machine_def|
-            if child_machine_def.kind_of? Stacks::AppService
+            if child_machine_def.is_a? Stacks::AppService
               app_service = child_machine_def
               factory = Orc::Factory.new(
                 :application => app_service.application,

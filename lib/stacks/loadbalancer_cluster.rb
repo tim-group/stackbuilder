@@ -22,7 +22,7 @@ module Stacks::LoadBalancerCluster
     virtual_services = []
     environment.accept do |node|
       unless node.environment.contains_node_of_type?(Stacks::LoadBalancer) && environment != node.environment
-        virtual_services << node if node.kind_of? type
+        virtual_services << node if node.is_a? type
       end
     end
     virtual_services

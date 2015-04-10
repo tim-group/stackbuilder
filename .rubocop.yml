@@ -74,47 +74,28 @@ Style/Proc:
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 1
-Lint/HandleExceptions:
-  Enabled: false
-
-# Offense count: 4
-Lint/RescueException:
-  Enabled: false
-
-# Offense count: 17
-Lint/ShadowingOuterLocalVariable:
-  Enabled: false
-
-# Offense count: 3
-Style/AccessorMethodName:
-  Enabled: false
-
 # Offense count: 82
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/ClassAndModuleChildren:
-  Enabled: false
-
-# Offense count: 13
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/ClassCheck:
-  Enabled: false
-
-# Offense count: 9
-Style/ClassVars:
   Enabled: false
 
 # Offense count: 103
 Style/Documentation:
   Enabled: false
 
-# Offense count: 3
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/MethodName:
+# Offense count: 4
+Lint/RescueException:
   Enabled: false
 
-# Offense count: 3
+# Offense count: 4
+Style/AccessorMethodName:
+  Enabled: false
+
+# Offense count: 10
+Style/ClassVars:
+  Enabled: false
+
+# Offense count: 7
 # Configuration parameters: EnforcedStyle, MinBodyLength, SupportedStyles.
 Style/Next:
   Enabled: false
@@ -123,13 +104,7 @@ Style/Next:
 Style/RescueModifier:
   Enabled: false
 
-# Offense count: 32
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/SignalException:
-  Enabled: false
-
-# Offense count: 13
+# Offense count: 11
 # Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.
 Style/TrivialAccessors:
   Enabled: false

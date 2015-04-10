@@ -31,7 +31,7 @@ module Stacks::Core::Actions
       machine_specs = machine_def.flatten.map(&:to_spec)
       machines.each do |machine|
         if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
-          raise "cannot instantiate machines in local site without owner fact"
+          fail "cannot instantiate machines in local site without owner fact"
         end
       end
 
@@ -41,8 +41,8 @@ module Stacks::Core::Actions
         services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}")
       end
 
-      allocation_results[:newly_allocated].each do |host, machines|
-        machines.each do |machine|
+      allocation_results[:newly_allocated].each do |host, namachines|
+        namachines.each do |machine|
           services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
         end
       end
@@ -61,10 +61,10 @@ module Stacks::Core::Actions
           services.logger.error "#{vm} was unaccounted for"
         end
         has :failure do
-          raise "some machines failed to launch"
+          fail "some machines failed to launch"
         end
         has :unaccounted do
-          raise "some machines were unaccounted for"
+          fail "some machines were unaccounted for"
         end
       end
     end

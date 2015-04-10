@@ -72,7 +72,7 @@ module Stacks::MysqlCluster
 
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
-    raise "No masters were not found! #{children}" if masters.empty?
+    fail "No masters were not found! #{children}" if masters.empty?
     # Only return the first master (multi-master support not implemented)
     [masters.first.prod_fqdn]
   end

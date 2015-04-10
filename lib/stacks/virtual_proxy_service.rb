@@ -37,12 +37,12 @@ module Stacks::VirtualProxyService
 
   def find_virtual_service(service, environment_name = environment.name)
     find_environment(environment_name).accept do |machine_def|
-      if machine_def.kind_of?(Stacks::AbstractVirtualService) && service.eql?(machine_def.name)
+      if machine_def.is_a?(Stacks::AbstractVirtualService) && service.eql?(machine_def.name)
         return machine_def
       end
     end
 
-    raise "Cannot find the service called #{service}"
+    fail "Cannot find the service called #{service}"
   end
 
   def set_default_ssl_cert(cert_name)
@@ -54,7 +54,7 @@ module Stacks::VirtualProxyService
 
     duplicates = Hash[vhost_map.select { |_key, values| values.size > 1 }]
 
-    raise "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size == 0
+    fail "duplicate keys found #{duplicates.keys.inspect}" unless duplicates.size == 0
 
     Hash[@proxy_vhosts_lookup.values.map do |vhost|
       primary_app = find_virtual_service(vhost.service, vhost.environment)
@@ -85,9 +85,9 @@ module Stacks::VirtualProxyService
       'blue'
     end
 
-    realservers = Hash[grouped_realservers.map do |group, realservers|
-      realserver_fqdns = realservers.map(&:prod_fqdn).sort
-      [group, realserver_fqdns]
+    realservers = Hash[grouped_realservers.map do |group, grealservers|
+      grealserver_fqdns = grealservers.map(&:prod_fqdn).sort
+      [group, grealserver_fqdns]
     end]
 
     enc = {

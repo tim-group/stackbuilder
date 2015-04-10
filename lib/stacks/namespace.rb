@@ -67,9 +67,9 @@ module Stacks
       return_environment = nil
       env_names = Set.new
       accept do |node|
-        if node.kind_of?(Stacks::Environment) && node.name == environment_name
+        if node.is_a?(Stacks::Environment) && node.name == environment_name
           if env_names.include?("#{node.name}")
-            raise "Duplicate environment detected: #{node.name}\n" \
+            fail "Duplicate environment detected: #{node.name}\n" \
               "Please check the stacks config to ensure you dont have two environments called '#{node.name}'."
           end
           env_names  << "#{node.name}"

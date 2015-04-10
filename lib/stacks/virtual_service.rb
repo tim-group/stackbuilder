@@ -113,9 +113,9 @@ module Stacks::VirtualService
   def lb_config
     fewest_servers_in_a_group = realservers.size
     grouped_realservers = realservers.group_by(&:group)
-    realservers = Hash[grouped_realservers.map do |group, realservers|
-      fewest_servers_in_a_group = realservers.size unless realservers.size > fewest_servers_in_a_group
-      realserver_fqdns = realservers.map(&:prod_fqdn).sort
+    realservers = Hash[grouped_realservers.map do |group, rs|
+      fewest_servers_in_a_group = rs.size unless rs.size > fewest_servers_in_a_group
+      realserver_fqdns = rs.map(&:prod_fqdn).sort
       [group, realserver_fqdns]
     end]
 
