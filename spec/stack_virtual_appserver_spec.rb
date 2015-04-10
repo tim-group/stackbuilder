@@ -41,21 +41,21 @@ describe_stack 'enabling tomcat session replication creates the right enc' do
   end
 
   host("e1-fundsuserapp-001.mgmt.space.net.local") do |host|
-    enc = host.to_enc
-    enc['role::http_app']['dependencies']['cluster.enabled'].should eql('true')
-    enc['role::http_app']['dependencies']['cluster.members'].should eql('e1-fundsuserapp-002.space.net.local,e1-fundsuserapp-003.space.net.local')
-    enc['role::http_app']['dependencies']['cluster.receiver.address'].should eql('e1-fundsuserapp-001.space.net.local')
+    deps = host.to_enc['role::http_app']['dependencies']
+    deps['cluster.enabled'].should eql('true')
+    deps['cluster.members'].should eql('e1-fundsuserapp-002.space.net.local,e1-fundsuserapp-003.space.net.local')
+    deps['cluster.receiver.address'].should eql('e1-fundsuserapp-001.space.net.local')
   end
   host("e1-fundsuserapp-002.mgmt.space.net.local") do |host|
-    enc = host.to_enc
-    enc['role::http_app']['dependencies']['cluster.enabled'].should eql('true')
-    enc['role::http_app']['dependencies']['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-003.space.net.local')
-    enc['role::http_app']['dependencies']['cluster.receiver.address'].should eql('e1-fundsuserapp-002.space.net.local')
+    deps = host.to_deps
+    deps['cluster.enabled'].should eql('true')
+    deps['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-003.space.net.local')
+    deps['cluster.receiver.address'].should eql('e1-fundsuserapp-002.space.net.local')
   end
   host("e1-fundsuserapp-003.mgmt.space.net.local") do |host|
-    enc = host.to_enc
-    enc['role::http_app']['dependencies']['cluster.enabled'].should eql('true')
-    enc['role::http_app']['dependencies']['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-002.space.net.local')
-    enc['role::http_app']['dependencies']['cluster.receiver.address'].should eql('e1-fundsuserapp-003.space.net.local')
+    deps = host.to_deps
+    deps['cluster.enabled'].should eql('true')
+    deps['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-002.space.net.local')
+    deps['cluster.receiver.address'].should eql('e1-fundsuserapp-003.space.net.local')
   end
 end

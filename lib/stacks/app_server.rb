@@ -35,8 +35,6 @@ class Stacks::AppServer < Stacks::MachineDef
     @virtual_service.dependency_config.reject! { |key, _value| key == 'sftp_servers' }
   end
 
-  public
-
   def to_enc
     enc = super
     enc['role::http_app'] = {
@@ -72,37 +70,43 @@ class Stacks::AppServer < Stacks::MachineDef
       enc.merge!('idea_positions_exports::appserver' => dependency_config_sftp_servers_only)
     end
 
-    if @virtual_service.ehcache
-      peers = @virtual_service.children.map do |child|
-        child.qualified_hostname(:prod)
-      end
-
-      peers.delete qualified_hostname(:prod)
-
-      unless peers == []
-        enc['role::http_app']['dependencies']['cache.enabled'] = "true"
-        enc['role::http_app']['dependencies']['cache.peers'] = "[\"#{peers.join(',')}\"]"
-        enc['role::http_app']['dependencies']['cache.registryPort'] = "49000"
-        enc['role::http_app']['dependencies']['cache.remoteObjectPort'] = "49010"
-      end
-    end
-
-    if @virtual_service.enable_tomcat_session_replication
-      peers = @virtual_service.children.map do |child|
-        child.qualified_hostname(:prod)
-      end
-
-      peers.delete qualified_hostname(:prod)
-
-      enc['role::http_app']['dependencies']['cluster.enabled'] ='true'
-      enc['role::http_app']['dependencies']['cluster.receiver.address'] = qualified_hostname(:prod)
-      enc['role::http_app']['dependencies']['cluster.members'] = "#{peers.sort.join(',')}"
-    end
+    enc_ehcache(enc)
+    enc_tomcat_session_replication(enc)
 
     unless @launch_config.empty?
       enc['role::http_app']['launch_config'] = @launch_config
     end
 
     enc
+  end
+
+  private
+
+  def enc_ehcache(enc)
+    return unless @virtual_service.ehcache
+    peers = @virtual_service.children.map do |child|
+      child.qualified_hostname(:prod)
+    end
+
+    peers.delete qualified_hostname(:prod)
+
+    return if peers == []
+    enc['role::http_app']['dependencies']['cache.enabled'] = "true"
+    enc['role::http_app']['dependencies']['cache.peers'] = "[\"#{peers.join(',')}\"]"
+    enc['role::http_app']['dependencies']['cache.registryPort'] = "49000"
+    enc['role::http_app']['dependencies']['cache.remoteObjectPort'] = "49010"
+  end
+
+  def enc_tomcat_session_replication(enc)
+    return unless @virtual_service.enable_tomcat_session_replication
+    peers = @virtual_service.children.map do |child|
+      child.qualified_hostname(:prod)
+    end
+
+    peers.delete qualified_hostname(:prod)
+
+    enc['role::http_app']['dependencies']['cluster.enabled'] = 'true'
+    enc['role::http_app']['dependencies']['cluster.receiver.address'] = qualified_hostname(:prod)
+    enc['role::http_app']['dependencies']['cluster.members'] = "#{peers.sort.join(',')}"
   end
 end
