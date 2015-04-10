@@ -29,7 +29,7 @@ describe_stack 'enabling tomcat session replication creates the right enc' do
   given do
     stack 'funds' do
       virtual_appserver 'fundsuserapp' do
-        enable_tomcat_session_replication
+        @tomcat_session_replication = true
         self.application = 'tfunds'
         self.instances = 3
       end
@@ -47,13 +47,13 @@ describe_stack 'enabling tomcat session replication creates the right enc' do
     deps['cluster.receiver.address'].should eql('e1-fundsuserapp-001.space.net.local')
   end
   host("e1-fundsuserapp-002.mgmt.space.net.local") do |host|
-    deps = host.to_deps
+    deps = host.to_enc['role::http_app']['dependencies']
     deps['cluster.enabled'].should eql('true')
     deps['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-003.space.net.local')
     deps['cluster.receiver.address'].should eql('e1-fundsuserapp-002.space.net.local')
   end
   host("e1-fundsuserapp-003.mgmt.space.net.local") do |host|
-    deps = host.to_deps
+    deps = host.to_enc['role::http_app']['dependencies']
     deps['cluster.enabled'].should eql('true')
     deps['cluster.members'].should eql('e1-fundsuserapp-001.space.net.local,e1-fundsuserapp-002.space.net.local')
     deps['cluster.receiver.address'].should eql('e1-fundsuserapp-003.space.net.local')

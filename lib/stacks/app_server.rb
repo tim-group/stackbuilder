@@ -98,7 +98,8 @@ class Stacks::AppServer < Stacks::MachineDef
   end
 
   def enc_tomcat_session_replication(enc)
-    return unless @virtual_service.enable_tomcat_session_replication
+    return if @virtual_service.nil?
+    return unless @virtual_service.tomcat_session_replication == true
     peers = @virtual_service.children.map do |child|
       child.qualified_hostname(:prod)
     end
