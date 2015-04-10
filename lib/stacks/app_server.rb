@@ -107,6 +107,7 @@ class Stacks::AppServer < Stacks::MachineDef
     peers.delete qualified_hostname(:prod)
 
     enc['role::http_app']['dependencies']['cluster.enabled'] = 'true'
+    enc['role::http_app']['dependencies']['cluster.domain'] = availability_group
     enc['role::http_app']['dependencies']['cluster.receiver.address'] = qualified_hostname(:prod)
     enc['role::http_app']['dependencies']['cluster.members'] = "#{peers.sort.join(',')}"
   end
