@@ -1,19 +1,24 @@
 module Stacks::AppService
+  attr_accessor :ajp_port
+  attr_accessor :application
+  attr_accessor :ehcache
+  attr_accessor :idea_positions_exports
+  attr_accessor :jvm_args
+  attr_accessor :sso_port
+  attr_accessor :tomcat_session_replication
+
   def self.extended(object)
     object.configure
   end
 
-  attr_accessor :application, :ehcache, :sso_port, :ajp_port, :jvm_args, :idea_positions_exports
-  attr_accessor :tomcat_session_replication
-
   def configure
+    @ajp_port = nil
+    @disable_http_lb_hack = false
     @ehcache = false
+    @idea_positions_exports = false
+    @jvm_args = nil
     @ports = [8000]
     @sso_port = nil
-    @ajp_port = nil
-    @jvm_args = nil
-    @idea_positions_exports = false
-    @disable_http_lb_hack = false
     @tomcat_session_replication = false
   end
 
@@ -37,6 +42,7 @@ module Stacks::AppService
     @disable_http_lb_hack = true
   end
 
+  # XXX mmazurek 13.04.2015 remove
   def set_jvm_args(jvm_args)
     @jvm_args = jvm_args
   end

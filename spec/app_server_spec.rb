@@ -44,8 +44,8 @@ describe_stack 'test_app_server with custom jvm args' do
     stack "test_app_server" do
       virtual_appserver "appx" do
         self.application = "JavaHttpRef"
-        set_jvm_args('-Xms256m -Xmx256m -XX:CMSInitiatingOccupancyFraction=55 -XX:+UseCompressedOops ' \
-          '-XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -XX:+CMSClassUnloadingEnabled')
+        @jvm_args = '-Xms256m -Xmx256m -XX:CMSInitiatingOccupancyFraction=55 -XX:+UseCompressedOops ' \
+          '-XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -XX:+CMSClassUnloadingEnabled'
       end
     end
 
