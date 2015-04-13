@@ -1,4 +1,6 @@
 require 'support/namespace'
+require 'support/mcollective'
+require 'support/callback'
 
 class Hash
   def hash_select(&block)
