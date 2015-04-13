@@ -50,15 +50,7 @@ module Stacks::MachineGroup
     SecureRandom.hex(20)
   end
 
-  def default_networks
-    [:mgmt, :prod]
-  end
-
-  def default_site
-    :primary_site
-  end
-
-  def instantiate_machine(i, environment, networks = default_networks, location = default_site)
+  def instantiate_machine(i, environment, networks = @default_networks, location = @default_site)
     index = sprintf("%03d", i + 1)
     server = nil
     # FIXME: Temporary fix - Remove me when all stacks have a 4 param or use the default constructor.

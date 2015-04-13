@@ -14,22 +14,27 @@ class Stacks::MachineSet
   attr_accessor :ports
   attr_accessor :type
   attr_reader :allowed_hosts
+  attr_reader :default_networks
+  attr_reader :default_site
   attr_reader :depends_on
   attr_reader :enable_secondary_site
 
   include Stacks::MachineDefContainer
 
   def initialize(name, &config_block)
-    @allowed_hosts = []
     @auto_configure_dependencies = true
     @bind_steps = []
     @config_block = config_block
     @definitions = {}
-    @depends_on = []
-    @enable_secondary_site = false
     @groups = ['blue']
     @instances = 2
     @name = name
+
+    @allowed_hosts = []
+    @default_networks = [:mgmt, :prod]
+    @default_site = :primary_site
+    @depends_on = []
+    @enable_secondary_site = false
   end
 
   def depend_on(dependant, env = environment.name)
