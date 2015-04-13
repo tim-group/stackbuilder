@@ -5,31 +5,31 @@ require 'stacks/nat'
 require 'uri'
 
 class Stacks::MachineSet
-  attr_accessor :type
-  attr_accessor :name
+  attr_accessor :auto_configure_dependencies
   attr_accessor :fabric
-  attr_accessor :instances
-  attr_accessor :ports
-  attr_accessor :port_map
   attr_accessor :groups
+  attr_accessor :instances
+  attr_accessor :name
+  attr_accessor :port_map
+  attr_accessor :ports
+  attr_accessor :type
   attr_reader :allowed_hosts
   attr_reader :depends_on
   attr_reader :enable_secondary_site
-  attr_accessor :auto_configure_dependencies
 
   include Stacks::MachineDefContainer
 
   def initialize(name, &config_block)
-    @name = name
-    @groups = ['blue']
-    @definitions = {}
-    @bind_steps = []
-    @instances = 2
-    @config_block = config_block
-    @depends_on = []
-    @auto_configure_dependencies = true
-    @enable_secondary_site = false
     @allowed_hosts = []
+    @auto_configure_dependencies = true
+    @bind_steps = []
+    @config_block = config_block
+    @definitions = {}
+    @depends_on = []
+    @enable_secondary_site = false
+    @groups = ['blue']
+    @instances = 2
+    @name = name
   end
 
   def depend_on(dependant, env = environment.name)
