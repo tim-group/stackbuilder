@@ -266,12 +266,11 @@ namespace :sbx do
     [hostnames, machines]
   end
 
-  def get_allocated_machines
+  def get_allocated_machines(sites)
     hostnames = []
     domains = Hash[]
     storage = Hash[]
-    # %w(st).each do |site|
-    %w(oy lon pg st ci).each do |site|
+    sites.each do |site|
       puts "polling #{site}..."
       compute_nodes = @factory.host_repository.find_compute_nodes(site, true).hosts
       hostnames += compute_nodes.map(&:allocated_machines).flatten.map { |vm| vm[:hostname] }
@@ -364,7 +363,7 @@ namespace :sbx do
   desc 'find inconsistency between stackbuilder-config and reality'
   task :find_rogue do
     defined_hostnames, defined_machines = get_defined_machines(environment)
-    allocated_hostnames, allocated_domains, allocated_storage = get_allocated_machines
+    allocated_hostnames, allocated_domains, allocated_storage = get_allocated_machines(%w(oy lon pg st ci))
 
     rogue_check_allocation(defined_hostnames, allocated_hostnames)
     rogue_check_resources(defined_machines, allocated_domains)
