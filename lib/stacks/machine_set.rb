@@ -108,6 +108,7 @@ class Stacks::MachineSet
   end
 
   def instantiate_machines(environment)
+    # FIXME: We should switch to using an Array of definitions not a hash with a random key
     @instances.times do |i|
       @definitions[random_name] = instantiate_machine(i, environment)
     end
