@@ -6,7 +6,7 @@ describe 'Stacks::MachineSet' do
       stack "funds" do
         virtual_appserver 'fundsapp' do
           self.instances = 1
-          enable_secondary_site
+          @enable_secondary_site = true
         end
       end
 

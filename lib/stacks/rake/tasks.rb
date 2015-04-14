@@ -11,6 +11,7 @@ require 'support/zamls'
 require 'support/mcollective'
 require 'support/mcollective_puppet'
 require 'support/nagios'
+require 'support/subscription'
 
 require 'set'
 require 'rspec'
@@ -18,7 +19,6 @@ require 'compute/controller'
 require 'stacks/factory'
 require 'stacks/core/actions'
 require 'thread'
-require 'stacks/subscription'
 @@factory = @factory = Stacks::Factory.new
 
 include Rake::DSL
@@ -734,7 +734,7 @@ namespace :sbx do
         desc "deploys the up2date version of the artifact according to the cmdb using orc"
         sbtask :resolve do
           machine_def.accept do |child_machine_def|
-            if child_machine_def.is_a? Stacks::AppService
+            if child_machine_def.is_a? Stacks::Services::AppService
               app_service = child_machine_def
               factory = Orc::Factory.new(
                 :application => app_service.application,

@@ -31,6 +31,8 @@ Metrics/MethodLength:
 Metrics/PerceivedComplexity:
   Max: 15
 
+Style/MultilineIfThen:
+  Enabled: false
 
 Style/FormatString:
   EnforcedStyle: sprintf

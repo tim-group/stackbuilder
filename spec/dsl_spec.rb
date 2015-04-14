@@ -1,7 +1,5 @@
 require 'set'
-require 'stacks/stack'
-require 'stacks/environment'
-require 'stacks/standalone_server'
+require 'stacks/namespace'
 require 'pp'
 
 describe Stacks::DSL do
@@ -30,7 +28,7 @@ describe Stacks::DSL do
 
   it 'can make an arbitrary specd machine' do
     stack "fabric" do
-      @definitions["puppetmaster"] = Stacks::StandaloneServer.new("puppetmaster-001") do
+      @definitions["puppetmaster"] = Stacks::Services::StandaloneServer.new("puppetmaster-001") do
         def to_specs
           specs = super
           specs.each do |spec|

@@ -1,5 +1,5 @@
 require 'set'
-require 'stacks/stack'
+require 'stacks/namespace'
 require 'stacks/environment'
 require 'pp'
 require 'matchers/server_matcher'

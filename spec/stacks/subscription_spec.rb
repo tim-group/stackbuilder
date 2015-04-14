@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'stacks/subscription'
+require 'support/subscription'
 require 'securerandom'
 
 describe Subscription do

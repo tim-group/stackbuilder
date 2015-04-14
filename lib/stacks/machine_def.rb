@@ -37,10 +37,6 @@ class Stacks::MachineDef
     @included_classes = {}
   end
 
-  def children
-    []
-  end
-
   def include_class(class_name, class_hash = {})
     @included_classes[class_name] = class_hash
   end

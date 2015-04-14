@@ -1,6 +1,6 @@
 require 'stacks/test_framework'
 
-describe 'Stacks::VirtualService' do
+describe 'Stacks::Services::VirtualService' do
   describe_stack 'provides the default vips when to_vip_spec is run' do
     given do
       stack "test" do
