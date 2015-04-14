@@ -21,6 +21,7 @@ module Stacks::Services::MysqlCluster
     server = @type.new(server_name, self, type)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
+    # FIXME: Is this required?
     @definitions[server_name] = server
     server
   end
