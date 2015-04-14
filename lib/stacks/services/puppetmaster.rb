@@ -2,7 +2,6 @@ require 'stacks/namespace'
 
 class Stacks::Services::PuppetMaster < Stacks::MachineDef
   attr_accessor :cnames
-  attr_accessor :puppetmaster_role
 
   def initialize(machineset, index)
     super(machineset.name + "-" + index, [:mgmt])
