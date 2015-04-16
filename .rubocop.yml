@@ -6,7 +6,6 @@ AllCops:
 Metrics/AbcSize:
   Max: 65
 
-# Configuration parameters: CountKeywordArgs.
 Metrics/ParameterLists:
   Max: 8
 
@@ -16,20 +15,18 @@ Metrics/LineLength:
 Metrics/BlockNesting:
   Max: 6
 
-# Configuration parameters: CountComments.
 Metrics/ClassLength:
   Max: 180
 
-# Offense count: 9
 Metrics/CyclomaticComplexity:
   Max: 15
 
-# Configuration parameters: CountComments.
 Metrics/MethodLength:
   Max: 45
 
 Metrics/PerceivedComplexity:
   Max: 15
+
 
 Style/MultilineIfThen:
   Enabled: false
@@ -38,6 +35,9 @@ Style/FormatString:
   EnforcedStyle: sprintf
 
 Style/NegatedIf:
+  Enabled: false
+
+Style/NegatedWhile:
   Enabled: false
 
 Style/MultilineBlockChain:
