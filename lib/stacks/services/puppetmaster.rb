@@ -10,7 +10,6 @@ class Stacks::Services::PuppetMaster < Stacks::MachineDef
     modify_storage('/' => { :size => '25G' })
     @vcpus = '2'
     @ram = '2097152' # 2GB
-    @instances = 1
   end
 
   def needs_signing?
