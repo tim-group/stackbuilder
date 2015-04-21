@@ -43,7 +43,8 @@ module Stacks::Services::VirtualService
   end
 
   def realservers
-    @definitions.values
+    @definitions.values.reject do |server| server.fabric != fabric
+  end
   end
 
   def vip_fqdn(net)
