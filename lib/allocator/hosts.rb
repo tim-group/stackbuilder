@@ -10,7 +10,7 @@ class StackBuilder::Allocator::Hosts
 
     fail 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
     hosts.each do |host|
-      host.set_preference_functions(args[:preference_functions])
+      host.preference_functions = args[:preference_functions]
     end
   end
 

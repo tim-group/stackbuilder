@@ -89,10 +89,6 @@ Style/Documentation:
 Lint/RescueException:
   Enabled: false
 
-# Offense count: 4
-Style/AccessorMethodName:
-  Enabled: false
-
 # Offense count: 10
 Style/ClassVars:
   Enabled: false

@@ -3,25 +3,25 @@ require 'allocator/host_policies'
 
 class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines
-  attr_accessor :provisionally_allocated_machines
   attr_accessor :allocation_disabled
+  attr_accessor :domains # set externally
+  attr_accessor :policies
+  attr_accessor :preference_functions
+  attr_accessor :provisionally_allocated_machines
   attr_reader :fqdn
   attr_reader :ram
   attr_reader :storage
-  attr_reader :preference_functions
-  attr_accessor :policies
-  attr_accessor :domains # set externally
 
   def initialize(fqdn, args = { :preference_functions => [], :policies => [], :ram => '0', :storage => {} })
-    @provisionally_allocated_machines = []
-    @fqdn = fqdn
     @allocated_machines = []
-    @policies = args[:policies]
-    @preference_functions = [] # args[:preference_functions]
-    @ram = args[:ram]
-    @storage = args[:storage]
     @allocation_disabled = args[:allocation_disabled] || false
     @domains = Hash
+    @fqdn = fqdn
+    @policies = args[:policies]
+    @preference_functions = [] # args[:preference_functions]
+    @provisionally_allocated_machines = []
+    @ram = args[:ram]
+    @storage = args[:storage]
   end
 
   def machines
@@ -34,10 +34,6 @@ class StackBuilder::Allocator::Host
 
   def add_policy(&block)
     @policies << block
-  end
-
-  def set_preference_functions(functions)
-    @preference_functions = functions
   end
 
   def can_allocate(machine_hash)

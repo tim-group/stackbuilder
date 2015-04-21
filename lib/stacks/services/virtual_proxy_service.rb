@@ -41,10 +41,6 @@ module Stacks::Services::VirtualProxyService
     fail "Cannot find the service called #{service}"
   end
 
-  def set_default_ssl_cert(cert_name)
-    @cert = cert_name
-  end
-
   def downstream_services
     vhost_map = @proxy_vhosts_lookup.values.group_by(&:vhost_fqdn)
 

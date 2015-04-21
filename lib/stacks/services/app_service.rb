@@ -42,11 +42,6 @@ module Stacks::Services::AppService
     @disable_http_lb_hack = true
   end
 
-  # XXX mmazurek 13.04.2015 remove
-  def set_jvm_args(jvm_args)
-    @jvm_args = jvm_args
-  end
-
   def config_params(_dependant)
     { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000" }
   end
