@@ -44,6 +44,16 @@ module Stacks
       node
     end
 
+    def fqdn_list
+      hosts = []
+      accept do |machine_def|
+        if machine_def.respond_to?(:mgmt_fqdn)
+          hosts << machine_def.mgmt_fqdn
+        end
+      end
+      hosts
+    end
+
     def exist?(fqdn)
       found = false
       accept do |machine_def|

@@ -45,6 +45,20 @@ module Stacks::Matchers
     end
   end
 
+  RSpec::Matchers.define :have_hosts do |hosts|
+    match do |stacks|
+      stacks.fqdn_list - hosts == []
+    end
+
+    failure_message_for_should do
+      "Expected: #{hosts}\nActual: #{stacks.fqdn_list}\nDiff: #{hosts - stacks.fqdn_list}"
+    end
+
+    failure_message_for_should_not do
+      "Expected to not have: #{hosts}\nActual: #{stacks.fqdn_list}\nDiff: #{hosts - stacks.fqdn_list}"
+    end
+  end
+
   RSpec::Matchers.define :have_ancestory do |expected_ancestory|
     match do |server|
       traversal = stacks.environments[expected_ancestory.shift]
