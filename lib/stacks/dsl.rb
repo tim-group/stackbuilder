@@ -47,9 +47,7 @@ module Stacks
     def fqdn_list
       hosts = []
       accept do |machine_def|
-        if machine_def.respond_to?(:mgmt_fqdn)
-          hosts << machine_def.mgmt_fqdn
-        end
+        hosts << machine_def.mgmt_fqdn if machine_def.respond_to?(:mgmt_fqdn)
       end
       hosts
     end
