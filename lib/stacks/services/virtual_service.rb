@@ -25,15 +25,6 @@ module Stacks::Services::VirtualService
     @udp = false
   end
 
-  def instantiate_machines(environment)
-    @instances.times do |i|
-      @definitions[random_name] = instantiate_machine(i, environment, default_networks, default_site)
-      if @enable_secondary_site
-        @definitions[random_name] = instantiate_machine(i, environment, default_networks, :secondary_site)
-      end
-    end
-  end
-
   def to_loadbalancer_config
     lb_config
   end

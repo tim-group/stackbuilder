@@ -37,6 +37,15 @@ class Stacks::MachineSet
     @enable_secondary_site = false
   end
 
+  def instantiate_machines(environment)
+    @instances.times do |i|
+      @definitions[random_name] = instantiate_machine(i, environment, default_networks, default_site)
+      if @enable_secondary_site
+        @definitions[random_name] = instantiate_machine(i, environment, default_networks, :secondary_site)
+      end
+    end
+  end
+
   def depend_on(dependant, env = environment.name)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
@@ -105,13 +114,6 @@ class Stacks::MachineSet
 
   def availability_group(environment)
     environment.name + "-" + name
-  end
-
-  def instantiate_machines(environment)
-    # FIXME: We should switch to using an Array of definitions not a hash with a random key
-    @instances.times do |i|
-      @definitions[random_name] = instantiate_machine(i, environment)
-    end
   end
 
   # FIXME: This should generate a unique name
