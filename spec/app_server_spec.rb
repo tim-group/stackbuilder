@@ -59,3 +59,25 @@ describe_stack 'test_app_server with custom jvm args' do
       '-XX:+UseCompressedOops -XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -XX:+CMSClassUnloadingEnabled')
   end
 end
+
+describe_stack 'test_app_server with only one instance in the load balancer' do
+  given do
+    stack "test_app_server" do
+      loadbalancer do
+      end
+      virtual_appserver "appx" do
+        self.application = "JavaHttpRef"
+        @one_instance_in_lb = true
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "test_app_server"
+    end
+  end
+
+  host("e1-lb-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc['role::loadbalancer']['virtual_servers']['e1-appx-vip.space.net.local']
+    enc['type'].should eql 'one_instance_in_lb_with_sorry_server'
+  end
+end

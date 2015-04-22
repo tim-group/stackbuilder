@@ -18,6 +18,7 @@ module Stacks::Services::AppService
     @idea_positions_exports = false
     @jvm_args = nil
     @ports = [8000]
+    @one_instance_in_lb = false
     @sso_port = nil
     @tomcat_session_replication = false
   end
@@ -47,6 +48,10 @@ module Stacks::Services::AppService
   end
 
   def to_loadbalancer_config
+    if @disable_http_lb_hack && @one_instance_in_lb
+      fail('disable_http_lb_hack and one_instance_in_lb cannot be specified at the same time')
+    end
+
     config = lb_config
     unless @sso_port.nil?
       if @disable_http_lb_hack
@@ -54,6 +59,9 @@ module Stacks::Services::AppService
       else
         config[vip_fqdn(:prod)]['type'] = 'http_and_sso_app'
       end
+    end
+    if @one_instance_in_lb
+      config[vip_fqdn(:prod)]['type'] = 'one_instance_in_lb_with_sorry_server'
     end
     config
   end
