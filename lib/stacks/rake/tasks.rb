@@ -19,7 +19,7 @@ require 'compute/controller'
 require 'stacks/factory'
 require 'stacks/core/actions'
 require 'thread'
-@@factory = @factory = Stacks::Factory.new
+@factory = Stacks::Factory.new
 
 include Rake::DSL
 include Support::MCollective
@@ -72,7 +72,7 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #
 
 def logger
-  @@factory.logger
+  @factory.logger
 end
 
 def sbtask(name, &block)
@@ -80,7 +80,7 @@ def sbtask(name, &block)
     logger.start task.name
     begin
       block.call
-    rescue Exception => e
+    rescue StandardError => e
       logger.failed(name)
       raise e
     end
@@ -89,8 +89,8 @@ def sbtask(name, &block)
   end
 end
 
-@@subscription = Subscription.new
-@@subscription.start(["provision.*", "puppet_status"])
+@subscription = Subscription.new
+@subscription.start(["provision.*", "puppet_status"])
 
 namespace :sbx do
   def ram_stats_to_string(ram_stats)
@@ -536,7 +536,7 @@ namespace :sbx do
             end
           end
           start_time = Time.now
-          result = @@subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
+          result = @subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
           result.all.each do |vm, status|
             logger.info "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)"
           end
@@ -582,7 +582,7 @@ namespace :sbx do
             end
           end
 
-          run_result = @@subscription.wait_for_hosts("puppet_status", hosts, 5400)
+          run_result = @subscription.wait_for_hosts("puppet_status", hosts, 5400)
 
           run_result.all.each do |vm, status|
             logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"

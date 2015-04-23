@@ -1,7 +1,7 @@
 require 'mcollective'
 
 class Subscription
-  @@loaded = false
+  @loaded = false
   attr_reader :stomp
 
   def initialize(options = {})
@@ -48,9 +48,9 @@ class Subscription
   def self.create_client
     configfile = MCollective::Util.config_file_for_user
 
-    unless @@loaded
+    unless @loaded
       MCollective::Config.instance.loadconfig(configfile)
-      @@loaded = true
+      @loaded = true
     end
     config = MCollective::Config.instance
 
@@ -63,9 +63,9 @@ class Subscription
   def self.create_stomp
     configfile = MCollective::Util.config_file_for_user
 
-    unless @@loaded
+    unless @loaded
       MCollective::Config.instance.loadconfig(configfile)
-      @@loaded = true
+      @loaded = true
     end
     config = MCollective::Config.instance
 

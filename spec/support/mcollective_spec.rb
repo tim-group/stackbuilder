@@ -1,3 +1,4 @@
+# rubocop:disable Style/ClassVars
 require 'support/mcollective'
 require 'facter'
 

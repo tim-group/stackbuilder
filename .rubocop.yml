@@ -27,6 +27,8 @@ Metrics/MethodLength:
 Metrics/PerceivedComplexity:
   Max: 15
 
+Style/Documentation:
+  Enabled: false
 
 Style/MultilineIfThen:
   Enabled: false
@@ -41,6 +43,12 @@ Style/NegatedWhile:
   Enabled: false
 
 Style/MultilineBlockChain:
+  Enabled: false
+
+Style/RescueModifier:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
   Enabled: false
 
 # This is just so we don't have to correct a zillion lines
@@ -76,33 +84,8 @@ Style/Proc:
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 82
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/ClassAndModuleChildren:
-  Enabled: false
-
-# Offense count: 103
-Style/Documentation:
-  Enabled: false
-
-# Offense count: 4
-Lint/RescueException:
-  Enabled: false
-
-# Offense count: 10
-Style/ClassVars:
-  Enabled: false
-
-# Offense count: 7
-# Configuration parameters: EnforcedStyle, MinBodyLength, SupportedStyles.
 Style/Next:
   Enabled: false
 
-# Offense count: 9
-Style/RescueModifier:
-  Enabled: false
-
-# Offense count: 11
-# Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.
 Style/TrivialAccessors:
   Enabled: false

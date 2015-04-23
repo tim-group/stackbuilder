@@ -53,7 +53,7 @@ module Support
       def resolv_host_for_uri(uri)
         begin
           Resolv.getaddress uri.host
-        rescue Exception => e
+        rescue StandardError => e
           raise e
         end
         uri.host
@@ -72,7 +72,7 @@ module Support
               result = "Failed: #{json['content']}"
             end
           end
-          rescue Exception => e
+          rescue StandardError => e
             result = "Failed: #{e} #{e.backtrace}"
         end
         result

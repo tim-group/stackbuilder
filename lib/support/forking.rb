@@ -18,7 +18,7 @@ module Support::Forking
         result = nil
         exception = nil
         result = block.call
-      rescue Exception => e
+      rescue StandardError => e
         exception = e
       end
       Marshal.dump({ :result => result, :exception => exception }, write)
