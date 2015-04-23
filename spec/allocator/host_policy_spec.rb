@@ -153,7 +153,7 @@ describe StackBuilder::Allocator::HostPolicies do
       should eql(true)
   end
 
-  it 'accept allocations where the hosts persistant storage does exist on this computenode' do
+  it 'accept allocations where the hosts persistent storage does exist on this computenode' do
     machine = {
       :hostname => 'test-db-001',
       :storage => {
@@ -178,7 +178,7 @@ describe StackBuilder::Allocator::HostPolicies do
       should eql(true)
   end
 
-  it 'rejects allocations where the hosts persistant storage does not exist on this computenode' do
+  it 'rejects allocations where the hosts persistent storage does not exist on this computenode' do
     machine = {
       :hostname => 'test-db-001',
       :storage => {

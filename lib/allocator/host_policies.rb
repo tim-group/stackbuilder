@@ -48,24 +48,21 @@ module StackBuilder::Allocator::HostPolicies
   def self.ensure_defined_storage_types_policy
     Proc.new do |host, machine|
       missing_storage_types = machine[:storage].inject([]) do |result, (_mount_point, values)|
-        # FIXME: remove the rescue once all compute nodes have storage config
-        host_storage_type = host.storage[values[:type]] rescue nil
+        host_storage_type = host.storage[values[:type]]
         result << values[:type] if host_storage_type.nil?
         result
       end
-      result = { :passed => true }
-      # FIXME: unwrap from unless once all compute nodes have storage config
-      unless host.storage.nil?
-        if missing_storage_types.any?
-          unique_missing_storage_types = Set.new(missing_storage_types).to_a
-          result = {
-            :passed => false,
-            :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} " \
-                       "available: #{host.storage.keys.sort.join(',')})"
-          }
-        end
+
+      if missing_storage_types.any?
+        unique_missing_storage_types = Set.new(missing_storage_types).to_a
+        {
+          :passed => false,
+          :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} " \
+                      "available: #{host.storage.keys.sort.join(',')})"
+        }
+      else
+        { :passed => true }
       end
-      result
     end
   end
 
@@ -76,7 +73,6 @@ module StackBuilder::Allocator::HostPolicies
   def self.require_persistent_storage_to_exist_policy
     Proc.new do |host, machine|
       result = { :passed => true }
-      return result if host.storage.nil?
 
       persistent_storage_not_found = {}
       machine[:storage].each do |mount_point, attributes|

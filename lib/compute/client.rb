@@ -22,6 +22,17 @@ class Compute::Client
     target_hash
   end
 
+  def get_libvirt_domains(mco, hv)
+    domains = Hash[]
+    domain_name = hv[:sender].gsub(/^[^.]*\.mgmt\./, "")
+    (hv[:data][:active_domains] + hv[:data][:inactive_domains]).each do |d|
+      mco.domaininfo(:domain => d).map do |di|
+        domains[d + "." + domain_name] = di[:data] if di[:statusmsg] == "OK"
+      end
+    end
+    domains
+  end
+
   # audit_domains is not enabled by default, as it takes significant time to complete
   def audit_hosts(fabric, audit_domains = false)
     hosts = discover_compute_nodes(fabric)
@@ -31,16 +42,7 @@ class Compute::Client
       mco.hvinfo.map do |hv|
         fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
-        domains = Hash[]
-        if audit_domains
-          # XXX is there a better way to get the fqdn?
-          domain_name = hv[:sender].gsub(/^[^.]*\.mgmt\./, "")
-          (hv[:data][:active_domains] + hv[:data][:inactive_domains]).each do |d|
-            mco.domaininfo(:domain => d).map do |di|
-              domains[d + "." + domain_name] = di[:data] if di[:statusmsg] == "OK"
-            end
-          end
-        end
+        domains = audit_domains ? {} : get_libvirt_domains(mco, hv)
 
         [hv[:sender], hv[:data].merge(:domains => domains)]
       end
@@ -55,34 +57,22 @@ class Compute::Client
 
     libvirt_response_hash = Hash[response_hash]
 
-    # FIXME: Once all computenodes have new storage config, unwrap this code from begin/rescue
-    response = nil
-    begin
-      response = mco_client("computenodestorage", :nodes => hosts) do |mco|
-        result = mco.details
-        result.map do |resp|
-          # FIXME: Once all compute nodes have new storage config, renable this
-          # fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
-          #   unless resp[:statuscode]==0
-          [resp[:sender], { :storage => resp[:data] }]
-        end
-      end
+    response = mco_client("computenodestorage", :nodes => hosts) do |mco|
+      result = mco.details
+      result.map do |resp|
+        fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
+          unless resp[:statuscode] == 0
 
-      fail "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-        "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
-      # rubocop:disable Lint/HandleExceptions
-    rescue
-      # rubocop:enable Lint/HandleExceptions
-    end
-
-    # FIXME: Once all computenodes have new storage config, unwrap this code from unless
-    unless response.nil?
-      storage_response_hash = Hash[response]
-
-      libvirt_response_hash.each do |fqdn, attr|
-        libvirt_response_hash[fqdn] = attr.merge(storage_response_hash[fqdn])
+        [resp[:sender], { :storage => resp[:data] }]
       end
     end
+
+    fail "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+      "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
+
+    storage_response_hash = Hash[response]
+
+    libvirt_response_hash.each { |fqdn, attr| libvirt_response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
 
     libvirt_response_hash
   end
