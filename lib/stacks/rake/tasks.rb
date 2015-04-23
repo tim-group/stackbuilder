@@ -19,7 +19,7 @@ require 'compute/controller'
 require 'stacks/factory'
 require 'stacks/core/actions'
 require 'thread'
-@factory = Stacks::Factory.new
+@@factory = @factory = Stacks::Factory.new
 
 include Rake::DSL
 include Support::MCollective
@@ -72,7 +72,7 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #
 
 def logger
-  @factory.logger
+  @@factory.logger
 end
 
 def sbtask(name, &block)
