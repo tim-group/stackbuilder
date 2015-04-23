@@ -27,13 +27,17 @@ module Stacks::Services::AppService
     @ehcache = true
   end
 
+  # rubocop:disable Style/TrivialAccessors
   def enable_sso(sso_port = '8443')
     @sso_port = sso_port
   end
+  # rubocop:enable Style/TrivialAccessors
 
+  # rubocop:disable Style/TrivialAccessors
   def enable_ajp(ajp_port = '8009')
     @ajp_port = ajp_port
   end
+  # rubocop:enable Style/TrivialAccessors
 
   def enable_tomcat_session_replication
     @tomcat_session_replication = true

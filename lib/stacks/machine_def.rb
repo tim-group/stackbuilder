@@ -58,17 +58,21 @@ class Stacks::MachineDef
     true
   end
 
+  # rubocop:disable Style/TrivialAccessors
   def destroyable?
     @destroyable
   end
+  # rubocop:enable Style/TrivialAccessors
 
   def needs_poll_signing?
     true
   end
 
+  # rubocop:disable Style/TrivialAccessors
   def allow_destroy(destroyable = true)
     @destroyable = destroyable
   end
+  # rubocop:enable Style/TrivialAccessors
 
   def bind_to(environment)
     @environment = environment

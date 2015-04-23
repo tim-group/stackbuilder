@@ -40,13 +40,17 @@ class Stacks::Environment
     }
   end
 
+  # rubocop:disable Style/TrivialAccessors
   def persistent_storage_supported?
     @persistent_storage_supported
   end
+  # rubocop:enable Style/TrivialAccessors
 
+  # rubocop:disable Style/TrivialAccessors
   def every_machine_destroyable?
     @every_machine_destroyable
   end
+  # rubocop:enable Style/TrivialAccessors
 
   def env(name, options = {}, &block)
     @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), @environments, @stack_procs)
