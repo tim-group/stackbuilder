@@ -19,7 +19,9 @@ require 'compute/controller'
 require 'stacks/factory'
 require 'stacks/core/actions'
 require 'thread'
+# rubocop:disable Style/ClassVars
 @@factory = @factory = Stacks::Factory.new
+# rubocop:enable Style/ClassVars
 
 include Rake::DSL
 include Support::MCollective
