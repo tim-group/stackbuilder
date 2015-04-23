@@ -5,16 +5,15 @@ module StackBuilder::Allocator::HostPolicies
   def self.ha_group
     Proc.new do |host, machine_spec|
       result = { :passed => true }
-      if machine_spec[:availability_group]
-        host.machines.each do |allocated_machine|
-          if allocated_machine[:availability_group] &&
-             machine_spec[:availability_group] == allocated_machine[:availability_group]
-            result = {
-              :passed => false,
-              :reason => "Availability group violation (already running #{allocated_machine[:hostname]})"
-            }
-          end
-        end
+      next result if !machine_spec[:availability_group]
+
+      host.machines.each do |allocated_machine|
+        next if !allocated_machine[:availability_group] ||
+                allocated_machine[:availability_group] != machine_spec[:availability_group]
+        result = {
+          :passed => false,
+          :reason => "Availability group violation (already running #{allocated_machine[:hostname]})"
+        }
       end
       result
     end
@@ -22,9 +21,11 @@ module StackBuilder::Allocator::HostPolicies
 
   def self.allocation_temporarily_disabled_policy
     Proc.new do |host, _machine|
-      result = { :passed => true }
-      result = { :passed => false, :reason => "Allocation disabled" } if host.allocation_disabled
-      result
+      if host.allocation_disabled
+        { :passed => false, :reason => "Allocation disabled" }
+      else
+        { :passed => true }
+      end
     end
   end
 
@@ -75,43 +76,42 @@ module StackBuilder::Allocator::HostPolicies
   def self.require_persistent_storage_to_exist_policy
     Proc.new do |host, machine|
       result = { :passed => true }
+      return result if host.storage.nil?
 
       persistent_storage_not_found = {}
-      unless host.storage.nil?
-        machine[:storage].each do |mount_point, attributes|
-          persistent = attributes[:persistent]
-          persistence_options = attributes[:persistence_options] rescue {}
-          on_storage_not_found = persistence_options[:on_storage_not_found] rescue :raise_error
-          if persistent
-            case on_storage_not_found
-            when :raise_error
-              underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
-              type = attributes[:type]
-              if host.storage.key?(type)
-                unless host.storage[type][:existing_storage].include? underscore_name.to_sym
-                  persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
-                  persistent_storage_not_found[type] << underscore_name
-                end
-              else
-                persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
-                persistent_storage_not_found[type] << underscore_name
-              end
-            when :create_new
-              # Allow the storage to be created
-            end
-          end
-        end
-        reasons = persistent_storage_not_found.keys.map do |type|
-          "#{type}: #{persistent_storage_not_found[type].join(',')}"
-        end
-        unless persistent_storage_not_found.empty?
-          result = {
-            :passed => false,
-            :reason => "Persistent storage not present for type \"#{reasons.join(',')}\""
-          }
-        end
+      machine[:storage].each do |mount_point, attributes|
+        persistent = attributes[:persistent]
+        next if !persistent
 
+        on_storage_not_found = attributes[:persistence_options][:on_storage_not_found] rescue :raise_error
+
+        case on_storage_not_found
+        when :raise_error
+          underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
+          type = attributes[:type]
+          if host.storage.key?(type)
+            unless host.storage[type][:existing_storage].include? underscore_name.to_sym
+              persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
+              persistent_storage_not_found[type] << underscore_name
+            end
+          else
+            persistent_storage_not_found[type] = [] unless persistent_storage_not_found.include? type
+            persistent_storage_not_found[type] << underscore_name
+          end
+        when :create_new
+          # Allow the storage to be created
+        end
       end
+      reasons = persistent_storage_not_found.keys.map do |type|
+        "#{type}: #{persistent_storage_not_found[type].join(',')}"
+      end
+      unless persistent_storage_not_found.empty?
+        result = {
+          :passed => false,
+          :reason => "Persistent storage not present for type \"#{reasons.join(',')}\""
+        }
+      end
+
       result
     end
   end

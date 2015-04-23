@@ -49,12 +49,11 @@ module Stacks::Dependencies
   def virtual_services_that_depend_on_me
     virtual_services_that_depend_on_me = []
     virtual_services.each do |virtual_service|
-      if virtual_service.is_a?(Stacks::MachineDefContainer) &&
-         virtual_service.respond_to?(:depends_on) &&
-         virtual_service.depends_on.include?([name, environment.name])
-      then
-        virtual_services_that_depend_on_me.push virtual_service
-      end
+      next if !virtual_service.is_a?(Stacks::MachineDefContainer)
+      next if !virtual_service.respond_to?(:depends_on)
+      next if !virtual_service.depends_on.include?([name, environment.name])
+
+      virtual_services_that_depend_on_me.push virtual_service
     end
     virtual_services_that_depend_on_me.uniq
   end

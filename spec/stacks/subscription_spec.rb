@@ -56,7 +56,7 @@ describe Subscription do
       subscription2.stomp.publish("/topic/#{topic2}", { "host" => "a" }.to_json)
     end
 
-    subscription2.wait_for_hosts(topic, ["a"]).responses.should have_messages_for_hosts(["a"])
+    subscription2.wait_for_hosts(topic, ["a"]).responses.should have_messages_for_hosts(["a"]) # XXX flicker
     subscription2.wait_for_hosts(topic2, ["a"]).responses.should have_messages_for_hosts(["a"])
   end
 
@@ -74,7 +74,7 @@ describe Subscription do
 
     result = subscription.wait_for_hosts(topic, %w(a b c))
 
-    result.passed.should eql(["a"])
+    result.passed.should eql(["a"]) # XXX flicker
     result.failed.should eql(["b"])
     result.unaccounted_for.should eql(["c"])
 

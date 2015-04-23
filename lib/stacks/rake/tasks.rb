@@ -292,6 +292,7 @@ namespace :sbx do
     rogue2.each { |node| puts "  #{node}" }
   end
 
+  # rubocop:disable Style/Next
   def rogue_check_resources(defined_machines, allocated_domains)
     puts "checking vm properties..."
     allocated_domains.each do |afqdn, adata|
@@ -361,6 +362,7 @@ namespace :sbx do
       end
     end
   end
+  # rubocop:enable Style/Next
 
   desc 'find inconsistency between stackbuilder-config and reality'
   task :find_rogue do
