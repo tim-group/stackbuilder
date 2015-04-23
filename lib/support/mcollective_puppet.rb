@@ -148,7 +148,7 @@ module Support::MCollectivePuppet
     puppetmaster = case machine_fqdn
                    when /\.mgmt\.st\.net\.local$/ then ["st-puppetmaster-001.mgmt.st.net.local",
                                                         "staging-puppetmaster-001.mgmt.st.net.local"]
-                   when /\.mgmt\.oy\.net\.local$/ then ["antarctica.oyldn.youdevise.com"]
+                   when /\.mgmt\.oy\.net\.local$/ then ["oy-puppetmaster-001.mgmt.oy.net.local"]
                    when /\.mgmt\.pg\.net\.local$/ then ["australia.pgldn.youdevise.com"]
                    when /\.mgmt\.ci\.net\.local$/ then ["ldn-puppet-001.youdevise.com"]
     end
