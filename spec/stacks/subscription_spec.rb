@@ -48,7 +48,7 @@ describe Subscription do
     topic2 = random_topic
 
     subscription2 = Subscription.new(:pop_timeout => 1)
-    subscription2.start([topic, topic2])
+    subscription2.start([topic, topic2]) # XXX flicker, see http://jenkins.youdevise.com/job/stackbuilder/1061/console
 
     threads = []
     threads << Thread.new do
