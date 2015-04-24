@@ -94,17 +94,19 @@ class Stacks::MachineDef
     end
   end
 
+  # this used to be the 'owner' fact set by puppet, but looking it up with the Facter module was incredibly slow
+  # the following code recreates the logic from puppet
+  # caching `hostname` in @@localhost_hostname is a major speedup (0.5 seconds as of 24.04.2015 on a dev box)
+  # rubocop:disable Style/ClassVars
   def owner_fact
-    unless $LOAD_PATH.include?('/var/lib/puppet/lib')
-      $LOAD_PATH << '/var/lib/puppet/lib'
-    end
-    Facter.loadfacts
-    if Facter.value('owner').nil?
-      'OWNER-FACT-NOT-FOUND'
-    else
-      Facter.value 'owner'
+    @@localhost_hostname = `hostname` if !defined? @@localhost_hostname
+    case @@localhost_hostname
+    when /^\w{3}-dev-(\w+)/ then $1
+    when /^(\w+)-desktop/   then $1
+    else 'OWNER-FACT-NOT-FOUND'
     end
   end
+  # rubocop:enable Style/ClassVars
 
   def accept(&block)
     block.call(self)

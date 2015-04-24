@@ -48,6 +48,12 @@ Style/NegatedIf:
 Style/NegatedWhile:
   Enabled: false
 
+Style/PerlBackrefs:
+  Enabled: false
+
+Style/RegexpLiteral:
+  Enabled: false
+
 Style/RescueModifier:
   Enabled: false
 

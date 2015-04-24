@@ -43,12 +43,14 @@ describe Support::MCollective do
     mco_client("blah", :fabric => "st")
   end
 
+  # XXX Facter is slow
   it 'applies a filter so that only local machines are addressed' do
     @mock_rpcclient.should_receive(:discover).with(no_args).ordered
     @mock_rpcclient.should_receive(:fact_filter).with("owner", Facter.value('owner'))
     mco_client("blah", :fabric => "local")
   end
 
+  # XXX Facter is slow
   it 'uses a timeout if supplied' do
     @mock_rpcclient.should_receive(:discover).with(no_args).ordered
     @mock_rpcclient.should_receive(:fact_filter).with("owner", Facter.value('owner'))
