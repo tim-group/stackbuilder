@@ -12,6 +12,7 @@ end
 
 desc "Run specs"
 RSpec::Core::RakeTask.new do |t|
+  ENV['INSIDE_RSPEC'] = 'true'
   t.rspec_opts = %w(--color)
   t.pattern = "spec/**/*_spec.rb"
 end

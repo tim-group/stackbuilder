@@ -46,17 +46,32 @@ module Stacks::Dependencies
     virtual_services
   end
 
+  # the @@eligible_virtual_services_cache variable is used for caching a semi-processed list.
+  # this reduces runs of sbx:dump_enc from 4-5 minutes to under 4 seconds (as of 24.04.2015)
+  # rubocop:disable Style/ClassVars
   def virtual_services_that_depend_on_me
+    # the constant part (cache)
+    # do not cache if running from inside rspec, as virtual_services change there and it causes tests to fail
+    if !defined?(@@eligible_virtual_services_cache) || ENV['INSIDE_RSPEC']
+      @@eligible_virtual_services_cache = []
+      virtual_services.each do |virtual_service|
+        next if !virtual_service.is_a?(Stacks::MachineDefContainer)
+        next if !virtual_service.respond_to?(:depends_on)
+
+        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
+      end
+    end
+
+    # the variable part
     virtual_services_that_depend_on_me = []
-    virtual_services.each do |virtual_service|
-      next if !virtual_service.is_a?(Stacks::MachineDefContainer)
-      next if !virtual_service.respond_to?(:depends_on)
-      next if !virtual_service.depends_on.include?([name, environment.name])
+    @@eligible_virtual_services_cache.each do |virtual_service, depends_on|
+      next if !depends_on.include?([name, environment.name])
 
       virtual_services_that_depend_on_me.push virtual_service
     end
     virtual_services_that_depend_on_me.uniq
   end
+  # rubocop:enable Style/ClassVars
 
   def get_children_for_virtual_services(virtual_services)
     children = []
