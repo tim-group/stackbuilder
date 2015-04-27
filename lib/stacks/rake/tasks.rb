@@ -403,7 +403,7 @@ namespace :sbx do
       end
 
       if machine_def.respond_to? :to_enc
-        desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
+        desc "External Node Classifiers; fed to puppet"
         task :to_enc do
           puts ZAMLS.to_zamls(machine_def.to_enc)
         end
