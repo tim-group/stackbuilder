@@ -50,7 +50,7 @@ class Stacks::Services::ProxyVHost
     end
     aliases.merge(@aliases)
     aliases.delete(fqdn(location))
-    aliases.to_a
+    aliases.to_a.sort
   end
 
   def fqdn(location)
