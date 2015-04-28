@@ -28,7 +28,11 @@ describe Stacks::MachineDef do
 
   it 'should allow environment to override destroyable' do
     machinedef = Stacks::MachineDef.new("test")
-    env = Stacks::Environment.new("noenv", { :primary_site => "local", :every_machine_destroyable => true }, nil, {}, {})
+    env_opts = {
+      :primary_site => "local",
+      :every_machine_destroyable => true
+    }
+    env = Stacks::Environment.new("noenv", env_opts, nil, {}, {})
     machinedef.bind_to(env)
     machinedef.allow_destroy(false)
     machinedef.destroyable?.should eql false
@@ -39,7 +43,11 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new("test")
     machinedef.modify_storage('/'.to_sym         => { :persistent => true },
                               '/mnt/data'.to_sym => { :persistent => true })
-    env = Stacks::Environment.new("noenv", { :primary_site => "local", :persistent_storage_supported => false }, nil, {}, {})
+    env_opts = {
+      :primary_site                 => "local",
+      :persistent_storage_supported => false
+    }
+    env = Stacks::Environment.new("noenv", env_opts, nil, {}, {})
     machinedef.bind_to(env)
     machinedef.to_spec[:storage]['/'.to_sym][:persistent].should eql false
     machinedef.to_spec[:storage]['/mnt/data'.to_sym][:persistent].should eql false
