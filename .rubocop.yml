@@ -82,6 +82,6 @@ Style/HashSyntax:
 Style/Proc:
   Enabled: false
 
+# flat_map not present in ruby1.8
 Performance/FlatMap:
   Enabled: false
-
