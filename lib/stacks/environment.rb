@@ -22,7 +22,7 @@ class Stacks::Environment
       options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
     @primary_site = options[:primary_site]
     @secondary_site = options[:secondary_site]
-    @domain_suffix = option[:domain_suffix] rescue 'net.local'
+    @domain_suffix = options[:domain_suffix] || 'net.local'
     @parent = parent
     @children = []
   end
@@ -48,11 +48,21 @@ class Stacks::Environment
   end
 
   def domain(fabric, network = nil)
-    case network
-    when nil, :prod
-      "#{fabric}.#{@domain_suffix}"
+    case fabric
+    when 'local'
+      case network
+      when nil, :prod
+        "#{@domain_suffix}"
+      else
+        "#{network}.#{@domain_suffix}"
+      end
     else
-      "#{network}.#{fabric}.#{@domain_suffix}"
+      case network
+      when nil, :prod
+        "#{fabric}.#{@domain_suffix}"
+      else
+        "#{network}.#{fabric}.#{@domain_suffix}"
+      end
     end
   end
 
