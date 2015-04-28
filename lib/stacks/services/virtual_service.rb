@@ -42,13 +42,7 @@ module Stacks::Services::VirtualService
     fabric = environment.options[location]
     fail "Unable to determine fabric for #{location}" if fabric.nil?
     domain = environment.domain(fabric, network)
-    case fabric
-    when 'local'
-      hostname = "#{environment.name}-#{name}-vip-#{owner_fact}"
-    else
-      hostname = "#{environment.name}-#{name}-vip"
-    end
-    "#{hostname}.#{domain}"
+    "#{environment.name}-#{name}-vip.#{domain}"
   end
 
   def to_vip_spec(location)
