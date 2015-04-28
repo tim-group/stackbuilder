@@ -9,7 +9,10 @@ module Stacks::Services::LoadBalancerCluster
   end
 
   def depends_on
-    services = virtual_services.select { |node| node.respond_to?(:to_loadbalancer_config) }
+    services = virtual_services.select { |node|
+      node.respond_to?(:to_loadbalancer_config) &&
+      node.respond_to?(:load_balanced_service?)
+    }
     services.map do |node|
       [node.name, environment.name]
     end
