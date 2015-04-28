@@ -159,7 +159,7 @@ module Stacks::Services::VirtualBindService
         'type'         => 'bind',
         'ports'        => @ports,
         'realservers'  => {
-          'blue' => realservers.map { |server| server.qualified_hostname(vip_net) }.sort
+          'blue' => realservers(location).map { |server| server.qualified_hostname(vip_net) }.sort
         },
         'healthchecks' => healthchecks(location)
       }
