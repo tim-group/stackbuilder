@@ -30,15 +30,13 @@ module Stacks::Services::VirtualBindService
     @forwarder_zones.uniq!
   end
 
-  def zones_fqdn
-    zones.inject([]) do |zones, zone|
-      if zone.eql?(:prod)
-        zones << "#{@domain}"
-      else
-        zones << "#{zone}.#{@domain}"
-      end
-      zones
+  def zones_fqdn(location)
+    fabric = environment.options[location]
+    fqdn_zones = []
+    zones.map do |zone|
+      fqdn_zones  << environment.domain(fabric, zone.to_sym)
     end
+    fqdn_zones
   end
 
   def bind_servers_that_depend_on_me
@@ -53,13 +51,13 @@ module Stacks::Services::VirtualBindService
     machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
   end
 
-  def bind_master_servers_and_zones_that_i_depend_on
+  def bind_master_servers_and_zones_that_i_depend_on(location)
     zones = nil
     machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
     machine_defs.each do |machine_def|
       if machine_def.is_a?(Stacks::Services::BindServer) && machine_def.master?
         zones = {} if zones.nil?
-        zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.zones_fqdn
+        zones[machine_def.mgmt_fqdn] = machine_def.virtual_service.zones_fqdn(location)
       end
     end
     zones
@@ -76,26 +74,27 @@ module Stacks::Services::VirtualBindService
     all_deps.to_a
   end
 
-  def slave_zones_fqdn(machine_def)
-    return nil if machine_def == master_server
-    { master_server.mgmt_fqdn => zones_fqdn }
+  def slave_zones_fqdn(bind_server)
+    return nil if bind_server == master_server
+    { master_server.mgmt_fqdn => zones_fqdn(bind_server.location) }
   end
 
-  def instantiate_machine(name, type, index, environment)
-    server_name = "#{name}-#{index}"
-    server = @type.new(server_name, self, type)
+  def instantiate_machine(type, i, environment, networks, location)
+    index = sprintf("%03d", i + 1)
+    server = @type.new(type, self, index, networks, location)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
-    @definitions[server_name] = server
+    @definitions[random_name] = server
     server
   end
 
   def instantiate_machines(environment)
-    i = 0
+    fail 'Bind servers do not currently support enable_secondary_site' if @enable_secondary_site
 
-    instantiate_machine(name, :master, sprintf("%03d", i += 1), environment)
+    i = 0
+    instantiate_machine(:master, i, environment, default_networks, :primary_site)
     @slave_instances.times do
-      instantiate_machine(name, :slave, sprintf("%03d", i += 1), environment)
+      instantiate_machine(:slave, i += 1, environment, default_networks, :primary_site)
     end
   end
 
@@ -124,7 +123,7 @@ module Stacks::Services::VirtualBindService
     masters.first
   end
 
-  def healthchecks
+  def healthchecks(location)
     healthchecks = []
     healthchecks << {
       'healthcheck' => 'MISC_CHECK',
@@ -132,7 +131,7 @@ module Stacks::Services::VirtualBindService
       'path'        => '/opt/youdevise/keepalived/healthchecks/bin/check_participation.rb',
       'url_path'    => '/participation'
     }
-    zones_fqdn.each do |zone|
+    zones_fqdn(location).each do |zone|
       if zone =~ /mgmt/
         healthchecks << {
           'healthcheck' => 'MISC_CHECK',
@@ -150,19 +149,19 @@ module Stacks::Services::VirtualBindService
     healthchecks
   end
 
-  def to_loadbalancer_config
+  def to_loadbalancer_config(location)
     vip_nets = @vip_networks.select do |vip_network|
       ![:front].include? vip_network
     end
     lb_config = {}
     vip_nets.each do |vip_net|
-      lb_config[vip_fqdn(vip_net)] = {
+      lb_config[vip_fqdn(vip_net, location)] = {
         'type'         => 'bind',
         'ports'        => @ports,
         'realservers'  => {
           'blue' => realservers.map { |server| server.qualified_hostname(vip_net) }.sort
         },
-        'healthchecks' => healthchecks
+        'healthchecks' => healthchecks(location)
       }
     end
     lb_config

@@ -4,13 +4,14 @@ require 'resolv'
 
 class Stacks::Services::BindServer < Stacks::MachineDef
   attr_reader :environment
+  attr_reader :location
   attr_reader :role
   attr_reader :virtual_service
 
-  def initialize(base_hostname, virtual_service, role)
-    @role = role
-    super(base_hostname, [:mgmt, :prod], :primary_site)
+  def initialize(role, virtual_service, index, networks, location)
+    super(virtual_service.name + "-" + index, networks, location)
     @virtual_service = virtual_service
+    @role = role
   end
 
   def master?
@@ -25,23 +26,19 @@ class Stacks::Services::BindServer < Stacks::MachineDef
     super(environment)
   end
 
-  def vip_fqdn(net)
-    @virtual_service.vip_fqdn(net)
-  end
-
   def slave_from(env)
     @virtual_service.depend_on('ns', env)
   end
 
   def to_enc
-    dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on
+    dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on(location)
 
     enc = super()
     vip_fqdns = @virtual_service.vip_networks.map do |vip_network|
       if [:front].include? vip_network
         nil
       else
-        vip_fqdn(vip_network)
+        @virtual_service.vip_fqdn(vip_network, location)
       end
     end
     vip_fqdns.compact!
@@ -53,7 +50,7 @@ class Stacks::Services::BindServer < Stacks::MachineDef
                  'forwarder_zones'                   => @virtual_service.forwarder_zones
                },
                'server::default_new_mgmt_net_local'  => nil)
-    enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn if master?
+    enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn(location) if master?
 
     enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn(self) \
       unless @virtual_service.slave_zones_fqdn(self).nil?

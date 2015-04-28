@@ -34,6 +34,6 @@ describe Stacks::Inventory do
 
     result.hostname.should eql("te-stapp-001")
     result.domain.should eql("space.net.local")
-    result.vip_fqdn(:prod).should eql("te-stapp-vip.space.net.local")
+    result.virtual_service.vip_fqdn(:prod, :primary_site).should eql("te-stapp-vip.space.net.local")
   end
 end

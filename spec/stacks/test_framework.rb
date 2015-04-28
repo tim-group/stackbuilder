@@ -22,6 +22,14 @@ module Stacks::TestFramework
     end
   end
 
+  def environment(environment, desc = '', &block)
+    subject = @subject
+    it "#{environment} #{desc}" do
+      env = subject.find_environment(environment)
+      block.call(env)
+    end
+  end
+
   def it_stack(desc, &block)
     subject = @subject
     it "stack #{desc}" do
@@ -47,15 +55,24 @@ module Stacks::Matchers
 
   RSpec::Matchers.define :have_hosts do |hosts|
     match do |stacks|
-      stacks.fqdn_list - hosts == []
+      stacks.fqdn_list.to_set == hosts.to_set
     end
 
     failure_message_for_should do
-      "Expected: #{hosts}\nActual: #{stacks.fqdn_list}\nDiff: #{hosts - stacks.fqdn_list}"
-    end
-
-    failure_message_for_should_not do
-      "Expected to not have: #{hosts}\nActual: #{stacks.fqdn_list}\nDiff: #{hosts - stacks.fqdn_list}"
+      expected_hosts = hosts.to_set
+      actual_hosts = stacks.fqdn_list.to_set
+      missing_nodes = expected_hosts - actual_hosts
+      unexpected_nodes = actual_hosts - expected_hosts
+      error_message = ""
+      if missing_nodes.size > 0
+        error_message += "Expected hosts are missing:\n #{expected.to_a.join("\n ")}\n"
+        error_message += "-#{missing_nodes.to_a.join("\n-")}\n"
+      end
+      if unexpected_nodes.size > 0
+        error_message += "Unexpected hosts were found:\n #{expected.to_a.join("\n ")}\n"
+        error_message += "+#{unexpected_nodes.to_a.join("\n+")}\n"
+      end
+      error_message
     end
   end
 

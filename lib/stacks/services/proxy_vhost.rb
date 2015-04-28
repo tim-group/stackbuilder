@@ -1,5 +1,4 @@
 class Stacks::Services::ProxyVHost
-  attr_accessor :add_default_aliases
   attr_accessor :aliases
   attr_accessor :cert
   attr_reader :properties
@@ -7,19 +6,18 @@ class Stacks::Services::ProxyVHost
   attr_reader :redirects
   attr_reader :service
   attr_reader :type
-  attr_reader :vhost_fqdn
   attr_reader :environment
 
-  def initialize(virtual_proxy_service, vhost_fqdn, service, environment, type = 'default', &block)
-    @add_default_aliases = true
+  def initialize(virtual_proxy_service, fqdn, service, environment, type = 'default', &block)
     @aliases = []
+    @add_default_aliases = true
     @cert = 'wildcard_timgroup_com'
     @properties = {}
     @proxy_pass_rules = {}
     @redirects = []
     @service = service
     @type = type
-    @vhost_fqdn = vhost_fqdn
+    @fqdn = fqdn
     @environment = environment
     @virtual_proxy_service = virtual_proxy_service
 
@@ -42,5 +40,45 @@ class Stacks::Services::ProxyVHost
 
   def add_properties(properties)
     @properties.merge!(properties)
+  end
+
+  def aliases(location)
+    aliases = Set.new
+    if @add_default_aliases
+      aliases << @virtual_proxy_service.vip_fqdn(:front, location)
+      aliases << @virtual_proxy_service.vip_fqdn(:prod, location)
+    end
+    aliases.merge(@aliases)
+    aliases.delete(fqdn(location))
+    aliases.to_a
+  end
+
+  def fqdn(location)
+    if @fqdn.nil?
+      @virtual_proxy_service.vip_fqdn(:front, location)
+    else
+      @fqdn
+    end
+  end
+
+  def proxy_pass_rules(location)
+    Hash[@proxy_pass_rules.map do |path, config_hash|
+      service_environment = environment
+      service_environment = config_hash[:environment] if config_hash.key?(:environment)
+      service = @virtual_proxy_service.find_virtual_service(config_hash[:service], service_environment)
+      [path, "http://#{service.vip_fqdn(:prod, location)}:8000"]
+    end]
+  end
+
+  def to_proxy_config_hash(location)
+    [fqdn(location), {
+      'aliases'          => aliases(location),
+      'redirects'        => redirects,
+      'application'      => @virtual_proxy_service.find_virtual_service(service, environment).application,
+      'proxy_pass_rules' => proxy_pass_rules(location),
+      'type'             => type,
+      'vhost_properties' => properties,
+      'cert'             => cert
+    }]
   end
 end

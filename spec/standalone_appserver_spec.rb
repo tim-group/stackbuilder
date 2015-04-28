@@ -94,3 +94,22 @@ describe_stack 'app with ajp port' do
     host.to_enc['role::http_app']['ajp_port'].should eql '8444'
   end
 end
+
+describe_stack 'standalone servers should not provide a configuration to load balancers' do
+  given do
+    stack "lb" do
+      loadbalancer
+    end
+    stack 'tim_cyclic' do
+      standalone_appserver 'timcyclic'
+    end
+
+    env "mirror", :primary_site => "oy", :secondary_site => "bs" do
+      instantiate_stack "lb"
+      instantiate_stack "tim_cyclic"
+    end
+  end
+  host("mirror-lb-001.mgmt.oy.net.local") do |load_balancer|
+    load_balancer.to_enc['role::loadbalancer']['virtual_servers'].should eql({})
+  end
+end

@@ -7,7 +7,6 @@ require 'uri'
 class Stacks::MachineSet
   attr_accessor :auto_configure_dependencies
   attr_accessor :enable_secondary_site
-  attr_accessor :fabric
   attr_accessor :groups
   attr_accessor :instances
   attr_accessor :name
@@ -16,7 +15,6 @@ class Stacks::MachineSet
   attr_accessor :type
   attr_reader :allowed_hosts
   attr_reader :default_networks
-  attr_reader :default_site
   attr_reader :depends_on
 
   include Stacks::MachineDefContainer
@@ -32,14 +30,13 @@ class Stacks::MachineSet
 
     @allowed_hosts = []
     @default_networks = [:mgmt, :prod]
-    @default_site = :primary_site
     @depends_on = []
     @enable_secondary_site = false
   end
 
   def instantiate_machines(environment)
     @instances.times do |i|
-      @definitions[random_name] = instantiate_machine(i, environment, default_networks, default_site)
+      @definitions[random_name] = instantiate_machine(i, environment, default_networks, :primary_site)
       if @enable_secondary_site
         @definitions[random_name] = instantiate_machine(i, environment, default_networks, :secondary_site)
       end
@@ -51,11 +48,11 @@ class Stacks::MachineSet
     @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
   end
 
-  def dependency_config
+  def dependency_config(location)
     config = {}
     if @auto_configure_dependencies
       virtual_services_that_i_depend_on.each do |dependency|
-        config.merge! dependency.config_params(self)
+        config.merge! dependency.config_params(self, location)
       end
     end
     config
@@ -89,20 +86,9 @@ class Stacks::MachineSet
   def configure
     on_bind do |_machineset, environment|
       @environment = environment
-      configure_domain_name(environment)
       instance_eval(&@config_block) unless @config_block.nil?
       instantiate_machines(environment)
       bind_children(environment)
-    end
-  end
-
-  def configure_domain_name(environment)
-    @fabric = environment.options[:primary_site]
-    suffix = 'net.local'
-    @domain = "#{@fabric}.#{suffix}"
-    case @fabric
-    when 'local'
-      @domain = "dev.#{suffix}"
     end
   end
 
@@ -123,7 +109,7 @@ class Stacks::MachineSet
 
   private
 
-  def instantiate_machine(i, environment, networks = @default_networks, location = @default_site)
+  def instantiate_machine(i, environment, networks = @default_networks, location = :primary_site)
     index = sprintf("%03d", i + 1)
     server = nil
     # FIXME: Temporary fix - Remove me when all stacks have a 4 param or use the default constructor.

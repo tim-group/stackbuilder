@@ -6,6 +6,8 @@ class Stacks::MachineDef
   attr_reader :environment
   attr_reader :fabric
   attr_reader :hostname
+  attr_reader :virtual_service
+  attr_reader :location
   attr_accessor :availability_group
   attr_accessor :fabric
   attr_accessor :networks
@@ -76,22 +78,14 @@ class Stacks::MachineDef
 
   def bind_to(environment)
     @environment = environment
-    @hostname = environment.name + "-" + @base_hostname
     @fabric = environment.options[@location]
-    suffix = 'net.local'
-    @domain = "#{@fabric}.#{suffix}"
     case @fabric
     when 'local'
-      @domain = "dev.#{suffix}"
-      @hostname = "#{@hostname}-#{owner_fact}"
+      @hostname  = "#{@environment.name}-#{@base_hostname}-#{owner_fact}"
+    else
+      @hostname = "#{@environment.name}-#{@base_hostname}"
     end
-    fail "domain must not contain mgmt" if @domain =~ /mgmt\./
-  end
-
-  def disable_persistent_storage
-    @storage.each do |mount_point, _values|
-      modify_storage(mount_point.to_sym => { :persistent => false })
-    end
+    @domain = environment.domain(@fabric)
   end
 
   # this used to be the 'owner' fact set by puppet, but looking it up with the Facter module was incredibly slow
@@ -107,6 +101,12 @@ class Stacks::MachineDef
     end
   end
   # rubocop:enable Style/ClassVars
+
+  def disable_persistent_storage
+    @storage.each do |mount_point, _values|
+      modify_storage(mount_point.to_sym => { :persistent => false })
+    end
+  end
 
   def accept(&block)
     block.call(self)

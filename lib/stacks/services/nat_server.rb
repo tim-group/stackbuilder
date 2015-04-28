@@ -3,10 +3,10 @@ require 'stacks/namespace'
 class Stacks::Services::NatServer < Stacks::MachineDef
   attr_reader :virtual_router_ids
 
-  def initialize(server_group, index)
-    super(server_group.name + "-" + index, [:mgmt, :prod, :front])
+  def initialize(virtual_service, index, networks = [:mgmt, :prod, :front], location = :primary_site)
+    super(virtual_service.name + "-" + index, networks, location)
+    @virtual_service = virtual_service
     @virtual_router_ids = {}
-    self
   end
 
   def bind_to(environment)
@@ -15,13 +15,13 @@ class Stacks::Services::NatServer < Stacks::MachineDef
     @virtual_router_ids[:prod] = environment.options[:nat_prod_virtual_router_id] || 106
   end
 
-  def find_nat_rules
+  def find_nat_rules(location)
     rules = []
     environment.accept do |node|
       puts node.name if node.environment.nil?
       unless node.environment.contains_node_of_type?(Stacks::Services::NatServer) && environment != node.environment
         if node.respond_to? :nat
-          rules =  rules.concat node.nat_rules if node.nat
+          rules =  rules.concat node.nat_rules(location) if node.nat
         end
       end
     end
@@ -35,12 +35,12 @@ class Stacks::Services::NatServer < Stacks::MachineDef
     snat = {
       'SNAT' => {
         'prod' => {
-          'to_source' => "nat-vip.front.#{environment.options[:primary_site]}.net.local"
+          'to_source' => "nat-vip.front.#{environment.options[location]}.net.local"
         }
       }
     }
 
-    dnat_rules = Hash[find_nat_rules.map do |rule|
+    dnat_rules = Hash[find_nat_rules(@location).map do |rule|
       [
         "#{rule.from.host} #{rule.from.port}",
         {

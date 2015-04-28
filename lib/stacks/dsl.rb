@@ -20,7 +20,7 @@ module Stacks
     end
 
     def env(name, options, &block)
-      environments[name] = Stacks::Environment.new(name, options, environments, stack_procs)
+      environments[name] = Stacks::Environment.new(name, options, nil, environments, stack_procs)
       environments[name].instance_eval(&block) unless block.nil?
     end
 

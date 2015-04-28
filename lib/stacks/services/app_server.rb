@@ -2,7 +2,8 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::Services::AppServer < Stacks::MachineDef
-  attr_reader :environment, :virtual_service
+  attr_reader :environment
+  attr_reader :location
   attr_accessor :group
   attr_accessor :launch_config
 
@@ -18,31 +19,27 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     super(environment)
   end
 
-  def vip_fqdn(net)
-    @virtual_service.vip_fqdn(net)
-  end
-
   def allow_host(source_host_or_network)
     @allowed_hosts << source_host_or_network
     @allowed_hosts.uniq!
   end
 
-  def dependency_config_sftp_servers_only
-    @virtual_service.dependency_config.reject { |key, _value| key != 'sftp_servers' }
+  def dependency_config_sftp_servers_only(location)
+    @virtual_service.dependency_config(location).reject { |key, _value| key != 'sftp_servers' }
   end
 
-  def dependency_config_excluding_sftp_servers
-    @virtual_service.dependency_config.reject! { |key, _value| key == 'sftp_servers' }
+  def dependency_config_excluding_sftp_servers(location)
+    @virtual_service.dependency_config(location).reject! { |key, _value| key == 'sftp_servers' }
   end
 
   def to_enc
     enc = super
     enc['role::http_app'] = {
-      'application'         => virtual_service.application,
+      'application'         => @virtual_service.application,
       'group'               => group,
       'cluster'             => availability_group,
       'environment'         => environment.name,
-      'dependencies'        => @virtual_service.dependency_config,
+      'dependencies'        => @virtual_service.dependency_config(location),
       'dependant_instances' => @virtual_service.dependant_machine_def_fqdns,
       'port'                => '8000'
     }
@@ -56,7 +53,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     enc['role::http_app']['allowed_hosts'] = allowed_hosts.uniq.sort unless allowed_hosts.empty?
 
     if @virtual_service.respond_to? :vip_fqdn
-      enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod)
+      enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod, @location)
     end
 
     # FIXME: It is less than ideal having to use the same dependency mechanism for
@@ -66,8 +63,8 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     # Likewise we strip an non-sftp servers and see them to idea_positions_exports::appserver
     #
     if @virtual_service.idea_positions_exports
-      enc['role::http_app']['dependencies'] = dependency_config_excluding_sftp_servers
-      enc.merge!('idea_positions_exports::appserver' => dependency_config_sftp_servers_only)
+      enc['role::http_app']['dependencies'] = dependency_config_excluding_sftp_servers(location)
+      enc.merge!('idea_positions_exports::appserver' => dependency_config_sftp_servers_only(location))
     end
 
     enc_ehcache(enc)

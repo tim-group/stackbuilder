@@ -36,7 +36,7 @@ describe Puppet::Node::Stacks do
     node = node_for(hostname)
     @delegate.should_receive(:find).with(request).and_return(node)
     machine = double('machine')
-    machine.stub(:environment).and_return(Stacks::Environment.new("testenv", {}, {}, {}))
+    machine.stub(:environment).and_return(Stacks::Environment.new("testenv", {}, nil, {}, {}))
     @stacks_inventory.should_receive(:find).with(hostname).and_return(machine)
     machine.should_receive(:to_enc).and_return("role::http_app" => { "application" => "JavaHttpRef" })
 

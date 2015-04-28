@@ -36,6 +36,21 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     end
   end
 
+  it_stack 'should contain all the expected hosts' do |stack|
+    stack.should have_hosts(
+      [
+        'oy-ns-001.mgmt.oy.net.local',
+        'oy-ns-002.mgmt.oy.net.local',
+        'pg-ns-001.mgmt.pg.net.local',
+        'pg-ns-002.mgmt.pg.net.local',
+        'oy-lb-001.mgmt.oy.net.local',
+        'oy-lb-002.mgmt.oy.net.local',
+        'pg-lb-001.mgmt.pg.net.local',
+        'pg-lb-002.mgmt.pg.net.local'
+      ]
+    )
+  end
+
   # OY Master - Slaves from PG Master
   host("oy-ns-001.mgmt.oy.net.local") do |host|
     enc = host.to_enc

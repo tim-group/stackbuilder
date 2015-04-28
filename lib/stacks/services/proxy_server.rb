@@ -1,10 +1,11 @@
 require 'stacks/namespace'
 
 class Stacks::Services::ProxyServer < Stacks::MachineDef
-  attr_reader :virtual_service, :disable_enc
+  attr_reader :disable_enc
+  attr_reader :location
 
-  def initialize(virtual_service, index)
-    super(virtual_service.name + "-" + index)
+  def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)
+    super(virtual_service.name + "-" + index, networks, location)
     @virtual_service = virtual_service
     @disable_enc = false
   end
@@ -21,11 +22,11 @@ class Stacks::Services::ProxyServer < Stacks::MachineDef
     if @disable_enc
       {}
     else
-      service_resources = Hash[virtual_service.downstream_services]
+      service_resources = Hash[@virtual_service.downstream_services(location)]
       {
         'role::proxyserver' => {
           'default_ssl_cert' => @virtual_service.cert,
-          'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod),
+          'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod, location),
           'vhosts'           => service_resources,
           'environment'      => environment.name
         }

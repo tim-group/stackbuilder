@@ -25,32 +25,35 @@ module Stacks::Services::VirtualService
     @udp = false
   end
 
-  def to_loadbalancer_config
-    lb_config
-  end
-
   def clazz
     'virtualservice'
   end
 
-  def realservers
-    @definitions.values.reject do |server|
-      server.fabric != fabric
-    end
-  end
-
-  def vip_fqdn(net)
-    case net
-    when nil, :prod
-      "#{environment.name}-#{name}-vip.#{@domain}"
+  def realservers(location = nil)
+    case location
+    when nil
+      @definitions.values
     else
-      "#{environment.name}-#{name}-vip.#{net}.#{@domain}"
+      @definitions.values.select { |server| server.location == location }
     end
   end
 
-  def to_vip_spec
+  def vip_fqdn(network, location)
+    fabric = environment.options[location]
+    fail "Unable to determine fabric for #{location}" if fabric.nil?
+    domain = environment.domain(fabric, network)
+    case fabric
+    when 'local'
+      hostname = "#{environment.name}-#{name}-vip-#{owner_fact}"
+    else
+      hostname = "#{environment.name}-#{name}-vip"
+    end
+    "#{hostname}.#{domain}"
+  end
+
+  def to_vip_spec(location)
     qualified_hostnames = Hash[@vip_networks.map do |network|
-      [network, vip_fqdn(network)]
+      [network, vip_fqdn(network, location)]
     end]
     {
       :hostname => "#{environment.name}-#{name}",
@@ -82,27 +85,31 @@ module Stacks::Services::VirtualService
     @persistent_ports << port
   end
 
-  def nat_rules
+  def nat_rules(location)
     rules = []
     @ports.map do |back_port|
       front_port = @port_map[back_port] || back_port
-      front_uri = URI.parse("http://#{vip_fqdn(:front)}:#{front_port}")
-      prod_uri = URI.parse("http://#{vip_fqdn(:prod)}:#{back_port}")
+      front_uri = URI.parse("http://#{vip_fqdn(:front, location)}:#{front_port}")
+      prod_uri = URI.parse("http://#{vip_fqdn(:prod, location)}:#{back_port}")
       rules << Stacks::Services::Nat.new(front_uri, prod_uri, @tcp, @udp)
     end
     rules
   end
 
-  def config_params(_dependant)
+  def config_params(_dependant, _location)
     {}
+  end
+
+  def load_balanced_service?
+    true
   end
 
   private
 
-  def lb_config
-    fewest_servers_in_a_group = realservers.size
-    grouped_realservers = realservers.group_by(&:group)
-    realservers = Hash[grouped_realservers.map do |group, rs|
+  def loadbalancer_config(location)
+    fewest_servers_in_a_group = realservers(location).size
+    grouped_realservers = realservers(location).group_by(&:group)
+    realservers_hash = Hash[grouped_realservers.map do |group, rs|
       fewest_servers_in_a_group = rs.size unless rs.size > fewest_servers_in_a_group
       realserver_fqdns = rs.map(&:prod_fqdn).sort
       [group, realserver_fqdns]
@@ -111,10 +118,10 @@ module Stacks::Services::VirtualService
     monitor_warn = fewest_servers_in_a_group == 1 ? 0 : 1
 
     {
-      vip_fqdn(:prod) => {
+      vip_fqdn(:prod, location) => {
         'env' => environment.name,
         'app' => application,
-        'realservers' => realservers,
+        'realservers' => realservers_hash,
         'monitor_warn' => monitor_warn,
         'healthcheck_timeout' => healthcheck_timeout
       }

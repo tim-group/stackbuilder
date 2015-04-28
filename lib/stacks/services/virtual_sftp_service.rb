@@ -19,8 +19,8 @@ module Stacks::Services::VirtualSftpService
     machine_defs_to_fqdns(virtual_service_children, networks)
   end
 
-  def to_loadbalancer_config
-    grouped_realservers = realservers.group_by do |_|
+  def to_loadbalancer_config(location)
+    grouped_realservers = realservers(location).group_by do |_|
       'blue'
     end
 
@@ -30,7 +30,7 @@ module Stacks::Services::VirtualSftpService
     end]
 
     {
-      vip_fqdn(:prod) => {
+      vip_fqdn(:prod, location) => {
         'type'         => 'sftp',
         'ports'        => @ports,
         'realservers'  => realservers,
@@ -39,7 +39,7 @@ module Stacks::Services::VirtualSftpService
     }
   end
 
-  def config_params(dependant)
+  def config_params(dependant, _location)
     fail "#{type} is not configured to provide config_params to #{dependant.type}" \
       unless dependant.type.eql?(Stacks::Services::AppServer)
     { 'sftp_servers' => machine_defs_to_fqdns(children, [:mgmt]) }

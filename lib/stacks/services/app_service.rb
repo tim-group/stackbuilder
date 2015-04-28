@@ -47,25 +47,27 @@ module Stacks::Services::AppService
     @disable_http_lb_hack = true
   end
 
-  def config_params(_dependant)
-    { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod)}:8000" }
+  def config_params(_dependant, location)
+    { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, location)}:8000" }
   end
 
-  def to_loadbalancer_config
+  def to_loadbalancer_config(location)
     if @disable_http_lb_hack && @one_instance_in_lb
       fail('disable_http_lb_hack and one_instance_in_lb cannot be specified at the same time')
     end
-
-    config = lb_config
-    unless @sso_port.nil?
-      if @disable_http_lb_hack
-        config[vip_fqdn(:prod)]['type'] = 'sso_app'
-      else
-        config[vip_fqdn(:prod)]['type'] = 'http_and_sso_app'
+    config = {}
+    if respond_to?(:load_balanced_service?)
+      config = loadbalancer_config(location)
+      unless @sso_port.nil?
+        if @disable_http_lb_hack
+          config[vip_fqdn(:prod, location)]['type'] = 'sso_app'
+        else
+          config[vip_fqdn(:prod, location)]['type'] = 'http_and_sso_app'
+        end
       end
     end
     if @one_instance_in_lb
-      config[vip_fqdn(:prod)]['type'] = 'one_instance_in_lb_with_sorry_server'
+      config[vip_fqdn(:prod, location)]['type'] = 'one_instance_in_lb_with_sorry_server'
     end
     config
   end

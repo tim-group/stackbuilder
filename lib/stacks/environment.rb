@@ -2,11 +2,15 @@ require 'stacks/namespace'
 require 'stacks/machine_def_container'
 
 class Stacks::Environment
-  attr_reader :name, :options, :environments
+  attr_reader :domain_suffix
+  attr_reader :environments
+  attr_reader :parent
+  attr_reader :name
+  attr_reader :options
 
   include Stacks::MachineDefContainer
 
-  def initialize(name, options, environments, stack_procs)
+  def initialize(name, options, parent, environments, stack_procs)
     @name = name
     @options = options
     @environments = environments
@@ -18,10 +22,46 @@ class Stacks::Environment
       options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
     @primary_site = options[:primary_site]
     @secondary_site = options[:secondary_site]
+    @domain_suffix = option[:domain_suffix] rescue 'net.local'
+    @parent = parent
+    @children = []
+  end
+
+  def child?(environment)
+    children.include?(environment)
+  end
+
+  def child_or_self?(environment)
+    children.include?(environment) || environment == self
+  end
+
+  def sub_environments
+    children.select { |node| node.is_a?(Stacks::Environment) }
+  end
+
+  def sub_environment_names
+    names = []
+    sub_environments.each do |sub_environment|
+      names << sub_environment.name
+    end
+    names
+  end
+
+  def domain(fabric, network = nil)
+    case network
+    when nil, :prod
+      "#{fabric}.#{@domain_suffix}"
+    else
+      "#{network}.#{fabric}.#{@domain_suffix}"
+    end
   end
 
   def environment
     self
+  end
+
+  def parent?
+    !@parent.nil?
   end
 
   def cross_site_routing_required?
@@ -53,7 +93,8 @@ class Stacks::Environment
   # rubocop:enable Style/TrivialAccessors
 
   def env(name, options = {}, &block)
-    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), @environments, @stack_procs)
+    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), self, @environments, @stack_procs)
+    @children << @definitions[name]
     @definitions[name].instance_eval(&block) unless block.nil?
   end
 

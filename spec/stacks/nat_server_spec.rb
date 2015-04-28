@@ -9,7 +9,7 @@ describe Stacks::Services::NatServer do
       end
     end
     machinedef = Stacks::Services::NatServer.new(Group.new("my-nat-server"), "001")
-    env = Stacks::Environment.new("noenv", { :primary_site => "local" }, {}, {})
+    env = Stacks::Environment.new("noenv", { :primary_site => "local" }, nil, {}, {})
     machinedef.bind_to(env)
     machinedef.to_spec[:networks].should eql [:mgmt, :prod, :front]
   end

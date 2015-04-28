@@ -4,10 +4,10 @@ require 'stacks/machine_def'
 class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :master
 
-  def initialize(base_hostname, virtual_service, role)
+  def initialize(base_hostname, virtual_service, role, location)
     @master = (role == :master) ? true : false
     @backup = (role == :backup) ? true : false
-    location = backup? ? (:secondary_site) : (:primary_site)
+    @location = location
 
     super(base_hostname, [:mgmt, :prod], location)
     @virtual_service = virtual_service
@@ -90,7 +90,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::mysql_server'].merge!('dependencies' => @virtual_service.dependency_config,
+      enc['role::mysql_server'].merge!('dependencies' => @virtual_service.dependency_config(location),
                                        'dependant_instances' => dependant_instances)
       unless backup?
         enc.merge!(@virtual_service.dependant_instance_mysql_rights)

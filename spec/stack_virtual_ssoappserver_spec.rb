@@ -28,7 +28,7 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
   end
 
   host("e1-testapp-001.mgmt.space.net.local") do |host|
-    data = host.virtual_service.to_loadbalancer_config['e1-testapp-vip.space.net.local']
+    data = host.virtual_service.to_loadbalancer_config(:primary_site)['e1-testapp-vip.space.net.local']
     data['monitor_warn'].should eql(1)
     data['healthcheck_timeout'].should eql(10)
     data['env'].should eql('e1')
@@ -43,7 +43,7 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
   end
 
   host("e1-testapp2-001.mgmt.space.net.local") do |host|
-    data = host.virtual_service.to_loadbalancer_config['e1-testapp2-vip.space.net.local']
+    data = host.virtual_service.to_loadbalancer_config(:primary_site)['e1-testapp2-vip.space.net.local']
     data['monitor_warn'].should eql(1)
     data['healthcheck_timeout'].should eql(10)
     data['env'].should eql('e1')
