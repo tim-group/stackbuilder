@@ -472,7 +472,7 @@ namespace :sbx do
       sbtask :allocate_vips do
         vips = []
         machine_def.accept do |child_machine_def|
-          vips << child_machine_def.to_vip_spec if child_machine_def.respond_to?(:to_vip_spec)
+          vips << child_machine_def.to_vip_spec(:primary_site) if child_machine_def.respond_to?(:to_vip_spec)
         end
         if vips.empty?
           logger.info 'no vips to allocate'
