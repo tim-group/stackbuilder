@@ -8,7 +8,7 @@ module Support
   module Nagios
     class Service
       def initialize(options = {})
-        @service = options[:service] ||  Nagios::Service::Http.new(options)
+        @service = options[:service] || Nagios::Service::Http.new(options)
       end
 
       def schedule_downtime(machines, duration = 600, &block)
@@ -36,8 +36,8 @@ module Support
           'pg' => 'australia.mgmt.pg.net.local'
         }
         default_api_port = 5152
-        @nagios_servers = options[:nagios_servers]  || default_nagios_servers
-        @nagios_api_port = options[:nagios_api_port]  || default_api_port
+        @nagios_servers = options[:nagios_servers] || default_nagios_servers
+        @nagios_api_port = options[:nagios_api_port] || default_api_port
       end
 
       def http_request(url, body, initheader)

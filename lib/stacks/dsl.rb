@@ -77,7 +77,7 @@ module Stacks
             fail "Duplicate environment detected: #{node.name}\n" \
               "Please check the stacks config to ensure you dont have two environments called '#{node.name}'."
           end
-          env_names  << "#{node.name}"
+          env_names << "#{node.name}"
           return_environment = node
         end
       end

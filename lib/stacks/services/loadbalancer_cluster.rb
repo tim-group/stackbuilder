@@ -27,7 +27,7 @@ module Stacks::Services::LoadBalancerCluster
     lb_services = services.select do |node|
       node.environment == environment ||
       (
-        node.environment.parent == environment  &&
+        node.environment.parent == environment &&
         !node.environment.contains_node_of_type?(Stacks::Services::LoadBalancer)
       )
     end

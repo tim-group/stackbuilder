@@ -34,7 +34,7 @@ module Stacks::Services::VirtualBindService
     fabric = environment.options[location]
     fqdn_zones = []
     zones.map do |zone|
-      fqdn_zones  << environment.domain(fabric, zone.to_sym)
+      fqdn_zones << environment.domain(fabric, zone.to_sym)
     end
     fqdn_zones
   end
