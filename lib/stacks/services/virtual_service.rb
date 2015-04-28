@@ -29,13 +29,8 @@ module Stacks::Services::VirtualService
     'virtualservice'
   end
 
-  def realservers(location = nil)
-    case location
-    when nil
-      @definitions.values
-    else
-      @definitions.values.select { |server| server.location == location }
-    end
+  def realservers(location)
+    @definitions.values.select { |server| server.location == location }
   end
 
   def vip_fqdn(network, location)
