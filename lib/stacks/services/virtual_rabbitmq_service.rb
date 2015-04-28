@@ -18,7 +18,6 @@ module Stacks::Services::VirtualRabbitMQService
   end
 
   def to_loadbalancer_config(location)
-
     {
       vip_fqdn(:prod, location) => {
         'type' => 'rabbitmq',

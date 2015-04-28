@@ -15,7 +15,7 @@ module Stacks::Services::VirtualMailService
     end
     lb_config = {}
     vip_nets.each do |vip_net|
-      lb_config[vip_fqdn(vip_net,location)] = {
+      lb_config[vip_fqdn(vip_net, location)] = {
         'type'         => 'mail',
         'ports'        => @ports,
         'realservers'  => {
