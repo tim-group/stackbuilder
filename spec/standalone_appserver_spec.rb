@@ -16,6 +16,8 @@ describe_stack 'tim' do
     end
 
     stack 'tim' do
+      loadbalancer do
+      end
       standalone_appserver 'timcyclic' do
         self.application = 'TIM'
         self.instances = environment.options[:tim_instances] || 1
