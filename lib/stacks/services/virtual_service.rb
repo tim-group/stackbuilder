@@ -40,8 +40,7 @@ module Stacks::Services::VirtualService
     "#{environment.name}-#{name}-vip.#{domain}"
   end
 
-  ## FIXME: We should not have to specify a default location
-  def to_vip_spec(location=:primary_site)
+  def to_vip_spec(location)
     qualified_hostnames = Hash[@vip_networks.map do |network|
       [network, vip_fqdn(network, location)]
     end]
