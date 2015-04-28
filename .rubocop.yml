@@ -48,6 +48,9 @@ Style/NegatedIf:
 Style/NegatedWhile:
   Enabled: false
 
+Lint/NonLocalExitFromIterator:
+  Enabled: false
+
 Style/PerlBackrefs:
   Enabled: false
 
