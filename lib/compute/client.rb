@@ -35,8 +35,9 @@ class Compute::Client
 
   # audit_domains is not enabled by default, as it takes significant time to complete
   def audit_hosts(fabric, audit_domains = false)
+    fail "Unable to audit hosts when Fabric is nil" if fabric.nil?
     hosts = discover_compute_nodes(fabric)
-    fail "unable to find any compute nodes" if hosts.empty?
+    fail "unable to find any compute nodes in fabric #{fabric}" if hosts.empty?
 
     response = mco_client("libvirt", :nodes => hosts) do |mco|
       mco.hvinfo.map do |hv|
