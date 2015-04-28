@@ -15,6 +15,7 @@ class Compute::Allocation
   end
 
   def create_vm_to_host_map
+    ## FIXME: Rubocop - Use flat_map instead of map...flatten.
     Hash[@current_allocation.reject { |_host, vms| vms.nil? }.map do |host, vms|
       vms.map do |vm|
         [vm, host]
@@ -108,6 +109,7 @@ class Compute::Controller
 
     threads.each(&:join)
 
+    ## FIXME: Rubocop - Use flat_map instead of map...flatten.
     all_specs = allocation.map do |_host, specs|
       specs
     end.flatten

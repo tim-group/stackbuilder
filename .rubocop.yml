@@ -81,3 +81,7 @@ Style/HashSyntax:
 # in ruby1.9, proc {} is a synonym for Proc.new {}
 Style/Proc:
   Enabled: false
+
+Performance/FlatMap:
+  Enabled: false
+
