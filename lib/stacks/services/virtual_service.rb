@@ -46,7 +46,7 @@ module Stacks::Services::VirtualService
     end]
     {
       :hostname => "#{environment.name}-#{name}",
-      :fabric => @fabric,
+      :fabric => environment.options[location],
       :networks => @vip_networks,
       :qualified_hostnames => qualified_hostnames
     }
