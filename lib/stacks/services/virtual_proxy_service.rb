@@ -38,7 +38,7 @@ module Stacks::Services::VirtualProxyService
   end
 
   def to_loadbalancer_config(location)
-    grouped_realservers = realservers.group_by do |_|
+    grouped_realservers = realservers(location).group_by do |_|
       'blue'
     end
 
