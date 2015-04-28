@@ -11,7 +11,7 @@ class Stacks::Services::RabbitMQServer < Stacks::MachineDef
   def to_enc
     enc = {
       'role::rabbitmq_server' => {
-        'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns.map { |fqdn| fqdn.split('.')[0] },
+        'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns(location).map { |fqdn| fqdn.split('.')[0] },
         'vip_fqdn' => @virtual_service.vip_fqdn(:prod, @location)
       },
       'server::default_new_mgmt_net_local' => nil
