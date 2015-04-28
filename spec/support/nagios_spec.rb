@@ -50,7 +50,7 @@ describe Support::Nagios::Service do
 end
 
 describe Support::Nagios::Service::Http do
-  class NagiosServiceHttpTest  < WebTestFramework::SimpleTest
+  class NagiosServiceHttpTest < WebTestFramework::SimpleTest
     def invoke_test_server_with_fixture_and_create_service(fixture_file)
       setup_test_server_with_fixture(fixture_file)
       Support::Nagios::Service::Http.new(:nagios_servers => {
