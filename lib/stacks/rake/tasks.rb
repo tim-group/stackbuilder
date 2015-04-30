@@ -255,6 +255,16 @@ namespace :sbx do
     end
   end
 
+  desc 'run to_spec on all nodes'
+  task :dump_spec do
+    environment.environments.sort.each do |envname, env|
+      puts sprintf("=== %s ===", envname)
+      env.flatten.each do |stack|
+        puts ZAMLS.to_zamls(stack.to_spec)
+      end
+    end
+  end
+
   def get_defined_machines(environment)
     puts "parsing stackbuilder-config..."
     hostnames = []
