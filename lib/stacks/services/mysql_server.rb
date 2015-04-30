@@ -104,9 +104,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         }
       }
     }
-    if master?
-      enc.merge!(@virtual_service.dependant_children_replication_mysql_rights)
-    end
+    enc.merge!(@virtual_service.dependant_children_replication_mysql_rights(self))
     enc
   end
 end

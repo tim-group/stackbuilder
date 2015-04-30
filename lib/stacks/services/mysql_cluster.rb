@@ -80,12 +80,12 @@ module Stacks::Services::MysqlCluster
     machine_defs_to_fqdns(machine_defs).sort
   end
 
-  def dependant_children_replication_mysql_rights
+  def dependant_children_replication_mysql_rights(server)
     rights = {
       'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} }
     }
     children.each do |dependant|
-      next if dependant.master?
+      next if dependant == server
 
       rights['mysql_hacks::replication_rights_wrapper']['rights'].merge!(
         "replicant@#{dependant.prod_fqdn}" => {

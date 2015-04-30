@@ -158,7 +158,17 @@ describe_stack 'should provide correct enc data' do
     enc_rights['mydb']['database_name'].should eql('mydb')
 
     host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
+    host.to_enc.should include('mysql_hacks::replication_rights_wrapper')
+    host.to_enc.should include('server::default_new_mgmt_net_local')
+
+    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
+      'replicant@testing-mydb-001.space.net.local' => {
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+      },
+      'replicant@testing-mydbbackup-001.earth.net.local' => {
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+      }
+    )
   end
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
@@ -170,8 +180,17 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['master'].should eql(false)
     enc_server_role['server_id'].should eql(3)
 
+    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
+      'replicant@testing-mydb-001.space.net.local' => {
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+      },
+      'replicant@testing-mydb-002.space.net.local' => {
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+      }
+    )
+
     host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc.should_not include('mysql_hacks::replication_rights_wrapper')
+    host.to_enc.should include('mysql_hacks::replication_rights_wrapper')
     host.to_enc.should_not include('mysql_hacks::application_rights_wrapper')
   end
 end
