@@ -103,3 +103,9 @@ def describe_stack(name, &block)
     instance_eval(&block)
   end
 end
+
+def x_describe_stack(name, &block)
+  describe name do
+    puts "describe_stack #{name} - disabled"
+  end
+end

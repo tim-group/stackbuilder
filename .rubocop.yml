@@ -88,3 +88,7 @@ Style/Proc:
 # flat_map not present in ruby1.8
 Performance/FlatMap:
   Enabled: false
+
+# Offense count: 1
+Lint/UnusedMethodArgument:
+  Enabled: false
