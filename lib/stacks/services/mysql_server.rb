@@ -3,6 +3,7 @@ require 'stacks/machine_def'
 
 class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :master
+  attr_accessor :version
 
   def initialize(base_hostname, virtual_service, role, location)
     @master = (role == :master) ? true : false
@@ -14,6 +15,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @ram = '4194304' # 4GB
     @vcpus = '2'
     @destroyable = false
+    @version = '5.1.49-1ubuntu8'
 
     storage = {
       '/mnt/data' => {
@@ -80,7 +82,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         'environment'              => environment.name,
         'master'                   => master?,
         'server_id'                => server_id,
-        'charset'                  => @virtual_service.charset
+        'charset'                  => @virtual_service.charset,
+        'version'                  => @version
       },
       'server::default_new_mgmt_net_local' => nil
     }

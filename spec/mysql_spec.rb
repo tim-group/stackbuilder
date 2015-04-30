@@ -250,6 +250,30 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
   end
 end
 
+describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysql' do
+  given do
+    stack "mysql51" do
+      mysql_cluster "my51" do
+      end
+    end
+    stack "mysql55" do
+      mysql_cluster "my55" do
+        each_machine { |machine| machine.version = '5.5.43-0ubuntu0.12.04.1' }
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql51"
+      instantiate_stack "mysql55"
+    end
+  end
+  host("testing-my51-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::mysql_server']['version'].should eql('5.1.49-1ubuntu8')
+  end
+  host("testing-my55-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::mysql_server']['version'].should eql('5.5.43-0ubuntu0.12.04.1')
+  end
+end
+
 describe_stack 'should support dependencies' do
   given do
     stack 'fr' do
