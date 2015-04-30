@@ -248,8 +248,8 @@ namespace :sbx do
   desc 'run to_enc on all nodes'
   task :dump_enc do
     environment.environments.sort.each do |envname, env|
-      puts sprintf("=== %s ===", envname)
       env.flatten.each do |stack|
+        puts "running to_enc on #{stack.hostname}.#{stack.domain}/#{envname}:"
         puts ZAMLS.to_zamls(stack.to_enc)
       end
     end
@@ -258,8 +258,8 @@ namespace :sbx do
   desc 'run to_spec on all nodes'
   task :dump_spec do
     environment.environments.sort.each do |envname, env|
-      puts sprintf("=== %s ===", envname)
       env.flatten.each do |stack|
+        puts "running to_spec on #{stack.hostname}.#{stack.domain}/#{envname}:"
         puts ZAMLS.to_zamls(stack.to_spec)
       end
     end
