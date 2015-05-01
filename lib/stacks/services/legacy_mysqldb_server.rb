@@ -2,6 +2,9 @@ require 'stacks/namespace'
 require 'stacks/machine_def'
 
 class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
+
+  attr_accessor :version
+
   def initialize(virtual_service, index)
     @virtual_service = virtual_service
     super(virtual_service.name + "-" + index)
@@ -19,6 +22,7 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
     @ram = '4194304' # 4GB
     @vcpus = '2'
     @destroyable = false
+    @version = '5.1.49-1ubuntu8'
   end
 
   def to_enc
@@ -29,7 +33,8 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
         'database_name'            => @virtual_service.database_name,
         'restart_on_config_change' => false,
         'restart_on_install'       => true,
-        'datadir'                  => '/mnt/data/mysql'
+        'datadir'                  => '/mnt/data/mysql',
+        'version'                  => @version
       }
     }
     dependant_instances = @virtual_service.dependant_machine_def_fqdns

@@ -155,3 +155,30 @@ describe_stack 'should support dependencies' do
     host.to_enc['role::databaseserver']['dependencies'].should be_nil
   end
 end
+
+describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysql' do
+  given do
+    stack 'fr_db' do
+      legacy_mysqldb 'frdb' do
+        self.database_name = "futuresroll"
+      end
+    end
+    stack 'hr_db' do
+      legacy_mysqldb 'hrdb' do
+        self.database_name = "huturesroll"
+        each_machine { |machine| machine.version = '5.5.43-0ubuntu0.12.04.1' }
+      end
+    end
+
+    env "testing", :primary_site => "space" do
+      instantiate_stack "fr_db"
+      instantiate_stack "hr_db"
+    end
+  end
+  host("testing-frdb-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::databaseserver']['version'].should eql('5.1.49-1ubuntu8')
+  end
+  host("testing-hrdb-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::databaseserver']['version'].should eql('5.5.43-0ubuntu0.12.04.1')
+  end
+end
