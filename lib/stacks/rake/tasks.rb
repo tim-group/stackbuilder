@@ -436,13 +436,6 @@ namespace :sbx do
         get_action("launch").call(@factory.services, machine_def)
       end
 
-      sbtask :blah do
-        hosts = @factory.host_repository.find_compute_nodes("st")
-        hosts.allocated_machines(machine_def.flatten).map do |machine, host|
-          logger.info("#{machine.mgmt_fqdn} already allocated to #{host.fqdn}")
-        end
-      end
-
       desc "new hosts model auditing"
       sbtask :audit_hosts do
         hosts = @factory.host_repository.find_compute_nodes("st")
