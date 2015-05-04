@@ -1,3 +1,4 @@
+# XXX remove all but the "rake_task" requires once ruby1.8 is abandoned
 require 'rubygems'
 require 'rake'
 require 'rake/testtask'
