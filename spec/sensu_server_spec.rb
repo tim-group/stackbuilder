@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'sensu' do
   given do
     stack "sensu" do
@@ -12,8 +10,6 @@ describe_stack 'sensu' do
   end
 
   host("e1-sensu-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('role::sensu' => {
-                             'server' => true
-                           })
+    host.to_enc.should eql('role::sensu' => { 'server' => true })
   end
 end

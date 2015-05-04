@@ -1,5 +1,3 @@
-require 'compute/controller'
-
 describe Compute::Controller do
   before :each do
     @compute_node_client = double

@@ -1,5 +1,3 @@
-require 'rspec'
-
 def silence_output
   @orig_stderr = $stderr
   @orig_stdout = $stdout

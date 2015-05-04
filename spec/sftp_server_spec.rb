@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'sftp servers' do
   given do
     stack "lb" do

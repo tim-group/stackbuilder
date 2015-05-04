@@ -1,6 +1,3 @@
-require 'stacks/environment'
-require 'stacks/test_framework'
-
 describe_stack 'nat servers should have all 3 networks' do
   given do
     stack 'fabric' do

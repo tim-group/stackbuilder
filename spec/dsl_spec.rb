@@ -1,6 +1,3 @@
-require 'set'
-require 'stacks/namespace'
-
 describe Stacks::DSL do
   before do
     extend Stacks::DSL

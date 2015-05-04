@@ -1,8 +1,3 @@
-require 'set'
-require 'stacks/namespace'
-require 'stacks/environment'
-require 'matchers/server_matcher'
-
 module Stacks::TestFramework
   attr_reader :stacks
 

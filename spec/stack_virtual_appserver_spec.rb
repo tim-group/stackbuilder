@@ -1,4 +1,3 @@
-require 'stacks/test_framework'
 describe_stack 'stack.virtual_appserver.to_loadbalancer_config' do
   given do
     stack 'fr' do

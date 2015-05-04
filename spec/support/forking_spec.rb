@@ -1,5 +1,3 @@
-require 'support/forking'
-
 describe Support::Forking do
   include Support::Forking
 

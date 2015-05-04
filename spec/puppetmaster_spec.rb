@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'basic dev puppetmaster' do
   given do
     stack 'puppetmaster' do

@@ -1,4 +1,3 @@
-require 'stacks/test_framework'
 describe_stack 'load balancers in multiple sites create the correct load balancing config in each site' do
   given do
     stack "lb" do

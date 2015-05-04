@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'debrepo' do
   given do
     stack "debrepo" do

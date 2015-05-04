@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'should default to disallow destory' do
   given do
     stack "mysql" do

@@ -1,6 +1,3 @@
-require 'support/subscription'
-require 'securerandom'
-
 describe Subscription do
   RSpec::Matchers.define :have_messages_for_hosts do |expected|
     match do |actual|

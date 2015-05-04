@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'should provide a single instance mode to be backwards compatible with old mysqldb code' do
   given do
     stack "mysql" do

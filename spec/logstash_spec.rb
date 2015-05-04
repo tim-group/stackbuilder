@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'logstash' do
   given do
     stack "logstash" do

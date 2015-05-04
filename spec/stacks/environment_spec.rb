@@ -1,6 +1,3 @@
-
-require 'stacks/test_framework'
-
 describe_stack 'basic environment' do
   given do
     stack "x" do

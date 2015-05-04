@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'stack-with-dependencies' do
   given do
     stack "rabbit" do

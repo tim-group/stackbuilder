@@ -1,7 +1,3 @@
-require 'stacks/namespace'
-require 'allocator/host_repository'
-require 'allocator/ephemeral_allocator'
-
 describe StackBuilder::Allocator::EphemeralAllocator do
   before do
     extend Stacks::DSL

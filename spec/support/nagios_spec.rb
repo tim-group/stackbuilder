@@ -1,7 +1,3 @@
-$LOAD_PATH << File.join(File.dirname(__FILE__), "..")
-require 'web-test-framework'
-require 'support/nagios'
-
 describe Support::Nagios::Service do
   class MockService
     def schedule_downtime(_machine, _duration)

@@ -1,6 +1,4 @@
 # rubocop:disable Style/ClassVars
-require 'support/mcollective'
-require 'facter'
 
 describe Support::MCollective do
   before do

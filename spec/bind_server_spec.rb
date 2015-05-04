@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'nameservers with bi-directional slave_from dependencies' do
   given do
     stack "lb" do

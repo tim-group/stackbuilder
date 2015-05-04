@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'mongodb' do
   given do
     stack "mongo" do

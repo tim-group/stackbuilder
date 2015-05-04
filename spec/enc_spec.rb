@@ -1,7 +1,3 @@
-require 'set'
-require 'stacks/namespace'
-require 'matchers/server_matcher'
-
 describe Stacks::DSL do
   before do
     extend Stacks::DSL

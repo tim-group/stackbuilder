@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe 'Stacks::MachineSet' do
   describe_stack 'allows creation of secondary servers' do
     given do

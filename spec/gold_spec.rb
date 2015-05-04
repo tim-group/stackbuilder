@@ -1,4 +1,3 @@
-require 'stacks/test_framework'
 describe_stack 'gold image' do
   given do
     stack "gold-image" do

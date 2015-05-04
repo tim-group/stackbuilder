@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'exampleproxy' do
   given do
     stack "exampleproxy" do

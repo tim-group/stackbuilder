@@ -1,5 +1,3 @@
-require 'stacks/test_framework'
-
 describe_stack 'quant' do
   given do
     stack "quant" do

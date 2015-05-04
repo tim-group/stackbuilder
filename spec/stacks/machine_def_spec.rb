@@ -1,6 +1,3 @@
-require 'stacks/environment'
-require 'stacks/machine_def'
-
 describe Stacks::MachineDef do
   it 'produces x.net.local for the prod network' do
     machinedef = Stacks::MachineDef.new("test")

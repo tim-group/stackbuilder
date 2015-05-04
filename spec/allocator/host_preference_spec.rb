@@ -1,6 +1,3 @@
-require 'allocator/hosts'
-require 'allocator/host_preference'
-
 describe StackBuilder::Allocator::HostPreference do
   it 'does shit' do
     preference_function = Proc.new do |host|

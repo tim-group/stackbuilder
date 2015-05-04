@@ -1,6 +1,3 @@
-require 'puppet'
-require 'puppet/indirector/node/stacks'
-
 describe Puppet::Node::Stacks do
   before :each do
     @stacks_inventory = double('stacks_inventory')
