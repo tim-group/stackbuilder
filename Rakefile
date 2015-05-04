@@ -1,9 +1,4 @@
-require 'rubygems'
-require 'rake'
-require 'rake/testtask'
-require 'fileutils'
 require 'rspec/core/rake_task'
-require 'fpm'
 
 desc "Generate CTags"
 task :ctags do
