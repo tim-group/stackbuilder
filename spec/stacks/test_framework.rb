@@ -1,7 +1,6 @@
 require 'set'
 require 'stacks/namespace'
 require 'stacks/environment'
-require 'pp'
 require 'matchers/server_matcher'
 
 module Stacks::TestFramework

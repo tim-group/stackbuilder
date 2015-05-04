@@ -1,6 +1,5 @@
 require 'set'
 require 'stacks/namespace'
-require 'pp'
 
 describe Stacks::DSL do
   before do
