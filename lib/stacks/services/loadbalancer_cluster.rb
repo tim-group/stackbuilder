@@ -31,10 +31,14 @@ module Stacks::Services::LoadBalancerCluster
         !node.environment.contains_node_of_type?(Stacks::Services::LoadBalancer)
       )
     end
-
     lb_services.uniq.map do |node|
-      config_hash.merge! node.to_loadbalancer_config(location)
+      if location == :primary_site
+        config_hash.merge! node.to_loadbalancer_config(location)
+      else
+        config_hash.merge! node.to_loadbalancer_config(location) if node.enable_secondary_site == true
+      end
     end
+
     config_hash
   end
 

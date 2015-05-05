@@ -2,19 +2,32 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
   given do
     stack "lb" do
       loadbalancer  do
-        @enable_secondary_site = true
+        @enable_secondary_site = true if %w(e1).include? environment.name
       end
     end
 
     stack "funds" do
       virtual_appserver 'fundsapp' do
-        @enable_secondary_site = true
+        @enable_secondary_site = true if %w(e1).include? environment.name
+      end
+    end
+
+    stack 'example' do
+      virtual_appserver 'exampleapp' do
+        self.application = 'example'
       end
     end
 
     env 'e1', :primary_site => 'mars', :secondary_site => 'jupiter' do
       instantiate_stack 'lb'
       instantiate_stack 'funds'
+      instantiate_stack 'example'
+    end
+
+    env 'x1', :primary_site => 'pluto', :secondary_site => 'mercury' do
+      instantiate_stack 'lb'
+      instantiate_stack 'funds'
+      instantiate_stack 'example'
     end
   end
 
@@ -28,17 +41,38 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
         'e1-fundsapp-001.mgmt.mars.net.local',
         'e1-fundsapp-002.mgmt.mars.net.local',
         'e1-fundsapp-001.mgmt.jupiter.net.local',
-        'e1-fundsapp-002.mgmt.jupiter.net.local'
+        'e1-fundsapp-002.mgmt.jupiter.net.local',
+        'e1-exampleapp-001.mgmt.mars.net.local',
+        'e1-exampleapp-002.mgmt.mars.net.local',
+        'x1-fundsapp-001.mgmt.pluto.net.local',
+        'x1-fundsapp-002.mgmt.pluto.net.local',
+        'x1-lb-001.mgmt.pluto.net.local',
+        'x1-lb-002.mgmt.pluto.net.local',
+        'x1-exampleapp-001.mgmt.pluto.net.local',
+        'x1-exampleapp-002.mgmt.pluto.net.local'
       ]
     )
   end
   host("e1-lb-001.mgmt.mars.net.local") do |host|
-    vip = host.to_enc['role::loadbalancer']['virtual_servers']['e1-fundsapp-vip.mars.net.local']
+    virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
+    virtual_servers.keys.should include('e1-fundsapp-vip.mars.net.local')
+    virtual_servers.keys.should include('e1-exampleapp-vip.mars.net.local')
+    virtual_servers.size.should eql(2)
+    vip = virtual_servers['e1-fundsapp-vip.mars.net.local']
     vip['realservers']['blue'].should eql(['e1-fundsapp-001.mars.net.local', 'e1-fundsapp-002.mars.net.local'])
   end
   host("e1-lb-001.mgmt.jupiter.net.local") do |host|
-    vip = host.to_enc['role::loadbalancer']['virtual_servers']['e1-fundsapp-vip.jupiter.net.local']
+    virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
+    virtual_servers.keys.should include('e1-fundsapp-vip.jupiter.net.local')
+    virtual_servers.size.should eql(1)
+    vip = virtual_servers['e1-fundsapp-vip.jupiter.net.local']
     vip['realservers']['blue'].should eql(['e1-fundsapp-001.jupiter.net.local', 'e1-fundsapp-002.jupiter.net.local'])
+  end
+  host("x1-lb-001.mgmt.pluto.net.local") do |host|
+    virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
+    virtual_servers.keys.should include('x1-fundsapp-vip.pluto.net.local')
+    virtual_servers.keys.should include('x1-exampleapp-vip.pluto.net.local')
+    virtual_servers.size.should eql(2)
   end
 end
 
