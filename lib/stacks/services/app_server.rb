@@ -40,7 +40,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'cluster'             => availability_group,
       'environment'         => environment.name,
       'dependencies'        => @virtual_service.dependency_config(location),
-      'dependant_instances' => @virtual_service.dependant_machine_def_fqdns,
+      'dependant_instances' => @virtual_service.dependant_machine_def_fqdns(location),
       'port'                => '8000'
     }
 
