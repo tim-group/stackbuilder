@@ -61,6 +61,16 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
     vip = virtual_servers['e1-fundsapp-vip.mars.net.local']
     vip['realservers']['blue'].should eql(['e1-fundsapp-001.mars.net.local', 'e1-fundsapp-002.mars.net.local'])
   end
+  host("e1-fundsapp-001.mgmt.mars.net.local") do |host|
+    role = host.to_enc['role::http_app']
+    role['dependant_instances'].should include('e1-lb-001.mars.net.local', 'e1-lb-002.mars.net.local')
+    role['dependant_instances'].size.should eql(2)
+  end
+  host("e1-fundsapp-001.mgmt.jupiter.net.local") do |host|
+    role = host.to_enc['role::http_app']
+    role['dependant_instances'].should include('e1-lb-001.jupiter.net.local', 'e1-lb-002.jupiter.net.local')
+    role['dependant_instances'].size.should eql(2)
+  end
   host("e1-lb-001.mgmt.jupiter.net.local") do |host|
     virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
     virtual_servers.keys.should include('e1-fundsapp-vip.jupiter.net.local')
