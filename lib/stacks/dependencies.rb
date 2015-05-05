@@ -37,10 +37,6 @@ module Stacks::Dependencies
     machine_defs_to_fqdns(dependant_machine_defs(location), networks).sort
   end
 
-  def dependant_machine_def_with_children_fqdns(location, networks = [:prod])
-    machine_defs_to_fqdns(dependant_machine_defs(location).concat(children), networks).sort
-  end
-
   def virtual_services(environments = find_all_environments)
     virtual_services = []
     environments.each do |env|
