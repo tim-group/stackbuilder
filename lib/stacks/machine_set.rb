@@ -34,6 +34,10 @@ class Stacks::MachineSet
     @enable_secondary_site = false
   end
 
+  def secondary_site?
+    @enable_secondary_site
+  end
+
   def instantiate_machines(environment)
     @instances.times do |i|
       @definitions[random_name] = instantiate_machine(i, environment, default_networks, :primary_site)

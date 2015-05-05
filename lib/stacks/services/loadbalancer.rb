@@ -10,6 +10,10 @@ class Stacks::Services::LoadBalancer < Stacks::MachineDef
     @location = location
   end
 
+  def secondary_site?
+    @enable_secondary_site
+  end
+
   def bind_to(environment)
     super(environment)
     @virtual_router_id = environment.options[:lb_virtual_router_id] || 1
