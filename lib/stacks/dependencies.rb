@@ -15,7 +15,7 @@ module Stacks::Dependencies
         fqdns << machine_def.qualified_hostname(network)
       end
     end
-    fqdns
+    fqdns.sort
   end
 
   def dependant_load_balancer_machine_def_fqdns(networks = [:prod])

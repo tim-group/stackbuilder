@@ -248,7 +248,7 @@ namespace :sbx do
   desc 'run to_enc on all nodes'
   task :dump_enc do
     environment.environments.sort.each do |envname, env|
-      env.flatten.each do |stack|
+      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
         puts "running to_enc on #{stack.hostname}.#{stack.domain}/#{envname}:"
         puts ZAMLS.to_zamls(stack.to_enc)
       end
