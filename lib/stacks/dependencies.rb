@@ -8,11 +8,11 @@ module Stacks::Dependencies
     {} # parameters for config.properties of apps depending on this service
   end
 
-  def machine_defs_to_fqdns(machine_defs, networks = [:prod])
+  def fqdn_list(instances, networks = [:prod])
     fqdns = []
     networks.each do |network|
-      machine_defs.map do |machine_def|
-        fqdns << machine_def.qualified_hostname(network)
+      instances.map do |instance|
+        fqdns << instance.qualified_hostname(network)
       end
     end
     fqdns.sort
@@ -24,12 +24,12 @@ module Stacks::Dependencies
 
   def dependant_load_balancer_fqdns(location, networks = [:prod])
     instances = dependant_instances_of_type(Stacks::Services::LoadBalancer, location)
-    machine_defs_to_fqdns(instances, networks)
+    fqdn_list(instances, networks)
   end
 
   def dependant_app_server_fqdns(location, networks = [:prod])
     instances = dependant_instances_of_type(Stacks::Services::AppServer, location)
-    machine_defs_to_fqdns(instances, networks)
+    fqdn_list(instances, networks)
   end
 
   def dependant_instances(location)
@@ -42,7 +42,7 @@ module Stacks::Dependencies
   end
 
   def dependant_machine_def_fqdns(location, networks = [:prod])
-    machine_defs_to_fqdns(dependant_instances(location), networks).sort
+    fqdn_list(dependant_instances(location), networks).sort
   end
 
   def virtual_services(environments = find_all_environments)

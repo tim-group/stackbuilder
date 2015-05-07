@@ -42,13 +42,13 @@ module Stacks::Services::VirtualBindService
   def bind_servers_that_depend_on_me
     machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::Services::BindServer }
-    machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
+    fqdn_list(machine_defs, [:mgmt]).sort
   end
 
   def bind_servers_that_i_depend_on
     machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::Services::BindServer || !machine_def.master? }
-    machine_defs_to_fqdns(machine_defs, [:mgmt]).sort
+    fqdn_list(machine_defs, [:mgmt]).sort
   end
 
   def bind_master_servers_and_zones_that_i_depend_on(location)

@@ -36,6 +36,6 @@ module Stacks::Services::VirtualSftpService
   def config_params(dependant, _location)
     fail "#{type} is not configured to provide config_params to #{dependant.type}" \
       unless dependant.type.eql?(Stacks::Services::AppServer)
-    { 'sftp_servers' => machine_defs_to_fqdns(children, [:mgmt]) }
+    { 'sftp_servers' => fqdn_list(children, [:mgmt]) }
   end
 end

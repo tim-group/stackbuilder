@@ -77,7 +77,7 @@ module Stacks::Services::MysqlCluster
 
   def dependant_instance_prod_fqdns(location)
     instances = dependant_instances(location).concat(children)
-    machine_defs_to_fqdns(instances)
+    fqdn_list(instances)
   end
 
   def dependant_children_replication_mysql_rights(server)
