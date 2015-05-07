@@ -15,9 +15,9 @@ class Stacks::Services::SftpServer < Stacks::MachineDef
                  'vip_fqdn' => @virtual_service.vip_fqdn(:prod, location),
                  'env' => environment.name,
                  'participation_dependant_instances' =>
-                   @virtual_service.dependant_load_balancer_fqdns([:prod]),
+                   @virtual_service.dependant_load_balancer_fqdns(location, [:prod]),
                  'ssh_dependant_instances' =>
-                   @virtual_service.dependant_app_server_fqdns([:mgmt])
+                   @virtual_service.dependant_app_server_fqdns(location, [:mgmt])
                })
     enc
   end

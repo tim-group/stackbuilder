@@ -45,7 +45,7 @@ class Stacks::Services::BindServer < Stacks::MachineDef
     enc.merge!('role::bind_server' => {
                  'vip_fqdns'                         => vip_fqdns,
                  'participation_dependant_instances' =>
-                   @virtual_service.dependant_load_balancer_fqdns(@networks),
+                   @virtual_service.dependant_load_balancer_fqdns(location, @networks),
                  'dependant_instances'               => @virtual_service.all_dependencies(self),
                  'forwarder_zones'                   => @virtual_service.forwarder_zones
                },
