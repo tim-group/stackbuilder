@@ -23,12 +23,19 @@ require 'thread'
 @@factory = @factory = Stacks::Factory.new
 # rubocop:enable Style/ClassVars
 
+def logger
+  @@factory.logger
+end
+
 include Rake::DSL
 include Support::MCollective
 extend Stacks::Core::Actions
 
 environment_name = ENV.fetch('env', 'dev')
-environment = @factory.inventory.find_environment(environment_name)
+if (environment = @factory.inventory.find_environment(environment_name)).nil?
+  logger.error "environment \"#{environment_name}\" does not exist"
+  exit 1
+end
 
 RSpec::Core::Runner.disable_autorun!
 config = RSpec.configuration
@@ -72,10 +79,6 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 #   ie provision dependson [launch, mping, puppet, test]
 #      clean     dependson [destroy_vms, clean_certs]
 #
-
-def logger
-  @@factory.logger
-end
 
 def sbtask(name, &block)
   task name do |task|
