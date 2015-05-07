@@ -1,11 +1,6 @@
 describe Stacks::DSL do
   before do
     extend Stacks::DSL
-    class Resolv::DNS
-      def getaddress(_url)
-        '1.1.1.1'
-      end
-    end
   end
 
   it 'can pass in virtual_router_id for the loadbalancers and nat boxes to the stack instantiation' do
