@@ -18,10 +18,6 @@ module Stacks::Dependencies
     fqdns.sort
   end
 
-  def dependant_instances_of_type(type, location)
-    dependant_instances(location).reject { |machine_def| machine_def.class != type }
-  end
-
   def dependant_load_balancer_fqdns(location, networks = [:prod])
     instances = dependant_instances_of_type(Stacks::Services::LoadBalancer, location)
     fqdn_list(instances, networks)
@@ -32,6 +28,14 @@ module Stacks::Dependencies
     fqdn_list(instances, networks)
   end
 
+  def dependant_instance_fqdns(location, networks = [:prod])
+    fqdn_list(dependant_instances(location), networks).sort
+  end
+
+  def dependant_instances_of_type(type, location)
+    dependant_instances(location).reject { |machine_def| machine_def.class != type }
+  end
+
   def dependant_instances(location)
     nodes = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     nodes.reject! { |node| node.location != location }
@@ -39,10 +43,6 @@ module Stacks::Dependencies
       nodes.reject! { |node| node.secondary_site? == false }
     end
     nodes
-  end
-
-  def dependant_machine_def_fqdns(location, networks = [:prod])
-    fqdn_list(dependant_instances(location), networks).sort
   end
 
   def virtual_services(environments = find_all_environments)
