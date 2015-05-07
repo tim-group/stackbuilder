@@ -33,7 +33,7 @@ module Stacks::Dependencies
     machine_defs_to_fqdns(instances, networks)
   end
 
-  def dependant_machine_defs(location)
+  def dependant_instances(location)
     nodes = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     nodes.reject! { |node| node.location != location }
     if location == :secondary_site
@@ -43,7 +43,7 @@ module Stacks::Dependencies
   end
 
   def dependant_machine_def_fqdns(location, networks = [:prod])
-    machine_defs_to_fqdns(dependant_machine_defs(location), networks).sort
+    machine_defs_to_fqdns(dependant_instances(location), networks).sort
   end
 
   def virtual_services(environments = find_all_environments)
