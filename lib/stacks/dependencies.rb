@@ -53,7 +53,7 @@ module Stacks::Dependencies
   def virtual_services_that_depend_on_me
     # the constant part (cache)
     # do not cache if running from inside rspec, as virtual_services change there and it causes tests to fail
-    if !defined?(@@eligible_virtual_services_cache) || ENV['INSIDE_RSPEC']
+    if !defined?(@@eligible_virtual_services_cache) || ENV['INSIDE_RSPEC'] == 'true'
       @@eligible_virtual_services_cache = []
       virtual_services.each do |virtual_service|
         next if !virtual_service.is_a?(Stacks::MachineDefContainer)
