@@ -1,3 +1,10 @@
+begin
+  require 'simplecov'
+  SimpleCov.start
+rescue Gem::LoadError
+  puts "simplecov not installed, not generating coverage reports"
+end
+
 # global requires, pulled in before any test has run
 require 'allocator/ephemeral_allocator'
 require 'allocator/host'
