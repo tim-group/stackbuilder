@@ -75,11 +75,6 @@ module Stacks::Services::MysqlCluster
     [masters.first.prod_fqdn]
   end
 
-  def dependant_instance_prod_fqdns(location)
-    instances = dependant_instances(location).concat(children)
-    fqdn_list(instances)
-  end
-
   def dependant_children_replication_mysql_rights(server)
     rights = {
       'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} }
