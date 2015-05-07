@@ -1,8 +1,10 @@
-begin
-  require 'simplecov'
-  SimpleCov.start
-rescue Gem::LoadError
-  puts "simplecov not installed, not generating coverage reports"
+if RUBY_VERSION[0, 3] != '1.8' # XXX remove once ruby1.8 is abandoned
+  begin
+    require 'simplecov'
+    SimpleCov.start
+  rescue Gem::LoadError
+    puts "simplecov not installed, not generating coverage reports"
+  end
 end
 
 # global requires, pulled in before any test has run
