@@ -18,10 +18,19 @@ module Stacks::Dependencies
     fqdns.sort
   end
 
-  def dependant_load_balancer_machine_def_fqdns(networks = [:prod])
-    virtual_service_children = get_children_for_virtual_services(virtual_services_that_depend_on_me)
-    virtual_service_children.reject! { |machine_def| machine_def.class != Stacks::Services::LoadBalancer }
-    machine_defs_to_fqdns(virtual_service_children, networks).sort
+  def dependant_instances_of_type(type)
+    instances = get_children_for_virtual_services(virtual_services_that_depend_on_me)
+    instances.reject { |machine_def| machine_def.class != type }
+  end
+
+  def dependant_load_balancer_fqdns(networks = [:prod])
+    instances = dependant_instances_of_type(Stacks::Services::LoadBalancer)
+    machine_defs_to_fqdns(instances, networks)
+  end
+
+  def dependant_app_server_fqdns(networks = [:prod])
+    instances = dependant_instances_of_type(Stacks::Services::AppServer)
+    machine_defs_to_fqdns(instances, networks)
   end
 
   def dependant_machine_defs(location)
