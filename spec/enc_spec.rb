@@ -204,7 +204,8 @@ describe Stacks::DSL do
                                'environment' => 'ci',
                                'port'        => '8000',
                                'dependencies' => {},
-                               'dependant_instances' => []
+                               'application_dependant_instances' => [],
+                               'participation_dependant_instances' => []
                              })
   end
 
@@ -227,7 +228,8 @@ describe Stacks::DSL do
                                'environment' => 'ci',
                                'port'        => '8000',
                                'dependencies' => {},
-                               'dependant_instances' => []
+                               'application_dependant_instances' => [],
+                               'participation_dependant_instances' => []
                              })
   end
 

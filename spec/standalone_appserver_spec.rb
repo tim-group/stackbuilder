@@ -45,7 +45,7 @@ describe_stack 'tim' do
     enc['role::http_app']['port'].should eql('8000')
     enc['role::http_app']['dependencies']['timflow.url'].should eql('http://e1-timflowapp-vip.space.net.local:8000')
     enc['role::http_app']['dependencies'].key?('sftp_servers').should eql(false)
-    enc['role::http_app']['dependant_instances'].should eql([])
+    enc['role::http_app']['application_dependant_instances'].should eql([])
     enc['idea_positions_exports::appserver']['sftp_servers'].should include(
       'e1-sftp-001.mgmt.space.net.local',
       'e1-sftp-002.mgmt.space.net.local'

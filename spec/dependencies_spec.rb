@@ -61,7 +61,7 @@ describe_stack 'stack-with-dependencies' do
   end
 
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["dependant_instances"].should eql([
+    host.to_enc["role::http_app"]["application_dependant_instances"].should eql([
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
@@ -73,7 +73,7 @@ describe_stack 'stack-with-dependencies' do
     deps['example.url'].should eql('http://e1-exampleapp-vip.space.net.local:8000')
   end
   host("e1-exampleapp-002.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["dependant_instances"].should eql([
+    host.to_enc["role::http_app"]["application_dependant_instances"].should eql([
       "e1-exampleapp2-001.space.net.local",
       "e1-exampleapp2-002.space.net.local",
       "e1-exampleproxy-001.space.net.local",
@@ -162,13 +162,13 @@ describe_stack 'stack with cross environment dependencies' do
   end
 
   host("e2-noconfigapp-001.mgmt.earth.net.local") do |host|
-    host.to_enc['role::http_app']['dependant_instances'].should eql([
+    host.to_enc['role::http_app']['application_dependant_instances'].should eql([
       'e1-noconfigapp-001.space.net.local',
       'e1-noconfigapp-002.space.net.local'
     ])
   end
   host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app']['dependant_instances'].should eql([
+    host.to_enc['role::http_app']['application_dependant_instances'].should eql([
       'e2-noconfigapp-001.earth.net.local',
       'e2-noconfigapp-002.earth.net.local'
     ])
@@ -225,7 +225,7 @@ describe_stack 'stack with sub environment dependencies' do
     end
   end
   host("mirror-blondinapp-001.mgmt.oy.net.local") do |host|
-    host.to_enc['role::http_app']['dependant_instances'].should include(
+    host.to_enc['role::http_app']['application_dependant_instances'].should include(
       'shared-fundsproxy-001.oy.net.local',
       'shared-fundsproxy-002.oy.net.local')
   end

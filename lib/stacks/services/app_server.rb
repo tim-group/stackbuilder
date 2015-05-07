@@ -39,13 +39,14 @@ class Stacks::Services::AppServer < Stacks::MachineDef
   def to_enc
     enc = super
     enc['role::http_app'] = {
-      'application'         => @virtual_service.application,
-      'group'               => group,
-      'cluster'             => availability_group,
-      'environment'         => environment.name,
-      'dependencies'        => @virtual_service.dependency_config(location),
-      'dependant_instances' => @virtual_service.dependant_instance_fqdns(location),
-      'port'                => '8000'
+      'application'                       => @virtual_service.application,
+      'group'                             => group,
+      'cluster'                           => availability_group,
+      'environment'                       => environment.name,
+      'dependencies'                      => @virtual_service.dependency_config(location),
+      'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location),
+      'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
+      'port'                              => '8000'
     }
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
