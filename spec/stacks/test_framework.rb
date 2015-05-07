@@ -98,7 +98,7 @@ def describe_stack(name, &block)
   end
 end
 
-def x_describe_stack(name, &block)
+def x_describe_stack(name, &_block)
   describe name do
     puts "describe_stack #{name} - disabled"
   end
