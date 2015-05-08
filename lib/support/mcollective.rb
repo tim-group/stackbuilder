@@ -5,7 +5,6 @@ require 'mcollective'
 require 'mcollective/pluginmanager'
 require 'puppetroll'
 require 'puppetroll/client'
-require 'facter'
 
 module Support
   module MCollective
@@ -26,6 +25,7 @@ module Support
         @rpc = MCollectiveRPC.new
         @options = options
         @mco_options = ::MCollective::Util.default_options
+        # XXX 08.05.2015 mmazurek -- facter is no more, what to do about the line below now?
         @mco_options[:disctimeout] = 5 # Facter can take aaages to respond
         @mco_options[:timeout] = options[:timeout] if options.key?(:timeout)
       end
@@ -39,8 +39,8 @@ module Support
       def apply_fabric_filter(mco, fabric)
         if fabric == "local"
           ENV['FACTERLIB'] = "/var/lib/puppet/lib/facter:/var/lib/puppet/facts"
-          if (Facter.value('owner') != "")
-            mco.fact_filter "owner", Facter.value('owner')
+          if (OwnerFact.owner_fact != "")
+            mco.fact_filter "owner", OwnerFact.owner_fact
           end
         else
           mco.fact_filter "domain", "mgmt.#{fabric}.net.local"
