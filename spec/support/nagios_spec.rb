@@ -1,3 +1,9 @@
+# This test is slow because of how webrick is written. To speed it up edit
+# /usr/lib/ruby/1.9.1/webrick/server.rb and apply this diff:
+#            begin
+# -            if svrs = IO.select(@listeners, nil, nil, 2.0)
+# +            if svrs = IO.select(@listeners, nil, nil, 0.01)
+#                svrs[0].each{|svr|
 describe Support::Nagios::Service do
   class MockService
     def schedule_downtime(_machine, _duration)
