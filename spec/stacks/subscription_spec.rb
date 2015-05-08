@@ -35,7 +35,8 @@ describe Subscription do
       subscription.stomp.publish("/topic/#{topic}", { "host" => "a" }.to_json)
     end
 
-    events = subscription.wait_for_hosts(topic, %w(a b))
+    # 08.05.2015 mmazurek: 0.01 might be to slow, bump if causing specs to fail, remove comment if fine after a while
+    events = subscription.wait_for_hosts(topic, %w(a b), 0.01)
     events.responses.should have_messages_for_hosts(["a"])
   end
 
@@ -59,7 +60,8 @@ describe Subscription do
   it 'correctly shows: successful, failed and unknowns' do
     topic = random_topic
 
-    subscription = Subscription.new(:pop_timeout => 1)
+    # 08.05.2015 mmazurek: 0.05 might be to slow, bump if causing specs to fail, remove comment if fine after a while
+    subscription = Subscription.new(:pop_timeout => 0.05)
     subscription.start([topic]) # XXX flicker, see http://jenkins.youdevise.com/job/stackbuilder/1030/console
 
     threads = []
@@ -68,7 +70,8 @@ describe Subscription do
       subscription.stomp.publish("/topic/#{topic}", { "host" => "b", "status" => "failed" }.to_json)
     end
 
-    result = subscription.wait_for_hosts(topic, %w(a b c))
+    # 08.05.2015 mmazurek: 0.1 might be to slow, bump if causing specs to fail, remove comment if fine after a while
+    result = subscription.wait_for_hosts(topic, %w(a b c), 0.1)
 
     result.passed.should eql(["a"]) # XXX flicker
     result.failed.should eql(["b"])
