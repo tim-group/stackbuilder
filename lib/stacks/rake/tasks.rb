@@ -745,12 +745,14 @@ namespace :sbx do
         sbtask :resolve do
           machine_def.accept do |child_machine_def|
             if child_machine_def.respond_to? :virtual_service
-              factory = Orc::Factory.new(
-                :application => child_machine_def.virtual_service.application,
-                :environment => child_machine_def.environment.name
-              )
-              factory.cmdb_git.update
-              factory.engine.resolve
+              if defined? child_machine_def.virtual_service.application
+                factory = Orc::Factory.new(
+                  :application => child_machine_def.virtual_service.application,
+                  :environment => child_machine_def.environment.name
+                )
+                factory.cmdb_git.update
+                factory.engine.resolve
+              end
             end
           end
         end
