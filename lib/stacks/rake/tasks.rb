@@ -744,11 +744,10 @@ namespace :sbx do
         desc "deploys the up2date version of the artifact according to the cmdb using orc"
         sbtask :resolve do
           machine_def.accept do |child_machine_def|
-            if child_machine_def.is_a? Stacks::Services::AppService
-              app_service = child_machine_def
+            if child_machine_def.respond_to? :virtual_service
               factory = Orc::Factory.new(
-                :application => app_service.application,
-                :environment => app_service.environment.name
+                :application => child_machine_def.virtual_service.application,
+                :environment => child_machine_def.environment.name
               )
               factory.cmdb_git.update
               factory.engine.resolve
