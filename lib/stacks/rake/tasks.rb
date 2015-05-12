@@ -422,10 +422,19 @@ namespace :sbx do
         end
       end
 
-      # Orc resolve should only be available on stacks (containers) that have app servers
+      # make orc resolve available on stacks (containers) that have app servers, and individual app servers
       namespace :orc do
-        # Orc cannot be run against a single server
-        if !machine_def.is_a? Stacks::Services::AppServer
+        if machine_def.is_a? Stacks::Services::AppServer
+          desc "orc resolve #{machine_def.virtual_service.application}"
+          sbtask :resolve do
+            factory = Orc::Factory.new(
+              :application => machine_def.virtual_service.application,
+              :environment => machine_def.environment.name
+            )
+            factory.cmdb_git.update
+            factory.engine.resolve
+          end
+        else
           applications = Set.new
           machine_def.accept do |child_machine_def|
             next unless child_machine_def.is_a? Stacks::Services::AppServer
