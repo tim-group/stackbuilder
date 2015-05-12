@@ -744,16 +744,15 @@ namespace :sbx do
         desc "deploys the up2date version of the artifact according to the cmdb using orc"
         sbtask :resolve do
           machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to? :virtual_service
-              if defined? child_machine_def.virtual_service.application
-                factory = Orc::Factory.new(
-                  :application => child_machine_def.virtual_service.application,
-                  :environment => child_machine_def.environment.name
-                )
-                factory.cmdb_git.update
-                factory.engine.resolve
-              end
-            end
+            next if !child_machine_def.respond_to? :virtual_service
+            next if !defined? child_machine_def.virtual_service.application
+            next if child_machine_def.virtual_service.application.class != String # XXX it's a bool for legacy_mysql
+            factory = Orc::Factory.new(
+              :application => child_machine_def.virtual_service.application,
+              :environment => child_machine_def.environment.name
+            )
+            factory.cmdb_git.update
+            factory.engine.resolve
           end
         end
       end
