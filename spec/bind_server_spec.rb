@@ -8,13 +8,11 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       virtual_bindserver 'ns' do
         enable_nat
         forwarder_zone(['youdevise.com'])
-        each_machine do |machine|
-          case environment.name
-          when 'pg'
-            machine.slave_from 'oy'
-          when 'oy'
-            machine.slave_from 'pg'
-          end
+        case environment.name
+        when 'pg'
+          depend_on 'ns', 'oy'
+        when 'oy'
+          depend_on 'ns', 'pg'
         end
       end
     end
@@ -167,11 +165,9 @@ describe_stack 'nameservers with single slave_from dependency' do
       virtual_bindserver 'ns' do
         enable_nat
         forwarder_zone(['youdevise.com'])
-        each_machine do |machine|
-          case environment.name
-          when 'pg'
-            machine.slave_from 'oy'
-          end
+        case environment.name
+        when 'pg'
+          depend_on 'ns', 'oy'
         end
       end
     end

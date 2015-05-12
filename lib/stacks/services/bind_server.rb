@@ -26,10 +26,6 @@ class Stacks::Services::BindServer < Stacks::MachineDef
     super(environment)
   end
 
-  def slave_from(env)
-    @virtual_service.depend_on('ns', env)
-  end
-
   def to_enc
     dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on(location)
 
