@@ -8,7 +8,7 @@ class Stacks::Services::ProxyVHost
   attr_reader :type
   attr_reader :environment
 
-  def initialize(virtual_proxy_service, fqdn, service, environment, type = 'default', &block)
+  def initialize(virtual_proxy_service, fqdn, service, environment, location, type = 'default', &block)
     @aliases = []
     @add_default_aliases = true
     @cert = 'wildcard_timgroup_com'
@@ -20,7 +20,7 @@ class Stacks::Services::ProxyVHost
     @fqdn = fqdn
     @environment = environment
     @virtual_proxy_service = virtual_proxy_service
-
+    @location = location
     instance_eval(&block) if block
   end
 

@@ -328,3 +328,119 @@ describe_stack 'generates proxy server enc data with persistent when enable_pers
     vserver_enc['persistent_ports'].should eql(['443'])
   end
 end
+
+describe_stack 'generates the correct proxy_pass rules when using override_vhost_location' do
+  given do
+    stack "test" do
+      loadbalancer do
+        @enable_secondary_site = true if %w(production).include? environment.name
+      end
+    end
+
+    stack 'foo' do
+      virtual_appserver 'blondinapp' do
+        self.groups = ['blue']
+        self.application = 'Blondin'
+        depend_on 'foouserapp'
+        @one_instance_in_lb = true
+        @enable_secondary_site = true if %w(production).include? environment.name
+      end
+      virtual_appserver 'foouserapp' do
+        self.groups = ['blue']
+        self.application = 'tfoo'
+        self.ports = [8443]
+        enable_ajp('8009')
+        enable_sso('8443')
+        enable_tomcat_session_replication
+        @enable_secondary_site = true if %w(production).include? environment.name
+      end
+    end
+    stack 'foo_proxy' do
+      virtual_proxyserver 'fooproxy' do
+        @cert = 'wildcard_youdevise_com'
+        @enable_secondary_site = true if %w(production).include? environment.name
+        @override_vhost_location = { 'production' => :secondary_site } if environment.name == 'shared'
+        vhost('foouserapp', 'foo-old.com', 'production') do
+          @add_default_aliases = false
+          @cert = 'wildcard_youdevise_com'
+          case environment
+          when 'shared'
+            add_properties 'is_hip' => true
+            add_pass_rule '/HIP/resources', :service => 'blondinapp'
+          end
+        end
+        vhost('foouserapp', 'foo.fooexample.com', 'production') do
+          @cert = 'wildcard_fooexample.com'
+          add_properties 'is_hip' => true
+          add_pass_rule '/HIP/resources', :service => 'blondinapp'
+        end
+        case environment.name
+        when 'shared'
+          vhost('foouserapp', 'foo-mirror.fooexample.com', 'mirror') do
+            @cert = 'wildcard_fooexample.com'
+            add_properties 'is_hip' => true
+            add_pass_rule '/HIP/resources', :service => 'blondinapp'
+          end
+          vhost('foouserapp', 'foo-latest.fooexample.com', 'latest') do
+            @cert = 'wildcard_fooexample.com'
+            add_properties 'is_hip' => true
+            add_pass_rule '/HIP/resources', :service => 'blondinapp'
+          end
+        end
+      end
+    end
+
+    env "production", :primary_site => "pg", :secondary_site => "oy" do
+      instantiate_stack "foo_proxy"
+      instantiate_stack "test"
+      instantiate_stack "foo"
+    end
+
+    env "shared", :primary_site => "oy" do
+      instantiate_stack "foo_proxy"
+
+      env "latest", :primary_site => "oy"do
+        instantiate_stack "test"
+        instantiate_stack "foo"
+      end
+
+      env "mirror", :primary_site => "oy" do
+        instantiate_stack "test"
+        instantiate_stack "foo"
+      end
+    end
+  end
+
+  host("shared-fooproxy-001.mgmt.oy.net.local") do |proxy|
+    vhosts = proxy.to_enc['role::proxyserver']['vhosts']
+    vhosts.size.should eql(4)
+    vhosts['foo-old.com']['proxy_pass_rules']['/'].should eql(
+      'http://production-foouserapp-vip.oy.net.local:8000'
+    )
+    vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+      'http://production-blondinapp-vip.oy.net.local:8000'
+    )
+    vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/'].should eql(
+      'http://mirror-foouserapp-vip.oy.net.local:8000'
+    )
+    vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+      'http://mirror-blondinapp-vip.oy.net.local:8000'
+    )
+    vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/'].should eql(
+      'http://latest-foouserapp-vip.oy.net.local:8000'
+    )
+    vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+      'http://latest-blondinapp-vip.oy.net.local:8000'
+    )
+  end
+  host("production-fooproxy-001.mgmt.pg.net.local") do |proxy|
+    vhosts = proxy.to_enc['role::proxyserver']['vhosts']
+    vhosts.size.should eql(2)
+    vhosts['foo-old.com']['proxy_pass_rules']['/'].should eql(
+      'http://production-foouserapp-vip.pg.net.local:8000'
+    )
+    vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+      'http://production-blondinapp-vip.pg.net.local:8000'
+    )
+  end
+end
