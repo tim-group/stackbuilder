@@ -422,8 +422,9 @@ namespace :sbx do
         end
       end
 
-      # task available only on app server clusters
+      # Orc resolve should only be available on stacks (containers) that have app servers
       namespace :orc do
+        # Orc cannot be run against a single server so it makes no sense to allow orc::resolve to exist at a server level.
         if !machine_def.is_a? Stacks::Services::AppServer
           applications = Set.new
           machine_def.accept do |child_machine_def|
