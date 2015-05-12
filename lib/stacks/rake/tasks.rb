@@ -423,8 +423,10 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait',
-                          'orc:resolve', 'cancel_downtime']
+      task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait'] do
+        Rake.application['orc:resolve'].invoke if Rake::Task.task_defined?('orc:resolve') # doesnt exist for all targets
+        Rake.application['cancel_downtime'].invoke
+      end
 
       desc "perform a clean followed by a provision"
       task :reprovision => %w(clean provision)
@@ -740,19 +742,26 @@ namespace :sbx do
           end
         end
       end
+
       namespace :orc do
-        desc "deploys the up2date version of the artifact according to the cmdb using orc"
-        sbtask :resolve do
+        if !machine_def.is_a? Stacks::Services::AppServer
+          applications = Set.new
           machine_def.accept do |child_machine_def|
-            next if !child_machine_def.respond_to? :virtual_service
-            next if !defined? child_machine_def.virtual_service.application
-            next if child_machine_def.virtual_service.application.class != String # XXX it's a bool for legacy_mysql
-            factory = Orc::Factory.new(
-              :application => child_machine_def.virtual_service.application,
-              :environment => child_machine_def.environment.name
-            )
-            factory.cmdb_git.update
-            factory.engine.resolve
+            next unless child_machine_def.is_a? Stacks::Services::AppServer
+            applications << child_machine_def.virtual_service.application
+          end
+          if applications.to_a.size > 0
+            desc "orc resolve #{applications.to_a.join(', ')}"
+            sbtask :resolve do
+              applications.to_a.each do |application|
+                factory = Orc::Factory.new(
+                  :application => application,
+                  :environment => machine_def.environment.name
+                )
+                factory.cmdb_git.update
+                factory.engine.resolve
+              end
+            end
           end
         end
       end
