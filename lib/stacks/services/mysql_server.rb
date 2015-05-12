@@ -97,7 +97,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       enc['role::mysql_server'].merge!('dependencies' => @virtual_service.dependency_config(location),
                                        'dependant_instances' => dependant_instances)
       unless backup?
-        enc.merge!(@virtual_service.dependant_instance_mysql_rights)
+        enc.merge!(@virtual_service.dependant_instance_mysql_rights(location))
       end
     end
     enc['role::mysql_multiple_rights'] = {

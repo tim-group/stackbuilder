@@ -37,7 +37,7 @@ module Stacks::Dependencies
   end
 
   def dependant_instances(location)
-    nodes = get_children_for_virtual_services(virtual_services_that_depend_on_me)
+    nodes = get_children_for_virtual_services(virtual_services_that_depend_on_me(location))
     nodes.reject! { |node| node.location != location }
     if location == :secondary_site
       nodes.reject! { |node| node.secondary_site? == false }
@@ -58,7 +58,7 @@ module Stacks::Dependencies
   # the @@eligible_virtual_services_cache variable is used for caching a semi-processed list.
   # this reduces runs of sbx:dump_enc from 4-5 minutes to under 4 seconds (as of 24.04.2015)
   # rubocop:disable Style/ClassVars
-  def virtual_services_that_depend_on_me
+  def virtual_services_that_depend_on_me(location)
     # the constant part (cache)
     # do not cache if running from inside rspec, as virtual_services change there and it causes tests to fail
     if !defined?(@@eligible_virtual_services_cache) || ENV['INSIDE_RSPEC'] == 'true'
@@ -67,14 +67,14 @@ module Stacks::Dependencies
         next if !virtual_service.is_a?(Stacks::MachineDefContainer)
         next if !virtual_service.respond_to?(:depends_on)
 
-        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
+        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on(location)]
       end
     end
 
     # the variable part
     virtual_services_that_depend_on_me = []
     @@eligible_virtual_services_cache.each do |virtual_service, depends_on|
-      next if !depends_on.include?([name, environment.name])
+      next if !depends_on.include?([name, environment.name, location])
 
       virtual_services_that_depend_on_me.push virtual_service
     end
@@ -90,10 +90,14 @@ module Stacks::Dependencies
     children.flatten
   end
 
-  def virtual_services_that_i_depend_on(environments = find_all_environments)
-    depends_on.map do |dependency|
+  def virtual_services_that_i_depend_on(location, environments = find_all_environments)
+    depends_on(location).map do |dependency|
       find_virtual_service_that_i_depend_on(dependency, environments)
     end
+  end
+
+  def depends_on(_location)
+    @depends_on
   end
 
   private

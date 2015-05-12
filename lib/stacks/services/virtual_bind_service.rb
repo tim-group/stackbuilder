@@ -39,21 +39,21 @@ module Stacks::Services::VirtualBindService
     fqdn_zones
   end
 
-  def bind_servers_that_depend_on_me
-    machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me)
+  def bind_servers_that_depend_on_me(location)
+    machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me(location))
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::Services::BindServer }
     fqdn_list(machine_defs, [:mgmt]).sort
   end
 
-  def bind_servers_that_i_depend_on
-    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
+  def bind_servers_that_i_depend_on(location)
+    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on(location))
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::Services::BindServer || !machine_def.master? }
     fqdn_list(machine_defs, [:mgmt]).sort
   end
 
   def bind_master_servers_and_zones_that_i_depend_on(location)
     zones = nil
-    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
+    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on(location))
     machine_defs.each do |machine_def|
       if machine_def.is_a?(Stacks::Services::BindServer) && machine_def.master?
         zones = {} if zones.nil?
@@ -65,12 +65,13 @@ module Stacks::Services::VirtualBindService
 
   def all_dependencies(machine_def)
     all_deps = Set.new
+    location = machine_def.location
     # the directly related dependant instances (ie the master if you're a slave or the slaves if you're a master)
     all_deps.merge(cluster_dependant_instances(machine_def))
     # indirectly related dependant instances (ie. things that say they depend on this service)
-    indirect_deps = bind_servers_that_depend_on_me if machine_def.master?
+    indirect_deps = bind_servers_that_depend_on_me(location) if machine_def.master?
     all_deps.merge(indirect_deps) unless indirect_deps.nil?
-    all_deps.merge(bind_servers_that_i_depend_on) unless bind_servers_that_i_depend_on.nil?
+    all_deps.merge(bind_servers_that_i_depend_on(location))
     all_deps.to_a
   end
 

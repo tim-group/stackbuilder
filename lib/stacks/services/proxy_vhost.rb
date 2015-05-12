@@ -30,12 +30,9 @@ class Stacks::Services::ProxyVHost
   end
 
   def add_pass_rule(path, config_hash)
+    config_hash[:location] = :primary_site if config_hash[:location].nil?
     @proxy_pass_rules[path] = config_hash
-    if config_hash.key? :environment
-      @virtual_proxy_service.depend_on config_hash[:service], config_hash[:environment]
-    else
-      @virtual_proxy_service.depend_on config_hash[:service], @environment
-    end
+    @virtual_proxy_service.depend_on config_hash[:service], config_hash[:environment], config_hash[:location]
   end
 
   def add_properties(properties)
@@ -62,11 +59,14 @@ class Stacks::Services::ProxyVHost
   end
 
   def proxy_pass_rules(location)
+    vhost_location = @virtual_proxy_service.override_vhost_location[@environment]
+    vhost_location = location if vhost_location.nil?
+
     Hash[@proxy_pass_rules.map do |path, config_hash|
       service_environment = environment
       service_environment = config_hash[:environment] if config_hash.key?(:environment)
       service = @virtual_proxy_service.find_virtual_service(config_hash[:service], service_environment)
-      [path, "http://#{service.vip_fqdn(:prod, location)}:8000"]
+      [path, "http://#{service.vip_fqdn(:prod, vhost_location)}:8000"]
     end]
   end
 

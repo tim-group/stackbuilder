@@ -47,15 +47,15 @@ class Stacks::MachineSet
     end
   end
 
-  def depend_on(dependant, env = environment.name)
+  def depend_on(dependant, env = environment.name, location = :primary_site)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
-    @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
+    @depends_on << [dependant, env, location] unless @depends_on.include? [dependant, env, location]
   end
 
   def dependency_config(location)
     config = {}
     if @auto_configure_dependencies
-      virtual_services_that_i_depend_on.each do |dependency|
+      virtual_services_that_i_depend_on(location).each do |dependency|
         config.merge! dependency.config_params(self, location)
       end
     end
