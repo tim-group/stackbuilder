@@ -75,6 +75,13 @@ module Stacks::Services::MysqlCluster
     [masters.first.prod_fqdn]
   end
 
+  def secondary_servers
+    (children.select { |mysq_server| !mysq_server.master? }).inject([]) { |slaves, server|
+        slaves << server.prod_fqdn
+        slaves
+    }
+  end
+
   def dependant_children_replication_mysql_rights(server)
     rights = {
       'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} }
@@ -111,7 +118,8 @@ module Stacks::Services::MysqlCluster
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => dependant.application,
       "db.#{@database_name}.password_hiera_key" =>
-        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
+        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
+      "db.#{@database_name}.secondary_hostnames" => secondary_servers.join(",")
     }
   end
 end
