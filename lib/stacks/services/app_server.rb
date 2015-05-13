@@ -32,10 +32,6 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     @virtual_service.dependency_config(location).reject! { |key, _value| key == 'sftp_servers' }
   end
 
-  def secondary_site?
-    @enable_secondary_site
-  end
-
   def to_enc
     enc = super
     enc['role::http_app'] = {

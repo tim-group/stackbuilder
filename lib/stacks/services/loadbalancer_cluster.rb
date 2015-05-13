@@ -35,7 +35,9 @@ module Stacks::Services::LoadBalancerCluster
       if location == :primary_site
         config_hash.merge! node.to_loadbalancer_config(location)
       else
-        config_hash.merge! node.to_loadbalancer_config(location) if node.enable_secondary_site == true
+        if node.respond_to?(:secondary_site?)
+          config_hash.merge! node.to_loadbalancer_config(location) if node.secondary_site?
+        end
       end
     end
 

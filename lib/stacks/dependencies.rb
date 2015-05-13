@@ -40,7 +40,7 @@ module Stacks::Dependencies
     nodes = get_children_for_virtual_services(virtual_services_that_depend_on_me(location))
     nodes.reject! { |node| node.location != location }
     if location == :secondary_site
-      nodes.reject! { |node| node.secondary_site? == false }
+      nodes.reject! { |node| node.virtual_service.secondary_site? == false }
     end
     nodes
   end
