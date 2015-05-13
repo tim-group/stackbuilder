@@ -76,7 +76,7 @@ module Stacks::Services::MysqlCluster
   end
 
   def secondary_servers
-    (children.select { |mysq_server| !mysq_server.master? }).inject([]) { |slaves, server|
+    (children.select { |mysq_server| !mysq_server.master? && !mysq_server.backup? }).inject([]) { |slaves, server|
         slaves << server.prod_fqdn
         slaves
     }
