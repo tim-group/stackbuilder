@@ -18,7 +18,7 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
-    env "e1", :primary_site => "space", :secondary_site=> "earth" do
+    env "e1", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "example"
       instantiate_stack "example_db"
       instantiate_stack "loadbalancer"
@@ -35,7 +35,8 @@ describe_stack 'stack-with-dependencies' do
     deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
     deps["db.example.password_hiera_key"].should eql("enc/e1/example2/mysql_password")
     deps["db.example.username"].should eql("example2")
-    deps["db.example.secondary_hostnames"].should eql("e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local")
+    deps["db.example.secondary_hostnames"].should eql(
+      "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local"
+    )
   end
-
 end
