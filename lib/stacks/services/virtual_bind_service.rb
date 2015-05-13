@@ -45,15 +45,15 @@ module Stacks::Services::VirtualBindService
     fqdn_list(machine_defs, [:mgmt]).sort
   end
 
-  def bind_servers_that_i_depend_on(location)
-    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on(location))
+  def bind_servers_that_i_depend_on
+    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::Services::BindServer || !machine_def.master? }
     fqdn_list(machine_defs, [:mgmt]).sort
   end
 
   def bind_master_servers_and_zones_that_i_depend_on(location)
     zones = nil
-    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on(location))
+    machine_defs = get_children_for_virtual_services(virtual_services_that_i_depend_on)
     machine_defs.each do |machine_def|
       if machine_def.is_a?(Stacks::Services::BindServer) && machine_def.master?
         zones = {} if zones.nil?
@@ -71,7 +71,7 @@ module Stacks::Services::VirtualBindService
     # indirectly related dependant instances (ie. things that say they depend on this service)
     indirect_deps = bind_servers_that_depend_on_me(location) if machine_def.master?
     all_deps.merge(indirect_deps) unless indirect_deps.nil?
-    all_deps.merge(bind_servers_that_i_depend_on(location))
+    all_deps.merge(bind_servers_that_i_depend_on)
     all_deps.to_a
   end
 

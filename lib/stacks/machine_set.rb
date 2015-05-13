@@ -55,7 +55,7 @@ class Stacks::MachineSet
   def dependency_config(location)
     config = {}
     if @auto_configure_dependencies
-      virtual_services_that_i_depend_on(location).each do |dependency|
+      virtual_services_that_i_depend_on.each do |dependency|
         config.merge! dependency.config_params(self, location)
       end
     end

@@ -67,7 +67,10 @@ module Stacks::Dependencies
         next if !virtual_service.is_a?(Stacks::MachineDefContainer)
         next if !virtual_service.respond_to?(:depends_on)
 
-        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on(location)]
+        if virtual_service.respond_to?(:establish_dependencies)
+          virtual_service.establish_dependencies(location)
+        end
+        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
       end
     end
 
@@ -90,14 +93,10 @@ module Stacks::Dependencies
     children.flatten
   end
 
-  def virtual_services_that_i_depend_on(location, environments = find_all_environments)
-    depends_on(location).map do |dependency|
+  def virtual_services_that_i_depend_on(environments = find_all_environments)
+    depends_on.map do |dependency|
       find_virtual_service_that_i_depend_on(dependency, environments)
     end
-  end
-
-  def depends_on(_location)
-    @depends_on
   end
 
   private
