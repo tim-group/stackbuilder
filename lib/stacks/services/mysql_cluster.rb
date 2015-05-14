@@ -113,13 +113,14 @@ module Stacks::Services::MysqlCluster
 
   def config_params(dependant, _location)
     # This is where we can provide config params to App servers (only) to put into their config.properties
-    {
+    config_params = {
       "db.#{@database_name}.hostname"           => master_servers.join(','),
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => dependant.application,
       "db.#{@database_name}.password_hiera_key" =>
         "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
-      "db.#{@database_name}.secondary_hostnames" => secondary_servers.join(",")
     }
+    config_params["db.#{@database_name}.secondary_hostnames"] = secondary_servers.join(",") unless secondary_servers.empty?
+    config_params
   end
 end
