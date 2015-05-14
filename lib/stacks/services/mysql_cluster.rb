@@ -118,9 +118,10 @@ module Stacks::Services::MysqlCluster
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => dependant.application,
       "db.#{@database_name}.password_hiera_key" =>
-        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
+        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
     }
-    config_params["db.#{@database_name}.secondary_hostnames"] = secondary_servers.join(",") unless secondary_servers.empty?
+    config_params["db.#{@database_name}.secondary_hostnames"] =
+        secondary_servers.join(",") unless secondary_servers.empty?
     config_params
   end
 end
