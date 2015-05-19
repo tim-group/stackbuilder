@@ -19,10 +19,17 @@ class Stacks::Services::NatServer < Stacks::MachineDef
   def find_nat_rules(location)
     rules = []
     environment.accept do |node|
-      puts node.name if node.environment.nil?
       unless node.environment.contains_node_of_type?(Stacks::Services::NatServer) && environment != node.environment
         if node.respond_to? :nat
-          rules =  rules.concat node.nat_rules(location) if node.nat
+          if node.nat
+            if location == :primary_site
+              rules =  rules.concat node.nat_rules(location)
+            else
+              if node.respond_to?(:secondary_site?)
+                rules =  rules.concat node.nat_rules(location) if node.secondary_site?
+              end
+            end
+          end
         end
       end
     end

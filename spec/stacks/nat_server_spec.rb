@@ -52,3 +52,87 @@ describe_stack 'nat servers should have all 3 networks' do
     dnat_3['udp'].should eql('false')
   end
 end
+
+describe_stack 'nat servers should only collect services in the same site when using secondary_site' do
+  given do
+    stack 'nat' do
+      natserver do
+        @enable_secondary_site = true
+      end
+    end
+
+    stack 'example' do
+      virtual_appserver 'exampleuserapp' do
+        self.application = 'example'
+        @enable_secondary_site = true
+      end
+    end
+
+    stack 'example_proxy' do
+      virtual_proxyserver 'exampleproxy' do
+        @enable_secondary_site = true
+        vhost('exampleuserapp', 'example-mirror.timgroup.com', 'production')
+        enable_nat
+      end
+    end
+
+    stack 'simple' do
+      virtual_appserver 'simpleuserapp' do
+        self.application = 'simple'
+      end
+    end
+
+    stack 'simple_proxy' do
+      virtual_proxyserver 'simpleproxy' do
+        vhost('simpleuserapp', 'simple-mirror.timgroup.com', 'production')
+        enable_nat
+      end
+    end
+    env 'production', :primary_site         => 'pg',
+                      :secondary_site       => 'oy',
+                      :lb_virtual_router_id => 27 do
+      instantiate_stack 'nat'
+      instantiate_stack 'example_proxy'
+      instantiate_stack 'example'
+      instantiate_stack 'simple_proxy'
+      instantiate_stack 'simple'
+    end
+  end
+  host("production-nat-001.mgmt.oy.net.local") do |nat|
+    dnat = nat.to_enc['role::natserver']['rules']['DNAT']
+    dnat.keys.should include(
+      'production-exampleproxy-vip.front.oy.net.local 80',
+      'production-exampleproxy-vip.front.oy.net.local 443'
+    )
+    dnat.keys.size.should eql(2)
+    dnat['production-exampleproxy-vip.front.oy.net.local 80']['dest_host'].should eql(
+      'production-exampleproxy-vip.oy.net.local'
+    )
+    dnat['production-exampleproxy-vip.front.oy.net.local 443']['dest_host'].should eql(
+      'production-exampleproxy-vip.oy.net.local'
+    )
+  end
+
+  host("production-nat-001.mgmt.pg.net.local") do |nat|
+    dnat = nat.to_enc['role::natserver']['rules']['DNAT']
+    dnat.keys.should include(
+      'production-exampleproxy-vip.front.pg.net.local 80',
+      'production-exampleproxy-vip.front.pg.net.local 443',
+      'production-simpleproxy-vip.front.pg.net.local 80',
+      'production-simpleproxy-vip.front.pg.net.local 443'
+    )
+    dnat.keys.size.should eql(4)
+    dnat['production-exampleproxy-vip.front.pg.net.local 80']['dest_host'].should eql(
+      'production-exampleproxy-vip.pg.net.local'
+    )
+    dnat['production-exampleproxy-vip.front.pg.net.local 443']['dest_host'].should eql(
+      'production-exampleproxy-vip.pg.net.local'
+    )
+    dnat['production-simpleproxy-vip.front.pg.net.local 80']['dest_host'].should eql(
+      'production-simpleproxy-vip.pg.net.local'
+    )
+    dnat['production-simpleproxy-vip.front.pg.net.local 443']['dest_host'].should eql(
+      'production-simpleproxy-vip.pg.net.local'
+    )
+  end
+end
