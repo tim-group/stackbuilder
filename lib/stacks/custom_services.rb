@@ -120,6 +120,10 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::CiSlave, &block)
   end
 
+  def eventstore(name = 'eventstore', &block)
+    machineset_with(name, [Stacks::Services::EventStoreCluster], Stacks::Services::EventStoreServer, &block)
+  end
+
   def pentaho_server(name = 'pentaho_server', &block)
     machineset_with(name, [Stacks::Services::AppService], Stacks::Services::PentahoServer, &block)
   end

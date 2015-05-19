@@ -7,6 +7,8 @@ module Stacks
     require 'stacks/services/deb_repo'
     require 'stacks/services/deb_repo_mirror'
     require 'stacks/services/elasticsearch_node'
+    require 'stacks/services/eventstore_server'
+    require 'stacks/services/eventstore_cluster'
     require 'stacks/services/fmanalyticsanalysis_server'
     require 'stacks/services/fmanalyticsreporting_server'
     require 'stacks/services/legacy_mysql_cluster'
