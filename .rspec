@@ -1,2 +1,5 @@
 --color
 --require=spec_helper
+--order=rand
+--fail-fast
+--profile=5
