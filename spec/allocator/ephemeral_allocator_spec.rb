@@ -1,3 +1,6 @@
+require 'allocator/ephemeral_allocator'
+require 'stacks/factory'
+
 describe StackBuilder::Allocator::EphemeralAllocator do
   before do
     extend Stacks::DSL

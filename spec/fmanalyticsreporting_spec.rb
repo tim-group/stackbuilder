@@ -1,3 +1,6 @@
+require 'stacks/factory'
+require 'stacks/test_framework'
+
 describe_stack 'analytics' do
   given do
     stack "analytics" do

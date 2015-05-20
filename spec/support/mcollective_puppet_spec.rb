@@ -1,3 +1,5 @@
+require 'stacks/factory'
+
 # XXX probably the wrong way to do this
 class Support::MCollectivePuppetTest
   include Support::MCollectivePuppet

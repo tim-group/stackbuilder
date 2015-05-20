@@ -1,3 +1,8 @@
+require 'puppet'
+require 'puppet/indirector/node/stacks'
+require 'stacks/factory'
+require 'stacks/test_framework'
+
 describe Puppet::Node::Stacks do
   before :each do
     @stacks_inventory = double('stacks_inventory')

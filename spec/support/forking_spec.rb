@@ -1,3 +1,5 @@
+require 'stacks/factory'
+
 describe Support::Forking do
   include Support::Forking
 

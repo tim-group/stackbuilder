@@ -1,3 +1,6 @@
+require 'stacks/factory'
+require 'stacks/test_framework'
+
 describe_stack 'test_app_server' do
   given do
     stack "test_app_server" do

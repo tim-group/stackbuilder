@@ -1,3 +1,5 @@
+require 'stacks/factory'
+
 describe Compute::Controller do
   before :each do
     @compute_node_client = double

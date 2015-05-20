@@ -1,3 +1,6 @@
+require 'stacks/factory'
+require 'support/subscription'
+
 describe Subscription do
   RSpec::Matchers.define :have_messages_for_hosts do |expected|
     match do |actual|

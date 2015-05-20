@@ -1,3 +1,6 @@
+require 'support/nagios'
+require 'web-test-framework'
+
 # This test is slow because of how webrick is written. To speed it up edit
 # /usr/lib/ruby/1.9.1/webrick/server.rb and apply this diff:
 #            begin

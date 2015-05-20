@@ -1,3 +1,5 @@
+require 'stacks/factory'
+
 describe Support::Callback do
   it 'allows callbacks to be passed in and executed by the subject code' do
     event_called = false

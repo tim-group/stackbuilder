@@ -18,9 +18,8 @@ if ENV['STACKS_RSPEC_SEPARATE'] # run each rspec in a separate ruby instance
     ENV['INSIDE_RSPEC'] = 'true'
   end
 else # fast run (common ruby process for all tests)
-  RSpec::Core::RakeTask.new do |t|
+  RSpec::Core::RakeTask.new do
     ENV['INSIDE_RSPEC'] = 'true'
-    t.rspec_opts = %w(--require=spec_requires) # XXX remove once spec with STACKS_RSPEC_SEPARATE passes
   end
 end
 

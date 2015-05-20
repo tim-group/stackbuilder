@@ -1,3 +1,6 @@
+require 'stacks/factory'
+require 'stacks/test_framework'
+
 describe_stack 'jenkins' do
   given do
     stack "jenkins" do

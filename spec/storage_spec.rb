@@ -1,3 +1,6 @@
+require 'stacks/factory'
+require 'stacks/test_framework'
+
 describe_stack 'should default root storage size to 3G' do
   given do
     stack 'demo' do

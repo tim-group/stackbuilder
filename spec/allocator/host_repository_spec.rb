@@ -1,3 +1,6 @@
+require 'allocator/host_repository'
+require 'stacks/factory'
+
 describe StackBuilder::Allocator::HostRepository do
   before do
     extend Stacks::DSL

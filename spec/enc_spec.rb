@@ -1,3 +1,6 @@
+require 'matchers/server_matcher'
+require 'stacks/factory'
+
 describe Stacks::DSL do
   before do
     extend Stacks::DSL

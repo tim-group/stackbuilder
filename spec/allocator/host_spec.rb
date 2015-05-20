@@ -1,3 +1,6 @@
+require 'allocator/host'
+require 'stacks/factory'
+
 describe StackBuilder::Allocator::Host do
   it 'removes the ha policy when using local fabric' do
     policies =  Stacks::Factory.new.policies

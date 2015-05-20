@@ -1,3 +1,5 @@
+require 'stacks/factory'
+
 describe Stacks::Inventory do
   before :each do
     @stacks_dir = File.dirname(__FILE__) + '/teststack'

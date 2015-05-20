@@ -1,3 +1,6 @@
+require 'stacks/factory'
+require 'stacks/test_framework'
+
 describe 'Stacks::Services::VirtualService' do
   describe_stack 'provides the default vips when to_vip_spec is run' do
     given do

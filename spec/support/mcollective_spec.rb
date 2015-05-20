@@ -1,5 +1,6 @@
-# rubocop:disable Style/ClassVars
+require 'stacks/factory'
 
+# rubocop:disable Style/ClassVars
 describe Support::MCollective do
   before do
     extend Support::MCollective

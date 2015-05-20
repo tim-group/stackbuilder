@@ -1,3 +1,6 @@
+require 'allocator/host_policies'
+require 'stacks/factory'
+
 describe StackBuilder::Allocator::HostPolicies do
   def test_env_with_refstack
     [{

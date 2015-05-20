@@ -1,3 +1,6 @@
+require 'stacks/factory'
+require 'stacks/test_framework'
+
 describe_stack 'eventstore' do
   given do
     stack "eventstore_stack" do

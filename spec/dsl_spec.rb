@@ -1,3 +1,5 @@
+require 'stacks/factory'
+
 describe Stacks::DSL do
   before do
     extend Stacks::DSL
