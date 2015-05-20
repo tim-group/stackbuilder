@@ -4,6 +4,8 @@ require 'stacks/machine_def'
 class Stacks::Services::AppServer < Stacks::MachineDef
   attr_reader :environment
   attr_reader :location
+  attr_reader :ram
+  attr_reader :storage
   attr_accessor :group
   attr_accessor :launch_config
 
@@ -30,6 +32,15 @@ class Stacks::Services::AppServer < Stacks::MachineDef
 
   def dependency_config_excluding_sftp_servers(location)
     @virtual_service.dependency_config(location).reject! { |key, _value| key == 'sftp_servers' }
+  end
+
+  def normalize_storage
+    root_size_cur = @storage['/'.to_sym][:size].chomp('G').to_i
+    root_size_min = @ram.to_i / 524288 + 2
+
+    if root_size_cur < root_size_min
+      modify_storage('/' => { :size => root_size_min.to_s.concat('G') })
+    end
   end
 
   def to_enc
