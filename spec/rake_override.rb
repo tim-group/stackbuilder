@@ -21,7 +21,7 @@ module SingleTestFilePerInterpreterSpec
 
               begin
                 puts spec_command if verbose
-                success = system(spec_command)
+                success = system('export INSIDE_RSPEC=true; ' + spec_command)
               rescue
                 puts failure_message if failure_message
               end

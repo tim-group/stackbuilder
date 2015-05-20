@@ -16,14 +16,11 @@ if ENV['STACKS_RSPEC_SEPARATE'] # run each rspec in a separate ruby instance
   require './spec/rake_override'
   SingleTestFilePerInterpreterSpec::RakeTask.new do |t|
     ENV['INSIDE_RSPEC'] = 'true'
-    t.rspec_opts = %w(--color --require=spec_helper)
-    t.pattern = "spec/**/*_spec.rb"
   end
 else # fast run (common ruby process for all tests)
   RSpec::Core::RakeTask.new do |t|
     ENV['INSIDE_RSPEC'] = 'true'
-    t.rspec_opts = %w(--color --require=spec_requires --require=spec_helper)
-    t.pattern = "spec/**/*_spec.rb"
+    t.rspec_opts = %w(--require=spec_requires) # XXX remove once spec with STACKS_RSPEC_SEPARATE passes
   end
 end
 
