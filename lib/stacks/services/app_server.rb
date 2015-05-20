@@ -41,6 +41,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     if root_size_cur < root_size_min
       modify_storage('/' => { :size => root_size_min.to_s.concat('G') })
     end
+    return
   end
 
   def to_enc
