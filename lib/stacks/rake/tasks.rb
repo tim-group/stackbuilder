@@ -488,11 +488,6 @@ namespace :sbx do
         end
       end
 
-      sbtask :audit do
-        computecontroller = Compute::Controller.new
-        pp computecontroller.audit(machine_def.to_specs)
-      end
-
       desc "resolve the IP numbers of these machines"
       sbtask :resolve do
         computecontroller = Compute::Controller.new

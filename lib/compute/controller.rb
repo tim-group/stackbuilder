@@ -71,15 +71,6 @@ class Compute::Controller
     end
   end
 
-  # DEP
-  def audit(specs)
-    fabrics = specs.group_by { |spec| spec[:fabric] }
-
-    fabrics.each do |fabric, _specs|
-      pp @compute_node_client.audit_hosts(fabric)
-    end
-  end
-
   def launch_raw(allocation, &block)
     grouped_results = []
 
