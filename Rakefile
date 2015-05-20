@@ -13,7 +13,7 @@ end
 
 desc "Run specs"
 if ENV['STACKS_RSPEC_SEPARATE'] # run each rspec in a separate ruby instance
-  require './spec/rakefile'
+  require './spec/rake_override'
   SingleTestFilePerInterpreterSpec::RakeTask.new do |t|
     ENV['INSIDE_RSPEC'] = 'true'
     t.rspec_opts = %w(--color --require=spec_helper)
