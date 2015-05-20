@@ -48,6 +48,9 @@ Style/NegatedIf:
 Style/NegatedWhile:
   Enabled: false
 
+Style/NumericLiterals:
+  Enabled: false
+
 Lint/NonLocalExitFromIterator:
   Enabled: false
 
