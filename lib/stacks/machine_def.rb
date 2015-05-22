@@ -39,7 +39,7 @@ class Stacks::MachineDef
     @included_classes = {}
 
     fail "illegal hostname: \"#{@base_hostname}\". hostnames can only contain letters, digits and hyphens" \
-      unless /(^[-a-zA-Z0-9]+$)/.match(@base_hostname)
+      unless /^[-a-zA-Z0-9]+$/.match(@base_hostname)
   end
 
   def include_class(class_name, class_hash = {})
