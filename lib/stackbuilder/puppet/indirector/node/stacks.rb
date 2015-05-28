@@ -1,3 +1,4 @@
+$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "..", "..")
 require 'stacks/environment'
 require 'stacks/inventory'
 require 'puppet/node'
