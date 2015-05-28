@@ -1,9 +1,7 @@
 #! /usr/bin/env ruby
 
-$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib", "stackbuilder")
-
 require 'puppet'
-require 'stackbuilder/puppet/indirector/node/stacks'
+require 'puppet/indirector/node/stacks'
 
 fail "Usage: puppet_enc FQDN..." if ARGV.empty?
 
