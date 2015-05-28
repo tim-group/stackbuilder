@@ -1,5 +1,7 @@
 $LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib")
-require '/opt/orctool/lib/orc/util/option_parser'
+$LOAD_PATH << '/opt/orctool/lib'
+require 'orc/util/option_parser'
+$LOAD_PATH.delete('/opt/orctool/lib') # potentially confusing, delete
 require 'rake'
 require 'pp'
 require 'yaml'
