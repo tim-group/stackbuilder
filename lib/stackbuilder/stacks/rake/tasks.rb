@@ -1,6 +1,8 @@
 $LOAD_PATH << '/opt/orctool/lib'
+$LOAD_PATH << '/opt/orc/lib/ruby/site_ruby'
 require 'orc/util/option_parser'
-$LOAD_PATH.delete('/opt/orctool/lib') # potentially confusing, delete
+$LOAD_PATH.delete('/opt/orctool/lib')
+$LOAD_PATH.delete('/opt/orc/lib/ruby/site_ruby')
 require 'rake'
 require 'pp'
 require 'yaml'
