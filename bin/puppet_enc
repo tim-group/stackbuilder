@@ -3,7 +3,7 @@
 $LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib", "stackbuilder")
 
 require 'puppet'
-require 'puppet/indirector/node/stacks'
+require 'stackbuilder/puppet/indirector/node/stacks'
 
 fail "Usage: puppet_enc FQDN..." if ARGV.empty?
 
