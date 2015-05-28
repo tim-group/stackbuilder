@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 
-$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib")
+$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib", "stackbuilder")
 
 require 'puppet'
 require 'puppet/indirector/node/stacks'

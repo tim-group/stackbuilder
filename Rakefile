@@ -50,6 +50,18 @@ task :install => [:package] do
   sh "sudo /etc/init.d/mcollective restart;"
 end
 
+desc "Prepare a directory tree for omnibus"
+task :omnibus do
+  sh "rm -rf build/omnibus"
+
+  sh "mkdir -p build/omnibus"
+  sh "mkdir -p build/omnibus/bin"
+  sh "mkdir -p build/omnibus/embedded/lib"
+
+  sh "cp -r bin/* build/omnibus/bin"
+  sh "cp -r lib/* build/omnibus/embedded/lib/"
+end
+
 desc "Run lint (Rubocop)"
 task :lint do
   sh "/var/lib/gems/1.9.1/bin/rubocop --require rubocop/formatter/checkstyle_formatter "\
