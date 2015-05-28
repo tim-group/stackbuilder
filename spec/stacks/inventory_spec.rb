@@ -1,4 +1,4 @@
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 
 describe Stacks::Inventory do
   before :each do

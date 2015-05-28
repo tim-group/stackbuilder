@@ -1,4 +1,4 @@
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
 describe_stack 'should default root storage size to 3G' do

@@ -1,5 +1,5 @@
-require 'stacks/environment'
-require 'stacks/factory'
+require 'stackbuilder/stacks/environment'
+require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
 describe_stack 'stack-with-dependencies' do

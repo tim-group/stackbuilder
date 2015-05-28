@@ -1,4 +1,3 @@
-$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib", "stackbuilder")
 # generate a spec coverage test if 'simplecov' is installed
 # note this adds approx 1 second to 'rake spec'.
 if !ENV['STACKS_RSPEC_SEPARATE'] # doesn't make sense with STACKS_RSPEC_SEPARATE enabled

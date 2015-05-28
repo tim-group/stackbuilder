@@ -1,8 +1,8 @@
-require 'support/callback'
-require 'support/monkeypatches' # Add flatten_hashes method to Array
-require 'compute/namespace'
-require 'compute/client'
-require 'compute/nagservclient'
+require 'stackbuilder/support/callback'
+require 'stackbuilder/support/monkeypatches' # Add flatten_hashes method to Array
+require 'stackbuilder/compute/namespace'
+require 'stackbuilder/compute/client'
+require 'stackbuilder/compute/nagservclient'
 require 'socket'
 require 'set'
 

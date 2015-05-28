@@ -1,8 +1,8 @@
 require 'net/http'
 require 'json'
 require 'resolv'
-require 'support/callback'
-require 'stacks/namespace'
+require 'stackbuilder/support/callback'
+require 'stackbuilder/stacks/namespace'
 
 module Support
   module Nagios

@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/machine_def_container'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/machine_def_container'
 require 'uri'
 
 module Stacks::Services::ShadowServerCluster

@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::Gold::UbuntuNode < Stacks::MachineDef
   attr_reader :options

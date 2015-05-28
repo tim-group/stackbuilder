@@ -1,6 +1,6 @@
-require 'compute/namespace'
+require 'stackbuilder/compute/namespace'
 require 'mcollective'
-require 'support/mcollective'
+require 'stackbuilder/support/mcollective'
 
 class Compute::Client
   include Support::MCollective

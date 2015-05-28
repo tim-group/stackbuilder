@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 require 'uri'
 
 module Stacks::Services::LegacyMysqlCluster

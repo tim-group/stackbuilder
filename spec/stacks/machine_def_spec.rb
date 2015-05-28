@@ -1,4 +1,4 @@
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 
 describe Stacks::MachineDef do
   it 'produces x.net.local for the prod network' do

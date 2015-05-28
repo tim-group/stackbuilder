@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::Nat
   attr_reader :from

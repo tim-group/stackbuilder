@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/services/proxy_vhost'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/services/proxy_vhost'
 
 module Stacks::Services::VirtualProxyService
   attr_reader :cert

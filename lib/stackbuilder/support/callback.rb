@@ -1,4 +1,4 @@
-require 'support/namespace'
+require 'stackbuilder/support/namespace'
 
 class Support::Callback
   def initialize(&block)

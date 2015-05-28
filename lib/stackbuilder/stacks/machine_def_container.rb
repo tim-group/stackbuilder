@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 module Stacks::MachineDefContainer
   attr_reader :definitions

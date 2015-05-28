@@ -1,4 +1,4 @@
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 
 describe Compute::Controller do
   before :each do

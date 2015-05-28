@@ -1,6 +1,5 @@
-$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "..", "..", "stackbuilder")
-require 'stacks/environment'
-require 'stacks/inventory'
+require 'stackbuilder/stacks/environment'
+require 'stackbuilder/stacks/inventory'
 require 'puppet/node'
 require 'puppet/indirector/node/plain'
 

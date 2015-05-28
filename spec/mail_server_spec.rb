@@ -1,4 +1,4 @@
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
 describe_stack 'test enc of the mail servers' do

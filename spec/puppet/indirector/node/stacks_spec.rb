@@ -1,6 +1,6 @@
 require 'puppet'
 require 'puppet/indirector/node/stacks'
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
 describe Puppet::Node::Stacks do

@@ -1,4 +1,4 @@
-require 'stacks/services/selenium/namespace'
+require 'stackbuilder/stacks/services/selenium/namespace'
 
 class Stacks::Services::Selenium::Win7Node < Stacks::MachineDef
   attr_reader :hub

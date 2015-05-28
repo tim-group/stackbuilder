@@ -1,5 +1,5 @@
-require 'support/owner_fact'
-require 'stacks/namespace'
+require 'stackbuilder/support/owner_fact'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::MachineDef
   attr_reader :domain

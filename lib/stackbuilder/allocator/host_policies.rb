@@ -1,5 +1,5 @@
-require 'allocator/namespace'
-require 'allocator/policy_helpers'
+require 'stackbuilder/allocator/namespace'
+require 'stackbuilder/allocator/policy_helpers'
 
 module StackBuilder::Allocator::HostPolicies
   def self.ha_group

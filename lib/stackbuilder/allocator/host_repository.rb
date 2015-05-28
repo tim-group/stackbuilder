@@ -1,5 +1,5 @@
-require 'allocator/namespace'
-require 'allocator/hosts'
+require 'stackbuilder/allocator/namespace'
+require 'stackbuilder/allocator/hosts'
 
 class StackBuilder::Allocator::HostRepository
   attr_accessor :machine_repo

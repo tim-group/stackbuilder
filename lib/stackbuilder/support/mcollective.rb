@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift('/opt/puppetroll/lib/')
 
-require 'support/forking'
+require 'stackbuilder/support/forking'
 require 'mcollective'
 require 'mcollective/pluginmanager'
 require 'puppetroll'

@@ -1,5 +1,5 @@
-require 'allocator/ephemeral_allocator'
-require 'stacks/factory'
+require 'stackbuilder/allocator/ephemeral_allocator'
+require 'stackbuilder/stacks/factory'
 
 describe StackBuilder::Allocator::EphemeralAllocator do
   before do

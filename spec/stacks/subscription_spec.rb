@@ -1,5 +1,5 @@
-require 'stacks/factory'
-require 'support/subscription'
+require 'stackbuilder/stacks/factory'
+require 'stackbuilder/support/subscription'
 
 describe Subscription do
   RSpec::Matchers.define :have_messages_for_hosts do |expected|

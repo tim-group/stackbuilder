@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/machine_def'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::EventStoreServer < Stacks::MachineDef
   def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)

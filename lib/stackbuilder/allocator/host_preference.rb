@@ -1,4 +1,4 @@
-require 'allocator/namespace'
+require 'stackbuilder/allocator/namespace'
 
 module StackBuilder::Allocator::HostPreference
   def self.fewest_machines

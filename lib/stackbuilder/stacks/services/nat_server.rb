@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::NatServer < Stacks::MachineDef
   attr_reader :virtual_router_ids

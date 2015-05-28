@@ -1,4 +1,4 @@
-require 'compute/controller'
+require 'stackbuilder/compute/controller'
 
 module StackBuilder::DNS
 end

@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::SftpServer < Stacks::MachineDef
   attr_reader :location

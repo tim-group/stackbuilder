@@ -1,5 +1,5 @@
 require 'securerandom'
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 module Stacks::Dependencies
   public

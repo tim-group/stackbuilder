@@ -1,4 +1,4 @@
-require 'allocator/namespace'
+require 'stackbuilder/allocator/namespace'
 
 class StackBuilder::Allocator::EphemeralAllocator
   def initialize(options)

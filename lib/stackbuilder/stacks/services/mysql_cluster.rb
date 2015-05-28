@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 module Stacks::Services::MysqlCluster
   def self.extended(object)

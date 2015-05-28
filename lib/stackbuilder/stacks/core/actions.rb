@@ -1,4 +1,4 @@
-require 'stacks/core/namespace'
+require 'stackbuilder/stacks/core/namespace'
 
 ##- allocate
 ##- allocate_ips

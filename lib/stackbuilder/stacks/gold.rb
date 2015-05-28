@@ -1,8 +1,8 @@
 
 module Stacks::Gold
-  require 'stacks/namespace'
-  require 'stacks/gold/win_node'
-  require 'stacks/gold/ubuntu_node'
+  require 'stackbuilder/stacks/namespace'
+  require 'stackbuilder/stacks/gold/win_node'
+  require 'stackbuilder/stacks/gold/ubuntu_node'
 
   def self.extended(object)
     object.configure

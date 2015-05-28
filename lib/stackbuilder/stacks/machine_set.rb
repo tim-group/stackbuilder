@@ -1,7 +1,7 @@
 require 'securerandom'
-require 'stacks/machine_def_container'
-require 'stacks/dependencies'
-require 'stacks/namespace'
+require 'stackbuilder/stacks/machine_def_container'
+require 'stackbuilder/stacks/dependencies'
+require 'stackbuilder/stacks/namespace'
 require 'uri'
 
 class Stacks::MachineSet

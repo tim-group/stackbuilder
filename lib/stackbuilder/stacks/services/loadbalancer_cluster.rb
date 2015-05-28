@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 module Stacks::Services::LoadBalancerCluster
   def self.extended(object)

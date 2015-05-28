@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/services/selenium/namespace'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/services/selenium/namespace'
 
 module Stacks::Services::Selenium::Cluster
   def self.extended(object)

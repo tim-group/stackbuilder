@@ -1,5 +1,5 @@
-require 'allocator/namespace'
-require 'allocator/host'
+require 'stackbuilder/allocator/namespace'
+require 'stackbuilder/allocator/host'
 
 class StackBuilder::Allocator::Hosts
   attr_reader :hosts

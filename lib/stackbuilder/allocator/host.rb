@@ -1,5 +1,5 @@
-require 'allocator/namespace'
-require 'allocator/host_policies'
+require 'stackbuilder/allocator/namespace'
+require 'stackbuilder/allocator/host_policies'
 
 class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines

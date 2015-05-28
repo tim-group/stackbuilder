@@ -1,4 +1,4 @@
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
 describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do

@@ -1,6 +1,6 @@
-require 'support/namespace'
-require 'support/mcollective'
-require 'support/callback'
+require 'stackbuilder/support/namespace'
+require 'stackbuilder/support/mcollective'
+require 'stackbuilder/support/callback'
 
 class Hash
   def hash_select(&block)

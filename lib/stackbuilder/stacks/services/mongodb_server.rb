@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/machine_def'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::MongoDBServer < Stacks::MachineDef
   attr_accessor :backup

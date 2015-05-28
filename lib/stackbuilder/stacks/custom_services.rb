@@ -1,6 +1,6 @@
-require 'stacks/services/namespace'
-require 'stacks/gold'
-require 'stacks/namespace'
+require 'stackbuilder/stacks/services/namespace'
+require 'stackbuilder/stacks/gold'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::CustomServices
   attr_reader :name

@@ -1,5 +1,5 @@
-require 'allocator/host_repository'
-require 'stacks/factory'
+require 'stackbuilder/allocator/host_repository'
+require 'stackbuilder/stacks/factory'
 
 describe StackBuilder::Allocator::HostRepository do
   before do

@@ -1,4 +1,4 @@
-require 'stacks/core/namespace'
+require 'stackbuilder/stacks/core/namespace'
 
 class Stacks::Core::Services
   attr_accessor :allocator

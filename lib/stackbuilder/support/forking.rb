@@ -1,4 +1,4 @@
-require 'support/namespace'
+require 'stackbuilder/support/namespace'
 
 module Support::Forking
   class Future

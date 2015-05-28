@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::LoadBalancer < Stacks::MachineDef
   attr_accessor :virtual_router_id

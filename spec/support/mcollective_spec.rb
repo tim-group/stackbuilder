@@ -1,4 +1,4 @@
-require 'stacks/factory'
+require 'stackbuilder/stacks/factory'
 
 # rubocop:disable Style/ClassVars
 describe Support::MCollective do

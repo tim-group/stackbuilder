@@ -1,4 +1,4 @@
-require 'stacks/namespace'
+require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::PuppetMaster < Stacks::MachineDef
   attr_accessor :cnames

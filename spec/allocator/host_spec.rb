@@ -1,5 +1,5 @@
-require 'allocator/host'
-require 'stacks/factory'
+require 'stackbuilder/allocator/host'
+require 'stackbuilder/stacks/factory'
 
 describe StackBuilder::Allocator::Host do
   it 'removes the ha policy when using local fabric' do

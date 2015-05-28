@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/machine_def'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
   attr_accessor :version

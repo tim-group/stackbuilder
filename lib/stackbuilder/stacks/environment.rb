@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/machine_def_container'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/machine_def_container'
 
 class Stacks::Environment
   attr_reader :domain_suffix

@@ -1,5 +1,5 @@
-require 'stacks/namespace'
-require 'stacks/machine_def'
+require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::CiSlave < Stacks::MachineDef
   def initialize(server_group, index)

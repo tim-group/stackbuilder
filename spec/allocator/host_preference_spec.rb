@@ -1,5 +1,5 @@
-require 'allocator/host_preference'
-require 'stacks/factory'
+require 'stackbuilder/allocator/host_preference'
+require 'stackbuilder/stacks/factory'
 
 describe StackBuilder::Allocator::HostPreference do
   it 'does shit' do
