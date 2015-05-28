@@ -1,6 +1,5 @@
 $LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib")
-$LOAD_PATH << '/opt/orctool/lib'
-require 'orc/util/option_parser'
+require '/opt/orctool/lib/orc/util/option_parser'
 require 'rake'
 require 'pp'
 require 'yaml'
