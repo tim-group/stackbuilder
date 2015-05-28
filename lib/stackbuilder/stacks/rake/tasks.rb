@@ -1,4 +1,4 @@
-$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib", "stackbuilder")
+$LOAD_PATH << File.join(File.dirname(__FILE__), "..", "..")
 $LOAD_PATH << '/opt/orctool/lib'
 require 'orc/util/option_parser'
 $LOAD_PATH.delete('/opt/orctool/lib') # potentially confusing, delete
