@@ -56,10 +56,10 @@ task :omnibus do
 
   sh "mkdir -p build/omnibus"
   sh "mkdir -p build/omnibus/bin"
-  sh "mkdir -p build/omnibus/embedded/lib"
+  sh "mkdir -p build/omnibus/embedded/lib/ruby/site_ruby"
 
   sh "cp -r bin/* build/omnibus/bin"
-  sh "cp -r lib/* build/omnibus/embedded/lib/"
+  sh "cp -r lib/* build/omnibus/embedded/lib/ruby/site_ruby"
 end
 
 desc "Run lint (Rubocop)"
