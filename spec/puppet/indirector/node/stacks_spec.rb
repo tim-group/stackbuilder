@@ -53,9 +53,10 @@ describe Puppet::Node::Stacks do
     result.classes.should eql("role::http_app" => { "application" => "JavaHttpRef" })
   end
 
-  it 'should dump a copy of the enc data for each node to local disk' do
+  it 'should dump a copy of the enc data for each node to local disk and log requests' do
     tmp_dir = Dir.mktmpdir
     enc_dir = "#{tmp_dir}/stacks/enc"
+    log_file = "#{tmp_dir}/stacks/enc.log"
 
     begin
       hostname = 'te-stapp-001.mgmt.local.net.local'
@@ -67,12 +68,16 @@ describe Puppet::Node::Stacks do
       machine.stub(:environment).and_return(Stacks::Environment.new("testenv", {}, nil, {}, {}))
       @stacks_inventory.should_receive(:find).with(hostname).and_return(machine)
       machine.should_receive(:to_enc).and_return("role::http_app" => { "application" => "JavaHttpRef" })
-      indirector = Puppet::Node::Stacks.new(@stacks_inventory, @delegate, true, enc_dir)
+      indirector = Puppet::Node::Stacks.new(@stacks_inventory, @delegate, true, enc_dir, log_file)
       indirector.find(request)
 
       File.exist?(dump_file).should eql(true)
       dumped_enc = YAML.load_file(dump_file)
       dumped_enc.should eql("role::http_app" => { "application" => "JavaHttpRef" })
+
+      File.exist?(log_file).should eql(true)
+      log_contents = File.read(log_file)
+      log_contents.should include('Node found: te-stapp-001.mgmt.local.net.local')
 
     ensure
       FileUtils.remove_entry_secure tmp_dir
