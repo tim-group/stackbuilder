@@ -83,7 +83,7 @@ class Stacks::CustomServices
   end
 
   def natserver(&block)
-    machineset_with('nat', [], Stacks::Services::NatServer, &block)
+    machineset_with('nat', [Stacks::Services::NatCluster], Stacks::Services::NatServer, &block)
   end
 
   def elasticsearch(name = 'elasticsearch', &block)

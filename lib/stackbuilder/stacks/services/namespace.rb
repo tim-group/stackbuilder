@@ -23,6 +23,7 @@ module Stacks
     require 'stackbuilder/stacks/services/mysql_server'
     require 'stackbuilder/stacks/services/nat'
     require 'stackbuilder/stacks/services/nat_server'
+    require 'stackbuilder/stacks/services/nat_cluster'
     require 'stackbuilder/stacks/services/pentaho_server'
     require 'stackbuilder/stacks/services/proxy_server'
     require 'stackbuilder/stacks/services/proxy_vhost'

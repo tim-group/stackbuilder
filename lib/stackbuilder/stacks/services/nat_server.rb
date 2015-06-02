@@ -16,60 +16,16 @@ class Stacks::Services::NatServer < Stacks::MachineDef
     @virtual_router_ids[:prod] = environment.options[:nat_prod_virtual_router_id] || 106
   end
 
-  def find_nat_rules(location)
-    rules = []
-    environment.accept do |node|
-      unless node.environment.contains_node_of_type?(Stacks::Services::NatServer) && environment != node.environment
-        if node.respond_to? :nat
-          if node.nat
-            if location == :primary_site
-              rules =  rules.concat node.nat_rules(location)
-            else
-              if node.respond_to?(:secondary_site?)
-                rules =  rules.concat node.nat_rules(location) if node.secondary_site?
-              end
-            end
-          end
-        end
-      end
-    end
-    rules
-  end
-
   def to_enc
     enc = super
-    rules = {}
-
-    snat = {
-      'SNAT' => {
-        'prod' => {
-          'to_source' => "nat-vip.front.#{environment.options[location]}.net.local"
-        }
-      }
+    rules = {
+      'SNAT' => @virtual_service.snat_rules(@location),
+      'DNAT' => @virtual_service.dnat_rules(@location)
     }
-
-    dnat_rules = Hash[find_nat_rules(@location).map do |rule|
-      [
-        "#{rule.from.host} #{rule.from.port}",
-        {
-          'dest_host' => "#{rule.to.host}",
-          'dest_port' => "#{rule.to.port}",
-          'tcp'       => "#{rule.tcp}",
-          'udp'       => "#{rule.udp}"
-        }
-      ]
-    end]
-
-    dnat = {
-      'DNAT' => dnat_rules
-    }
-    rules.merge! snat
-    rules.merge! dnat
-
     enc.merge('role::natserver' => {
-                'rules' => rules,
+                'rules'                   => rules,
                 'front_virtual_router_id' => virtual_router_ids[:front],
-                'prod_virtual_router_id' => virtual_router_ids[:prod]
+                'prod_virtual_router_id'  => virtual_router_ids[:prod]
               })
   end
 end
