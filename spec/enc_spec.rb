@@ -293,81 +293,65 @@ describe Stacks::DSL do
       end
     end
 
-    eg_nat = find("eg-nat-001.mgmt.st.net.local")
-    eg_nat.to_enc.should eql(
-      'role::natserver' => {
-        'rules' => {
-          'SNAT' => {
-            'prod' => {
-              'to_source' => 'nat-vip.front.st.net.local'
-            }
-          },
-          'DNAT' => {
-            'eg-withnat-vip.front.st.net.local 80' => {
-              'dest_host'  => 'eg-withnat-vip.st.net.local',
-              'dest_port'  => '80',
-              'tcp'        => 'true',
-              'udp'        => 'false'
-            },
-            'eg-withnat-vip.front.st.net.local 443' => {
-              'dest_host'  => 'eg-withnat-vip.st.net.local',
-              'dest_port'  => '443',
-              'tcp'        => 'true',
-              'udp'        => 'false'
-            },
-            'eg-sftp-vip.front.st.net.local 21' => {
-              'dest_host'  => 'eg-sftp-vip.st.net.local',
-              'dest_port'  => '21',
-              'tcp'        => 'true',
-              'udp'        => 'false'
-            },
-            'eg-sftp-vip.front.st.net.local 22' => {
-              'dest_host'  => 'eg-sftp-vip.st.net.local',
-              'dest_port'  => '22',
-              'tcp'        => 'true',
-              'udp'        => 'false'
-            },
-            'eg-sftp-vip.front.st.net.local 2222' => {
-              'dest_host'  => 'eg-sftp-vip.st.net.local',
-              'dest_port'  => '2222',
-              'tcp'        => 'true',
-              'udp'        => 'false'
-            }
-          }
-        },
-        'prod_virtual_router_id'  => 106,
-        'front_virtual_router_id' => 105
-      }
-    )
+    enc = find("eg-nat-001.mgmt.st.net.local").to_enc
+    enc['role::natserver']['prod_virtual_router_id'].should eql(106)
+    enc['role::natserver']['front_virtual_router_id'].should eql(105)
 
-    sub_nat = find("sub-nat-001.mgmt.st.net.local")
-    sub_nat.to_enc.should eql(
-      'role::natserver' => {
-        'rules' => {
-          'SNAT' => {
-            'prod' => {
-              'to_source' => 'nat-vip.front.st.net.local'
-            }
-          },
-          'DNAT' => {
-            'sub-blahnat-vip.front.st.net.local 8008' => {
-              'dest_host'  => 'sub-blahnat-vip.st.net.local',
-              'dest_port'  => '8008',
-              "tcp" => "true",
-              "udp" => "false"
-            },
-            "sub-defaultport-vip.front.st.net.local 8000" => {
-              "dest_port" => "8000",
-              "dest_host" => "sub-defaultport-vip.st.net.local",
-              "tcp" => "true",
-              "udp" => "false"
-            }
-          }
-        },
-        'prod_virtual_router_id' => 106,
-        'front_virtual_router_id' => 105
-      }
-    )
+    snat = enc['role::natserver']['rules']['SNAT']
+    snat['prod']['to_source'].should eql('nat-vip.front.st.net.local')
+
+    dnat = enc['role::natserver']['rules']['DNAT']
+    dnat.size.should eql(5)
+    dnat_1 = dnat['eg-withnat-vip.front.st.net.local 80']
+    dnat_1['dest_host'].should eql('eg-withnat-vip.st.net.local')
+    dnat_1['dest_port'].should eql('80')
+    dnat_1['tcp'].should eql('true')
+    dnat_1['udp'].should eql('false')
+
+    dnat_2 = dnat['eg-withnat-vip.front.st.net.local 443']
+    dnat_2['dest_host'].should eql('eg-withnat-vip.st.net.local')
+    dnat_2['dest_port'].should eql('443')
+    dnat_2['tcp'].should eql('true')
+    dnat_2['udp'].should eql('false')
+
+    dnat_3 = dnat['eg-sftp-vip.front.st.net.local 21']
+    dnat_3['dest_host'].should eql('eg-sftp-vip.st.net.local')
+    dnat_3['dest_port'].should eql('21')
+    dnat_3['tcp'].should eql('true')
+    dnat_3['udp'].should eql('false')
+
+    dnat_4 = dnat['eg-sftp-vip.front.st.net.local 22']
+    dnat_4['dest_host'].should eql('eg-sftp-vip.st.net.local')
+    dnat_4['dest_port'].should eql('22')
+    dnat_4['tcp'].should eql('true')
+    dnat_4['udp'].should eql('false')
+
+    dnat_5 = dnat['eg-sftp-vip.front.st.net.local 2222']
+    dnat_5['dest_host'].should eql('eg-sftp-vip.st.net.local')
+    dnat_5['dest_port'].should eql('2222')
+    dnat_5['tcp'].should eql('true')
+    dnat_5['udp'].should eql('false')
+
+    enc = find('sub-nat-001.mgmt.st.net.local').to_enc
+    enc['role::natserver']['prod_virtual_router_id'].should eql(106)
+    enc['role::natserver']['front_virtual_router_id'].should eql(105)
+
+    snat = enc['role::natserver']['rules']['SNAT']
+    snat['prod']['to_source'].should eql('nat-vip.front.st.net.local')
+
+    dnat = enc['role::natserver']['rules']['DNAT']
+    dnat.size.should eql(2)
+    dnat_1 = dnat['sub-blahnat-vip.front.st.net.local 8008']
+    dnat_1['dest_host'].should eql('sub-blahnat-vip.st.net.local')
+    dnat_1['dest_port'].should eql('8008')
+    dnat_1['tcp'].should eql('true')
+    dnat_1['udp'].should eql('false')
+
+    dnat_2 = dnat['sub-defaultport-vip.front.st.net.local 8000']
+    dnat_2['dest_host'].should eql('sub-defaultport-vip.st.net.local')
+    dnat_2['dest_port'].should eql('8000')
+    dnat_2['tcp'].should eql('true')
+    dnat_2['udp'].should eql('false')
   end
 
   it 'throws an error if we try and instantiate a stack that isnt defined' do
