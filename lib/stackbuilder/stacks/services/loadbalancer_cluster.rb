@@ -13,7 +13,7 @@ module Stacks::Services::LoadBalancerCluster
       node.respond_to?(:to_loadbalancer_config) &&
       node.respond_to?(:load_balanced_service?)
     end
-    @depends_on = services.map do |node|
+    services.map do |node|
       [node.name, environment.name, location]
     end
   end

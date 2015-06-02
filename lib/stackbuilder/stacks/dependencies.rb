@@ -68,9 +68,10 @@ module Stacks::Dependencies
         next if !virtual_service.respond_to?(:depends_on)
 
         if virtual_service.respond_to?(:establish_dependencies)
-          virtual_service.establish_dependencies(location)
+          @@eligible_virtual_services_cache.push [virtual_service, virtual_service.establish_dependencies(location)]
+        else
+          @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
         end
-        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
       end
     end
 
