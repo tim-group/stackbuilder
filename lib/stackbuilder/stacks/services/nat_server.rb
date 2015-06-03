@@ -17,6 +17,7 @@ class Stacks::Services::NatServer < Stacks::MachineDef
   end
 
   def to_enc
+    fail 'Nat servers do not support secondary_site' if @virtual_service.enable_secondary_site
     enc = super
     rules = {
       'SNAT' => @virtual_service.snat_rules(@location),
