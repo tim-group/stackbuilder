@@ -7,6 +7,8 @@ class Stacks::Environment
   attr_reader :parent
   attr_reader :name
   attr_reader :options
+  attr_reader :primary_site
+  attr_reader :secondary_site
 
   include Stacks::MachineDefContainer
 
