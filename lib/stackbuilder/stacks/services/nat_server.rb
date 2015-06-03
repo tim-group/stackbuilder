@@ -20,8 +20,8 @@ class Stacks::Services::NatServer < Stacks::MachineDef
     fail 'Nat servers do not support secondary_site' if @virtual_service.enable_secondary_site
     enc = super
     rules = {
-      'SNAT' => @virtual_service.snat_rules(@location),
-      'DNAT' => @virtual_service.dnat_rules(@location)
+      'SNAT' => @virtual_service.snat_rules,
+      'DNAT' => @virtual_service.dnat_rules
     }
     enc.merge('role::natserver' => {
                 'rules'                   => rules,

@@ -8,16 +8,16 @@ module Stacks::Services::NatCluster
   def configure
   end
 
-  def snat_rules(location)
+  def snat_rules
     {
       'prod' => {
-        'to_source' => "nat-vip.front.#{environment.options[location]}.net.local"
+        'to_source' => "nat-vip.front.#{environment.options[:primary_site]}.net.local"
       }
     }
   end
 
-  def dnat_rules(location)
-    Hash[find_nat_rules(location).map do |rule|
+  def dnat_rules
+    Hash[find_nat_rules.map do |rule|
       [
         "#{rule.from.host} #{rule.from.port}",
         {
@@ -30,27 +30,51 @@ module Stacks::Services::NatCluster
     end]
   end
 
-  def find_nat_rules(location)
-    rules = []
-    environment.accept do |node|
-      unless node.environment.contains_node_of_type?(Stacks::Services::NatServer) && environment != node.environment
-        if node.respond_to? :nat
-          if node.nat
-            if location == :primary_site
-              rules =  rules.concat node.nat_rules(location)
-            else
-              if node.respond_to?(:secondary_site?)
-                rules =  rules.concat node.nat_rules(location) if node.secondary_site?
-              end
-            end
-          end
-        end
-      end
-    end
-    rules
-  end
-
   def clazz
     'natcluster'
+  end
+
+  private
+
+  def find_services_that_require_nat
+    virtual_services.select do |node|
+      node.respond_to?(:nat) &&
+        node.nat == true
+    end
+  end
+
+  def environment_services_that_require_nat
+    find_services_that_require_nat.select do |node|
+      node.environment == environment
+    end
+  end
+
+  def sub_environment_services_that_require_nat
+    find_services_that_require_nat.select do |node|
+      node.environment.parent == environment &&
+        !node.environment.contains_node_of_type?(Stacks::Services::NatServer)
+    end
+  end
+
+  def secondary_site_services_that_require_nat
+    find_services_that_require_nat.select do |node|
+      node.environment != environment &&
+        node.respond_to?(:secondary_site?) &&
+        node.secondary_site? == true &&
+        node.environment.secondary_site == environment.primary_site
+    end
+  end
+
+  def find_nat_rules
+    rules = []
+    services = environment_services_that_require_nat
+    services = services.concat(sub_environment_services_that_require_nat)
+    services.each do |service|
+      rules = rules.concat(service.nat_rules(:primary_site))
+    end
+    secondary_site_services_that_require_nat.uniq.each do |service|
+      rules = rules.concat(service.nat_rules(:secondary_site))
+    end
+    rules
   end
 end
