@@ -71,8 +71,14 @@ module Stacks::Services::MysqlCluster
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
     fail "No masters were not found! #{children}" if masters.empty?
-    # Only return the first master (multi-master support not implemented)
     [masters.first.prod_fqdn]
+  end
+
+  def all_servers
+    children.select { |server| !server.backup? }.inject([]) do |prod_fqdns, server|
+      prod_fqdns << server.prod_fqdn
+      prod_fqdns
+    end
   end
 
   def secondary_servers
@@ -122,6 +128,8 @@ module Stacks::Services::MysqlCluster
     }
     config_params["db.#{@database_name}.secondary_hostnames"] =
         secondary_servers.join(",") unless secondary_servers.empty?
+    config_params["db.#{@database_name}.read_only_cluster"] =
+        all_servers.join(",") unless all_servers.empty?
     config_params
   end
 end
