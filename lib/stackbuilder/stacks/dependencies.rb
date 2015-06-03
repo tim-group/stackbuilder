@@ -59,19 +59,16 @@ module Stacks::Dependencies
   # this reduces runs of sbx:dump_enc from 4-5 minutes to under 4 seconds (as of 24.04.2015)
   # rubocop:disable Style/ClassVars
   def virtual_services_that_depend_on_me(location)
-    # the constant part (cache)
-    # do not cache if running from inside rspec, as virtual_services change there and it causes tests to fail
-    if !defined?(@@eligible_virtual_services_cache) || ENV['INSIDE_RSPEC'] == 'true'
-      @@eligible_virtual_services_cache = []
-      virtual_services.each do |virtual_service|
-        next if !virtual_service.is_a?(Stacks::MachineDefContainer)
-        next if !virtual_service.respond_to?(:depends_on)
+    # FIXME: Re-enable caching when we understand how best to fix it.
+    @@eligible_virtual_services_cache = []
+    virtual_services.each do |virtual_service|
+      next if !virtual_service.is_a?(Stacks::MachineDefContainer)
+      next if !virtual_service.respond_to?(:depends_on)
 
-        if virtual_service.respond_to?(:establish_dependencies)
-          @@eligible_virtual_services_cache.push [virtual_service, virtual_service.establish_dependencies(location)]
-        else
-          @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
-        end
+      if virtual_service.respond_to?(:establish_dependencies)
+        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.establish_dependencies(location)]
+      else
+        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
       end
     end
 
