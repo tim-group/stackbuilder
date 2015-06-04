@@ -129,7 +129,7 @@ module Stacks::Services::MysqlCluster
     config_params["db.#{@database_name}.secondary_hostnames"] =
         secondary_servers.join(",") unless secondary_servers.empty?
     config_params["db.#{@database_name}.read_only_cluster"] =
-        all_servers.join(",") unless all_servers.empty?
+        "\"" + all_servers.join(",") + "\"" unless all_servers.empty?
     config_params
   end
 end
