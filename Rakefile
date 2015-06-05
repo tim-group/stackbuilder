@@ -50,6 +50,15 @@ task :install => [:package] do
   sh "sudo /etc/init.d/mcollective restart;"
 end
 
+# needs to be run with sudo
+# XXX used by jenkins. ci has sudo access but only for the 'rake' command
+desc "Prepare for an omnibus run "
+task :omnibus_prep do
+  sh "rm -rf /opt/stackbuilder" # XXX very bad
+  sh "mkdir -p /opt/stackbuilder"
+  sh "chown \$SUDO_UID:\$SUDO_GID /opt/stackbuilder"
+end
+
 desc "Prepare a directory tree for omnibus"
 task :omnibus do
   sh "rm -rf build/omnibus"
@@ -60,6 +69,8 @@ task :omnibus do
 
   sh "cp -r bin/* build/omnibus/bin"
   sh "cp -r lib/* build/omnibus/embedded/lib/ruby/site_ruby"
+  # expose stackbuilder libs; required by stackbuilder-config
+  sh "ln -s ../../../embedded/lib/ruby/site_ruby/stackbuilder build/omnibus/lib/ruby/site_ruby/stackbuilder"
 end
 
 desc "Run lint (Rubocop)"
