@@ -1,5 +1,7 @@
+$LOAD_PATH << '/opt/stackbuilder/lib/ruby/site_ruby'
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/inventory'
+$LOAD_PATH.delete('/opt/stackbuilder/lib/ruby/site_ruby')
 require 'puppet/node'
 require 'puppet/indirector/node/plain'
 require 'yaml'

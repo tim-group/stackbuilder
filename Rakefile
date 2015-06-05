@@ -72,6 +72,7 @@ task :omnibus do
   sh "cp -r lib/* build/omnibus/embedded/lib/ruby/site_ruby"
   # expose stackbuilder libs; required by stackbuilder-config
   sh "ln -s ../../../embedded/lib/ruby/site_ruby/stackbuilder build/omnibus/lib/ruby/site_ruby/stackbuilder"
+  sh "ln -s ../../../embedded/lib/ruby/site_ruby/puppet build/omnibus/lib/ruby/site_ruby/puppet"
 end
 
 desc "Run lint (Rubocop)"
