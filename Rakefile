@@ -65,6 +65,7 @@ task :omnibus do
 
   sh "mkdir -p build/omnibus"
   sh "mkdir -p build/omnibus/bin"
+  sh "mkdir -p build/omnibus/lib/ruby/site_ruby"
   sh "mkdir -p build/omnibus/embedded/lib/ruby/site_ruby"
 
   sh "cp -r bin/* build/omnibus/bin"
