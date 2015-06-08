@@ -683,6 +683,7 @@ namespace :sbx do
       # Note that the ordering here is important - must have killed VMs before
       # removing their puppet cert, otherwise we have a race condition
       task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
+
       desc "frees up ip and vip allocation of these machines"
       task :free_ip_allocation => %w(free_ips free_vips)
 
