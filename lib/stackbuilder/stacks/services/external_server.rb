@@ -1,7 +1,7 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
-class Stacks::Services::ShadowServer < Stacks::MachineDef
+class Stacks::Services::ExternalServer < Stacks::MachineDef
   attr_reader :environment, :virtual_service
   attr_accessor :group, :hostname, :domain
 

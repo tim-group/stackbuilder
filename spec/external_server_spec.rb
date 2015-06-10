@@ -6,14 +6,14 @@ describe_stack 'stack-with-dependencies' do
     stack "rabbit" do
       virtual_rabbitmqserver 'rabbitmq'
     end
-    stack "shadow" do
-      shadow_server "oy-mon-001.oy.net.local" do
+    stack "external" do
+      external_server "oy-mon-001.oy.net.local" do
         depend_on 'rabbitmq'
       end
     end
 
     env "e1", :primary_site => "space" do
-      instantiate_stack "shadow"
+      instantiate_stack "external"
       instantiate_stack "rabbit"
     end
   end

@@ -46,8 +46,8 @@ class Stacks::CustomServices
                     Stacks::Services::MailServer, &block)
   end
 
-  def shadow_server(name, &block)
-    machineset_with(name, [Stacks::Services::ShadowServerCluster], Stacks::Services::ShadowServer, &block)
+  def external_server(name, &block)
+    machineset_with(name, [Stacks::Services::ExternalServerCluster], Stacks::Services::ExternalServer, &block)
   end
 
   def mongodb(name = 'mongodb', &block)
