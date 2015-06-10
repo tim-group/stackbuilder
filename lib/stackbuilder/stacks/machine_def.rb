@@ -6,6 +6,7 @@ class Stacks::MachineDef
   attr_reader :environment
   attr_reader :fabric
   attr_reader :hostname
+  attr_reader :base_hostname
   attr_reader :virtual_service
   attr_reader :location
   attr_accessor :availability_group
@@ -37,9 +38,12 @@ class Stacks::MachineDef
     @dont_start = false
     @routes = []
     @included_classes = {}
+    validate_name
+  end
 
-    fail "illegal hostname: \"#{@base_hostname}\". hostnames can only contain letters, digits and hyphens" \
-      unless /^[-a-zA-Z0-9]+$/.match(@base_hostname)
+  def validate_name
+    return if /^[-a-zA-Z0-9]+$/.match(@base_hostname)
+    fail "illegal hostname: \"#{@base_hostname}\". hostnames can only contain letters, digits and hyphens"
   end
 
   def include_class(class_name, class_hash = {})

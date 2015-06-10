@@ -15,6 +15,13 @@ class Stacks::Services::ShadowServer < Stacks::MachineDef
     super(environment)
   end
 
+  def validate_name
+  end
+
+  def qualified_hostname(_network)
+    @base_hostname
+  end
+
   def to_enc
     {}
   end
