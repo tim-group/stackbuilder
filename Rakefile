@@ -1,8 +1,4 @@
-# XXX remove all but the "rake_task" requires once ruby1.8 is abandoned
-require 'rubygems'
-require 'rake'
-require 'rake/testtask'
-require 'fileutils'
+require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
 
 desc "Generate CTags"
@@ -13,11 +9,11 @@ end
 desc "Run specs"
 if ENV['STACKS_RSPEC_SEPARATE'] # run each rspec in a separate ruby instance
   require './spec/rake_override'
-  SingleTestFilePerInterpreterSpec::RakeTask.new do
+  SingleTestFilePerInterpreterSpec::RakeTask.new(:spec => ["ci:setup:rspec"]) do
     ENV['INSIDE_RSPEC'] = 'true'
   end
 else # fast run (common ruby process for all tests)
-  RSpec::Core::RakeTask.new do
+  RSpec::Core::RakeTask.new(:spec => ["ci:setup:rspec"]) do
     ENV['INSIDE_RSPEC'] = 'true'
   end
 end
