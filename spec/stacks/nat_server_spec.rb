@@ -39,20 +39,20 @@ describe_stack 'nat servers should have all 3 networks' do
     dnat_1 = enc_rules['DNAT']['oy-app-vip.front.oy.net.local 8000']
     dnat_1['dest_host'].should eql('oy-app-vip.oy.net.local')
     dnat_1['dest_port'].should eql('8000')
-    dnat_1['tcp'].should eql('true')
-    dnat_1['udp'].should eql('false')
+    dnat_1['tcp'].should eql(true)
+    dnat_1['udp'].should eql(false)
 
     dnat_2 = enc_rules['DNAT']['oy-proxy-vip.front.oy.net.local 80']
     dnat_2['dest_host'].should eql('oy-proxy-vip.oy.net.local')
     dnat_2['dest_port'].should eql('80')
-    dnat_2['tcp'].should eql('true')
-    dnat_2['udp'].should eql('false')
+    dnat_2['tcp'].should eql(true)
+    dnat_2['udp'].should eql(false)
 
     dnat_3 = enc_rules['DNAT']['oy-proxy-vip.front.oy.net.local 443']
     dnat_3['dest_host'].should eql('oy-proxy-vip.oy.net.local')
     dnat_3['dest_port'].should eql('443')
-    dnat_3['tcp'].should eql('true')
-    dnat_3['udp'].should eql('false')
+    dnat_3['tcp'].should eql(true)
+    dnat_3['udp'].should eql(false)
   end
 end
 
@@ -174,32 +174,32 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     dnat_1 = dnat['eg-withnat-vip.front.st.net.local 80']
     dnat_1['dest_host'].should eql('eg-withnat-vip.st.net.local')
     dnat_1['dest_port'].should eql('80')
-    dnat_1['tcp'].should eql('true')
-    dnat_1['udp'].should eql('false')
+    dnat_1['tcp'].should eql(true)
+    dnat_1['udp'].should eql(false)
 
     dnat_2 = dnat['eg-withnat-vip.front.st.net.local 443']
     dnat_2['dest_host'].should eql('eg-withnat-vip.st.net.local')
     dnat_2['dest_port'].should eql('443')
-    dnat_2['tcp'].should eql('true')
-    dnat_2['udp'].should eql('false')
+    dnat_2['tcp'].should eql(true)
+    dnat_2['udp'].should eql(false)
 
     dnat_3 = dnat['eg-sftp-vip.front.st.net.local 21']
     dnat_3['dest_host'].should eql('eg-sftp-vip.st.net.local')
     dnat_3['dest_port'].should eql('21')
-    dnat_3['tcp'].should eql('true')
-    dnat_3['udp'].should eql('false')
+    dnat_3['tcp'].should eql(true)
+    dnat_3['udp'].should eql(false)
 
     dnat_4 = dnat['eg-sftp-vip.front.st.net.local 22']
     dnat_4['dest_host'].should eql('eg-sftp-vip.st.net.local')
     dnat_4['dest_port'].should eql('22')
-    dnat_4['tcp'].should eql('true')
-    dnat_4['udp'].should eql('false')
+    dnat_4['tcp'].should eql(true)
+    dnat_4['udp'].should eql(false)
 
     dnat_5 = dnat['eg-sftp-vip.front.st.net.local 2222']
     dnat_5['dest_host'].should eql('eg-sftp-vip.st.net.local')
     dnat_5['dest_port'].should eql('2222')
-    dnat_5['tcp'].should eql('true')
-    dnat_5['udp'].should eql('false')
+    dnat_5['tcp'].should eql(true)
+    dnat_5['udp'].should eql(false)
   end
 
   host('sub-nat-001.mgmt.st.net.local') do |host|
@@ -215,13 +215,13 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     dnat_1 = dnat['sub-blahnat-vip.front.st.net.local 8008']
     dnat_1['dest_host'].should eql('sub-blahnat-vip.st.net.local')
     dnat_1['dest_port'].should eql('8008')
-    dnat_1['tcp'].should eql('true')
-    dnat_1['udp'].should eql('false')
+    dnat_1['tcp'].should eql(true)
+    dnat_1['udp'].should eql(false)
 
     dnat_2 = dnat['sub-defaultport-vip.front.st.net.local 8000']
     dnat_2['dest_host'].should eql('sub-defaultport-vip.st.net.local')
     dnat_2['dest_port'].should eql('8000')
-    dnat_2['tcp'].should eql('true')
-    dnat_2['udp'].should eql('false')
+    dnat_2['tcp'].should eql(true)
+    dnat_2['udp'].should eql(false)
   end
 end

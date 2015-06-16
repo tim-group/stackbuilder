@@ -23,8 +23,8 @@ module Stacks::Services::NatCluster
         {
           'dest_host' => "#{rule.to.host}",
           'dest_port' => "#{rule.to.port}",
-          'tcp'       => "#{rule.tcp}",
-          'udp'       => "#{rule.udp}"
+          'tcp'       => rule.tcp,
+          'udp'       => rule.udp
         }
       ]
     end]

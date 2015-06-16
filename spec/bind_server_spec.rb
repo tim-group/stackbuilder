@@ -334,8 +334,8 @@ describe_stack 'nameservers should have working load balancer and nat configurat
     host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['dest_host'].
       should eql('oy-ns-vip.oy.net.local')
     host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['dest_port'].should eql('53')
-    host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['tcp'].should eql('true')
-    host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['udp'].should eql('true')
+    host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['tcp'].should eql(true)
+    host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['udp'].should eql(true)
   end
 
   host("oy-lb-001.mgmt.oy.net.local") do |host|
