@@ -23,26 +23,26 @@ class StackBuilder::Allocator::HostRepository
       all_domains.each do |vm_hostname|
         vm_object = machine_repo.find_by_hostname(vm_hostname)
         if vm_object.nil?
-          vms << { hostname: vm_hostname, in_model: false }
+          vms << { :hostname => vm_hostname, :in_model => false }
         else
           vms << vm_object.to_spec
         end
       end
 
       host = StackBuilder::Allocator::Host.new(fqdn,
-                                               preference_functions: preference_functions,
-                                               policies: policies,
-                                               ram: attr[:memory],
-                                               storage: attr[:storage],
-                                               allocation_disabled: attr[:allocation_disabled])
+                                               :preference_functions => preference_functions,
+                                               :policies => policies,
+                                               :ram => attr[:memory],
+                                               :storage => attr[:storage],
+                                               :allocation_disabled => attr[:allocation_disabled])
 
       host.allocated_machines = vms
       host.domains = attr[:domains]
       hosts << host
     end
 
-    StackBuilder::Allocator::Hosts.new(hosts: hosts,
-                                       preference_functions: preference_functions,
-                                       logger: @logger)
+    StackBuilder::Allocator::Hosts.new(:hosts => hosts,
+                                       :preference_functions => preference_functions,
+                                       :logger => @logger)
   end
 end

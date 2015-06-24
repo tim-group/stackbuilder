@@ -8,7 +8,7 @@ describe_stack 'quant' do
       end
     end
 
-    env "e1", primary_site: "space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "quant"
     end
   end

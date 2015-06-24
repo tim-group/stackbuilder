@@ -6,8 +6,8 @@ class Compute::Client
   include Support::MCollective
 
   def get_fact(fact, hosts)
-    fact_response = mco_client('rpcutil', nodes: hosts) do |mco|
-      result = mco.get_fact(fact: fact)
+    fact_response = mco_client('rpcutil', :nodes => hosts) do |mco|
+      result = mco.get_fact(:fact => fact)
       result.map do |resp|
         [resp[:sender], { fact.to_sym => resp[:data][:value] }]
       end
@@ -26,7 +26,7 @@ class Compute::Client
     domains = Hash[]
     domain_name = hv[:sender].gsub(/^[^.]*\.mgmt\./, "")
     (hv[:data][:active_domains] + hv[:data][:inactive_domains]).each do |d|
-      mco.domaininfo(domain: d).map do |di|
+      mco.domaininfo(:domain => d).map do |di|
         domains[d + "." + domain_name] = di[:data] if di[:statusmsg] == "OK"
       end
     end
@@ -39,13 +39,13 @@ class Compute::Client
     hosts = discover_compute_nodes(fabric)
     fail "unable to find any compute nodes in fabric #{fabric}" if hosts.empty?
 
-    response = mco_client("libvirt", nodes: hosts) do |mco|
+    response = mco_client("libvirt", :nodes => hosts) do |mco|
       mco.hvinfo.map do |hv|
         fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
         domains = audit_domains ? {} : get_libvirt_domains(mco, hv)
 
-        [hv[:sender], hv[:data].merge(domains: domains)]
+        [hv[:sender], hv[:data].merge(:domains => domains)]
       end
     end
 
@@ -58,13 +58,13 @@ class Compute::Client
 
     libvirt_response_hash = Hash[response_hash]
 
-    response = mco_client("computenodestorage", nodes: hosts) do |mco|
+    response = mco_client("computenodestorage", :nodes => hosts) do |mco|
       result = mco.details
       result.map do |resp|
         fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
           unless resp[:statuscode] == 0
 
-        [resp[:sender], { storage: resp[:data] }]
+        [resp[:sender], { :storage => resp[:data] }]
       end
     end
 
@@ -79,14 +79,14 @@ class Compute::Client
   end
 
   def discover_compute_nodes(fabric)
-    mco_client("computenode", fabric: fabric) do |mco|
+    mco_client("computenode", :fabric => fabric) do |mco|
       mco.discover.sort
     end
   end
 
   def invoke(selector, specs, client_options)
     mco_client("computenode", client_options) do |mco|
-      mco.send(selector, specs: specs).map do |node|
+      mco.send(selector, :specs => specs).map do |node|
         fail node[:statusmsg] if node[:statuscode] != 0
         [node.results[:sender], node.results[:data]]
       end
@@ -94,26 +94,26 @@ class Compute::Client
   end
 
   def launch(host, specs)
-    invoke :launch, specs, timeout: 10_000, nodes: [host]
+    invoke :launch, specs, :timeout => 10_000, :nodes => [host]
   end
 
   def allocate_ips(host, specs)
-    invoke :allocate_ips, specs, nodes: [host]
+    invoke :allocate_ips, specs, :nodes => [host]
   end
 
   def free_ips(host, specs)
-    invoke :free_ips, specs, nodes: [host]
+    invoke :free_ips, specs, :nodes => [host]
   end
 
   def clean(fabric, specs)
-    invoke :clean, specs, fabric: fabric
+    invoke :clean, specs, :fabric => fabric
   end
 
   def add_cnames(host, spec)
-    invoke :add_cnames, spec, nodes: [host]
+    invoke :add_cnames, spec, :nodes => [host]
   end
 
   def remove_cnames(host, spec)
-    invoke :remove_cnames, spec, nodes: [host]
+    invoke :remove_cnames, spec, :nodes => [host]
   end
 end

@@ -23,7 +23,7 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
       end
     end
 
-    env "e1", primary_site: "space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "test"
       instantiate_stack "test_stack_2"
     end

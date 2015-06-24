@@ -43,10 +43,10 @@ module Stacks::Services::VirtualService
   def to_vip_spec(location)
     qualified_hostnames = Hash[@vip_networks.sort.map { |network| [network, vip_fqdn(network, location)] }]
     {
-      hostname: "#{environment.name}-#{name}",
-      fabric: environment.options[location],
-      networks: @vip_networks,
-      qualified_hostnames: qualified_hostnames
+      :hostname => "#{environment.name}-#{name}",
+      :fabric => environment.options[location],
+      :networks => @vip_networks,
+      :qualified_hostnames => qualified_hostnames
     }
   end
 

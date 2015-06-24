@@ -14,7 +14,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     @virtual_service = virtual_service
     @allowed_hosts = []
     @launch_config = {}
-    modify_storage('/' => { size: '5G' })
+    modify_storage('/' => { :size => '5G' })
   end
 
   def bind_to(environment)
@@ -39,7 +39,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     root_size_min = @ram.to_i / 524288 + 2
 
     if root_size_cur < root_size_min
-      modify_storage('/' => { size: root_size_min.to_s.concat('G') })
+      modify_storage('/' => { :size => root_size_min.to_s.concat('G') })
     end
     nil
   end

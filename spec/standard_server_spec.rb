@@ -7,7 +7,7 @@ describe_stack 'standard' do
       standard "mymachine"
     end
 
-    env "e1", primary_site: "space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "standard"
     end
   end

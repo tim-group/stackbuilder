@@ -36,7 +36,7 @@ module Support::MCollectivePuppet
 
       ready_to_sign.each do |machine_fqdn|
         signed = puppetca do |mco|
-          mco.sign(certname: machine_fqdn).select do |response|
+          mco.sign(:certname => machine_fqdn).select do |response|
             response[:statuscode] == 0
           end.size > 0
         end
@@ -60,7 +60,7 @@ module Support::MCollectivePuppet
     callback = Support::Callback.new(&block)
     machines_fqdns.each do |machine_fqdn|
       puppetca(machine_fqdn) do |mco|
-        cleaned = mco.clean(certname: machine_fqdn).select do |response|
+        cleaned = mco.clean(:certname => machine_fqdn).select do |response|
           response[:statuscode] == 0
         end.size > 0
         if cleaned
@@ -137,7 +137,7 @@ module Support::MCollectivePuppet
   def puppetd_query(selector, fqdns, &block)
     return {} if fqdns.empty?
     Hash[puppetd(fqdns.sort) do |mco|
-      mco.send(selector, timeout: 30).map do |response|
+      mco.send(selector, :timeout => 30).map do |response|
         [response[:sender], block.call(response[:data])]
       end
     end]
@@ -156,12 +156,12 @@ module Support::MCollectivePuppet
     if puppetmaster.nil?
       mco_client("puppetca", &block)
     else
-      mco_client("puppetca", nodes: puppetmaster, &block)
+      mco_client("puppetca", :nodes => puppetmaster, &block)
     end
   end
 
   def puppetd(nodes, &block)
-    mco_client("puppet", nodes: nodes, &block)
+    mco_client("puppet", :nodes => nodes, &block)
   end
 
   def timed_out(start_time, timeout)

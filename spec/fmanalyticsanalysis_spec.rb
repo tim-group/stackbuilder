@@ -7,7 +7,7 @@ describe_stack 'analytics' do
       fmanalyticsanalysis
     end
 
-    env "e1", primary_site: "space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "analytics"
     end
   end

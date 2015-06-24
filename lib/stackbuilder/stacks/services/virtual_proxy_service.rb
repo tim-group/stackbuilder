@@ -20,7 +20,7 @@ module Stacks::Services::VirtualProxyService
   def vhost(service, fqdn = nil, service_env_name = nil, service_location = :primary_site, &config_block)
     service_env_name = environment.name if service_env_name.nil?
     vhost = Stacks::Services::ProxyVHost.new(self, fqdn, service, service_env_name, service_location, &config_block)
-    vhost.add_pass_rule('/', service: service, environment: service_env_name, location: service_location)
+    vhost.add_pass_rule('/', :service => service, :environment => service_env_name, :location => service_location)
     @proxy_vhosts << vhost
   end
 

@@ -7,7 +7,7 @@ describe_stack 'should default to disallow destory' do
       legacy_mysqldb "mydb"
     end
 
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "mysql"
     end
   end
@@ -25,7 +25,7 @@ describe_stack 'should allow destroy to be overwritten' do
         each_machine(&:allow_destroy)
       end
     end
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "mysql"
     end
   end
@@ -43,7 +43,7 @@ describe_stack 'should provide correct enc data' do
         each_machine(&:allow_destroy)
       end
     end
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "mysql"
     end
   end
@@ -63,20 +63,20 @@ describe_stack 'should allow storage options to be overwritten' do
       legacy_mysqldb "mydb" do
         self.database_name = "mydb"
         each_machine do |machine|
-          machine.modify_storage('/'              => { size: '5G' },
-                                 '/var/lib/mysql' => { type: 'data', size: '10G' })
+          machine.modify_storage('/'              => { :size => '5G' },
+                                 '/var/lib/mysql' => { :type => 'data', :size => '10G' })
         end
       end
     end
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "mysql"
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(type: "data")
-    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(size: "10G")
-    host.to_specs.shift[:storage]['/'.to_sym].should include(type: "os")
-    host.to_specs.shift[:storage]['/'.to_sym].should include(size: "5G")
+    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(:type => "data")
+    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(:size => "10G")
+    host.to_specs.shift[:storage]['/'.to_sym].should include(:type => "os")
+    host.to_specs.shift[:storage]['/'.to_sym].should include(:size => "5G")
   end
 end
 
@@ -86,7 +86,7 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
       legacy_mysqldb "mydb" do
       end
     end
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "mysql"
     end
   end
@@ -105,7 +105,7 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
       legacy_mysqldb "mydb" do
       end
     end
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "mysql"
     end
   end
@@ -139,7 +139,7 @@ describe_stack 'should support dependencies' do
       end
     end
 
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "fr"
       instantiate_stack "fr_db"
       instantiate_stack "hr"
@@ -171,7 +171,7 @@ describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysq
       end
     end
 
-    env "testing", primary_site: "space" do
+    env "testing", :primary_site => "space" do
       instantiate_stack "fr_db"
       instantiate_stack "hr_db"
     end

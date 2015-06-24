@@ -15,8 +15,8 @@ shared_examples_for "vip" do |virtualservice|
       vip_fqdn = virtualservice.vip_fqdn(:prod, :primary_site)
       logger.debug("executing vip test for #{vip_fqdn} test on #{node_to_execute_from}")
 
-      data = mco_client("nettest", nodes: [node_to_execute_from]) do |mco|
-        result = mco.connect(fqdn: vip_fqdn, port: "#{port}")[0]
+      data = mco_client("nettest", :nodes => [node_to_execute_from]) do |mco|
+        result = mco.connect(:fqdn => vip_fqdn, :port => "#{port}")[0]
         fail "error attempting to connect to vip #{vip_fqdn}" if result[:statuscode] != 0
         result[:data]
       end

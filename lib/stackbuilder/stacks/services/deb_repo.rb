@@ -17,8 +17,8 @@ class Stacks::Services::DebRepo < Stacks::MachineDef
   def to_spec
     specs = super
     cname = {
-      cnames: {
-        mgmt: {
+      :cnames => {
+        :mgmt =>  {
           'aptly-master'     => "#{qualified_hostname(:mgmt)}",
           'deb-transitional' => "#{qualified_hostname(:mgmt)}"
         }

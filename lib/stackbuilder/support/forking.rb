@@ -21,7 +21,7 @@ module Support::Forking
       rescue StandardError => e
         exception = e
       end
-      Marshal.dump({ result: result, exception: exception }, write)
+      Marshal.dump({ :result => result, :exception => exception }, write)
     end
     write.close
 

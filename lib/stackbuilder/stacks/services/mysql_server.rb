@@ -19,16 +19,16 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
 
     storage = {
       '/mnt/data' => {
-        type: 'data',
-        size: '10G',
-        persistent: true
+        :type       => 'data',
+        :size       => '10G',
+        :persistent => true
       }
     }
     backup_storage = {
       '/mnt/storage' => {
-        type: 'data',
-        size: '10G',
-        persistent: true
+        :type       => 'data',
+        :size       => '10G',
+        :persistent => true
       }
     }
     modify_storage(storage)
@@ -36,19 +36,19 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def backup_size(size)
-    modify_storage('/mnt/storage' => { size: size }) if @backup
+    modify_storage('/mnt/storage' => { :size => size }) if @backup
   end
 
   def data_size(size)
-    modify_storage('/mnt/data' => { size: size })
+    modify_storage('/mnt/data' => { :size => size })
   end
 
   def create_persistent_storage_override
     modify_storage('/mnt/data' => {
-                     persistence_options: { on_storage_not_found: :create_new }
+                     :persistence_options => { :on_storage_not_found => :create_new }
                    })
     modify_storage('/mnt/storage' => {
-                     persistence_options: { on_storage_not_found: :create_new }
+                     :persistence_options => { :on_storage_not_found => :create_new }
                    }) if backup?
   end
 

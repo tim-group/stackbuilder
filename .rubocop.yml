@@ -33,17 +33,8 @@ Style/ClassAndModuleChildren:
 Style/Documentation:
   Enabled: false
 
-Style/DotPosition:
-  EnforcedStyle: trailing
-
-Style/EachWithObject: # this is just confusing
-  Enabled: false
-
 Style/FormatString:
   EnforcedStyle: sprintf
-
-Style/Lambda:
-  Enabled: false
 
 Style/MultilineBlockChain:
   Enabled: false
@@ -73,4 +64,30 @@ Style/RescueModifier:
   Enabled: false
 
 Style/StringLiterals: # This is just so we don't have to correct a zillion lines
+  Enabled: false
+
+### XXX ruby 1.8 compatibility
+# Ruby 1.8 does't have each_with_object()
+Style/EachWithObject:
+  Enabled: false
+
+# Ruby 1.8 requirement
+Style/DotPosition:
+  EnforcedStyle: trailing
+
+# Ruby 1.8 requirement
+Style/Lambda:
+  Enabled: false
+
+# Ruby 1.8 requirement
+Style/HashSyntax:
+  EnforcedStyle: hash_rockets
+
+# in ruby1.8, proc {} is a synonym for lambda {}
+# in ruby1.9, proc {} is a synonym for Proc.new {}
+Style/Proc:
+  Enabled: false
+
+# flat_map not present in ruby1.8
+Performance/FlatMap:
   Enabled: false

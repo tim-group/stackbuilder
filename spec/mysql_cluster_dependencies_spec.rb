@@ -21,7 +21,7 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
-    env "e1", primary_site: "space", secondary_site: "earth" do
+    env "e1", :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "example"
       instantiate_stack "example_db"
       instantiate_stack "loadbalancer"

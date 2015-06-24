@@ -7,7 +7,7 @@ describe_stack 'basic environment' do
       virtual_appserver "appx"
     end
 
-    env "e", primary_site: "st", secondary_site: "bs" do
+    env "e", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "x"
     end
   end
@@ -38,7 +38,7 @@ describe_stack 'sub environments' do
       virtual_appserver "appz"
     end
 
-    env "daddy", primary_site: "st", secondary_site: "bs" do
+    env "daddy", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "x"
       env "daughter" do
         instantiate_stack "y"
@@ -47,7 +47,7 @@ describe_stack 'sub environments' do
         instantiate_stack "z"
       end
     end
-    env "latest", primary_site: "st", secondary_site: "bs"
+    env "latest", :primary_site => "st", :secondary_site => "bs"
   end
 
   environment('daddy', 'should have the correct sub environments') do |daddy|

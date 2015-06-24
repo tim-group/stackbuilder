@@ -11,7 +11,7 @@ describe 'Stacks::MachineSet' do
         end
       end
 
-      env 'env', primary_site: 'mars', secondary_site: 'jupiter' do
+      env 'env', :primary_site => 'mars', :secondary_site => 'jupiter' do
         instantiate_stack 'funds'
       end
     end
@@ -30,7 +30,7 @@ describe 'Stacks::MachineSet' do
           end
         end
       end
-      env "e1", primary_site: 'space' do
+      env "e1", :primary_site => 'space' do
         instantiate_stack "mystack"
       end
     end
@@ -50,7 +50,7 @@ describe 'Stacks::MachineSet' do
           end
         end
       end
-      env "e1", primary_site: 'space' do
+      env "e1", :primary_site => 'space' do
         instantiate_stack "mystack"
       end
     end

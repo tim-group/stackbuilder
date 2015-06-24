@@ -3,7 +3,7 @@ require 'stackbuilder/stacks/factory'
 
 describe StackBuilder::Allocator::HostPreference do
   it 'does shit' do
-    preference_function = proc do |host|
+    preference_function = Proc.new do |host|
       host.machines.size
     end
 
@@ -17,7 +17,7 @@ describe StackBuilder::Allocator::HostPreference do
   end
 
   it 'rejects' do
-    preference_function = proc do |host|
+    preference_function = Proc.new do |host|
       host.machines.size
     end
 

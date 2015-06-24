@@ -26,13 +26,13 @@ describe_stack 'tim' do
         each_machine do |machine|
           machine.ram = '14680064'
           machine.vcpus = '8'
-          machine.modify_storage('/'.to_sym => { size: '10G' })
+          machine.modify_storage('/'.to_sym => { :size => '10G' })
         end
         depend_on 'sftp'
         depend_on 'timflowapp'
       end
     end
-    env "e1", primary_site: "space", tim_instances: 2 do
+    env "e1", :primary_site => "space", :tim_instances => 2 do
       instantiate_stack "tim"
       instantiate_stack "secureftp"
       instantiate_stack "timflow"
@@ -70,7 +70,7 @@ describe_stack 'app with sso port' do
         enable_sso('8444')
       end
     end
-    env "e1", primary_site: "space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "app"
     end
   end
@@ -88,7 +88,7 @@ describe_stack 'app with ajp port' do
         enable_ajp('8444')
       end
     end
-    env "e1", primary_site: "space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "app"
     end
   end
@@ -107,7 +107,7 @@ describe_stack 'standalone servers should not provide a configuration to load ba
       standalone_appserver 'timcyclic'
     end
 
-    env "mirror", primary_site: "oy", secondary_site: "bs" do
+    env "mirror", :primary_site => "oy", :secondary_site => "bs" do
       instantiate_stack "lb"
       instantiate_stack "tim_cyclic"
     end

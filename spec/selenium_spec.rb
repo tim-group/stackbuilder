@@ -5,33 +5,33 @@ describe_stack 'selenium' do
   given do
     stack "segrid" do
       selenium_version = "2.41.0"
-      hub = selenium_hub('hub-001', selenium_version: selenium_version)
+      hub = selenium_hub('hub-001', :selenium_version => selenium_version)
       selenium_node_cluster "a" do
         self.hub = hub
         self.selenium_version = selenium_version
         self.firefox_version = "36.0+build2-0ubuntu0.12.04.5"
         self.nodespecs = [
           {
-            type: "ubuntu",
-            instances: 5
+            :type => "ubuntu",
+            :instances => 5
           },
           {
-            type: "winxp",
-            instances: 2,
-            ie_version: "6",
-            gold_image: "file:///var/local/images/dev-sxp-gold.img"
+            :type => "winxp",
+            :instances => 2,
+            :ie_version => "6",
+            :gold_image => "file:///var/local/images/dev-sxp-gold.img"
           },
           {
-            type: "win7",
-            instances: 2,
-            ie_version: "9",
-            gold_image: "http://iso.youdevise.com/gold/win7-ie9-gold.img"
+            :type => "win7",
+            :instances => 2,
+            :ie_version => "9",
+            :gold_image => "http://iso.youdevise.com/gold/win7-ie9-gold.img"
           },
           {
-            type: "win7",
-            instances: 1,
-            ie_version: "10",
-            gold_image: "http://iso.youdevise.com/gold/win7-ie10-gold.img"
+            :type => "win7",
+            :instances => 1,
+            :ie_version => "10",
+            :gold_image => "http://iso.youdevise.com/gold/win7-ie10-gold.img"
           }
         ]
       end
@@ -41,30 +41,30 @@ describe_stack 'selenium' do
       selenium_node_cluster "a" do
         self.nodespecs = [
           {
-            type: "ubuntu",
-            instances: 5
+            :type => "ubuntu",
+            :instances => 5
           },
           {
-            type: "winxp",
-            instances: 10,
-            ie_version: "6",
-            gold_image: "file:///var/local/images/dev-sxp-gold.img"
+            :type => "winxp",
+            :instances => 10,
+            :ie_version => "6",
+            :gold_image => "file:///var/local/images/dev-sxp-gold.img"
           },
           {
-            type: "win7",
-            instances: 10,
-            ie_version: "9",
-            gold_image: "http://iso.youdevise.com/gold/win7-ie9-gold.img"
+            :type => "win7",
+            :instances => 10,
+            :ie_version => "9",
+            :gold_image => "http://iso.youdevise.com/gold/win7-ie9-gold.img"
           }
         ]
       end
     end
 
-    env "e1", primary_site: "space" do
+    env "e1", :primary_site => "space" do
       instantiate_stack "segrid"
     end
 
-    env "qa", primary_site: "space" do
+    env "qa", :primary_site => "space" do
       instantiate_stack "qatestmachines"
     end
   end

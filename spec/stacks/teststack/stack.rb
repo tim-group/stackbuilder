@@ -6,6 +6,6 @@ stack "ststack" do
   end
 end
 
-env 'te', primary_site: 'space', secondary_site: 'space' do
+env 'te', :primary_site => 'space', :secondary_site => 'space' do
   instantiate_stack 'ststack'
 end

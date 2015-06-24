@@ -15,7 +15,7 @@ module Support
         callback = Support::Callback.new(&block)
         machines.each do |machine|
           response = @service.schedule_downtime(machine, duration)
-          callback.invoke :success, machine: machine.hostname, result: response
+          callback.invoke :success, :machine => machine.hostname, :result => response
         end
       end
 
@@ -23,7 +23,7 @@ module Support
         callback = Support::Callback.new(&block)
         machines.each do |machine|
           response = @service.cancel_downtime(machine)
-          callback.invoke :success, machine: machine.hostname, result: response
+          callback.invoke :success, :machine => machine.hostname, :result => response
         end
       end
     end

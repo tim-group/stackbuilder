@@ -2,13 +2,13 @@ require 'stackbuilder/allocator/namespace'
 
 module StackBuilder::Allocator::HostPreference
   def self.fewest_machines
-    proc do |host|
+    Proc.new do |host|
       host.machines.size
     end
   end
 
   def self.alphabetical_fqdn
-    proc do |host|
+    Proc.new do |host|
       host.fqdn
     end
   end
