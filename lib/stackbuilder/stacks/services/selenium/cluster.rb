@@ -22,20 +22,20 @@ module Stacks::Services::Selenium::Cluster
       when "ubuntu"
         node_name = "#{name}-browser-#{index}"
         @definitions[node_name] = Stacks::Services::Selenium::UbuntuNode.new(node_name, @hub,
-                                                                             :selenium_version => @selenium_version,
-                                                                             :firefox_version => @firefox_version)
+                                                                             selenium_version: @selenium_version,
+                                                                             firefox_version: @firefox_version)
       when "winxp"
         node_name = "#{name}-ie#{nodespec[:ie_version]}-#{index}"
         @definitions[node_name] = Stacks::Services::Selenium::XpNode.new(node_name, @hub,
-                                                                         :selenium_version => @selenium_version,
-                                                                         :gold_image => nodespec[:gold_image],
-                                                                         :ie_version => nodespec[:ie_version])
+                                                                         selenium_version: @selenium_version,
+                                                                         gold_image: nodespec[:gold_image],
+                                                                         ie_version: nodespec[:ie_version])
       when "win7"
         node_name = "#{name}-ie#{nodespec[:ie_version]}-#{index}"
         @definitions[node_name] = Stacks::Services::Selenium::Win7Node.new(node_name, @hub,
-                                                                           :selenium_version => @selenium_version,
-                                                                           :gold_image => nodespec[:gold_image],
-                                                                           :ie_version => nodespec[:ie_version])
+                                                                           selenium_version: @selenium_version,
+                                                                           gold_image: nodespec[:gold_image],
+                                                                           ie_version: nodespec[:ie_version])
       else
         fail "unknown Selenium node type"
       end

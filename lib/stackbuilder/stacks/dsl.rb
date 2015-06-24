@@ -11,7 +11,7 @@ module Stacks
     end
 
     def stack(name, &block)
-      @stack_procs[name] = Proc.new do |environment|
+      @stack_procs[name] = proc do |environment|
         stack = Stacks::CustomServices.new(name)
         stack.instance_eval(&block)
         stack.bind_to(environment)

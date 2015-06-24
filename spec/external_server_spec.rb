@@ -12,7 +12,7 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "external"
       instantiate_stack "rabbit"
     end

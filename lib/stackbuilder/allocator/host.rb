@@ -12,7 +12,7 @@ class StackBuilder::Allocator::Host
   attr_reader :ram
   attr_reader :storage
 
-  def initialize(fqdn, args = { :preference_functions => [], :policies => [], :ram => '0', :storage => {} })
+  def initialize(fqdn, args = { preference_functions: [], policies: [], ram: '0', storage: {} })
     @allocated_machines = []
     @allocation_disabled = args[:allocation_disabled] || false
     @domains = Hash
@@ -37,7 +37,7 @@ class StackBuilder::Allocator::Host
   end
 
   def can_allocate(machine_hash)
-    result = { :allocatable => true, :reasons => [] }
+    result = { allocatable: true, reasons: [] }
     relevant_policies(machine_hash[:fabric]).each do |policy|
       policy_result = policy.call(self, machine_hash)
       if (policy_result[:passed] != true)

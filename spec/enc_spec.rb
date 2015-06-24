@@ -12,17 +12,17 @@ describe Stacks::DSL do
       natserver
     end
 
-    env "parent", :primary_site => "st", :secondary_site => "bs" do
-      env "e1", :lb_virtual_router_id => 1,
-                :nat_front_virtual_router_id => 40,
-                :nat_prod_virtual_router_id => 41,
-                :primary_site => "space" do
+    env "parent", primary_site: "st", secondary_site: "bs" do
+      env "e1", lb_virtual_router_id: 1,
+                nat_front_virtual_router_id: 40,
+                nat_prod_virtual_router_id: 41,
+                primary_site: "space" do
         instantiate_stack "fabric"
       end
 
-      env "e2", :lb_virtual_router_id => 2,
-                :nat_front_virtual_router_id => 42,
-                :nat_prod_virtual_router_id => 43 do
+      env "e2", lb_virtual_router_id: 2,
+                nat_front_virtual_router_id: 42,
+                nat_prod_virtual_router_id: 43 do
         instantiate_stack "fabric"
       end
     end
@@ -39,7 +39,7 @@ describe Stacks::DSL do
     stack "fabric" do
       loadbalancer
     end
-    env "rah", :primary_site => "st", :secondary_site => "bs" do
+    env "rah", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "fabric"
     end
     find("rah-lb-001.mgmt.st.net.local").should_not be_nil
@@ -57,7 +57,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary_site => "st", :secondary_site => "bs" do
+    env "st", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "loadbalancer"
       instantiate_stack "sftp"
     end
@@ -85,7 +85,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary_site => "st", :secondary_site => "bs" do
+    env "st", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "fabric"
       instantiate_stack "twoapp"
       instantiate_stack "oneapp"
@@ -134,7 +134,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "st", :primary_site => "st", :secondary_site => "bs" do
+    env "st", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "fabric"
       instantiate_stack "twoapp"
       instantiate_stack "oneapp"
@@ -177,7 +177,7 @@ describe Stacks::DSL do
         self.groups = %w(blue green)
       end
     end
-    env "ci", :primary_site => "st" do
+    env "ci", primary_site: "st" do
       instantiate_stack "blah"
     end
 
@@ -194,7 +194,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "ci", :primary_site => "st", :secondary_site => "bs" do
+    env "ci", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "blah"
     end
 
@@ -219,7 +219,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "ci", :primary_site => "st", :secondary_site => "bs" do
+    env "ci", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "blah"
     end
 
@@ -246,7 +246,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "eg", :primary_site => "st", :secondary_site => "bs" do
+    env "eg", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "es"
     end
 
@@ -259,7 +259,7 @@ describe Stacks::DSL do
 
   it 'throws an error if we try and instantiate a stack that isnt defined' do
     expect do
-      env "myold", :primary_site => "x", :secondary_site => "y" do
+      env "myold", primary_site: "x", secondary_site: "y" do
         instantiate_stack "no-exist"
       end
     end.to raise_error "no stack found 'no-exist'"
@@ -271,7 +271,7 @@ describe Stacks::DSL do
       natserver
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "mystack"
     end
 
@@ -283,7 +283,7 @@ describe Stacks::DSL do
       rate_limited_forward_proxy 's3proxy'
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "mystack"
     end
 
@@ -299,7 +299,7 @@ describe Stacks::DSL do
       virtual_sftpserver "sx"
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "mystack"
     end
 
@@ -315,7 +315,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "e1", :primary_site => 'space' do
+    env "e1", primary_site: 'space' do
       instantiate_stack "mystack"
     end
 
@@ -336,7 +336,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "e1", :primary_site => 'space' do
+    env "e1", primary_site: 'space' do
       instantiate_stack "mystack"
     end
 
@@ -355,7 +355,7 @@ describe Stacks::DSL do
       end
     end
 
-    env "e1", :primary_site => 'space' do
+    env "e1", primary_site: 'space' do
       instantiate_stack "mystack"
     end
 

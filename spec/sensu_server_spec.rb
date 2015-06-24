@@ -7,7 +7,7 @@ describe_stack 'sensu' do
       sensu
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "sensu"
     end
   end

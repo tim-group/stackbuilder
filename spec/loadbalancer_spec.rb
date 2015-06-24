@@ -21,13 +21,13 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
       end
     end
 
-    env 'e1', :primary_site => 'mars', :secondary_site => 'jupiter' do
+    env 'e1', primary_site: 'mars', secondary_site: 'jupiter' do
       instantiate_stack 'lb'
       instantiate_stack 'funds'
       instantiate_stack 'example'
     end
 
-    env 'x1', :primary_site => 'pluto', :secondary_site => 'mercury' do
+    env 'x1', primary_site: 'pluto', secondary_site: 'mercury' do
       instantiate_stack 'lb'
       instantiate_stack 'funds'
       instantiate_stack 'example'
@@ -107,7 +107,7 @@ describe_stack 'load balancer stack create a secondary server with the correct e
       end
     end
 
-    env "e1", :primary_site => "space", :lb_virtual_router_id => 66 do
+    env "e1", primary_site: "space", lb_virtual_router_id: 66 do
       instantiate_stack "lb"
       instantiate_stack "fr"
     end
@@ -125,8 +125,8 @@ describe_stack 'load balancer stack create a secondary server with the correct e
       "healthcheck_timeout" => 10
     )
     host.to_enc['routes'].should eql("to" => ["mgmt_pg_from_mgmt_oy"])
-    host.to_specs.shift[:qualified_hostnames].should eql(:mgmt => "e1-lb-002.mgmt.space.net.local",
-                                                         :prod => "e1-lb-002.space.net.local")
+    host.to_specs.shift[:qualified_hostnames].should eql(mgmt: "e1-lb-002.mgmt.space.net.local",
+                                                         prod: "e1-lb-002.space.net.local")
     host.to_specs.shift[:availability_group].should eql('e1-lb')
     host.to_specs.shift[:networks].should eql([:mgmt, :prod])
     host.to_specs.shift[:hostname].should eql('e1-lb-002')
@@ -158,7 +158,7 @@ describe_stack 'load balancer will generate config for a sub environment' do
       end
     end
 
-    env "st", :primary_site => "st", :secondary_site => "bs" do
+    env "st", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "lb"
       instantiate_stack "secureftp"
       env "ci" do

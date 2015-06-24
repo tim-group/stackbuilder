@@ -13,7 +13,7 @@ describe_stack 'mongodb' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "rabbit"
       instantiate_stack "example"
     end

@@ -22,7 +22,7 @@ describe_stack 'sftp servers' do
       end
     end
 
-    env "mirror", :primary_site => "oy", :secondary_site => "bs" do
+    env "mirror", primary_site: "oy", secondary_site: "bs" do
       instantiate_stack "lb"
       instantiate_stack "tim_cyclic"
       instantiate_stack "secureftp"

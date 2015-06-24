@@ -8,13 +8,13 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
     @ubuntu_version = ubuntu_version
     @options = options
     modify_storage('/'.to_sym => {
-                     :prepare => {
-                       :method =>  'format',
-                       :options => {
-                         :resize => false,
-                         :create_in_fstab => false,
-                         :type => 'ext4',
-                         :shrink_after_unmount => true
+                     prepare: {
+                       method: 'format',
+                       options: {
+                         resize: false,
+                         create_in_fstab: false,
+                         type: 'ext4',
+                         shrink_after_unmount: true
                        }
                      }
                    })

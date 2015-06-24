@@ -9,7 +9,7 @@ describe_stack 'should provide a single instance mode to be backwards compatible
       end
     end
 
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -25,7 +25,7 @@ describe_stack 'should provide the correct cross routing enc data' do
       mysql_cluster "frdb"
     end
 
-    env "testing", :primary_site => "pg", :secondary_site => "oy" do
+    env "testing", primary_site: "pg", secondary_site: "oy" do
       instantiate_stack "mysql"
     end
   end
@@ -50,7 +50,7 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
       mysql_cluster "frdb"
     end
 
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -80,7 +80,7 @@ describe_stack 'should default to disallow destory' do
       mysql_cluster "spoondb"
     end
 
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -98,7 +98,7 @@ describe_stack 'should allow destroy to be overwritten' do
         each_machine(&:allow_destroy)
       end
     end
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -116,7 +116,7 @@ describe_stack 'should provide correct enc data' do
         each_machine(&:allow_destroy)
       end
     end
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -205,7 +205,7 @@ describe_stack 'should allow storage options to be overwritten' do
         backup_size('29G')
       end
     end
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -224,7 +224,7 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
       mysql_cluster "mydb" do
       end
     end
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -241,7 +241,7 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
       mysql_cluster "mydb" do
       end
     end
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql"
     end
   end
@@ -262,7 +262,7 @@ describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysq
         each_machine { |machine| machine.version = '5.5.43-0ubuntu0.12.04.1' }
       end
     end
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "mysql51"
       instantiate_stack "mysql55"
     end
@@ -299,7 +299,7 @@ describe_stack 'should support dependencies' do
       end
     end
 
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
+    env "testing", primary_site: "space", secondary_site: "earth" do
       instantiate_stack "fr"
       instantiate_stack "fr_db"
       instantiate_stack "hr"

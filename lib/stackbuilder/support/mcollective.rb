@@ -27,7 +27,7 @@ module Support
       end
 
       def new_client(name)
-        client = @rpc.rpcclient(name, :options => @mco_options)
+        client = @rpc.rpcclient(name, options: @mco_options)
         apply_fabric_filter client, @options[:fabric] if @options.key?(:fabric)
         client
       end
@@ -82,7 +82,7 @@ module Support
         runner = create_fabric_runner(options)
         client = runner.new_client(name)
         nodes = options[:nodes] || []
-        nodes.empty? ? client.discover : client.discover(:nodes => nodes)
+        nodes.empty? ? client.discover : client.discover(nodes: nodes)
         retval = block.nil? ? nil : block.call(client)
         client.disconnect
         retval

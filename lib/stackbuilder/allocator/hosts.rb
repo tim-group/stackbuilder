@@ -17,19 +17,19 @@ class StackBuilder::Allocator::Hosts
   public
 
   def do_allocation(specs)
-    allocated_machines = Hash[hosts.map do |host|
+    allocated_machines = Hash[hosts.flat_map do |host|
       host.allocated_machines.map do |machine|
         [machine, host.fqdn]
       end
-    end.flatten(1)]
+    end]
 
     already_allocated = allocated_machines.reject do |machine, _host|
       !specs.include?(machine)
     end
 
     {
-      :already_allocated => already_allocated,
-      :newly_allocated => allocate(specs)
+      already_allocated: already_allocated,
+      newly_allocated: allocate(specs)
     }
   end
 

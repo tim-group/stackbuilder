@@ -20,14 +20,14 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env "o", primary_site: "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
       end
     end
 
-    env "p", :primary_site => "pg" do
+    env "p", primary_site: "pg" do
       env 'pg' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
@@ -175,14 +175,14 @@ describe_stack 'nameservers with single slave_from dependency' do
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env "o", primary_site: "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
       end
     end
 
-    env "p", :primary_site => "pg" do
+    env "p", primary_site: "pg" do
       env 'pg' do
         instantiate_stack "nameserver"
         instantiate_stack "lb"
@@ -292,8 +292,8 @@ describe_stack 'nameservers with single slave_from dependency' do
     ])
     enc['role::bind_server']['forwarder_zones'].should eql(['youdevise.com'])
     host.to_spec[:networks].should be_eql([:mgmt, :prod])
-    host.to_spec[:qualified_hostnames].should eql(:prod => 'pg-ns-002.pg.net.local',
-                                                  :mgmt => 'pg-ns-002.mgmt.pg.net.local')
+    host.to_spec[:qualified_hostnames].should eql(prod: 'pg-ns-002.pg.net.local',
+                                                  mgmt: 'pg-ns-002.mgmt.pg.net.local')
   end
 end
 
@@ -313,7 +313,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env "o", primary_site: "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "nat"
@@ -321,7 +321,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
       end
     end
 
-    env "p", :primary_site => "pg" do
+    env "p", primary_site: "pg" do
       env 'pg' do
         instantiate_stack "nameserver"
         instantiate_stack "nat"
@@ -381,7 +381,7 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env "o", primary_site: "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
         instantiate_stack "nat"
@@ -394,7 +394,7 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
     host.virtual_service.vip_networks.should be_eql [:mgmt]
     host.to_enc['role::bind_server']['vip_fqdns'].should eql(['oy-ns-vip.mgmt.oy.net.local'])
     host.to_spec[:networks].should eql([:mgmt])
-    host.to_spec[:qualified_hostnames].should be_eql(:mgmt => 'oy-ns-001.mgmt.oy.net.local')
+    host.to_spec[:qualified_hostnames].should be_eql(mgmt: 'oy-ns-001.mgmt.oy.net.local')
   end
 
   host("oy-nat-001.mgmt.oy.net.local") do |host|
@@ -416,7 +416,7 @@ describe_stack 'bind servers with zones removed should have the right zone files
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env "o", primary_site: "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
       end
@@ -436,7 +436,7 @@ describe_stack 'test @slave_instances = 2' do
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env "o", primary_site: "oy" do
       env 'oy' do
         instantiate_stack "nameserver"
       end

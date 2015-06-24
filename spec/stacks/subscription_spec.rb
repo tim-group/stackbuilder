@@ -15,7 +15,7 @@ describe Subscription do
 
   it 'waits for all hosts to check-in' do
     topic = random_topic
-    subscription = Subscription.new(:pop_timeout => 1)
+    subscription = Subscription.new(pop_timeout: 1)
     subscription.start([topic])
 
     threads = []
@@ -30,7 +30,7 @@ describe Subscription do
 
   it 'returns anyway after the timeout with some results missing' do
     topic = random_topic
-    subscription = Subscription.new(:pop_timeout => 1)
+    subscription = Subscription.new(pop_timeout: 1)
     subscription.start([topic])
 
     threads = []
@@ -47,7 +47,7 @@ describe Subscription do
     topic = random_topic
     topic2 = random_topic
 
-    subscription2 = Subscription.new(:pop_timeout => 1)
+    subscription2 = Subscription.new(pop_timeout: 1)
     subscription2.start([topic, topic2]) # XXX flicker, see http://jenkins.youdevise.com/job/stackbuilder/1061/console
 
     threads = []
@@ -64,7 +64,7 @@ describe Subscription do
     topic = random_topic
 
     # 08.05.2015 mmazurek: 0.05 might be to slow, bump if causing specs to fail, remove comment if fine after a while
-    subscription = Subscription.new(:pop_timeout => 0.05)
+    subscription = Subscription.new(pop_timeout: 0.05)
     subscription.start([topic]) # XXX flicker, see http://jenkins.youdevise.com/job/stackbuilder/1030/console
 
     threads = []

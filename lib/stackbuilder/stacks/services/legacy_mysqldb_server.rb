@@ -9,11 +9,11 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
     storage = {
       '/mnt/data' => {
-        :type                => 'data',
-        :size                => '10G',
-        :persistent          => true,
-        :persistence_options => {
-          :on_storage_not_found => :raise_error
+        type: 'data',
+        size: '10G',
+        persistent: true,
+        persistence_options: {
+          on_storage_not_found: :raise_error
         }
       }
     }

@@ -39,7 +39,7 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "example"
       instantiate_stack "example_db"
       instantiate_stack "loadbalancer"
@@ -122,7 +122,7 @@ describe_stack 'stack with dependencies that does not provide config params when
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "example"
       instantiate_stack "example_db"
     end
@@ -156,11 +156,11 @@ describe_stack 'stack with cross environment dependencies' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "example"
     end
 
-    env "e2", :primary_site => "earth" do
+    env "e2", primary_site: "earth" do
       instantiate_stack "example"
     end
   end
@@ -207,7 +207,7 @@ describe_stack 'stack with sub environment dependencies' do
           vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
             @cert = 'wildcard_timgroup_com'
             add_properties 'is_hip' => true
-            add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
+            add_pass_rule "/HIP/resources", service: "blondinapp", environment: 'mirror'
           end
         end
         enable_nat
@@ -215,14 +215,14 @@ describe_stack 'stack with sub environment dependencies' do
     end
 
     env 'shared',
-        :primary_site => 'oy',
-        :secondary_site => 'oy',
-        :lb_virtual_router_id => 27 do
+        primary_site: 'oy',
+        secondary_site: 'oy',
+        lb_virtual_router_id: 27 do
       instantiate_stack 'funds_proxy'
 
       env 'mirror',
-          :timcyclic_instances => 1,
-          :lb_virtual_router_id => 21 do
+          timcyclic_instances: 1,
+          lb_virtual_router_id: 21 do
         instantiate_stack 'funds'
         instantiate_stack 'blondin'
       end

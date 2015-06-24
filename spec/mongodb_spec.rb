@@ -24,15 +24,15 @@ describe_stack 'mongodb' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "mongo"
     end
 
-    env "latest", :primary_site => "space" do
+    env "latest", primary_site: "space" do
       instantiate_stack "mongo"
       instantiate_stack "mongo_arbiter"
     end
-    env "prodbackup", :primary_site => "space" do
+    env "prodbackup", primary_site: "space" do
       instantiate_stack "mongo_backup"
     end
   end

@@ -200,7 +200,7 @@ namespace :sbx do
     Table.header("KVM host machines audit")
     ordered_headers.each do |header|
       width = header_widths[header] rescue header.to_s.size
-      Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
+      Table.column(header.to_s, width: width, padding: 1, justification: :left)
     end
     Table.tabulate
   end
@@ -428,8 +428,8 @@ namespace :sbx do
           desc "orc resolve #{machine_def.virtual_service.application}"
           sbtask :resolve do
             factory = Orc::Factory.new(
-              :application => machine_def.virtual_service.application,
-              :environment => machine_def.environment.name
+              application: machine_def.virtual_service.application,
+              environment: machine_def.environment.name
             )
             factory.cmdb_git.update
             factory.engine.resolve
@@ -445,8 +445,8 @@ namespace :sbx do
             sbtask :resolve do
               applications.to_a.each do |application|
                 factory = Orc::Factory.new(
-                  :application => application,
-                  :environment => machine_def.environment.name
+                  application: application,
+                  environment: machine_def.environment.name
                 )
                 factory.cmdb_git.update
                 factory.engine.resolve
@@ -457,14 +457,14 @@ namespace :sbx do
       end
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait'] do |t|
+      task provision: ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait'] do |t|
         namespace = t.name.sub(/:provision$/, '')
         Rake::Task[namespace + ':orc:resolve'].invoke if Rake::Task.task_defined?(namespace + ':orc:resolve')
         Rake::Task[namespace + ':cancel_downtime'].invoke
       end
 
       desc "perform a clean followed by a provision"
-      task :reprovision => %w(clean provision)
+      task reprovision: %w(clean provision)
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -645,7 +645,7 @@ namespace :sbx do
           end
 
           success = mco_client("puppetd") do |mco|
-            engine = PuppetRoll::Engine.new({ :concurrency => 5 }, [], hosts, PuppetRoll::Client.new(hosts, mco))
+            engine = PuppetRoll::Engine.new({ concurrency: 5 }, [], hosts, PuppetRoll::Client.new(hosts, mco))
             engine.execute
             pp engine.get_report
             engine.successful?
@@ -682,10 +682,10 @@ namespace :sbx do
       desc "clean away all traces of these machines"
       # Note that the ordering here is important - must have killed VMs before
       # removing their puppet cert, otherwise we have a race condition
-      task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
+      task clean: ['schedule_downtime', 'clean_nodes', 'puppet:clean']
 
       desc "frees up ip and vip allocation of these machines"
-      task :free_ip_allocation => %w(free_ips free_vips)
+      task free_ip_allocation: %w(free_ips free_vips)
 
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
@@ -753,7 +753,7 @@ namespace :sbx do
           mco.fact_filter "domain=/(st|ci)/"
           results = {}
           hosts.each do |host|
-            mco.domainxml(:domain => host) do |result|
+            mco.domainxml(domain: host) do |result|
               xml = result[:body][:data][:xml]
               sender = result[:senderid]
               unless xml.nil?
@@ -762,8 +762,8 @@ namespace :sbx do
                 fail "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
                   if matches.captures.empty?
                 results[host] = {
-                  :host => sender,
-                  :port => matches.captures.first
+                  host: sender,
+                  port: matches.captures.first
                 }
               end
             end

@@ -7,13 +7,13 @@ describe_stack 'jenkins' do
       cislave 'jenkinsslave' do
         each_machine do |machine|
           machine.vcpus = '8'
-          machine.modify_storage('/'.to_sym => { :size => '10G' })
+          machine.modify_storage('/'.to_sym => { size: '10G' })
           machine.ram = '8000'
         end
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "jenkins"
     end
   end

@@ -16,7 +16,7 @@ describe_stack 'test enc of the mail servers' do
       end
     end
 
-    env "oymigration", :primary_site => "oy" do
+    env "oymigration", primary_site: "oy" do
       instantiate_stack "lb"
       instantiate_stack "mail_stack"
     end

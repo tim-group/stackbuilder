@@ -7,7 +7,7 @@ describe_stack 'logstash' do
       logstash
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "logstash"
     end
   end

@@ -13,7 +13,7 @@ describe_stack 'nat servers should have all 3 networks' do
       end
     end
 
-    env "oy", :primary_site => "oy" do
+    env "oy", primary_site: "oy" do
       instantiate_stack 'fabric'
     end
   end
@@ -64,9 +64,9 @@ describe_stack 'nat servers cannot suppot enable_secondary_site' do
       end
     end
 
-    env 'production', :primary_site         => 'pg',
-                      :secondary_site       => 'oy',
-                      :lb_virtual_router_id => 27 do
+    env 'production', primary_site: 'pg',
+                      secondary_site: 'oy',
+                      lb_virtual_router_id: 27 do
       instantiate_stack 'nat'
     end
   end
@@ -96,15 +96,15 @@ describe_stack 'nat servers should provide natting for secondary_site services i
       end
     end
 
-    env 'shared', :primary_site         => 'oy',
-                  :secondary_site       => 'pg',
-                  :lb_virtual_router_id => 27 do
+    env 'shared', primary_site: 'oy',
+                  secondary_site: 'pg',
+                  lb_virtual_router_id: 27 do
       instantiate_stack 'nat'
     end
 
-    env 'production', :primary_site         => 'pg',
-                      :secondary_site       => 'oy',
-                      :lb_virtual_router_id => 27 do
+    env 'production', primary_site: 'pg',
+                      secondary_site: 'oy',
+                      lb_virtual_router_id: 27 do
       instantiate_stack 'example_proxy'
       instantiate_stack 'example'
     end
@@ -153,7 +153,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
       end
     end
 
-    env "eg", :primary_site => "st", :secondary_site => "bs" do
+    env "eg", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "frontexample"
       env "sub" do
         instantiate_stack "example2"

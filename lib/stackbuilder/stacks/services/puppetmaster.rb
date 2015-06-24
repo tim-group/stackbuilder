@@ -7,7 +7,7 @@ class Stacks::Services::PuppetMaster < Stacks::MachineDef
     super(machineset.name + "-" + index, [:mgmt])
 
     # the puppet repo takes over 15GB as of 25.03.2015
-    modify_storage('/' => { :size => '25G' })
+    modify_storage('/' => { size: '25G' })
     @vcpus = '8'
     @ram = '4194304' # 4GB
   end
@@ -30,9 +30,9 @@ class Stacks::Services::PuppetMaster < Stacks::MachineDef
   def to_spec
     specs = super
     puppetmaster_special = {
-      :template            => 'puppetmaster',
-      :cnames              => {
-        :mgmt => {
+      template: 'puppetmaster',
+      cnames: {
+        mgmt: {
           'puppet' => "#{qualified_hostname(:mgmt)}"
         }
       }

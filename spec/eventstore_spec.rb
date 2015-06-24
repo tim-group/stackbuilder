@@ -10,7 +10,7 @@ describe_stack 'eventstore' do
       end
     end
 
-    env "e1", :primary_site => "space", :secondary_site => "moon" do
+    env "e1", primary_site: "space", secondary_site: "moon" do
       instantiate_stack "eventstore_stack"
     end
   end

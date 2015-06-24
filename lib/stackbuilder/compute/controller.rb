@@ -16,11 +16,11 @@ class Compute::Allocation
 
   def create_vm_to_host_map
     ## FIXME: Rubocop - Use flat_map instead of map...flatten.
-    Hash[@current_allocation.reject { |_host, vms| vms.nil? }.map do |host, vms|
+    Hash[@current_allocation.reject { |_host, vms| vms.nil? }.flat_map do |host, vms|
       vms.map do |vm|
         [vm, host]
       end
-    end.flatten(1)]
+    end]
   end
 
   def allocate(specs)
@@ -141,7 +141,7 @@ class Compute::Controller
 
     flattened_results = results.map do |host, vms|
       vms.map do |vm, result|
-        [vm, { :result => result, :host => host }]
+        [vm, { result: result, host: host }]
       end
     end.flatten_hashes
 

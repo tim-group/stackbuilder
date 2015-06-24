@@ -11,7 +11,7 @@ describe StackBuilder::Allocator::HostRepository do
       virtual_appserver "refapp"
     end
 
-    env "test", :primary_site => "t" do
+    env "test", primary_site: "t" do
       instantiate_stack "ref"
     end
 
@@ -27,8 +27,8 @@ describe StackBuilder::Allocator::HostRepository do
     result = {}
     n.times do |i|
       result["h#{i}"] = {
-        :active_domains => machines,
-        :inactive_domains => []
+        active_domains: machines,
+        inactive_domains: []
       }
     end
 
@@ -36,9 +36,9 @@ describe StackBuilder::Allocator::HostRepository do
     compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
-      :machine_repo => self,
-      :preference_functions => preference_functions,
-      :compute_node_client => compute_node_client)
+      machine_repo: self,
+      preference_functions: preference_functions,
+      compute_node_client: compute_node_client)
 
     hosts = host_repo.find_compute_nodes("t")
     hosts.hosts.size.should eql(n)
@@ -53,14 +53,14 @@ describe StackBuilder::Allocator::HostRepository do
     machines = env.flatten.map(&:hostname)
     machine_specs = env.flatten.map(&:to_specs).flatten
     machines << "roguemachine"
-    machine_specs << { :hostname => "roguemachine", :in_model => false }
+    machine_specs << { hostname: "roguemachine", in_model: false }
     compute_node_client = double
     n = 5
     result = {}
     n.times do |i|
       result["h#{i}"] = {
-        :active_domains => machines,
-        :inactive_domains => []
+        active_domains: machines,
+        inactive_domains: []
       }
     end
 
@@ -68,9 +68,9 @@ describe StackBuilder::Allocator::HostRepository do
     compute_node_client.stub(:audit_hosts).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
-      :machine_repo => self,
-      :preference_functions => preference_functions,
-      :compute_node_client => compute_node_client)
+      machine_repo: self,
+      preference_functions: preference_functions,
+      compute_node_client: compute_node_client)
 
     hosts = host_repo.find_compute_nodes("t")
     hosts.hosts.size.should eql(n)

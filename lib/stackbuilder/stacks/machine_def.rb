@@ -24,12 +24,12 @@ class Stacks::MachineDef
     @ram = "2097152"
     @storage = {
       '/'.to_sym =>  {
-        :type        => 'os',
-        :size        => '3G',
-        :prepare     => {
-          :method => 'image',
-          :options => {
-            :path => '/var/local/images/gold-precise/generic.img'
+        type: 'os',
+        size: '3G',
+        prepare: {
+          method: 'image',
+          options: {
+            path: '/var/local/images/gold-precise/generic.img'
           }
         }
       }
@@ -53,9 +53,9 @@ class Stacks::MachineDef
   def use_trusty
     trusty_gold_image = {
       '/'.to_sym =>  {
-        :prepare     => {
-          :options => {
-            :path => '/var/local/images/gold-trusty/generic.img'
+        prepare: {
+          options: {
+            path: '/var/local/images/gold-trusty/generic.img'
           }
         }
       }
@@ -97,7 +97,7 @@ class Stacks::MachineDef
 
   def disable_persistent_storage
     @storage.each do |mount_point, _values|
-      modify_storage(mount_point.to_sym => { :persistent => false })
+      modify_storage(mount_point.to_sym => { persistent: false })
     end
   end
 
@@ -146,12 +146,12 @@ class Stacks::MachineDef
     @destroyable = true if environment.every_machine_destroyable?
 
     spec = {
-      :hostname => @hostname,
-      :domain => @domain,
-      :fabric => @fabric,
-      :availability_group => availability_group,
-      :networks => @networks,
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
+      hostname: @hostname,
+      domain: @domain,
+      fabric: @fabric,
+      availability_group: availability_group,
+      networks: @networks,
+      qualified_hostnames: Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }
 
     spec[:disallow_destroy] = true unless @destroyable

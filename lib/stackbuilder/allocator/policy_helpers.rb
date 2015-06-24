@@ -9,10 +9,10 @@ module StackBuilder::Allocator::PolicyHelpers
       end
       available_ram = ((host_ram - allocated_ram) - host_reserve_ram)
       result = {
-        :host_ram => host_ram,
-        :host_reserve_ram => host_reserve_ram,
-        :allocated_ram => allocated_ram,
-        :available_ram => available_ram
+        host_ram: host_ram,
+        host_reserve_ram: host_reserve_ram,
+        allocated_ram: allocated_ram,
+        available_ram: available_ram
       }
     end
     result
@@ -24,7 +24,7 @@ module StackBuilder::Allocator::PolicyHelpers
 
   def self.vm_stats_of(host)
     result = {
-      :vms => host.machines.length
+      vms: host.machines.length
     }
     result
   end

@@ -9,11 +9,11 @@ end
 desc "Run specs"
 if ENV['STACKS_RSPEC_SEPARATE'] # run each rspec in a separate ruby instance
   require './spec/rake_override'
-  SingleTestFilePerInterpreterSpec::RakeTask.new(:spec => ["ci:setup:rspec"]) do
+  SingleTestFilePerInterpreterSpec::RakeTask.new(spec: ["ci:setup:rspec"]) do
     ENV['INSIDE_RSPEC'] = 'true'
   end
 else # fast run (common ruby process for all tests)
-  RSpec::Core::RakeTask.new(:spec => ["ci:setup:rspec"]) do
+  RSpec::Core::RakeTask.new(spec: ["ci:setup:rspec"]) do
     ENV['INSIDE_RSPEC'] = 'true'
   end
 end
@@ -40,7 +40,7 @@ task :package do
 end
 
 desc "Create a debian package"
-task :install => [:package] do
+task install: [:package] do
   sh "sudo dpkg -i *.deb"
   sh "sudo /etc/init.d/mcollective restart;"
 end

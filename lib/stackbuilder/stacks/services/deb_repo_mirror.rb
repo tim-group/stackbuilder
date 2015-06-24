@@ -16,7 +16,7 @@ class Stacks::Services::DebRepoMirror < Stacks::MachineDef
 
   def to_spec
     specs = super
-    cname = { :cnames => { :mgmt =>  { 'deb-transitional' => "#{qualified_hostname(:mgmt)}" } } }
+    cname = { cnames: { mgmt: { 'deb-transitional' => "#{qualified_hostname(:mgmt)}" } } }
     specs.merge!(cname)
     specs[:cnames] = cnames unless cnames.nil?
     specs

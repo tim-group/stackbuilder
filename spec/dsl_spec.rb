@@ -7,7 +7,7 @@ describe Stacks::DSL do
       virtual_appserver "appx"
       virtual_appserver "dbx"
     end
-    env "ci", :primary_site => "st", :secondary_site => "bs" do
+    env "ci", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "blah"
     end
   end
@@ -21,7 +21,7 @@ describe Stacks::DSL do
     spec[:fabric].should eql('st')
     spec[:availability_group].should eql('ci-appx')
     spec[:qualified_hostnames].
-      should eql(:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local")
+      should eql(mgmt: "ci-appx-001.mgmt.st.net.local", prod: "ci-appx-001.st.net.local")
   end
 
   it 'can make an arbitrary specd machine' do
@@ -37,28 +37,28 @@ describe Stacks::DSL do
       end
     end
 
-    env "ci", :primary_site => "st", :secondary_site => "bs" do
+    env "ci", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "fabric"
     end
 
     environments["ci"]["fabric"].to_specs.should eql([{
-                                                       :hostname => "ci-puppetmaster-001",
-                                                       :bling => true,
-                                                       :domain => "st.net.local",
-                                                       :qualified_hostnames => {
-                                                         :mgmt => "ci-puppetmaster-001.mgmt.st.net.local",
-                                                         :prod => "ci-puppetmaster-001.st.net.local" },
-                                                       :networks => [:mgmt, :prod],
-                                                       :fabric => "st",
-                                                       :ram => "2097152",
-                                                       :storage => {
+                                                       hostname: "ci-puppetmaster-001",
+                                                       bling: true,
+                                                       domain: "st.net.local",
+                                                       qualified_hostnames: {
+                                                         mgmt: "ci-puppetmaster-001.mgmt.st.net.local",
+                                                         prod: "ci-puppetmaster-001.st.net.local" },
+                                                       networks: [:mgmt, :prod],
+                                                       fabric: "st",
+                                                       ram: "2097152",
+                                                       storage: {
                                                          :/ => {
-                                                           :type => "os",
-                                                           :size => "3G",
-                                                           :prepare => {
-                                                             :method => "image",
-                                                             :options => {
-                                                               :path => "/var/local/images/gold-precise/generic.img"
+                                                           type: "os",
+                                                           size: "3G",
+                                                           prepare: {
+                                                             method: "image",
+                                                             options: {
+                                                               path: "/var/local/images/gold-precise/generic.img"
                                                              }
                                                            }
                                                          }
@@ -67,7 +67,7 @@ describe Stacks::DSL do
   end
 
   it 'can find sub environments' do
-    env "parent", :primary_site => "st", :secondary_site => "bs" do
+    env "parent", primary_site: "st", secondary_site: "bs" do
       env "sub" do
       end
     end

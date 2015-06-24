@@ -12,7 +12,7 @@ describe_stack 'test_app_server' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "test_app_server"
     end
   end
@@ -30,7 +30,7 @@ describe_stack 'test_app_server should default to no jvm args' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "test_app_server"
     end
   end
@@ -50,7 +50,7 @@ describe_stack 'test_app_server with custom jvm args' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "test_app_server"
     end
   end
@@ -72,7 +72,7 @@ describe_stack 'test_app_server with only one instance in the load balancer' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "test_app_server"
     end
   end
@@ -100,7 +100,7 @@ describe_stack 'should have the correct app_dependant_instances and participatio
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "loadbalancer"
       instantiate_stack "example"
     end

@@ -20,7 +20,7 @@ describe_stack 'exampleproxy' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "exampleproxy"
     end
   end
@@ -72,7 +72,7 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", primary_site: "space" do
       instantiate_stack "exampleproxy"
     end
   end
@@ -93,10 +93,10 @@ describe_stack 'proxy pass rules without an environment default to the environme
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
           @cert = 'wildcard_timgroup_com'
           add_properties 'is_hip' => true
-          add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
-          add_pass_rule "/HIP/blah", :service => "blondinapp", :environment => 'latest'
-          add_pass_rule "/HIP/blah2", :service => "blondinapp", :environment => 'shared'
-          add_pass_rule "/HIP/blah3", :service => "blondinapp"
+          add_pass_rule "/HIP/resources", service: "blondinapp", environment: 'mirror'
+          add_pass_rule "/HIP/blah", service: "blondinapp", environment: 'latest'
+          add_pass_rule "/HIP/blah2", service: "blondinapp", environment: 'shared'
+          add_pass_rule "/HIP/blah3", service: "blondinapp"
         end
         enable_nat
       end
@@ -113,7 +113,7 @@ describe_stack 'proxy pass rules without an environment default to the environme
         self.ports = [8443]
       end
     end
-    env 'shared', :primary_site => 'oy' do
+    env 'shared', primary_site: 'oy' do
       instantiate_stack 'funds_proxy'
       instantiate_stack 'funds'
 
@@ -149,7 +149,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
         @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'shared') do
           add_properties 'is_hip' => true
-          add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'shared'
+          add_pass_rule "/HIP/resources", service: "blondinapp", environment: 'shared'
         end
         enable_nat
       end
@@ -160,7 +160,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
         self.application = 'tfunds'
       end
     end
-    env 'shared', :primary_site => 'oy', :secondary_site => 'pg' do
+    env 'shared', primary_site: 'oy', secondary_site: 'pg' do
       instantiate_stack 'blondin'
       instantiate_stack 'funds_proxy'
       instantiate_stack 'funds'
@@ -244,7 +244,7 @@ describe_stack 'generates proxyserver enc data' do
           with_redirect "old-example.timgroup.com"
         end
         vhost('ref2app', 'example.timgroup.com') do
-          add_pass_rule "/resources", :service => "downstreamapp"
+          add_pass_rule "/resources", service: "downstreamapp"
         end
       end
     end
@@ -254,14 +254,14 @@ describe_stack 'generates proxyserver enc data' do
       end
       virtual_proxyserver "refproxy2" do
         vhost('refapp3', 'example2.timgroup.com') do
-          add_pass_rule "/somewhere", :service => "downstreamapp", :environment => 'env'
+          add_pass_rule "/somewhere", service: "downstreamapp", environment: 'env'
         end
       end
     end
-    env "env", :primary_site => "st" do
+    env "env", primary_site: "st" do
       instantiate_stack "ref"
     end
-    env "env2", :primary_site => "st" do
+    env "env2", primary_site: "st" do
       instantiate_stack "ref2"
     end
   end
@@ -315,7 +315,7 @@ describe_stack 'generates proxy server enc data with persistent when enable_pers
       end
     end
 
-    env "st", :primary_site => "st", :secondary_site => "bs" do
+    env "st", primary_site: "st", secondary_site: "bs" do
       instantiate_stack "loadbalancer"
       instantiate_stack "proxyserver"
     end
@@ -369,45 +369,45 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
           case environment
           when 'shared'
             add_properties 'is_hip' => true
-            add_pass_rule '/HIP/resources', :service => 'blondinapp'
+            add_pass_rule '/HIP/resources', service: 'blondinapp'
           end
         end
         vhost('foouserapp', 'foo.fooexample.com', 'production') do
           @cert = 'wildcard_fooexample.com'
           add_properties 'is_hip' => true
-          add_pass_rule '/HIP/resources', :service => 'blondinapp'
+          add_pass_rule '/HIP/resources', service: 'blondinapp'
         end
         case environment.name
         when 'shared'
           vhost('foouserapp', 'foo-mirror.fooexample.com', 'mirror') do
             @cert = 'wildcard_fooexample.com'
             add_properties 'is_hip' => true
-            add_pass_rule '/HIP/resources', :service => 'blondinapp'
+            add_pass_rule '/HIP/resources', service: 'blondinapp'
           end
           vhost('foouserapp', 'foo-latest.fooexample.com', 'latest') do
             @cert = 'wildcard_fooexample.com'
             add_properties 'is_hip' => true
-            add_pass_rule '/HIP/resources', :service => 'blondinapp'
+            add_pass_rule '/HIP/resources', service: 'blondinapp'
           end
         end
       end
     end
 
-    env "production", :primary_site => "pg", :secondary_site => "oy" do
+    env "production", primary_site: "pg", secondary_site: "oy" do
       instantiate_stack "foo_proxy"
       instantiate_stack "test"
       instantiate_stack "foo"
     end
 
-    env "shared", :primary_site => "oy" do
+    env "shared", primary_site: "oy" do
       instantiate_stack "foo_proxy"
 
-      env "latest", :primary_site => "oy"do
+      env "latest", primary_site: "oy"do
         instantiate_stack "test"
         instantiate_stack "foo"
       end
 
-      env "mirror", :primary_site => "oy" do
+      env "mirror", primary_site: "oy" do
         instantiate_stack "test"
         instantiate_stack "foo"
       end

@@ -16,25 +16,25 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
   def to_spec
     spec = super
     modify_storage('/'.to_sym => {
-                     :prepare => {
-                       :options => {
-                         :create_in_fstab => false,
-                         :path   => "#{options[:master_location]}#{options[:master_image_file]}",
-                         :resize => false
+                     prepare: {
+                       options: {
+                         create_in_fstab: false,
+                         path: "#{options[:master_location]}#{options[:master_image_file]}",
+                         resize: false
                        }
                      }
                    })
     case @win_version
     when 'win7'
       modify_storage('/'.to_sym => {
-                       :size => '15G'
+                       size: '15G'
                      })
     when 'xp'
       modify_storage('/'.to_sym => {
-                       :size => '8G',
-                       :prepare => {
-                         :options => {
-                           :virtio => false
+                       size: '8G',
+                       prepare: {
+                         options: {
+                           virtio: false
                          }
                        }
                      })
