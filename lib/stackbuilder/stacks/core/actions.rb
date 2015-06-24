@@ -16,12 +16,12 @@ module Stacks::Core::Actions
       allocation_results = services.allocator.allocate(machine_specs)
 
       allocation_results[:already_allocated].each do |machine, host|
-        services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}")
+        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}"
       end
 
       allocation_results[:newly_allocated].each do |host, machines|
         machines.each do |machine|
-          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
+          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}"
         end
       end
     end
@@ -38,12 +38,12 @@ module Stacks::Core::Actions
       allocation_results = services.allocator.allocate(machine_specs)
 
       allocation_results[:already_allocated].each do |machine, host|
-        services.logger.info("#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}")
+        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}"
       end
 
       allocation_results[:newly_allocated].each do |host, namachines|
         namachines.each do |machine|
-          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}\n"
+          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}"
         end
       end
 
