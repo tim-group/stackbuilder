@@ -21,6 +21,33 @@ class Stacks::Factory
     @interactive = $stdout.tty? || ENV.key?("BUILD_NUMBER")
 
     @log = Logger.new STDOUT
+
+    logger.formatter = proc do |severity, datetime, progname, msg|
+      def msg2str(msg)
+        case msg
+        when ::String
+          msg
+        when ::Exception
+          "#{ msg.message } (#{ msg.class })\n" << (msg.backtrace || []).join("\n")
+        else
+          msg.inspect
+        end
+      end
+
+      fdatetime = datetime.strftime("%Y-%m-%d %H:%M:%S.") << "%06d" % datetime.usec
+
+      col = case severity
+            when 'UNKNOWN' then '[0m'
+            when 'FATAL'   then '[31;1m'
+            when 'ERROR'   then '[31m'
+            when 'WARN'    then '[33m'
+            when 'INFO'    then '[34;1m'
+            when 'DEBUG'   then '[0m'
+            else                '[0m'
+      end
+      "#{col}%s (%5d): %s %s[0m\n" % [fdatetime, $$, severity, msg2str(msg)]
+    end
+
     @log.instance_eval do
       def start(task)
         @start_time = Time.now

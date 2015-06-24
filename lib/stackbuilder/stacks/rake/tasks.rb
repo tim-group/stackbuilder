@@ -19,12 +19,21 @@ require 'stackbuilder/compute/controller'
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/stacks/core/actions'
 require 'thread'
+
+# XXX refactor this somehow, causes warnings in new rubys. hide the warnings for now
 # rubocop:disable Style/ClassVars
+warn_level = $VERBOSE
+$VERBOSE = nil
 @@factory = @factory = Stacks::Factory.new
+$VERBOSE = warn_level
 # rubocop:enable Style/ClassVars
 
 def logger
-  @@factory.logger
+  warn_level = $VERBOSE
+  $VERBOSE = nil
+  ret = @@factory.logger
+  $VERBOSE = warn_level
+  ret
 end
 
 include Rake::DSL
