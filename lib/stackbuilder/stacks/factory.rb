@@ -22,19 +22,8 @@ class Stacks::Factory
 
     @log = Logger.new STDOUT
 
-    logger.formatter = proc do |severity, datetime, progname, msg|
-      def msg2str(msg)
-        case msg
-        when ::String
-          msg
-        when ::Exception
-          "#{ msg.message } (#{ msg.class })\n" << (msg.backtrace || []).join("\n")
-        else
-          msg.inspect
-        end
-      end
-
-      fdatetime = datetime.strftime("%Y-%m-%d %H:%M:%S.") << "%06d" % datetime.usec
+    logger.formatter = proc do |severity, datetime, _progname, msg|
+      fdatetime = datetime.strftime("%Y-%m-%d %H:%M:%S.") << sprintf("%06d", datetime.usec)
 
       col = case severity
             when 'UNKNOWN' then '[0m'
@@ -45,7 +34,7 @@ class Stacks::Factory
             when 'DEBUG'   then '[0m'
             else                '[0m'
       end
-      "#{col}%s (%5d): %s %s[0m\n" % [fdatetime, $$, severity, msg2str(msg)]
+      sprintf("#{col}%s (%5d): %s %s[0m\n", fdatetime, $PROCESS_ID, severity, msg2str(msg))
     end
 
     @log.instance_eval do
@@ -136,5 +125,18 @@ class Stacks::Factory
       :dns_service => dns_service,
       :logger => logger
     )
+  end
+
+  private
+
+  def msg2str(msg)
+    case msg
+    when ::String
+      msg
+    when ::Exception
+      "#{ msg.message } (#{ msg.class })\n" << (msg.backtrace || []).join("\n")
+    else
+      msg.inspect
+    end
   end
 end
