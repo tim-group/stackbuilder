@@ -145,6 +145,7 @@ class Compute::Controller
       end
     end.flatten_hashes
 
+    puts 'aa'
     all_specs.each do |spec|
       vm = spec[:hostname]
       result = flattened_results[vm]
@@ -162,6 +163,7 @@ class Compute::Controller
       end
     end
 
+    puts 'bb'
     callback.finish
   end
 
@@ -208,7 +210,6 @@ class Compute::Controller
 
   def clean(all_specs, &block)
     callback = Support::Callback.new(&block)
-
     non_destroyable_specs, destroyable_specs = all_specs.partition do |spec|
       spec[:disallow_destroy]
     end
