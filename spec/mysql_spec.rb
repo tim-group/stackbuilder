@@ -123,7 +123,6 @@ describe_stack 'should provide correct enc data' do
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
     enc_server_role['backup'].should eql(false)
-    enc_server_role['config'].should eql({})
     enc_server_role['database_name'].should eql('mydb')
     enc_server_role['datadir'].should eql('/mnt/data/mysql')
     enc_server_role['environment'].should eql('testing')
@@ -147,7 +146,6 @@ describe_stack 'should provide correct enc data' do
   host("testing-mydb-002.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
     enc_server_role['backup'].should eql(false)
-    enc_server_role['config'].should eql({})
     enc_server_role['database_name'].should eql('mydb')
     enc_server_role['datadir'].should eql('/mnt/data/mysql')
     enc_server_role['environment'].should eql('testing')
@@ -174,7 +172,6 @@ describe_stack 'should provide correct enc data' do
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
     enc_server_role['backup'].should eql(true)
-    enc_server_role['config'].should eql({})
     enc_server_role['database_name'].should eql('mydb')
     enc_server_role['datadir'].should eql('/mnt/data/mysql')
     enc_server_role['environment'].should eql('testing')

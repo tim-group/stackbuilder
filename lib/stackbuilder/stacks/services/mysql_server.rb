@@ -64,10 +64,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
   # rubocop:enable Style/TrivialAccessors
 
-  def config
-    {}
-  end
-
   def server_id
     @virtual_service.children.index(self) + 1
   end
@@ -76,7 +72,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     enc = {
       'role::mysql_server' => {
         'backup'                   => backup?,
-        'config'                   => config,
         'database_name'            => @virtual_service.database_name,
         'datadir'                  => '/mnt/data/mysql',
         'environment'              => environment.name,
