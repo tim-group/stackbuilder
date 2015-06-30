@@ -38,7 +38,7 @@ module StackBuilder::Allocator::HostPolicies
         result = {
           :passed => false,
           :reason => "Insufficient memory (required: #{machine[:ram]} KiB " \
-                     "available: #{host_ram_stats[:available_ram]} KiB)"
+                     "available (minus host_reserve_ram): #{host_ram_stats[:available_ram]} KiB)"
         }
       end
       result
