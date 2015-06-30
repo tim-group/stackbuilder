@@ -43,7 +43,7 @@ describe Subscription do
     events.responses.should have_messages_for_hosts(["a"])
   end
 
-  it 'can wait for multiple topics' do
+  xit 'can wait for multiple topics' do
     topic = random_topic
     topic2 = random_topic
 
@@ -60,7 +60,7 @@ describe Subscription do
     subscription2.wait_for_hosts(topic2, ["a"]).responses.should have_messages_for_hosts(["a"])
   end
 
-  it 'correctly shows: successful, failed and unknowns' do
+  xit 'correctly shows: successful, failed and unknowns' do
     topic = random_topic
 
     # 08.05.2015 mmazurek: 0.05 might be to slow, bump if causing specs to fail, remove comment if fine after a while
