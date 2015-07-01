@@ -241,7 +241,7 @@ describe StackBuilder::Allocator::HostPolicies do
       }
     }
     host1_storage = {
-      'os'=> {
+      'os' => {
         :existing_storage => {}
       },
       'data' => {
@@ -249,7 +249,7 @@ describe StackBuilder::Allocator::HostPolicies do
       }
     }
     host2_storage = {
-      'os'=> {
+      'os' => {
         :existing_storage => {}
       },
       'data' => {
@@ -265,5 +265,4 @@ describe StackBuilder::Allocator::HostPolicies do
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h2, machine)[:passed].
       should eql(true)
   end
-
 end

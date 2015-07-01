@@ -124,9 +124,9 @@ module StackBuilder::Allocator::HostPolicies
         underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
         # Deal with already existing storage (ie. persistent storage) by fudging
         # size (and therefore required_space) for this mount point to zero
-        if host.storage.key?(type) and
-           host.storage[type].has_key?(:existing_storage) and
-           host.storage[type][:existing_storage].include? underscore_name.to_sym
+        if host.storage.key?(type) &&
+           host.storage[type].key?(:existing_storage) &&
+           host.storage[type][:existing_storage].include?(underscore_name.to_sym)
           # FIXME: required space should really be any difference between persistent
           # size and what should be allocated if it weren't persistent
           size = 0.to_f
