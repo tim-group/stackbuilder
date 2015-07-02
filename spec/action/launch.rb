@@ -54,17 +54,13 @@ describe 'launch' do
         host = find_suitable_host_for(machine)
         host.provisionally_allocate(machine)
       end
-
-      def to_unlaunched_specs
-      end
     end
   end
 
   action 'launch' do |services, machine_def|
     hosts = services.host_repo.find_compute_nodes
     hosts.allocate(machine_def.flatten)
-    specs = hosts.to_unlaunched_specs
-    services.compute_controller.launch(specs)
+    services.compute_controller.launch(nil)
   end
 
   it 'will allocate and launch a bunch of machines' do

@@ -52,17 +52,13 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                    }) if backup?
   end
 
-  # rubocop:disable Style/TrivialAccessors
   def master?
     @master
   end
-  # rubocop:enable Style/TrivialAccessors
 
-  # rubocop:disable Style/TrivialAccessors
   def backup?
     @backup
   end
-  # rubocop:enable Style/TrivialAccessors
 
   def server_id
     @virtual_service.children.index(self) + 1

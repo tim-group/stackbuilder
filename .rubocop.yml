@@ -27,6 +27,9 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 15
 
+Metrics/ModuleLength:
+  Max: 146 # 100
+
 Style/ClassAndModuleChildren:
   Enabled: false
 

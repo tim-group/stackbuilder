@@ -36,6 +36,7 @@ class Stacks::Factory
       sprintf("#{col}%s (%5d): %s %s[0m\n", fdatetime, $PROCESS_ID, severity, msg2str(msg))
     end
 
+    # rubocop:disable Lint/NestedMethodDefinition
     @log.instance_eval do
       def start(task)
         @start_time = Time.now
@@ -54,6 +55,8 @@ class Stacks::Factory
         puts "\n\e[1m\e[32m:#{task} passed in #{e}s\e[0m\n"
       end
     end
+    # rubocop:enable Lint/NestedMethodDefinition
+
     @log
   end
 
@@ -121,7 +124,7 @@ class Stacks::Factory
     when ::String
       msg
     when ::Exception
-      "#{ msg.message } (#{ msg.class })\n" << (msg.backtrace || []).join("\n")
+      "#{msg.message} (#{msg.class})\n" << (msg.backtrace || []).join("\n")
     else
       msg.inspect
     end

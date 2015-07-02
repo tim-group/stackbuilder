@@ -36,9 +36,7 @@ module Support::MCollectivePuppet
 
       ready_to_sign.each do |machine_fqdn|
         signed = puppetca do |mco|
-          mco.sign(:certname => machine_fqdn).select do |response|
-            response[:statuscode] == 0
-          end.size > 0
+          mco.sign(:certname => machine_fqdn).count { |response| response[:statuscode] == 0 } > 0
         end
         if signed
           callback.invoke :success, machine_fqdn
@@ -60,9 +58,7 @@ module Support::MCollectivePuppet
     callback = Support::Callback.new(&block)
     machines_fqdns.each do |machine_fqdn|
       puppetca(machine_fqdn) do |mco|
-        cleaned = mco.clean(:certname => machine_fqdn).select do |response|
-          response[:statuscode] == 0
-        end.size > 0
+        cleaned = mco.clean(:certname => machine_fqdn).count { |response| response[:statuscode] == 0 } > 0
         if cleaned
           callback.invoke :success, machine_fqdn
         else
