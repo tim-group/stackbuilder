@@ -145,7 +145,6 @@ class Compute::Controller
       end
     end.flatten_hashes
 
-    puts 'aa'
     all_specs.each do |spec|
       vm = spec[:hostname]
       result = flattened_results[vm]
@@ -163,7 +162,6 @@ class Compute::Controller
       end
     end
 
-    puts 'bb'
     callback.finish
   end
 
