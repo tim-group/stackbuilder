@@ -118,8 +118,20 @@ module StackBuilder::Allocator::HostPolicies
       machine[:storage].each do |_mount_point, values|
         required_space_hash[values[:type]] = 0
       end
-      machine[:storage].each do |_mount_point, values|
-        required_space_hash[values[:type]] += values[:size].to_f
+      machine[:storage].each do |mount_point, values|
+        size = values[:size].to_f
+        type = values[:type]
+        underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
+        # Deal with already existing storage (ie. persistent storage) by fudging
+        # size (and therefore required_space) for this mount point to zero
+        if host.storage.key?(type) &&
+           host.storage[type].key?(:existing_storage) &&
+           host.storage[type][:existing_storage].include?(underscore_name.to_sym)
+          # FIXME: required space should really be any difference between persistent
+          # size and what should be allocated if it weren't persistent
+          size = 0.to_f
+        end
+        required_space_hash[values[:type]] += size
       end
       storage_without_enough_space = required_space_hash.inject({}) do |result, (type, required_space)|
         host_storage_type = host.storage[type] rescue nil

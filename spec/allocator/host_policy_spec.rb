@@ -227,4 +227,42 @@ describe StackBuilder::Allocator::HostPolicies do
 
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed].should eql(true)
   end
+
+  it 'accepts the disk space allocation if persistent storage already exists' do
+    machine = {
+      :hostname => 'test-db-001',
+      :storage => {
+        "/var/lib/mysql/".to_sym => {
+          :type => "data",
+          :size => "1G",
+          :persistent => true,
+          :persistence_options => { :on_storage_not_found => :raise_error }
+        }
+      }
+    }
+    host1_storage = {
+      'os' => {
+        :existing_storage => {}
+      },
+      'data' => {
+        :existing_storage => {}
+      }
+    }
+    host2_storage = {
+      'os' => {
+        :existing_storage => {}
+      },
+      'data' => {
+        :existing_storage => {
+          'test-db-001_var_lib_mysql'.to_sym => {}
+        }
+      }
+    }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => host1_storage)
+    h2 = StackBuilder::Allocator::Host.new("h2", :storage => host2_storage)
+    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed].
+      should eql(false)
+    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h2, machine)[:passed].
+      should eql(true)
+  end
 end
