@@ -8,8 +8,7 @@ class Stacks::Services::ShinyServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
-      'role::shiny_server' => {}
-    }
+    enc = super
+    enc.merge!('role::shiny_server' => {})
   end
 end

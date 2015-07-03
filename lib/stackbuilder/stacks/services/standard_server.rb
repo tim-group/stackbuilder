@@ -8,8 +8,7 @@ class Stacks::Services::StandardServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
-      'server::default_new_mgmt_net_local' => {}
-    }
+    enc = super
+    enc.merge!('server::default_new_mgmt_net_local' => {})
   end
 end

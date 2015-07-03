@@ -23,7 +23,7 @@ class Stacks::Services::ExternalServer < Stacks::MachineDef
   end
 
   def to_enc
-    {}
+    enc = super
   end
 
   def to_spec
