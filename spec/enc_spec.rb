@@ -98,7 +98,7 @@ describe Stacks::DSL do
           "st-twoapp-vip.st.net.local" => {
             "healthcheck_timeout" => 10,
             "realservers" => {
-              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"],
+              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
             },
             "env" => "st",
             "app" => nil,
@@ -107,14 +107,14 @@ describe Stacks::DSL do
             "healthcheck_timeout" => 10,
             "realservers" => {
               "green" => ["st-oneapp-002.st.net.local"],
-              "blue" => ["st-oneapp-001.st.net.local"],
+              "blue" => ["st-oneapp-001.st.net.local"]
             },
             "env" => "st",
             "app" => nil,
-            "monitor_warn" => 0,
-          },
-        },
-      },
+            "monitor_warn" => 0
+          }
+        }
+      }
     )
   end
 
@@ -147,25 +147,25 @@ describe Stacks::DSL do
           "st-twoapp-vip.st.net.local" => {
             "healthcheck_timeout" => 10,
             "realservers" => {
-              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"],
+              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
             },
             "env" => "st",
             "app" => nil,
-            "monitor_warn" => 1,
+            "monitor_warn" => 1
           },
           "st-oneapp-vip.st.net.local" => {
             "healthcheck_timeout" => 10,
             "realservers" => {
               "green" => ["st-oneapp-002.st.net.local"],
-              "blue" => ["st-oneapp-001.st.net.local"],
+              "blue" => ["st-oneapp-001.st.net.local"]
             },
             "env" => "st",
             "app" => nil,
             "monitor_warn" => 0,
-            "healthcheck_timeout" => 999,
-          },
-        },
-      },
+            "healthcheck_timeout" => 999
+          }
+        }
+      }
     )
   end
 
@@ -208,7 +208,7 @@ describe Stacks::DSL do
                                'port'        => '8000',
                                'dependencies' => {},
                                'application_dependant_instances' => [],
-                               'participation_dependant_instances' => [],
+                               'participation_dependant_instances' => []
                              })
   end
 
@@ -232,7 +232,7 @@ describe Stacks::DSL do
                                'port'        => '8000',
                                'dependencies' => {},
                                'application_dependant_instances' => [],
-                               'participation_dependant_instances' => [],
+                               'participation_dependant_instances' => []
                              })
   end
 

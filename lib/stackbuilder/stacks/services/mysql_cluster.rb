@@ -90,14 +90,14 @@ module Stacks::Services::MysqlCluster
 
   def dependant_children_replication_mysql_rights(server)
     rights = {
-      'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} },
+      'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} }
     }
     children.each do |dependant|
       next if dependant == server
 
       rights['mysql_hacks::replication_rights_wrapper']['rights'].merge!(
         "replicant@#{dependant.prod_fqdn}" => {
-          'password_hiera_key' => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password",
+          'password_hiera_key' => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password"
         })
     end
     rights
@@ -105,7 +105,7 @@ module Stacks::Services::MysqlCluster
 
   def dependant_instance_mysql_rights(location)
     rights = {
-      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} },
+      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
     }
     virtual_services_that_depend_on_me(location).each do |service|
       service.children.each do |dependant|
@@ -124,7 +124,7 @@ module Stacks::Services::MysqlCluster
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => dependant.application,
       "db.#{@database_name}.password_hiera_key" =>
-        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
+        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
     }
     config_params["db.#{@database_name}.secondary_hostnames"] =
         secondary_servers.join(",") unless secondary_servers.empty?

@@ -52,8 +52,8 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
         'x1-lb-001.mgmt.pluto.net.local',
         'x1-lb-002.mgmt.pluto.net.local',
         'x1-exampleapp-001.mgmt.pluto.net.local',
-        'x1-exampleapp-002.mgmt.pluto.net.local',
-      ],
+        'x1-exampleapp-002.mgmt.pluto.net.local'
+      ]
     )
   end
   host("e1-lb-001.mgmt.mars.net.local") do |host|
@@ -120,9 +120,9 @@ describe_stack 'load balancer stack create a secondary server with the correct e
       "monitor_warn" => 1,
       "app" => "futuresroll",
       "realservers" => {
-        "blue" => ["e1-frapp-001.space.net.local", "e1-frapp-002.space.net.local"],
+        "blue" => ["e1-frapp-001.space.net.local", "e1-frapp-002.space.net.local"]
       },
-      "healthcheck_timeout" => 10,
+      "healthcheck_timeout" => 10
     )
     host.to_enc['routes'].should eql("to" => ["mgmt_pg_from_mgmt_oy"])
     host.to_specs.shift[:qualified_hostnames].should eql(:mgmt => "e1-lb-002.mgmt.space.net.local",

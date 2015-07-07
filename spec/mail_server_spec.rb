@@ -27,18 +27,18 @@ describe_stack 'test enc of the mail servers' do
     enc = host.to_enc
     enc['server::default_new_mgmt_net_local'].should be_nil
     enc['role::mail_server2']['allowed_hosts'].sort.should eql([
-      '172.16.0.0/21',
+      '172.16.0.0/21'
     ])
     enc['role::mail_server2']['vip_fqdns'].sort.should eql([
-      'oymigration-mail-vip.mgmt.oy.net.local',
+      'oymigration-mail-vip.mgmt.oy.net.local'
     ])
     enc['role::mail_server2']['dependant_instances'].sort.should eql([
       'oymigration-lb-001.mgmt.oy.net.local',
-      'oymigration-lb-002.mgmt.oy.net.local',
+      'oymigration-lb-002.mgmt.oy.net.local'
     ])
     enc['role::mail_server2']['participation_dependant_instances'].should eql([
       'oymigration-lb-001.mgmt.oy.net.local',
-      'oymigration-lb-002.mgmt.oy.net.local',
+      'oymigration-lb-002.mgmt.oy.net.local'
     ])
     enc['role::mail_server2']['vip_networks'].should eql(['mgmt'])
   end

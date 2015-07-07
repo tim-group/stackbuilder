@@ -29,7 +29,7 @@ class StackBuilder::Allocator::Hosts
 
     {
       :already_allocated => already_allocated,
-      :newly_allocated => allocate(specs),
+      :newly_allocated => allocate(specs)
     }
   end
 

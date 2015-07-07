@@ -14,9 +14,9 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
                          :resize => false,
                          :create_in_fstab => false,
                          :type => 'ext4',
-                         :shrink_after_unmount => true,
-                       },
-                     },
+                         :shrink_after_unmount => true
+                       }
+                     }
                    })
   end
 

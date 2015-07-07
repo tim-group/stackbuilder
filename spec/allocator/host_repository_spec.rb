@@ -28,7 +28,7 @@ describe StackBuilder::Allocator::HostRepository do
     n.times do |i|
       result["h#{i}"] = {
         :active_domains => machines,
-        :inactive_domains => [],
+        :inactive_domains => []
       }
     end
 
@@ -60,7 +60,7 @@ describe StackBuilder::Allocator::HostRepository do
     n.times do |i|
       result["h#{i}"] = {
         :active_domains => machines,
-        :inactive_domains => [],
+        :inactive_domains => []
       }
     end
 

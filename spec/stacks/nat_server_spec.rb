@@ -26,8 +26,8 @@ describe_stack 'nat servers should have all 3 networks' do
         'oy-proxy-001.mgmt.oy.net.local',
         'oy-proxy-002.mgmt.oy.net.local',
         'oy-app-001.mgmt.oy.net.local',
-        'oy-app-002.mgmt.oy.net.local',
-      ],
+        'oy-app-002.mgmt.oy.net.local'
+      ]
     )
   end
 
@@ -113,14 +113,14 @@ describe_stack 'nat servers should provide natting for secondary_site services i
     dnat = nat.to_enc['role::natserver']['rules']['DNAT']
     dnat.keys.should include(
       'production-exampleproxy-vip.front.oy.net.local 80',
-      'production-exampleproxy-vip.front.oy.net.local 443',
+      'production-exampleproxy-vip.front.oy.net.local 443'
     )
     dnat.keys.size.should eql(2)
     dnat['production-exampleproxy-vip.front.oy.net.local 80']['dest_host'].should eql(
-      'production-exampleproxy-vip.oy.net.local',
+      'production-exampleproxy-vip.oy.net.local'
     )
     dnat['production-exampleproxy-vip.front.oy.net.local 443']['dest_host'].should eql(
-      'production-exampleproxy-vip.oy.net.local',
+      'production-exampleproxy-vip.oy.net.local'
     )
   end
 end

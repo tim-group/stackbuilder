@@ -28,8 +28,8 @@ module Stacks::Services::VirtualSftpService
         'type'         => 'sftp',
         'ports'        => @ports,
         'realservers'  => realservers,
-        'persistent_ports'  => @persistent_ports,
-      },
+        'persistent_ports'  => @persistent_ports
+      }
     }
   end
 

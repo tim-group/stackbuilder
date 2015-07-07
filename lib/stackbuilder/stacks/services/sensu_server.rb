@@ -10,8 +10,8 @@ class Stacks::Services::SensuServer < Stacks::MachineDef
   def to_enc
     {
       'role::sensu' => {
-        'server' => true,
-      },
+        'server' => true
+      }
     }
   end
 end

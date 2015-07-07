@@ -50,12 +50,12 @@ describe_stack 'stack-with-dependencies' do
     host.to_enc["role::loadbalancer"]["virtual_servers"]["e1-exampleapp-vip.space.net.local"]["realservers"]["blue"].
       should eql([
         "e1-exampleapp-001.space.net.local",
-        "e1-exampleapp-002.space.net.local",
+        "e1-exampleapp-002.space.net.local"
       ])
     host.to_enc["role::loadbalancer"]["virtual_servers"]["e1-exampleapp2-vip.space.net.local"]["realservers"]["blue"].
       should eql([
         "e1-exampleapp2-001.space.net.local",
-        "e1-exampleapp2-002.space.net.local",
+        "e1-exampleapp2-002.space.net.local"
       ])
   end
 
@@ -67,7 +67,7 @@ describe_stack 'stack-with-dependencies' do
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
     host.to_enc["role::http_app"]["application_dependant_instances"].should eql([
       'e1-lb-001.space.net.local',
-      'e1-lb-002.space.net.local',
+      'e1-lb-002.space.net.local'
     ])
     deps = host.to_enc["role::http_app"]["dependencies"]
     deps["db.example.database"].should eql("example")
@@ -83,14 +83,14 @@ describe_stack 'stack-with-dependencies' do
       "e1-exampleproxy-001.space.net.local",
       "e1-exampleproxy-002.space.net.local",
       'e1-lb-001.space.net.local',
-      'e1-lb-002.space.net.local',
+      'e1-lb-002.space.net.local'
     ])
     host.to_enc["role::http_app"]["dependencies"].should eql({})
   end
   host("e1-exampledb-001.mgmt.space.net.local") do |host|
     host.to_enc["role::databaseserver"]["dependant_instances"].should eql([
       "e1-exampleapp2-001.space.net.local",
-      "e1-exampleapp2-002.space.net.local",
+      "e1-exampleapp2-002.space.net.local"
     ])
     rights = host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']
     rights['example2@e1-exampleapp2-001.space.net.local/example'].should eql(
@@ -168,13 +168,13 @@ describe_stack 'stack with cross environment dependencies' do
   host("e2-noconfigapp-001.mgmt.earth.net.local") do |host|
     host.to_enc['role::http_app']['application_dependant_instances'].should eql([
       'e1-noconfigapp-001.space.net.local',
-      'e1-noconfigapp-002.space.net.local',
+      'e1-noconfigapp-002.space.net.local'
     ])
   end
   host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
     host.to_enc['role::http_app']['application_dependant_instances'].should eql([
       'e2-noconfigapp-001.earth.net.local',
-      'e2-noconfigapp-002.earth.net.local',
+      'e2-noconfigapp-002.earth.net.local'
     ])
   end
 end

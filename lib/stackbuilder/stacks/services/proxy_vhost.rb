@@ -78,7 +78,7 @@ class Stacks::Services::ProxyVHost
       'proxy_pass_rules' => proxy_pass_rules(location),
       'type'             => type,
       'vhost_properties' => properties,
-      'cert'             => cert,
+      'cert'             => cert
     }]
   end
 end

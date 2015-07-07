@@ -20,23 +20,23 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
                        :options => {
                          :create_in_fstab => false,
                          :path   => "#{options[:master_location]}#{options[:master_image_file]}",
-                         :resize => false,
-                       },
-                     },
+                         :resize => false
+                       }
+                     }
                    })
     case @win_version
     when 'win7'
       modify_storage('/'.to_sym => {
-                       :size => '15G',
+                       :size => '15G'
                      })
     when 'xp'
       modify_storage('/'.to_sym => {
                        :size => '8G',
                        :prepare => {
                          :options => {
-                           :virtio => false,
-                         },
-                       },
+                           :virtio => false
+                         }
+                       }
                      })
     else
       fail "Unkown version of Windows: #{win_version}"

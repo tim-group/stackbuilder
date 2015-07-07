@@ -35,12 +35,12 @@ describe_stack 'sftp servers' do
     sftp_enc['role::sftpserver']['env'].should eql('mirror')
     sftp_enc['role::sftpserver']['participation_dependant_instances'].should include(
       'mirror-lb-001.oy.net.local',
-      'mirror-lb-002.oy.net.local',
+      'mirror-lb-002.oy.net.local'
     )
     sftp_enc['role::sftpserver']['participation_dependant_instances'].size.should eql(2)
     sftp_enc['role::sftpserver']['ssh_dependant_instances'].should include(
       'mirror-timcyclic-001.mgmt.oy.net.local',
-      'mirror-timcyclic-002.mgmt.oy.net.local',
+      'mirror-timcyclic-002.mgmt.oy.net.local'
     )
     sftp_enc['role::sftpserver']['ssh_dependant_instances'].size.should eql(2)
   end

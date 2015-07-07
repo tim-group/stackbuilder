@@ -10,8 +10,8 @@ class Stacks::Services::EventStoreServer < Stacks::MachineDef
   def to_enc
     {
       'role::eventstore_server' => {
-        'clusternodes' => @virtual_service.children.map(&:prod_fqdn).sort,
-      },
+        'clusternodes' => @virtual_service.children.map(&:prod_fqdn).sort
+      }
     }
   end
 end

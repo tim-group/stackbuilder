@@ -53,7 +53,7 @@ module Stacks::Services::VirtualProxyService
     enc = {
       'type' => 'proxy',
       'ports' => @ports,
-      'realservers' => realservers,
+      'realservers' => realservers
     }
 
     unless @persistent_ports.empty?
@@ -62,7 +62,7 @@ module Stacks::Services::VirtualProxyService
     end
 
     {
-      vip_fqdn(:prod, location) => enc,
+      vip_fqdn(:prod, location) => enc
     }
   end
 end

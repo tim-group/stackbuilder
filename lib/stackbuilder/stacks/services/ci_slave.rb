@@ -17,7 +17,7 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
 
   def to_enc
     {
-      'role::cinode_precise' => {},
+      'role::cinode_precise' => {}
     }
   end
 end

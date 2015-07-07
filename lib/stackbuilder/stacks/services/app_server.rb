@@ -54,7 +54,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'dependencies'                      => @virtual_service.dependency_config(location),
       'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location),
       'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
-      'port'                              => '8000',
+      'port'                              => '8000'
     }
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?

@@ -10,8 +10,8 @@ class Stacks::Services::LogstashServer < Stacks::MachineDef
   def to_enc
     {
       'role::logstash_server' => {
-        'environment' => environment.name,
-      },
+        'environment' => environment.name
+      }
     }
   end
 end

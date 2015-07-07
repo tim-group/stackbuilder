@@ -10,7 +10,7 @@ class Stacks::Services::DebRepo < Stacks::MachineDef
 
   def to_enc
     {
-      'role::deb_repo' => {},
+      'role::deb_repo' => {}
     }
   end
 
@@ -20,9 +20,9 @@ class Stacks::Services::DebRepo < Stacks::MachineDef
       :cnames => {
         :mgmt =>  {
           'aptly-master'     => "#{qualified_hostname(:mgmt)}",
-          'deb-transitional' => "#{qualified_hostname(:mgmt)}",
-        },
-      },
+          'deb-transitional' => "#{qualified_hostname(:mgmt)}"
+        }
+      }
     }
     specs.merge!(cname)
     specs[:cnames] = cnames unless cnames.nil?

@@ -33,7 +33,7 @@ module Support
         ## FIXME: This does not belong here, but we dont know where it should go
         default_nagios_servers = {
           'oy' => 'antarctica.mgmt.oy.net.local',
-          'pg' => 'australia.mgmt.pg.net.local',
+          'pg' => 'australia.mgmt.pg.net.local'
         }
         default_api_port = 5152
         @nagios_servers = options[:nagios_servers] || default_nagios_servers

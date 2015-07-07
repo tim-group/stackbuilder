@@ -46,7 +46,7 @@ module Stacks::Services::VirtualService
       :hostname => "#{environment.name}-#{name}",
       :fabric => environment.options[location],
       :networks => @vip_networks,
-      :qualified_hostnames => qualified_hostnames,
+      :qualified_hostnames => qualified_hostnames
     }
   end
 
@@ -110,8 +110,8 @@ module Stacks::Services::VirtualService
         'app' => application,
         'realservers' => realservers_hash,
         'monitor_warn' => monitor_warn,
-        'healthcheck_timeout' => healthcheck_timeout,
-      },
+        'healthcheck_timeout' => healthcheck_timeout
+      }
     }
   end
 end

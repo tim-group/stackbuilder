@@ -13,9 +13,9 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
         :size                => '10G',
         :persistent          => true,
         :persistence_options => {
-          :on_storage_not_found => :raise_error,
-        },
-      },
+          :on_storage_not_found => :raise_error
+        }
+      }
     }
     modify_storage(storage)
     @ram = '4194304' # 4GB
@@ -33,8 +33,8 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
         'restart_on_config_change' => false,
         'restart_on_install'       => true,
         'datadir'                  => '/mnt/data/mysql',
-        'version'                  => @version,
-      },
+        'version'                  => @version
+      }
     }
     dependant_instances = @virtual_service.dependant_instance_fqdns(location)
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []

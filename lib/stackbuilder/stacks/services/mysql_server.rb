@@ -21,20 +21,20 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       '/tmp' => {
         :type       => 'os',
         :size       => '10G',
-        :persistent => false,
+        :persistent => false
       },
       '/mnt/data' => {
         :type       => 'data',
         :size       => '10G',
-        :persistent => true,
-      },
+        :persistent => true
+      }
     }
     backup_storage = {
       '/mnt/storage' => {
         :type       => 'data',
         :size       => '10G',
-        :persistent => true,
-      },
+        :persistent => true
+      }
     }
     modify_storage(storage)
     modify_storage(backup_storage) if @backup
@@ -50,10 +50,10 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
 
   def create_persistent_storage_override
     modify_storage('/mnt/data' => {
-                     :persistence_options => { :on_storage_not_found => :create_new },
+                     :persistence_options => { :on_storage_not_found => :create_new }
                    })
     modify_storage('/mnt/storage' => {
-                     :persistence_options => { :on_storage_not_found => :create_new },
+                     :persistence_options => { :on_storage_not_found => :create_new }
                    }) if backup?
   end
 
@@ -79,9 +79,9 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         'master'                   => master?,
         'server_id'                => server_id,
         'charset'                  => @virtual_service.charset,
-        'version'                  => @version,
+        'version'                  => @version
       },
-      'server::default_new_mgmt_net_local' => nil,
+      'server::default_new_mgmt_net_local' => nil
     }
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
@@ -100,9 +100,9 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       'rights' => {
         @virtual_service.database_name => {
           'environment'   => environment.name,
-          'database_name' => @virtual_service.database_name,
-        },
-      },
+          'database_name' => @virtual_service.database_name
+        }
+      }
     }
     enc.merge!(@virtual_service.dependant_children_replication_mysql_rights(self))
     enc

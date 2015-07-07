@@ -71,14 +71,14 @@ class Stacks::Factory
       StackBuilder::Allocator::HostPolicies.ha_group,
       StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy,
       StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy,
-      StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy,
+      StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy
     ]
   end
 
   def preference_functions
     @preference_functions ||= [
       StackBuilder::Allocator::HostPreference.fewest_machines,
-      StackBuilder::Allocator::HostPreference.alphabetical_fqdn,
+      StackBuilder::Allocator::HostPreference.alphabetical_fqdn
     ]
   end
 
@@ -95,11 +95,13 @@ class Stacks::Factory
   end
 
   def host_repository
-    @host_repository ||= StackBuilder::Allocator::HostRepository.new(:machine_repo => inventory,
-                                                                     :preference_functions => preference_functions,
-                                                                     :policies => policies,
-                                                                     :compute_node_client => compute_node_client,
-                                                                     :logger => logger)
+    @host_repository ||= StackBuilder::Allocator::HostRepository.new(
+      :machine_repo => inventory,
+      :preference_functions => preference_functions,
+      :policies => policies,
+      :compute_node_client => compute_node_client,
+      :logger => logger
+    )
   end
 
   def allocator
@@ -107,10 +109,12 @@ class Stacks::Factory
   end
 
   def services
-    @services ||= Stacks::Core::Services.new(:compute_controller => compute_controller,
-                                             :allocator => allocator,
-                                             :dns_service => dns_service,
-                                             :logger => logger)
+    @services ||= Stacks::Core::Services.new(
+      :compute_controller => compute_controller,
+      :allocator => allocator,
+      :dns_service => dns_service,
+      :logger => logger
+    )
   end
 
   private

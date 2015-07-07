@@ -31,7 +31,7 @@ describe_stack 'stack-with-dependencies' do
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
     host.to_enc["role::http_app"]["application_dependant_instances"].should eql([
       'e1-lb-001.space.net.local',
-      'e1-lb-002.space.net.local',
+      'e1-lb-002.space.net.local'
     ])
     deps = host.to_enc["role::http_app"]["dependencies"]
     deps["db.example.database"].should eql("example")
@@ -39,10 +39,10 @@ describe_stack 'stack-with-dependencies' do
     deps["db.example.password_hiera_key"].should eql("enc/e1/example2/mysql_password")
     deps["db.example.username"].should eql("example2")
     deps["db.example.secondary_hostnames"].should eql(
-      "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local",
+      "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local"
     )
     deps["db.example.read_only_cluster"].should eql(
-      "\"e1-exampledb-001.space.net.local,e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local\"",
+      "\"e1-exampledb-001.space.net.local,e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local\""
     )
   end
 end

@@ -11,7 +11,7 @@ class Compute::NagsrvClient
         {
           :sender => node.results[:sender],
           :statuscode => node[:statuscode],
-          :result => node.results[:data][:output].size,
+          :result => node.results[:data][:output].size
         }
       end
     end

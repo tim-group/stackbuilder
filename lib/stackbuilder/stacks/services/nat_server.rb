@@ -21,12 +21,12 @@ class Stacks::Services::NatServer < Stacks::MachineDef
     enc = super
     rules = {
       'SNAT' => @virtual_service.snat_rules,
-      'DNAT' => @virtual_service.dnat_rules,
+      'DNAT' => @virtual_service.dnat_rules
     }
     enc.merge('role::natserver' => {
                 'rules'                   => rules,
                 'front_virtual_router_id' => virtual_router_ids[:front],
-                'prod_virtual_router_id'  => virtual_router_ids[:prod],
+                'prod_virtual_router_id'  => virtual_router_ids[:prod]
               })
   end
 end

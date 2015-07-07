@@ -15,7 +15,7 @@ describe_stack 'basic dev puppetmaster' do
     host.to_enc.should eql({})
     host.to_specs.first[:template].should eql('puppetmaster')
     host.to_specs.first[:cnames].should eql(:mgmt => {
-                                              "puppet" => "e1-basic-001.mgmt.space.net.local",
+                                              "puppet" => "e1-basic-001.mgmt.space.net.local"
                                             })
   end
 end

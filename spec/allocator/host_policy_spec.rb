@@ -5,10 +5,10 @@ describe StackBuilder::Allocator::HostPolicies do
   def test_env_with_refstack
     [{
       :hostname => "refapp1",
-      :availability_group => "refapp",
+      :availability_group => "refapp"
     }, {
       :hostname => "refapp2",
-      :availability_group => "refapp",
+      :availability_group => "refapp"
     }]
   end
 
@@ -30,12 +30,12 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'allows allocation if the availability group is unset' do
     machine = {
       :hostname => "host1",
-      :availability_group => nil,
+      :availability_group => nil
     }
 
     running_machine = {
       :hostname => "host2",
-      :availability_group => nil,
+      :availability_group => nil
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1")
@@ -46,17 +46,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'allows allocations where the host ram is sufficient' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '8388608') # 8GB
@@ -70,17 +70,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'rejects allocations where the host ram is insufficient due to host reserve' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '8388607') # 1 byte under 8GB
@@ -94,17 +94,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'rejects allocations where the host ram is insufficient' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304') # 4GB
@@ -118,17 +118,17 @@ describe StackBuilder::Allocator::HostPolicies do
   it 'rejects allocations where the host provisioning has been disabled' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2_097_152,
+      :ram => 2_097_152
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304', :allocation_disabled => true) # 4GB
@@ -161,17 +161,17 @@ describe StackBuilder::Allocator::HostPolicies do
           :type => "data",
           :size => "1G",
           :persistent => true,
-          :persistence_options => { :on_storage_not_found => :raise_error },
-        },
-      },
+          :persistence_options => { :on_storage_not_found => :raise_error }
+        }
+      }
     }
     host_storage = {
       'os' => {
-        :existing_storage => {},
+        :existing_storage => {}
       },
       'data' => {
-        :existing_storage => { 'test-db-001_var_lib_mysql'.to_sym => 1.00 },
-      },
+        :existing_storage => { 'test-db-001_var_lib_mysql'.to_sym => 1.00 }
+      }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
     StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy.call(h1, machine)[:passed].
@@ -186,17 +186,17 @@ describe StackBuilder::Allocator::HostPolicies do
           :type => "data",
           :size => "1G",
           :persistent => true,
-          :persistence_options => { :on_storage_not_found => :raise_error },
-        },
-      },
+          :persistence_options => { :on_storage_not_found => :raise_error }
+        }
+      }
     }
     host_storage = {
       :os => {
-        :existing_storage => {},
+        :existing_storage => {}
       },
       :data => {
-        :existing_storage => {},
-      },
+        :existing_storage => {}
+      }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
     StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy.call(h1, machine)[:passed].
@@ -214,8 +214,8 @@ describe StackBuilder::Allocator::HostPolicies do
     machine = {
       :storage => {
         '/foo'.to_sym      => { :type => 'data', :size => "10G" },
-        '/mnt/data'.to_sym => { :type => 'data', :size => "10G" },
-      },
+        '/mnt/data'.to_sym => { :type => 'data', :size => "10G" }
+      }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "data" => { :free => "15000000" } })
     StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed].should eql(false)
@@ -236,27 +236,27 @@ describe StackBuilder::Allocator::HostPolicies do
           :type => "data",
           :size => "1G",
           :persistent => true,
-          :persistence_options => { :on_storage_not_found => :raise_error },
-        },
-      },
+          :persistence_options => { :on_storage_not_found => :raise_error }
+        }
+      }
     }
     host1_storage = {
       'os' => {
-        :existing_storage => {},
+        :existing_storage => {}
       },
       'data' => {
-        :existing_storage => {},
-      },
+        :existing_storage => {}
+      }
     }
     host2_storage = {
       'os' => {
-        :existing_storage => {},
+        :existing_storage => {}
       },
       'data' => {
         :existing_storage => {
-          'test-db-001_var_lib_mysql'.to_sym => {},
-        },
-      },
+          'test-db-001_var_lib_mysql'.to_sym => {}
+        }
+      }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host1_storage)
     h2 = StackBuilder::Allocator::Host.new("h2", :storage => host2_storage)
