@@ -18,6 +18,11 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @version = '5.1.49-1ubuntu8'
 
     storage = {
+      '/tmp' => {
+        :type       => 'os',
+        :size       => '10G',
+        :persistent => false
+      },
       '/mnt/data' => {
         :type       => 'data',
         :size       => '10G',

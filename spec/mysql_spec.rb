@@ -209,6 +209,8 @@ describe_stack 'should allow storage options to be overwritten' do
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql "14G"
+    host.to_specs.shift[:storage]['/tmp'.to_sym][:type].should eql "os"
+    host.to_specs.shift[:storage]['/tmp'.to_sym][:size].should eql "10G"
   end
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
     host.to_specs.shift[:storage]['/mnt/storage'.to_sym][:size].should eql "29G"
