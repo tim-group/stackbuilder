@@ -438,10 +438,8 @@ namespace :sbx do
         if machine_def.is_a? Stacks::Services::AppServer
           desc "orc resolve #{machine_def.virtual_service.application}"
           sbtask :resolve do
-            factory = Orc::Factory.new(
-              :application => machine_def.virtual_service.application,
-              :environment => machine_def.environment.name,
-            )
+            factory = Orc::Factory.new(:application => machine_def.virtual_service.application,
+                                       :environment => machine_def.environment.name)
             factory.cmdb_git.update
             factory.engine.resolve
           end
@@ -455,10 +453,7 @@ namespace :sbx do
             desc "orc resolve #{applications.to_a.join(', ')}"
             sbtask :resolve do
               applications.to_a.each do |application|
-                factory = Orc::Factory.new(
-                  :application => application,
-                  :environment => machine_def.environment.name,
-                )
+                factory = Orc::Factory.new(:application => application, :environment => machine_def.environment.name)
                 factory.cmdb_git.update
                 factory.engine.resolve
               end
