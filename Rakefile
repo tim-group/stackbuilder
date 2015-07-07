@@ -72,6 +72,5 @@ end
 
 desc "Run lint (Rubocop)"
 task :lint do
-  sh "rubocop --require rubocop/formatter/checkstyle_formatter "\
-     "--format RuboCop::Formatter::CheckstyleFormatter --out tmp/checkstyle.xml"
+  sh "rubocop"
 end
