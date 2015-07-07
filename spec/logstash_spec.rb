@@ -14,7 +14,7 @@ describe_stack 'logstash' do
 
   host("e1-logstash-001.mgmt.space.net.local") do |host|
     host.to_enc.should eql('role::logstash_server' => {
-                             'environment' => "e1"
+                             'environment' => "e1",
                            })
   end
 end

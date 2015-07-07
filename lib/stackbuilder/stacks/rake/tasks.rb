@@ -202,7 +202,7 @@ namespace :sbx do
       "total",
       "#{@total[:vms]}",
       @total_str.call(@total[:mem_used], @total[:mem_avail]),
-      @total_str.call(@total[:os_used], @total[:os_avail])
+      @total_str.call(@total[:os_used], @total[:os_avail]),
     ]
     # data(GB) not present in env=dev
     total_list.push(@total_str.call(@total[:data_used], @total[:data_avail])) if @total[:data_avail] > 0
@@ -440,7 +440,7 @@ namespace :sbx do
           sbtask :resolve do
             factory = Orc::Factory.new(
               :application => machine_def.virtual_service.application,
-              :environment => machine_def.environment.name
+              :environment => machine_def.environment.name,
             )
             factory.cmdb_git.update
             factory.engine.resolve
@@ -457,7 +457,7 @@ namespace :sbx do
               applications.to_a.each do |application|
                 factory = Orc::Factory.new(
                   :application => application,
-                  :environment => machine_def.environment.name
+                  :environment => machine_def.environment.name,
                 )
                 factory.cmdb_git.update
                 factory.engine.resolve
@@ -774,7 +774,7 @@ namespace :sbx do
                   if matches.captures.empty?
                 results[host] = {
                   :host => sender,
-                  :port => matches.captures.first
+                  :port => matches.captures.first,
                 }
               end
             end

@@ -18,7 +18,7 @@ describe_stack 'debrepo' do
 
     host.to_specs.shift[:cnames].should eql(:mgmt => {
                                               'aptly-master'     => 'e1-debrepo-001.mgmt.space.net.local',
-                                              'deb-transitional' => 'e1-debrepo-001.mgmt.space.net.local'
+                                              'deb-transitional' => 'e1-debrepo-001.mgmt.space.net.local',
                                             })
   end
 end

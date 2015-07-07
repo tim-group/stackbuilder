@@ -60,7 +60,7 @@ describe Support::Nagios::Service::Http do
       setup_test_server_with_fixture(fixture_file)
       Support::Nagios::Service::Http.new(:nagios_servers => {
                                            'oy' => 'localhost',
-                                           'pg' => 'localhost'
+                                           'pg' => 'localhost',
                                          },
                                          :nagios_api_port => 5152)
     end

@@ -3,6 +3,9 @@ AllCops:
   Exclude:
     - 'build/**/*'
 
+Lint/NonLocalExitFromIterator:
+  Enabled: false
+
 Metrics/AbcSize:
   Max: 65
 
@@ -54,9 +57,6 @@ Style/NegatedWhile:
 Style/NumericLiterals:
   Enabled: false
 
-Lint/NonLocalExitFromIterator:
-  Enabled: false
-
 Style/PerlBackrefs:
   Enabled: false
 
@@ -68,6 +68,9 @@ Style/RescueModifier:
 
 Style/StringLiterals: # This is just so we don't have to correct a zillion lines
   Enabled: false
+
+Style/TrailingComma:
+  EnforcedStyleForMultiline: comma
 
 ### XXX ruby 1.8 compatibility
 # Ruby 1.8 does't have each_with_object()

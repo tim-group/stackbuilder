@@ -29,10 +29,10 @@ class Stacks::MachineDef
         :prepare     => {
           :method => 'image',
           :options => {
-            :path => '/var/local/images/gold-precise/generic.img'
-          }
-        }
-      }
+            :path => '/var/local/images/gold-precise/generic.img',
+          },
+        },
+      },
     }
     @destroyable = true
     @dont_start = false
@@ -55,10 +55,10 @@ class Stacks::MachineDef
       '/'.to_sym =>  {
         :prepare     => {
           :options => {
-            :path => '/var/local/images/gold-trusty/generic.img'
-          }
-        }
-      }
+            :path => '/var/local/images/gold-trusty/generic.img',
+          },
+        },
+      },
     }
     modify_storage(trusty_gold_image)
   end
@@ -147,7 +147,7 @@ class Stacks::MachineDef
       :fabric => @fabric,
       :availability_group => availability_group,
       :networks => @networks,
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
+      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
     }
 
     spec[:disallow_destroy] = true unless @destroyable
@@ -169,7 +169,7 @@ class Stacks::MachineDef
     enc.merge! @virtual_service.included_classes if @virtual_service && @virtual_service.respond_to?(:included_classes)
     unless @routes.empty?
       enc['routes'] = {
-        'to' => @routes
+        'to' => @routes,
       }
     end
     enc

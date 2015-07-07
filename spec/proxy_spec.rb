@@ -45,7 +45,7 @@ describe_stack 'exampleproxy' do
     vhost2_enc['proxy_pass_rules'].should eql('/' => 'http://e1-exampleapp2-vip.space.net.local:8000')
     vhost2_enc['aliases'].should include(
       'e1-exampleproxy-vip.front.space.net.local',
-      'e1-exampleproxy-vip.space.net.local'
+      'e1-exampleproxy-vip.space.net.local',
     )
     vhost2_enc['aliases'].size.should eql(2)
     vhost2_enc['application'].should eql('example')
@@ -181,8 +181,8 @@ describe_stack 'proxy servers can exist in multiple sites' do
         'shared-blondinapp-001.mgmt.pg.net.local',
         'shared-blondinapp-002.mgmt.pg.net.local',
         'shared-blondinapp-001.mgmt.oy.net.local',
-        'shared-blondinapp-002.mgmt.oy.net.local'
-      ]
+        'shared-blondinapp-002.mgmt.oy.net.local',
+      ],
     )
   end
 
@@ -197,7 +197,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
                                              '/'              => 'http://shared-fundsuserapp-vip.pg.net.local:8000')
     vhost_enc['aliases'].should include(
       'shared-fundsproxy-vip.front.pg.net.local',
-      'shared-fundsproxy-vip.pg.net.local'
+      'shared-fundsproxy-vip.pg.net.local',
     )
     vhost_enc['aliases'].size.should eql(2)
     vhost_enc['application'].should eql('tfunds')
@@ -218,7 +218,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
                                              '/'              => 'http://shared-fundsuserapp-vip.oy.net.local:8000')
     vhost_enc['aliases'].should include(
       'shared-fundsproxy-vip.front.oy.net.local',
-      'shared-fundsproxy-vip.oy.net.local'
+      'shared-fundsproxy-vip.oy.net.local',
     )
     vhost_enc['aliases'].size.should eql(2)
     vhost_enc['application'].should eql('tfunds')
@@ -418,32 +418,32 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
     vhosts = proxy.to_enc['role::proxyserver']['vhosts']
     vhosts.size.should eql(4)
     vhosts['foo-old.com']['proxy_pass_rules']['/'].should eql(
-      'http://production-foouserapp-vip.oy.net.local:8000'
+      'http://production-foouserapp-vip.oy.net.local:8000',
     )
     vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
-      'http://production-blondinapp-vip.oy.net.local:8000'
+      'http://production-blondinapp-vip.oy.net.local:8000',
     )
     vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/'].should eql(
-      'http://mirror-foouserapp-vip.oy.net.local:8000'
+      'http://mirror-foouserapp-vip.oy.net.local:8000',
     )
     vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
-      'http://mirror-blondinapp-vip.oy.net.local:8000'
+      'http://mirror-blondinapp-vip.oy.net.local:8000',
     )
     vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/'].should eql(
-      'http://latest-foouserapp-vip.oy.net.local:8000'
+      'http://latest-foouserapp-vip.oy.net.local:8000',
     )
     vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
-      'http://latest-blondinapp-vip.oy.net.local:8000'
+      'http://latest-blondinapp-vip.oy.net.local:8000',
     )
   end
   host("production-fooproxy-001.mgmt.pg.net.local") do |proxy|
     vhosts = proxy.to_enc['role::proxyserver']['vhosts']
     vhosts.size.should eql(2)
     vhosts['foo-old.com']['proxy_pass_rules']['/'].should eql(
-      'http://production-foouserapp-vip.pg.net.local:8000'
+      'http://production-foouserapp-vip.pg.net.local:8000',
     )
     vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
-      'http://production-blondinapp-vip.pg.net.local:8000'
+      'http://production-blondinapp-vip.pg.net.local:8000',
     )
   end
 end

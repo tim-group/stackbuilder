@@ -16,8 +16,8 @@ class Stacks::Services::ElasticSearchNode < Stacks::MachineDef
   def to_enc
     {
       'role::elasticsearch_node' => {
-        'cluster_nodes' =>  machine_set.definitions.values.map(&:prod_fqdn)
-      }
+        'cluster_nodes' =>  machine_set.definitions.values.map(&:prod_fqdn),
+      },
     }
   end
 end

@@ -20,7 +20,7 @@ describe_stack 'stack-with-dependencies' do
 
   host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
     host.to_enc["role::rabbitmq_server"]["dependant_instances"].should eql([
-      'oy-mon-001.oy.net.local'
+      'oy-mon-001.oy.net.local',
     ])
   end
 end

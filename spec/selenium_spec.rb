@@ -13,26 +13,26 @@ describe_stack 'selenium' do
         self.nodespecs = [
           {
             :type => "ubuntu",
-            :instances => 5
+            :instances => 5,
           },
           {
             :type => "winxp",
             :instances => 2,
             :ie_version => "6",
-            :gold_image => "file:///var/local/images/dev-sxp-gold.img"
+            :gold_image => "file:///var/local/images/dev-sxp-gold.img",
           },
           {
             :type => "win7",
             :instances => 2,
             :ie_version => "9",
-            :gold_image => "http://iso.youdevise.com/gold/win7-ie9-gold.img"
+            :gold_image => "http://iso.youdevise.com/gold/win7-ie9-gold.img",
           },
           {
             :type => "win7",
             :instances => 1,
             :ie_version => "10",
-            :gold_image => "http://iso.youdevise.com/gold/win7-ie10-gold.img"
-          }
+            :gold_image => "http://iso.youdevise.com/gold/win7-ie10-gold.img",
+          },
         ]
       end
     end
@@ -42,20 +42,20 @@ describe_stack 'selenium' do
         self.nodespecs = [
           {
             :type => "ubuntu",
-            :instances => 5
+            :instances => 5,
           },
           {
             :type => "winxp",
             :instances => 10,
             :ie_version => "6",
-            :gold_image => "file:///var/local/images/dev-sxp-gold.img"
+            :gold_image => "file:///var/local/images/dev-sxp-gold.img",
           },
           {
             :type => "win7",
             :instances => 10,
             :ie_version => "9",
-            :gold_image => "http://iso.youdevise.com/gold/win7-ie9-gold.img"
-          }
+            :gold_image => "http://iso.youdevise.com/gold/win7-ie9-gold.img",
+          },
         ]
       end
     end
@@ -104,7 +104,7 @@ describe_stack 'selenium' do
       'e1-a-ie6-001',
       'e1-a-ie6-002',
       'e1-a-ie9-001',
-      'e1-a-ie9-002'
+      'e1-a-ie9-002',
     ])
   end
 

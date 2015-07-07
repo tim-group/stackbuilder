@@ -60,7 +60,7 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
     host.backup?.should eql false
     host.to_enc['role::mysql_server']['dependant_instances'].should eql([
       'testing-frdb-002.space.net.local',
-      'testing-frdbbackup-001.earth.net.local'
+      'testing-frdbbackup-001.earth.net.local',
     ])
   end
   host("testing-frdb-002.mgmt.space.net.local") do |host|
@@ -136,11 +136,11 @@ describe_stack 'should provide correct enc data' do
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
       'replicant@testing-mydb-002.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password',
       },
       'replicant@testing-mydbbackup-001.earth.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-      }
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password',
+      },
     )
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
@@ -162,11 +162,11 @@ describe_stack 'should provide correct enc data' do
 
     host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
       'replicant@testing-mydb-001.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password',
       },
       'replicant@testing-mydbbackup-001.earth.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-      }
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password',
+      },
     )
   end
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
@@ -180,11 +180,11 @@ describe_stack 'should provide correct enc data' do
 
     host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
       'replicant@testing-mydb-001.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password',
       },
       'replicant@testing-mydb-002.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
-      }
+        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password',
+      },
     )
 
     host.to_enc.should include('server::default_new_mgmt_net_local')

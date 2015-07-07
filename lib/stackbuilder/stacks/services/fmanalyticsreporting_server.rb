@@ -9,7 +9,7 @@ class Stacks::Services::FmAnalyticsReportingServer < Stacks::MachineDef
 
   def to_enc
     {
-      'role::fmanalyticsreporting_server' => {}
+      'role::fmanalyticsreporting_server' => {},
     }
   end
 end

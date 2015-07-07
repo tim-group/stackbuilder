@@ -9,17 +9,17 @@ describe StackBuilder::Allocator::EphemeralAllocator do
   it 'provides lists of already allocated and newly allocated hosts' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :fabric => "f1"
+      :fabric => "f1",
     }
 
     candidate_machine_2 = {
       :hostname => "candidate_machine_2",
-      :fabric => "f2"
+      :fabric => "f2",
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :fabric => "f1"
+      :fabric => "f1",
     }
 
     h1 = StackBuilder::Allocator::Host.new("h1")

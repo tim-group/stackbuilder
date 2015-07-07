@@ -25,7 +25,7 @@ module Stacks::Services::LegacyMysqlCluster
 
   def dependant_instance_mysql_rights(location)
     rights = {
-      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
+      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} },
     }
     virtual_services_that_depend_on_me(location).each do |service|
       service.children.each do |dependant|
@@ -44,7 +44,7 @@ module Stacks::Services::LegacyMysqlCluster
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => "#{dependant.application}",
       "db.#{@database_name}.password_hiera_key" =>
-        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
+        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password",
     }
   end
 end

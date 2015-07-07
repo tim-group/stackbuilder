@@ -58,11 +58,11 @@ describe Stacks::DSL do
                                                            :prepare => {
                                                              :method => "image",
                                                              :options => {
-                                                               :path => "/var/local/images/gold-precise/generic.img"
-                                                             }
-                                                           }
-                                                         }
-                                                       }
+                                                               :path => "/var/local/images/gold-precise/generic.img",
+                                                             },
+                                                           },
+                                                         },
+                                                       },
                                                      }])
   end
 

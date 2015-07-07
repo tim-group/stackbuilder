@@ -114,8 +114,8 @@ describe_stack 'should have the correct app_dependant_instances and participatio
         'e1-appy-001.mgmt.space.net.local',
         'e1-appy-002.mgmt.space.net.local',
         'e1-lb-001.mgmt.space.net.local',
-        'e1-lb-002.mgmt.space.net.local'
-      ]
+        'e1-lb-002.mgmt.space.net.local',
+      ],
     )
   end
 
@@ -135,7 +135,7 @@ describe_stack 'should have the correct app_dependant_instances and participatio
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local',
       'e1-appy-001.space.net.local',
-      'e1-appy-002.space.net.local'
+      'e1-appy-002.space.net.local',
     )
     enc['application_dependant_instances'].size.should eql(4)
   end

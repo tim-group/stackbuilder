@@ -71,14 +71,14 @@ class Stacks::Factory
       StackBuilder::Allocator::HostPolicies.ha_group,
       StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy,
       StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy,
-      StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy
+      StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy,
     ]
   end
 
   def preference_functions
     @preference_functions ||= [
       StackBuilder::Allocator::HostPreference.fewest_machines,
-      StackBuilder::Allocator::HostPreference.alphabetical_fqdn
+      StackBuilder::Allocator::HostPreference.alphabetical_fqdn,
     ]
   end
 
@@ -100,7 +100,7 @@ class Stacks::Factory
       :preference_functions => preference_functions,
       :policies => policies,
       :compute_node_client => compute_node_client,
-      :logger => logger
+      :logger => logger,
     )
   end
 
@@ -113,7 +113,7 @@ class Stacks::Factory
       :compute_controller => compute_controller,
       :allocator => allocator,
       :dns_service => dns_service,
-      :logger => logger
+      :logger => logger,
     )
   end
 

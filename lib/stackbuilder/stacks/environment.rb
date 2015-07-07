@@ -87,8 +87,8 @@ class Stacks::Environment
     {
       "networking::routing::to_site" => {
         'network' => network,
-        'site'    => site
-      }
+        'site'    => site,
+      },
     }
   end
 

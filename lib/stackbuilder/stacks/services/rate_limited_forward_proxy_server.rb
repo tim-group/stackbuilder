@@ -13,7 +13,7 @@ class Stacks::Services::RateLimitedForwardProxyServer < Stacks::MachineDef
 
   def to_enc
     {
-      'role::rate_limited_forward_proxy' => {}
+      'role::rate_limited_forward_proxy' => {},
     }
   end
 end

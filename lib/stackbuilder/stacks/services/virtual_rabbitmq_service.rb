@@ -23,9 +23,9 @@ module Stacks::Services::VirtualRabbitMQService
         'type' => 'rabbitmq',
         'ports' => @ports,
         'realservers' => {
-          'blue' => realserver_prod_fqdns(location)
-        }
-      }
+          'blue' => realserver_prod_fqdns(location),
+        },
+      },
     }
   end
 end

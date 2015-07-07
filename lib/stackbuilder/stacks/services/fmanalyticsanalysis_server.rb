@@ -12,8 +12,8 @@ class Stacks::Services::FmAnalyticsAnalysisServer < Stacks::MachineDef
     {
       'role::fmanalyticsanalysis_server' => {
         'datadir'     => @data_directory,
-        'environment' => environment.name
-      }
+        'environment' => environment.name,
+      },
     }
   end
 
@@ -25,8 +25,8 @@ class Stacks::Services::FmAnalyticsAnalysisServer < Stacks::MachineDef
         :type                => 'data',
         :size                => size,
         :persistent          => true,
-        :persistence_options => { :on_storage_not_found => :create_new }
-      }
+        :persistence_options => { :on_storage_not_found => :create_new },
+      },
     }
     modify_storage(storage)
   end

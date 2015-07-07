@@ -10,7 +10,7 @@ class Stacks::Services::DebRepoMirror < Stacks::MachineDef
 
   def to_enc
     {
-      'role::deb_repo_mirror' => {}
+      'role::deb_repo_mirror' => {},
     }
   end
 

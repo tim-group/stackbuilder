@@ -29,7 +29,7 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new("test")
     env_opts = {
       :primary_site => "local",
-      :every_machine_destroyable => true
+      :every_machine_destroyable => true,
     }
     env = Stacks::Environment.new("noenv", env_opts, nil, {}, {})
     machinedef.bind_to(env)
@@ -44,7 +44,7 @@ describe Stacks::MachineDef do
                               '/mnt/data'.to_sym => { :persistent => true })
     env_opts = {
       :primary_site                 => "local",
-      :persistent_storage_supported => false
+      :persistent_storage_supported => false,
     }
     env = Stacks::Environment.new("noenv", env_opts, nil, {}, {})
     machinedef.bind_to(env)

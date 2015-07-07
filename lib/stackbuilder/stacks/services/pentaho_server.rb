@@ -14,8 +14,8 @@ class Stacks::Services::PentahoServer < Stacks::MachineDef
     {
       'role::pentaho_server' => {
         'datadir'     => @data_directory,
-        'environment' => environment.name
-      }
+        'environment' => environment.name,
+      },
     }
   end
 end

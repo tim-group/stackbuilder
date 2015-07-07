@@ -36,7 +36,7 @@ describe 'Stacks::Services::VirtualService' do
       vip_spec = host.virtual_service.to_vip_spec(:primary_site)
       vip_spec[:qualified_hostnames].should eql(
         :prod  => 'env-myvs-vip.mars.net.local',
-        :front => 'env-myvs-vip.front.mars.net.local'
+        :front => 'env-myvs-vip.front.mars.net.local',
       )
     end
   end
@@ -58,7 +58,7 @@ describe 'Stacks::Services::VirtualService' do
       vip_spec = host.virtual_service.to_vip_spec(:primary_site)
       vip_spec[:qualified_hostnames].should eql(
         :prod => 'env-myvs-vip.mars.net.local',
-        :mgmt => 'env-myvs-vip.mgmt.mars.net.local'
+        :mgmt => 'env-myvs-vip.mgmt.mars.net.local',
       )
     end
   end

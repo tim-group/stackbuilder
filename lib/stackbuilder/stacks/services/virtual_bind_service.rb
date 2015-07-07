@@ -130,20 +130,20 @@ module Stacks::Services::VirtualBindService
       'healthcheck' => 'MISC_CHECK',
       'arg_style'   => 'PARTICIPATION',
       'path'        => '/opt/youdevise/keepalived/healthchecks/bin/check_participation.rb',
-      'url_path'    => '/participation'
+      'url_path'    => '/participation',
     }
     zones_fqdn(location).each do |zone|
       if zone =~ /mgmt/
         healthchecks << {
           'healthcheck' => 'MISC_CHECK',
           'arg_style'   => 'APPEND_HOST',
-          'path'        => "/usr/bin/host -4 -W 3 -t A -s apt.#{zone}"
+          'path'        => "/usr/bin/host -4 -W 3 -t A -s apt.#{zone}",
         }
       else
         healthchecks << {
           'healthcheck' => 'MISC_CHECK',
           'arg_style'   => 'APPEND_HOST',
-          'path'        => "/usr/bin/host -4 -W 3 -t A -s gw-vip.#{zone}"
+          'path'        => "/usr/bin/host -4 -W 3 -t A -s gw-vip.#{zone}",
         }
       end
     end
@@ -160,9 +160,9 @@ module Stacks::Services::VirtualBindService
         'type'         => 'bind',
         'ports'        => @ports,
         'realservers'  => {
-          'blue' => realservers(location).map { |server| server.qualified_hostname(vip_net) }.sort
+          'blue' => realservers(location).map { |server| server.qualified_hostname(vip_net) }.sort,
         },
-        'healthchecks' => healthchecks(location)
+        'healthchecks' => healthchecks(location),
       }
     end
     lb_config

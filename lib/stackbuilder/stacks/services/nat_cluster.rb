@@ -11,8 +11,8 @@ module Stacks::Services::NatCluster
   def snat_rules
     {
       'prod' => {
-        'to_source' => "nat-vip.front.#{environment.options[:primary_site]}.net.local"
-      }
+        'to_source' => "nat-vip.front.#{environment.options[:primary_site]}.net.local",
+      },
     }
   end
 
@@ -24,8 +24,8 @@ module Stacks::Services::NatCluster
           'dest_host' => "#{rule.to.host}",
           'dest_port' => "#{rule.to.port}",
           'tcp'       => rule.tcp,
-          'udp'       => rule.udp
-        }
+          'udp'       => rule.udp,
+        },
       ]
     end]
   end

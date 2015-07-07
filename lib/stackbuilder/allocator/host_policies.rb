@@ -12,7 +12,7 @@ module StackBuilder::Allocator::HostPolicies
                 allocated_machine[:availability_group] != machine_spec[:availability_group]
         result = {
           :passed => false,
-          :reason => "Availability group violation (already running #{allocated_machine[:hostname]})"
+          :reason => "Availability group violation (already running #{allocated_machine[:hostname]})",
         }
       end
       result
@@ -38,7 +38,7 @@ module StackBuilder::Allocator::HostPolicies
         result = {
           :passed => false,
           :reason => "Insufficient memory (required: #{machine[:ram]} KiB " \
-                     "available (minus host_reserve_ram): #{host_ram_stats[:available_ram]} KiB)"
+                     "available (minus host_reserve_ram): #{host_ram_stats[:available_ram]} KiB)",
         }
       end
       result
@@ -58,7 +58,7 @@ module StackBuilder::Allocator::HostPolicies
         {
           :passed => false,
           :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} " \
-                      "available: #{host.storage.keys.sort.join(',')})"
+                      "available: #{host.storage.keys.sort.join(',')})",
         }
       else
         { :passed => true }
@@ -104,7 +104,7 @@ module StackBuilder::Allocator::HostPolicies
       unless persistent_storage_not_found.empty?
         result = {
           :passed => false,
-          :reason => "Persistent storage not present for type \"#{reasons.join(',')}\""
+          :reason => "Persistent storage not present for type \"#{reasons.join(',')}\"",
         }
       end
 
@@ -152,7 +152,7 @@ module StackBuilder::Allocator::HostPolicies
         available = sorted_keys.collect { |key| storage_without_enough_space[key][:available_space] }.join(',')
         result = {
           :passed => false,
-          :reason => "Insufficient disk space (required: #{required}G available: #{available}G)"
+          :reason => "Insufficient disk space (required: #{required}G available: #{available}G)",
         }
       end
       result
