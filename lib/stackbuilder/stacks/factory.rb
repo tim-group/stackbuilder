@@ -95,13 +95,11 @@ class Stacks::Factory
   end
 
   def host_repository
-    @host_repository ||= StackBuilder::Allocator::HostRepository.new(
-      :machine_repo => inventory,
-      :preference_functions => preference_functions,
-      :policies => policies,
-      :compute_node_client => compute_node_client,
-      :logger => logger,
-    )
+    @host_repository ||= StackBuilder::Allocator::HostRepository.new(:machine_repo => inventory,
+                                                                     :preference_functions => preference_functions,
+                                                                     :policies => policies,
+                                                                     :compute_node_client => compute_node_client,
+                                                                     :logger => logger)
   end
 
   def allocator
@@ -109,12 +107,10 @@ class Stacks::Factory
   end
 
   def services
-    @services ||= Stacks::Core::Services.new(
-      :compute_controller => compute_controller,
-      :allocator => allocator,
-      :dns_service => dns_service,
-      :logger => logger,
-    )
+    @services ||= Stacks::Core::Services.new(:compute_controller => compute_controller,
+                                             :allocator => allocator,
+                                             :dns_service => dns_service,
+                                             :logger => logger)
   end
 
   private
