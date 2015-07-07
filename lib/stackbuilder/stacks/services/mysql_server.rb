@@ -21,7 +21,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       '/tmp' => {
         :type       => 'os',
         :size       => '10G',
-        :persistent => false
+        :persistent => false,
       },
       '/mnt/data' => {
         :type       => 'data',
