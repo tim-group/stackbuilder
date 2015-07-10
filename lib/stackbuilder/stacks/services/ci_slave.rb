@@ -20,9 +20,9 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
 
   def to_enc
     {
-        'role::cinode_precise' => {
-            'mysql_version' => @mysql_version
-        }
+      'role::cinode_precise' => {
+        'mysql_version' => @mysql_version
+      }
     }
   end
 end
