@@ -19,6 +19,6 @@ describe_stack 'jenkins' do
   end
 
   host("e1-jenkinsslave-002.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('role::cinode_precise' => {})
+    host.to_enc.should eql('role::cinode_precise' => {"mysql_version"=>"5.1.49-1ubuntu8"})
   end
 end
