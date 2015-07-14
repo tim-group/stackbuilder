@@ -423,7 +423,7 @@ namespace :sbx do
 
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_vip_spec do
-        puts ZAMLS.to_zamls(machine_def.to_vip_spec)
+        puts ZAMLS.to_zamls(machine_def.to_vip_spec(:primary_site))
       end
 
       if machine_def.respond_to? :to_enc
@@ -534,7 +534,7 @@ namespace :sbx do
       sbtask :free_vips do
         vips = []
         machine_def.accept do |child_machine_def|
-          vips << child_machine_def.to_vip_spec if child_machine_def.respond_to?(:to_vip_spec)
+          vips << child_machine_def.to_vip_spec(:primary_site) if child_machine_def.respond_to?(:to_vip_spec)
         end
         @factory.services.dns.free(vips)
       end
