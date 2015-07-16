@@ -7,6 +7,28 @@ class Stacks::Services::SftpServer < Stacks::MachineDef
   def initialize(virtual_service, index)
     super(virtual_service.name + "-" + index)
     @virtual_service = virtual_service
+    storage = {
+      '/chroot' => {
+        :type       => 'data',
+        :size       => '40G',
+        :persistent => true
+      },
+      '/var/lib/batchelor' => {
+        :type       => 'data',
+        :size       => '40G',
+        :persistent => true
+      },
+      '/home' => {
+        :type       => 'data',
+        :size       => '20G',
+        :persistent => true
+      },
+      '/tmp' => {
+        :type       => 'data',
+        :size       => '10G'
+      }
+    }
+    modify_storage(storage)
   end
 
   def to_enc

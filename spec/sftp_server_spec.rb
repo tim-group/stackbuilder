@@ -1,7 +1,7 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
-describe_stack 'sftp servers' do
+describe_stack 'sftp servers should support load balancing and dependant instances' do
   given do
     stack "lb" do
       loadbalancer
@@ -48,5 +48,33 @@ describe_stack 'sftp servers' do
     lb_enc = load_balancer.to_enc
     lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['persistent_ports'].should eql([])
     lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['ports'].should eql(['2222'])
+  end
+end
+describe_stack 'sftp servers should provide specific mounts' do
+  given do
+    stack "secureftp" do
+      virtual_sftpserver 'sftp' do
+        self.ports = ['2222']
+      end
+    end
+
+    env "mirror", :primary_site => "oy", :secondary_site => "bs" do
+      instantiate_stack "secureftp"
+    end
+  end
+
+  host("mirror-sftp-001.mgmt.oy.net.local") do |sftp_server|
+    storage = sftp_server.to_specs.shift[:storage]
+    storage.key?(:"/chroot").should eql true
+    storage[:"/chroot"][:size].should eql '40G'
+    storage[:"/chroot"][:persistent].should eql true
+    storage.key?(:"/var/lib/batchelor").should eql true
+    storage[:"/var/lib/batchelor"][:size].should eql '40G'
+    storage[:"/var/lib/batchelor"][:persistent].should eql true
+    storage.key?(:"/home").should eql true
+    storage[:"/home"][:size].should eql '20G'
+    storage[:"/home"][:persistent].should eql true
+    storage.key?(:"/tmp").should eql true
+    storage[:"/tmp"][:size].should eql '10G'
   end
 end
