@@ -61,7 +61,13 @@ class StackBuilder::Allocator::Hosts
     if candidate_hosts.empty?
       fail "Unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}"
     end
-    candidate_hosts.sort_by(&:preference)[0]
+
+    candidate_hosts = candidate_hosts.sort_by(&:preference)
+
+    @logger.debug("kvm host preference list:")
+    candidate_hosts.each { |p| @logger.debug("  #{p.preference}") }
+
+    candidate_hosts[0]
   end
 
   private
