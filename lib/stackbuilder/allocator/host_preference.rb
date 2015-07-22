@@ -1,7 +1,7 @@
 require 'stackbuilder/allocator/namespace'
 
 module StackBuilder::Allocator::HostPreference
-  # prever kvm hosts without the "data" partition if the vm doesn't need it
+  # prefer kvm hosts without the "data" partition if the vm doesn't need it
   def self.prefer_no_data
     Proc.new { |host| host.storage["data"].nil? ? -1 : 1 }
   end
