@@ -65,9 +65,7 @@ class StackBuilder::Allocator::Host
     end
   end
 
-  def preference(_machine_hash)
-    @preference_functions.map do |function|
-      function.call(self)
-    end
+  def preference
+    @preference_functions.map { |function| function.call(self) }
   end
 end

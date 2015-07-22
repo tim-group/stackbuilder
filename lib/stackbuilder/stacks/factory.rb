@@ -77,6 +77,7 @@ class Stacks::Factory
 
   def preference_functions
     @preference_functions ||= [
+      StackBuilder::Allocator::HostPreference.prefer_no_data,
       StackBuilder::Allocator::HostPreference.fewest_machines,
       StackBuilder::Allocator::HostPreference.alphabetical_fqdn
     ]
