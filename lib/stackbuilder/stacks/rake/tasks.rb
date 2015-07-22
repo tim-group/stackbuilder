@@ -282,15 +282,10 @@ namespace :sbx do
   end
 
   def get_defined_machines(environment)
-    puts "parsing stackbuilder-config..."
-    hostnames = []
-    machines = []
-    environment.environments.each do |_envname, env|
-      # XXX oy-mon-001 is a ShadowServer and to_spec returns NilClass
-      machines += env.flatten.map(&:to_spec).select { |x| x.class != NilClass }
-      # XXX cannot just get hostname from defined_machines, as they don't include oy-mon-001
-      hostnames += env.flatten.map(&:hostname)
-    end
+    e = []
+    environment.environments.each { |_envname, env| e += env.flatten }
+    hostnames = e.map(&:hostname)
+    machines = e.map(&:to_spec)
     [hostnames, machines]
   end
 
@@ -299,7 +294,6 @@ namespace :sbx do
     domains = Hash[]
     storage = Hash[]
     sites.each do |site|
-      puts "polling #{site}..."
       compute_nodes = @factory.host_repository.find_compute_nodes(site, true).hosts
       hostnames += compute_nodes.map(&:allocated_machines).flatten.map { |vm| vm[:hostname] }
       domains.merge!(compute_nodes.map(&:domains).reduce({}, :merge))
@@ -309,9 +303,9 @@ namespace :sbx do
   end
 
   def rogue_check_allocation(defined_hostnames, allocated_hostnames)
-    rogue1 = defined_hostnames - allocated_hostnames
-    puts sprintf("defined, but not allocated (%d):", rogue1.size)
-    rogue1.each { |node| puts "  #{node}" }
+    # rogue1 = defined_hostnames - allocated_hostnames
+    # puts sprintf("defined, but not allocated (%d):", rogue1.size)
+    # rogue1.each { |node| puts "  #{node}" }
 
     rogue2 = allocated_hostnames - defined_hostnames
     puts sprintf("allocated, but not defined (%d):", rogue2.size)
@@ -392,12 +386,12 @@ namespace :sbx do
 
   desc 'find inconsistency between stackbuilder-config and reality'
   task :find_rogue do
-    defined_hostnames, defined_machines = get_defined_machines(environment)
-    allocated_hostnames, allocated_domains, allocated_storage = get_allocated_machines(%w(oy lon pg st ci))
+    defined_hostnames, _defined_machines = get_defined_machines(environment)
+    allocated_hostnames, _allocated_domains, _allocated_storage = get_allocated_machines(%w(oy pg st ci))
 
     rogue_check_allocation(defined_hostnames, allocated_hostnames)
-    rogue_check_resources(defined_machines, allocated_domains)
-    rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
+    # rogue_check_resources(defined_machines, allocated_domains)
+    # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
   end
 
   require 'set'
