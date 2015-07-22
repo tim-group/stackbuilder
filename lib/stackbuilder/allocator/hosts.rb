@@ -6,7 +6,7 @@ class StackBuilder::Allocator::Hosts
 
   def initialize(args)
     @hosts = args[:hosts]
-    @logger = args[:logger]
+    @logger = args[:logger] # XXX needing to use "unless @logger.nil?" is not good
 
     fail 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
     hosts.each do |host|
@@ -64,8 +64,10 @@ class StackBuilder::Allocator::Hosts
 
     candidate_hosts = candidate_hosts.sort_by(&:preference)
 
-    @logger.debug("kvm host preference list:")
-    candidate_hosts.each { |p| @logger.debug("  #{p.preference}") }
+    unless @logger.nil?
+      @logger.debug("kvm host preference list:")
+      candidate_hosts.each { |p| @logger.debug("  #{p.preference}") }
+    end
 
     candidate_hosts[0]
   end
