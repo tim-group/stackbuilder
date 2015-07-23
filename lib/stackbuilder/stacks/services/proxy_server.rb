@@ -24,14 +24,12 @@ class Stacks::Services::ProxyServer < Stacks::MachineDef
     else
       service_resources = Hash[@virtual_service.downstream_services(location)]
       enc = super()
-      enc.merge!({
-        'role::proxyserver' => {
-          'default_ssl_cert' => @virtual_service.cert,
-          'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod, location),
-          'vhosts'           => service_resources,
-          'environment'      => environment.name
-        }
-      })
+      enc.merge!('role::proxyserver' => {
+                   'default_ssl_cert' => @virtual_service.cert,
+                   'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod, location),
+                   'vhosts'           => service_resources,
+                   'environment'      => environment.name
+                 })
       enc
     end
   end

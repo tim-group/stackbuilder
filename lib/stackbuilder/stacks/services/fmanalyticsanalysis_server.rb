@@ -10,12 +10,10 @@ class Stacks::Services::FmAnalyticsAnalysisServer < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    enc.merge!({
-      'role::fmanalyticsanalysis_server' => {
-        'datadir'     => @data_directory,
-        'environment' => environment.name
-      }
-    })
+    enc.merge!('role::fmanalyticsanalysis_server' => {
+                 'datadir'     => @data_directory,
+                 'environment' => environment.name
+               })
     enc
   end
 

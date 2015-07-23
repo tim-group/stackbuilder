@@ -26,17 +26,15 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    enc.merge!({
-      'role::databaseserver' => {
-        'environment'              => environment.name,
-        'application'              => @virtual_service.application,
-        'database_name'            => @virtual_service.database_name,
-        'restart_on_config_change' => false,
-        'restart_on_install'       => true,
-        'datadir'                  => '/mnt/data/mysql',
-        'version'                  => @version
-      }
-    })
+    enc.merge!('role::databaseserver' => {
+                 'environment'              => environment.name,
+                 'application'              => @virtual_service.application,
+                 'database_name'            => @virtual_service.database_name,
+                 'restart_on_config_change' => false,
+                 'restart_on_install'       => true,
+                 'datadir'                  => '/mnt/data/mysql',
+                 'version'                  => @version
+               })
     dependant_instances = @virtual_service.dependant_instance_fqdns(location)
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::databaseserver'].merge!('dependencies' => @virtual_service.dependency_config(location),

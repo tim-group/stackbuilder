@@ -11,14 +11,12 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    enc.merge!({
-      'role::mongodb_server' => {
-        'application' => @virtual_service.application
-      },
-      'mongodb::users' => {
-        'environment' => environment.name
-      }
-    })
+    enc.merge!('role::mongodb_server' => {
+                 'application' => @virtual_service.application
+               },
+               'mongodb::users' => {
+                 'environment' => environment.name
+               })
     enc['mongodb::backup'] = { 'ensure' => 'present' } if @backup
     enc
   end

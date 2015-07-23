@@ -10,9 +10,7 @@ class Stacks::Services::DebRepo < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    enc.merge!({
-      'role::deb_repo' => {}
-    })
+    enc.merge!('role::deb_repo' => {})
     enc
   end
 
