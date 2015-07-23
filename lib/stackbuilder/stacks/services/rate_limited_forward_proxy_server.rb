@@ -12,8 +12,10 @@ class Stacks::Services::RateLimitedForwardProxyServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
+    enc = super()
+    enc.merge!({
       'role::rate_limited_forward_proxy' => {}
-    }
+    })
+    enc
   end
 end

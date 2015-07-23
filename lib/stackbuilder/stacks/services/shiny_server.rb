@@ -10,5 +10,6 @@ class Stacks::Services::ShinyServer < Stacks::MachineDef
   def to_enc
     enc = super
     enc.merge!('role::shiny_server' => {})
+    enc
   end
 end

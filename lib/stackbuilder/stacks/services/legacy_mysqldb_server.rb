@@ -25,7 +25,8 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
   end
 
   def to_enc
-    enc = {
+    enc = super()
+    enc.merge!({
       'role::databaseserver' => {
         'environment'              => environment.name,
         'application'              => @virtual_service.application,
@@ -35,7 +36,7 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
         'datadir'                  => '/mnt/data/mysql',
         'version'                  => @version
       }
-    }
+    })
     dependant_instances = @virtual_service.dependant_instance_fqdns(location)
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::databaseserver'].merge!('dependencies' => @virtual_service.dependency_config(location),

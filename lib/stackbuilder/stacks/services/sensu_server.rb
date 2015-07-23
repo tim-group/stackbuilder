@@ -8,10 +8,12 @@ class Stacks::Services::SensuServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
+    enc = super()
+    enc.merge!({
       'role::sensu' => {
         'server' => true
       }
-    }
+    })
+    enc
   end
 end

@@ -19,10 +19,12 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
   end
 
   def to_enc
-    {
+    enc = super()
+    enc.merge!({
       'role::cinode_precise' => {
         'mysql_version' => @mysql_version
       }
-    }
+    })
+    enc
   end
 end

@@ -11,11 +11,13 @@ class Stacks::Services::PentahoServer < Stacks::MachineDef
   attr_accessor :application
 
   def to_enc
-    {
+    enc = super()
+    enc.merge! ({
       'role::pentaho_server' => {
         'datadir'     => @data_directory,
         'environment' => environment.name
       }
-    }
+    })
+    enc
   end
 end

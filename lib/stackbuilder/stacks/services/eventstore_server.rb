@@ -8,10 +8,12 @@ class Stacks::Services::EventStoreServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
+    enc = super()
+    enc.merge!({
       'role::eventstore_server' => {
         'clusternodes' => @virtual_service.children.map(&:prod_fqdn).sort
       }
-    }
+    })
+    enc
   end
 end

@@ -8,10 +8,12 @@ class Stacks::Services::LogstashServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
+    enc = super()
+    enc.merge!({
       'role::logstash_server' => {
         'environment' => environment.name
       }
-    }
+    })
+    enc
   end
 end

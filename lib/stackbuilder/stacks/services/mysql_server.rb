@@ -70,7 +70,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def to_enc
-    enc = {
+    enc = super()
+    enc.merge!({
       'role::mysql_server' => {
         'backup'                   => backup?,
         'database_name'            => @virtual_service.database_name,
@@ -82,7 +83,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         'version'                  => @version
       },
       'server::default_new_mgmt_net_local' => nil
-    }
+    })
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
     dependant_instances = @virtual_service.dependant_instance_fqdns(location)

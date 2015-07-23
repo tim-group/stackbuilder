@@ -14,10 +14,12 @@ class Stacks::Services::ElasticSearchNode < Stacks::MachineDef
   end
 
   def to_enc
-    {
+    enc = super()
+    enc.merge!({
       'role::elasticsearch_node' => {
         'cluster_nodes' =>  machine_set.definitions.values.map(&:prod_fqdn)
       }
-    }
+    })
+    enc
   end
 end

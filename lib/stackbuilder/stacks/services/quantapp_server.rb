@@ -13,8 +13,10 @@ class Stacks::Services::QuantAppServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
+    enc = super()
+    enc.merge!({
       'role::quantapp_server' => {}
-    }
+    })
+    enc
   end
 end
