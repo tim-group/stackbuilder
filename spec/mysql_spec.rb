@@ -350,3 +350,26 @@ describe_stack 'should allow server_id_offset to be specified' do
     enc_server_role['server_id'].should eql(1001)
   end
 end
+
+describe_stack 'should allow use_gtids to be specified' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        each_machine do |machine|
+          machine.use_gtids = true if %w(testing-mydb-001).include? machine.hostname
+        end
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    enc_server_role = host.to_enc['role::mysql_server']
+    enc_server_role['use_gtids'].should eql(true)
+  end
+  host("testing-mydb-002.mgmt.space.net.local") do |host|
+    enc_server_role = host.to_enc['role::mysql_server']
+    enc_server_role['use_gtids'].should eql(false)
+  end
+end

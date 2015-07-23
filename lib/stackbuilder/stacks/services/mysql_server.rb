@@ -5,6 +5,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :master
   attr_accessor :version
   attr_accessor :server_id
+  attr_accessor :use_gtids
 
   def initialize(base_hostname, virtual_service, role, location)
     @master = (role == :master) ? true : false
@@ -18,6 +19,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @destroyable = false
     @version = '5.1.49-1ubuntu8'
     @server_id = nil
+    @use_gtids = false
 
     storage = {
       '/tmp' => {
@@ -82,7 +84,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'master'                   => master?,
                  'server_id'                => server_id,
                  'charset'                  => @virtual_service.charset,
-                 'version'                  => @version
+                 'version'                  => @version,
+                 'use_gtids'                => @use_gtids
                },
                'server::default_new_mgmt_net_local' => nil)
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
