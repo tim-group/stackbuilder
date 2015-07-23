@@ -5,7 +5,7 @@ module Stacks::Services::MysqlCluster
     object.configure
   end
 
-  attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances, :charset
+  attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances, :charset, :server_id_base
 
   def configure
     @database_name = ''
@@ -13,6 +13,7 @@ module Stacks::Services::MysqlCluster
     @slave_instances = 1
     @backup_instances = 1
     @charset = 'utf8'
+    @server_id_offset = 0
   end
 
   def instantiate_machine(name, type, index, environment, location)
@@ -24,6 +25,11 @@ module Stacks::Services::MysqlCluster
     # FIXME: Is this required?
     @definitions[server_name] = server
     server
+  end
+
+  def server_id(server)
+    fail "@server_id_offset must be numeric: #{@server_id_offset.class}" unless @server_id_offset.is_a? Numeric
+    children.index(server).to_i + @server_id_offset + 1
   end
 
   def instantiate_machines(environment)

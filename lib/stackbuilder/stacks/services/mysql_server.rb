@@ -4,6 +4,7 @@ require 'stackbuilder/stacks/machine_def'
 class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :master
   attr_accessor :version
+  attr_accessor :server_id
 
   def initialize(base_hostname, virtual_service, role, location)
     @master = (role == :master) ? true : false
@@ -16,6 +17,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @vcpus = '2'
     @destroyable = false
     @version = '5.1.49-1ubuntu8'
+    @server_id = nil
 
     storage = {
       '/tmp' => {
@@ -44,6 +46,11 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     modify_storage('/mnt/storage' => { :size => size }) if @backup
   end
 
+  def server_id
+    return virtual_service.server_id(self) if @server_id.nil?
+    @server_id
+  end
+
   def data_size(size)
     modify_storage('/mnt/data' => { :size => size })
   end
@@ -63,10 +70,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
 
   def backup?
     @backup
-  end
-
-  def server_id
-    @virtual_service.children.index(self) + 1
   end
 
   def to_enc

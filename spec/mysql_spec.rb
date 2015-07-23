@@ -316,3 +316,37 @@ describe_stack 'should support dependencies' do
     host.to_enc['role::mysql_server']['dependencies'].should eql({})
   end
 end
+
+describe_stack 'should allow server_id to be overwritten' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        each_machine { |machine| machine.server_id = 99 }
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    enc_server_role = host.to_enc['role::mysql_server']
+    enc_server_role['server_id'].should eql(99)
+  end
+end
+
+describe_stack 'should allow server_id_offset to be specified' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        @server_id_offset = 1000
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    enc_server_role = host.to_enc['role::mysql_server']
+    enc_server_role['server_id'].should eql(1001)
+  end
+end
