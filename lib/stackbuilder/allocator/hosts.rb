@@ -65,7 +65,7 @@ class StackBuilder::Allocator::Hosts
     candidate_hosts = candidate_hosts.sort_by(&:preference)
 
     unless @logger.nil?
-      @logger.debug("kvm host preference list:")
+      @logger.debug("kvm host preference list (data storage preference, number of vms, fqdn):")
       candidate_hosts.each { |p| @logger.debug("  #{p.preference}") }
     end
 
