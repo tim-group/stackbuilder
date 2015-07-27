@@ -29,7 +29,7 @@ module StackBuilder::Allocator::HostPolicies
     end
   end
 
-  def self.do_not_overallocated_ram_policy
+  def self.do_not_overallocate_ram_policy
     helper = StackBuilder::Allocator::PolicyHelpers
     Proc.new do |host, machine|
       result = { :passed => true }

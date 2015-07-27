@@ -63,7 +63,7 @@ describe StackBuilder::Allocator::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy.call(h1, candidate_machine)[:passed].
+    StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed].
       should eql(true)
   end
 
@@ -87,7 +87,7 @@ describe StackBuilder::Allocator::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy.call(h1, candidate_machine)[:passed].
+    StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed].
       should eql(false)
   end
 
@@ -111,7 +111,7 @@ describe StackBuilder::Allocator::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocated_ram_policy.call(h1, candidate_machine)[:passed].
+    StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed].
       should eql(false)
   end
 
