@@ -2,6 +2,7 @@ require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::MysqlServer < Stacks::MachineDef
+  attr_accessor :config
   attr_accessor :master
   attr_accessor :version
   attr_accessor :server_id
@@ -10,16 +11,17 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   def initialize(base_hostname, virtual_service, role, location)
     @master = (role == :master) ? true : false
     @backup = (role == :backup) ? true : false
-    @location = location
-
     super(base_hostname, [:mgmt, :prod], location)
-    @virtual_service = virtual_service
-    @ram = '4194304' # 4GB
-    @vcpus = '2'
+
+    @config = {}
     @destroyable = false
-    @version = '5.1.49-1ubuntu8'
+    @location = location
+    @ram = '4194304' # 4GB
     @server_id = nil
     @use_gtids = false
+    @vcpus = '2'
+    @version = '5.1.49-1ubuntu8'
+    @virtual_service = virtual_service
 
     storage = {
       '/tmp' => {
@@ -101,6 +103,13 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         enc.merge!(@virtual_service.dependant_instance_mysql_rights(location))
       end
     end
+    unless @config.empty?
+      enc['role::stacks_mysql_config'] = {
+        'config'         => @config,
+        'notify_service' => !%w(production).include?(environment.name)
+      }
+    end
+
     enc['role::mysql_multiple_rights'] = {
       'rights' => {
         @virtual_service.database_name => {

@@ -373,3 +373,38 @@ describe_stack 'should allow use_gtids to be specified' do
     enc_server_role['use_gtids'].should eql(false)
   end
 end
+
+describe_stack 'should allow custom mysql_config to be specified' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        each_machine do |machine|
+          machine.config = {
+            'mysqld' => {
+              'innodb_buffer_pool_size' => '10G',
+              'innodb_buffer_pool_instances' => '10'
+            }
+          }
+        end
+      end
+    end
+    env "production", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+    env "latest", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
+    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
+    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances'].should eql('10')
+    stacks_mysql_config['notify_service'].should eql(false)
+  end
+  host("latest-mydb-002.mgmt.space.net.local") do |host|
+    stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
+    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
+    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances'].should eql('10')
+    stacks_mysql_config['notify_service'].should eql(true)
+  end
+end
