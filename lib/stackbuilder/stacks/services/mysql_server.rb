@@ -106,7 +106,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     unless @config.empty?
       enc['role::stacks_mysql_config'] = {
         'config'         => @config,
-        'notify_service' => !%w(production).include?(environment.name)
+        'notify_service' => !@environment.production
       }
     end
 

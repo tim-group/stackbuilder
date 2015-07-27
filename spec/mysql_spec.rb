@@ -388,7 +388,7 @@ describe_stack 'should allow custom mysql_config to be specified' do
         end
       end
     end
-    env "production", :primary_site => "space", :secondary_site => "earth" do
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
       instantiate_stack "mysql"
     end
     env "latest", :primary_site => "space", :secondary_site => "earth" do
