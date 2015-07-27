@@ -9,6 +9,7 @@ class Stacks::Environment
   attr_reader :options
   attr_reader :primary_site
   attr_reader :secondary_site
+  attr_accessor :production
 
   include Stacks::MachineDefContainer
 
@@ -27,6 +28,7 @@ class Stacks::Environment
     @domain_suffix = options[:domain_suffix] || 'net.local'
     @parent = parent
     @children = []
+    @production = false
   end
 
   def child?(environment)
