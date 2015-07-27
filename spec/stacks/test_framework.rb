@@ -57,14 +57,14 @@ module Stacks::Matchers
       actual_hosts = stacks.fqdn_list.to_set
       missing_nodes = expected_hosts - actual_hosts
       unexpected_nodes = actual_hosts - expected_hosts
-      error_message = ""
+      error_message = ''
       if missing_nodes.size > 0
-        error_message += "Expected hosts are missing:\n #{expected.to_a.join("\n ")}\n"
-        error_message += "-#{missing_nodes.to_a.join("\n-")}\n"
+        error_message += "Expected hosts were missing:\n #{missing_nodes.to_a.join("\n ")}\n"
+        error_message += "Actual hosts:\n #{actual_hosts.to_a.join("\n ")}\n"
       end
       if unexpected_nodes.size > 0
-        error_message += "Unexpected hosts were found:\n #{expected.to_a.join("\n ")}\n"
-        error_message += "+#{unexpected_nodes.to_a.join("\n+")}\n"
+        error_message += "Unexpected hosts found:\n #{unexpected_nodes.to_a.join("\n ")}\n"
+        error_message += "Expected hosts:\n #{expected_hosts.to_a.join("\n ")}\n"
       end
       error_message
     end
