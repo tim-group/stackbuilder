@@ -28,7 +28,7 @@ class Stacks::Environment
     @domain_suffix = options[:domain_suffix] || 'net.local'
     @parent = parent
     @children = []
-    @production = false
+    @production = options[:production].nil? ? false : options[:production]
   end
 
   def child?(environment)
