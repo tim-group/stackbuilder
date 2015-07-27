@@ -437,3 +437,30 @@ describe_stack 'should merge mysql_config with gtid_config when using use_gtids'
     stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency'].should eql('ON')
   end
 end
+
+describe_stack 'should create secondary_sited slave databases' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.backup_instances = 1
+        self.secondary_site_slave_instances = 2
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  it_stack 'should contain all the expected hosts' do |stack|
+    stack.should have_hosts(
+      [
+        'production-mydb-001.mgmt.space.net.local',
+        'production-mydb-002.mgmt.space.net.local',
+        'production-mydbbackup-001.mgmt.earth.net.local',
+        'production-mydb-001.mgmt.earth.net.local',
+        'production-mydb-002.mgmt.earth.net.local'
+      ]
+    )
+  end
+end

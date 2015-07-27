@@ -5,12 +5,19 @@ module Stacks::Services::MysqlCluster
     object.configure
   end
 
-  attr_accessor :database_name, :master_instances, :slave_instances, :backup_instances, :charset, :server_id_base
+  attr_accessor :backup_instances
+  attr_accessor :charset
+  attr_accessor :database_name
+  attr_accessor :master_instances
+  attr_accessor :secondary_site_slave_instances
+  attr_accessor :server_id_base
+  attr_accessor :slave_instances
 
   def configure
     @database_name = ''
     @master_instances = 1
     @slave_instances = 1
+    @secondary_site_slave_instances = 0
     @backup_instances = 1
     @charset = 'utf8'
     @server_id_offset = 0
@@ -22,9 +29,7 @@ module Stacks::Services::MysqlCluster
     server = @type.new(server_name, self, type, location)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
-    # FIXME: Is this required?
-    @definitions[server_name] = server
-    server
+    @definitions["#{server_name}-#{location}"] = server
   end
 
   def server_id(server)
@@ -45,6 +50,10 @@ module Stacks::Services::MysqlCluster
     i = 0
     @backup_instances.times do
       instantiate_machine(name, :backup, sprintf("%03d", i += 1), environment, :secondary_site)
+    end
+    i = 0
+    @secondary_site_slave_instances.times do
+      instantiate_machine(name, :slave, sprintf("%03d", i += 1), environment, :secondary_site)
     end
   end
 
