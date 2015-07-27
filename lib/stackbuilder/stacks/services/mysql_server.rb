@@ -80,7 +80,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     gtid_config = {
       'mysqld' => {
         'gtid_mode'                => 'ON',
-        'enforce_gtid_consistency' => 'ON'
+        'enforce_gtid_consistency' => 'ON',
+        'log_slave_updates'        => 'ON'
       }
     }
     recurse_merge(@config, gtid_config)
