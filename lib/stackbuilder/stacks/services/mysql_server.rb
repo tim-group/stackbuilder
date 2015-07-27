@@ -76,6 +76,16 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @backup
   end
 
+  def merge_gtid_config
+    gtid_config = {
+      'mysqld' => {
+        'gtid_mode'                => 'ON',
+        'enforce_gtid_consistency' => 'ON'
+      }
+    }
+    recurse_merge(@config, gtid_config)
+  end
+
   def to_enc
     enc = super()
     enc.merge!('role::mysql_server' => {
@@ -86,8 +96,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'master'                   => master?,
                  'server_id'                => server_id,
                  'charset'                  => @virtual_service.charset,
-                 'version'                  => @version,
-                 'use_gtids'                => @use_gtids
+                 'version'                  => @version
                },
                'server::default_new_mgmt_net_local' => nil)
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
@@ -103,6 +112,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         enc.merge!(@virtual_service.dependant_instance_mysql_rights(location))
       end
     end
+    @config = merge_gtid_config if @use_gtids
+
     unless @config.empty?
       enc['role::stacks_mysql_config'] = {
         'config'        => @config,

@@ -365,12 +365,12 @@ describe_stack 'should allow use_gtids to be specified' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['use_gtids'].should eql(true)
+    stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
+    stacks_mysql_config['config']['mysqld']['gtid_mode'].should eql('ON')
+    stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency'].should eql('ON')
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
-    enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['use_gtids'].should eql(false)
+    host.to_enc.key?('role::stacks_mysql_config').should eql(false)
   end
 end
 
@@ -406,5 +406,34 @@ describe_stack 'should allow custom mysql_config to be specified' do
     stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
     stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances'].should eql('10')
     stacks_mysql_config['restart_mysql'].should eql(true)
+  end
+end
+
+describe_stack 'should merge mysql_config with gtid_config when using use_gtids' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        each_machine do |machine|
+          machine.use_gtids = true
+          machine.config = {
+            'mysqld' => {
+              'innodb_buffer_pool_size' => '10G'
+            }
+          }
+        end
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+    env "latest", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
+    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
+    stacks_mysql_config['config']['mysqld']['gtid_mode'].should eql('ON')
+    stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency'].should eql('ON')
   end
 end
