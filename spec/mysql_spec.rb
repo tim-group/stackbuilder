@@ -399,12 +399,12 @@ describe_stack 'should allow custom mysql_config to be specified' do
     stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
     stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
     stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances'].should eql('10')
-    stacks_mysql_config['notify_service'].should eql(false)
+    stacks_mysql_config['restart_mysql'].should eql(false)
   end
   host("latest-mydb-002.mgmt.space.net.local") do |host|
     stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
     stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
     stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances'].should eql('10')
-    stacks_mysql_config['notify_service'].should eql(true)
+    stacks_mysql_config['restart_mysql'].should eql(true)
   end
 end
