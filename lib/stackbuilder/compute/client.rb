@@ -88,6 +88,15 @@ class Compute::Client
     mco_client("computenode", client_options) do |mco|
       mco.send(selector, :specs => specs).map do |node|
         fail node[:statusmsg] if node[:statuscode] != 0
+
+        # XXX mcollective's implemented_by, after reading the return JSON, arbitrarily converts hash keys from strings
+        # to symbols. stackbuilder expects strings. the line below does the necessary conversion.
+        # this workaround can lead to nasty hard to debug problems
+        node.results[:data] = node.results[:data].inject({}) do |acc, (k, v)|
+          acc[k.to_s] = v
+          acc
+        end
+
         [node.results[:sender], node.results[:data]]
       end
     end
