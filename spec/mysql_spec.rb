@@ -127,7 +127,6 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['datadir'].should eql('/mnt/data/mysql')
     enc_server_role['environment'].should eql('testing')
     enc_server_role['master'].should eql(true)
-    enc_server_role['server_id'].should eql(1)
 
     enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
     enc_rights['mydb']['environment'].should eql('testing')
@@ -150,7 +149,6 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['datadir'].should eql('/mnt/data/mysql')
     enc_server_role['environment'].should eql('testing')
     enc_server_role['master'].should eql(false)
-    enc_server_role['server_id'].should eql(2)
 
     enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
     enc_rights['mydb']['environment'].should eql('testing')
@@ -176,7 +174,6 @@ describe_stack 'should provide correct enc data' do
     enc_server_role['datadir'].should eql('/mnt/data/mysql')
     enc_server_role['environment'].should eql('testing')
     enc_server_role['master'].should eql(false)
-    enc_server_role['server_id'].should eql(3)
 
     host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
       'replicant@testing-mydb-001.space.net.local' => {
@@ -186,7 +183,6 @@ describe_stack 'should provide correct enc data' do
         'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
       }
     )
-
     host.to_enc.should include('server::default_new_mgmt_net_local')
     host.to_enc.should include('mysql_hacks::replication_rights_wrapper')
     host.to_enc.should_not include('mysql_hacks::application_rights_wrapper')
@@ -317,6 +313,33 @@ describe_stack 'should support dependencies' do
   end
 end
 
+describe_stack 'should provide the correct server_ids' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.backup_instances = 1
+        self.secondary_site_slave_instances = 2
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    host.to_enc['role::mysql_server']['server_id'].should eql(1)
+  end
+  host("testing-mydb-002.mgmt.space.net.local") do |host|
+    host.to_enc['role::mysql_server']['server_id'].should eql(2)
+  end
+  host("testing-mydb-001.mgmt.earth.net.local") do |host|
+    host.to_enc['role::mysql_server']['server_id'].should eql(101)
+  end
+  host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
+    host.to_enc['role::mysql_server']['server_id'].should eql(201)
+  end
+end
 describe_stack 'should allow server_id to be overwritten' do
   given do
     stack "mysql" do

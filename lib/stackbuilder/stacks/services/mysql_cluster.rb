@@ -11,6 +11,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :master_instances
   attr_accessor :secondary_site_slave_instances
   attr_accessor :server_id_base
+  attr_accessor :server_id_offset
   attr_accessor :slave_instances
 
   def configure
@@ -23,37 +24,33 @@ module Stacks::Services::MysqlCluster
     @server_id_offset = 0
   end
 
-  def instantiate_machine(name, type, index, environment, location)
+  def instantiate_machine(name, type, i, environment, location)
+    index = sprintf("%03d", i)
     server_name = "#{name}-#{index}"
     server_name = "#{name}#{type}-#{index}" if type == :backup
-    server = @type.new(server_name, self, type, location)
+    server = @type.new(server_name, i, self, type, location)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
     @definitions["#{server_name}-#{location}"] = server
-  end
-
-  def server_id(server)
-    fail "@server_id_offset must be numeric: #{@server_id_offset.class}" unless @server_id_offset.is_a? Numeric
-    children.index(server).to_i + @server_id_offset + 1
   end
 
   def instantiate_machines(environment)
     fail 'MySQL clusters do not currently support enable_secondary_site' if @enable_secondary_site
     i = 0
     @master_instances.times do
-      instantiate_machine(name, :master, sprintf("%03d", i += 1), environment, :primary_site)
+      instantiate_machine(name, :master, i += 1, environment, :primary_site)
     end
     @slave_instances.times do
-      instantiate_machine(name, :slave, sprintf("%03d", i += 1), environment, :primary_site)
+      instantiate_machine(name, :slave, i += 1, environment, :primary_site)
     end
 
     i = 0
     @backup_instances.times do
-      instantiate_machine(name, :backup, sprintf("%03d", i += 1), environment, :secondary_site)
+      instantiate_machine(name, :backup, i += 1, environment, :secondary_site)
     end
     i = 0
     @secondary_site_slave_instances.times do
-      instantiate_machine(name, :slave, sprintf("%03d", i += 1), environment, :secondary_site)
+      instantiate_machine(name, :slave, i += 1, environment, :secondary_site)
     end
   end
 

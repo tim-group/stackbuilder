@@ -8,15 +8,19 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :server_id
   attr_accessor :use_gtids
 
-  def initialize(base_hostname, virtual_service, role, location)
+  def initialize(base_hostname, i, virtual_service, role, location)
+    index = sprintf("%03d", i)
     @master = (role == :master) ? true : false
     @backup = (role == :backup) ? true : false
     super(base_hostname, [:mgmt, :prod], location)
 
     @config = {}
     @destroyable = false
+    @i = i
+    @index = index
     @location = location
     @ram = '4194304' # 4GB
+    @role = role
     @server_id = nil
     @use_gtids = false
     @vcpus = '2'
@@ -51,7 +55,17 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def server_id
-    return virtual_service.server_id(self) if @server_id.nil?
+    if @server_id.nil?
+      case @role
+      when :master
+        @server_id = @i + @virtual_service.server_id_offset
+      when :slave
+        @server_id = @i + @virtual_service.server_id_offset
+        @server_id = @i + @virtual_service.server_id_offset + 100 if @location == :secondary_site
+      when :backup
+        @server_id = @i + @virtual_service.server_id_offset + 200
+      end
+    end
     @server_id
   end
 
