@@ -705,8 +705,9 @@ namespace :sbx do
             mco.host_cleanup(:fqdn => fqdn)
             mco.remove_entry_from_nagios_host_cfg(:fqdn => fqdn)
           end
+
           mco.reset_filter
-          mco.fact_filter 'hostname=ldn-puppet-001'
+          mco.agent_filter('registration')
           hosts.each do |fqdn|
             mco.remove_host_from_mongodb(:fqdn => fqdn)
           end
