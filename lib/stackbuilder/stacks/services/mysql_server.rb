@@ -144,7 +144,11 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         }
       }
     }
-    enc.merge!(@virtual_service.dependant_children_replication_mysql_rights(self))
+
+    replication_rights_class = 'mysql_hacks::replication_rights_wrapper'
+    enc[replication_rights_class] = {} if enc[replication_rights_class].nil?
+    enc[replication_rights_class]['rights'] = {} if enc[replication_rights_class]['rights'].nil?
+    enc[replication_rights_class]['rights'].merge!(@virtual_service.dependant_children_replication_mysql_rights(self))
     enc
   end
 end

@@ -101,13 +101,11 @@ module Stacks::Services::MysqlCluster
   end
 
   def dependant_children_replication_mysql_rights(server)
-    rights = {
-      'mysql_hacks::replication_rights_wrapper' => { 'rights' => {} }
-    }
+    rights = {}
     children.each do |dependant|
       next if dependant == server
 
-      rights['mysql_hacks::replication_rights_wrapper']['rights'].merge!(
+      rights.merge!(
         "replicant@#{dependant.prod_fqdn}" => {
           'password_hiera_key' => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password"
         })
