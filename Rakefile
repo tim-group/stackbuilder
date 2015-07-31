@@ -18,6 +18,11 @@ else # fast run (common ruby process for all tests)
   end
 end
 
+desc 'Clean up the build directory'
+task :clean do
+  sh 'rm -rf build/'
+end
+
 desc "Create a debian package"
 task :package do
   version = "0.0.#{ENV['BUILD_NUMBER']}"
