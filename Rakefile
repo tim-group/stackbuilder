@@ -20,23 +20,32 @@ end
 
 desc "Create a debian package"
 task :package do
-  hash = `git rev-parse --short HEAD`.chomp
-  v_part = ENV['BUILD_NUMBER'] || "0.pre.#{hash}"
-  version = "0.0.#{v_part}"
+  version = "0.0.#{ENV['BUILD_NUMBER']}"
 
-  sh "rm -f *.deb *.gem"
-  sh "rm -rf build/"
+  sh 'rm -rf build/package'
+  sh 'mkdir -p build/package/usr/local/lib/site_ruby/timgroup/'
+  sh 'cp -r lib/* build/package/usr/local/lib/site_ruby/timgroup/'
 
-  # XXX compatible with both 1.8 and 1.9 during the transition period
-  sh "mkdir -p build/usr/local/lib/site_ruby/1.8"
-  sh "cp -r lib/* build/usr/local/lib/site_ruby/1.8"
-  sh "mkdir -p build/usr/local/lib/site_ruby/1.9.1"
-  sh "cp -r lib/* build/usr/local/lib/site_ruby/1.9.1"
-  sh "mkdir -p build/usr/local/bin"
-  sh "cp bin/* build/usr/local/bin"
+  sh 'mkdir -p build/package/usr/local/bin/'
+  sh 'cp -r bin/* build/package/usr/local/bin/'
 
-  sh "fpm -s dir -t deb --architecture all -C build --name stacks "\
-     "--version #{version} --deb-pre-depends rubygem-collimator"
+  arguments = [
+    '--description', 'stackbuilder',
+    '--url', 'https://github.com/tim-group/stackbuilder',
+    '-p', "build/stackbuilder-transition_#{version}.deb",
+    '-n', 'stackbuilder-transition',
+    '-v', "#{version}",
+    '-m', 'Infrastructure <infra@timgroup.com>',
+    '-d', 'ruby-bundle',
+    '-a', 'all',
+    '-t', 'deb',
+    '-s', 'dir',
+    '-C', 'build/package'
+  ]
+
+  argv = arguments.map { |x| "'#{x}'" }.join(' ')
+  sh 'rm -f build/*.deb'
+  sh "fpm #{argv}"
 end
 
 desc "Create a debian package"
@@ -70,7 +79,7 @@ task :omnibus do
   sh "ln -s ../../../embedded/lib/ruby/site_ruby/puppet build/omnibus/lib/ruby/site_ruby/puppet"
 end
 
-desc "Run lint (Rubocop)"
+desc 'Run lint (Rubocop)'
 task :lint do
-  sh "rubocop"
+  sh 'rubocop'
 end
