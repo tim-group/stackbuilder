@@ -1,3 +1,5 @@
+# XXX mmazurek 2015-07-31 this is replaced by bin/stacks_indirector and can go away after puppet.conf has
+# been reconfigured to use bin/stacks_indirector.
 $LOAD_PATH << '/opt/stackbuilder/lib/ruby/site_ruby'
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/inventory'

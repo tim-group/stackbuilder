@@ -1,4 +1,5 @@
-#! /usr/bin/env ruby
+#!/opt/ruby-bundle/bin/ruby
+# XXX mmazurek 2015-07-31 replaced by stacks_indirector, remove after a while
 
 require 'puppet'
 require 'puppet/indirector/node/stacks'
