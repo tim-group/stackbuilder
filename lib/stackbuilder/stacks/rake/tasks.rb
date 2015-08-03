@@ -711,8 +711,8 @@ namespace :sbx do
           # Clean puppet
           mco.reset_filter
           mco.fact_filter 'puppetmaster=true'
-          mco.fact_filter 'domain!=mgmt.dev.net.local'
-          mco.fact_filter 'domain!=mgmt.st.net.local'
+          mco.compound_filter '!domain=mgmt.dev.net.local'
+          mco.compound_filter '!domain=mgmt.st.net.local'
           hosts.each { |fqdn| mco.puppet_cleanup(:fqdn => fqdn) }
         end
       end
