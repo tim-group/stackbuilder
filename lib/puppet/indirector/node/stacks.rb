@@ -1,9 +1,12 @@
 # XXX mmazurek 2015-07-31 this is replaced by bin/stacks_indirector and can go away after puppet.conf has
 # been reconfigured to use bin/stacks_indirector.
+
+$LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
 $LOAD_PATH << '/opt/stackbuilder/lib/ruby/site_ruby'
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/inventory'
 $LOAD_PATH.delete('/opt/stackbuilder/lib/ruby/site_ruby')
+$LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup/')
 require 'puppet/node'
 require 'puppet/indirector/node/plain'
 require 'yaml'

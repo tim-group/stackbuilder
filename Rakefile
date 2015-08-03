@@ -30,6 +30,8 @@ task :package do
   sh 'rm -rf build/package'
   sh 'mkdir -p build/package/usr/local/lib/site_ruby/timgroup/'
   sh 'cp -r lib/* build/package/usr/local/lib/site_ruby/timgroup/'
+  sh 'mkdir -p build/package/usr/lib/ruby/vendor_ruby/puppet/indirector/node/'
+  sh 'cp lib/puppet/indirector/node/stacks.rb build/package/usr/lib/ruby/vendor_ruby/puppet/indirector/node/'
 
   sh 'mkdir -p build/package/usr/local/bin/'
   sh 'cp -r bin/* build/package/usr/local/bin/'
