@@ -689,28 +689,31 @@ namespace :sbx do
       desc 'unallocate machines'
       # Note that the ordering here is important - must have killed VMs before
       # removing their puppet cert, otherwise we have a race condition
-      task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
+      task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean', 'clean_traces']
 
-      # XXX mmazurek/27.07.2015: test this a couple of times, then integrate into :clean
       desc 'clean away all traces of these machines'
-      sbtask :host_cleanup_experimental do
+      sbtask :clean_traces do
         hosts = []
         machine_def.accept do |child_machine_def|
           hosts << child_machine_def.mgmt_fqdn if child_machine_def.respond_to?(:mgmt_fqdn)
         end
 
         mco_client('hostcleanup') do |mco|
-          mco.fact_filter 'hostname=/^(antarctica|australia)/'
-          hosts.each do |fqdn|
-            mco.host_cleanup(:fqdn => fqdn)
-            mco.remove_entry_from_nagios_host_cfg(:fqdn => fqdn)
-          end
+          # Clean nagios
+          mco.class_filter 'nagios'
+          hosts.each { |fqdn| mco.nagios_cleanup(:fqdn => fqdn) }
 
+          # Clean mongo
           mco.reset_filter
-          mco.agent_filter('registration')
-          hosts.each do |fqdn|
-            mco.remove_host_from_mongodb(:fqdn => fqdn)
-          end
+          mco.agent_filter 'registration'
+          hosts.each { |fqdn| mco.mongodb_cleanup(:fqdn => fqdn) }
+
+          # Clean puppet
+          mco.reset_filter
+          mco.fact_filter 'puppetmaster=true'
+          mco.fact_filter 'domain!=mgmt.dev.net.local'
+          mco.fact_filter 'domain!=mgmt.st.net.local'
+          hosts.each { |fqdn| mco.puppet_cleanup(:fqdn => fqdn) }
         end
       end
 
