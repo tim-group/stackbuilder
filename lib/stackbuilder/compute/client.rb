@@ -107,22 +107,22 @@ class Compute::Client
   end
 
   def allocate_ips(host, specs)
-    invoke :allocate_ips, specs, :nodes => [host]
+    invoke :allocate_ips, specs, :timeout => 15 * 60, :nodes => [host]
   end
 
   def free_ips(host, specs)
-    invoke :free_ips, specs, :nodes => [host]
+    invoke :free_ips, specs, :timeout => 15 * 60, :nodes => [host]
   end
 
   def clean(fabric, specs)
-    invoke :clean, specs, :fabric => fabric
+    invoke :clean, specs, :timeout => 15 * 60, :fabric => fabric
   end
 
   def add_cnames(host, spec)
-    invoke :add_cnames, spec, :nodes => [host]
+    invoke :add_cnames, spec, :timeout => 15 * 60, :nodes => [host]
   end
 
   def remove_cnames(host, spec)
-    invoke :remove_cnames, spec, :nodes => [host]
+    invoke :remove_cnames, spec, :timeout => 15 * 60, :nodes => [host]
   end
 end
