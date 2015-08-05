@@ -4,7 +4,6 @@ require 'yaml'
 require 'logger'
 
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
-$LOAD_PATH << '/opt/stackbuilder/lib/ruby/site_ruby' # XXX
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/inventory'
 

@@ -2,10 +2,8 @@
 # been reconfigured to use bin/stacks_indirector.
 
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
-$LOAD_PATH << '/opt/stackbuilder/lib/ruby/site_ruby'
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/inventory'
-$LOAD_PATH.delete('/opt/stackbuilder/lib/ruby/site_ruby')
 $LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup/')
 require 'puppet/node'
 require 'puppet/indirector/node/plain'

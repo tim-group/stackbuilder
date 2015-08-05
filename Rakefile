@@ -1,19 +1,19 @@
 require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
 
-desc "Generate CTags"
+desc 'Generate CTags'
 task :ctags do
-  sh "ctags -R --exclude=.git --exclude=build ."
+  sh 'ctags -R --exclude=.git --exclude=build .'
 end
 
-desc "Run specs"
+desc 'Run specs'
 if ENV['STACKS_RSPEC_SEPARATE'] # run each rspec in a separate ruby instance
   require './spec/rake_override'
-  SingleTestFilePerInterpreterSpec::RakeTask.new(:spec => ["ci:setup:rspec"]) do
+  SingleTestFilePerInterpreterSpec::RakeTask.new(:spec => ['ci:setup:rspec']) do
     ENV['INSIDE_RSPEC'] = 'true'
   end
 else # fast run (common ruby process for all tests)
-  RSpec::Core::RakeTask.new(:spec => ["ci:setup:rspec"]) do
+  RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec']) do
     ENV['INSIDE_RSPEC'] = 'true'
   end
 end
@@ -23,7 +23,7 @@ task :clean do
   sh 'rm -rf build/'
 end
 
-desc "Create a debian package"
+desc 'Create a debian package'
 task :package do
   version = "0.0.#{ENV['BUILD_NUMBER']}"
 
@@ -55,35 +55,10 @@ task :package do
   sh "fpm #{argv}"
 end
 
-desc "Create a debian package"
+desc 'Create a debian package'
 task :install => [:package] do
-  sh "sudo dpkg -i *.deb"
-  sh "sudo /etc/init.d/mcollective restart;"
-end
-
-# needs to be run with sudo
-# XXX used by jenkins. ci has sudo access but only for the 'rake' command
-desc "Prepare for an omnibus run"
-task :omnibus_prep do
-  sh "rm -rf /opt/stackbuilder" # XXX very bad
-  sh "mkdir -p /opt/stackbuilder"
-  sh "chown \$SUDO_UID:\$SUDO_GID /opt/stackbuilder"
-end
-
-desc "Prepare a directory tree for omnibus"
-task :omnibus do
-  sh "rm -rf build/omnibus"
-
-  sh "mkdir -p build/omnibus"
-  sh "mkdir -p build/omnibus/bin"
-  sh "mkdir -p build/omnibus/lib/ruby/site_ruby"
-  sh "mkdir -p build/omnibus/embedded/lib/ruby/site_ruby"
-
-  sh "cp -r bin/* build/omnibus/bin"
-  sh "cp -r lib/* build/omnibus/embedded/lib/ruby/site_ruby"
-  # expose stackbuilder libs; required by stackbuilder-config
-  sh "ln -s ../../../embedded/lib/ruby/site_ruby/stackbuilder build/omnibus/lib/ruby/site_ruby/stackbuilder"
-  sh "ln -s ../../../embedded/lib/ruby/site_ruby/puppet build/omnibus/lib/ruby/site_ruby/puppet"
+  sh 'sudo dpkg -i *.deb'
+  sh 'sudo /etc/init.d/mcollective restart;'
 end
 
 desc 'Run lint (Rubocop)'
