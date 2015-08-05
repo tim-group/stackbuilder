@@ -28,7 +28,7 @@ Metrics/PerceivedComplexity:
   Max: 15
 
 Metrics/ModuleLength:
-  Max: 146 # 100
+  Enabled: false
 
 Style/ClassAndModuleChildren:
   Enabled: false
