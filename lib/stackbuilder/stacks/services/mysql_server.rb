@@ -75,10 +75,10 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
 
   def create_persistent_storage_override
     modify_storage('/mnt/data' => {
-                     :persistence_options => { :on_storage_not_found => :create_new }
+                     :persistence_options => { :on_storage_not_found => 'create_new' }
                    })
     modify_storage('/mnt/storage' => {
-                     :persistence_options => { :on_storage_not_found => :create_new }
+                     :persistence_options => { :on_storage_not_found => 'create_new' }
                    }) if backup?
   end
 

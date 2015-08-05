@@ -13,7 +13,7 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
         :size                => '10G',
         :persistent          => true,
         :persistence_options => {
-          :on_storage_not_found => :raise_error
+          :on_storage_not_found => 'raise_error'
         }
       }
     }

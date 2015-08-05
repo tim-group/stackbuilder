@@ -161,7 +161,7 @@ describe StackBuilder::Allocator::HostPolicies do
           :type => "data",
           :size => "1G",
           :persistent => true,
-          :persistence_options => { :on_storage_not_found => :raise_error }
+          :persistence_options => { :on_storage_not_found => 'raise_error' }
         }
       }
     }
@@ -186,7 +186,7 @@ describe StackBuilder::Allocator::HostPolicies do
           :type => "data",
           :size => "1G",
           :persistent => true,
-          :persistence_options => { :on_storage_not_found => :raise_error }
+          :persistence_options => { :on_storage_not_found => 'raise_error' }
         }
       }
     }
@@ -236,7 +236,7 @@ describe StackBuilder::Allocator::HostPolicies do
           :type => "data",
           :size => "1G",
           :persistent => true,
-          :persistence_options => { :on_storage_not_found => :raise_error }
+          :persistence_options => { :on_storage_not_found => 'raise_error' }
         }
       }
     }

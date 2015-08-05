@@ -95,7 +95,7 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql '10G'
     host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found].
-      should eql :raise_error
+      should eql 'raise_error'
   end
 end
 

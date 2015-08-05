@@ -25,7 +25,7 @@ class Stacks::Services::FmAnalyticsAnalysisServer < Stacks::MachineDef
         :type                => 'data',
         :size                => size,
         :persistent          => true,
-        :persistence_options => { :on_storage_not_found => :create_new }
+        :persistence_options => { :on_storage_not_found => 'create_new' }
       }
     }
     modify_storage(storage)
