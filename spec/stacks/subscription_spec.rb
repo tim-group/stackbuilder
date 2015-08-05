@@ -48,7 +48,7 @@ describe Subscription do
     topic2 = random_topic
 
     subscription2 = Subscription.new(:pop_timeout => 1)
-    subscription2.start([topic, topic2]) # XXX flicker, see http://jenkins.youdevise.com/job/stackbuilder/1061/console
+    subscription2.start([topic, topic2]) # XXX flicker
 
     threads = []
     threads << Thread.new do
@@ -65,7 +65,7 @@ describe Subscription do
 
     # 08.05.2015 mmazurek: 0.05 might be to slow, bump if causing specs to fail, remove comment if fine after a while
     subscription = Subscription.new(:pop_timeout => 0.05)
-    subscription.start([topic]) # XXX flicker, see http://jenkins.youdevise.com/job/stackbuilder/1030/console
+    subscription.start([topic]) # XXX flicker
 
     threads = []
     threads << Thread.new do
