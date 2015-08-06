@@ -188,6 +188,37 @@ describe_stack 'should provide correct enc data' do
     host.to_enc.should_not include('mysql_hacks::application_rights_wrapper')
   end
 end
+describe_stack 'should provide the correct application rights' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = "ref"
+      end
+    end
+    stack "app_server" do
+      virtual_appserver "applong" do
+        self.application = "SuperLongLengthName"
+        depend_on 'mydb'
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+      instantiate_stack "app_server"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
+    rights['SuperLongLengthN@testing-applong-001.space.net.local/ref']['password_hiera_key'].should \
+      eql('enc/testing/SuperLongLengthName/mysql_password')
+  end
+  host("testing-applong-001.mgmt.space.net.local") do |host|
+    rights = host.to_enc['role::http_app']['dependencies']
+    rights['db.ref.database'].should eql('ref')
+    rights['db.ref.hostname'].should eql('testing-mydb-001.space.net.local')
+    rights['db.ref.password_hiera_key'].should eql('enc/testing/SuperLongLengthName/mysql_password')
+    rights['db.ref.username'].should eql('SuperLongLengthN')
+  end
+end
 
 describe_stack 'should allow storage options to be overwritten' do
   given do
