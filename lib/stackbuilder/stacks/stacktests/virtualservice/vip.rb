@@ -24,19 +24,19 @@ shared_examples_for "vip" do |virtualservice|
     end
   end
 
-  #  it 'check there are N instances in the load balancer' do
-  #    pending("not implemented yet")
-  #  end
+   xit 'check there are N instances in the load balancer' do
+     pending("not implemented yet")
+   end
 
   if virtualservice.nat
-    it "#{virtualservice.vip_fqdn(:front, :primary_site)} can be accessed from the Internetover http" do
+    xit "#{virtualservice.vip_fqdn(:front, :primary_site)} can be accessed from the Internetover http" do
       pending("nat boxes need to be auto-built")
       uri = URI.parse("http://#{virtualservice.vip_fqdn(:front, :primary_site)}")
       response = Net::HTTP.get_response(uri)
       response.code.should eql('302')
     end
 
-    it "#{virtualservice.vip_fqdn(:front, :primary_site)} can be accessed from the Internet over https" do
+    xit "#{virtualservice.vip_fqdn(:front, :primary_site)} can be accessed from the Internet over https" do
       pending("nat boxes need to be auto-built")
       request_url = "https://#{virtualservice.vip_fqdn(:front, :primary_site)}"
 
