@@ -24,9 +24,9 @@ shared_examples_for "vip" do |virtualservice|
     end
   end
 
-#  it 'check there are N instances in the load balancer' do
-#    pending("not implemented yet")
-#  end
+  #  it 'check there are N instances in the load balancer' do
+  #    pending("not implemented yet")
+  #  end
 
   if virtualservice.nat
     it "#{virtualservice.vip_fqdn(:front, :primary_site)} can be accessed from the Internetover http" do
