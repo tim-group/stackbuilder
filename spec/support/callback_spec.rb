@@ -17,7 +17,7 @@ describe Support::Callback do
 
   it 'does not raise an error if a callback is not defined for an event' do
     callback = Support::Callback.new
-    callback.invoke(:event, mock)
+    callback.invoke(:event, double)
   end
 
   it 'dispatches summary events when the callback is finished' do

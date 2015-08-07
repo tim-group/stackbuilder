@@ -49,8 +49,6 @@ if (environment = @factory.inventory.find_environment(environment_name)).nil?
 end
 
 RSpec::Core::Runner.disable_autorun!
-config = RSpec.configuration
-config.color_enabled = true
 ENV['CI_REPORTS'] = 'build/spec/reports/'
 
 ####

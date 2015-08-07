@@ -30,9 +30,7 @@ describe Support::MCollectivePuppet do
     @mcollective_puppet = Support::MCollectivePuppetTest.new(@callouts, @mco)
     @callback = double
 
-    @callouts.should_receive(:now).any_number_of_times do
-      0
-    end
+    @callouts.should_receive(:now) { 0 }.at_least(1)
   end
 
   def wait_for_complete_callback
@@ -272,7 +270,7 @@ describe Support::MCollectivePuppet do
   end
 
   it 'reports an error if machines are still running when the time runs out' do
-    @callouts.rspec_reset
+    RSpec::Mocks.space.proxy_for(@callouts).reset
 
     @callouts.should_receive(:now).ordered.and_return(0) # start_time
 
@@ -347,7 +345,7 @@ describe Support::MCollectivePuppet do
   end
 
   it 'reports an error if machines are still unaccounted for when the time runs out' do
-    @callouts.rspec_reset
+    RSpec::Mocks.space.proxy_for(@callouts).reset
 
     @callouts.should_receive(:now).ordered.and_return(0) # start_time
 
