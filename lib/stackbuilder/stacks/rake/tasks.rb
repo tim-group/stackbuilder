@@ -481,18 +481,6 @@ namespace :sbx do
         get_action("launch").call(@factory.services, machine_def)
       end
 
-      desc "new hosts model auditing"
-      sbtask :audit_hosts do
-        hosts = @factory.host_repository.find_compute_nodes("st")
-        hosts.allocate(machine_def.flatten)
-        hosts.hosts.each do |host|
-          pp host.fqdn
-          host.allocated_machines.each do |machine|
-            puts "\t #{machine.mgmt_fqdn}" unless machine.nil?
-          end
-        end
-      end
-
       desc "resolve the IP numbers of these machines"
       sbtask :resolve do
         computecontroller = Compute::Controller.new
