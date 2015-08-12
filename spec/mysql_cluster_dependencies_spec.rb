@@ -1,3 +1,4 @@
+require 'matchers/server_matcher'
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
@@ -10,14 +11,16 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        depend_on "exampledb"
+        depend_on("exampledb", "e1", "space")
       end
     end
+
     stack "example_db" do
       mysql_cluster 'exampledb' do
         self.database_name = "example"
         self.backup_instances = 1
         self.slave_instances = 2
+        self.secondary_site_slave_instances = 1
       end
     end
 
@@ -34,6 +37,7 @@ describe_stack 'stack-with-dependencies' do
       'e1-lb-002.space.net.local'
     ])
     deps = host.to_enc["role::http_app"]["dependencies"]
+
     deps["db.example.database"].should eql("example")
     deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
     deps["db.example.port"].should eql("3306")
@@ -43,7 +47,8 @@ describe_stack 'stack-with-dependencies' do
       "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local"
     )
     deps["db.example.read_only_cluster"].should eql(
-      "\"e1-exampledb-001.space.net.local,e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local\""
+      "\"e1-exampledb-001.space.net.local," \
+      "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local\""
     )
   end
 end
