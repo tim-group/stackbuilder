@@ -215,6 +215,7 @@ describe_stack 'should provide the correct application rights' do
     rights = host.to_enc['role::http_app']['dependencies']
     rights['db.ref.database'].should eql('ref')
     rights['db.ref.hostname'].should eql('testing-mydb-001.space.net.local')
+    rights['db.ref.port'].should eql('3306')
     rights['db.ref.password_hiera_key'].should eql('enc/testing/SuperLongLengthName/mysql_password')
     rights['db.ref.username'].should eql('SuperLongLengthN')
   end

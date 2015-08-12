@@ -132,6 +132,7 @@ describe_stack 'stack with dependencies that does not provide config params when
     host.to_enc["role::http_app"]["dependencies"].
       should eql("db.example.database"           => "example",
                  "db.example.hostname"           => "e1-exampledb-001.space.net.local",
+                 "db.example.port"               => "3306",
                  "db.example.password_hiera_key" => "enc/e1/example/mysql_password",
                  "db.example.username"           => "example")
   end
