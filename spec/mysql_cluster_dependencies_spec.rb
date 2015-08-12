@@ -36,6 +36,7 @@ describe_stack 'stack-with-dependencies' do
     deps = host.to_enc["role::http_app"]["dependencies"]
     deps["db.example.database"].should eql("example")
     deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
+    deps["db.example.port"].should eql("3306")
     deps["db.example.password_hiera_key"].should eql("enc/e1/example2/mysql_password")
     deps["db.example.username"].should eql("example2")
     deps["db.example.secondary_hostnames"].should eql(
