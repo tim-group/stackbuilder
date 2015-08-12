@@ -136,7 +136,6 @@ module Stacks::Services::MysqlCluster
     # This is where we can provide config params to App servers (only) to put into their config.properties
     config_params = {
       "db.#{@database_name}.hostname"           => master_servers.join(','),
-      "db.#{@database_port}.port"               => '3306',
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.username"           => mysql_username(dependant),
       "db.#{@database_name}.password_hiera_key" =>
