@@ -469,7 +469,7 @@ namespace :sbx do
       end
 
       desc "perform a clean followed by a provision"
-      task :reprovision => %w(schedule_downtime clean_nodes puppet:clean provision)
+      task :reprovision => %w(clean provision)
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -675,7 +675,7 @@ namespace :sbx do
       desc 'unallocate machines'
       # Note that the ordering here is important - must have killed VMs before
       # removing their puppet cert, otherwise we have a race condition
-      task :clean => %w(schedule_downtime clean_nodes puppet:clean clean_traces)
+      task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
 
       desc 'clean away all traces of these machines'
       sbtask :clean_traces do
