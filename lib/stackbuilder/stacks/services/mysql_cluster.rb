@@ -13,6 +13,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :server_id_base
   attr_accessor :server_id_offset
   attr_accessor :slave_instances
+  attr_accessor :include_master_in_read_only_cluster
 
   def configure
     @database_name = ''
@@ -22,6 +23,7 @@ module Stacks::Services::MysqlCluster
     @backup_instances = 1
     @charset = 'utf8'
     @server_id_offset = 0
+    @include_master_in_read_only_cluster = true
   end
 
   def instantiate_machine(name, type, i, environment, location)
@@ -87,7 +89,13 @@ module Stacks::Services::MysqlCluster
   end
 
   def all_servers(location)
-    children.select { |server| !server.backup? && server.location == location }.inject([]) do |prod_fqdns, server|
+    children.select do |server|
+      if server.master? && !@include_master_in_read_only_cluster
+        false
+      else
+        true
+      end
+    end.select { |server| !server.backup? && server.location == location }.inject([]) do |prod_fqdns, server|
       prod_fqdns << server.prod_fqdn
       prod_fqdns
     end
