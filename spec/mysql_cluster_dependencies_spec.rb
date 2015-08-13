@@ -47,8 +47,8 @@ describe_stack 'stack-with-dependencies' do
       "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local"
     )
     deps["db.example.read_only_cluster"].should eql(
-      "\"e1-exampledb-001.space.net.local," \
-      "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local\""
+      "e1-exampledb-001.space.net.local," \
+      "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local"
     )
   end
 end
