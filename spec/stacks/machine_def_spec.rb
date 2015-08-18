@@ -75,7 +75,7 @@ describe Stacks::MachineDef do
         'bar' => 'env-test.mgmt.ps.net.local'
       },
       :prod => {
-        'baz' => 'env-test.prod.ps.net.local'
+        'baz' => 'env-test.ps.net.local'
       }
     )
   end
