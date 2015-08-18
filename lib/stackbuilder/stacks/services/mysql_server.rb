@@ -95,7 +95,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       'mysqld' => {
         'gtid_mode'                => 'ON',
         'enforce_gtid_consistency' => 'ON',
-        'log_slave_updates'        => 'ON'
+        'log_slave_updates'        => 'ON',
+        'log_bin'                  => 'mysqld-bin'
       }
     }
     recurse_merge(@config, gtid_config)
