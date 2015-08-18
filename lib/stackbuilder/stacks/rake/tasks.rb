@@ -1,8 +1,6 @@
-$LOAD_PATH << '/opt/orc/lib/ruby/site_ruby'
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup'
 require 'orc/util/option_parser'
 $LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup')
-$LOAD_PATH.delete('/opt/orc/lib/ruby/site_ruby')
 require 'rake'
 require 'pp'
 require 'yaml'
