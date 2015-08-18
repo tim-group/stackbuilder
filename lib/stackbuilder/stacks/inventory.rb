@@ -1,7 +1,8 @@
-require "English"
+require 'English'
 
 class Stacks::Inventory
   def initialize(stack_dir)
+    stack_dir = File.expand_path(stack_dir)
     @stacks = Object.new
     @stacks.extend Stacks::DSL
     files = Dir.glob("#{stack_dir}/*.rb").sort +

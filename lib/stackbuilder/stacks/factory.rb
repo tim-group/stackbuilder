@@ -61,7 +61,7 @@ class Stacks::Factory
   end
 
   def inventory
-    @inventory ||= Stacks::Inventory.new('.')
+    @inventory ||= Stacks::Inventory.new(defined?($options[:path]) ? $options[:path] : '.')
   end
 
   def policies
@@ -97,11 +97,10 @@ class Stacks::Factory
 
   def host_repository
     @host_repository ||= StackBuilder::Allocator::HostRepository.new(
-      :machine_repo => inventory,
+      :machine_repo         => inventory,
       :preference_functions => preference_functions,
-      :policies => policies,
-      :compute_node_client => compute_node_client,
-      :logger => logger
+      :policies             => policies,
+      :compute_node_client  => compute_node_client
     )
   end
 
@@ -112,9 +111,8 @@ class Stacks::Factory
   def services
     @services ||= Stacks::Core::Services.new(
       :compute_controller => compute_controller,
-      :allocator => allocator,
-      :dns_service => dns_service,
-      :logger => logger
+      :allocator          => allocator,
+      :dns_service        => dns_service
     )
   end
 

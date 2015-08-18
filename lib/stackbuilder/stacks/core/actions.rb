@@ -16,12 +16,12 @@ module Stacks::Core::Actions
       allocation_results = services.allocator.allocate(machine_specs)
 
       allocation_results[:already_allocated].each do |machine, host|
-        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}"
+        logger(Logger::INFO) { "#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}" }
       end
 
       allocation_results[:newly_allocated].each do |host, machines|
         machines.each do |machine|
-          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}"
+          logger(Logger::INFO) { "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}" }
         end
       end
     end
@@ -37,27 +37,27 @@ module Stacks::Core::Actions
       allocation_results = services.allocator.allocate(machine_specs)
 
       allocation_results[:already_allocated].each do |machine, host|
-        services.logger.info "#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}"
+        logger(Logger::INFO) { "#{machine[:qualified_hostnames][:mgmt]} already allocated to #{host}" }
       end
 
       allocation_results[:newly_allocated].each do |host, namachines|
         namachines.each do |machine|
-          services.logger.info "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}"
+          logger(Logger::INFO) { "#{machine[:qualified_hostnames][:mgmt]} *would be* allocated to #{host}" }
         end
       end
 
       services.compute_controller.launch_raw(allocation_results[:newly_allocated]) do
         on :allocated do |vm, host|
-          services.logger.info "#{vm} allocated to #{host}"
+          logger(Logger::INFO) { "#{vm} allocated to #{host}" }
         end
         on :success do |vm, _msg|
-          services.logger.info "#{vm} launched successfully"
+          logger(Logger::INFO) { "#{vm} launched successfully" }
         end
         on :failure do |vm, msg|
-          services.logger.error "#{vm} failed to launch: #{msg}"
+          logger(Logger::ERROR) { "#{vm} failed to launch: #{msg}" }
         end
         on :unaccounted do |vm|
-          services.logger.error "#{vm} was unaccounted for"
+          logger(Logger::ERROR) { "#{vm} was unaccounted for" }
         end
         has :failure do
           fail "some machines failed to launch"

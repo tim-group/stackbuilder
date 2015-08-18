@@ -11,7 +11,6 @@ class StackBuilder::Allocator::HostRepository
     @preference_functions = args[:preference_functions]
     @compute_node_client = args[:compute_node_client]
     @policies = args[:policies]
-    @logger = args[:logger]
   end
 
   def find_compute_nodes(fabric, audit_domains = false)
@@ -42,7 +41,6 @@ class StackBuilder::Allocator::HostRepository
     end
 
     StackBuilder::Allocator::Hosts.new(:hosts => hosts,
-                                       :preference_functions => preference_functions,
-                                       :logger => @logger)
+                                       :preference_functions => preference_functions)
   end
 end

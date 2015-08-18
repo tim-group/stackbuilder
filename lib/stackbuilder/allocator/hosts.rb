@@ -1,12 +1,12 @@
 require 'stackbuilder/allocator/namespace'
 require 'stackbuilder/allocator/host'
+require 'stackbuilder/support/logger'
 
 class StackBuilder::Allocator::Hosts
   attr_reader :hosts
 
   def initialize(args)
     @hosts = args[:hosts]
-    @logger = args[:logger] # XXX needing to use "unless @logger.nil?" is not good
 
     fail 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
     hosts.each do |host|
@@ -49,9 +49,9 @@ class StackBuilder::Allocator::Hosts
                          else
                            allocation_check_result[:reasons].join("; ")
                          end
-        unless @logger.nil?
-          @logger.debug("Allocating #{machine[:hostname]} -- skipping #{host.fqdn} - #{reasons.size} " \
-                        "reasons:\n          * #{reason_message}")
+        logger(Logger::DEBUG) do
+          "Allocating #{machine[:hostname]} -- skipping #{host.fqdn} - #{reasons.size} " \
+                        "reasons:\n          * #{reason_message}"
         end
         allocation_denials << "unable to allocate to #{host.fqdn} because it is [#{reason_message}]"
       end
@@ -64,10 +64,8 @@ class StackBuilder::Allocator::Hosts
 
     candidate_hosts = candidate_hosts.sort_by(&:preference)
 
-    unless @logger.nil?
-      @logger.debug("kvm host preference list (data storage preference, number of vms, fqdn):")
-      candidate_hosts.each { |p| @logger.debug("  #{p.preference}") }
-    end
+    logger(Logger::DEBUG) { "kvm host preference list (data storage preference, number of vms, fqdn):" }
+    candidate_hosts.each { |p| logger(Logger::DEBUG) { "  #{p.preference}" } }
 
     candidate_hosts[0]
   end
