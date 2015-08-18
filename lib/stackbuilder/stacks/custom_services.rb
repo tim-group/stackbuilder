@@ -108,14 +108,6 @@ class Stacks::CustomServices
     @definitions[name] = machineset
   end
 
-  def debrepo(name, &block)
-    machineset_with(name, [], Stacks::Services::DebRepo, &block)
-  end
-
-  def debrepo_mirror(name, &block)
-    machineset_with(name, [], Stacks::Services::DebRepoMirror, &block)
-  end
-
   def cislave(name, &block)
     machineset_with(name, [], Stacks::Services::CiSlave, &block)
   end
