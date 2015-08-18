@@ -136,10 +136,6 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::SensuServer, &block)
   end
 
-  def shiny(name = 'shiny', &block)
-    machineset_with(name, [], Stacks::Services::ShinyServer, &block)
-  end
-
   def standard(name, &block)
     machineset_with(name, [], Stacks::Services::StandardServer, &block)
   end
