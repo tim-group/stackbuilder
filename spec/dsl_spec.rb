@@ -51,6 +51,7 @@ describe Stacks::DSL do
                                                        :networks => [:mgmt, :prod],
                                                        :fabric => "st",
                                                        :ram => "2097152",
+                                                       :cnames => {},
                                                        :storage => {
                                                          :/ => {
                                                            :type => "os",
