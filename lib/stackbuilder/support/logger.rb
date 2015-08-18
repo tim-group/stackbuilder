@@ -2,7 +2,7 @@ require 'logger'
 
 module Kernel
   def logger(level = Logger::INFO, &msg)
-    return if defined? $options && $options[:verbose] == 0
+    return if defined?($options) && ($options[:verbose] == 0)
 
     logger_initialize unless @console_logger
 
