@@ -7,14 +7,12 @@ class Stacks::Services::QuantAppServer < Stacks::MachineDef
     super(virtual_service.name + "-" + index)
   end
 
-  def to_spec
-    spec = super
-    spec
-  end
-
   def to_enc
-    enc = super()
-    enc.merge!('role::quantapp_server' => {})
-    enc
+    {
+      'role::quantapp_server' => {
+        'allowed_hosts' => @virtual_service.allowed_hosts,
+        'environment'   => environment.name
+      }
+    }
   end
 end
