@@ -52,8 +52,8 @@ class Stacks::MachineDef
   end
 
   def add_cname(network = :mgmt, cname = "")
-    new_cnames = { network => { cname => "#{qualified_hostname(network)}" } }
-    @added_cnames.merge! new_cnames
+    @added_cnames[network] = [] if @added_cnames[network].nil?
+    @added_cnames[network] = @added_cnames[network].push(cname)
   end
 
   def use_trusty
@@ -154,7 +154,6 @@ class Stacks::MachineDef
       :availability_group => availability_group,
       :networks => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
-      :cnames => @added_cnames
     }
 
     spec[:disallow_destroy] = true unless @destroyable
@@ -162,6 +161,7 @@ class Stacks::MachineDef
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:storage] = storage
     spec[:dont_start] = true if @dont_start
+    spec[:cnames] = Hash[@added_cnames.map{ |network, cnames| [network, Hash[cnames.map { |cname|  [ cname, qualified_hostname(network) ]}] ] }]
     spec
   end
 
