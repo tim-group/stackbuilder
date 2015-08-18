@@ -37,7 +37,6 @@ module Stacks
     require 'stackbuilder/stacks/services/selenium/hub'
     require 'stackbuilder/stacks/services/sensu_server'
     require 'stackbuilder/stacks/services/sftp_server'
-    require 'stackbuilder/stacks/services/shiny_server'
     require 'stackbuilder/stacks/services/standalone_server'
     require 'stackbuilder/stacks/services/standard_server'
     require 'stackbuilder/stacks/services/virtual_bind_service'
