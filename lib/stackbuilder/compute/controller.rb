@@ -56,7 +56,6 @@ class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || Compute::Client.new
     @nagsrv_client = Compute::NagsrvClient.new
-    @logger = args[:logger] || Logger.new(STDOUT)
   end
 
   def enable_notify(specs)
@@ -83,7 +82,7 @@ class Compute::Controller
 
           result.each do |sender, result_hash|
             result_text = result_hash[spec[:hostname]].nil? ? 'nil' : result_hash[spec[:hostname]].first
-            @logger.info("#{host} launch #{spec[:hostname]} result: #{sender}: #{result_text}")
+            logger(Logger::INFO) { "#{host} launch #{spec[:hostname]} result: #{sender}: #{result_text}" }
 
             grouped[sender] = {} if grouped[sender].nil?
             grouped[sender].merge!(result_hash)
@@ -239,8 +238,10 @@ class Compute::Controller
 
   def fail_non_destroyable_vms(non_destroyable_specs, _callback)
     non_destroyable_specs.each do |spec|
-      @logger.fatal("#{spec[:hostname]} is not destroyable\n To override this protection, " \
-        "please specify machine.allow_destroy(true)")
+      logger(Logger::FATAL) do
+        "#{spec[:hostname]} is not destroyable\n To override this protection, " \
+        "please specify machine.allow_destroy(true)"
+      end
       fail "#{spec[:hostname]} is not destroyable"
     end
   end

@@ -49,10 +49,8 @@ class StackBuilder::Allocator::Hosts
                          else
                            allocation_check_result[:reasons].join("; ")
                          end
-        logger(Logger::DEBUG) do
-          "Allocating #{machine[:hostname]} -- skipping #{host.fqdn} - #{reasons.size} " \
-                        "reasons:\n          * #{reason_message}"
-        end
+        logger(Logger::DEBUG) { "cannot allocate #{machine[:hostname]} on #{host.fqdn} - #{reasons.size} reason(s):" }
+        logger(Logger::DEBUG) { "  #{reason_message}" }
         allocation_denials << "unable to allocate to #{host.fqdn} because it is [#{reason_message}]"
       end
       !allocation_check_result[:allocatable]

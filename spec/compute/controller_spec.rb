@@ -3,8 +3,7 @@ require 'stackbuilder/stacks/factory'
 describe Compute::Controller do
   before :each do
     @compute_node_client = double
-    @logger = double
-    @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client, :logger => @logger
+    @compute_controller = Compute::Controller.new :compute_node_client => @compute_node_client
   end
 
   it 'no hosts found' do
@@ -142,16 +141,18 @@ describe Compute::Controller do
   it 'machines that are already allocated should show up as that' do
     @compute_node_client.stub(:audit_hosts).and_return("myhost" => { :active_domains => ["vm2"] })
 
-    specs = [{
-      :hostname => "vm1",
-      :fabric => "st",
-      :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
-    },
-             {
-               :hostname => "vm2",
-               :fabric => "st",
-               :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
-             }]
+    specs = [
+      {
+        :hostname => "vm1",
+        :fabric => "st",
+        :qualified_hostnames => { :mgmt => "vm1.mgmt.st.net.local" }
+      },
+      {
+        :hostname => "vm2",
+        :fabric => "st",
+        :qualified_hostnames => { :mgmt => "vm2.mgmt.st.net.local" }
+      }
+    ]
 
     @compute_node_client.stub(:launch).with("myhost", specs).and_return([["myhost", { "vm1" => %w(success yay) }]])
     @compute_node_client.should_receive(:launch).with("myhost", [specs[0]])
@@ -206,9 +207,6 @@ describe Compute::Controller do
       ]
     }
 
-    #    @compute_node_client.stub(:launch).with("myhost", specs["myhost"]).
-    #      and_return([["myhost", {"vm1" => ["success", "o noes"], "vm2" => ["success", "yes"]}]])
-
     @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][0]]).
       and_return([["myhost", { "vm1" => ["success", "o noes"] }]])
     @compute_node_client.stub(:launch).with("myhost", [specs["myhost"][1]]).
@@ -216,8 +214,6 @@ describe Compute::Controller do
 
     result = []
 
-    @logger.should_receive(:info).with("myhost launch vm1 result: myhost: success")
-    @logger.should_receive(:info).with("myhost launch vm2 result: myhost: success")
     @compute_controller.launch_raw(specs) do
       on :success do |row|
         result << row
@@ -240,7 +236,6 @@ describe Compute::Controller do
 
     failure = nil
 
-    @logger.should_receive(:info).with("myhost launch vm1 result: myhost: failed")
     @compute_controller.launch_raw(specs) do
       on :failure do |_vm, msg|
         failure = msg

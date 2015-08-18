@@ -1,5 +1,5 @@
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup'
-require 'orc/util/option_parser'
+require 'orc/util/option_parser' # XXX decouple orc from stackbuiler somehow
 $LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup')
 require 'rake'
 require 'pp'
@@ -28,21 +28,13 @@ $VERBOSE = nil
 $VERBOSE = warn_level
 # rubocop:enable Style/ClassVars
 
-def logger
-  warn_level = $VERBOSE
-  $VERBOSE = nil
-  ret = @@factory.logger
-  $VERBOSE = warn_level
-  ret
-end
-
 include Rake::DSL
 include Support::MCollective
 extend Stacks::Core::Actions
 
 environment_name = ENV.fetch('env', 'dev')
 if (environment = @factory.inventory.find_environment(environment_name)).nil?
-  logger.error "environment \"#{environment_name}\" does not exist"
+  logger(Logger::ERROR) { "environment \"#{environment_name}\" does not exist" }
   exit 1
 end
 
@@ -89,15 +81,20 @@ ENV['CI_REPORTS'] = 'build/spec/reports/'
 
 def sbtask(name, &block)
   task name do |task|
-    logger.start task.name
+    @start_time = Time.now
+    puts "\e[1m\e[34m:#{task}\e[0m"
     begin
       block.call
     rescue StandardError => e
-      logger.failed(name)
+      @elapsed = Time.now - @start_time
+      t = sprintf("%.2f", @elapsed)
+      puts "\n\e[1m\e[31m:#{task} failed in #{t}\e[0m\n"
       raise e
     end
 
-    logger.passed(name)
+    @elapsed = Time.now - @start_time
+    t = sprintf("%.2f", @elapsed)
+    puts "\n\e[1m\e[32m:#{task} passed in #{t}s\e[0m\n"
   end
 end
 
@@ -504,7 +501,7 @@ namespace :sbx do
           vips << child_machine_def.to_vip_spec(:primary_site) if child_machine_def.respond_to?(:to_vip_spec)
         end
         if vips.empty?
-          logger.info 'no vips to allocate'
+          logger(Logger::INFO) { 'no vips to allocate' }
         else
           @factory.services.dns.allocate(vips)
         end
@@ -544,7 +541,7 @@ namespace :sbx do
         end
 
         fail("nodes #{hosts.join(' ')} not checked in to mcollective") unless found
-        logger.info "all nodes found in mcollective #{hosts.size}"
+        logger(Logger::INFO) { "all nodes found in mcollective #{hosts.size}" }
       end
 
       def timed_out(start_time, timeout)
@@ -564,14 +561,14 @@ namespace :sbx do
               if child_machine_def.needs_signing?
                 puppet_certs_to_sign << child_machine_def.mgmt_fqdn
               else
-                logger.info "signing not needed for #{child_machine_def.mgmt_fqdn}"
+                logger(Logger::INFO) { "signing not needed for #{child_machine_def.mgmt_fqdn}" }
               end
             end
           end
           start_time = Time.now
           result = @subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
           result.all.each do |vm, status|
-            logger.info "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)"
+            logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
           end
         end
 
@@ -583,7 +580,7 @@ namespace :sbx do
               if child_machine_def.needs_poll_signing?
                 puppet_certs_to_sign << child_machine_def.mgmt_fqdn
               else
-                logger.info "poll signing not needed for #{child_machine_def.mgmt_fqdn}"
+                logger(Logger::INFO) { "poll signing not needed for #{child_machine_def.mgmt_fqdn}" }
               end
             end
           end
@@ -591,16 +588,16 @@ namespace :sbx do
           include Support::MCollectivePuppet
           ca_sign(puppet_certs_to_sign) do
             on :success do |machine|
-              logger.info "successfully signed cert for #{machine}"
+              logger(Logger::INFO) { "successfully signed cert for #{machine}" }
             end
             on :failed do |machine|
-              logger.warn "failed to signed cert for #{machine}"
+              logger(Logger::WARN) { "failed to signed cert for #{machine}" }
             end
             on :unaccounted do |machine|
-              logger.warn "cert not signed for #{machine} (unaccounted for)"
+              logger(Logger::WARN) { "cert not signed for #{machine} (unaccounted for)" }
             end
             on :already_signed do |machine|
-              logger.warn "cert for #{machine} already signed, skipping"
+              logger(Logger::WARN) { "cert for #{machine} already signed, skipping" }
             end
           end
         end
@@ -618,7 +615,7 @@ namespace :sbx do
           run_result = @subscription.wait_for_hosts("puppet_status", hosts, 5400)
 
           run_result.all.each do |vm, status|
-            logger.info "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)"
+            logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
           end
 
           unless run_result.all_passed?
@@ -653,7 +650,7 @@ namespace :sbx do
               if child_machine_def.needs_signing?
                 puppet_certs_to_clean << child_machine_def.mgmt_fqdn
               else
-                logger.info "removal of cert not needed for #{child_machine_def.mgmt_fqdn}"
+                logger(Logger::INFO) { "removal of cert not needed for #{child_machine_def.mgmt_fqdn}" }
               end
             end
           end
@@ -661,10 +658,10 @@ namespace :sbx do
           include Support::MCollectivePuppet
           ca_clean(puppet_certs_to_clean) do
             on :success do |machine|
-              logger.info "successfully removed cert for #{machine}"
+              logger(Logger::INFO) { "successfully removed cert for #{machine}" }
             end
             on :failed do |machine|
-              logger.warn "failed to remove cert for #{machine}"
+              logger(Logger::WARN) { "failed to remove cert for #{machine}" }
             end
           end
         end
@@ -708,13 +705,13 @@ namespace :sbx do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
           on :success do |vm, msg|
-            logger.info "successfully cleaned #{vm}: #{msg}"
+            logger(Logger::INFO) { "successfully cleaned #{vm}: #{msg}" }
           end
           on :failure do |vm, msg|
-            logger.error "failed to clean #{vm}: #{msg}"
+            logger(Logger::ERROR) { "failed to clean #{vm}: #{msg}" }
           end
           on :unaccounted do |vm|
-            logger.warn "VM was unaccounted for: #{vm}"
+            logger(Logger::WARN) { "VM was unaccounted for: #{vm}" }
           end
         end
       end
@@ -731,12 +728,16 @@ namespace :sbx do
         downtime_secs = 1800 # 1800 = 30 mins
         nagios_helper.schedule_downtime(hosts, downtime_secs) do
           on :success do |response_hash|
-            logger.info "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
+            logger(Logger::INFO) do
+              "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
               "result: #{response_hash[:result]}"
+            end
           end
           on :failed do |response_hash|
-            logger.info "failed to schedule #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
+            logger(Logger::INFO) do
+              "failed to schedule #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
               "result: #{response_hash[:result]}"
+            end
           end
         end
       end
@@ -752,11 +753,16 @@ namespace :sbx do
         nagios_helper = Support::Nagios::Service.new
         nagios_helper.cancel_downtime(hosts) do
           on :success do |response_hash|
-            logger.info "successfully cancelled downtime for #{response_hash[:machine]} " \
+            logger(Logger::INFO) do
+              "successfully cancelled downtime for #{response_hash[:machine]} " \
               "result: #{response_hash[:result]}"
+            end
           end
           on :failed do |response_hash|
-            logger.info "failed to cancel downtime for #{response_hash[:machine]} result: #{response_hash[:result]}"
+            logger(Logger::INFO) do
+              "failed to cancel downtime for #{response_hash[:machine]} " \
+              "result: #{response_hash[:result]}"
+            end
           end
         end
       end

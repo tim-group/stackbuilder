@@ -16,50 +16,6 @@ require 'stackbuilder/stacks/core/services'
 require 'stackbuilder/stacks/namespace'
 
 class Stacks::Factory
-  def logger
-    return @log unless @log.nil?
-
-    @log = Logger.new STDOUT
-
-    logger.formatter = proc do |severity, datetime, _progname, msg|
-      fdatetime = datetime.strftime("%Y-%m-%d %H:%M:%S.") << sprintf("%06d", datetime.usec)
-
-      col = case severity
-            when 'UNKNOWN' then '[0m'
-            when 'FATAL'   then '[31;1m'
-            when 'ERROR'   then '[31m'
-            when 'WARN'    then '[33m'
-            when 'INFO'    then '[34;1m'
-            when 'DEBUG'   then '[0m'
-            else                '[0m'
-      end
-      sprintf("#{col}%s (%5d): %s %s[0m\n", fdatetime, $PROCESS_ID, severity, msg2str(msg))
-    end
-
-    # rubocop:disable Lint/NestedMethodDefinition
-    @log.instance_eval do
-      def start(task)
-        @start_time = Time.now
-        puts "\e[1m\e[34m:#{task}\e[0m"
-      end
-
-      def failed(task)
-        @elapsed = Time.now - @start_time
-        e = sprintf("%.2f", @elapsed)
-        puts "\n\e[1m\e[31m:#{task} failed in #{e}\e[0m\n"
-      end
-
-      def passed(task)
-        @elapsed = Time.now - @start_time
-        e = sprintf("%.2f", @elapsed)
-        puts "\n\e[1m\e[32m:#{task} passed in #{e}s\e[0m\n"
-      end
-    end
-    # rubocop:enable Lint/NestedMethodDefinition
-
-    @log
-  end
-
   def inventory
     @inventory ||= Stacks::Inventory.new(defined?($options[:path]) ? $options[:path] : '.')
   end
@@ -92,7 +48,7 @@ class Stacks::Factory
   end
 
   def dns_service
-    @dns_service ||= StackBuilder::DNS::BasicDNSService.new(:logger => logger)
+    @dns_service ||= StackBuilder::DNS::BasicDNSService.new
   end
 
   def host_repository
@@ -114,18 +70,5 @@ class Stacks::Factory
       :allocator          => allocator,
       :dns_service        => dns_service
     )
-  end
-
-  private
-
-  def msg2str(msg)
-    case msg
-    when ::String
-      msg
-    when ::Exception
-      "#{msg.message} (#{msg.class})\n" << (msg.backtrace || []).join("\n")
-    else
-      msg.inspect
-    end
   end
 end
