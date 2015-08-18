@@ -153,7 +153,7 @@ class Stacks::MachineDef
       :fabric => @fabric,
       :availability_group => availability_group,
       :networks => @networks,
-      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
+      :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }
 
     spec[:disallow_destroy] = true unless @destroyable
@@ -161,7 +161,9 @@ class Stacks::MachineDef
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:storage] = storage
     spec[:dont_start] = true if @dont_start
-    spec[:cnames] = Hash[@added_cnames.map{ |network, cnames| [network, Hash[cnames.map { |cname|  [ cname, qualified_hostname(network) ]}] ] }]
+    spec[:cnames] = Hash[@added_cnames.map {
+      |network, cnames| [network, Hash[cnames.map { |cname| [cname, qualified_hostname(network)] }]]
+    }]
     spec
   end
 
