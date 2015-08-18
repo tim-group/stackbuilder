@@ -33,7 +33,6 @@ module Stacks
     require 'stackbuilder/stacks/services/rate_limited_forward_proxy_server'
     require 'stackbuilder/stacks/services/selenium/cluster'
     require 'stackbuilder/stacks/services/selenium/hub'
-    require 'stackbuilder/stacks/services/sensu_server'
     require 'stackbuilder/stacks/services/sftp_server'
     require 'stackbuilder/stacks/services/standalone_server'
     require 'stackbuilder/stacks/services/standard_server'

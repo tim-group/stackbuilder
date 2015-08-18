@@ -124,10 +124,6 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::QuantAppServer, &block)
   end
 
-  def sensu(name = 'sensu', &block)
-    machineset_with(name, [], Stacks::Services::SensuServer, &block)
-  end
-
   def standard(name, &block)
     machineset_with(name, [], Stacks::Services::StandardServer, &block)
   end
