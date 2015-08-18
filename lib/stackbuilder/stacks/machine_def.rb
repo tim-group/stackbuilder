@@ -38,7 +38,7 @@ class Stacks::MachineDef
     @dont_start = false
     @routes = []
     @included_classes = {}
-    @cnames = {}
+    @added_cnames = {}
     validate_name
   end
 
@@ -53,7 +53,7 @@ class Stacks::MachineDef
 
   def add_cname(network = :mgmt, cname = "")
     new_cnames = { network => { cname => "#{qualified_hostname(network)}" } }
-    @cnames.merge! new_cnames
+    @added_cnames.merge! new_cnames
   end
 
   def use_trusty
@@ -154,7 +154,7 @@ class Stacks::MachineDef
       :availability_group => availability_group,
       :networks => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }],
-      :cnames => @cnames
+      :cnames => @added_cnames
     }
 
     spec[:disallow_destroy] = true unless @destroyable
