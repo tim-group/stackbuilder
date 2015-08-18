@@ -1,22 +1,8 @@
 require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
 
-desc 'Generate CTags'
-task :ctags do
-  sh 'ctags -R --exclude=.git --exclude=build .'
-end
-
 desc 'Run specs'
-if ENV['STACKS_RSPEC_SEPARATE'] # run each rspec in a separate ruby instance
-  require './spec/rake_override'
-  SingleTestFilePerInterpreterSpec::RakeTask.new(:spec => ['ci:setup:rspec']) do
-    ENV['INSIDE_RSPEC'] = 'true'
-  end
-else # fast run (common ruby process for all tests)
-  RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec']) do
-    ENV['INSIDE_RSPEC'] = 'true'
-  end
-end
+RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec'])
 
 desc 'Clean up the build directory'
 task :clean do
@@ -59,6 +45,11 @@ desc 'Create a debian package'
 task :install => [:package] do
   sh 'sudo dpkg -i *.deb'
   sh 'sudo /etc/init.d/mcollective restart;'
+end
+
+desc 'Generate CTags'
+task :ctags do
+  sh 'ctags -R --exclude=.git --exclude=build .'
 end
 
 desc 'Run lint (Rubocop)'
