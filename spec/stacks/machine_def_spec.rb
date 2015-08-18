@@ -59,4 +59,22 @@ describe Stacks::MachineDef do
     machinedef.bind_to(env)
     machinedef.to_enc.should eql('routes' => { 'to' => ['mgmt_pg'] })
   end
+
+    it 'allows cnames to be added' do
+      machinedef = Stacks::MachineDef.new("test")
+      machinedef.add_cname(:mgmt, 'foo')
+      machinedef.add_cname(:mgmt, 'bar')
+      machinedef.add_cname(:prod, 'baz')
+
+  env = Stacks::Environment.new("env", { :primary_site => "ps" }, nil, {}, {})
+    machinedef.bind_to(env)
+    machinedef.to_specs.shift[:cnames].should eql({
+      :mgmt => {
+        'foo' => 'env-test.mgmt.ps.net.local',
+        'bar' => 'env-test.mgmt.ps.net.local'
+      },
+      :prod => {
+        'baz' => 'env-test.prod.ps.net.local'
+    }})
+  end
 end
