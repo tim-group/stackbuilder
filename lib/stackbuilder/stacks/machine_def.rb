@@ -161,7 +161,7 @@ class Stacks::MachineDef
     spec[:vcpus] = vcpus unless vcpus.nil?
     spec[:storage] = storage
     spec[:dont_start] = true if @dont_start
-    spec[:cnames] = Hash[@added_cnames.map { |n, c| [n, Hash[c.map { |c| [c, qualified_hostname(n)] }]] }]
+    spec[:cnames] = Hash[@added_cnames.map { |n, cnames| [n, Hash[cnames.map { |c| [c, qualified_hostname(n)] }]] }]
     spec
   end
 
