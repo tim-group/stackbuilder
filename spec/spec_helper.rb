@@ -1,16 +1,3 @@
-# generate a spec coverage test if 'simplecov' is installed
-# note this adds approx 1 second to 'rake spec'.
-if !ENV['STACKS_RSPEC_SEPARATE'] # doesn't make sense with STACKS_RSPEC_SEPARATE enabled
-  if RUBY_VERSION[0, 3] != '1.8' # XXX remove once ruby1.8 is abandoned
-    begin
-      require 'simplecov'
-      SimpleCov.start
-    rescue Gem::LoadError
-      puts "simplecov not installed, not generating coverage reports"
-    end
-  end
-end
-
 def silence_output
   @orig_stderr = $stderr
   @orig_stdout = $stdout
