@@ -13,7 +13,7 @@ module Kernel
 
   def logger_initialize
     # $options is not defined if the entry path to the codebase is not the 'stacks' executable
-    verbosity = defined? $options ? $options[:verbose] : 3
+    verbosity = defined?($options) ? $options[:verbose] : 3
 
     # TODO: dump debug info to a file as well
     @console_logger = Logger.new STDOUT
