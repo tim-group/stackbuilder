@@ -47,7 +47,7 @@ end
 
 desc 'Create a debian package'
 task :install => [:package] do
-  sh 'sudo dpkg -i *.deb'
+  sh 'sudo dpkg -i build/*.deb'
   sh 'sudo /etc/init.d/mcollective restart;'
 end
 
