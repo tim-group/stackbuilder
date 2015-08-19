@@ -33,7 +33,7 @@ describe StackBuilder::Allocator::HostRepository do
     end
 
     preference_functions = []
-    compute_node_client.stub(:audit_hosts).and_return(result)
+    allow(compute_node_client).to receive(:audit_hosts).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
       :machine_repo => self,
@@ -41,10 +41,10 @@ describe StackBuilder::Allocator::HostRepository do
       :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_compute_nodes("t")
-    hosts.hosts.size.should eql(n)
+    expect(hosts.hosts.size).to eql(n)
     hosts.hosts.each do |host|
-      host.preference_functions.should eql(preference_functions)
-      host.machines.should eql(env.flatten.map(&:to_specs).flatten)
+      expect(host.preference_functions).to eql(preference_functions)
+      expect(host.machines).to eql(env.flatten.map(&:to_specs).flatten)
     end
   end
 
@@ -65,7 +65,7 @@ describe StackBuilder::Allocator::HostRepository do
     end
 
     preference_functions = []
-    compute_node_client.stub(:audit_hosts).and_return(result)
+    allow(compute_node_client).to receive(:audit_hosts).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
       :machine_repo => self,
@@ -73,10 +73,10 @@ describe StackBuilder::Allocator::HostRepository do
       :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_compute_nodes("t")
-    hosts.hosts.size.should eql(n)
+    expect(hosts.hosts.size).to eql(n)
     hosts.hosts.each do |host|
-      host.preference_functions.should eql(preference_functions)
-      host.machines.should eql(machine_specs)
+      expect(host.preference_functions).to eql(preference_functions)
+      expect(host.machines).to eql(machine_specs)
     end
   end
 end

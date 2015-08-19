@@ -31,7 +31,7 @@ describe_stack 'sftp servers should support load balancing and dependant instanc
 
   host("mirror-sftp-001.mgmt.oy.net.local") do |sftp_server|
     sftp_enc = sftp_server.to_enc
-    sftp_enc['role::sftpserver']['vip_fqdn'].should eql('mirror-sftp-vip.oy.net.local')
+    expect(sftp_enc['role::sftpserver']['vip_fqdn']).to eql('mirror-sftp-vip.oy.net.local')
     sftp_enc['role::sftpserver']['env'].should eql('mirror')
     sftp_enc['role::sftpserver']['participation_dependant_instances'].should include(
       'mirror-lb-001.oy.net.local',

@@ -14,14 +14,14 @@ describe Stacks::DSL do
 
   it 'binds to configuration from the environment' do
     appx = environments["ci"]["blah"]["appx"]
-    appx.to_specs.size.should eql 2
+    expect(appx.to_specs.size).to eql 2
     spec = find("ci-appx-001.mgmt.st.net.local").to_spec
-    spec[:hostname].should eql('ci-appx-001')
-    spec[:domain].should eql('st.net.local')
-    spec[:fabric].should eql('st')
-    spec[:availability_group].should eql('ci-appx')
-    spec[:qualified_hostnames].
-      should eql(:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local")
+    expect(spec[:hostname]).to eql('ci-appx-001')
+    expect(spec[:domain]).to eql('st.net.local')
+    expect(spec[:fabric]).to eql('st')
+    expect(spec[:availability_group]).to eql('ci-appx')
+    expect(spec[:qualified_hostnames]).
+      to eql(:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local")
   end
 
   it 'can make an arbitrary specd machine' do
@@ -41,30 +41,30 @@ describe Stacks::DSL do
       instantiate_stack "fabric"
     end
 
-    environments["ci"]["fabric"].to_specs.should eql([{
-                                                       :hostname => "ci-puppetmaster-001",
-                                                       :bling => true,
-                                                       :domain => "st.net.local",
-                                                       :qualified_hostnames => {
-                                                         :mgmt => "ci-puppetmaster-001.mgmt.st.net.local",
-                                                         :prod => "ci-puppetmaster-001.st.net.local" },
-                                                       :networks => [:mgmt, :prod],
-                                                       :fabric => "st",
-                                                       :ram => "2097152",
-                                                       :cnames => {},
-                                                       :storage => {
-                                                         :/ => {
-                                                           :type => "os",
-                                                           :size => "3G",
-                                                           :prepare => {
-                                                             :method => "image",
-                                                             :options => {
-                                                               :path => "/var/local/images/gold-precise/generic.img"
+    expect(environments["ci"]["fabric"].to_specs).to eql([{
+                                                           :hostname => "ci-puppetmaster-001",
+                                                           :bling => true,
+                                                           :domain => "st.net.local",
+                                                           :qualified_hostnames => {
+                                                             :mgmt => "ci-puppetmaster-001.mgmt.st.net.local",
+                                                             :prod => "ci-puppetmaster-001.st.net.local" },
+                                                           :networks => [:mgmt, :prod],
+                                                           :fabric => "st",
+                                                           :ram => "2097152",
+                                                           :cnames => {},
+                                                           :storage => {
+                                                             :/ => {
+                                                               :type => "os",
+                                                               :size => "3G",
+                                                               :prepare => {
+                                                                 :method => "image",
+                                                                 :options => {
+                                                                   :path => "/var/local/images/gold-precise/generic.img"
+                                                                 }
+                                                               }
                                                              }
                                                            }
-                                                         }
-                                                       }
-                                                     }])
+                                                         }])
   end
 
   it 'can find sub environments' do
@@ -73,7 +73,7 @@ describe Stacks::DSL do
       end
     end
 
-    find_environment("sub").name.should eql("sub")
-    find_environment("parent").name.should eql("parent")
+    expect(find_environment("sub").name).to eql("sub")
+    expect(find_environment("parent").name).to eql("parent")
   end
 end

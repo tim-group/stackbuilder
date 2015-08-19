@@ -13,7 +13,7 @@ describe StackBuilder::Allocator::HostPreference do
 
     h1.allocated_machines << "x"
     hosts = [h3, h1, h2]
-    hosts.sort_by { |host| [preference_function.call(host), host.fqdn] }.map(&:fqdn).should eql(%w(h2 h3 h1))
+    expect(hosts.sort_by { |host| [preference_function.call(host), host.fqdn] }.map(&:fqdn)).to eql(%w(h2 h3 h1))
   end
 
   it 'rejects' do
@@ -27,6 +27,6 @@ describe StackBuilder::Allocator::HostPreference do
 
     h1.allocated_machines << "x"
     hosts = [h3, h1, h2]
-    hosts.sort_by { |host| [preference_function.call(host), host.fqdn] }.map(&:fqdn).should eql(%w(h2 h3 h1))
+    expect(hosts.sort_by { |host| [preference_function.call(host), host.fqdn] }.map(&:fqdn)).to eql(%w(h2 h3 h1))
   end
 end

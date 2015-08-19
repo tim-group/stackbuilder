@@ -10,7 +10,7 @@ describe Support::Callback do
       end
     end
     mock = double
-    mock.should_receive(:blah)
+    expect(mock).to receive(:blah)
     callback.invoke(:event, mock)
     event_called.should eql(true)
   end

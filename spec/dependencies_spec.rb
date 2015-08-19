@@ -167,13 +167,13 @@ describe_stack 'stack with cross environment dependencies' do
   end
 
   host("e2-noconfigapp-001.mgmt.earth.net.local") do |host|
-    host.to_enc['role::http_app']['application_dependant_instances'].should eql([
+    expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
       'e1-noconfigapp-001.space.net.local',
       'e1-noconfigapp-002.space.net.local'
     ])
   end
   host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app']['application_dependant_instances'].should eql([
+    expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
       'e2-noconfigapp-001.earth.net.local',
       'e2-noconfigapp-002.earth.net.local'
     ])

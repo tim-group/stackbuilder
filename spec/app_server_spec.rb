@@ -18,7 +18,7 @@ describe_stack 'test_app_server' do
   end
 
   host("e1-appx-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app']['launch_config'].should eql('specify_config_as_system_property' => 'yes')
+    expect(host.to_enc['role::http_app']['launch_config']).to eql('specify_config_as_system_property' => 'yes')
   end
 end
 
@@ -36,7 +36,7 @@ describe_stack 'test_app_server should default to no jvm args' do
   end
 
   host("e1-appx-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app'].key?('jvm_args').should eql(false)
+    expect(host.to_enc['role::http_app'].key?('jvm_args')).to eql(false)
   end
 end
 
@@ -56,8 +56,9 @@ describe_stack 'test_app_server with custom jvm args' do
   end
 
   host("e1-appx-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app']['jvm_args'].should eql('-Xms256m -Xmx256m -XX:CMSInitiatingOccupancyFraction=55 ' \
-      '-XX:+UseCompressedOops -XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -XX:+CMSClassUnloadingEnabled')
+    expect(host.to_enc['role::http_app']['jvm_args']).to eql('-Xms256m -Xmx256m ' \
+      '-XX:CMSInitiatingOccupancyFraction=55 -XX:+UseCompressedOops -XX:+UseConcMarkSweepGC ' \
+      '-XX:MaxPermSize=128M -XX:+CMSClassUnloadingEnabled')
   end
 end
 
@@ -79,7 +80,7 @@ describe_stack 'test_app_server with only one instance in the load balancer' do
 
   host("e1-lb-001.mgmt.space.net.local") do |host|
     enc = host.to_enc['role::loadbalancer']['virtual_servers']['e1-appx-vip.space.net.local']
-    enc['type'].should eql 'one_instance_in_lb_with_sorry_server'
+    expect(enc['type']).to eql 'one_instance_in_lb_with_sorry_server'
   end
 end
 
@@ -107,7 +108,7 @@ describe_stack 'should have the correct app_dependant_instances and participatio
   end
 
   it_stack 'should contain all the expected hosts' do |stack|
-    stack.should have_hosts(
+    expect(stack).to have_hosts(
       [
         'e1-appx-001.mgmt.space.net.local',
         'e1-appx-002.mgmt.space.net.local',
@@ -121,22 +122,22 @@ describe_stack 'should have the correct app_dependant_instances and participatio
 
   host("e1-appy-001.mgmt.space.net.local") do |host|
     enc = host.to_enc['role::http_app']
-    enc['participation_dependant_instances'].should include('e1-lb-001.space.net.local', 'e1-lb-002.space.net.local')
-    enc['participation_dependant_instances'].size.should eql(2)
-    enc['application_dependant_instances'].should include('e1-lb-001.space.net.local', 'e1-lb-002.space.net.local')
-    enc['application_dependant_instances'].size.should eql(2)
+    expect(enc['participation_dependant_instances']).to include('e1-lb-001.space.net.local',
+                                                                'e1-lb-002.space.net.local')
+    expect(enc['participation_dependant_instances'].size).to eql(2)
+    expect(enc['application_dependant_instances']).to include('e1-lb-001.space.net.local', 'e1-lb-002.space.net.local')
+    expect(enc['application_dependant_instances'].size).to eql(2)
   end
 
   host("e1-appx-001.mgmt.space.net.local") do |host|
     enc = host.to_enc['role::http_app']
-    enc['participation_dependant_instances'].should include('e1-lb-001.space.net.local', 'e1-lb-002.space.net.local')
-    enc['participation_dependant_instances'].size.should eql(2)
-    enc['application_dependant_instances'].should include(
-      'e1-lb-001.space.net.local',
-      'e1-lb-002.space.net.local',
-      'e1-appy-001.space.net.local',
-      'e1-appy-002.space.net.local'
-    )
-    enc['application_dependant_instances'].size.should eql(4)
+    expect(enc['participation_dependant_instances']).to include('e1-lb-001.space.net.local',
+                                                                'e1-lb-002.space.net.local')
+    expect(enc['participation_dependant_instances'].size).to eql(2)
+    expect(enc['application_dependant_instances']).to include('e1-lb-001.space.net.local',
+                                                              'e1-lb-002.space.net.local',
+                                                              'e1-appy-001.space.net.local',
+                                                              'e1-appy-002.space.net.local')
+    expect(enc['application_dependant_instances'].size).to eql(4)
   end
 end

@@ -16,7 +16,7 @@ describe StackBuilder::Allocator::HostPolicies do
     env = test_env_with_refstack
     machines = env.flatten
     h1 = StackBuilder::Allocator::Host.new("h1")
-    StackBuilder::Allocator::HostPolicies.ha_group.call(h1, machines[1])[:passed].should eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.ha_group.call(h1, machines[1])[:passed]).to eql(true)
   end
 
   it 'rejects allocations that allocate >1 machine of the same group to the same host' do
@@ -24,7 +24,7 @@ describe StackBuilder::Allocator::HostPolicies do
     machines = env.flatten
     h1 = StackBuilder::Allocator::Host.new("h1")
     h1.allocated_machines << machines[0]
-    StackBuilder::Allocator::HostPolicies.ha_group.call(h1, machines[1])[:passed].should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.ha_group.call(h1, machines[1])[:passed]).to eql(false)
   end
 
   it 'allows allocation if the availability group is unset' do
@@ -40,7 +40,7 @@ describe StackBuilder::Allocator::HostPolicies do
 
     h1 = StackBuilder::Allocator::Host.new("h1")
     h1.allocated_machines << running_machine
-    StackBuilder::Allocator::HostPolicies.ha_group.call(h1, machine)[:passed].should eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.ha_group.call(h1, machine)[:passed]).to eql(true)
   end
 
   it 'allows allocations where the host ram is sufficient' do
@@ -63,8 +63,8 @@ describe StackBuilder::Allocator::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed].
-      should eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed]).
+      to eql(true)
   end
 
   it 'rejects allocations where the host ram is insufficient due to host reserve' do
@@ -87,8 +87,8 @@ describe StackBuilder::Allocator::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed].
-      should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed]).
+      to eql(false)
   end
 
   it 'rejects allocations where the host ram is insufficient' do
@@ -111,8 +111,8 @@ describe StackBuilder::Allocator::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed].
-      should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed]).
+      to eql(false)
   end
 
   it 'rejects allocations where the host provisioning has been disabled' do
@@ -135,22 +135,22 @@ describe StackBuilder::Allocator::HostPolicies do
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-    StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy.
-      call(h1, candidate_machine)[:passed].should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy.
+      call(h1, candidate_machine)[:passed]).to eql(false)
   end
 
   it 'rejects allocations where the host has no defined storage types' do
     machine = { :storage => { :mount_point => { :type => "something" } } }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => {})
-    StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy.call(h1, machine)[:passed].
-      should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy.call(h1, machine)[:passed]).
+      to eql(false)
   end
 
   it 'accepts allocations where the host has no defined storage types' do
     machine = { :storage => { :mount_point => { :type => "LVS" } } }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "LVS" => { "some_key" => "value" } })
-    StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy.call(h1, machine)[:passed].
-      should eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy.call(h1, machine)[:passed]).
+      to eql(true)
   end
 
   it 'accept allocations where the hosts persistent storage does exist on this computenode' do
@@ -174,8 +174,8 @@ describe StackBuilder::Allocator::HostPolicies do
       }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
-    StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy.call(h1, machine)[:passed].
-      should eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy.call(h1, machine)[:passed]).
+      to eql(true)
   end
 
   it 'rejects allocations where the hosts persistent storage does not exist on this computenode' do
@@ -199,15 +199,16 @@ describe StackBuilder::Allocator::HostPolicies do
       }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
-    StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy.call(h1, machine)[:passed].
-      should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy.call(h1, machine)[:passed]).
+      to eql(false)
   end
 
   it 'rejects overallocated disks' do
     machine = { :storage => { :mount_point => { :type => "LVS", :size => "5G" } } }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "LVS" => { :free => "2000000" } })
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed].should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed]).
+      to eql(false)
   end
 
   it 'rejects overallocated disks for same type' do
@@ -218,14 +219,16 @@ describe StackBuilder::Allocator::HostPolicies do
       }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "data" => { :free => "15000000" } })
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed].should eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed]).
+      to eql(false)
   end
 
   it 'accepts disk space it can allocate' do
     machine = { :storage => { :mount_point => { :type => "LVS", :size => "2G" } } }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "LVS" => { :free => "5000000" } })
 
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed].should eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed]).
+      to eql(true)
   end
 
   it 'accepts the disk space allocation if persistent storage already exists' do
@@ -260,9 +263,9 @@ describe StackBuilder::Allocator::HostPolicies do
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host1_storage)
     h2 = StackBuilder::Allocator::Host.new("h2", :storage => host2_storage)
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed].
-      should eql(false)
-    StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h2, machine)[:passed].
-      should eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed]).
+      to eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h2, machine)[:passed]).
+      to eql(true)
   end
 end

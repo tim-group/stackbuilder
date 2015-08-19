@@ -31,15 +31,15 @@ describe StackBuilder::Allocator::EphemeralAllocator do
     f2_hosts = StackBuilder::Allocator::Hosts.new(:hosts => [h2], :preference_functions => [])
 
     host_repository = double
-    host_repository.stub(:find_compute_nodes).with("f1").and_return(hosts)
-    host_repository.stub(:find_compute_nodes).with("f2").and_return(f2_hosts)
+    allow(host_repository).to receive(:find_compute_nodes).with("f1").and_return(hosts)
+    allow(host_repository).to receive(:find_compute_nodes).with("f2").and_return(f2_hosts)
 
     allocator = StackBuilder::Allocator::EphemeralAllocator.new(:host_repository => host_repository)
 
     allocation_result = allocator.allocate([candidate_machine, candidate_machine_2, existing_machine])
 
-    allocation_result[:already_allocated].should eql(existing_machine => 'h1')
-    allocation_result[:newly_allocated].should eql(
+    expect(allocation_result[:already_allocated]).to eql(existing_machine => 'h1')
+    expect(allocation_result[:newly_allocated]).to eql(
       'h1' => [candidate_machine],
       'h2' => [candidate_machine_2])
   end
