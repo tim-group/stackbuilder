@@ -1,0 +1,59 @@
+#!/opt/ruby-bundle/bin/ruby
+#
+# stacks COMMAND [arguments]
+#
+# Use -p PATH, or the environmental variable STACKBUILDER_CONFIG_PATH to specify stackbuilder-config path. The default
+# is '/etc/stacks'
+#
+
+$LOAD_PATH << '/home/mmazurek/work/stackbuilder/lib/'
+
+require 'optparse'
+
+require 'stackbuilder/stacks/factory'
+require 'stackbuilder/support/logger'
+
+$options = {
+  :environment => 'dev',
+  :path        => ENV['STACKBUILDER_CONFIG_PATH'] || '/etc/stacks',
+  :verbose     => 1
+}
+
+cmd = ARGV.shift
+OptionParser.new do |opts|
+  opts.banner = 'Usage: example.rb [options]'
+
+  opts.on('-e', '--environment ENVIRONMENT', 'specify environment') do |env|
+    $options[:environment] = env
+  end
+  opts.on('-p', '--path PATH', 'specify stackbuilder-config path') do |path|
+    $options[:path] = path
+  end
+  opts.on('-v', '--verbose', 'run verbosely') do
+    $options[:verbose] += 1
+  end
+end.parse!
+args = ARGV
+logger(Logger::DEBUG) { "finished processing options. command: #{cmd}, options: #{$options}, args: #{args}" }
+
+logger(Logger::DEBUG) { 'initializing $factory' }
+$factory = Stacks::Factory.new
+if (environment = $factory.inventory.find_environment($options[:environment])).nil?
+  logger(Logger::ERROR) { "environment \"#{$options[:environment]}\" not found" }
+  exit 1
+end
+logger(Logger::DEBUG) { "environment \"#{environment.name}\" has #{environment.definitions.count} definitions" }
+
+logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
+case cmd
+when 'audit'
+  require 'stackbuilder/support/cmd_audit'
+  logger(Logger::DEBUG) { ":primary_site for \"#{environment.name}\" is \"#{environment.options[:primary_site]}\"" }
+
+  CMDAudit.audit(environment.options[:primary_site])
+else
+  logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
+  exit 1
+end
+
+logger(Logger::DEBUG) { 'exiting gracefuly' }
