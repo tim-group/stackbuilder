@@ -2,11 +2,7 @@ require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
 
 desc 'Run specs'
-RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec']) do
-  $options = {
-    :verbose => 0
-  }
-end
+RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec'])
 
 desc 'Clean up the build directory'
 task :clean do
