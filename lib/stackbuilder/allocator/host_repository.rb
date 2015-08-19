@@ -40,7 +40,6 @@ class StackBuilder::Allocator::HostRepository
       hosts << host
     end
 
-    StackBuilder::Allocator::Hosts.new(:hosts => hosts,
-                                       :preference_functions => preference_functions)
+    StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
   end
 end
