@@ -26,43 +26,43 @@ describe Support::MCollective do
       Support::Forking::Future.new(&block)
     end
 
-    @mock_rpcclient.should_receive(:disconnect)
+    expect(@mock_rpcclient).to receive(:disconnect)
   end
 
   it 'shortcuts a nested mco_client' do
-    @mock_rpcclient.should_receive(:discover).with(no_args)
+    expect(@mock_rpcclient).to receive(:discover).with(no_args)
     mco_client("blah") do |mco|
-      mco.should eql(@mock_rpcclient)
+      expect(mco).to eql(@mock_rpcclient)
     end
   end
 
   it 'applies a filter so that only machines in the fabric are addressed' do
-    @mock_rpcclient.should_receive(:discover).with(no_args)
-    @mock_rpcclient.should_receive(:fact_filter).with("domain", "mgmt.st.net.local")
+    expect(@mock_rpcclient).to receive(:discover).with(no_args)
+    expect(@mock_rpcclient).to receive(:fact_filter).with("domain", "mgmt.st.net.local")
     mco_client("blah", :fabric => "st")
   end
 
   it 'applies a filter so that only local machines are addressed' do
-    @mock_rpcclient.should_receive(:discover).with(no_args).ordered
-    @mock_rpcclient.should_receive(:fact_filter).with("owner", OwnerFact.owner_fact)
+    expect(@mock_rpcclient).to receive(:discover).with(no_args).ordered
+    expect(@mock_rpcclient).to receive(:fact_filter).with("owner", OwnerFact.owner_fact)
     mco_client("blah", :fabric => "local")
   end
 
   it 'uses a timeout if supplied' do
-    @mock_rpcclient.should_receive(:discover).with(no_args).ordered
-    @mock_rpcclient.should_receive(:fact_filter).with("owner", OwnerFact.owner_fact)
+    expect(@mock_rpcclient).to receive(:discover).with(no_args).ordered
+    expect(@mock_rpcclient).to receive(:fact_filter).with("owner", OwnerFact.owner_fact)
     mco_client("blah", :fabric => "local", :timeout => 44)
-    Support::MCollective::MCollectiveRPC.mco_options[:options][:timeout].should eql(44)
+    expect(Support::MCollective::MCollectiveRPC.mco_options[:options][:timeout]).to eql(44)
   end
 
   it 'can be pre-injected with a list of hosts to discover' do
     my_nodes = %w(1 2 3)
-    @mock_rpcclient.should_receive(:discover).with(:nodes => my_nodes)
+    expect(@mock_rpcclient).to receive(:discover).with(:nodes => my_nodes)
     mco_client("blah", :nodes => my_nodes)
   end
 
   it 'switch the mco key to use' do
-    @mock_rpcclient.should_receive(:discover).with(no_args).ordered
+    expect(@mock_rpcclient).to receive(:discover).with(no_args).ordered
     mco_client("blah") do
     end
   end
