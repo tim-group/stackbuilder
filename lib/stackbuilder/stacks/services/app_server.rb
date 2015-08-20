@@ -26,12 +26,12 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     @allowed_hosts.uniq!
   end
 
-  def dependency_config_sftp_servers_only(location)
-    @virtual_service.dependency_config(location).reject { |key, _value| key != 'sftp_servers' }
+  def dependency_config_sftp_servers_only(fabric)
+    @virtual_service.dependency_config(fabric).reject { |key, _value| key != 'sftp_servers' }
   end
 
-  def dependency_config_excluding_sftp_servers(location)
-    @virtual_service.dependency_config(location).reject! { |key, _value| key == 'sftp_servers' }
+  def dependency_config_excluding_sftp_servers(fabric)
+    @virtual_service.dependency_config(fabric).reject! { |key, _value| key == 'sftp_servers' }
   end
 
   def normalize_storage
@@ -76,8 +76,8 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     # Likewise we strip an non-sftp servers and see them to idea_positions_exports::appserver
     #
     if @virtual_service.idea_positions_exports
-      enc['role::http_app']['dependencies'] = dependency_config_excluding_sftp_servers(location)
-      enc.merge!('idea_positions_exports::appserver' => dependency_config_sftp_servers_only(location))
+      enc['role::http_app']['dependencies'] = dependency_config_excluding_sftp_servers(fabric)
+      enc.merge!('idea_positions_exports::appserver' => dependency_config_sftp_servers_only(fabric))
     end
 
     enc_ehcache(enc)
