@@ -6,7 +6,7 @@
 # is '/etc/stacks'
 #
 
-$LOAD_PATH << '/home/mmazurek/work/stackbuilder/lib/'
+$LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
 
 require 'optparse'
 
