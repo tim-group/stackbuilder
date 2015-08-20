@@ -78,6 +78,9 @@ when 'find_rogue'
   CMDFindRogue.rogue_check_allocation(defined_hostnames, allocated_hostnames)
   # rogue_check_resources(defined_machines, allocated_domains)
   # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
+when 'ls'
+  require 'stackbuilder/support/cmd_ls'
+  CMDLs.ls(environment)
 else
   logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
   exit 1
