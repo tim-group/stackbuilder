@@ -30,7 +30,7 @@ opts.each do |opt, arg|
   when '--environment'
     $options[:environment] = arg
   when '--path'
-    $options[:path] = path
+    $options[:path] = arg
   when '--verbose'
     $options[:verbose] += 1
   end
