@@ -29,4 +29,8 @@ class Stacks::Inventory
   def find_environment(name)
     @stacks.find_environment(name)
   end
+
+  def environments
+    @stacks.environments
+  end
 end

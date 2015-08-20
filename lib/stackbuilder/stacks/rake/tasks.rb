@@ -7,7 +7,6 @@ require 'yaml'
 require 'rubygems'
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/inventory'
-require 'stackbuilder/support/zamls'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_puppet'
 require 'stackbuilder/support/nagios'
@@ -108,26 +107,16 @@ namespace :sbx do
     puts "replaced by the commandline utility, run: 'stacks audit -e env'"
   end
 
+  # XXX 2015-08-19 remove after a while
   desc 'run to_enc on all nodes'
   task :dump_enc do
-    environment.environments.sort.each do |envname, env|
-      next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
-      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        puts "running to_enc on #{stack.hostname}.#{stack.domain}/#{envname}:"
-        puts ZAMLS.to_zamls(stack.to_enc)
-      end
-    end
+    puts "replaced by the commandline utility, run: 'stacks dump_enc'"
   end
 
+  # XXX 2015-08-19 remove after a while
   desc 'run to_spec on all nodes'
   task :dump_spec do
-    environment.environments.sort.each do |envname, env|
-      next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
-      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        puts "running to_spec on #{stack.hostname}.#{stack.domain}/#{envname}:"
-        puts ZAMLS.to_zamls(stack.to_spec)
-      end
-    end
+    puts "replaced by the commandline utility, run: 'stacks dump_spec'"
   end
 
   def get_defined_machines(environment)
