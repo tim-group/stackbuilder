@@ -124,12 +124,16 @@ module Stacks::Dependencies
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|
       env.accept do |virtual_service|
-        if virtual_service.is_a?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) &&
-           service[1].eql?(env.name)
+        if virtual_service.is_a?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) && service[1].eql?(env.name)
+          #&& service[2].eql?(virtual_service.children.first.fabric)
+#          pp virtual_service.children.first.fabric
+ #         fail
+          # pp virtual_service.type
+          # pp virtual_service.definitions
           return virtual_service
         end
       end
     end
-    fail "Cannot find service #{service[0]} in #{service[1]}, that I depend_on"
+    fail "Cannot find service #{service[0]} in #{service[1]} (#{service[2]}), that I depend_on"
   end
 end

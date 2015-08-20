@@ -88,14 +88,15 @@ module Stacks::Services::MysqlCluster
     [masters.first.prod_fqdn]
   end
 
-  def all_servers(location)
+  def all_servers(fabric)
     children.select do |server|
       if server.master? && !@include_master_in_read_only_cluster
         false
       else
         true
       end
-    end.select { |server| !server.backup? && server.location == location }.inject([]) do |prod_fqdns, server|
+    end.select { |server| !server.backup? && server.fabric == fabric }.inject([]) do |prod_fqdns, server|
+      puts "#{server.prod_fqdn} - server.fabric = #{server.fabric} == fabric - #{fabric}"
       prod_fqdns << server.prod_fqdn
       prod_fqdns
     end
@@ -142,7 +143,7 @@ module Stacks::Services::MysqlCluster
     rights
   end
 
-  def config_params(dependant, location)
+  def config_params(dependant, fabric)
     # This is where we can provide config params to App servers (only) to put into their config.properties
     config_params = {
       "db.#{@database_name}.hostname"           => master_servers.join(','),
@@ -152,10 +153,8 @@ module Stacks::Services::MysqlCluster
       "db.#{@database_name}.password_hiera_key" =>
         "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
     }
-    config_params["db.#{@database_name}.secondary_hostnames"] =
-        secondary_servers(location).join(",") unless secondary_servers(location).empty?
     config_params["db.#{@database_name}.read_only_cluster"] =
-        all_servers(location).join(",") unless all_servers(location).empty?
+        all_servers(fabric).join(",") unless all_servers(fabric).empty?
     config_params
   end
 end

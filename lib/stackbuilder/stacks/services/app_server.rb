@@ -46,12 +46,15 @@ class Stacks::Services::AppServer < Stacks::MachineDef
 
   def to_enc
     enc = super
+    pp @envrionment
+    pp @location
+    pp @fabric
     enc['role::http_app'] = {
       'application'                       => @virtual_service.application,
       'group'                             => group,
       'cluster'                           => availability_group,
       'environment'                       => environment.name,
-      'dependencies'                      => @virtual_service.dependency_config(location),
+      'dependencies'                      => @virtual_service.dependency_config(fabric),
       'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location),
       'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
       'port'                              => '8000'

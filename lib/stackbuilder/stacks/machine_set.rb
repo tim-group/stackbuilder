@@ -52,11 +52,11 @@ class Stacks::MachineSet
     @depends_on << [dependant, env, location] unless @depends_on.include? [dependant, env, location]
   end
 
-  def dependency_config(location)
+  def dependency_config(fabric)
     config = {}
     if @auto_configure_dependencies
       virtual_services_that_i_depend_on.each do |dependency|
-        config.merge! dependency.config_params(self, location)
+        config.merge! dependency.config_params(self, fabric)
       end
     end
     config
