@@ -96,7 +96,6 @@ module Stacks::Services::MysqlCluster
         true
       end
     end.select { |server| !server.backup? && server.fabric == fabric }.inject([]) do |prod_fqdns, server|
-      puts "#{server.prod_fqdn} - server.fabric = #{server.fabric} == fabric - #{fabric}"
       prod_fqdns << server.prod_fqdn
       prod_fqdns
     end

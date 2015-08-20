@@ -46,9 +46,6 @@ class Stacks::Services::AppServer < Stacks::MachineDef
 
   def to_enc
     enc = super
-    pp @envrionment
-    pp @location
-    pp @fabric
     enc['role::http_app'] = {
       'application'                       => @virtual_service.application,
       'group'                             => group,
