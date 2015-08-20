@@ -33,9 +33,7 @@ module Stacks::Services::VirtualService
     @definitions.values.select { |server| server.location == location }
   end
 
-  def vip_fqdn(network, location)
-    fabric = environment.options[location]
-    fail "Unable to determine fabric for #{location}" if fabric.nil?
+  def vip_fqdn(network, fabric)
     domain = environment.domain(fabric, network)
     "#{environment.name}-#{name}-vip.#{domain}"
   end
@@ -83,7 +81,7 @@ module Stacks::Services::VirtualService
     rules
   end
 
-  def config_params(_dependant, _location)
+  def config_params(_dependant, _fabric)
     {}
   end
 

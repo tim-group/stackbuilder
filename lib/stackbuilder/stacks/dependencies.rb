@@ -4,7 +4,7 @@ require 'stackbuilder/stacks/namespace'
 module Stacks::Dependencies
   public
 
-  def config_params(_dependant, _location)
+  def config_params(_dependant, fabric)
     {} # parameters for config.properties of apps depending on this service
   end
 

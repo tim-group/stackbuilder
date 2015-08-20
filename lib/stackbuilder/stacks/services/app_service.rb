@@ -43,8 +43,8 @@ module Stacks::Services::AppService
     @disable_http_lb_hack = true
   end
 
-  def config_params(_dependant, location)
-    { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, location)}:8000" }
+  def config_params(_dependant, fabric)
+    { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
   end
 
   def to_loadbalancer_config(location)
