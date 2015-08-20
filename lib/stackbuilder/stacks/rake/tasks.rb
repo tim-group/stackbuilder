@@ -287,14 +287,6 @@ namespace :sbx do
         logger(Logger::INFO) { "all nodes found in mcollective #{hosts.size}" }
       end
 
-      def timed_out(start_time, timeout)
-        (now - start_time) > timeout
-      end
-
-      def now
-        Time.now
-      end
-
       namespace :puppet do
         desc "sign outstanding Puppet certificate signing requests for these machines"
         sbtask :sign do
