@@ -8,7 +8,7 @@
 
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
 
-require 'optparse'
+require 'getoptlong'
 
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/logger'
@@ -19,22 +19,25 @@ $options = {
   :verbose     => 1
 }
 
-cmd = ARGV.shift
-OptionParser.new do |opts|
-  opts.banner = 'Usage: example.rb [options]'
+opts = GetoptLong.new(
+  ['--environment', '-e', GetoptLong::REQUIRED_ARGUMENT],
+  ['--path',        '-p', GetoptLong::REQUIRED_ARGUMENT],
+  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT]
+)
 
-  opts.on('-e', '--environment ENVIRONMENT', 'specify environment') do |env|
-    $options[:environment] = env
-  end
-  opts.on('-p', '--path PATH', 'specify stackbuilder-config path') do |path|
+opts.each do |opt, arg|
+  case opt
+  when '--environment'
+    $options[:environment] = arg
+  when '--path'
     $options[:path] = path
-  end
-  opts.on('-v', '--verbose', 'run verbosely') do
+  when '--verbose'
     $options[:verbose] += 1
   end
-end.parse!
-args = ARGV
-logger(Logger::DEBUG) { "finished processing options. command: #{cmd}, options: #{$options}, args: #{args}" }
+end
+cmd = ARGV.shift
+argv = ARGV
+logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", options: \"#{$options}\", argv: #{argv}" }
 
 logger(Logger::DEBUG) { 'initializing $factory' }
 $factory = Stacks::Factory.new
@@ -80,7 +83,13 @@ when 'find_rogue'
   # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
 when 'ls'
   require 'stackbuilder/support/cmd_ls'
-  CMDLs.ls(environment)
+  CMDLs.ls(argv, environment)
+when 'enc'
+  require 'stackbuilder/support/cmd_enc'
+  CMDEnc.enc(argv)
+when 'spec'
+when 'vip_spec'
+when 'orc'
 else
   logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
   exit 1
