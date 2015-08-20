@@ -69,6 +69,15 @@ when 'dump_spec'
       puts ZAMLS.to_zamls(stack.to_spec)
     end
   end
+when 'find_rogue'
+  # find inconsistency between stackbuilder-config and reality
+  require 'stackbuilder/support/cmd_find_rogue'
+  defined_hostnames, _defined_machines = CMDFindRogue.get_defined_machines(environment)
+  allocated_hostnames, _allocated_domains, _allocated_storage = CMDFindRogue.get_allocated_machines(%w(oy pg st ci))
+
+  CMDFindRogue.rogue_check_allocation(defined_hostnames, allocated_hostnames)
+  # rogue_check_resources(defined_machines, allocated_domains)
+  # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
 else
   logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
   exit 1

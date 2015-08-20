@@ -3,7 +3,7 @@ require 'stackbuilder/stacks/machine_def_container'
 
 class Stacks::Environment
   attr_reader :domain_suffix
-  attr_reader :environments
+  attr_reader :environments # XXX this is silly and leads to an infinite data structure
   attr_reader :parent
   attr_reader :name
   attr_reader :options
