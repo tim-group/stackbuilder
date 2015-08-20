@@ -11,6 +11,7 @@ require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_puppet'
 require 'stackbuilder/support/nagios'
 require 'stackbuilder/support/subscription'
+require 'stackbuilder/support/zamls'
 
 require 'set'
 require 'rspec'
