@@ -105,24 +105,28 @@ namespace :sbx do
   desc 'Print a report of KVM host CPU/Storage/Memory allocation'
   task :audit_host_machines do
     puts "replaced by the commandline utility, run: 'stacks audit -e env'"
+    exit 1
   end
 
   # XXX 2015-08-19 remove after a while
   desc 'run to_enc on all nodes'
   task :dump_enc do
     puts "replaced by the commandline utility, run: 'stacks dump_enc'"
+    exit 1
   end
 
   # XXX 2015-08-19 remove after a while
   desc 'run to_spec on all nodes'
   task :dump_spec do
     puts "replaced by the commandline utility, run: 'stacks dump_spec'"
+    exit 1
   end
 
   # XXX 2015-08-20 remove after a while
   desc 'find inconsistency between stackbuilder-config and reality'
   task :find_rogue do
     puts "replaced by the commandline utility, run: 'stacks find_rogue'"
+    exit 1
   end
 
   require 'set'
