@@ -38,11 +38,11 @@ module Stacks::Matchers
       stacks.exist?(fqdn)
     end
 
-    failure_message_for_should do
+    failure_message do
       "Expected to have host: #{fqdn}"
     end
 
-    failure_message_for_should_not do
+    failure_message_when_negated do
       "Expected to not have host: #{fqdn}"
     end
   end
@@ -52,7 +52,7 @@ module Stacks::Matchers
       stacks.fqdn_list.to_set == hosts.to_set
     end
 
-    failure_message_for_should do
+    failure_message do
       expected_hosts = hosts.to_set
       actual_hosts = stacks.fqdn_list.to_set
       missing_nodes = expected_hosts - actual_hosts
