@@ -87,6 +87,9 @@ when 'enc'
 when 'spec'
 when 'vip_spec'
 when 'orc'
+when 'puppet'
+  require 'stackbuilder/support/cmd_puppet'
+  CMDPuppet.puppet(argv)
 else
   logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
   exit 1
