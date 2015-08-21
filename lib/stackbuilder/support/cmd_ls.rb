@@ -1,7 +1,6 @@
 module CMDLs
-  def self.ls(argv, environment)
-    @short = argv.include? 'short'
-    traverse('', nil, environment)
+  def self.ls(argv)
+    traverse('', nil, $environment)
   end
 
   private
@@ -11,17 +10,17 @@ module CMDLs
     when 'container'
       if machine_def.respond_to?(:domain_suffix) # environment
         type = '[0;35mE[0m'
-        rake_task_name = machine_def.name
+        name = machine_def.name
       else
         type = '[0;36mC[0m'
-        rake_task_name = machine_def.name
+        name = machine_def.name
       end
     when 'machine'
       type = '[0;32mm[0m'
-      rake_task_name = machine_def.mgmt_fqdn
+      name = machine_def.mgmt_fqdn
     else
       type = "[0;36m#{machine_def.clazz}[0m"
-      rake_task_name = machine_def.name
+      name = machine_def.name
     end
 
     ptr, space, char = case is_last
@@ -30,13 +29,13 @@ module CMDLs
                        when true then  ['-> ', '  ', ' `'] # last item
     end
 
-    printf("[0;33m%s[0m%s %s\n", indent + char + ptr, type, rake_task_name)
+    printf("[0;33m%s[0m%s %s\n", indent + char + ptr, type, name)
     indent += space
 
     return unless machine_def.respond_to?(:children)
 
     children = machine_def.children
-    children.select! { |m| m.clazz != 'machine' } if @short
+    children.select! { |m| m.clazz != 'machine' } if $options[:terse]
 
     last = children.count - 1
     children.each_with_index do |child, index|

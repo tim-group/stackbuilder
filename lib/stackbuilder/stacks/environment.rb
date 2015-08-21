@@ -122,4 +122,16 @@ class Stacks::Environment
     end
     found
   end
+
+  def find_stack(name)
+    node = nil
+    accept do |machine_def|
+      if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == name) ||
+          machine_def.name == name
+        node = machine_def
+        break
+      end
+    end
+    node
+  end
 end

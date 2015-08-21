@@ -1,10 +1,4 @@
 #!/opt/ruby-bundle/bin/ruby
-#
-# stacks COMMAND [arguments]
-#
-# Use -p PATH, or the environmental variable STACKBUILDER_CONFIG_PATH to specify stackbuilder-config path. The default
-# is '/etc/stacks'
-#
 
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
 
@@ -19,20 +13,23 @@ $options = {
   :verbose     => 1
 }
 
-opts = GetoptLong.new(
+# options with arguments go straight into $options
+# unknown options are to be ignored
+GetoptLong.new(
   ['--environment', '-e', GetoptLong::REQUIRED_ARGUMENT],
   ['--path',        '-p', GetoptLong::REQUIRED_ARGUMENT],
-  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT]
-)
-
-opts.each do |opt, arg|
+  ['--stack',       '-s', GetoptLong::REQUIRED_ARGUMENT],
+  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT],
+  ['--terse',       '-t', GetoptLong::NO_ARGUMENT]
+).each do |opt, arg|
+  opt_sym = opt[2..-1].to_sym
   case opt
-  when '--environment'
-    $options[:environment] = arg
-  when '--path'
-    $options[:path] = arg
   when '--verbose'
-    $options[:verbose] += 1
+    $options[opt_sym] += 1
+  when '--terse'
+    $options[opt_sym] = true
+  else
+    $options[opt_sym] = arg
   end
 end
 cmd = ARGV.shift
@@ -41,19 +38,19 @@ logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", optio
 
 logger(Logger::DEBUG) { 'initializing $factory' }
 $factory = Stacks::Factory.new
-if (environment = $factory.inventory.find_environment($options[:environment])).nil?
+if ($environment = $factory.inventory.find_environment($options[:environment])).nil?
   logger(Logger::ERROR) { "environment \"#{$options[:environment]}\" not found" }
   exit 1
 end
-logger(Logger::DEBUG) { "environment \"#{environment.name}\" has #{environment.definitions.count} definitions" }
+logger(Logger::DEBUG) { "environment \"#{$environment.name}\" has #{$environment.definitions.count} definitions" }
 
 logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
 case cmd
 when 'audit'
   require 'stackbuilder/support/cmd_audit'
-  logger(Logger::DEBUG) { ":primary_site for \"#{environment.name}\" is \"#{environment.options[:primary_site]}\"" }
+  logger(Logger::DEBUG) { ":primary_site for \"#{$environment.name}\" is \"#{$environment.options[:primary_site]}\"" }
 
-  CMDAudit.audit(environment.options[:primary_site])
+  CMDAudit.audit($environment.options[:primary_site])
 when 'dump_enc'
   require 'stackbuilder/support/zamls'
   $factory.inventory.environments.sort.each do |envname, env|
@@ -83,7 +80,7 @@ when 'find_rogue'
   # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
 when 'ls'
   require 'stackbuilder/support/cmd_ls'
-  CMDLs.ls(argv, environment)
+  CMDLs.ls(argv)
 when 'enc'
   require 'stackbuilder/support/cmd_enc'
   CMDEnc.enc(argv)
