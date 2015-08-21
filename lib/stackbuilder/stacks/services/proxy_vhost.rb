@@ -39,26 +39,26 @@ class Stacks::Services::ProxyVHost
     @properties.merge!(properties)
   end
 
-  def aliases(location)
+  def aliases(fabric)
     aliases = Set.new
     if @add_default_aliases
-      aliases << @virtual_proxy_service.vip_fqdn(:front, location)
-      aliases << @virtual_proxy_service.vip_fqdn(:prod, location)
+      aliases << @virtual_proxy_service.vip_fqdn(:front, fabric)
+      aliases << @virtual_proxy_service.vip_fqdn(:prod, fabric)
     end
     aliases.merge(@aliases)
-    aliases.delete(fqdn(location))
+    aliases.delete(fqdn(fabric))
     aliases.to_a.sort
   end
 
-  def fqdn(location)
+  def fqdn(fabric)
     if @fqdn.nil?
-      @virtual_proxy_service.vip_fqdn(:front, location)
+      @virtual_proxy_service.vip_fqdn(:front, fabric)
     else
       @fqdn
     end
   end
 
-  def proxy_pass_rules(location)
+  def proxy_pass_rules(location, environments)
     vhost_location = @virtual_proxy_service.override_vhost_location[@environment]
     vhost_location = location if vhost_location.nil?
 
@@ -66,16 +66,26 @@ class Stacks::Services::ProxyVHost
       service_environment = environment
       service_environment = config_hash[:environment] if config_hash.key?(:environment)
       service = @virtual_proxy_service.find_virtual_service(config_hash[:service], service_environment)
-      [path, "http://#{service.vip_fqdn(:prod, vhost_location)}:8000"]
+      fabric = environments[service_environment].options[vhost_location]
+      [path, "http://#{service.vip_fqdn(:prod, fabric)}:8000"]
     end]
   end
 
-  def to_proxy_config_hash(location)
-    [fqdn(location), {
-      'aliases'          => aliases(location),
+  def to_proxy_config_hash(location, environment)
+    envs = environment.environments.inject([]) do |acc, (name, env)|
+      acc = acc + env.all_environments
+      acc
+    end.inject({}) do |map, env|
+      map[env.name] = env
+      map
+    end
+
+    fabric = envs[@environment].options[location]
+    [fqdn(fabric), {
+      'aliases'          => aliases(fabric),
       'redirects'        => redirects,
-      'application'      => @virtual_proxy_service.find_virtual_service(service, environment).application,
-      'proxy_pass_rules' => proxy_pass_rules(location),
+      'application'      => @virtual_proxy_service.find_virtual_service(service, @environment).application,
+      'proxy_pass_rules' => proxy_pass_rules(location, envs),
       'type'             => type,
       'vhost_properties' => properties,
       'cert'             => cert

@@ -34,7 +34,7 @@ class Stacks::Services::BindServer < Stacks::MachineDef
       if [:front].include? vip_network
         nil
       else
-        @virtual_service.vip_fqdn(vip_network, location)
+        @virtual_service.vip_fqdn(vip_network, fabric)
       end
     end
     vip_fqdns.compact!

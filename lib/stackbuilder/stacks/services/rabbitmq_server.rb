@@ -12,7 +12,7 @@ class Stacks::Services::RabbitMQServer < Stacks::MachineDef
     enc = super()
     enc.merge!('role::rabbitmq_server' => {
                  'cluster_nodes' =>  @virtual_service.realserver_prod_fqdns(location).map { |fqdn| fqdn.split('.')[0] },
-                 'vip_fqdn' => @virtual_service.vip_fqdn(:prod, @location)
+                 'vip_fqdn' => @virtual_service.vip_fqdn(:prod, fabric)
                },
                'server::default_new_mgmt_net_local' => nil)
     dependant_instances = @virtual_service.dependant_instance_fqdns(location)

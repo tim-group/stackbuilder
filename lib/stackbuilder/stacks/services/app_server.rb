@@ -66,7 +66,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     enc['role::http_app']['allowed_hosts'] = allowed_hosts.uniq.sort unless allowed_hosts.empty?
 
     if @virtual_service.respond_to? :vip_fqdn
-      enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod, @location)
+      enc['role::http_app']['vip_fqdn'] = @virtual_service.vip_fqdn(:prod, @fabric)
     end
 
     # FIXME: It is less than ideal having to use the same dependency mechanism for

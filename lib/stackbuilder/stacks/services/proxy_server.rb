@@ -26,7 +26,7 @@ class Stacks::Services::ProxyServer < Stacks::MachineDef
       enc = super()
       enc.merge!('role::proxyserver' => {
                    'default_ssl_cert' => @virtual_service.cert,
-                   'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod, location),
+                   'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod, fabric),
                    'vhosts'           => service_resources,
                    'environment'      => environment.name
                  })

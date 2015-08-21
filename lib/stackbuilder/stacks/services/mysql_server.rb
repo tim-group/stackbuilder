@@ -122,7 +122,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::mysql_server'].merge!('dependencies' => @virtual_service.dependency_config(location, fabric),
+      enc['role::mysql_server'].merge!('dependencies' => @virtual_service.dependency_config(fabric),
                                        'dependant_instances' => dependant_instances)
       unless backup?
         enc.merge!(@virtual_service.dependant_instance_mysql_rights(location))

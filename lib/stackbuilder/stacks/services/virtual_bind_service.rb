@@ -150,13 +150,13 @@ module Stacks::Services::VirtualBindService
     healthchecks
   end
 
-  def to_loadbalancer_config(location)
+  def to_loadbalancer_config(location, fabric)
     vip_nets = @vip_networks.select do |vip_network|
       ![:front].include? vip_network
     end
     lb_config = {}
     vip_nets.each do |vip_net|
-      lb_config[vip_fqdn(vip_net, location)] = {
+      lb_config[vip_fqdn(vip_net, fabric)] = {
         'type'         => 'bind',
         'ports'        => @ports,
         'realservers'  => {

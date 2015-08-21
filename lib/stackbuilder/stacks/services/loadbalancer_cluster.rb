@@ -18,7 +18,7 @@ module Stacks::Services::LoadBalancerCluster
     end
   end
 
-  def loadbalancer_config_hash(location)
+  def loadbalancer_config_hash(location, fabric)
     config_hash = {}
     services = virtual_services.select do |node|
       node.respond_to?(:to_loadbalancer_config)
@@ -33,10 +33,10 @@ module Stacks::Services::LoadBalancerCluster
     end
     lb_services.uniq.map do |node|
       if location == :primary_site
-        config_hash.merge! node.to_loadbalancer_config(location)
+        config_hash.merge! node.to_loadbalancer_config(location, fabric)
       else
         if node.respond_to?(:secondary_site?)
-          config_hash.merge! node.to_loadbalancer_config(location) if node.secondary_site?
+          config_hash.merge! node.to_loadbalancer_config(location, fabric) if node.secondary_site?
         end
       end
     end

@@ -36,11 +36,11 @@ module Stacks::Services::VirtualProxyService
 
   def downstream_services(proxy_location)
     Hash[@proxy_vhosts.map do |vhost|
-      vhost.to_proxy_config_hash(proxy_location)
+      vhost.to_proxy_config_hash(proxy_location, environment)
     end]
   end
 
-  def to_loadbalancer_config(location)
+  def to_loadbalancer_config(location, fabric)
     grouped_realservers = realservers(location).group_by do |_|
       'blue'
     end
@@ -62,7 +62,7 @@ module Stacks::Services::VirtualProxyService
     end
 
     {
-      vip_fqdn(:prod, location) => enc
+      vip_fqdn(:prod, fabric) => enc
     }
   end
 end

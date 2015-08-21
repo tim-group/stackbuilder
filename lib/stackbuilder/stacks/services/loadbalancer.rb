@@ -19,7 +19,7 @@ class Stacks::Services::LoadBalancer < Stacks::MachineDef
     enc = super()
     enc['role::loadbalancer'] = {
       'virtual_router_id' => virtual_router_id,
-      'virtual_servers'   => @virtual_service.loadbalancer_config_hash(@location)
+      'virtual_servers'   => @virtual_service.loadbalancer_config_hash(@location, @fabric)
     }
     enc
   end

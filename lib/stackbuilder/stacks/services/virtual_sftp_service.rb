@@ -13,7 +13,7 @@ module Stacks::Services::VirtualSftpService
     @ports = [21, 22, 2222]
   end
 
-  def to_loadbalancer_config(location)
+  def to_loadbalancer_config(location, fabric)
     grouped_realservers = realservers(location).group_by do |_|
       'blue'
     end
@@ -24,7 +24,7 @@ module Stacks::Services::VirtualSftpService
     end]
 
     {
-      vip_fqdn(:prod, location) => {
+      vip_fqdn(:prod, fabric) => {
         'type'         => 'sftp',
         'ports'        => @ports,
         'realservers'  => realservers,

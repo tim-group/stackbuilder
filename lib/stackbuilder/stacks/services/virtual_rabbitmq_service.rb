@@ -17,9 +17,9 @@ module Stacks::Services::VirtualRabbitMQService
     realservers(location).map(&:prod_fqdn).sort
   end
 
-  def to_loadbalancer_config(location)
+  def to_loadbalancer_config(location, fabric)
     {
-      vip_fqdn(:prod, location) => {
+      vip_fqdn(:prod, fabric) => {
         'type' => 'rabbitmq',
         'ports' => @ports,
         'realservers' => {

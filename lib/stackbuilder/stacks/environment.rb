@@ -74,6 +74,26 @@ class Stacks::Environment
     self
   end
 
+  def all_environments
+    add_sub_environments([], top_level_env_of(self))
+  end
+
+  def add_sub_environments(accumulator, env)
+    accumulator << env
+    env.sub_environments.inject(accumulator) do |acc, sub|
+      add_sub_environments(acc, sub)
+      acc
+    end
+  end
+
+  def top_level_env_of(e)
+    if e.parent.nil?
+      e
+    else
+      highest_environment(e.parent)
+    end
+  end
+
   def parent?
     !@parent.nil?
   end

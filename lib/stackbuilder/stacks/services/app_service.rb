@@ -47,23 +47,23 @@ module Stacks::Services::AppService
     { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
   end
 
-  def to_loadbalancer_config(location)
+  def to_loadbalancer_config(location, fabric)
     if @disable_http_lb_hack && @one_instance_in_lb
       fail('disable_http_lb_hack and one_instance_in_lb cannot be specified at the same time')
     end
     config = {}
     if respond_to?(:load_balanced_service?)
-      config = loadbalancer_config(location)
+      config = loadbalancer_config(location, fabric)
       unless @sso_port.nil?
         if @disable_http_lb_hack
-          config[vip_fqdn(:prod, location)]['type'] = 'sso_app'
+          config[vip_fqdn(:prod, fabric)]['type'] = 'sso_app'
         else
-          config[vip_fqdn(:prod, location)]['type'] = 'http_and_sso_app'
+          config[vip_fqdn(:prod, fabric)]['type'] = 'http_and_sso_app'
         end
       end
     end
     if @one_instance_in_lb
-      config[vip_fqdn(:prod, location)]['type'] = 'one_instance_in_lb_with_sorry_server'
+      config[vip_fqdn(:prod, fabric)]['type'] = 'one_instance_in_lb_with_sorry_server'
     end
     config
   end

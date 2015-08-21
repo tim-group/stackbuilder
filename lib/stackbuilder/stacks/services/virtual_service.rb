@@ -39,10 +39,11 @@ module Stacks::Services::VirtualService
   end
 
   def to_vip_spec(location)
-    qualified_hostnames = Hash[@vip_networks.sort.map { |network| [network, vip_fqdn(network, location)] }]
+    fabric = environment.options[location]
+    qualified_hostnames = Hash[@vip_networks.sort.map { |network| [network, vip_fqdn(network, fabric)] }]
     {
       :hostname => "#{environment.name}-#{name}",
-      :fabric => environment.options[location],
+      :fabric => fabric,
       :networks => @vip_networks,
       :qualified_hostnames => qualified_hostnames
     }
@@ -72,10 +73,11 @@ module Stacks::Services::VirtualService
 
   def nat_rules(location)
     rules = []
+    fabric = environment.options[location]
     @ports.map do |back_port|
       front_port = @port_map[back_port] || back_port
-      front_uri = URI.parse("http://#{vip_fqdn(:front, location)}:#{front_port}")
-      prod_uri = URI.parse("http://#{vip_fqdn(:prod, location)}:#{back_port}")
+      front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
+      prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
       rules << Stacks::Services::Nat.new(front_uri, prod_uri, @tcp, @udp)
     end
     rules
@@ -91,7 +93,7 @@ module Stacks::Services::VirtualService
 
   private
 
-  def loadbalancer_config(location)
+  def loadbalancer_config(location, fabric)
     fewest_servers_in_a_group = realservers(location).size
     grouped_realservers = realservers(location).group_by(&:group)
     realservers_hash = Hash[grouped_realservers.map do |group, rs|
@@ -103,7 +105,7 @@ module Stacks::Services::VirtualService
     monitor_warn = fewest_servers_in_a_group == 1 ? 0 : 1
 
     {
-      vip_fqdn(:prod, location) => {
+      vip_fqdn(:prod, fabric) => {
         'env' => environment.name,
         'app' => application,
         'realservers' => realservers_hash,

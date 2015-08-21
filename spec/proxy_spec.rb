@@ -324,7 +324,9 @@ describe_stack 'generates proxy server enc data with persistent when enable_pers
     lb_role_enc = loadbalancer.to_enc['role::loadbalancer']
     lb_role_enc["virtual_router_id"].should eql(1)
     lb_role_enc["virtual_servers"].size.should eql(1)
+
     vserver_enc = lb_role_enc["virtual_servers"]['st-proxy-vip.st.net.local']
+
     vserver_enc['type'].should eql('proxy')
     vserver_enc['ports'].should eql([80, 443])
     vserver_enc['realservers']['blue'].should eql(["st-proxy-001.st.net.local", "st-proxy-002.st.net.local"])

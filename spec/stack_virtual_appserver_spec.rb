@@ -17,7 +17,7 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config' do
   end
 
   host("e1-frapp-001.mgmt.space.net.local") do |host|
-    data = host.virtual_service.to_loadbalancer_config(:primary_site)['e1-frapp-vip.space.net.local']
+    data = host.virtual_service.to_loadbalancer_config(:primary_site, 'space')['e1-frapp-vip.space.net.local']
     data['monitor_warn'].should eql(1)
     data['healthcheck_timeout'].should eql(10)
     data['env'].should eql('e1')
