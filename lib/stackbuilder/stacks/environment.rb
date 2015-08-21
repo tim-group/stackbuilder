@@ -75,7 +75,13 @@ class Stacks::Environment
   end
 
   def all_environments
-    add_sub_environments([], top_level_env_of(self))
+    @environments.inject([]) do |acc, (name, env)|
+      add_sub_environments(acc, top_level_env_of(env))
+      acc
+    end.inject({}) do |map, env|
+      map[env.name] = env
+      map
+    end
   end
 
   def add_sub_environments(accumulator, env)

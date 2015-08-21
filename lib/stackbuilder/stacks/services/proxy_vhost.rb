@@ -72,14 +72,7 @@ class Stacks::Services::ProxyVHost
   end
 
   def to_proxy_config_hash(location, environment)
-    envs = environment.environments.inject([]) do |acc, (name, env)|
-      acc = acc + env.all_environments
-      acc
-    end.inject({}) do |map, env|
-      map[env.name] = env
-      map
-    end
-
+    envs = environment.all_environments
     fabric = envs[@environment].options[location]
     [fqdn(fabric), {
       'aliases'          => aliases(fabric),
