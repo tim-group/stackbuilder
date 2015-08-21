@@ -80,7 +80,7 @@ when 'find_rogue'
   # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
 when 'ls'
   require 'stackbuilder/support/cmd_ls'
-  CMDLs.ls(argv)
+  CMDLs.ls
 when 'enc'
   require 'stackbuilder/support/cmd_enc'
   CMDEnc.enc(argv)

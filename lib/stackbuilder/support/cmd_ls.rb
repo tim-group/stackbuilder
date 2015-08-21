@@ -1,6 +1,9 @@
 module CMDLs
-  def self.ls(_argv)
-    traverse('', nil, $environment)
+  require 'stackbuilder/support/cmd'
+
+  def self.ls
+    machine_def = $options[:stack] ? CMD.stack : $environment
+    traverse('', nil, machine_def)
   end
 
   private
