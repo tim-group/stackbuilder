@@ -1,8 +1,8 @@
 module CMDEnc
   require 'stackbuilder/support/cmd'
 
-  def self.enc(argv)
-    machine_def = CMD.get_stack
+  def self.enc(_argv)
+    machine_def = CMD.stack
 
     if machine_def.respond_to?(:to_enc)
       require 'stackbuilder/support/zamls'

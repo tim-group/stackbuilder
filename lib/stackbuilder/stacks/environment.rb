@@ -127,7 +127,7 @@ class Stacks::Environment
     node = nil
     accept do |machine_def|
       if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == name) ||
-          machine_def.name == name
+         machine_def.name == name
         node = machine_def
         break
       end

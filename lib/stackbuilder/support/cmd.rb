@@ -1,5 +1,5 @@
 module CMD
-  def self.get_stack
+  def self.stack
     if $options[:stack].nil?
       logger(Logger::FATAL) { 'option "stack" not set' }
       exit 1

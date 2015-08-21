@@ -1,5 +1,5 @@
 module CMDLs
-  def self.ls(argv)
+  def self.ls(_argv)
     traverse('', nil, $environment)
   end
 

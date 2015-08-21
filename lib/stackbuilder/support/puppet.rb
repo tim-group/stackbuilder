@@ -75,9 +75,12 @@ class PuppetCtl
       logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
 
+    # false positive
+    # rubocop:disable Style/GuardClause
     unless run_result.all_passed?
       fail("Puppet runs have timed out or failed, see above for details")
     end
+    # rubocop:enable Style/GuardClause
   end
 
   # run puppet on these machines
