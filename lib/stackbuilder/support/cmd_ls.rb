@@ -2,7 +2,7 @@ module CMDLs
   require 'stackbuilder/support/cmd'
 
   def self.ls
-    machine_def = $options[:stack] ? CMD.stack : $environment
+    machine_def = $options[:stack] ? Opt.stack : $environment
     traverse('', nil, machine_def)
   end
 

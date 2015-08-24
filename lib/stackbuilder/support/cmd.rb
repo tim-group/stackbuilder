@@ -1,4 +1,4 @@
-module CMD
+module Opt
   def self.stack
     if $options[:stack].nil?
       logger(Logger::FATAL) { 'option "stack" not set' }
