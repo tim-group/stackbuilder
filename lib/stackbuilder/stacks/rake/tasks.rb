@@ -140,7 +140,7 @@ namespace :sbx do
     end
 
     namespace rake_task_name do
-      RSpec::Core::Runner.disable_autorun!
+      RSpec::Core::Runner.disable_autorun! # XXX wtf does this do
       if machine_names.include?(rake_task_name)
         fail "Duplicate machine name detected: #{machine_def.name} in #{machine_def.environment.name}. " \
           "Look for a stack that has the same name as the server being created.\neg.\n" \
@@ -148,11 +148,13 @@ namespace :sbx do
       end
       machine_names << "#{machine_def.environment.name}:#{machine_def.name}"
 
+      # TO_PORT
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_specs do
         puts ZAMLS.to_zamls(machine_def.to_specs)
       end
 
+      # TO_PORT
       desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
       task :to_vip_spec do
         puts ZAMLS.to_zamls(machine_def.to_vip_spec(:primary_site))
@@ -199,6 +201,7 @@ namespace :sbx do
         end
       end
 
+      # TO_PORT
       desc "perform all steps required to create and configure the machine(s)"
       task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait'] do |t|
         namespace = t.name.sub(/:provision$/, '')
@@ -206,37 +209,44 @@ namespace :sbx do
         Rake::Task[namespace + ':cancel_downtime'].invoke
       end
 
+      # TO_PORT
       desc "perform a clean followed by a provision"
       task :reprovision => %w(clean provision)
 
+      # TO_PORT
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
         get_action("allocate").call(@factory.services, machine_def)
       end
 
+      # TO_PORT
       desc "launch these machines"
       sbtask :launch do
         get_action("launch").call(@factory.services, machine_def)
       end
 
+      # TO_PORT
       desc "resolve the IP numbers of these machines"
       sbtask :resolve do
         computecontroller = Compute::Controller.new
         pp computecontroller.resolve(machine_def.to_specs)
       end
 
+      # TO_PORT
       desc "disable notify for these machines"
       sbtask :disable_notify do
         computecontroller = Compute::Controller.new
         computecontroller.disable_notify(machine_def.to_specs)
       end
 
+      # TO_PORT
       desc "enable notify for these machines"
       sbtask :enable_notify do
         computecontroller = Compute::Controller.new
         computecontroller.enable_notify(machine_def.to_specs)
       end
 
+      # TO_PORT
       desc "allocate IPs for these virtual services"
       sbtask :allocate_vips do
         vips = []
@@ -250,6 +260,7 @@ namespace :sbx do
         end
       end
 
+      # TO_PORT
       desc "free IPs for these virtual services"
       sbtask :free_vips do
         vips = []
@@ -259,12 +270,14 @@ namespace :sbx do
         @factory.services.dns.free(vips)
       end
 
+      # TO_PORT
       desc "free IPs"
       sbtask :free_ips do
         all_specs = machine_def.flatten.map(&:to_spec)
         @factory.services.dns.free(all_specs)
       end
 
+      # TO_PORT - maybe this can just be removed?
       desc "perform an MCollective ping against these machines"
       sbtask :mping do
         hosts = []
@@ -402,11 +415,13 @@ namespace :sbx do
         end
       end
 
+      # TO_PORT
       desc 'unallocate machines'
       # Note that the ordering here is important - must have killed VMs before
       # removing their puppet cert, otherwise we have a race condition
       task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
 
+      # TO_PORT
       desc 'clean away all traces of these machines'
       sbtask :clean_traces do
         hosts = []
@@ -433,9 +448,11 @@ namespace :sbx do
         end
       end
 
+      # TO_PORT
       desc "frees up ip and vip allocation of these machines"
       task :free_ip_allocation => %w(free_ips free_vips)
 
+      # TO_PORT
       sbtask :clean_nodes do
         computecontroller = Compute::Controller.new
         computecontroller.clean(machine_def.to_specs) do
@@ -502,6 +519,7 @@ namespace :sbx do
         end
       end
 
+      # TO_PORT - some problems with mco_client being a module, and thus not so easy to use in another module
       sbtask :showvnc do
         hosts = []
         machine_def.accept do |child|
@@ -532,6 +550,7 @@ namespace :sbx do
         end
       end
 
+      # TO_PORT - the code seems to be somehow tied to rake, cannot easily make into a module
       desc "carry out all appropriate tests on these machines"
       sbtask :test do
         machine_def.accept do |child_machine_def|
