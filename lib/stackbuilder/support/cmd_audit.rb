@@ -1,12 +1,18 @@
 module CMDAudit
-  def self.audit(site)
+  def audit(_argv)
+    site = $environment.options[:primary_site]
+    logger(Logger::DEBUG) { ":primary_site for \"#{$environment.name}\" is \"#{site}\"" }
+
+    @total = Hash.new(0)
+    @total_str = lambda { |a, b| sprintf("%d/%d %2.0f%%", a, b, 100.0 * a / b) }
+
     hosts = details_for($factory.host_repository.find_compute_nodes(site).hosts)
     kvm_hosts_tabulate(hosts, site)
   end
 
   private
 
-  def self.order(headers)
+  def order(headers)
     headers.inject([]) do |order, header|
       case header
       when :fqdn                then order[0] = header
@@ -20,9 +26,7 @@ module CMDAudit
     end.select { |header| !header.nil? }
   end
 
-  @total = Hash.new(0)
-  @total_str = lambda { |a, b| sprintf("%d/%d %2.0f%%", a, b, 100.0 * a / b) }
-  def self.kvm_hosts_tabulate_sum_totals(header, value)
+  def kvm_hosts_tabulate_sum_totals(header, value)
     return 0 if value.size == 0
 
     total_width = 0
@@ -49,10 +53,13 @@ module CMDAudit
     total_width + 1
   end
 
-  # XXX output not very pretty, percentages not aligned
-  def self.kvm_hosts_tabulate(data, site)
+  def self.included(receiver)
     require 'collimator'
     include Collimator
+    receiver.send :include, Collimator
+  end
+  # XXX output not very pretty, percentages not aligned
+  def kvm_hosts_tabulate(data, site)
     require 'set'
 
     all_headers = data.inject(Set.new) { |acc, (_fqdn, header)| acc.merge(header.keys) }
@@ -95,7 +102,7 @@ module CMDAudit
     Table.tabulate
   end
 
-  def self.details_for(hosts)
+  def details_for(hosts)
     hosts.inject({}) do |data, host|
       stats = stats_for(host)
       data[host.fqdn] = stats
@@ -103,7 +110,7 @@ module CMDAudit
     end
   end
 
-  def self.stats_for(host)
+  def stats_for(host)
     ram_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host))
     storage_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host))
     vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
@@ -114,7 +121,7 @@ module CMDAudit
     merged_stats
   end
 
-  def self.convert_hash_values_from_kb_to_gb(result_hash)
+  def convert_hash_values_from_kb_to_gb(result_hash)
     gb_hash = result_hash.each.inject({}) do |result, (key, value)|
       if value.is_a?(Hash)
         result[key] = convert_hash_values_from_kb_to_gb(value)
@@ -128,18 +135,18 @@ module CMDAudit
     gb_hash
   end
 
-  def self.kb_to_gb(value)
+  def kb_to_gb(value)
     (value.to_f / (1024 * 1024) * 100).round / 100.0
   end
 
-  def self.ram_stats_to_string(ram_stats)
+  def ram_stats_to_string(ram_stats)
     used = ram_stats[:allocated_ram]
     total = ram_stats[:host_ram]
     used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s.rjust(3)}%" rescue 0
     { 'memory(GB)'.to_sym => "#{used}/#{total} #{used_percentage}" }
   end
 
-  def self.storage_stats_to_string(storage_stats)
+  def storage_stats_to_string(storage_stats)
     storage_stats.inject({}) do |stats, (storage_type, value_hash)|
       arch = value_hash[:arch]
       used = value_hash[:used]

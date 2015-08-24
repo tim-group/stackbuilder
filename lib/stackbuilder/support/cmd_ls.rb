@@ -1,14 +1,12 @@
 module CMDLs
-  require 'stackbuilder/support/cmd'
-
-  def self.ls
-    machine_def = $options[:stack] ? Opt.stack : $environment
+  def ls(_argv)
+    machine_def = $options[:stack] ? check_and_get_stack : $environment
     traverse('', nil, machine_def)
   end
 
   private
 
-  def self.traverse(indent, is_last, machine_def)
+  def traverse(indent, is_last, machine_def)
     case machine_def.clazz
     when 'container'
       if machine_def.respond_to?(:domain_suffix) # environment

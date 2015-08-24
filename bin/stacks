@@ -7,6 +7,7 @@ require 'getoptlong'
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/logger'
 
+# options with defaults. an arbitrary option can be set here, this is not an exclusive list.
 $options = {
   :environment => 'dev',
   :path        => ENV['STACKBUILDER_CONFIG_PATH'] || '/etc/stacks',
@@ -14,7 +15,7 @@ $options = {
 }
 
 # options with arguments go straight into $options
-# unknown options are to be ignored
+# unrecognized options are ignored
 GetoptLong.new(
   ['--environment', '-e', GetoptLong::REQUIRED_ARGUMENT],
   ['--path',        '-p', GetoptLong::REQUIRED_ARGUMENT],
@@ -44,56 +45,13 @@ if ($environment = $factory.inventory.find_environment($options[:environment])).
 end
 logger(Logger::DEBUG) { "environment \"#{$environment.name}\" has #{$environment.definitions.count} definitions" }
 
-require 'stackbuilder/support/cmd_audit'
-require 'stackbuilder/support/cmd_find_rogue'
-require 'stackbuilder/support/cmd_ls'
-require 'stackbuilder/support/cmd_enc'
-require 'stackbuilder/support/cmd_orc'
-require 'stackbuilder/support/cmd_puppet'
-require 'stackbuilder/support/cmd_nagios'
+require 'stackbuilder/support/cmd'
 
-logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
-case cmd
-when 'audit'
-  logger(Logger::DEBUG) { ":primary_site for \"#{$environment.name}\" is \"#{$environment.options[:primary_site]}\"" }
+commands = CMD.new
 
-  CMDAudit.audit($environment.options[:primary_site])
-when 'dump_enc'
-  require 'stackbuilder/support/zamls'
-  $factory.inventory.environments.sort.each do |envname, env|
-    next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
-    env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-      puts "running to_enc on #{stack.hostname}.#{stack.domain}/#{envname}:"
-      puts ZAMLS.to_zamls(stack.to_enc)
-    end
-  end
-when 'dump_spec'
-  require 'stackbuilder/support/zamls'
-  $factory.inventory.environments.sort.each do |envname, env|
-    next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
-    env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-      puts "running to_spec on #{stack.hostname}.#{stack.domain}/#{envname}:"
-      puts ZAMLS.to_zamls(stack.to_spec)
-    end
-  end
-when 'find_rogue'
-  # find inconsistency between stackbuilder-config and reality
-  defined_hostnames, _defined_machines = CMDFindRogue.get_defined_machines(environment)
-  allocated_hostnames, _allocated_domains, _allocated_storage = CMDFindRogue.get_allocated_machines(%w(oy pg st ci))
-
-  CMDFindRogue.rogue_check_allocation(defined_hostnames, allocated_hostnames)
-  # rogue_check_resources(defined_machines, allocated_domains)
-  # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
-when 'ls'
-  CMDLs.ls
-when 'enc'
-  CMDEnc.enc
-when 'orc'
-  CMDOrc.resolve
-when 'puppet'
-  CMDPuppet.puppet(argv)
-when 'nagios'
-  CMDNagios.nagios(argv)
+if commands.cmds.include? cmd
+  logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
+  commands.method(cmd).call(argv)
 else
   logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
   exit 1

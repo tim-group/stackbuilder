@@ -1,14 +1,12 @@
-require 'stackbuilder/support/cmd'
-
 module CMDNagios
-  def self.nagios(argv)
+  def nagios(argv)
     cmd = argv.shift
     if cmd.nil? then
       logger(Logger::FATAL) { 'nagios needs a subcommand' }
       exit 1
     end
 
-    machine_def = Opt.stack
+    machine_def = check_and_get_stack
 
     case cmd
     when 'disable'
@@ -23,7 +21,7 @@ module CMDNagios
 
   private
 
-  def self.schedule_downtime(machine_def)
+  def schedule_downtime(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
       hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
@@ -47,7 +45,7 @@ module CMDNagios
     end
   end
 
-  def self.cancel_downtime(machine_def)
+  def cancel_downtime(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
       hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)

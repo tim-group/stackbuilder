@@ -1,5 +1,16 @@
 module CMDFindRogue
-  def self.get_defined_machines(environment)
+  def find_rogue(_argv)
+    defined_hostnames, _defined_machines = get_defined_machines($environment)
+    allocated_hostnames, _allocated_domains, _allocated_storage = get_allocated_machines(%w(oy pg st ci))
+
+    rogue_check_allocation(defined_hostnames, allocated_hostnames)
+    # rogue_check_resources(defined_machines, allocated_domains)
+    # rogue_check_missing_storage(defined_machines, allocated_storage, allocated_hostnames)
+  end
+
+  private
+
+  def get_defined_machines(environment)
     e = []
     environment.environments.each { |_envname, env| e += env.flatten }
     hostnames = e.map(&:hostname)
@@ -7,7 +18,7 @@ module CMDFindRogue
     [hostnames, machines]
   end
 
-  def self.get_allocated_machines(sites)
+  def get_allocated_machines(sites)
     hostnames = []
     domains = Hash[]
     storage = Hash[]
@@ -20,7 +31,7 @@ module CMDFindRogue
     [hostnames, domains, storage]
   end
 
-  def self.rogue_check_allocation(defined_hostnames, allocated_hostnames)
+  def rogue_check_allocation(defined_hostnames, allocated_hostnames)
     # rogue1 = defined_hostnames - allocated_hostnames
     # puts sprintf("defined, but not allocated (%d):", rogue1.size)
     # rogue1.each { |node| puts "  #{node}" }
@@ -30,10 +41,8 @@ module CMDFindRogue
     rogue2.each { |node| puts "  #{node}" }
   end
 
-  private
-
   # rubocop:disable Style/Next
-  def self.rogue_check_resources(defined_machines, allocated_domains)
+  def rogue_check_resources(defined_machines, allocated_domains)
     puts "checking vm properties..."
     allocated_domains.each do |afqdn, adata|
       dhost = defined_machines.detect { |dh| sprintf("%s.%s", dh[:hostname], dh[:domain]) == afqdn }
@@ -60,7 +69,7 @@ module CMDFindRogue
   end
 
   # XXX incomplete, too many special cases. return to this once everything is migrated to NNI
-  def self.rogue_check_missing_storage(defined_machines, allocated_storage, _allocated_hostnames)
+  def rogue_check_missing_storage(defined_machines, allocated_storage, _allocated_hostnames)
     puts "checking missing or misallocated storage..."
     defined_machines.each do |dhost|
       dhost[:storage].each do |mount_point, p|
