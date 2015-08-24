@@ -8,7 +8,7 @@ module CMDPuppet
       exit 1
     end
 
-    machine_def = Opt.stack
+    machine_def = CMD.get_stack
 
     logger(Logger::DEBUG) { "about to run puppet \"#{cmd}\" on \"#{machine_def.name}\"" }
 
