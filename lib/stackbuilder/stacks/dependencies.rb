@@ -4,7 +4,7 @@ require 'stackbuilder/stacks/namespace'
 module Stacks::Dependencies
   public
 
-  def config_params(_dependant, fabric)
+  def config_params(_dependant, _fabric)
     {} # parameters for config.properties of apps depending on this service
   end
 
@@ -124,12 +124,9 @@ module Stacks::Dependencies
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|
       env.accept do |virtual_service|
-        if virtual_service.is_a?(Stacks::MachineSet) && service[0].eql?(virtual_service.name) && service[1].eql?(env.name)
-          #&& service[2].eql?(virtual_service.children.first.fabric)
-#          pp virtual_service.children.first.fabric
- #         fail
-          # pp virtual_service.type
-          # pp virtual_service.definitions
+        if virtual_service.is_a?(Stacks::MachineSet) &&
+           service[0].eql?(virtual_service.name) &&
+           service[1].eql?(env.name)
           return virtual_service
         end
       end
