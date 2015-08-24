@@ -26,9 +26,7 @@ module CMDNagios
   def self.schedule_downtime(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
-      if child_machine_def.respond_to?(:mgmt_fqdn)
-        hosts << child_machine_def
-      end
+      hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
     end
 
     nagios_helper = Support::Nagios::Service.new
@@ -52,9 +50,7 @@ module CMDNagios
   def self.cancel_downtime(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
-      if child_machine_def.respond_to?(:mgmt_fqdn)
-        hosts << child_machine_def
-      end
+      hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
     end
 
     nagios_helper = Support::Nagios::Service.new
