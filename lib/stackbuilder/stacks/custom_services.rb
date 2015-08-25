@@ -121,7 +121,7 @@ class Stacks::CustomServices
   end
 
   def quantapp(name = 'quantapp', &block)
-    machineset_with(name, [], Stacks::Services::QuantAppServer, &block)
+    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::QuantAppServer, &block)
   end
 
   def standard(name, &block)
