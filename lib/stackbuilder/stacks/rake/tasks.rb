@@ -98,8 +98,8 @@ def sbtask(name, &block)
   end
 end
 
-@subscription = Subscription.new
-@subscription.start(["provision.*", "puppet_status"])
+require 'stackbuilder/support/puppet'
+@pctl = PuppetCtl.new
 
 namespace :sbx do
   # XXX 2015-08-19 remove after a while
@@ -301,32 +301,29 @@ namespace :sbx do
       end
 
       namespace :puppet do
-        require 'stackbuilder/support/puppet'
-        pctl = PuppetCtl.new
-
         desc "sign outstanding Puppet certificate signing requests for these machines"
         sbtask :sign do
-          pctl.sign(machine_def)
+          @pctl.sign(machine_def)
         end
 
         desc "sign outstanding Puppet certificate signing requests for these machines"
         sbtask :poll_sign do
-          pctl.poll_sign(machine_def)
+          @pctl.poll_sign(machine_def)
         end
 
         desc "wait for puppet to complete its run on these machines"
         sbtask :wait do
-          pctl.wait(machine_def)
+          @pctl.wait(machine_def)
         end
 
         desc "run Puppet on these machines"
         sbtask :run do
-          pctl.run(machine_def)
+          @pctl.run(machine_def)
         end
 
         desc "Remove signed certs from puppetmaster"
         sbtask :clean do
-          pctl.clean(machine_def)
+          @pctl.clean(machine_def)
         end
       end
 
