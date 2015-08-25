@@ -32,7 +32,7 @@ class Stacks::Services::ProxyVHost
   def add_pass_rule(path, config_hash)
     config_hash[:location] = :primary_site if config_hash[:location].nil?
     @proxy_pass_rules[path] = config_hash
-    @virtual_proxy_service.depend_on config_hash[:service], config_hash[:environment], config_hash[:location]
+    @virtual_proxy_service.depend_on config_hash[:service], config_hash[:environment]
   end
 
   def add_properties(properties)

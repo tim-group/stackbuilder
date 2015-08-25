@@ -37,7 +37,10 @@ module Stacks::Dependencies
   end
 
   def dependant_instances(location, reject_nodes_in_different_location = true)
-    get_children_for_virtual_services(virtual_services_that_depend_on_me(location), location, reject_nodes_in_different_location)
+    get_children_for_virtual_services(
+      virtual_services_that_depend_on_me(location),
+      location,
+      reject_nodes_in_different_location)
   end
 
   def virtual_services(environments = find_all_environments)
@@ -70,7 +73,6 @@ module Stacks::Dependencies
     # the variable part
     virtual_services_that_depend_on_me = []
 
-
     @@eligible_virtual_services_cache.each do |virtual_service, depends_on|
       next if !depends_on.include?([name, environment.name])
 
@@ -81,7 +83,9 @@ module Stacks::Dependencies
   end
   # rubocop:enable Style/ClassVars
 
-  def get_children_for_virtual_services(virtual_services, location, reject_nodes_in_different_location = true)
+  def get_children_for_virtual_services(virtual_services,
+                                        location = :primary_site,
+                                        reject_nodes_in_different_location = true)
     children = []
     virtual_services.map do |service|
       children.concat(service.children)

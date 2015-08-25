@@ -47,7 +47,7 @@ class Stacks::MachineSet
     end
   end
 
-  def depend_on(dependant, env = environment.name, location = :primary_site)
+  def depend_on(dependant, env = environment.name)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
   end

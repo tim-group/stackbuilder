@@ -12,9 +12,9 @@ describe_stack 'stack-with-dependencies' do
         self.groups = ['blue']
         self.application = 'example2'
         if %w(e1) == environment.name
-          depend_on("exampledb", "e1", :primary_site)
+          depend_on("exampledb", "e1")
         else
-          depend_on("exampledb", "e1", :secondary_site)
+          depend_on("exampledb", "e1")
         end
       end
     end
