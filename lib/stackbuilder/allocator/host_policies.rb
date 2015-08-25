@@ -66,6 +66,26 @@ module StackBuilder::Allocator::HostPolicies
     end
   end
 
+  def self.ensure_mount_points_have_specified_storage_types_policy
+    Proc.new do |host, machine|
+      mount_points_with_unspecified_storage_type = machine[:storage].inject([]) do |result, (mount_point, values)|
+        host_storage_type = host.storage[values[:type]]
+        result << mount_point if host_storage_type.nil?
+        result
+      end
+
+      if mount_points_with_unspecified_storage_type.any?
+        unique_unspecified_mount_points = Set.new(mount_points_with_unspecified_storage_type).to_a
+        {
+          :passed => false,
+          :reason => "Storage type not specified for mount points: #{unique_unspecified_mount_points.join(',')}"
+        }
+      else
+        { :passed => true }
+      end
+    end
+  end
+
   def self.check_storage_exists(_mount_point)
     false
   end
