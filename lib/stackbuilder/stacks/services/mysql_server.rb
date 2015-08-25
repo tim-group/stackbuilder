@@ -117,7 +117,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                'server::default_new_mgmt_net_local' => nil)
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
-    dependant_instances = @virtual_service.dependant_instance_fqdns(location, @networks, false)
+    dependant_instances = @virtual_service.dependant_instance_fqdns(location, [:prod], false)
     dependant_instances.concat(@virtual_service.fqdn_list(@virtual_service.children))
     dependant_instances.delete prod_fqdn
 
