@@ -122,7 +122,6 @@ describe_stack 'should have the correct app_dependant_instances and participatio
 
   host("e1-appy-001.mgmt.space.net.local") do |host|
     enc = host.to_enc['role::http_app']
-    pp enc
     expect(enc['participation_dependant_instances']).to include('e1-lb-001.space.net.local',
                                                                 'e1-lb-002.space.net.local')
     expect(enc['participation_dependant_instances'].size).to eql(2)
