@@ -49,7 +49,7 @@ class Stacks::MachineSet
 
   def depend_on(dependant, env = environment.name, location = :primary_site)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
-    @depends_on << [dependant, env, location] unless @depends_on.include? [dependant, env, location]
+    @depends_on << [dependant, env] unless @depends_on.include? [dependant, env]
   end
 
   def dependency_config(fabric)

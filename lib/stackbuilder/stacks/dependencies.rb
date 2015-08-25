@@ -28,21 +28,16 @@ module Stacks::Dependencies
     fqdn_list(instances, networks)
   end
 
-  def dependant_instance_fqdns(location, networks = [:prod])
-    fqdn_list(dependant_instances(location), networks).sort
+  def dependant_instance_fqdns(location, networks = [:prod], reject_nodes_in_different_location = true)
+    fqdn_list(dependant_instances(location, reject_nodes_in_different_location), networks).sort
   end
 
   def dependant_instances_of_type(type, location)
     dependant_instances(location).reject { |machine_def| machine_def.class != type }
   end
 
-  def dependant_instances(location)
-    nodes = get_children_for_virtual_services(virtual_services_that_depend_on_me(location))
-    nodes.reject! { |node| node.location != location }
-    if location == :secondary_site
-      nodes.reject! { |node| node.virtual_service.secondary_site? == false }
-    end
-    nodes
+  def dependant_instances(location, reject_nodes_in_different_location = true)
+    get_children_for_virtual_services(virtual_services_that_depend_on_me(location), location, reject_nodes_in_different_location)
   end
 
   def virtual_services(environments = find_all_environments)
@@ -74,21 +69,34 @@ module Stacks::Dependencies
 
     # the variable part
     virtual_services_that_depend_on_me = []
+
+
     @@eligible_virtual_services_cache.each do |virtual_service, depends_on|
-      next if !depends_on.include?([name, environment.name, location])
+      next if !depends_on.include?([name, environment.name])
 
       virtual_services_that_depend_on_me.push virtual_service
     end
+
     virtual_services_that_depend_on_me.uniq
   end
   # rubocop:enable Style/ClassVars
 
-  def get_children_for_virtual_services(virtual_services)
+  def get_children_for_virtual_services(virtual_services, location, reject_nodes_in_different_location = true)
     children = []
     virtual_services.map do |service|
       children.concat(service.children)
     end
-    children.flatten
+
+    nodes = children.flatten
+
+    if reject_nodes_in_different_location
+      nodes.reject! { |node| node.location != location }
+
+      if location == :secondary_site
+        nodes.reject! { |node| node.virtual_service.secondary_site? == false }
+      end
+    end
+    nodes
   end
 
   def virtual_services_that_i_depend_on(environments = find_all_environments)

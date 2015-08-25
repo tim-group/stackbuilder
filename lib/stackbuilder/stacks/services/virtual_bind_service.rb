@@ -40,7 +40,8 @@ module Stacks::Services::VirtualBindService
   end
 
   def bind_servers_that_depend_on_me(location)
-    machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me(location))
+    # machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me(location))
+    machine_defs = dependant_instances(location)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::Services::BindServer }
     fqdn_list(machine_defs, [:mgmt]).sort
   end
