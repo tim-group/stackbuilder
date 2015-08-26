@@ -19,7 +19,7 @@ Metrics/LineLength:
   Max: 120
 
 Metrics/MethodLength:
-  Max: 45
+  Enabled: false
 
 Metrics/ParameterLists:
   Max: 8
