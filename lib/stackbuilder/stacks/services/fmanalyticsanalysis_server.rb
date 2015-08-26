@@ -16,18 +16,4 @@ class Stacks::Services::FmAnalyticsAnalysisServer < Stacks::MachineDef
                })
     enc
   end
-
-  def persistent_storage(datadir, size)
-    @data_directory = datadir
-
-    storage = {
-      '/mnt/data' => {
-        :type                => 'data',
-        :size                => size,
-        :persistent          => true,
-        :persistence_options => { :on_storage_not_found => 'create_new' }
-      }
-    }
-    modify_storage(storage)
-  end
 end
