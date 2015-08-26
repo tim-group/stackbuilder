@@ -6,6 +6,7 @@ require 'getoptlong'
 
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/logger'
+require 'stackbuilder/support/cmd'
 
 # options with defaults. an arbitrary option can be set here, this is not an exclusive list.
 $options = {
@@ -45,10 +46,7 @@ if ($environment = $factory.inventory.find_environment($options[:environment])).
 end
 logger(Logger::DEBUG) { "environment \"#{$environment.name}\" has #{$environment.definitions.count} definitions" }
 
-require 'stackbuilder/support/cmd'
-
 commands = CMD.new
-
 if commands.cmds.include? cmd
   logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
   commands.method(cmd).call(argv)
