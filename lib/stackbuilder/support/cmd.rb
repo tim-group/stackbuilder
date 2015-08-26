@@ -11,7 +11,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit find_rogue ls orc nagios dump_enc dump_spec enc puppet nagios)
+    @cmds = %w(audit find_rogue ls dump_enc dump_spec enc clean provision reprovision)
   end
   include CMDAudit
   include CMDFindRogue
@@ -51,6 +51,9 @@ class CMD
   end
 
   def puppet(argv)
+    logger(Logger::FATAL) { "work in progress" }
+    exit 1
+
     cmd = argv.shift
     if cmd.nil? then
       logger(Logger::FATAL) { 'puppet needs a subcommand' }
@@ -81,6 +84,24 @@ class CMD
     end
   end
 
+  # XXX
+  def clean(_argv)
+    machine_def = check_and_get_stack
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:clean")
+  end
+
+  # XXX
+  def provision(_argv)
+    machine_def = check_and_get_stack
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:provision")
+  end
+
+  # XXX
+  def reprovision(_argv)
+    machine_def = check_and_get_stack
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:reprovision")
+  end
+
   private
 
   def check_and_get_stack
@@ -96,6 +117,10 @@ class CMD
     end
 
     machine_def
+  end
+
+  def to_rake_stack_name(machine_def)
+    machine_def.respond_to?(:mgmt_fqdn) ? machine_def.mgmt_fqdn : machine_def.name
   end
 end
 
