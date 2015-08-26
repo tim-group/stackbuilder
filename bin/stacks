@@ -8,6 +8,72 @@ require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/logger'
 require 'stackbuilder/support/cmd'
 
+def help
+  puts <<END
+stacks - the infrastructure manager
+
+Description:
+  stacks is a front end tool for the stackbuilder library, used to bring up and destroy stacks of
+  virtual machines, as well as perform other administrative tasks.
+
+Usage: stacks [OPTIONS] command
+       stacks --help
+
+Options:
+  General options:
+
+    -h, --help                display this help and exit
+    -p, --path=VALUE          path to the stackbuilder-config repository. "/etc/stacks" is the default
+    -v, --verbose             increase logging verbosity. Can be specified multiple times (e.g. -vvv)
+
+  Options that may affect commands. Depending on "command", some of these may be mandatory, optional, or ignored.
+
+    -e, --environment=VALUE   set the environment to operate on. "dev" is the default
+    -s, --stack=VALUE         select the stack
+    -t, --terse               shorten the output
+
+  For further information about options, read bin/stacks.
+
+  The list of commands follows. Optional and mandatory options are outlined.
+
+    audit [-e]                show the state of the KVM host machines
+    clean [-e] -s             shuts down and removes a stack, but retains configuration (nagios, dns)
+    dump_enc                  print the enc of every stack. Used for debugging
+    dump_spec                 print the spec of every stack. Used for debugging
+    enc [-e] -s               print the enc of the specified stack. Used for debugging
+    ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,
+                              skip stacks of type "machine".
+    provision [-e] -s         allocates and spins up a stack
+    reprovision [-e] -s       "clean", and then "provision" a stack
+
+  For further information about commands, read lib/stackbuilder/support/cmd*.rb
+
+Environment:
+  BUILD_NUMBER              used to set the .deb package version. Used in Jenkins builds
+  RUBYLIB                   set the path to the stackbuilder library. Used for testing and development
+  STACKBUILDER_CONFIG_PATH  set the path to stackbuilder-config. The -p option takes precedence
+
+Files:
+  ~/.mc/                    directory with mcollective keys
+  /etc/stacks/              default path to stackbuilder-config
+  /usr/local/bin/stacks     the stacks executable
+  /usr/local/lib/site_ruby/timgroup/stackbuilder/
+                            the stackbuilder library on production hosts
+  /usr/lib/ruby/vendor_ruby/puppet/indirector/node/stacks.rb
+                            stacks indirector, for puppet. This file is 'required' by puppet.
+  /usr/local/bin/stacks_indirector
+                            new stacks indirector, for puppet. This script is executed by puppet. Working but not in
+                            use due to blockers
+
+Examples:
+  stacks dump_enc > /tmp/enc_test
+  stacks -e test ls -s refapp
+  stacks -e test enc -s test-refapp-002.mgmt.st.net.local
+
+Bugs:
+END
+end
+
 # options with defaults. an arbitrary option can be set here, this is not an exclusive list.
 $options = {
   :environment => 'dev',
@@ -19,13 +85,17 @@ $options = {
 # unrecognized options are ignored
 GetoptLong.new(
   ['--environment', '-e', GetoptLong::REQUIRED_ARGUMENT],
+  ['--help',        '-h', GetoptLong::NO_ARGUMENT],
   ['--path',        '-p', GetoptLong::REQUIRED_ARGUMENT],
   ['--stack',       '-s', GetoptLong::REQUIRED_ARGUMENT],
-  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT],
-  ['--terse',       '-t', GetoptLong::NO_ARGUMENT]
+  ['--terse',       '-t', GetoptLong::NO_ARGUMENT],
+  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
+  when '--help'
+    help
+    exit 0
   when '--verbose'
     $options[opt_sym] += 1
   when '--terse'

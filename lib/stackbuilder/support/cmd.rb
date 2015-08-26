@@ -14,10 +14,10 @@ class CMD
     @cmds = %w(audit find_rogue ls dump_enc dump_spec enc clean provision reprovision)
   end
   include CMDAudit
-  include CMDFindRogue
+  include CMDFindRogue # XXX work in progress
   include CMDLs
-  include CMDOrc
-  include CMDNagios
+  include CMDOrc # XXX work in progress
+  include CMDNagios # XXX work in progress
 
   def dump_enc(_argv)
     $factory.inventory.environments.sort.each do |envname, env|
@@ -50,6 +50,7 @@ class CMD
     end
   end
 
+  # XXX work in progress
   def puppet(argv)
     logger(Logger::FATAL) { "work in progress" }
     exit 1
@@ -84,19 +85,19 @@ class CMD
     end
   end
 
-  # XXX
+  # XXX do this properly
   def clean(_argv)
     machine_def = check_and_get_stack
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:clean")
   end
 
-  # XXX
+  # XXX do this properly
   def provision(_argv)
     machine_def = check_and_get_stack
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:provision")
   end
 
-  # XXX
+  # XXX do this properly
   def reprovision(_argv)
     machine_def = check_and_get_stack
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:reprovision")
@@ -119,6 +120,7 @@ class CMD
     machine_def
   end
 
+  # XXX won't be needed if system("...rake...") is no longer used in the commands above
   def to_rake_stack_name(machine_def)
     machine_def.respond_to?(:mgmt_fqdn) ? machine_def.mgmt_fqdn : machine_def.name
   end
