@@ -105,19 +105,19 @@ namespace :sbx do
   # XXX 2015-08-19 remove after a while
   desc 'Print a report of KVM host CPU/Storage/Memory allocation'
   task :audit_host_machines do
-    system("stacks -e #{environment.name} audit")
+    system("stacks -e #{environment.name} -p . audit")
   end
 
   # XXX 2015-08-19 remove after a while
   desc 'run to_enc on all nodes'
   task :dump_enc do
-    system("stacks dump_enc")
+    system("stacks -p . dump_enc")
   end
 
   # XXX 2015-08-19 remove after a while
   desc 'run to_spec on all nodes'
   task :dump_spec do
-    system("stacks dump_spec")
+    system("stacks -p . dump_spec")
   end
 
   # XXX 2015-08-20 remove after a while
