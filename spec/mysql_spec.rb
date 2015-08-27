@@ -397,6 +397,26 @@ describe_stack 'should allow server_id_offset to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.master_instances = 1
+        self.slave_instances = 0
+        self.backup_instances = 0
+        self.secondary_site_slave_instances = 0
+        @master_index_offset = 2
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  it_stack 'should contain all the expected hosts' do |stack|
+    stack.should have_hosts(['testing-mydb-003.mgmt.space.net.local'])
+  end
+end
+
+describe_stack 'should allow index_offset' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
         @server_id_offset = 1000
       end
     end

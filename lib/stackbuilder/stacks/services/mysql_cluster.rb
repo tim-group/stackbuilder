@@ -24,6 +24,7 @@ module Stacks::Services::MysqlCluster
     @charset = 'utf8'
     @server_id_offset = 0
     @include_master_in_read_only_cluster = true
+    @master_index_offset = 0
   end
 
   def instantiate_machine(name, type, i, environment, location)
@@ -38,7 +39,7 @@ module Stacks::Services::MysqlCluster
 
   def instantiate_machines(environment)
     fail 'MySQL clusters do not currently support enable_secondary_site' if @enable_secondary_site
-    i = 0
+    i = @master_index_offset
     @master_instances.times do
       instantiate_machine(name, :master, i += 1, environment, :primary_site)
     end
