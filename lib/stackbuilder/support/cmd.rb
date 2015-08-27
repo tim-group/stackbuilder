@@ -11,7 +11,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit find_rogue ls dump_enc dump_spec enc clean provision reprovision)
+    @cmds = %w(audit find_rogue ls lsenv dump_enc dump_spec enc clean provision reprovision)
   end
   include CMDAudit
   include CMDFindRogue # XXX work in progress
