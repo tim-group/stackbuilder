@@ -6,6 +6,8 @@ module CMDLs
 
   def lsenv(_argv)
     @lsenv = true
+    # XXX anonymous class to construct a fake root. this should be in Factory or some other place.
+    # rubocop:disable Lint/NestedMethodDefinition
     root = Class.new do
       attr_reader :children
 
@@ -21,6 +23,7 @@ module CMDLs
         'root'
       end
     end.new
+    # rubocop:enable Lint/NestedMethodDefinition
 
     traverse('', nil, root)
   end
@@ -32,7 +35,7 @@ module CMDLs
     when 'container'
       if machine_def.respond_to?(:domain_suffix) # environment
         name = machine_def.name
-        type = machine_def.parent == nil ? '[0;35mE[0m' : '[0;35me[0m'
+        type = machine_def.parent.nil? ? '[0;35mE[0m' : '[0;35me[0m'
       else
         type = '[0;36mC[0m'
         name = machine_def.name
