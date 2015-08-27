@@ -231,6 +231,23 @@ describe StackBuilder::Allocator::HostPolicies do
       to eql(true)
   end
 
+  it 'accepts lvm_in_block_device disk space it can allocate' do
+    # FIXME: If ever we check size has to be less than guest_lvm_pv_size this test will need fixing!
+    machine = { :storage => { :mount_point => {
+      :type => "LVS",
+      :size => "20G",
+      :prepare => {
+        :options => {
+          :guest_lvm_pv_size => '4G'
+        }
+      }
+    } } }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => { "LVS" => { :free => "5000000" } })
+
+    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy.call(h1, machine)[:passed]).
+      to eql(true)
+  end
+
   it 'accepts the disk space allocation if persistent storage already exists' do
     machine = {
       :hostname => 'test-db-001',

@@ -139,7 +139,9 @@ module StackBuilder::Allocator::HostPolicies
         required_space_hash[values[:type]] = 0
       end
       machine[:storage].each do |mount_point, values|
-        size = values[:size].to_f
+        lvm_in_lvm_size = values[:prepare][:options][:guest_lvm_pv_size] rescue false
+        size = lvm_in_lvm_size ? lvm_in_lvm_size.to_f : values[:size].to_f
+
         type = values[:type]
         underscore_name = "#{machine[:hostname]}#{mount_point.to_s.gsub('/', '_').gsub(/_$/, '')}"
         # Deal with already existing storage (ie. persistent storage) by fudging
