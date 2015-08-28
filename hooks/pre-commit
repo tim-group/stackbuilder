@@ -18,30 +18,8 @@ if which rubocop > /dev/null; then
 	git diff --cached --name-only --diff-filter=ACM \
 	 | git checkout-index --stdin --prefix=$tmpdir/
 
-	# rake lint is configured to work with Jenkins
-	# here we run rubocop with no arguments for interactive use
 	rubocop $tmpdir/ || exit 1
 else
 	echo "[31mrubocop not found[0m" >&2
 	exit 1
-fi
-
-# change to 'true' to enable this check. it adds 11 seconds to runtime.
-if false; then
-	tmpdir=$(mktemp -d pre-commit.XXXXXXXXXX)
-	git clone -q git@git:stackbuilder-config.git $tmpdir/sbc
-	git clone -q `pwd` $tmpdir/sb
-	cd $tmpdir/sbc
-	MD5_IS=$(RUBYLIB=../../lib/ rake checksum)
-	MD5_WAS=$(RUBYLIB=../sb/lib/ rake checksum)
-
-	echo $MD5_IS
-	echo $MD5_WAS
-	if [ "$MD5_IS" = "$MD5_WAS" ]; then
-		echo "[32mstackbuilder-config checksums match[0m"
-	else
-		echo "[31mstackbuilder-config checksums differ[0m" >&2
-	fi
-	cd ../..
-	rm -rf $tmpdir
 fi
