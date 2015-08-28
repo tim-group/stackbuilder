@@ -109,7 +109,8 @@ argv = ARGV
 logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", options: \"#{$options}\", argv: #{argv}" }
 
 # this is to make error messages more meaningful
-if !system("cd \"#{$options[:path]}\" && test \"$(git config remote.origin.url)\" = \"git@git:stackbuilder-config.git\"")
+if !system("cd \"#{$options[:path]}\" && " \
+           "test \"$(git config remote.origin.url)\" = \"git@git:stackbuilder-config.git\"")
   logger(Logger::FATAL) { "\"#{$options[:path]}\" is not a stackbuilder-config repo. use -p." }
   exit 1
 end
