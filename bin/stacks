@@ -108,10 +108,16 @@ cmd = ARGV.shift
 argv = ARGV
 logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", options: \"#{$options}\", argv: #{argv}" }
 
+# this is to make error messages more meaningful
+if !system("cd \"#{$options[:path]}\" && test \"$(git config remote.origin.url)\" = \"git@git:stackbuilder-config.git\"")
+  logger(Logger::FATAL) { "\"#{$options[:path]}\" is not a stackbuilder-config repo. use -p." }
+  exit 1
+end
+
 logger(Logger::DEBUG) { 'initializing $factory' }
 $factory = Stacks::Factory.new
 if ($environment = $factory.inventory.find_environment($options[:environment])).nil?
-  logger(Logger::ERROR) { "environment \"#{$options[:environment]}\" not found" }
+  logger(Logger::FATAL) { "environment \"#{$options[:environment]}\" not found" }
   exit 1
 end
 logger(Logger::DEBUG) { "environment \"#{$environment.name}\" has #{$environment.definitions.count} definitions" }
@@ -121,7 +127,11 @@ if commands.cmds.include? cmd
   logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
   commands.method(cmd).call(argv)
 else
-  logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
+  if cmd.nil?
+    logger(Logger::FATAL) { "no command specified, see --help" }
+  else
+    logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
+  end
   exit 1
 end
 
