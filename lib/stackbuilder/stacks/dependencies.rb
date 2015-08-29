@@ -138,11 +138,11 @@ module Stacks::Dependencies
       env.accept do |virtual_service|
         if virtual_service.is_a?(Stacks::MachineSet) &&
            service[0].eql?(virtual_service.name) &&
-           service[1].eql?(env.name)
+           service[1].eql?(virtual_service.environment.name)
           return virtual_service
         end
       end
     end
-    fail "Cannot find service #{service[0]} in #{service[1]} (#{service[2]}), that I depend_on"
+    fail "Cannot find service #{service[0]} in #{service[1]}, that I depend_on"
   end
 end

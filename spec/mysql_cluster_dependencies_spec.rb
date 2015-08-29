@@ -11,8 +11,10 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        if %w(e1) == environment.name
+        if "e1" == environment.name
           depend_on("exampledb", "e1")
+        elsif "pg" == environment.name
+          depend_on("exampledb", "pg")
         else
           depend_on("exampledb", "e1")
         end
@@ -30,6 +32,11 @@ describe_stack 'stack-with-dependencies' do
     end
 
     env "e1", :primary_site => "space", :secondary_site => "earth" do
+      env 'pg', :production => true do
+        instantiate_stack "example_db"
+        instantiate_stack "example"
+      end
+
       instantiate_stack "example_db"
       instantiate_stack "example"
     end
@@ -42,7 +49,6 @@ describe_stack 'stack-with-dependencies' do
 
   host("e2-exampleapp2-002.mgmt.earth.net.local") do |host|
     deps = host.to_enc["role::http_app"]["dependencies"]
-
     deps["db.example.database"].should eql("example")
     deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
     deps["db.example.port"].should eql("3306")
@@ -63,6 +69,19 @@ describe_stack 'stack-with-dependencies' do
     deps["db.example.username"].should eql("example2")
     deps["db.example.read_only_cluster"].should eql(
       "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local" \
+    )
+  end
+
+  host("pg-exampleapp2-002.mgmt.space.net.local") do |host|
+    deps = host.to_enc["role::http_app"]["dependencies"]
+
+    deps["db.example.database"].should eql("example")
+    deps["db.example.hostname"].should eql("pg-exampledb-001.space.net.local")
+    deps["db.example.port"].should eql("3306")
+    deps["db.example.password_hiera_key"].should eql("enc/pg/example2/mysql_password")
+    deps["db.example.username"].should eql("example2")
+    deps["db.example.read_only_cluster"].should eql(
+      "pg-exampledb-002.space.net.local,pg-exampledb-003.space.net.local" \
     )
   end
 end
