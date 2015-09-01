@@ -69,24 +69,6 @@ module Stacks::Matchers
       error_message
     end
   end
-
-  RSpec::Matchers.define :have_ancestory do |expected_ancestory|
-    match do |server|
-      traversal = stacks.environments[expected_ancestory.shift]
-
-      expected_ancestory.each do |ancestor|
-        traversal = traversal[ancestor]
-      end
-
-      traversal.should eql(server)
-    end
-
-    # failure_message_for_should do |server|
-    # end
-
-    # failure_message_for_should_not do |actual|
-    # end
-  end
 end
 
 def describe_stack(name, &block)
