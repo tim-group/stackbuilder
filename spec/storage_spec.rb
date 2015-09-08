@@ -12,7 +12,7 @@ describe_stack 'should default root storage size to 3G' do
   end
 
   host("e1-lb-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('3G')
+    expect(host.to_specs.first[:storage]['/'.to_sym][:size]).to eql('3G')
   end
 end
 
@@ -27,7 +27,7 @@ describe_stack 'should default appserver storage size to 5G' do
   end
 
   host("e1-default-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('5G')
+    expect(host.to_specs.first[:storage]['/'.to_sym][:size]).to eql('5G')
   end
 end
 
@@ -46,7 +46,7 @@ describe_stack 'can specify app server system storage size' do
   end
 
   host("e1-default-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('10G')
+    expect(host.to_specs.first[:storage]['/'.to_sym][:size]).to eql('10G')
   end
 end
 
@@ -65,8 +65,8 @@ describe_stack 'allow additional storage to be specified' do
   end
 
   host("e1-mysqldb-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:type].should eql('data')
-    host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:size].should eql('50G')
+    expect(host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:type]).to eql('data')
+    expect(host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:size]).to eql('50G')
   end
 end
 
@@ -104,14 +104,15 @@ describe_stack 'allow all existing storage options to be modified' do
   end
 
   host("e1-mysqldb-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/'.to_sym][:type].should eql('wizzy')
-    host.to_specs.first[:storage]['/'.to_sym][:size].should eql('5G')
-    host.to_specs.first[:storage]['/'.to_sym][:prepare][:method].should eql('image')
-    host.to_specs.first[:storage]['/'.to_sym][:prepare][:options][:path].should eql '/var/local/images/gold/duck.img'
-    host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:type].should eql('data')
-    host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:size].should eql('500G')
-    host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:prepare][:method].should eql('format')
-    host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:prepare][:options][:type].should eql 'ext4'
+    expect(host.to_specs.first[:storage]['/'.to_sym][:type]).to eql('wizzy')
+    expect(host.to_specs.first[:storage]['/'.to_sym][:size]).to eql('5G')
+    expect(host.to_specs.first[:storage]['/'.to_sym][:prepare][:method]).to eql('image')
+    expect(host.to_specs.first[:storage]['/'.to_sym][:prepare][:options][:path]).
+      to eql '/var/local/images/gold/duck.img'
+    expect(host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:type]).to eql('data')
+    expect(host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:size]).to eql('500G')
+    expect(host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:prepare][:method]).to eql('format')
+    expect(host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:prepare][:options][:type]).to eql 'ext4'
   end
 end
 
@@ -134,6 +135,6 @@ describe_stack 'allow persistence to be set' do
   end
 
   host("e1-mysqldb-002.mgmt.space.net.local") do |host|
-    host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:persistent].should eql(true)
+    expect(host.to_specs.first[:storage]['/var/lib/mysql'.to_sym][:persistent]).to eql(true)
   end
 end

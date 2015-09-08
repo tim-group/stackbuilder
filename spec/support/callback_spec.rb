@@ -12,7 +12,7 @@ describe Support::Callback do
     mock = double
     expect(mock).to receive(:blah)
     callback.invoke(:event, mock)
-    event_called.should eql(true)
+    expect(event_called).to eql(true)
   end
 
   it 'does not raise an error if a callback is not defined for an event' do
@@ -32,6 +32,6 @@ describe Support::Callback do
     callback.invoke(:event, "bar")
     callback.finish
 
-    passed_args.should eql(%w(foo bar))
+    expect(passed_args).to eql(%w(foo bar))
   end
 end

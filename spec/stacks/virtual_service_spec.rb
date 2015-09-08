@@ -15,7 +15,7 @@ describe 'Stacks::Services::VirtualService' do
 
     host('env-myvs-001.mgmt.mars.net.local') do |host|
       vip_spec = host.virtual_service.to_vip_spec(:primary_site)
-      vip_spec[:qualified_hostnames].should eql(:prod => 'env-myvs-vip.mars.net.local')
+      expect(vip_spec[:qualified_hostnames]).to eql(:prod => 'env-myvs-vip.mars.net.local')
     end
   end
 
@@ -34,7 +34,7 @@ describe 'Stacks::Services::VirtualService' do
 
     host('env-myvs-001.mgmt.mars.net.local') do |host|
       vip_spec = host.virtual_service.to_vip_spec(:primary_site)
-      vip_spec[:qualified_hostnames].should eql(
+      expect(vip_spec[:qualified_hostnames]).to eql(
         :prod  => 'env-myvs-vip.mars.net.local',
         :front => 'env-myvs-vip.front.mars.net.local'
       )
@@ -56,7 +56,7 @@ describe 'Stacks::Services::VirtualService' do
 
     host('env-myvs-001.mgmt.mars.net.local') do |host|
       vip_spec = host.virtual_service.to_vip_spec(:primary_site)
-      vip_spec[:qualified_hostnames].should eql(
+      expect(vip_spec[:qualified_hostnames]).to eql(
         :prod => 'env-myvs-vip.mars.net.local',
         :mgmt => 'env-myvs-vip.mgmt.mars.net.local'
       )

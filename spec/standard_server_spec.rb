@@ -13,6 +13,6 @@ describe_stack 'standard' do
   end
 
   host("e1-mymachine-001.mgmt.space.net.local") do |host|
-    host.to_enc.should eql('server::default_new_mgmt_net_local' => {})
+    expect(host.to_enc).to eql('server::default_new_mgmt_net_local' => {})
   end
 end

@@ -12,8 +12,8 @@ describe Support::Forking do
       2
     end
 
-    future1.value.should eql(1)
-    future2.value.should eql(2)
+    expect(future1.value).to eql(1)
+    expect(future2.value).to eql(2)
   end
 
   it 'throws an exception if a mistake was made' do
@@ -21,6 +21,6 @@ describe Support::Forking do
       async_fork_and_return.value do
         provisio # syntax error
       end.value
-    end.to raise_error
+    end.to raise_error NoMethodError
   end
 end

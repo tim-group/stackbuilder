@@ -25,7 +25,7 @@ describe Subscription do
     end
 
     events = subscription.wait_for_hosts(topic, %w(a b))
-    events.responses.should have_messages_for_hosts(%w(a b))
+    expect(events.responses).to have_messages_for_hosts(%w(a b))
   end
 
   it 'returns anyway after the timeout with some results missing' do
@@ -40,7 +40,7 @@ describe Subscription do
 
     # 08.05.2015 mmazurek: 0.01 might be to slow, bump if causing specs to fail, remove comment if fine after a while
     events = subscription.wait_for_hosts(topic, %w(a b), 0.01)
-    events.responses.should have_messages_for_hosts(["a"])
+    expect(events.responses).to have_messages_for_hosts(["a"])
   end
 
   xit 'can wait for multiple topics' do
@@ -56,8 +56,8 @@ describe Subscription do
       subscription2.stomp.publish("/topic/#{topic2}", { "host" => "a" }.to_json)
     end
 
-    subscription2.wait_for_hosts(topic, ["a"]).responses.should have_messages_for_hosts(["a"]) # XXX flicker
-    subscription2.wait_for_hosts(topic2, ["a"]).responses.should have_messages_for_hosts(["a"])
+    expect(subscription2.wait_for_hosts(topic, ["a"]).responses).to have_messages_for_hosts(["a"]) # XXX flicker
+    expect(subscription2.wait_for_hosts(topic2, ["a"]).responses).to have_messages_for_hosts(["a"])
   end
 
   xit 'correctly shows: successful, failed and unknowns' do
@@ -76,13 +76,13 @@ describe Subscription do
     # 08.05.2015 mmazurek: 0.1 might be to slow, bump if causing specs to fail, remove comment if fine after a while
     result = subscription.wait_for_hosts(topic, %w(a b c), 0.1)
 
-    result.passed.should eql(["a"]) # XXX flicker
-    result.failed.should eql(["b"])
-    result.unaccounted_for.should eql(["c"])
+    expect(result.passed).to eql(["a"]) # XXX flicker
+    expect(result.failed).to eql(["b"])
+    expect(result.unaccounted_for).to eql(["c"])
 
-    result.all.should eql("a" => "success",
-                          "b" =>  "failed",
-                          "c" =>  "unaccounted_for")
-    result.all_passed?.should eql(false)
+    expect(result.all).to eql("a" => "success",
+                              "b" =>  "failed",
+                              "c" =>  "unaccounted_for")
+    expect(result.all_passed?).to eql(false)
   end
 end

@@ -41,24 +41,24 @@ describe_stack 'tim' do
 
   host("e1-timcyclic-001.mgmt.space.net.local") do |host|
     enc = host.to_enc
-    enc['role::http_app']['application'].should eql('TIM')
-    enc['role::http_app']['group'].should eql('blue')
-    enc['role::http_app']['cluster'].should eql('e1-timcyclic')
-    enc['role::http_app']['environment'].should eql('e1')
-    enc['role::http_app']['port'].should eql('8000')
-    enc['role::http_app']['dependencies']['timflow.url'].should eql('http://e1-timflowapp-vip.space.net.local:8000')
-    enc['role::http_app']['dependencies'].key?('sftp_servers').should eql(false)
-    enc['role::http_app']['application_dependant_instances'].should eql([])
-    enc['idea_positions_exports::appserver']['sftp_servers'].should include(
+    expect(enc['role::http_app']['application']).to eql('TIM')
+    expect(enc['role::http_app']['group']).to eql('blue')
+    expect(enc['role::http_app']['cluster']).to eql('e1-timcyclic')
+    expect(enc['role::http_app']['environment']).to eql('e1')
+    expect(enc['role::http_app']['port']).to eql('8000')
+    expect(enc['role::http_app']['dependencies']['timflow.url']).to eql('http://e1-timflowapp-vip.space.net.local:8000')
+    expect(enc['role::http_app']['dependencies'].key?('sftp_servers')).to eql(false)
+    expect(enc['role::http_app']['application_dependant_instances']).to eql([])
+    expect(enc['idea_positions_exports::appserver']['sftp_servers']).to include(
       'e1-sftp-001.mgmt.space.net.local',
       'e1-sftp-002.mgmt.space.net.local'
     )
-    enc['idea_positions_exports::appserver'].key?('timflow.url').should eql(false)
+    expect(enc['idea_positions_exports::appserver'].key?('timflow.url')).to eql(false)
   end
   host("e1-timcyclic-002.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:ram].should eql '14680064'
-    host.to_specs.shift[:vcpus].should eql '8'
-    host.to_specs.shift[:storage]['/'.to_sym][:size].should eql '10G'
+    expect(host.to_specs.shift[:ram]).to eql '14680064'
+    expect(host.to_specs.shift[:vcpus]).to eql '8'
+    expect(host.to_specs.shift[:storage]['/'.to_sym][:size]).to eql '10G'
   end
 end
 
@@ -76,7 +76,7 @@ describe_stack 'app with sso port' do
   end
 
   host("e1-testssoapp-002.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app']['sso_port'].should eql '8444'
+    expect(host.to_enc['role::http_app']['sso_port']).to eql '8444'
   end
 end
 
@@ -94,7 +94,7 @@ describe_stack 'app with ajp port' do
   end
 
   host("e1-testajpapp-002.mgmt.space.net.local") do |host|
-    host.to_enc['role::http_app']['ajp_port'].should eql '8444'
+    expect(host.to_enc['role::http_app']['ajp_port']).to eql '8444'
   end
 end
 
@@ -113,6 +113,6 @@ describe_stack 'standalone servers should not provide a configuration to load ba
     end
   end
   host("mirror-lb-001.mgmt.oy.net.local") do |load_balancer|
-    load_balancer.to_enc['role::loadbalancer']['virtual_servers'].should eql({})
+    expect(load_balancer.to_enc['role::loadbalancer']['virtual_servers']).to eql({})
   end
 end
