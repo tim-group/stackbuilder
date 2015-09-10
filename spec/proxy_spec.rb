@@ -27,32 +27,32 @@ describe_stack 'exampleproxy' do
 
   host('e1-exampleproxy-001.mgmt.space.net.local') do |host|
     role_enc = host.to_enc['role::proxyserver']
-    role_enc['default_ssl_cert'].should eql('wildcard_timgroup_com')
-    role_enc['environment'].should eql('e1')
-    role_enc['prod_vip_fqdn'].should eql('e1-exampleproxy-vip.space.net.local')
-    role_enc['vhosts'].size.should eql(2)
+    expect(role_enc['default_ssl_cert']).to eql('wildcard_timgroup_com')
+    expect(role_enc['environment']).to eql('e1')
+    expect(role_enc['prod_vip_fqdn']).to eql('e1-exampleproxy-vip.space.net.local')
+    expect(role_enc['vhosts'].size).to eql(2)
     vhost1_enc = role_enc['vhosts']['e1-exampleproxy-vip.front.space.net.local']
-    vhost1_enc['proxy_pass_rules'].should eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
-    vhost1_enc['aliases'].should include('e1-exampleproxy-vip.space.net.local')
-    vhost1_enc['aliases'].size.should eql(1)
-    vhost1_enc['application'].should eql('example')
-    vhost1_enc['redirects'].size.should eql(0)
-    vhost1_enc['type'].should eql('default')
-    vhost1_enc['vhost_properties'].should eql({})
-    vhost1_enc['cert'].should eql('wildcard_timgroup_com')
+    expect(vhost1_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
+    expect(vhost1_enc['aliases']).to include('e1-exampleproxy-vip.space.net.local')
+    expect(vhost1_enc['aliases'].size).to eql(1)
+    expect(vhost1_enc['application']).to eql('example')
+    expect(vhost1_enc['redirects'].size).to eql(0)
+    expect(vhost1_enc['type']).to eql('default')
+    expect(vhost1_enc['vhost_properties']).to eql({})
+    expect(vhost1_enc['cert']).to eql('wildcard_timgroup_com')
 
     vhost2_enc = role_enc['vhosts']['example.overridden']
-    vhost2_enc['proxy_pass_rules'].should eql('/' => 'http://e1-exampleapp2-vip.space.net.local:8000')
-    vhost2_enc['aliases'].should include(
+    expect(vhost2_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp2-vip.space.net.local:8000')
+    expect(vhost2_enc['aliases']).to include(
       'e1-exampleproxy-vip.front.space.net.local',
       'e1-exampleproxy-vip.space.net.local'
     )
-    vhost2_enc['aliases'].size.should eql(2)
-    vhost2_enc['application'].should eql('example')
-    vhost2_enc['redirects'].size.should eql(0)
-    vhost2_enc['type'].should eql('default')
-    vhost2_enc['vhost_properties'].should eql({})
-    vhost2_enc['cert'].should eql('wildcard_timgroup_com')
+    expect(vhost2_enc['aliases'].size).to eql(2)
+    expect(vhost2_enc['application']).to eql('example')
+    expect(vhost2_enc['redirects'].size).to eql(0)
+    expect(vhost2_enc['type']).to eql('default')
+    expect(vhost2_enc['vhost_properties']).to eql({})
+    expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com')
   end
 end
 
@@ -79,7 +79,7 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
 
   host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
     enc = host.to_enc
-    enc['role::proxyserver']['default_ssl_cert'].should eql('test_cert_change')
+    expect(enc['role::proxyserver']['default_ssl_cert']).to eql('test_cert_change')
     enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert'].
       should eql('test_vhost_cert_change')
   end
@@ -127,11 +127,11 @@ describe_stack 'proxy pass rules without an environment default to the environme
   end
   host('shared-fundsproxy-001.mgmt.oy.net.local') do |host|
     proxy_pass_rules = host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']
-    proxy_pass_rules['/'].should eql 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
-    proxy_pass_rules['/HIP/resources'].should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
-    proxy_pass_rules['/HIP/blah'].should eql 'http://latest-blondinapp-vip.oy.net.local:8000'
-    proxy_pass_rules['/HIP/blah2'].should eql 'http://shared-blondinapp-vip.oy.net.local:8000'
-    proxy_pass_rules['/HIP/blah3'].should eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
+    expect(proxy_pass_rules['/']).to eql 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
+    expect(proxy_pass_rules['/HIP/resources']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
+    expect(proxy_pass_rules['/HIP/blah']).to eql 'http://latest-blondinapp-vip.oy.net.local:8000'
+    expect(proxy_pass_rules['/HIP/blah2']).to eql 'http://shared-blondinapp-vip.oy.net.local:8000'
+    expect(proxy_pass_rules['/HIP/blah3']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
   end
 end
 
@@ -168,7 +168,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
   end
 
   it_stack 'should contain all the expected hosts' do |stack|
-    stack.should have_hosts(
+    expect(stack).to have_hosts(
       [
         'shared-fundsproxy-001.mgmt.oy.net.local',
         'shared-fundsproxy-002.mgmt.oy.net.local',
@@ -188,44 +188,44 @@ describe_stack 'proxy servers can exist in multiple sites' do
 
   host('shared-fundsproxy-001.mgmt.pg.net.local') do |host|
     role_enc = host.to_enc['role::proxyserver']
-    role_enc['default_ssl_cert'].should eql('wildcard_youdevise_com')
-    role_enc['environment'].should eql('shared')
-    role_enc['prod_vip_fqdn'].should eql('shared-fundsproxy-vip.pg.net.local')
-    role_enc['vhosts'].size.should eql(1)
+    expect(role_enc['default_ssl_cert']).to eql('wildcard_youdevise_com')
+    expect(role_enc['environment']).to eql('shared')
+    expect(role_enc['prod_vip_fqdn']).to eql('shared-fundsproxy-vip.pg.net.local')
+    expect(role_enc['vhosts'].size).to eql(1)
     vhost_enc = role_enc['vhosts']['funds-mirror.timgroup.com']
-    vhost_enc['proxy_pass_rules'].should eql('/HIP/resources' => 'http://shared-blondinapp-vip.pg.net.local:8000',
-                                             '/'              => 'http://shared-fundsuserapp-vip.pg.net.local:8000')
-    vhost_enc['aliases'].should include(
+    expect(vhost_enc['proxy_pass_rules']).to eql('/HIP/resources' => 'http://shared-blondinapp-vip.pg.net.local:8000',
+                                                 '/'              => 'http://shared-fundsuserapp-vip.pg.net.local:8000')
+    expect(vhost_enc['aliases']).to include(
       'shared-fundsproxy-vip.front.pg.net.local',
       'shared-fundsproxy-vip.pg.net.local'
     )
-    vhost_enc['aliases'].size.should eql(2)
-    vhost_enc['application'].should eql('tfunds')
-    vhost_enc['redirects'].size.should eql(0)
-    vhost_enc['type'].should eql('default')
-    vhost_enc['vhost_properties'].should eql('is_hip' => true)
-    vhost_enc['cert'].should eql('wildcard_timgroup_com')
+    expect(vhost_enc['aliases'].size).to eql(2)
+    expect(vhost_enc['application']).to eql('tfunds')
+    expect(vhost_enc['redirects'].size).to eql(0)
+    expect(vhost_enc['type']).to eql('default')
+    expect(vhost_enc['vhost_properties']).to eql('is_hip' => true)
+    expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 
   host('shared-fundsproxy-001.mgmt.oy.net.local') do |host|
     role_enc = host.to_enc['role::proxyserver']
-    role_enc['default_ssl_cert'].should eql('wildcard_youdevise_com')
-    role_enc['environment'].should eql('shared')
-    role_enc['prod_vip_fqdn'].should eql('shared-fundsproxy-vip.oy.net.local')
-    role_enc['vhosts'].size.should eql(1)
+    expect(role_enc['default_ssl_cert']).to eql('wildcard_youdevise_com')
+    expect(role_enc['environment']).to eql('shared')
+    expect(role_enc['prod_vip_fqdn']).to eql('shared-fundsproxy-vip.oy.net.local')
+    expect(role_enc['vhosts'].size).to eql(1)
     vhost_enc = role_enc['vhosts']['funds-mirror.timgroup.com']
-    vhost_enc['proxy_pass_rules'].should eql('/HIP/resources' => 'http://shared-blondinapp-vip.oy.net.local:8000',
-                                             '/'              => 'http://shared-fundsuserapp-vip.oy.net.local:8000')
-    vhost_enc['aliases'].should include(
+    expect(vhost_enc['proxy_pass_rules']).to eql('/HIP/resources' => 'http://shared-blondinapp-vip.oy.net.local:8000',
+                                                 '/'              => 'http://shared-fundsuserapp-vip.oy.net.local:8000')
+    expect(vhost_enc['aliases']).to include(
       'shared-fundsproxy-vip.front.oy.net.local',
       'shared-fundsproxy-vip.oy.net.local'
     )
-    vhost_enc['aliases'].size.should eql(2)
-    vhost_enc['application'].should eql('tfunds')
-    vhost_enc['redirects'].size.should eql(0)
-    vhost_enc['type'].should eql('default')
-    vhost_enc['vhost_properties'].should eql('is_hip' => true)
-    vhost_enc['cert'].should eql('wildcard_timgroup_com')
+    expect(vhost_enc['aliases'].size).to eql(2)
+    expect(vhost_enc['application']).to eql('tfunds')
+    expect(vhost_enc['redirects'].size).to eql(0)
+    expect(vhost_enc['type']).to eql('default')
+    expect(vhost_enc['vhost_properties']).to eql('is_hip' => true)
+    expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 end
 describe_stack 'generates proxyserver enc data' do
@@ -268,37 +268,37 @@ describe_stack 'generates proxyserver enc data' do
 
   host('env-refproxy-001.mgmt.st.net.local') do |proxyserver|
     role_enc = proxyserver.to_enc['role::proxyserver']
-    role_enc['default_ssl_cert'].should eql('wildcard_timgroup_com')
-    role_enc['environment'].should eql('env')
-    role_enc['prod_vip_fqdn'].should eql('env-refproxy-vip.st.net.local')
-    role_enc['vhosts'].size.should eql(2)
+    expect(role_enc['default_ssl_cert']).to eql('wildcard_timgroup_com')
+    expect(role_enc['environment']).to eql('env')
+    expect(role_enc['prod_vip_fqdn']).to eql('env-refproxy-vip.st.net.local')
+    expect(role_enc['vhosts'].size).to eql(2)
 
     vhost_enc1 = role_enc['vhosts']['env-refproxy-vip.front.st.net.local']
-    vhost_enc1['proxy_pass_rules'].should eql('/' => 'http://env-refapp-vip.st.net.local:8000')
-    vhost_enc1['aliases'].should include('example.timgroup.com', 'env-refproxy-vip.st.net.local')
-    vhost_enc1['aliases'].size.should eql(2)
-    vhost_enc1['application'].should eql('MyApp')
-    vhost_enc1['redirects'].should include('old-example.timgroup.com')
-    vhost_enc1['redirects'].size.should eql(1)
-    vhost_enc1['type'].should eql('default')
-    vhost_enc1['vhost_properties'].should eql({})
-    vhost_enc1['cert'].should eql('wildcard_timgroup_com')
+    expect(vhost_enc1['proxy_pass_rules']).to eql('/' => 'http://env-refapp-vip.st.net.local:8000')
+    expect(vhost_enc1['aliases']).to include('example.timgroup.com', 'env-refproxy-vip.st.net.local')
+    expect(vhost_enc1['aliases'].size).to eql(2)
+    expect(vhost_enc1['application']).to eql('MyApp')
+    expect(vhost_enc1['redirects']).to include('old-example.timgroup.com')
+    expect(vhost_enc1['redirects'].size).to eql(1)
+    expect(vhost_enc1['type']).to eql('default')
+    expect(vhost_enc1['vhost_properties']).to eql({})
+    expect(vhost_enc1['cert']).to eql('wildcard_timgroup_com')
 
     vhost_enc2 = role_enc['vhosts']['example.timgroup.com']
-    vhost_enc2['proxy_pass_rules'].should eql('/'          => "http://env-ref2app-vip.st.net.local:8000",
-                                              '/resources' => "http://env-downstreamapp-vip.st.net.local:8000")
-    vhost_enc2['aliases'].should include('env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local')
-    vhost_enc2['aliases'].size.should eql(2)
-    vhost_enc2['application'].should eql('MyOtherApp')
-    vhost_enc2['redirects'].size.should eql(0)
-    vhost_enc2['type'].should eql('default')
-    vhost_enc2['vhost_properties'].should eql({})
-    vhost_enc2['cert'].should eql('wildcard_timgroup_com')
+    expect(vhost_enc2['proxy_pass_rules']).to eql('/'          => "http://env-ref2app-vip.st.net.local:8000",
+                                                  '/resources' => "http://env-downstreamapp-vip.st.net.local:8000")
+    expect(vhost_enc2['aliases']).to include('env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local')
+    expect(vhost_enc2['aliases'].size).to eql(2)
+    expect(vhost_enc2['application']).to eql('MyOtherApp')
+    expect(vhost_enc2['redirects'].size).to eql(0)
+    expect(vhost_enc2['type']).to eql('default')
+    expect(vhost_enc2['vhost_properties']).to eql({})
+    expect(vhost_enc2['cert']).to eql('wildcard_timgroup_com')
   end
 
   host("env2-refproxy2-001.mgmt.st.net.local") do |proxyserver|
     enc = proxyserver.to_enc['role::proxyserver']
-    enc['vhosts']['example2.timgroup.com']['proxy_pass_rules']['/somewhere'].should \
+    expect(enc['vhosts']['example2.timgroup.com']['proxy_pass_rules']['/somewhere']).to \
       eql 'http://env-downstreamapp-vip.st.net.local:8000'
   end
 end
@@ -322,15 +322,15 @@ describe_stack 'generates proxy server enc data with persistent when enable_pers
   end
   host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
     lb_role_enc = loadbalancer.to_enc['role::loadbalancer']
-    lb_role_enc["virtual_router_id"].should eql(1)
-    lb_role_enc["virtual_servers"].size.should eql(1)
+    expect(lb_role_enc["virtual_router_id"]).to eql(1)
+    expect(lb_role_enc["virtual_servers"].size).to eql(1)
 
     vserver_enc = lb_role_enc["virtual_servers"]['st-proxy-vip.st.net.local']
 
-    vserver_enc['type'].should eql('proxy')
-    vserver_enc['ports'].should eql([80, 443])
-    vserver_enc['realservers']['blue'].should eql(["st-proxy-001.st.net.local", "st-proxy-002.st.net.local"])
-    vserver_enc['persistent_ports'].should eql(['443'])
+    expect(vserver_enc['type']).to eql('proxy')
+    expect(vserver_enc['ports']).to eql([80, 443])
+    expect(vserver_enc['realservers']['blue']).to eql(["st-proxy-001.st.net.local", "st-proxy-002.st.net.local"])
+    expect(vserver_enc['persistent_ports']).to eql(['443'])
   end
 end
 
@@ -418,33 +418,33 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
 
   host("shared-fooproxy-001.mgmt.oy.net.local") do |proxy|
     vhosts = proxy.to_enc['role::proxyserver']['vhosts']
-    vhosts.size.should eql(4)
-    vhosts['foo-old.com']['proxy_pass_rules']['/'].should eql(
+    expect(vhosts.size).to eql(4)
+    expect(vhosts['foo-old.com']['proxy_pass_rules']['/']).to eql(
       'http://production-foouserapp-vip.oy.net.local:8000'
     )
-    vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+    expect(vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources']).to eql(
       'http://production-blondinapp-vip.oy.net.local:8000'
     )
-    vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/'].should eql(
+    expect(vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/']).to eql(
       'http://mirror-foouserapp-vip.oy.net.local:8000'
     )
-    vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+    expect(vhosts['foo-mirror.fooexample.com']['proxy_pass_rules']['/HIP/resources']).to eql(
       'http://mirror-blondinapp-vip.oy.net.local:8000'
     )
-    vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/'].should eql(
+    expect(vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/']).to eql(
       'http://latest-foouserapp-vip.oy.net.local:8000'
     )
-    vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+    expect(vhosts['foo-latest.fooexample.com']['proxy_pass_rules']['/HIP/resources']).to eql(
       'http://latest-blondinapp-vip.oy.net.local:8000'
     )
   end
   host("production-fooproxy-001.mgmt.pg.net.local") do |proxy|
     vhosts = proxy.to_enc['role::proxyserver']['vhosts']
-    vhosts.size.should eql(2)
-    vhosts['foo-old.com']['proxy_pass_rules']['/'].should eql(
+    expect(vhosts.size).to eql(2)
+    expect(vhosts['foo-old.com']['proxy_pass_rules']['/']).to eql(
       'http://production-foouserapp-vip.pg.net.local:8000'
     )
-    vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources'].should eql(
+    expect(vhosts['foo.fooexample.com']['proxy_pass_rules']['/HIP/resources']).to eql(
       'http://production-blondinapp-vip.pg.net.local:8000'
     )
   end

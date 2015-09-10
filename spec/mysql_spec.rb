@@ -15,8 +15,8 @@ describe_stack 'should provide a single instance mode to be backwards compatible
   end
 
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.master?.should eql true
-    host.to_enc['role::mysql_server']['dependant_instances'].should eql nil
+    expect(host.master?).to eql true
+    expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql nil
   end
 end
 describe_stack 'should provide the correct cross routing enc data' do
@@ -31,16 +31,16 @@ describe_stack 'should provide the correct cross routing enc data' do
   end
 
   host("testing-frdb-001.mgmt.pg.net.local") do |host|
-    host.to_enc['networking::routing::to_site'].should eql('network' => 'prod',
-                                                           'site'    => 'oy')
+    expect(host.to_enc['networking::routing::to_site']).to eql('network' => 'prod',
+                                                               'site'    => 'oy')
   end
   host("testing-frdb-002.mgmt.pg.net.local") do |host|
-    host.to_enc['networking::routing::to_site'].should eql('network' => 'prod',
-                                                           'site'    => 'oy')
+    expect(host.to_enc['networking::routing::to_site']).to eql('network' => 'prod',
+                                                               'site'    => 'oy')
   end
   host("testing-frdbbackup-001.mgmt.oy.net.local") do |host|
-    host.to_enc['networking::routing::to_site'].should eql('network' => 'prod',
-                                                           'site'    => 'pg')
+    expect(host.to_enc['networking::routing::to_site']).to eql('network' => 'prod',
+                                                               'site'    => 'pg')
   end
 end
 
@@ -56,21 +56,21 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
   end
 
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.master?.should eql true
-    host.backup?.should eql false
-    host.to_enc['role::mysql_server']['dependant_instances'].should eql([
+    expect(host.master?).to eql true
+    expect(host.backup?).to eql false
+    expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql([
       'testing-frdb-002.space.net.local',
       'testing-frdbbackup-001.earth.net.local'
     ])
   end
   host("testing-frdb-002.mgmt.space.net.local") do |host|
-    host.master?.should eql false
-    host.backup?.should eql false
+    expect(host.master?).to eql false
+    expect(host.backup?).to eql false
   end
   host("testing-frdbbackup-001.mgmt.earth.net.local") do |host|
-    host.master?.should eql false
-    host.backup?.should eql true
-    host.to_specs.shift[:storage][:"/mnt/storage"][:size].should eql '10G'
+    expect(host.master?).to eql false
+    expect(host.backup?).to eql true
+    expect(host.to_specs.shift[:storage][:"/mnt/storage"][:size]).to eql '10G'
   end
 end
 
@@ -86,8 +86,8 @@ describe_stack 'should default to disallow destory' do
   end
 
   host("testing-spoondb-001.mgmt.space.net.local") do |host|
-    host.destroyable?.should eql false
-    host.to_specs.shift[:disallow_destroy].should eql true
+    expect(host.destroyable?).to eql false
+    expect(host.to_specs.shift[:disallow_destroy]).to eql true
   end
 end
 
@@ -103,8 +103,8 @@ describe_stack 'should allow destroy to be overwritten' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.destroyable?.should eql true
-    host.to_specs.shift[:disallow_destroy].should eql nil
+    expect(host.destroyable?).to eql true
+    expect(host.to_specs.shift[:disallow_destroy]).to eql nil
   end
 end
 
@@ -122,18 +122,18 @@ describe_stack 'should provide correct enc data' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['backup'].should eql(false)
-    enc_server_role['database_name'].should eql('mydb')
-    enc_server_role['datadir'].should eql('/mnt/data/mysql')
-    enc_server_role['environment'].should eql('testing')
-    enc_server_role['master'].should eql(true)
+    expect(enc_server_role['backup']).to eql(false)
+    expect(enc_server_role['database_name']).to eql('mydb')
+    expect(enc_server_role['datadir']).to eql('/mnt/data/mysql')
+    expect(enc_server_role['environment']).to eql('testing')
+    expect(enc_server_role['master']).to eql(true)
 
     enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
-    enc_rights['mydb']['environment'].should eql('testing')
-    enc_rights['mydb']['database_name'].should eql('mydb')
+    expect(enc_rights['mydb']['environment']).to eql('testing')
+    expect(enc_rights['mydb']['database_name']).to eql('mydb')
 
-    host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
+    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
+    expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-002.space.net.local' => {
         'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
       },
@@ -144,21 +144,21 @@ describe_stack 'should provide correct enc data' do
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['backup'].should eql(false)
-    enc_server_role['database_name'].should eql('mydb')
-    enc_server_role['datadir'].should eql('/mnt/data/mysql')
-    enc_server_role['environment'].should eql('testing')
-    enc_server_role['master'].should eql(false)
+    expect(enc_server_role['backup']).to eql(false)
+    expect(enc_server_role['database_name']).to eql('mydb')
+    expect(enc_server_role['datadir']).to eql('/mnt/data/mysql')
+    expect(enc_server_role['environment']).to eql('testing')
+    expect(enc_server_role['master']).to eql(false)
 
     enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
-    enc_rights['mydb']['environment'].should eql('testing')
-    enc_rights['mydb']['database_name'].should eql('mydb')
+    expect(enc_rights['mydb']['environment']).to eql('testing')
+    expect(enc_rights['mydb']['database_name']).to eql('mydb')
 
-    host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc.should include('mysql_hacks::replication_rights_wrapper')
-    host.to_enc.should include('server::default_new_mgmt_net_local')
+    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
+    expect(host.to_enc).to include('mysql_hacks::replication_rights_wrapper')
+    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
 
-    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
+    expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-001.space.net.local' => {
         'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
       },
@@ -169,13 +169,13 @@ describe_stack 'should provide correct enc data' do
   end
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['backup'].should eql(true)
-    enc_server_role['database_name'].should eql('mydb')
-    enc_server_role['datadir'].should eql('/mnt/data/mysql')
-    enc_server_role['environment'].should eql('testing')
-    enc_server_role['master'].should eql(false)
+    expect(enc_server_role['backup']).to eql(true)
+    expect(enc_server_role['database_name']).to eql('mydb')
+    expect(enc_server_role['datadir']).to eql('/mnt/data/mysql')
+    expect(enc_server_role['environment']).to eql('testing')
+    expect(enc_server_role['master']).to eql(false)
 
-    host.to_enc['mysql_hacks::replication_rights_wrapper']['rights'].should eql(
+    expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-001.space.net.local' => {
         'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
       },
@@ -183,9 +183,9 @@ describe_stack 'should provide correct enc data' do
         'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
       }
     )
-    host.to_enc.should include('server::default_new_mgmt_net_local')
-    host.to_enc.should include('mysql_hacks::replication_rights_wrapper')
-    host.to_enc.should_not include('mysql_hacks::application_rights_wrapper')
+    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
+    expect(host.to_enc).to include('mysql_hacks::replication_rights_wrapper')
+    expect(host.to_enc).not_to include('mysql_hacks::application_rights_wrapper')
   end
 end
 describe_stack 'should provide the correct application rights' do
@@ -208,16 +208,16 @@ describe_stack 'should provide the correct application rights' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
-    rights['SuperLongLengthN@testing-applong-001.space.net.local/ref']['password_hiera_key'].should \
+    expect(rights['SuperLongLengthN@testing-applong-001.space.net.local/ref']['password_hiera_key']).to \
       eql('enc/testing/SuperLongLengthName/mysql_password')
   end
   host("testing-applong-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['role::http_app']['dependencies']
-    rights['db.ref.database'].should eql('ref')
-    rights['db.ref.hostname'].should eql('testing-mydb-001.space.net.local')
-    rights['db.ref.port'].should eql('3306')
-    rights['db.ref.password_hiera_key'].should eql('enc/testing/SuperLongLengthName/mysql_password')
-    rights['db.ref.username'].should eql('SuperLongLengthN')
+    expect(rights['db.ref.database']).to eql('ref')
+    expect(rights['db.ref.hostname']).to eql('testing-mydb-001.space.net.local')
+    expect(rights['db.ref.port']).to eql('3306')
+    expect(rights['db.ref.password_hiera_key']).to eql('enc/testing/SuperLongLengthName/mysql_password')
+    expect(rights['db.ref.username']).to eql('SuperLongLengthN')
   end
 end
 
@@ -235,13 +235,13 @@ describe_stack 'should allow storage options to be overwritten' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql "14G"
-    host.to_specs.shift[:storage]['/tmp'.to_sym][:type].should eql "os"
-    host.to_specs.shift[:storage]['/tmp'.to_sym][:size].should eql "10G"
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type]).to eql "data"
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size]).to eql "14G"
+    expect(host.to_specs.shift[:storage]['/tmp'.to_sym][:type]).to eql "os"
+    expect(host.to_specs.shift[:storage]['/tmp'.to_sym][:size]).to eql "10G"
   end
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
-    host.to_specs.shift[:storage]['/mnt/storage'.to_sym][:size].should eql "29G"
+    expect(host.to_specs.shift[:storage]['/mnt/storage'.to_sym][:size]).to eql "29G"
   end
 end
 
@@ -256,9 +256,9 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql '10G'
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type]).to eql "data"
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent]).to eql true
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size]).to eql '10G'
   end
 end
 
@@ -273,8 +273,8 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:ram].should eql '4194304'
-    host.to_specs.shift[:vcpus].should eql '2'
+    expect(host.to_specs.shift[:ram]).to eql '4194304'
+    expect(host.to_specs.shift[:vcpus]).to eql '2'
   end
 end
 
@@ -295,10 +295,10 @@ describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysq
     end
   end
   host("testing-my51-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['version'].should eql('5.1.49-1ubuntu8')
+    expect(host.to_enc['role::mysql_server']['version']).to eql('5.1.49-1ubuntu8')
   end
   host("testing-my55-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['version'].should eql('5.5.43-0ubuntu0.12.04.1')
+    expect(host.to_enc['role::mysql_server']['version']).to eql('5.5.43-0ubuntu0.12.04.1')
   end
 end
 
@@ -334,18 +334,18 @@ describe_stack 'should support dependencies' do
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['dependant_instances'].size.should eql(4)
+    expect(host.to_enc['role::mysql_server']['dependant_instances'].size).to eql(4)
     host.to_enc['role::mysql_server']['dependant_instances'].
       should include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
     host.to_enc['role::mysql_server']['dependant_instances'].
       should include('testing-frdb-002.space.net.local', 'testing-frdbbackup-001.earth.net.local')
-    host.to_enc['role::mysql_server']['dependencies'].should eql({})
+    expect(host.to_enc['role::mysql_server']['dependencies']).to eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['dependant_instances'].size.should eql(2)
+    expect(host.to_enc['role::mysql_server']['dependant_instances'].size).to eql(2)
     host.to_enc['role::mysql_server']['dependant_instances'].
       should include('testing-hrdb-002.space.net.local', 'testing-hrdbbackup-001.earth.net.local')
-    host.to_enc['role::mysql_server']['dependencies'].should eql({})
+    expect(host.to_enc['role::mysql_server']['dependencies']).to eql({})
   end
 end
 
@@ -364,16 +364,16 @@ describe_stack 'should provide the correct server_ids' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['server_id'].should eql(1)
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(1)
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
-    host.to_enc['role::mysql_server']['server_id'].should eql(2)
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(2)
   end
   host("testing-mydb-001.mgmt.earth.net.local") do |host|
-    host.to_enc['role::mysql_server']['server_id'].should eql(101)
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(101)
   end
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
-    host.to_enc['role::mysql_server']['server_id'].should eql(201)
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(201)
   end
 end
 describe_stack 'should allow server_id to be overwritten' do
@@ -389,7 +389,7 @@ describe_stack 'should allow server_id to be overwritten' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['server_id'].should eql(99)
+    expect(enc_server_role['server_id']).to eql(99)
   end
 end
 
@@ -409,7 +409,7 @@ describe_stack 'should allow server_id_offset to be specified' do
     end
   end
   it_stack 'should contain all the expected hosts' do |stack|
-    stack.should have_hosts(['testing-mydb-003.mgmt.space.net.local'])
+    expect(stack).to have_hosts(['testing-mydb-003.mgmt.space.net.local'])
   end
 end
 
@@ -426,7 +426,7 @@ describe_stack 'should allow index_offset' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    enc_server_role['server_id'].should eql(1001)
+    expect(enc_server_role['server_id']).to eql(1001)
   end
 end
 
@@ -445,11 +445,11 @@ describe_stack 'should allow use_gtids to be specified' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
-    stacks_mysql_config['config']['mysqld']['gtid_mode'].should eql('ON')
-    stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency'].should eql('ON')
+    expect(stacks_mysql_config['config']['mysqld']['gtid_mode']).to eql('ON')
+    expect(stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency']).to eql('ON')
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
-    host.to_enc.key?('role::stacks_mysql_config').should eql(false)
+    expect(host.to_enc.key?('role::stacks_mysql_config')).to eql(false)
   end
 end
 
@@ -476,15 +476,15 @@ describe_stack 'should allow custom mysql_config to be specified' do
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
     stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
-    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
-    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances'].should eql('10')
-    stacks_mysql_config['restart_mysql'].should eql(false)
+    expect(stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size']).to eql('10G')
+    expect(stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances']).to eql('10')
+    expect(stacks_mysql_config['restart_mysql']).to eql(false)
   end
   host("latest-mydb-002.mgmt.space.net.local") do |host|
     stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
-    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
-    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances'].should eql('10')
-    stacks_mysql_config['restart_mysql'].should eql(true)
+    expect(stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size']).to eql('10G')
+    expect(stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_instances']).to eql('10')
+    expect(stacks_mysql_config['restart_mysql']).to eql(true)
   end
 end
 
@@ -511,9 +511,9 @@ describe_stack 'should merge mysql_config with gtid_config when using use_gtids'
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
     stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
-    stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size'].should eql('10G')
-    stacks_mysql_config['config']['mysqld']['gtid_mode'].should eql('ON')
-    stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency'].should eql('ON')
+    expect(stacks_mysql_config['config']['mysqld']['innodb_buffer_pool_size']).to eql('10G')
+    expect(stacks_mysql_config['config']['mysqld']['gtid_mode']).to eql('ON')
+    expect(stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency']).to eql('ON')
   end
 end
 
@@ -532,7 +532,7 @@ describe_stack 'should create secondary_sited slave databases' do
     end
   end
   it_stack 'should contain all the expected hosts' do |stack|
-    stack.should have_hosts(
+    expect(stack).to have_hosts(
       [
         'production-mydb-001.mgmt.space.net.local',
         'production-mydb-002.mgmt.space.net.local',

@@ -16,8 +16,8 @@ describe_stack 'quant' do
 
   host("e1-quantapp-001.mgmt.space.net.local") do |host|
     enc = host.to_enc
-    enc['role::quantapp_server']['allowed_hosts'].should eql(['0.0.0.0'])
-    enc['role::quantapp_server']['environment'].should eql('e1')
-    host.to_specs.shift[:ram].should eql('2097152')
+    expect(enc['role::quantapp_server']['allowed_hosts']).to eql(['0.0.0.0'])
+    expect(enc['role::quantapp_server']['environment']).to eql('e1')
+    expect(host.to_specs.shift[:ram]).to eql('2097152')
   end
 end
