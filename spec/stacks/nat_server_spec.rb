@@ -19,7 +19,7 @@ describe_stack 'nat servers should have all 3 networks' do
   end
 
   it_stack 'should contain all the expected hosts' do |stack|
-    stack.should have_hosts(
+    expect(stack).to have_hosts(
       [
         'oy-nat-001.mgmt.oy.net.local',
         'oy-nat-002.mgmt.oy.net.local',
@@ -32,27 +32,27 @@ describe_stack 'nat servers should have all 3 networks' do
   end
 
   host("oy-nat-001.mgmt.oy.net.local") do |host|
-    host.to_specs.first[:networks].should eql([:mgmt, :prod, :front])
+    expect(host.to_specs.first[:networks]).to eql([:mgmt, :prod, :front])
     enc_rules = host.to_enc['role::natserver']['rules']
-    enc_rules['SNAT']['prod']['to_source'].should eql 'nat-vip.front.oy.net.local'
-    enc_rules['DNAT'].size.should eql(3)
+    expect(enc_rules['SNAT']['prod']['to_source']).to eql 'nat-vip.front.oy.net.local'
+    expect(enc_rules['DNAT'].size).to eql(3)
     dnat_1 = enc_rules['DNAT']['oy-app-vip.front.oy.net.local 8000']
-    dnat_1['dest_host'].should eql('oy-app-vip.oy.net.local')
-    dnat_1['dest_port'].should eql('8000')
-    dnat_1['tcp'].should eql(true)
-    dnat_1['udp'].should eql(false)
+    expect(dnat_1['dest_host']).to eql('oy-app-vip.oy.net.local')
+    expect(dnat_1['dest_port']).to eql('8000')
+    expect(dnat_1['tcp']).to eql(true)
+    expect(dnat_1['udp']).to eql(false)
 
     dnat_2 = enc_rules['DNAT']['oy-proxy-vip.front.oy.net.local 80']
-    dnat_2['dest_host'].should eql('oy-proxy-vip.oy.net.local')
-    dnat_2['dest_port'].should eql('80')
-    dnat_2['tcp'].should eql(true)
-    dnat_2['udp'].should eql(false)
+    expect(dnat_2['dest_host']).to eql('oy-proxy-vip.oy.net.local')
+    expect(dnat_2['dest_port']).to eql('80')
+    expect(dnat_2['tcp']).to eql(true)
+    expect(dnat_2['udp']).to eql(false)
 
     dnat_3 = enc_rules['DNAT']['oy-proxy-vip.front.oy.net.local 443']
-    dnat_3['dest_host'].should eql('oy-proxy-vip.oy.net.local')
-    dnat_3['dest_port'].should eql('443')
-    dnat_3['tcp'].should eql(true)
-    dnat_3['udp'].should eql(false)
+    expect(dnat_3['dest_host']).to eql('oy-proxy-vip.oy.net.local')
+    expect(dnat_3['dest_port']).to eql('443')
+    expect(dnat_3['tcp']).to eql(true)
+    expect(dnat_3['udp']).to eql(false)
   end
 end
 
@@ -111,15 +111,15 @@ describe_stack 'nat servers should provide natting for secondary_site services i
   end
   host("shared-nat-001.mgmt.oy.net.local") do |nat|
     dnat = nat.to_enc['role::natserver']['rules']['DNAT']
-    dnat.keys.should include(
+    expect(dnat.keys).to include(
       'production-exampleproxy-vip.front.oy.net.local 80',
       'production-exampleproxy-vip.front.oy.net.local 443'
     )
-    dnat.keys.size.should eql(2)
-    dnat['production-exampleproxy-vip.front.oy.net.local 80']['dest_host'].should eql(
+    expect(dnat.keys.size).to eql(2)
+    expect(dnat['production-exampleproxy-vip.front.oy.net.local 80']['dest_host']).to eql(
       'production-exampleproxy-vip.oy.net.local'
     )
-    dnat['production-exampleproxy-vip.front.oy.net.local 443']['dest_host'].should eql(
+    expect(dnat['production-exampleproxy-vip.front.oy.net.local 443']['dest_host']).to eql(
       'production-exampleproxy-vip.oy.net.local'
     )
   end
@@ -163,65 +163,65 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
   end
   host('eg-nat-001.mgmt.st.net.local') do |host|
     enc = host.to_enc
-    enc['role::natserver']['prod_virtual_router_id'].should eql(106)
-    enc['role::natserver']['front_virtual_router_id'].should eql(105)
+    expect(enc['role::natserver']['prod_virtual_router_id']).to eql(106)
+    expect(enc['role::natserver']['front_virtual_router_id']).to eql(105)
 
     snat = enc['role::natserver']['rules']['SNAT']
-    snat['prod']['to_source'].should eql('nat-vip.front.st.net.local')
+    expect(snat['prod']['to_source']).to eql('nat-vip.front.st.net.local')
 
     dnat = enc['role::natserver']['rules']['DNAT']
-    dnat.size.should eql(5)
+    expect(dnat.size).to eql(5)
     dnat_1 = dnat['eg-withnat-vip.front.st.net.local 80']
-    dnat_1['dest_host'].should eql('eg-withnat-vip.st.net.local')
-    dnat_1['dest_port'].should eql('80')
-    dnat_1['tcp'].should eql(true)
-    dnat_1['udp'].should eql(false)
+    expect(dnat_1['dest_host']).to eql('eg-withnat-vip.st.net.local')
+    expect(dnat_1['dest_port']).to eql('80')
+    expect(dnat_1['tcp']).to eql(true)
+    expect(dnat_1['udp']).to eql(false)
 
     dnat_2 = dnat['eg-withnat-vip.front.st.net.local 443']
-    dnat_2['dest_host'].should eql('eg-withnat-vip.st.net.local')
-    dnat_2['dest_port'].should eql('443')
-    dnat_2['tcp'].should eql(true)
-    dnat_2['udp'].should eql(false)
+    expect(dnat_2['dest_host']).to eql('eg-withnat-vip.st.net.local')
+    expect(dnat_2['dest_port']).to eql('443')
+    expect(dnat_2['tcp']).to eql(true)
+    expect(dnat_2['udp']).to eql(false)
 
     dnat_3 = dnat['eg-sftp-vip.front.st.net.local 21']
-    dnat_3['dest_host'].should eql('eg-sftp-vip.st.net.local')
-    dnat_3['dest_port'].should eql('21')
-    dnat_3['tcp'].should eql(true)
-    dnat_3['udp'].should eql(false)
+    expect(dnat_3['dest_host']).to eql('eg-sftp-vip.st.net.local')
+    expect(dnat_3['dest_port']).to eql('21')
+    expect(dnat_3['tcp']).to eql(true)
+    expect(dnat_3['udp']).to eql(false)
 
     dnat_4 = dnat['eg-sftp-vip.front.st.net.local 22']
-    dnat_4['dest_host'].should eql('eg-sftp-vip.st.net.local')
-    dnat_4['dest_port'].should eql('22')
-    dnat_4['tcp'].should eql(true)
-    dnat_4['udp'].should eql(false)
+    expect(dnat_4['dest_host']).to eql('eg-sftp-vip.st.net.local')
+    expect(dnat_4['dest_port']).to eql('22')
+    expect(dnat_4['tcp']).to eql(true)
+    expect(dnat_4['udp']).to eql(false)
 
     dnat_5 = dnat['eg-sftp-vip.front.st.net.local 2222']
-    dnat_5['dest_host'].should eql('eg-sftp-vip.st.net.local')
-    dnat_5['dest_port'].should eql('2222')
-    dnat_5['tcp'].should eql(true)
-    dnat_5['udp'].should eql(false)
+    expect(dnat_5['dest_host']).to eql('eg-sftp-vip.st.net.local')
+    expect(dnat_5['dest_port']).to eql('2222')
+    expect(dnat_5['tcp']).to eql(true)
+    expect(dnat_5['udp']).to eql(false)
   end
 
   host('sub-nat-001.mgmt.st.net.local') do |host|
     enc = host.to_enc
-    enc['role::natserver']['prod_virtual_router_id'].should eql(106)
-    enc['role::natserver']['front_virtual_router_id'].should eql(105)
+    expect(enc['role::natserver']['prod_virtual_router_id']).to eql(106)
+    expect(enc['role::natserver']['front_virtual_router_id']).to eql(105)
 
     snat = enc['role::natserver']['rules']['SNAT']
-    snat['prod']['to_source'].should eql('nat-vip.front.st.net.local')
+    expect(snat['prod']['to_source']).to eql('nat-vip.front.st.net.local')
 
     dnat = enc['role::natserver']['rules']['DNAT']
-    dnat.size.should eql(2)
+    expect(dnat.size).to eql(2)
     dnat_1 = dnat['sub-blahnat-vip.front.st.net.local 8008']
-    dnat_1['dest_host'].should eql('sub-blahnat-vip.st.net.local')
-    dnat_1['dest_port'].should eql('8008')
-    dnat_1['tcp'].should eql(true)
-    dnat_1['udp'].should eql(false)
+    expect(dnat_1['dest_host']).to eql('sub-blahnat-vip.st.net.local')
+    expect(dnat_1['dest_port']).to eql('8008')
+    expect(dnat_1['tcp']).to eql(true)
+    expect(dnat_1['udp']).to eql(false)
 
     dnat_2 = dnat['sub-defaultport-vip.front.st.net.local 8000']
-    dnat_2['dest_host'].should eql('sub-defaultport-vip.st.net.local')
-    dnat_2['dest_port'].should eql('8000')
-    dnat_2['tcp'].should eql(true)
-    dnat_2['udp'].should eql(false)
+    expect(dnat_2['dest_host']).to eql('sub-defaultport-vip.st.net.local')
+    expect(dnat_2['dest_port']).to eql('8000')
+    expect(dnat_2['tcp']).to eql(true)
+    expect(dnat_2['udp']).to eql(false)
   end
 end

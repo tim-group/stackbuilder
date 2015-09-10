@@ -22,7 +22,7 @@ describe Stacks::Inventory do
     inventory = Stacks::Inventory.new(@stacks_dir)
     result = inventory.find(hostname)
 
-    result.should eql(nil)
+    expect(result).to eql(nil)
   end
 
   it 'finds known nodes' do
@@ -31,8 +31,8 @@ describe Stacks::Inventory do
     inventory = Stacks::Inventory.new(@stacks_dir)
     result = inventory.find(hostname)
 
-    result.hostname.should eql("te-stapp-001")
-    result.domain.should eql("space.net.local")
-    result.virtual_service.vip_fqdn(:prod, 'space').should eql("te-stapp-vip.space.net.local")
+    expect(result.hostname).to eql("te-stapp-001")
+    expect(result.domain).to eql("space.net.local")
+    expect(result.virtual_service.vip_fqdn(:prod, 'space')).to eql("te-stapp-vip.space.net.local")
   end
 end

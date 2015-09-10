@@ -16,8 +16,8 @@ describe 'Stacks::MachineSet' do
       end
     end
     it_stack 'should contain 1 server in each site' do |stack|
-      stack.should have_host('env-fundsapp-001.mgmt.mars.net.local')
-      stack.should have_host('env-fundsapp-001.mgmt.jupiter.net.local')
+      expect(stack).to have_host('env-fundsapp-001.mgmt.mars.net.local')
+      expect(stack).to have_host('env-fundsapp-001.mgmt.jupiter.net.local')
     end
   end
   describe_stack 'provides an allowed host mechanism that can be used by virtual_appservers' do
@@ -36,7 +36,7 @@ describe 'Stacks::MachineSet' do
     end
     it_stack 'allows specification of aditional hosts that are allowed to talk to the app or service' do
       host("e1-x-001.mgmt.space.net.local") do |host|
-        host.to_enc['role::http_app']['allowed_hosts'].should eql(['1.1.1.1', '2.2.2.2'])
+        expect(host.to_enc['role::http_app']['allowed_hosts']).to eql(['1.1.1.1', '2.2.2.2'])
       end
     end
   end
@@ -56,7 +56,7 @@ describe 'Stacks::MachineSet' do
     end
     it_stack 'allows specification of aditional hosts that are allowed to talk to the app or service' do
       host("e1-x-001.mgmt.space.net.local") do |host|
-        host.to_enc['role::http_app']['allowed_hosts'].should eql(['1.1.1.1', '2.2.2.2'])
+        expect(host.to_enc['role::http_app']['allowed_hosts']).to eql(['1.1.1.1', '2.2.2.2'])
       end
     end
   end

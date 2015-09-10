@@ -13,15 +13,15 @@ describe_stack 'basic environment' do
   end
 
   environment('e', 'should provide a working domain method') do |e|
-    e.domain('st').should eql('st.net.local')
-    e.domain('st', :prod).should eql('st.net.local')
-    e.domain('st', :mgmt).should eql('mgmt.st.net.local')
-    e.domain('st', :front).should eql('front.st.net.local')
-    e.children.size.should eql(1)
-    e.contains_node_of_type?(Stacks::Services::AppService).should eql(true)
+    expect(e.domain('st')).to eql('st.net.local')
+    expect(e.domain('st', :prod)).to eql('st.net.local')
+    expect(e.domain('st', :mgmt)).to eql('mgmt.st.net.local')
+    expect(e.domain('st', :front)).to eql('front.st.net.local')
+    expect(e.children.size).to eql(1)
+    expect(e.contains_node_of_type?(Stacks::Services::AppService)).to eql(true)
 
     host('e-appx-001.mgmt.st.net.local') do |host|
-      e.children.first.should eql(host)
+      expect(e.children.first).to eql(host)
     end
   end
 end
@@ -51,32 +51,32 @@ describe_stack 'sub environments' do
   end
 
   environment('daddy', 'should have the correct sub environments') do |daddy|
-    daddy.sub_environments.size.should eql(2)
-    daddy.sub_environment_names.size.should eql(daddy.sub_environments.size)
-    daddy.sub_environment_names.should include('daughter', 'son')
+    expect(daddy.sub_environments.size).to eql(2)
+    expect(daddy.sub_environment_names.size).to eql(daddy.sub_environments.size)
+    expect(daddy.sub_environment_names).to include('daughter', 'son')
 
     environment('daughter') do |daughter|
-      daddy.child?(daughter).should eql(true)
-      daddy.child_or_self?(daughter).should eql(true)
-      daddy.child_or_self?(daddy).should eql(true)
+      expect(daddy.child?(daughter)).to eql(true)
+      expect(daddy.child_or_self?(daughter)).to eql(true)
+      expect(daddy.child_or_self?(daddy)).to eql(true)
     end
 
     environment('latest') do |latest|
-      daddy.child_or_self?(latest).should eql(false)
+      expect(daddy.child_or_self?(latest)).to eql(false)
     end
   end
 
   environment('daughter', 'should know about its parent environment') do |daughter|
     environment('daddy') do |daddy|
-      daughter.parent.should eql(daddy)
-      daugther.parent?.should eql(true)
-      daughter.sub_environments.should eql([])
+      expect(daughter.parent).to eql(daddy)
+      expect(daugther.parent?).to eql(true)
+      expect(daughter.sub_environments).to eql([])
     end
   end
 
   environment('latest', 'should standalone') do |latest|
-    latest.parent.should be_nil
-    latest.parent?.should eql(false)
-    latest.sub_environments.should eql([])
+    expect(latest.parent).to be_nil
+    expect(latest.parent?).to eql(false)
+    expect(latest.sub_environments).to eql([])
   end
 end

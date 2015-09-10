@@ -31,31 +31,31 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
 
   host("e1-testapp-001.mgmt.space.net.local") do |host|
     data = host.virtual_service.to_loadbalancer_config(:primary_site, 'space')['e1-testapp-vip.space.net.local']
-    data['monitor_warn'].should eql(1)
-    data['healthcheck_timeout'].should eql(10)
-    data['env'].should eql('e1')
-    data['app'].should eql('test_application')
-    data['type'].should eql('sso_app')
-    data['realservers']['blue'].should eql(["e1-testapp-001.space.net.local", "e1-testapp-002.space.net.local"])
-    data['realservers']['green'].should be_nil
+    expect(data['monitor_warn']).to eql(1)
+    expect(data['healthcheck_timeout']).to eql(10)
+    expect(data['env']).to eql('e1')
+    expect(data['app']).to eql('test_application')
+    expect(data['type']).to eql('sso_app')
+    expect(data['realservers']['blue']).to eql(["e1-testapp-001.space.net.local", "e1-testapp-002.space.net.local"])
+    expect(data['realservers']['green']).to be_nil
 
-    host.to_enc['role::http_app']['port'].should eql('8000')
-    host.to_enc['role::http_app']['ajp_port'].should eql('8009')
-    host.to_enc['role::http_app']['sso_port'].should eql('8443')
+    expect(host.to_enc['role::http_app']['port']).to eql('8000')
+    expect(host.to_enc['role::http_app']['ajp_port']).to eql('8009')
+    expect(host.to_enc['role::http_app']['sso_port']).to eql('8443')
   end
 
   host("e1-testapp2-001.mgmt.space.net.local") do |host|
     data = host.virtual_service.to_loadbalancer_config(:primary_site, 'space')['e1-testapp2-vip.space.net.local']
-    data['monitor_warn'].should eql(1)
-    data['healthcheck_timeout'].should eql(10)
-    data['env'].should eql('e1')
-    data['app'].should eql('test_application')
-    data['type'].should eql('http_and_sso_app')
-    data['realservers']['blue'].should eql(["e1-testapp2-001.space.net.local", "e1-testapp2-002.space.net.local"])
-    data['realservers']['green'].should be_nil
+    expect(data['monitor_warn']).to eql(1)
+    expect(data['healthcheck_timeout']).to eql(10)
+    expect(data['env']).to eql('e1')
+    expect(data['app']).to eql('test_application')
+    expect(data['type']).to eql('http_and_sso_app')
+    expect(data['realservers']['blue']).to eql(["e1-testapp2-001.space.net.local", "e1-testapp2-002.space.net.local"])
+    expect(data['realservers']['green']).to be_nil
 
-    host.to_enc['role::http_app']['port'].should eql('8000')
-    host.to_enc['role::http_app']['ajp_port'].should be_nil
-    host.to_enc['role::http_app']['sso_port'].should eql('8443')
+    expect(host.to_enc['role::http_app']['port']).to eql('8000')
+    expect(host.to_enc['role::http_app']['ajp_port']).to be_nil
+    expect(host.to_enc['role::http_app']['sso_port']).to eql('8443')
   end
 end

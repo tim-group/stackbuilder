@@ -5,15 +5,15 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new("test")
     env = Stacks::Environment.new("env", { :primary_site => "st" }, nil, {}, {})
     machinedef.bind_to(env)
-    machinedef.prod_fqdn.should eql("env-test.st.net.local")
+    expect(machinedef.prod_fqdn).to eql("env-test.st.net.local")
   end
 
   it 'should be destroyable by default' do
     machinedef = Stacks::MachineDef.new("test")
     env = Stacks::Environment.new("noenv", { :primary_site => "local" }, nil, {}, {})
     machinedef.bind_to(env)
-    machinedef.destroyable?.should eql true
-    machinedef.to_spec[:disallow_destroy].should eql nil
+    expect(machinedef.destroyable?).to eql true
+    expect(machinedef.to_spec[:disallow_destroy]).to eql nil
   end
 
   it 'should allow destroyable to be overriden' do
@@ -21,8 +21,8 @@ describe Stacks::MachineDef do
     env = Stacks::Environment.new("noenv", { :primary_site => "local" }, nil, {}, {})
     machinedef.bind_to(env)
     machinedef.allow_destroy(false)
-    machinedef.destroyable?.should eql false
-    machinedef.to_spec[:disallow_destroy].should eql true
+    expect(machinedef.destroyable?).to eql false
+    expect(machinedef.to_spec[:disallow_destroy]).to eql true
   end
 
   it 'should allow environment to override destroyable' do
@@ -34,8 +34,8 @@ describe Stacks::MachineDef do
     env = Stacks::Environment.new("noenv", env_opts, nil, {}, {})
     machinedef.bind_to(env)
     machinedef.allow_destroy(false)
-    machinedef.destroyable?.should eql false
-    machinedef.to_spec[:disallow_destroy].should eql nil
+    expect(machinedef.destroyable?).to eql false
+    expect(machinedef.to_spec[:disallow_destroy]).to eql nil
   end
 
   it 'should disable persistent if the environment does not support it' do
@@ -48,8 +48,8 @@ describe Stacks::MachineDef do
     }
     env = Stacks::Environment.new("noenv", env_opts, nil, {}, {})
     machinedef.bind_to(env)
-    machinedef.to_spec[:storage]['/'.to_sym][:persistent].should eql false
-    machinedef.to_spec[:storage]['/mnt/data'.to_sym][:persistent].should eql false
+    expect(machinedef.to_spec[:storage]['/'.to_sym][:persistent]).to eql false
+    expect(machinedef.to_spec[:storage]['/mnt/data'.to_sym][:persistent]).to eql false
   end
 
   it 'populates routes in the enc if routes are added' do
@@ -57,7 +57,7 @@ describe Stacks::MachineDef do
     machinedef.add_route('mgmt_pg')
     env = Stacks::Environment.new("noenv", { :primary_site => "local" }, nil, {}, {})
     machinedef.bind_to(env)
-    machinedef.to_enc.should eql('routes' => { 'to' => ['mgmt_pg'] })
+    expect(machinedef.to_enc).to eql('routes' => { 'to' => ['mgmt_pg'] })
   end
 
   it 'allows cnames to be added' do
@@ -69,7 +69,7 @@ describe Stacks::MachineDef do
     env = Stacks::Environment.new("env", { :primary_site => "ps" }, nil, {}, {})
     machinedef.bind_to(env)
 
-    machinedef.to_specs.shift[:cnames].should eql(
+    expect(machinedef.to_specs.shift[:cnames]).to eql(
       :mgmt => {
         'foo' => 'env-test.mgmt.ps.net.local',
         'bar' => 'env-test.mgmt.ps.net.local'

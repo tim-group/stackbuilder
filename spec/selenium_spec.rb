@@ -71,30 +71,30 @@ describe_stack 'selenium' do
 
   it_stack("contains an environment on every node in the tree") do |root|
     root.accept do |node|
-      node.environment.should_not eql(nil)
+      expect(node.environment).not_to eql(nil)
     end
   end
 
   it_stack("does not create a hub when you do not define one") do |root|
-    root.find('qa-hub-001.mgmt.space.net.local').should be_nil
+    expect(root.find('qa-hub-001.mgmt.space.net.local')).to be_nil
   end
 
   host("qa-a-ie9-005.mgmt.space.net.local") do |host|
-    host.to_spec[:selenium_hub_host].should be_nil
+    expect(host.to_spec[:selenium_hub_host]).to be_nil
   end
 
   host("qa-a-ie6-005.mgmt.space.net.local") do |host|
-    host.to_spec[:selenium_hub_host].should be_nil
+    expect(host.to_spec[:selenium_hub_host]).to be_nil
   end
 
   host("qa-a-browser-005.mgmt.space.net.local") do |host|
-    host.to_spec[:selenium_hub_host].should be_nil
+    expect(host.to_spec[:selenium_hub_host]).to be_nil
   end
 
   host("e1-hub-001.mgmt.space.net.local") do |host|
-    host.to_spec[:template].should eql "sehub"
-    host.to_spec[:selenium_version].should eql('2.41.0')
-    host.to_spec[:nodes].should eql([
+    expect(host.to_spec[:template]).to eql "sehub"
+    expect(host.to_spec[:selenium_version]).to eql('2.41.0')
+    expect(host.to_spec[:nodes]).to eql([
       'e1-a-browser-001',
       'e1-a-browser-002',
       'e1-a-browser-003',
@@ -109,34 +109,34 @@ describe_stack 'selenium' do
   end
 
   host("e1-a-ie6-002.mgmt.space.net.local") do |host|
-    host.to_spec[:template].should eql("xpboot")
-    host.to_spec[:gold_image_url].should eql 'file:///var/local/images/dev-sxp-gold.img'
-    host.to_spec[:kvm_template].should eql 'kvm_no_virtio'
-    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
-    host.to_spec[:selenium_version].should eql '2.41.0'
-    host.to_spec[:ie_version].should eql '6'
+    expect(host.to_spec[:template]).to eql("xpboot")
+    expect(host.to_spec[:gold_image_url]).to eql 'file:///var/local/images/dev-sxp-gold.img'
+    expect(host.to_spec[:kvm_template]).to eql 'kvm_no_virtio'
+    expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
+    expect(host.to_spec[:selenium_version]).to eql '2.41.0'
+    expect(host.to_spec[:ie_version]).to eql '6'
   end
 
   host("e1-a-ie9-002.mgmt.space.net.local") do |host|
-    host.to_spec[:template].should eql("win7boot")
-    host.to_spec[:gold_image_url].should eql 'http://iso.youdevise.com/gold/win7-ie9-gold.img'
-    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
-    host.to_spec[:selenium_version].should eql '2.41.0'
-    host.to_spec[:ie_version].should eql '9'
+    expect(host.to_spec[:template]).to eql("win7boot")
+    expect(host.to_spec[:gold_image_url]).to eql 'http://iso.youdevise.com/gold/win7-ie9-gold.img'
+    expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
+    expect(host.to_spec[:selenium_version]).to eql '2.41.0'
+    expect(host.to_spec[:ie_version]).to eql '9'
   end
 
   host("e1-a-ie10-001.mgmt.space.net.local") do |host|
-    host.to_spec[:template].should eql("win7boot")
-    host.to_spec[:gold_image_url].should eql 'http://iso.youdevise.com/gold/win7-ie10-gold.img'
-    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
-    host.to_spec[:selenium_version].should eql '2.41.0'
-    host.to_spec[:ie_version].should eql '10'
+    expect(host.to_spec[:template]).to eql("win7boot")
+    expect(host.to_spec[:gold_image_url]).to eql 'http://iso.youdevise.com/gold/win7-ie10-gold.img'
+    expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
+    expect(host.to_spec[:selenium_version]).to eql '2.41.0'
+    expect(host.to_spec[:ie_version]).to eql '10'
   end
 
   host("e1-a-browser-001.mgmt.space.net.local") do |host|
-    host.to_spec[:template].should eql("senode")
-    host.to_spec[:selenium_hub_host].should eql 'e1-hub-001.mgmt.space.net.local'
-    host.to_spec[:selenium_version].should eql '2.41.0'
-    host.to_spec[:firefox_version].should eql '36.0+build2-0ubuntu0.12.04.5'
+    expect(host.to_spec[:template]).to eql("senode")
+    expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
+    expect(host.to_spec[:selenium_version]).to eql '2.41.0'
+    expect(host.to_spec[:firefox_version]).to eql '36.0+build2-0ubuntu0.12.04.5'
   end
 end

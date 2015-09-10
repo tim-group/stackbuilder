@@ -32,22 +32,23 @@ describe_stack 'sftp servers should support load balancing and dependant instanc
   host("mirror-sftp-001.mgmt.oy.net.local") do |sftp_server|
     sftp_enc = sftp_server.to_enc
     expect(sftp_enc['role::sftpserver']['vip_fqdn']).to eql('mirror-sftp-vip.oy.net.local')
-    sftp_enc['role::sftpserver']['env'].should eql('mirror')
-    sftp_enc['role::sftpserver']['participation_dependant_instances'].should include(
+    expect(sftp_enc['role::sftpserver']['env']).to eql('mirror')
+    expect(sftp_enc['role::sftpserver']['participation_dependant_instances']).to include(
       'mirror-lb-001.oy.net.local',
       'mirror-lb-002.oy.net.local'
     )
-    sftp_enc['role::sftpserver']['participation_dependant_instances'].size.should eql(2)
-    sftp_enc['role::sftpserver']['ssh_dependant_instances'].should include(
+    expect(sftp_enc['role::sftpserver']['participation_dependant_instances'].size).to eql(2)
+    expect(sftp_enc['role::sftpserver']['ssh_dependant_instances']).to include(
       'mirror-timcyclic-001.mgmt.oy.net.local',
       'mirror-timcyclic-002.mgmt.oy.net.local'
     )
-    sftp_enc['role::sftpserver']['ssh_dependant_instances'].size.should eql(2)
+    expect(sftp_enc['role::sftpserver']['ssh_dependant_instances'].size).to eql(2)
   end
   host("mirror-lb-001.mgmt.oy.net.local") do |load_balancer|
     lb_enc = load_balancer.to_enc
-    lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['persistent_ports'].should eql([])
-    lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['ports'].should eql(['2222'])
+    expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['persistent_ports']).
+      to eql([])
+    expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['ports']).to eql(['2222'])
   end
 end
 describe_stack 'sftp servers should provide specific mounts' do
@@ -65,16 +66,16 @@ describe_stack 'sftp servers should provide specific mounts' do
 
   host("mirror-sftp-001.mgmt.oy.net.local") do |sftp_server|
     storage = sftp_server.to_specs.shift[:storage]
-    storage.key?(:"/chroot").should eql true
-    storage[:"/chroot"][:size].should eql '40G'
-    storage[:"/chroot"][:persistent].should eql true
-    storage.key?(:"/var/lib/batchelor").should eql true
-    storage[:"/var/lib/batchelor"][:size].should eql '40G'
-    storage[:"/var/lib/batchelor"][:persistent].should eql true
-    storage.key?(:"/home").should eql true
-    storage[:"/home"][:size].should eql '20G'
-    storage[:"/home"][:persistent].should eql true
-    storage.key?(:"/tmp").should eql true
-    storage[:"/tmp"][:size].should eql '10G'
+    expect(storage.key?(:"/chroot")).to eql true
+    expect(storage[:"/chroot"][:size]).to eql '40G'
+    expect(storage[:"/chroot"][:persistent]).to eql true
+    expect(storage.key?(:"/var/lib/batchelor")).to eql true
+    expect(storage[:"/var/lib/batchelor"][:size]).to eql '40G'
+    expect(storage[:"/var/lib/batchelor"][:persistent]).to eql true
+    expect(storage.key?(:"/home")).to eql true
+    expect(storage[:"/home"][:size]).to eql '20G'
+    expect(storage[:"/home"][:persistent]).to eql true
+    expect(storage.key?(:"/tmp")).to eql true
+    expect(storage[:"/tmp"][:size]).to eql '10G'
   end
 end
