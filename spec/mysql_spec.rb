@@ -214,6 +214,7 @@ describe_stack 'should provide the correct application rights' do
   host("testing-applong-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['role::http_app']['dependencies']
     expect(rights['db.ref.database']).to eql('ref')
+    expect(rights['db.ref.driver']).to eql('com.mysql.jdbc.Driver')
     expect(rights['db.ref.hostname']).to eql('testing-mydb-001.space.net.local')
     expect(rights['db.ref.port']).to eql('3306')
     expect(rights['db.ref.password_hiera_key']).to eql('enc/testing/SuperLongLengthName/mysql_password')

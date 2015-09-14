@@ -148,6 +148,7 @@ module Stacks::Services::MysqlCluster
     config_params = {
       "db.#{@database_name}.hostname"           => master_servers.join(','),
       "db.#{@database_name}.database"           => database_name,
+      "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
       "db.#{@database_name}.port"               => '3306',
       "db.#{@database_name}.username"           => mysql_username(dependant),
       "db.#{@database_name}.password_hiera_key" =>
