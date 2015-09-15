@@ -264,7 +264,7 @@ describe_stack 'should allow backup_instance_site to be specified' do
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
       'testing-mydb-001.mgmt.space.net.local',
-      'testing-mydbbackup-001.mgmt.space.net.local',
+      'testing-mydbbackup-001.mgmt.space.net.local'
     ])
   end
 end
