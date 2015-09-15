@@ -14,6 +14,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :server_id_offset
   attr_accessor :slave_instances
   attr_accessor :include_master_in_read_only_cluster
+  attr_accessor :backup_instance_site
 
   def configure
     @database_name = ''
@@ -25,6 +26,7 @@ module Stacks::Services::MysqlCluster
     @server_id_offset = 0
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0
+    @backup_instance_site = :secondary_site
   end
 
   def instantiate_machine(name, type, i, environment, location)
@@ -46,10 +48,9 @@ module Stacks::Services::MysqlCluster
     @slave_instances.times do
       instantiate_machine(name, :slave, i += 1, environment, :primary_site)
     end
-
     i = 0
     @backup_instances.times do
-      instantiate_machine(name, :backup, i += 1, environment, :secondary_site)
+      instantiate_machine(name, :backup, i += 1, environment, @backup_instance_site)
     end
     i = 0
     @secondary_site_slave_instances.times do

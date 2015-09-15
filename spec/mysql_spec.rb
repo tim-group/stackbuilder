@@ -246,6 +246,29 @@ describe_stack 'should allow storage options to be overwritten' do
   end
 end
 
+describe_stack 'should allow backup_instance_site to be specified' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.backup_instance_site = :primary_site
+        self.master_instances = 1
+        self.slave_instances = 0
+        self.backup_instances = 1
+        self.secondary_site_slave_instances = 0
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts([
+      'testing-mydb-001.mgmt.space.net.local',
+      'testing-mydbbackup-001.mgmt.space.net.local',
+    ])
+  end
+end
+
 describe_stack 'should always provide a default data mount of /mnt/data with sensible defaults' do
   given do
     stack "mysql" do
