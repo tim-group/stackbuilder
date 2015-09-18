@@ -3,7 +3,7 @@ require 'stacks/test_framework'
 
 describe_stack 'jenkins' do
   given do
-    stack "jenkins" do
+    stack 'jenkins' do
       cislave 'jenkinsslave' do
         each_machine do |machine|
           machine.vcpus = '8'
@@ -19,8 +19,8 @@ describe_stack 'jenkins' do
       end
     end
 
-    env "e1", :primary_site => "space" do
-      instantiate_stack "jenkins"
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'jenkins'
     end
   end
 
@@ -31,7 +31,7 @@ describe_stack 'jenkins' do
                            })
   end
 
-  host("e1-jenkinsslavewithlabels-001.mgmt.space.net.local") do |host|
+  host('e1-jenkinsslavewithlabels-001.mgmt.space.net.local') do |host|
     host.to_enc['role::cinode_precise']['node_labels'].should eql(%w(first_label second_label))
   end
 end
