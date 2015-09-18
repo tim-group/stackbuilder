@@ -24,7 +24,7 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
     enc = super()
     enc.merge!('role::cinode_precise' => {
                  'mysql_version' => @mysql_version,
-                 'node_labels'   => @node_labels
+                 'node_labels'   => @node_labels.join(' ')
                })
     enc
   end

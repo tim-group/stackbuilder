@@ -27,11 +27,11 @@ describe_stack 'jenkins' do
   host('e1-jenkinsslave-002.mgmt.space.net.local') do |host|
     host.to_enc.should eql('role::cinode_precise' => {
                              'mysql_version' => '5.1.49-1ubuntu8',
-                             'node_labels'   => []
+                             'node_labels'   => ''
                            })
   end
 
   host('e1-jenkinsslavewithlabels-001.mgmt.space.net.local') do |host|
-    host.to_enc['role::cinode_precise']['node_labels'].should eql(%w(first_label second_label))
+    host.to_enc['role::cinode_precise']['node_labels'].should eql('first_label second_label')
   end
 end
