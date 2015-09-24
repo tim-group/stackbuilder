@@ -80,8 +80,8 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
   host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
     enc = host.to_enc
     expect(enc['role::proxyserver']['default_ssl_cert']).to eql('test_cert_change')
-    enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert'].
-      should eql('test_vhost_cert_change')
+    expect(enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert']).
+      to eql('test_vhost_cert_change')
   end
 end
 

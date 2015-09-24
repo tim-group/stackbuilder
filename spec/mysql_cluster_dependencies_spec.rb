@@ -49,12 +49,12 @@ describe_stack 'stack-with-dependencies' do
 
   host("e2-exampleapp2-002.mgmt.earth.net.local") do |host|
     deps = host.to_enc["role::http_app"]["dependencies"]
-    deps["db.example.database"].should eql("example")
-    deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
-    deps["db.example.port"].should eql("3306")
-    deps["db.example.password_hiera_key"].should eql("enc/e2/example2/mysql_password")
-    deps["db.example.username"].should eql("example2")
-    deps["db.example.read_only_cluster"].should eql(
+    expect(deps["db.example.database"]).to eql("example")
+    expect(deps["db.example.hostname"]).to eql("e1-exampledb-001.space.net.local")
+    expect(deps["db.example.port"]).to eql("3306")
+    expect(deps["db.example.password_hiera_key"]).to eql("enc/e2/example2/mysql_password")
+    expect(deps["db.example.username"]).to eql("example2")
+    expect(deps["db.example.read_only_cluster"]).to eql(
       "e1-exampledb-001.earth.net.local" \
     )
   end
@@ -62,12 +62,12 @@ describe_stack 'stack-with-dependencies' do
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
     deps = host.to_enc["role::http_app"]["dependencies"]
 
-    deps["db.example.database"].should eql("example")
-    deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
-    deps["db.example.port"].should eql("3306")
-    deps["db.example.password_hiera_key"].should eql("enc/e1/example2/mysql_password")
-    deps["db.example.username"].should eql("example2")
-    deps["db.example.read_only_cluster"].should eql(
+    expect(deps["db.example.database"]).to eql("example")
+    expect(deps["db.example.hostname"]).to eql("e1-exampledb-001.space.net.local")
+    expect(deps["db.example.port"]).to eql("3306")
+    expect(deps["db.example.password_hiera_key"]).to eql("enc/e1/example2/mysql_password")
+    expect(deps["db.example.username"]).to eql("example2")
+    expect(deps["db.example.read_only_cluster"]).to eql(
       "e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local" \
     )
   end
@@ -75,12 +75,12 @@ describe_stack 'stack-with-dependencies' do
   host("pg-exampleapp2-002.mgmt.space.net.local") do |host|
     deps = host.to_enc["role::http_app"]["dependencies"]
 
-    deps["db.example.database"].should eql("example")
-    deps["db.example.hostname"].should eql("pg-exampledb-001.space.net.local")
-    deps["db.example.port"].should eql("3306")
-    deps["db.example.password_hiera_key"].should eql("enc/pg/example2/mysql_password")
-    deps["db.example.username"].should eql("example2")
-    deps["db.example.read_only_cluster"].should eql(
+    expect(deps["db.example.database"]).to eql("example")
+    expect(deps["db.example.hostname"]).to eql("pg-exampledb-001.space.net.local")
+    expect(deps["db.example.port"]).to eql("3306")
+    expect(deps["db.example.password_hiera_key"]).to eql("enc/pg/example2/mysql_password")
+    expect(deps["db.example.username"]).to eql("example2")
+    expect(deps["db.example.read_only_cluster"]).to eql(
       "pg-exampledb-002.space.net.local,pg-exampledb-003.space.net.local" \
     )
   end

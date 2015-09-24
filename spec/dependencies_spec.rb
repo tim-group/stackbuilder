@@ -46,38 +46,32 @@ describe_stack 'stack-with-dependencies' do
     end
   end
 
-  host("e1-lb-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::loadbalancer"]["virtual_servers"]["e1-exampleapp-vip.space.net.local"]["realservers"]["blue"].
-      should eql([
-        "e1-exampleapp-001.space.net.local",
-        "e1-exampleapp-002.space.net.local"
-      ])
-    host.to_enc["role::loadbalancer"]["virtual_servers"]["e1-exampleapp2-vip.space.net.local"]["realservers"]["blue"].
-      should eql([
-        "e1-exampleapp2-001.space.net.local",
-        "e1-exampleapp2-002.space.net.local"
-      ])
+  host('e1-lb-001.mgmt.space.net.local') do |host|
+    rs = host.to_enc['role::loadbalancer']['virtual_servers']['e1-exampleapp-vip.space.net.local']['realservers']
+    expect(rs['blue']).to eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
+    rs = host.to_enc['role::loadbalancer']['virtual_servers']['e1-exampleapp2-vip.space.net.local']['realservers']
+    expect(rs['blue']).to eql(['e1-exampleapp2-001.space.net.local', 'e1-exampleapp2-002.space.net.local'])
   end
 
-  host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::proxyserver"]["vhosts"]["e1-exampleproxy-vip.front.space.net.local"]["proxy_pass_rules"].
-      should eql("/" => "http://e1-exampleapp-vip.space.net.local:8000")
+  host('e1-exampleproxy-001.mgmt.space.net.local') do |host|
+    ppr = host.to_enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['proxy_pass_rules']
+    expect(ppr).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
   end
 
   host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["application_dependant_instances"].should eql([
+    expect(host.to_enc["role::http_app"]["application_dependant_instances"]).to eql([
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
     deps = host.to_enc["role::http_app"]["dependencies"]
-    deps["db.example.database"].should eql("example")
-    deps["db.example.hostname"].should eql("e1-exampledb-001.space.net.local")
-    deps["db.example.password_hiera_key"].should eql("enc/e1/example2/mysql_password")
-    deps["db.example.username"].should eql("example2")
-    deps['example.url'].should eql('http://e1-exampleapp-vip.space.net.local:8000')
+    expect(deps["db.example.database"]).to eql("example")
+    expect(deps["db.example.hostname"]).to eql("e1-exampledb-001.space.net.local")
+    expect(deps["db.example.password_hiera_key"]).to eql("enc/e1/example2/mysql_password")
+    expect(deps["db.example.username"]).to eql("example2")
+    expect(deps['example.url']).to eql('http://e1-exampleapp-vip.space.net.local:8000')
   end
   host("e1-exampleapp-002.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["application_dependant_instances"].should eql([
+    expect(host.to_enc["role::http_app"]["application_dependant_instances"]).to eql([
       "e1-exampleapp2-001.space.net.local",
       "e1-exampleapp2-002.space.net.local",
       "e1-exampleproxy-001.space.net.local",
@@ -85,17 +79,17 @@ describe_stack 'stack-with-dependencies' do
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
-    host.to_enc["role::http_app"]["dependencies"].should eql({})
+    expect(host.to_enc["role::http_app"]["dependencies"]).to eql({})
   end
   host("e1-exampledb-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::databaseserver"]["dependant_instances"].should eql([
+    expect(host.to_enc["role::databaseserver"]["dependant_instances"]).to eql([
       "e1-exampleapp2-001.space.net.local",
       "e1-exampleapp2-002.space.net.local"
     ])
     rights = host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']
-    rights['example2@e1-exampleapp2-001.space.net.local/example'].should eql(
+    expect(rights['example2@e1-exampleapp2-001.space.net.local/example']).to eql(
       'password_hiera_key' => 'enc/e1/example2/mysql_password')
-    rights['example2@e1-exampleapp2-002.space.net.local/example'].should eql(
+    expect(rights['example2@e1-exampleapp2-002.space.net.local/example']).to eql(
       'password_hiera_key' => 'enc/e1/example2/mysql_password')
   end
 end
@@ -128,16 +122,16 @@ describe_stack 'stack with dependencies that does not provide config params when
     end
   end
 
-  host("e1-configapp-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["dependencies"].
-      should eql("db.example.database"           => "example",
-                 "db.example.hostname"           => "e1-exampledb-001.space.net.local",
-                 "db.example.port"               => "3306",
-                 "db.example.password_hiera_key" => "enc/e1/example/mysql_password",
-                 "db.example.username"           => "example")
+  host('e1-configapp-001.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::http_app']['dependencies']).to \
+      eql('db.example.database'           => 'example',
+          'db.example.hostname'           => 'e1-exampledb-001.space.net.local',
+          'db.example.port'               => '3306',
+          'db.example.password_hiera_key' => 'enc/e1/example/mysql_password',
+          'db.example.username'           => 'example')
   end
   host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
-    host.to_enc["role::http_app"]["dependencies"].should eql({})
+    expect(host.to_enc["role::http_app"]["dependencies"]).to eql({})
   end
 end
 
@@ -230,7 +224,7 @@ describe_stack 'stack with sub environment dependencies' do
     end
   end
   host("mirror-blondinapp-001.mgmt.oy.net.local") do |host|
-    host.to_enc['role::http_app']['application_dependant_instances'].should include(
+    expect(host.to_enc['role::http_app']['application_dependant_instances']).to include(
       'shared-fundsproxy-001.oy.net.local',
       'shared-fundsproxy-002.oy.net.local')
   end

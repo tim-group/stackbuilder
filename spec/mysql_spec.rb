@@ -359,16 +359,16 @@ describe_stack 'should support dependencies' do
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mysql_server']['dependant_instances'].size).to eql(4)
-    host.to_enc['role::mysql_server']['dependant_instances'].
-      should include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
-    host.to_enc['role::mysql_server']['dependant_instances'].
-      should include('testing-frdb-002.space.net.local', 'testing-frdbbackup-001.earth.net.local')
+    expect(host.to_enc['role::mysql_server']['dependant_instances']).to \
+      include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
+    expect(host.to_enc['role::mysql_server']['dependant_instances']).to \
+      include('testing-frdb-002.space.net.local', 'testing-frdbbackup-001.earth.net.local')
     expect(host.to_enc['role::mysql_server']['dependencies']).to eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mysql_server']['dependant_instances'].size).to eql(2)
-    host.to_enc['role::mysql_server']['dependant_instances'].
-      should include('testing-hrdb-002.space.net.local', 'testing-hrdbbackup-001.earth.net.local')
+    expect(host.to_enc['role::mysql_server']['dependant_instances']).to \
+      include('testing-hrdb-002.space.net.local', 'testing-hrdbbackup-001.earth.net.local')
     expect(host.to_enc['role::mysql_server']['dependencies']).to eql({})
   end
 end

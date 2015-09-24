@@ -25,21 +25,21 @@ describe_stack 'test enc of the mail servers' do
   # OY Master
   host("oymigration-mail-001.mgmt.oy.net.local") do |host|
     enc = host.to_enc
-    enc['server::default_new_mgmt_net_local'].should be_nil
-    enc['role::mail_server2']['allowed_hosts'].sort.should eql([
+    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['role::mail_server2']['allowed_hosts'].sort).to eql([
       '172.16.0.0/21'
     ])
-    enc['role::mail_server2']['vip_fqdns'].sort.should eql([
+    expect(enc['role::mail_server2']['vip_fqdns'].sort).to eql([
       'oymigration-mail-vip.mgmt.oy.net.local'
     ])
-    enc['role::mail_server2']['dependant_instances'].sort.should eql([
+    expect(enc['role::mail_server2']['dependant_instances'].sort).to eql([
       'oymigration-lb-001.mgmt.oy.net.local',
       'oymigration-lb-002.mgmt.oy.net.local'
     ])
-    enc['role::mail_server2']['participation_dependant_instances'].should eql([
+    expect(enc['role::mail_server2']['participation_dependant_instances']).to eql([
       'oymigration-lb-001.mgmt.oy.net.local',
       'oymigration-lb-002.mgmt.oy.net.local'
     ])
-    enc['role::mail_server2']['vip_networks'].should eql(['mgmt'])
+    expect(enc['role::mail_server2']['vip_networks']).to eql(['mgmt'])
   end
 end

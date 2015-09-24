@@ -35,7 +35,7 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
   end
 
   it_stack 'should contain all the expected hosts' do |stack|
-    stack.should have_hosts(
+    expect(stack).to have_hosts(
       [
         'e1-lb-001.mgmt.mars.net.local',
         'e1-lb-002.mgmt.mars.net.local',
@@ -58,34 +58,36 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
   end
   host("e1-lb-001.mgmt.mars.net.local") do |host|
     virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
-    virtual_servers.keys.should include('e1-fundsapp-vip.mars.net.local')
-    virtual_servers.keys.should include('e1-exampleapp-vip.mars.net.local')
-    virtual_servers.size.should eql(2)
+    expect(virtual_servers.keys).to include('e1-fundsapp-vip.mars.net.local')
+    expect(virtual_servers.keys).to include('e1-exampleapp-vip.mars.net.local')
+    expect(virtual_servers.size).to eql(2)
     vip = virtual_servers['e1-fundsapp-vip.mars.net.local']
-    vip['realservers']['blue'].should eql(['e1-fundsapp-001.mars.net.local', 'e1-fundsapp-002.mars.net.local'])
+    expect(vip['realservers']['blue']).to eql(['e1-fundsapp-001.mars.net.local', 'e1-fundsapp-002.mars.net.local'])
   end
   host("e1-fundsapp-001.mgmt.mars.net.local") do |host|
     role = host.to_enc['role::http_app']
-    role['application_dependant_instances'].should include('e1-lb-001.mars.net.local', 'e1-lb-002.mars.net.local')
-    role['application_dependant_instances'].size.should eql(2)
+    expect(role['application_dependant_instances']).to include('e1-lb-001.mars.net.local', 'e1-lb-002.mars.net.local')
+    expect(role['application_dependant_instances'].size).to eql(2)
   end
   host("e1-fundsapp-001.mgmt.jupiter.net.local") do |host|
     role = host.to_enc['role::http_app']
-    role['application_dependant_instances'].should include('e1-lb-001.jupiter.net.local', 'e1-lb-002.jupiter.net.local')
-    role['application_dependant_instances'].size.should eql(2)
+    expect(role['application_dependant_instances']).to include('e1-lb-001.jupiter.net.local',
+                                                               'e1-lb-002.jupiter.net.local')
+    expect(role['application_dependant_instances'].size).to eql(2)
   end
   host("e1-lb-001.mgmt.jupiter.net.local") do |host|
     virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
-    virtual_servers.keys.should include('e1-fundsapp-vip.jupiter.net.local')
-    virtual_servers.size.should eql(1)
+    expect(virtual_servers.keys).to include('e1-fundsapp-vip.jupiter.net.local')
+    expect(virtual_servers.size).to eql(1)
     vip = virtual_servers['e1-fundsapp-vip.jupiter.net.local']
-    vip['realservers']['blue'].should eql(['e1-fundsapp-001.jupiter.net.local', 'e1-fundsapp-002.jupiter.net.local'])
+    expect(vip['realservers']['blue']).to eql(['e1-fundsapp-001.jupiter.net.local',
+                                               'e1-fundsapp-002.jupiter.net.local'])
   end
   host("x1-lb-001.mgmt.pluto.net.local") do |host|
     virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
-    virtual_servers.keys.should include('x1-fundsapp-vip.pluto.net.local')
-    virtual_servers.keys.should include('x1-exampleapp-vip.pluto.net.local')
-    virtual_servers.size.should eql(2)
+    expect(virtual_servers.keys).to include('x1-fundsapp-vip.pluto.net.local')
+    expect(virtual_servers.keys).to include('x1-exampleapp-vip.pluto.net.local')
+    expect(virtual_servers.size).to eql(2)
   end
 end
 
@@ -114,8 +116,8 @@ describe_stack 'load balancer stack create a secondary server with the correct e
   end
 
   host("e1-lb-002.mgmt.space.net.local") do |host|
-    host.to_enc['role::loadbalancer']['virtual_router_id'].should eql(66)
-    host.to_enc['role::loadbalancer']['virtual_servers']['e1-frapp-vip.space.net.local'].should eql(
+    expect(host.to_enc['role::loadbalancer']['virtual_router_id']).to eql(66)
+    expect(host.to_enc['role::loadbalancer']['virtual_servers']['e1-frapp-vip.space.net.local']).to eql(
       "env" => "e1",
       "monitor_warn" => 1,
       "app" => "futuresroll",
@@ -124,13 +126,13 @@ describe_stack 'load balancer stack create a secondary server with the correct e
       },
       "healthcheck_timeout" => 10
     )
-    host.to_enc['routes'].should eql("to" => ["mgmt_pg_from_mgmt_oy"])
-    host.to_specs.shift[:qualified_hostnames].should eql(:mgmt => "e1-lb-002.mgmt.space.net.local",
-                                                         :prod => "e1-lb-002.space.net.local")
-    host.to_specs.shift[:availability_group].should eql('e1-lb')
-    host.to_specs.shift[:networks].should eql([:mgmt, :prod])
-    host.to_specs.shift[:hostname].should eql('e1-lb-002')
-    host.to_specs.shift[:domain].should eql('space.net.local')
+    expect(host.to_enc['routes']).to eql("to" => ["mgmt_pg_from_mgmt_oy"])
+    expect(host.to_specs.shift[:qualified_hostnames]).to eql(:mgmt => "e1-lb-002.mgmt.space.net.local",
+                                                             :prod => "e1-lb-002.space.net.local")
+    expect(host.to_specs.shift[:availability_group]).to eql('e1-lb')
+    expect(host.to_specs.shift[:networks]).to eql([:mgmt, :prod])
+    expect(host.to_specs.shift[:hostname]).to eql('e1-lb-002')
+    expect(host.to_specs.shift[:domain]).to eql('space.net.local')
   end
 end
 describe_stack 'load balancer will generate config for a sub environment' do
@@ -178,58 +180,58 @@ describe_stack 'load balancer will generate config for a sub environment' do
 
   host("st-lb-001.mgmt.st.net.local") do |st_loadbalancer|
     st_lb_role = st_loadbalancer.to_enc['role::loadbalancer']
-    st_lb_role['virtual_router_id'].should eql(1)
-    st_lb_role['virtual_servers'].size.should eql(4)
+    expect(st_lb_role['virtual_router_id']).to eql(1)
+    expect(st_lb_role['virtual_servers'].size).to eql(4)
 
     vip_1 = st_lb_role['virtual_servers']['ci2-appx-vip.st.net.local']
-    vip_1['env'].should eql('ci2')
-    vip_1['app'].should eql('JavaHttpRef')
-    vip_1['monitor_warn'].should eql(0)
-    vip_1['healthcheck_timeout'].should eql(10)
-    vip_1['realservers']['blue'].should eql(['ci2-appx-001.st.net.local'])
-    vip_1['realservers']['green'].should eql(['ci2-appx-002.st.net.local'])
+    expect(vip_1['env']).to eql('ci2')
+    expect(vip_1['app']).to eql('JavaHttpRef')
+    expect(vip_1['monitor_warn']).to eql(0)
+    expect(vip_1['healthcheck_timeout']).to eql(10)
+    expect(vip_1['realservers']['blue']).to eql(['ci2-appx-001.st.net.local'])
+    expect(vip_1['realservers']['green']).to eql(['ci2-appx-002.st.net.local'])
 
     vip_2 = st_lb_role['virtual_servers']['ci2-app2x-vip.st.net.local']
-    vip_2['env'].should eql('ci2')
-    vip_2['app'].should eql('MySuperCoolApp')
-    vip_2['monitor_warn'].should eql(1)
-    vip_2['healthcheck_timeout'].should eql(10)
-    vip_2['realservers']['blue'].should eql(['ci2-app2x-001.st.net.local', 'ci2-app2x-002.st.net.local'])
+    expect(vip_2['env']).to eql('ci2')
+    expect(vip_2['app']).to eql('MySuperCoolApp')
+    expect(vip_2['monitor_warn']).to eql(1)
+    expect(vip_2['healthcheck_timeout']).to eql(10)
+    expect(vip_2['realservers']['blue']).to eql(['ci2-app2x-001.st.net.local', 'ci2-app2x-002.st.net.local'])
 
     vip_3 = st_lb_role['virtual_servers']['ci2-myproxy-vip.st.net.local']
-    vip_3['type'].should eql('proxy')
-    vip_3['ports'].should eql([80, 443])
-    vip_3['realservers']['blue'].should eql(['ci2-myproxy-001.st.net.local', 'ci2-myproxy-002.st.net.local'])
+    expect(vip_3['type']).to eql('proxy')
+    expect(vip_3['ports']).to eql([80, 443])
+    expect(vip_3['realservers']['blue']).to eql(['ci2-myproxy-001.st.net.local', 'ci2-myproxy-002.st.net.local'])
 
     vip_4 = st_lb_role['virtual_servers']['st-sftp-vip.st.net.local']
-    vip_4['type'].should eql('sftp')
-    vip_4['realservers']['blue'].should eql(["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"])
-    vip_4['persistent_ports'].should eql([])
+    expect(vip_4['type']).to eql('sftp')
+    expect(vip_4['realservers']['blue']).to eql(["st-sftp-001.st.net.local", "st-sftp-002.st.net.local"])
+    expect(vip_4['persistent_ports']).to eql([])
   end
 
   host("ci-lb-001.mgmt.st.net.local") do |ci_loadbalancer|
     ci_lb_role = ci_loadbalancer.to_enc['role::loadbalancer']
 
-    ci_lb_role['virtual_router_id'].should eql(1)
-    ci_lb_role['virtual_servers'].size.should eql(3)
+    expect(ci_lb_role['virtual_router_id']).to eql(1)
+    expect(ci_lb_role['virtual_servers'].size).to eql(3)
     vip_1 = ci_lb_role['virtual_servers']['ci-appx-vip.st.net.local']
-    vip_1['env'].should eql('ci')
-    vip_1['app'].should eql('JavaHttpRef')
-    vip_1['monitor_warn'].should eql(0)
-    vip_1['healthcheck_timeout'].should eql(10)
-    vip_1['realservers']['blue'].should eql(['ci-appx-001.st.net.local'])
-    vip_1['realservers']['green'].should eql(['ci-appx-002.st.net.local'])
+    expect(vip_1['env']).to eql('ci')
+    expect(vip_1['app']).to eql('JavaHttpRef')
+    expect(vip_1['monitor_warn']).to eql(0)
+    expect(vip_1['healthcheck_timeout']).to eql(10)
+    expect(vip_1['realservers']['blue']).to eql(['ci-appx-001.st.net.local'])
+    expect(vip_1['realservers']['green']).to eql(['ci-appx-002.st.net.local'])
 
     vip_2 = ci_lb_role['virtual_servers']['ci-app2x-vip.st.net.local']
-    vip_2['env'].should eql('ci')
-    vip_2['app'].should eql('MySuperCoolApp')
-    vip_2['monitor_warn'].should eql(1)
-    vip_2['healthcheck_timeout'].should eql(10)
-    vip_2['realservers']['blue'].should eql(['ci-app2x-001.st.net.local', 'ci-app2x-002.st.net.local'])
+    expect(vip_2['env']).to eql('ci')
+    expect(vip_2['app']).to eql('MySuperCoolApp')
+    expect(vip_2['monitor_warn']).to eql(1)
+    expect(vip_2['healthcheck_timeout']).to eql(10)
+    expect(vip_2['realservers']['blue']).to eql(['ci-app2x-001.st.net.local', 'ci-app2x-002.st.net.local'])
 
     vip_3 = ci_lb_role['virtual_servers']['ci-sftp-vip.st.net.local']
-    vip_3['type'].should eql('sftp')
-    vip_3['realservers']['blue'].should eql(["ci-sftp-001.st.net.local", "ci-sftp-002.st.net.local"])
-    vip_3['persistent_ports'].should eql([])
+    expect(vip_3['type']).to eql('sftp')
+    expect(vip_3['realservers']['blue']).to eql(["ci-sftp-001.st.net.local", "ci-sftp-002.st.net.local"])
+    expect(vip_3['persistent_ports']).to eql([])
   end
 end

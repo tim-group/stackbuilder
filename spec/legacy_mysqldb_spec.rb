@@ -13,8 +13,8 @@ describe_stack 'should default to disallow destory' do
   end
 
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.destroyable?.should eql false
-    host.to_specs.shift[:disallow_destroy].should eql true
+    expect(host.destroyable?).to eql false
+    expect(host.to_specs.shift[:disallow_destroy]).to eql true
   end
 end
 
@@ -30,8 +30,8 @@ describe_stack 'should allow destroy to be overwritten' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.destroyable?.should eql true
-    host.to_specs.shift[:disallow_destroy].should eql nil
+    expect(host.destroyable?).to eql true
+    expect(host.to_specs.shift[:disallow_destroy]).to eql nil
   end
 end
 
@@ -48,12 +48,12 @@ describe_stack 'should provide correct enc data' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['database_name'].should eql 'mydb'
-    host.to_enc['role::databaseserver']['application'].should eql false
-    host.to_enc['role::databaseserver']['environment'].should eql 'testing'
-    host.to_enc['role::databaseserver']['restart_on_config_change'].should eql false
-    host.to_enc['role::databaseserver']['restart_on_install'].should eql true
-    host.to_enc['role::databaseserver']['datadir'].should eql '/mnt/data/mysql'
+    expect(host.to_enc['role::databaseserver']['database_name']).to eql 'mydb'
+    expect(host.to_enc['role::databaseserver']['application']).to eql false
+    expect(host.to_enc['role::databaseserver']['environment']).to eql 'testing'
+    expect(host.to_enc['role::databaseserver']['restart_on_config_change']).to eql false
+    expect(host.to_enc['role::databaseserver']['restart_on_install']).to eql true
+    expect(host.to_enc['role::databaseserver']['datadir']).to eql '/mnt/data/mysql'
   end
 end
 
@@ -73,10 +73,10 @@ describe_stack 'should allow storage options to be overwritten' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(:type => "data")
-    host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym].should include(:size => "10G")
-    host.to_specs.shift[:storage]['/'.to_sym].should include(:type => "os")
-    host.to_specs.shift[:storage]['/'.to_sym].should include(:size => "5G")
+    expect(host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym]).to include(:type => "data")
+    expect(host.to_specs.shift[:storage]['/var/lib/mysql'.to_sym]).to include(:size => "10G")
+    expect(host.to_specs.shift[:storage]['/'.to_sym]).to include(:type => "os")
+    expect(host.to_specs.shift[:storage]['/'.to_sym]).to include(:size => "5G")
   end
 end
 
@@ -91,11 +91,11 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type].should eql "data"
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent].should eql true
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size].should eql '10G'
-    host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found].
-      should eql 'raise_error'
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:type]).to eql "data"
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistent]).to eql true
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:size]).to eql '10G'
+    expect(host.to_specs.shift[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found]).
+      to eql 'raise_error'
   end
 end
 
@@ -110,8 +110,8 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
     end
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
-    host.to_specs.shift[:ram].should eql '4194304'
-    host.to_specs.shift[:vcpus].should eql '2'
+    expect(host.to_specs.shift[:ram]).to eql '4194304'
+    expect(host.to_specs.shift[:vcpus]).to eql '2'
   end
 end
 
@@ -147,13 +147,13 @@ describe_stack 'should support dependencies' do
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['dependant_instances'].
-      should eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
-    host.to_enc['role::databaseserver']['dependencies'].should eql({})
+    expect(host.to_enc['role::databaseserver']['dependant_instances']).to \
+      eql(['testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local'])
+    expect(host.to_enc['role::databaseserver']['dependencies']).to eql({})
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['dependant_instances'].should be_nil
-    host.to_enc['role::databaseserver']['dependencies'].should be_nil
+    expect(host.to_enc['role::databaseserver']['dependant_instances']).to be_nil
+    expect(host.to_enc['role::databaseserver']['dependencies']).to be_nil
   end
 end
 
@@ -177,9 +177,9 @@ describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysq
     end
   end
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['version'].should eql('5.1.49-1ubuntu8')
+    expect(host.to_enc['role::databaseserver']['version']).to eql('5.1.49-1ubuntu8')
   end
   host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    host.to_enc['role::databaseserver']['version'].should eql('5.5.43-0ubuntu0.12.04.1')
+    expect(host.to_enc['role::databaseserver']['version']).to eql('5.5.43-0ubuntu0.12.04.1')
   end
 end
