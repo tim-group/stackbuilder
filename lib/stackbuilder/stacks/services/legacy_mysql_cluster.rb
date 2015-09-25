@@ -38,6 +38,9 @@ module Stacks::Services::LegacyMysqlCluster
   end
 
   def config_params(dependant, _fabric)
+    # MySQL user names can be up to 16 characters long: https://dev.mysql.com/doc/refman/5.5/en/user-names.html
+    dependant.application[0..15]
+
     # This is where we can provide config params to App servers (only) to put into their config.properties
     {
       "db.#{@database_name}.hostname"           => mysqldb_server.prod_fqdn,
