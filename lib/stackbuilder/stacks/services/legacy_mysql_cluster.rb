@@ -23,6 +23,11 @@ module Stacks::Services::LegacyMysqlCluster
     children.first
   end
 
+  def mysql_username(service)
+    # MySQL user names can be up to 16 characters long: https://dev.mysql.com/doc/refman/5.5/en/user-names.html
+    service.application[0..15]
+  end
+
   def dependant_instance_mysql_rights(location)
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
@@ -30,7 +35,7 @@ module Stacks::Services::LegacyMysqlCluster
     virtual_services_that_depend_on_me(location).each do |service|
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].
-          merge!("#{service.application}@#{dependant.prod_fqdn}/#{database_name}" =>
+          merge!("#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
                  { 'password_hiera_key' => "enc/#{service.environment.name}/#{service.application}/mysql_password" })
       end
     end
@@ -38,15 +43,12 @@ module Stacks::Services::LegacyMysqlCluster
   end
 
   def config_params(dependant, _fabric)
-    # MySQL user names can be up to 16 characters long: https://dev.mysql.com/doc/refman/5.5/en/user-names.html
-    dependant.application[0..15]
-
     # This is where we can provide config params to App servers (only) to put into their config.properties
     {
       "db.#{@database_name}.hostname"           => mysqldb_server.prod_fqdn,
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.port"               => '3306',
-      "db.#{@database_name}.username"           => "#{dependant.application}",
+      "db.#{@database_name}.username"           => "#{mysql_username(dependant)}",
       "db.#{@database_name}.password_hiera_key" =>
         "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
     }
