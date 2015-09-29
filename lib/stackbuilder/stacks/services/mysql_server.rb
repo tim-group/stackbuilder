@@ -131,7 +131,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @config = merge_gtid_config if @use_gtids
 
     unless @virtual_service.allowed_hosts.empty?
-      enc['role::mysql_hacks::firewall'] = {
+      enc['role::allow_hosts'] = {
         'allow_hosts' => @virtual_service.allowed_hosts
       }
     end
