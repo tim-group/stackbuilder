@@ -52,6 +52,7 @@ describe_stack 'stack-with-dependencies' do
         self.master_instances = 2
         self.slave_instances = 3
         self.secondary_site_slave_instances = 1
+        self.include_master_in_read_only_cluster = false
         self.supported_dependencies = [:active_master, :read_only, :read_only_bulkhead]
       end
     end
@@ -139,5 +140,25 @@ describe_stack 'stack-with-dependencies' do
     deps = host.to_enc['role::http_app']['dependencies']
 
     expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.earth.net.local')
+  end
+
+  xhost('e3-roapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.read_only_cluster']).to eql(
+      'e3-dependedondb-003.earth.net.local,e3-dependedondb-004.earth.net.local'
+    )
+  end
+
+  xhost('e3-robulkheadapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.read_only_cluster']).to eql('e3-dependedondb-005.earth.net.local')
+  end
+
+  xhost('e3-rosecondaryapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.space.net.local')
   end
 end
