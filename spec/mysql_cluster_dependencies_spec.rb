@@ -45,6 +45,56 @@ describe_stack 'stack-with-dependencies' do
       instantiate_stack 'loadbalancer'
       instantiate_stack 'example'
     end
+
+    stack 'example_db_depended_on_in_different_ways' do
+      mysql_cluster 'dependedondb' do
+        self.database_name = 'dependedondb'
+        self.master_instances = 2
+        self.slave_instances = 3
+        self.secondary_site_slave_instances = 1
+        self.supported_dependencies = [:active_master, :read_only, :read_only_bulkhead]
+      end
+    end
+
+    stack 'read_write_example' do
+      virtual_appserver 'rwapp' do
+        self.groups = ['blue']
+        self.application = 'rw-app'
+        depend_on_with_requirement 'dependedondb', environment.name, [:active_master]
+      end
+    end
+
+    stack 'read_only_example' do
+      virtual_appserver 'roapp' do
+        self.groups = ['blue']
+        self.application = 'ro-app'
+        depend_on_with_requirement 'dependedondb', environment.name, [:read_only]
+      end
+    end
+
+    stack 'read_only_bulkhead_example' do
+      virtual_appserver 'robulkheadapp' do
+        self.groups = ['blue']
+        self.application = 'ro-bulkhead-app'
+        depend_on_with_requirement 'dependedondb', environment.name, [:read_only_bulkhead]
+      end
+    end
+
+    stack 'read_only_second_site_cluster' do
+      virtual_appserver 'rosecondaryapp' do
+        self.groups = ['blue']
+        self.application = 'ro-secondary-app'
+        depend_on_with_requirement 'dependedondb', environment.name, [:read_only]
+      end
+    end
+
+    env 'e3', :primary_site => 'earth', :secondary_site => 'space' do
+      instantiate_stack 'example_db_depended_on_in_different_ways'
+      instantiate_stack 'read_write_example'
+      instantiate_stack 'read_only_example'
+      instantiate_stack 'read_only_bulkhead_example'
+      instantiate_stack 'read_only_second_site_cluster'
+    end
   end
 
   host('e2-exampleapp2-002.mgmt.earth.net.local') do |host|
@@ -83,5 +133,11 @@ describe_stack 'stack-with-dependencies' do
     expect(deps['db.example.read_only_cluster']).to eql(
       'pg-exampledb-002.space.net.local,pg-exampledb-003.space.net.local' \
     )
+  end
+
+  host('e3-rwapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.earth.net.local')
   end
 end

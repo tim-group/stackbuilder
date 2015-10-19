@@ -15,6 +15,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :slave_instances
   attr_accessor :include_master_in_read_only_cluster
   attr_accessor :backup_instance_site
+  attr_accessor :supported_dependencies
 
   def configure
     @database_name = ''
@@ -27,6 +28,7 @@ module Stacks::Services::MysqlCluster
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0
     @backup_instance_site = :secondary_site
+    @supported_dependencies = []
   end
 
   def instantiate_machine(name, type, i, environment, location)
