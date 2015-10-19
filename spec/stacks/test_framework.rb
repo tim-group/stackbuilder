@@ -16,6 +16,14 @@ module Stacks::TestFramework
     end
   end
 
+  def xhost(host, &block)
+    subject = @subject
+    xit "#{host}" do
+      host = subject.find(host)
+      block.call(host)
+    end
+  end
+
   def environment(environment, desc = '', &block)
     subject = @subject
     it "#{environment} #{desc}" do
