@@ -142,7 +142,6 @@ describe_stack 'stack-with-dependencies' do
     expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.earth.net.local')
   end
 
-
   # Following tests are Work-in-progress for specifying a mysql db to depend on
   #  -- gallan, 2015-10-20
   xhost('e3-roapp-001.mgmt.earth.net.local') do |host|
