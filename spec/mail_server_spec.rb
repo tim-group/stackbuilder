@@ -25,7 +25,7 @@ describe_stack 'test enc of the mail servers' do
   # OY Master
   host("oymigration-mail-001.mgmt.oy.net.local") do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server::default_new_mgmt_net_local']).to eql({"postfix" => false})
     expect(enc['role::mail_server2']['allowed_hosts'].sort).to eql([
       '172.16.0.0/21'
     ])
