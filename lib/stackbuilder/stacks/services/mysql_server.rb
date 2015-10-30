@@ -7,6 +7,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :version
   attr_accessor :server_id
   attr_accessor :use_gtids
+  attr_accessor :monitoring_checks
 
   def initialize(base_hostname, i, virtual_service, role, location)
     index = sprintf("%03d", i)
@@ -26,6 +27,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @vcpus = '2'
     @version = '5.1.49-1ubuntu8'
     @virtual_service = virtual_service
+    @monitoring_checks = []
 
     storage = {
       '/tmp' => {
@@ -112,7 +114,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'master'                   => master?,
                  'server_id'                => server_id,
                  'charset'                  => @virtual_service.charset,
-                 'version'                  => @version
+                 'version'                  => @version,
+                 'monitoring_checks'        => @monitoring_checks
                },
                'server::default_new_mgmt_net_local' => nil)
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
