@@ -16,6 +16,8 @@ module Stacks::Services::MysqlCluster
   attr_accessor :include_master_in_read_only_cluster
   attr_accessor :backup_instance_site
   attr_accessor :supported_dependencies
+  attr_accessor :enable_percona_checksum_tools
+  attr_accessor :percona_checksum_ignore_tables
 
   def configure
     @database_name = ''
@@ -29,6 +31,8 @@ module Stacks::Services::MysqlCluster
     @master_index_offset = 0
     @backup_instance_site = :secondary_site
     @supported_dependencies = []
+    @enable_percona_checksum_tools = false
+    @percona_checksum_ignore_tables = ''
   end
 
   def instantiate_machine(name, type, i, environment, location)

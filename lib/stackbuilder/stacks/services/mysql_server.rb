@@ -145,6 +145,13 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         'restart_mysql' => !@environment.production
       }
     end
+    if @virtual_service.enable_percona_checksum_tools
+      enc['percona::checksum_tools'] = {
+        'database_name' => @virtual_service.database_name,
+        'master_fqdns'  => @virtual_service.master_servers,
+        'ignore_tables' => @virtual_service.percona_checksum_ignore_tables
+      }
+    end
 
     enc['role::mysql_multiple_rights'] = {
       'rights' => {

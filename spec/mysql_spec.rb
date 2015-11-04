@@ -567,3 +567,25 @@ describe_stack 'should create secondary_sited slave databases' do
     )
   end
 end
+
+describe_stack 'should allow percona_checksum_tools flag to be specified' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.enable_percona_checksum_tools = true
+        self.percona_checksum_ignore_tables = 'test.ignore'
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc.key?('percona::checksum_tools')).to eql(true)
+    pct = host.to_enc['percona::checksum_tools']
+    expect(pct['database_name']).to eql('test')
+    expect(pct['master_fqdns']).to eql(['production-mydb-001.space.net.local'])
+    expect(pct['ignore_tables']).to eql('test.ignore')
+  end
+end
