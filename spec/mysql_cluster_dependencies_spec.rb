@@ -94,11 +94,20 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
+    stack 'declares_requirement_that_is_not_supported' do
+      virtual_appserver 'badapp' do
+        self.groups = ['blue']
+        self.application = 'badapp'
+        depend_on_with_requirement 'dependedondb', environment.name, :i_made_this_up
+      end
+    end
+
     env 'e3', :primary_site => 'earth', :secondary_site => 'space' do
       instantiate_stack 'example_db_depended_on_in_different_ways'
       instantiate_stack 'read_write_example'
       instantiate_stack 'read_only_example'
       instantiate_stack 'read_only_bulkhead_example'
+      instantiate_stack 'declares_requirement_that_is_not_supported'
     end
   end
 
@@ -158,5 +167,11 @@ describe_stack 'stack-with-dependencies' do
     deps = host.to_enc['role::http_app']['dependencies']
 
     expect(deps['db.dependedondb.read_only_cluster']).to eql('e3-dependedondb-005.earth.net.local')
+  end
+
+  host('e3-badapp-001.mgmt.earth.net.local') do |host|
+    expect { host.to_enc['role::http_app']['dependencies'] }.to raise_error "Stack 'dependedondb' does not support "\
+      "requirement 'i_made_this_up' in environment 'e3'. " \
+      "Supported requirements: [active_master,read_only,read_only_bulkhead,secondary_site_read_only]."
   end
 end

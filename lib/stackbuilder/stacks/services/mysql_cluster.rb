@@ -119,8 +119,14 @@ module Stacks::Services::MysqlCluster
     elsif requirement_of(dependent).nil?
       config_given_no_requirement(dependent, fabric)
     else
+      requirement = requirement_of(dependent)
+      if !@supported_dependencies.include?(requirement)
+        fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
+          "Supported requirements: [#{@supported_dependencies.keys.sort.join(',')}]."
+      end
+
       servers_in_fabric = children.select { |server| server.fabric == fabric }
-      hostnames_for_requirement = @supported_dependencies[requirement_of(dependent)]
+      hostnames_for_requirement = @supported_dependencies[requirement]
       matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.name) }
 
       config_to_fulfil_requirement(dependent, matching_hostnames)
