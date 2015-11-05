@@ -86,14 +86,57 @@ module Stacks::Services::MysqlCluster
     end
   end
 
-  def create_persistent_storage_override
-    each_machine(&:create_persistent_storage_override)
+  def dependant_children_replication_mysql_rights(server)
+    rights = {}
+    children.each do |dependant|
+      next if dependant == server
+
+      rights.merge!(
+        "replicant@#{dependant.prod_fqdn}" => {
+          'password_hiera_key' => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password"
+        })
+    end
+    rights
+  end
+
+  def dependant_instance_mysql_rights(location)
+    rights = {
+      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
+    }
+    virtual_services_that_depend_on_me(location).each do |service|
+      service.children.each do |dependant|
+        rights['mysql_hacks::application_rights_wrapper']['rights'].
+          merge!("#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
+                 { 'password_hiera_key' => "enc/#{service.environment.name}/#{service.application}/mysql_password" })
+      end
+    end
+    rights
+  end
+
+  def config_params(dependent, fabric)
+    if @supported_dependencies.empty?
+      return config_given_no_requirement(dependent, fabric)
+    elsif requirement_of(dependent).nil?
+      config_given_no_requirement(dependent, fabric)
+    else
+      servers_in_fabric = children.select { |server| server.fabric == fabric }
+      hostnames_for_requirement = @supported_dependencies[requirement_of(dependent)]
+      matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.name) }
+
+      config_to_fulfil_requirement(dependent, matching_hostnames)
+    end
   end
 
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
     fail "No masters were not found! #{children}" if masters.empty?
     [masters.first.prod_fqdn]
+  end
+
+  private
+
+  def create_persistent_storage_override
+    each_machine(&:create_persistent_storage_override)
   end
 
   def all_servers(fabric)
@@ -118,86 +161,38 @@ module Stacks::Services::MysqlCluster
     end
   end
 
-  def dependant_children_replication_mysql_rights(server)
-    rights = {}
-    children.each do |dependant|
-      next if dependant == server
-
-      rights.merge!(
-        "replicant@#{dependant.prod_fqdn}" => {
-          'password_hiera_key' => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password"
-        })
-    end
-    rights
-  end
-
   def mysql_username(service)
     # MySQL user names can be up to 16 characters long: https://dev.mysql.com/doc/refman/5.5/en/user-names.html
     service.application[0..15]
   end
 
-  def dependant_instance_mysql_rights(location)
-    rights = {
-      'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
-    }
-    virtual_services_that_depend_on_me(location).each do |service|
-      service.children.each do |dependant|
-        rights['mysql_hacks::application_rights_wrapper']['rights'].
-          merge!("#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
-                 { 'password_hiera_key' => "enc/#{service.environment.name}/#{service.application}/mysql_password" })
-      end
-    end
-    rights
+  def config_given_no_requirement(dependent, fabric)
+    config_properties(dependent, master_servers, all_servers(fabric))
   end
-
-  def config_params(dependent, fabric)
-    if @supported_dependencies.empty?
-      return config_given_no_requirement(dependent, fabric)
-    elsif requirement_of(dependent).nil?
-      config_given_no_requirement(dependent, fabric)
-    else
-      servers_in_fabric = children.select do |server| server.fabric == fabric end
-      hostnames_for_requirement = @supported_dependencies[requirement_of(dependent)]
-      matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.name) }
-
-      config_to_fulfil_requirement(dependent, matching_hostnames)
-    end
-  end
-
-  private
 
   def requirement_of(dependant)
-    dependent_on_this_cluster = dependant.depends_on.find { |dependency| dependency[0] == self.name }
+    dependent_on_this_cluster = dependant.depends_on.find { |dependency| dependency[0] == name }
     dependent_on_this_cluster[2]
   end
 
-  def config_given_no_requirement(dependent, fabric)
-    config_params = {
-        "db.#{@database_name}.hostname"           => master_servers.join(','),
-        "db.#{@database_name}.database"           => database_name,
-        "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
-        "db.#{@database_name}.port"               => '3306',
-        "db.#{@database_name}.username"           => mysql_username(dependent),
-        "db.#{@database_name}.password_hiera_key" =>
-            "enc/#{dependent.environment.name}/#{dependent.application}/mysql_password"
-    }
-    config_params["db.#{@database_name}.read_only_cluster"] =
-        all_servers(fabric).join(",") unless all_servers(fabric).empty?
-    config_params
+  def config_to_fulfil_requirement(dependent, hosts)
+    hosts_fqdns = hosts.map(&:prod_fqdn)
+    config_properties(dependent, hosts_fqdns, hosts_fqdns)
   end
 
-  def config_to_fulfil_requirement(dependent, hosts)
+  def config_properties(dependent, hostnames, read_only_cluster)
     config_params = {
-        "db.#{@database_name}.hostname"           => hosts.map { |server| server.prod_fqdn }.join(','),
-        "db.#{@database_name}.database"           => database_name,
-        "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
-        "db.#{@database_name}.port"               => '3306',
-        "db.#{@database_name}.username"           => mysql_username(dependent),
-        "db.#{@database_name}.password_hiera_key" =>
-            "enc/#{dependent.environment.name}/#{dependent.application}/mysql_password"
+      "db.#{@database_name}.hostname"           => hostnames.join(','),
+      "db.#{@database_name}.database"           => database_name,
+      "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
+      "db.#{@database_name}.port"               => '3306',
+      "db.#{@database_name}.username"           => mysql_username(dependent),
+      "db.#{@database_name}.password_hiera_key" =>
+        "enc/#{dependent.environment.name}/#{dependent.application}/mysql_password"
     }
     config_params["db.#{@database_name}.read_only_cluster"] =
-        hosts.map { |server| server.prod_fqdn }.join(",") unless hosts.empty?
+        read_only_cluster.join(",") unless read_only_cluster.empty?
+
     config_params
   end
 end

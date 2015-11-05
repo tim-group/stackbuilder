@@ -159,5 +159,4 @@ describe_stack 'stack-with-dependencies' do
 
     expect(deps['db.dependedondb.read_only_cluster']).to eql('e3-dependedondb-005.earth.net.local')
   end
-
 end
