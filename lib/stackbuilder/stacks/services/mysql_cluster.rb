@@ -88,6 +88,10 @@ module Stacks::Services::MysqlCluster
     end
   end
 
+  def create_persistent_storage_override
+    each_machine(&:create_persistent_storage_override)
+  end
+
   def dependant_children_replication_mysql_rights(server)
     rights = {}
     children.each do |dependant|
@@ -149,10 +153,6 @@ module Stacks::Services::MysqlCluster
         fail "Attempting to support requirement '#{requirement}' with no servers assigned to it."
       end
     end
-  end
-
-  def create_persistent_storage_override
-    each_machine(&:create_persistent_storage_override)
   end
 
   def all_servers(fabric)
