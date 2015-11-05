@@ -30,7 +30,7 @@ module Stacks::Services::MysqlCluster
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0
     @backup_instance_site = :secondary_site
-    @supported_dependencies = []
+    @supported_dependencies = {}
     @enable_percona_checksum_tools = false
     @percona_checksum_ignore_tables = ''
   end
@@ -150,19 +150,54 @@ module Stacks::Services::MysqlCluster
     rights
   end
 
-  def config_params(dependant, fabric)
-    # This is where we can provide config params to App servers (only) to put into their config.properties
+  def config_params(dependent, fabric)
+    if @supported_dependencies.empty?
+      return config_given_no_requirement(dependent, fabric)
+    elsif requirement_of(dependent).nil?
+      config_given_no_requirement(dependent, fabric)
+    else
+      servers_in_fabric = children.select do |server| server.fabric == fabric end
+      hostnames_for_requirement = @supported_dependencies[requirement_of(dependent)]
+      matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.name) }
+
+      config_to_fulfil_requirement(dependent, matching_hostnames)
+    end
+  end
+
+  private
+
+  def requirement_of(dependant)
+    dependent_on_this_cluster = dependant.depends_on.find { |dependency| dependency[0] == self.name }
+    dependent_on_this_cluster[2]
+  end
+
+  def config_given_no_requirement(dependent, fabric)
     config_params = {
-      "db.#{@database_name}.hostname"           => master_servers.join(','),
-      "db.#{@database_name}.database"           => database_name,
-      "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
-      "db.#{@database_name}.port"               => '3306',
-      "db.#{@database_name}.username"           => mysql_username(dependant),
-      "db.#{@database_name}.password_hiera_key" =>
-        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
+        "db.#{@database_name}.hostname"           => master_servers.join(','),
+        "db.#{@database_name}.database"           => database_name,
+        "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
+        "db.#{@database_name}.port"               => '3306',
+        "db.#{@database_name}.username"           => mysql_username(dependent),
+        "db.#{@database_name}.password_hiera_key" =>
+            "enc/#{dependent.environment.name}/#{dependent.application}/mysql_password"
     }
     config_params["db.#{@database_name}.read_only_cluster"] =
         all_servers(fabric).join(",") unless all_servers(fabric).empty?
+    config_params
+  end
+
+  def config_to_fulfil_requirement(dependent, hosts)
+    config_params = {
+        "db.#{@database_name}.hostname"           => hosts.map { |server| server.prod_fqdn }.join(','),
+        "db.#{@database_name}.database"           => database_name,
+        "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
+        "db.#{@database_name}.port"               => '3306',
+        "db.#{@database_name}.username"           => mysql_username(dependent),
+        "db.#{@database_name}.password_hiera_key" =>
+            "enc/#{dependent.environment.name}/#{dependent.application}/mysql_password"
+    }
+    config_params["db.#{@database_name}.read_only_cluster"] =
+        hosts.map { |server| server.prod_fqdn }.join(",") unless hosts.empty?
     config_params
   end
 end

@@ -53,7 +53,12 @@ describe_stack 'stack-with-dependencies' do
         self.slave_instances = 3
         self.secondary_site_slave_instances = 1
         self.include_master_in_read_only_cluster = false
-        self.supported_dependencies = [:active_master, :read_only, :read_only_bulkhead]
+        self.supported_dependencies = {
+          :active_master => ['e3-dependedondb-001'],
+          :read_only => %w(e3-dependedondb-003 e3-dependedondb-004),
+          :secondary_site_read_only => ['e3-dependedondb-001'],
+          :read_only_bulkhead => ['e3-dependedondb-005']
+        }
       end
     end
 
@@ -61,7 +66,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'rwapp' do
         self.groups = ['blue']
         self.application = 'rw-app'
-        depend_on_with_requirement 'dependedondb', environment.name, [:active_master]
+        depend_on_with_requirement 'dependedondb', environment.name, :active_master
       end
     end
 
@@ -69,7 +74,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'roapp' do
         self.groups = ['blue']
         self.application = 'ro-app'
-        depend_on_with_requirement 'dependedondb', environment.name, [:read_only]
+        depend_on_with_requirement 'dependedondb', environment.name, :read_only
       end
     end
 
@@ -77,7 +82,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'robulkheadapp' do
         self.groups = ['blue']
         self.application = 'ro-bulkhead-app'
-        depend_on_with_requirement 'dependedondb', environment.name, [:read_only_bulkhead]
+        depend_on_with_requirement 'dependedondb', environment.name, :read_only_bulkhead
       end
     end
 
@@ -85,7 +90,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'rosecondaryapp' do
         self.groups = ['blue']
         self.application = 'ro-secondary-app'
-        depend_on_with_requirement 'dependedondb', environment.name, [:read_only]
+        depend_on_with_requirement 'dependedondb', environment.name, :secondary_site_read_only
       end
     end
 
@@ -94,7 +99,6 @@ describe_stack 'stack-with-dependencies' do
       instantiate_stack 'read_write_example'
       instantiate_stack 'read_only_example'
       instantiate_stack 'read_only_bulkhead_example'
-      instantiate_stack 'read_only_second_site_cluster'
     end
   end
 
@@ -142,9 +146,7 @@ describe_stack 'stack-with-dependencies' do
     expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.earth.net.local')
   end
 
-  # Following tests are Work-in-progress for specifying a mysql db to depend on
-  #  -- gallan, 2015-10-20
-  xhost('e3-roapp-001.mgmt.earth.net.local') do |host|
+  host('e3-roapp-001.mgmt.earth.net.local') do |host|
     deps = host.to_enc['role::http_app']['dependencies']
 
     expect(deps['db.dependedondb.read_only_cluster']).to eql(
@@ -152,15 +154,10 @@ describe_stack 'stack-with-dependencies' do
     )
   end
 
-  xhost('e3-robulkheadapp-001.mgmt.earth.net.local') do |host|
+  host('e3-robulkheadapp-001.mgmt.earth.net.local') do |host|
     deps = host.to_enc['role::http_app']['dependencies']
 
     expect(deps['db.dependedondb.read_only_cluster']).to eql('e3-dependedondb-005.earth.net.local')
   end
 
-  xhost('e3-rosecondaryapp-001.mgmt.earth.net.local') do |host|
-    deps = host.to_enc['role::http_app']['dependencies']
-
-    expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.space.net.local')
-  end
 end

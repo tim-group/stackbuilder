@@ -48,14 +48,13 @@ class Stacks::MachineSet
   end
 
   def depend_on(dependant, env = environment.name)
-    depend_on_with_requirement(dependant, env, [])
+    depend_on_with_requirement(dependant, env, nil)
   end
 
-  def depend_on_with_requirement(dependant, env = environment.name, requirements = [])
+  def depend_on_with_requirement(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     selected_env = environment.name if env.nil?
-    dependency_requirements = [] if requirements.nil? || requirements.empty?
-    @depends_on << [dependant, env] unless @depends_on.include? [dependant, selected_env, dependency_requirements]
+    @depends_on << [dependant, env, requirement] unless @depends_on.include? [dependant, selected_env, requirement]
   end
 
   def dependency_config(fabric)

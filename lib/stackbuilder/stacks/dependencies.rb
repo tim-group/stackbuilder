@@ -73,8 +73,8 @@ module Stacks::Dependencies
     # the variable part
     virtual_services_that_depend_on_me = []
 
-    @@eligible_virtual_services_cache.each do |virtual_service, depends_on|
-      next if !depends_on.include?([name, environment.name])
+    @@eligible_virtual_services_cache.each do |virtual_service, depends_on, requirement|
+      next if !depends_on.include?([name, environment.name, requirement])
 
       virtual_services_that_depend_on_me.push virtual_service
     end
