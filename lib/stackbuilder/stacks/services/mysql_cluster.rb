@@ -47,6 +47,8 @@ module Stacks::Services::MysqlCluster
 
   def instantiate_machines(environment)
     fail 'MySQL clusters do not currently support enable_secondary_site' if @enable_secondary_site
+    validate_supported_dependencies
+
     i = @master_index_offset
     @master_instances.times do
       instantiate_machine(name, :master, i += 1, environment, :primary_site)
@@ -140,6 +142,14 @@ module Stacks::Services::MysqlCluster
   end
 
   private
+
+  def validate_supported_dependencies
+    @supported_dependencies.each_pair do |requirement, hosts|
+      if hosts.nil? || hosts.empty?
+        fail "Attempting to support requirement '#{requirement}' with no servers assigned to it."
+      end
+    end
+  end
 
   def create_persistent_storage_override
     each_machine(&:create_persistent_storage_override)

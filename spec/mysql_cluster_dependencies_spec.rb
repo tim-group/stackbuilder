@@ -7,6 +7,7 @@ describe_stack 'stack-with-dependencies' do
     stack 'loadbalancer' do
       loadbalancer
     end
+
     stack 'example' do
       virtual_appserver 'exampleapp2' do
         self.groups = ['blue']
@@ -173,5 +174,23 @@ describe_stack 'stack-with-dependencies' do
     expect { host.to_enc['role::http_app']['dependencies'] }.to raise_error "Stack 'dependedondb' does not support "\
       "requirement 'i_made_this_up' in environment 'e3'. " \
       "Supported requirements: [active_master,read_only,read_only_bulkhead,secondary_site_read_only]."
+  end
+
+  describe_stack 'should fail to instantiate mysql_cluster if it attempts to support a requirement with no servers' do
+    expect do
+      given do
+        stack 'cluster_with_no_servers_to_support_a_requirement' do
+          mysql_cluster 'baddb' do
+            self.database_name = 'baddb'
+            self.supported_dependencies = {
+              :nothing_supports_this => []
+            }
+          end
+        end
+        env 'e4', :primary_site => 'earth', :secondary_site => 'space' do
+          instantiate_stack('cluster_with_no_servers_to_support_a_requirement')
+        end
+      end
+    end.to raise_error "Attempting to support requirement 'nothing_supports_this' with no servers assigned to it."
   end
 end
