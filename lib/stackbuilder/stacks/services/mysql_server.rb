@@ -149,6 +149,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       enc['percona::checksum_tools'] = {
         'database_name' => @virtual_service.database_name,
         'master_fqdns'  => @virtual_service.master_servers,
+        'is_master'     => master?,
         'ignore_tables' => @virtual_service.percona_checksum_ignore_tables
       }
     end
