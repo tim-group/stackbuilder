@@ -83,7 +83,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'rwapp' do
         self.groups = ['blue']
         self.application = 'rw-app'
-        depend_on_with_requirement 'dependedondb', environment.name, :active_master
+        depend_on 'dependedondb', environment.name, :active_master
       end
     end
 
@@ -91,7 +91,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'roapp' do
         self.groups = ['blue']
         self.application = 'ro-app'
-        depend_on_with_requirement 'dependedondb', environment.name, :read_only
+        depend_on 'dependedondb', environment.name, :read_only
       end
     end
 
@@ -99,7 +99,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'robulkheadapp' do
         self.groups = ['blue']
         self.application = 'ro-bulkhead-app'
-        depend_on_with_requirement 'dependedondb', environment.name, :read_only_bulkhead
+        depend_on 'dependedondb', environment.name, :read_only_bulkhead
       end
     end
 
@@ -107,7 +107,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'badapp' do
         self.groups = ['blue']
         self.application = 'badapp'
-        depend_on_with_requirement 'dependedondb', environment.name, :i_made_this_up
+        depend_on 'dependedondb', environment.name, :i_made_this_up
       end
     end
 
@@ -124,7 +124,7 @@ describe_stack 'stack-with-dependencies' do
       virtual_appserver 'rosecondaryapp' do
         self.groups = ['blue']
         self.application = 'ro-secondary-app'
-        depend_on_with_requirement 'dependedondb', 'e3', :read_only
+        depend_on 'dependedondb', 'e3', :read_only
       end
     end
 
