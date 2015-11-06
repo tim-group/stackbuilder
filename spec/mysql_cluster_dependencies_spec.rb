@@ -247,4 +247,27 @@ describe_stack 'stack-with-dependencies' do
       end
     end.to raise_error "Attempting to support requirement 'nothing_supports_this' with no servers assigned to it."
   end
+
+  describe_stack 'should fail to instantiate cluster if any machines supporting requirement do not exist' do
+    expect do
+      given do
+        stack 'cluster_with_fictional_servers_to_support_requirements' do
+          mysql_cluster 'fictionaldb' do
+            self.database_name = 'fictionaldb'
+            self.master_instances = 1
+            self.slave_instances = 1
+            self.secondary_site_slave_instances = 0
+            self.supported_dependencies = {
+              :active_master => ['e5-fictionaldb-009.earth.net.local']
+            }
+          end
+        end
+        env 'e5', :primary_site => 'earth', :secondary_site => 'space' do
+          instantiate_stack('cluster_with_fictional_servers_to_support_requirements')
+        end
+      end
+    end.to raise_error "Attempting to support requirement 'active_master' with non-existent server " \
+      "'e5-fictionaldb-009.earth.net.local'. Available servers: [e5-fictionaldb-001.earth.net.local," \
+      "e5-fictionaldb-002.earth.net.local,e5-fictionaldbbackup-001.space.net.local]."
+  end
 end

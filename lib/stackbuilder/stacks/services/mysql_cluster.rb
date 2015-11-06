@@ -47,7 +47,8 @@ module Stacks::Services::MysqlCluster
 
   def instantiate_machines(environment)
     fail 'MySQL clusters do not currently support enable_secondary_site' if @enable_secondary_site
-    validate_supported_dependencies
+    validate_supported_dependencies_specify_at_least_one_server
+    on_bind { validate_supported_dependency_servers_exist_on_bind }
 
     i = @master_index_offset
     @master_instances.times do
@@ -147,10 +148,21 @@ module Stacks::Services::MysqlCluster
 
   private
 
-  def validate_supported_dependencies
+  def validate_supported_dependencies_specify_at_least_one_server
     @supported_dependencies.each_pair do |requirement, hosts|
       if hosts.nil? || hosts.empty?
         fail "Attempting to support requirement '#{requirement}' with no servers assigned to it."
+      end
+    end
+  end
+
+  def validate_supported_dependency_servers_exist_on_bind
+    @supported_dependencies.each_pair do |requirement, hosts|
+      hosts.each do |host|
+        if children.find { |server| server.prod_fqdn == host }.nil?
+          fail "Attempting to support requirement '#{requirement}' with non-existent server '#{host}'. " \
+            "Available servers: [#{children.map(&:prod_fqdn).join(',')}]."
+        end
       end
     end
   end
