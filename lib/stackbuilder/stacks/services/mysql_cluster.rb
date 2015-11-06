@@ -133,7 +133,7 @@ module Stacks::Services::MysqlCluster
 
       servers_in_fabric = children.select { |server| server.fabric == fabric }
       hostnames_for_requirement = @supported_dependencies[requirement]
-      matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.name) }
+      matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.prod_fqdn) }
 
       config_to_fulfil_requirement(dependent, matching_hostnames)
     end

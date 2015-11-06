@@ -50,16 +50,32 @@ describe_stack 'stack-with-dependencies' do
     stack 'example_db_depended_on_in_different_ways' do
       mysql_cluster 'dependedondb' do
         self.database_name = 'dependedondb'
-        self.master_instances = 2
-        self.slave_instances = 3
-        self.secondary_site_slave_instances = 1
-        self.include_master_in_read_only_cluster = false
-        self.supported_dependencies = {
-          :active_master => ['e3-dependedondb-001'],
-          :read_only => %w(e3-dependedondb-003 e3-dependedondb-004),
-          :secondary_site_read_only => ['e3-dependedondb-001'],
-          :read_only_bulkhead => ['e3-dependedondb-005']
-        }
+
+        if environment.name == 'minimalenv'
+          self.master_instances = 1
+          self.slave_instances = 0
+          self.backup_instances = 0
+          self.secondary_site_slave_instances = 0
+          self.include_master_in_read_only_cluster = false
+          self.supported_dependencies = {
+            :active_master => ['minimalenv-dependedondb-001.earth.net.local'],
+            :read_only => %w(minimalenv-dependedondb-001.earth.net.local),
+            :read_only_bulkhead => ['minimalenv-dependedondb-001.earth.net.local']
+          }
+        else
+          self.master_instances = 2
+          self.slave_instances = 3
+          self.secondary_site_slave_instances = 1
+          self.include_master_in_read_only_cluster = false
+          self.supported_dependencies = {
+            :active_master => ['e3-dependedondb-001.earth.net.local'],
+            :read_only => %w(
+              e3-dependedondb-003.earth.net.local
+              e3-dependedondb-004.earth.net.local
+              e3-dependedondb-001.space.net.local),
+            :read_only_bulkhead => ['e3-dependedondb-005.earth.net.local']
+          }
+        end
       end
     end
 
@@ -87,14 +103,6 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
-    stack 'read_only_second_site_cluster' do
-      virtual_appserver 'rosecondaryapp' do
-        self.groups = ['blue']
-        self.application = 'ro-secondary-app'
-        depend_on_with_requirement 'dependedondb', environment.name, :secondary_site_read_only
-      end
-    end
-
     stack 'declares_requirement_that_is_not_supported' do
       virtual_appserver 'badapp' do
         self.groups = ['blue']
@@ -105,10 +113,31 @@ describe_stack 'stack-with-dependencies' do
 
     env 'e3', :primary_site => 'earth', :secondary_site => 'space' do
       instantiate_stack 'example_db_depended_on_in_different_ways'
+
       instantiate_stack 'read_write_example'
       instantiate_stack 'read_only_example'
       instantiate_stack 'read_only_bulkhead_example'
       instantiate_stack 'declares_requirement_that_is_not_supported'
+    end
+
+    stack 'read_only_second_site_cluster' do
+      virtual_appserver 'rosecondaryapp' do
+        self.groups = ['blue']
+        self.application = 'ro-secondary-app'
+        depend_on_with_requirement 'dependedondb', 'e3', :read_only
+      end
+    end
+
+    env 'e4', :primary_site => 'space', :secondary_site => 'moon' do
+      instantiate_stack 'read_only_second_site_cluster'
+    end
+
+    env 'minimalenv', :primary_site => 'earth', :secondary_site => 'space' do
+      instantiate_stack 'example_db_depended_on_in_different_ways'
+
+      instantiate_stack 'read_write_example'
+      instantiate_stack 'read_only_example'
+      instantiate_stack 'read_only_bulkhead_example'
     end
   end
 
@@ -170,10 +199,35 @@ describe_stack 'stack-with-dependencies' do
     expect(deps['db.dependedondb.read_only_cluster']).to eql('e3-dependedondb-005.earth.net.local')
   end
 
+  host('e4-rosecondaryapp-001.mgmt.space.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.space.net.local')
+  end
+
+  host('minimalenv-rwapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.hostname']).to eql('minimalenv-dependedondb-001.earth.net.local')
+  end
+
+  host('minimalenv-roapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.read_only_cluster']).to eql(
+      'minimalenv-dependedondb-001.earth.net.local')
+  end
+
+  host('minimalenv-robulkheadapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.dependedondb.read_only_cluster']).to eql('minimalenv-dependedondb-001.earth.net.local')
+  end
+
   host('e3-badapp-001.mgmt.earth.net.local') do |host|
     expect { host.to_enc['role::http_app']['dependencies'] }.to raise_error "Stack 'dependedondb' does not support "\
       "requirement 'i_made_this_up' in environment 'e3'. " \
-      "Supported requirements: [active_master,read_only,read_only_bulkhead,secondary_site_read_only]."
+      "Supported requirements: [active_master,read_only,read_only_bulkhead]."
   end
 
   describe_stack 'should fail to instantiate mysql_cluster if it attempts to support a requirement with no servers' do
