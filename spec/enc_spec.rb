@@ -240,23 +240,6 @@ describe Stacks::DSL do
     expect(find("no-exist")).to eql(nil)
   end
 
-  it 'can build elastics search clusters' do
-    stack "es" do
-      elasticsearch do
-      end
-    end
-
-    env "eg", :primary_site => "st", :secondary_site => "bs" do
-      instantiate_stack "es"
-    end
-
-    eg_es = find("eg-elasticsearch-001.mgmt.st.net.local")
-    expect(eg_es.to_enc['role::elasticsearch_node']['cluster_nodes']).to include(
-      'eg-elasticsearch-002.st.net.local',
-      'eg-elasticsearch-001.st.net.local')
-    expect(eg_es.to_enc['role::elasticsearch_node']['cluster_nodes'].size).to eql(2)
-  end
-
   it 'throws an error if we try and instantiate a stack that isnt defined' do
     expect do
       env "myold", :primary_site => "x", :secondary_site => "y" do
