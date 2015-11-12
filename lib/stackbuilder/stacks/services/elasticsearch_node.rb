@@ -1,10 +1,10 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
-class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
-  def initialize(virtual_service, index)
+class Stacks::Services::ElasticsearchNode < Stacks::Services::AppServer
+  def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)
     @virtual_service = virtual_service
-    super(virtual_service.name + "-" + index)
+    super(virtual_service, index, networks, location)
 
     @ram = '16777216' # 16GB
     @vcpus = '4'
