@@ -4,6 +4,7 @@ module Stacks
     require 'stackbuilder/stacks/services/app_service'
     require 'stackbuilder/stacks/services/bind_server'
     require 'stackbuilder/stacks/services/ci_slave'
+    require 'stackbuilder/stacks/services/elasticsearch_cluster'
     require 'stackbuilder/stacks/services/elasticsearch_node'
     require 'stackbuilder/stacks/services/eventstore_cluster'
     require 'stackbuilder/stacks/services/eventstore_server'

@@ -86,8 +86,8 @@ class Stacks::CustomServices
     machineset_with('nat', [Stacks::Services::NatCluster], Stacks::Services::NatServer, &block)
   end
 
-  def elasticsearch(name = 'elasticsearch', &block)
-    machineset_with(name, [], Stacks::Services::ElasticSearchNode, &block)
+  def elasticsearch_cluster(name = 'elasticsearch', &block)
+    machineset_with(name, [Stacks::Services::ElasticsearchCluster], Stacks::Services::ElasticsearchNode, &block)
   end
 
   def rate_limited_forward_proxy(name = 'rate_limited_forward_proxy', &block)

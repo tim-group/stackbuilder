@@ -1,22 +1,16 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
-class Stacks::Services::ElasticSearchNode < Stacks::MachineDef
-  attr_reader :machine_set
-  def initialize(server_group, index)
-    @machine_set = server_group
-    super(server_group.name + "-" + index, [:prod, :mgmt])
-    self
-  end
-
-  def bind_to(environment)
-    super(environment)
+class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
+  def initialize(virtual_service, index)
+    @virtual_service = virtual_service
+    super(virtual_service.name + "-" + index)
   end
 
   def to_enc
     enc = super()
     enc.merge!('role::elasticsearch_node' => {
-                 'cluster_nodes' =>  machine_set.definitions.values.map(&:prod_fqdn)
+                 'cluster_nodes' =>  @virtual_service.children.map(&:prod_fqdn)
                })
     enc
   end
