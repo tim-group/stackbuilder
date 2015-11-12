@@ -9,5 +9,4 @@ module Stacks::Services::ElasticsearchCluster
     @cluster_name = 'elasticsearch'
     @instances = 3
   end
-
 end
