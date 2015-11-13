@@ -21,7 +21,11 @@ describe_stack 'should provide 3 elasticsearch nodes by default' do
   end
 
   host("testing-logs-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc.key?('role::elasticsearch_node')).to eql(true)
+    expect(host.to_enc['role::elasticsearch_node']['cluster_nodes'].sort).to eql([
+      'testing-logs-001.space.net.local',
+      'testing-logs-002.space.net.local',
+      'testing-logs-003.space.net.local'
+    ])
   end
 end
 
@@ -35,6 +39,7 @@ describe_stack 'should provide a default of 16GB of ram and 4 cpu cores' do
       instantiate_stack "elasticsearch"
     end
   end
+
   host("testing-logs-001.mgmt.space.net.local") do |host|
     expect(host.to_specs.shift[:ram]).to eql '16777216'
     expect(host.to_specs.shift[:vcpus]).to eql '4'
