@@ -7,8 +7,10 @@ module Stacks::Services::ElasticsearchCluster
     object.configure
   end
 
+  attr_accessor :cluster_name
+
   def configure
-    @cluster_name = 'elasticsearch'
+    @cluster_name = @name
     @application = 'ElasticsearchApp'
     @instances = 3
     @jvm_args = '-Xmx8g -Xms8g'

@@ -29,12 +29,22 @@ describe_stack 'should provide 3 elasticsearch nodes by default' do
   end
 
   host("testing-logs-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::elasticsearch_node']['cluster_name']).to eql("logs")
+  end
+
+  host("testing-logs-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::http_app']['dependencies']['elasticsearch_cluster_nodes'].sort).to eql([
       'testing-logs-001.space.net.local',
       'testing-logs-002.space.net.local',
       'testing-logs-003.space.net.local'
     ])
   end
+
+  host("testing-logs-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::http_app']['elasticsearch_cluster_name']).to eql("logs")
+  end
+
+  # check the basic config hasn't been overwritten
   host("testing-logs-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::http_app']['port']).to eql("8000")
   end
