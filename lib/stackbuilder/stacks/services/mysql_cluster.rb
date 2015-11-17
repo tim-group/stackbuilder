@@ -121,12 +121,12 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_params(dependent, fabric)
+    requirement = requirement_of(dependent)
     if @supported_dependencies.empty?
       return config_given_no_requirement(dependent, fabric)
-    elsif requirement_of(dependent).nil?
+    elsif requirement.nil?
       config_given_no_requirement(dependent, fabric)
     else
-      requirement = requirement_of(dependent)
       if !@supported_dependencies.include?(requirement)
         fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
           "Supported requirements: [#{@supported_dependencies.keys.sort.join(',')}]."
