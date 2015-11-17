@@ -16,6 +16,9 @@ module Stacks::Services::MysqlCluster
   attr_accessor :include_master_in_read_only_cluster
   attr_accessor :backup_instance_site
   attr_accessor :supported_requirements
+  # rubocop:disable all
+  alias :supported_dependencies= :supported_requirements=
+  # rubocop:enable all
   attr_accessor :enable_percona_checksum_tools
   attr_accessor :percona_checksum_ignore_tables
 
