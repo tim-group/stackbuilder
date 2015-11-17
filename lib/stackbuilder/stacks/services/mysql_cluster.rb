@@ -125,9 +125,7 @@ module Stacks::Services::MysqlCluster
 
   def config_params(dependent, fabric)
     requirement = requirement_of(dependent)
-    if @supported_requirements.empty?
-      return config_given_no_requirement(dependent, fabric)
-    elsif requirement.nil?
+    if @supported_requirements.empty? || requirement.nil?
       config_given_no_requirement(dependent, fabric)
     else
       if !@supported_requirements.include?(requirement)
