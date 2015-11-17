@@ -15,7 +15,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :slave_instances
   attr_accessor :include_master_in_read_only_cluster
   attr_accessor :backup_instance_site
-  attr_accessor :supported_dependencies
+  attr_accessor :supported_requirements
   attr_accessor :enable_percona_checksum_tools
   attr_accessor :percona_checksum_ignore_tables
 
@@ -30,7 +30,7 @@ module Stacks::Services::MysqlCluster
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0
     @backup_instance_site = :secondary_site
-    @supported_dependencies = {}
+    @supported_requirements = {}
     @enable_percona_checksum_tools = false
     @percona_checksum_ignore_tables = ''
   end
@@ -47,8 +47,8 @@ module Stacks::Services::MysqlCluster
 
   def instantiate_machines(environment)
     fail 'MySQL clusters do not currently support enable_secondary_site' if @enable_secondary_site
-    validate_supported_dependencies_specify_at_least_one_server
-    on_bind { validate_supported_dependency_servers_exist_on_bind }
+    validate_supported_requirements_specify_at_least_one_server
+    on_bind { validate_supported_requirements_servers_exist_on_bind }
 
     i = @master_index_offset
     @master_instances.times do
@@ -122,18 +122,18 @@ module Stacks::Services::MysqlCluster
 
   def config_params(dependent, fabric)
     requirement = requirement_of(dependent)
-    if @supported_dependencies.empty?
+    if @supported_requirements.empty?
       return config_given_no_requirement(dependent, fabric)
     elsif requirement.nil?
       config_given_no_requirement(dependent, fabric)
     else
-      if !@supported_dependencies.include?(requirement)
+      if !@supported_requirements.include?(requirement)
         fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
-          "Supported requirements: [#{@supported_dependencies.keys.sort.join(',')}]."
+          "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
       end
 
       servers_in_fabric = children.select { |server| server.fabric == fabric }
-      hostnames_for_requirement = @supported_dependencies[requirement]
+      hostnames_for_requirement = @supported_requirements[requirement]
       matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.prod_fqdn) }
 
       config_to_fulfil_requirement(dependent, matching_hostnames)
@@ -148,16 +148,16 @@ module Stacks::Services::MysqlCluster
 
   private
 
-  def validate_supported_dependencies_specify_at_least_one_server
-    @supported_dependencies.each_pair do |requirement, hosts|
+  def validate_supported_requirements_specify_at_least_one_server
+    @supported_requirements.each_pair do |requirement, hosts|
       if hosts.nil? || hosts.empty?
         fail "Attempting to support requirement '#{requirement}' with no servers assigned to it."
       end
     end
   end
 
-  def validate_supported_dependency_servers_exist_on_bind
-    @supported_dependencies.each_pair do |requirement, hosts|
+  def validate_supported_requirements_servers_exist_on_bind
+    @supported_requirements.each_pair do |requirement, hosts|
       hosts.each do |host|
         if children.find { |server| server.prod_fqdn == host }.nil?
           fail "Attempting to support requirement '#{requirement}' with non-existent server '#{host}'. " \

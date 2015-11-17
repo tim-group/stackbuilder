@@ -57,7 +57,7 @@ describe_stack 'stack-with-dependencies' do
           self.backup_instances = 0
           self.secondary_site_slave_instances = 0
           self.include_master_in_read_only_cluster = false
-          self.supported_dependencies = {
+          self.supported_requirements = {
             :active_master => ['minimalenv-dependedondb-001.earth.net.local'],
             :read_only => %w(minimalenv-dependedondb-001.earth.net.local),
             :read_only_bulkhead => ['minimalenv-dependedondb-001.earth.net.local']
@@ -67,7 +67,7 @@ describe_stack 'stack-with-dependencies' do
           self.slave_instances = 3
           self.secondary_site_slave_instances = 1
           self.include_master_in_read_only_cluster = false
-          self.supported_dependencies = {
+          self.supported_requirements = {
             :active_master => ['e3-dependedondb-001.earth.net.local'],
             :read_only => %w(
               e3-dependedondb-003.earth.net.local
@@ -236,7 +236,7 @@ describe_stack 'stack-with-dependencies' do
         stack 'cluster_with_no_servers_to_support_a_requirement' do
           mysql_cluster 'baddb' do
             self.database_name = 'baddb'
-            self.supported_dependencies = {
+            self.supported_requirements = {
               :nothing_supports_this => []
             }
           end
@@ -257,7 +257,7 @@ describe_stack 'stack-with-dependencies' do
             self.master_instances = 1
             self.slave_instances = 1
             self.secondary_site_slave_instances = 0
-            self.supported_dependencies = {
+            self.supported_requirements = {
               :active_master => ['e5-fictionaldb-009.earth.net.local']
             }
           end
