@@ -270,4 +270,39 @@ describe_stack 'stack-with-dependencies' do
       "'e5-fictionaldb-009.earth.net.local'. Available servers: [e5-fictionaldb-001.earth.net.local," \
       "e5-fictionaldb-002.earth.net.local,e5-fictionaldbbackup-001.space.net.local]."
   end
+
+  describe_stack 'should fail to instantiate cluster if there are no supported dependencies but appserver specifies ' \
+    'requirement' do
+    given do
+      stack 'cluster_with_no_supported_requirements' do
+        mysql_cluster 'fictionaldb' do
+          self.database_name = 'fictionaldb'
+          self.master_instances = 1
+          self.slave_instances = 1
+          self.secondary_site_slave_instances = 0
+          self.supported_requirements = {
+          }
+        end
+      end
+
+      stack 'declares_requirement' do
+        virtual_appserver 'badapp' do
+          self.groups = ['blue']
+          self.application = 'badapp'
+          depend_on 'fictionaldb', environment.name, :i_made_this_up
+        end
+      end
+
+      env 'e6', :primary_site => 'earth', :secondary_site => 'space' do
+        instantiate_stack('cluster_with_no_supported_requirements')
+        instantiate_stack('declares_requirement')
+      end
+    end
+
+    host('e6-badapp-001.mgmt.earth.net.local') do |host|
+      expect { host.to_enc['role::http_app']['dependencies'] }.to raise_error \
+        "Stack 'fictionaldb' does not support requirement 'i_made_this_up' in environment 'e6'. " \
+        "supported_requirements is empty or unset."
+    end
+  end
 end
