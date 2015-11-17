@@ -25,7 +25,7 @@ describe Subscription do
     end
 
     events = subscription.wait_for_hosts(topic, %w(a b))
-    expect(events.responses).to have_messages_for_hosts(%w(a b))
+    expect(events.responses).to have_messages_for_hosts(%w(a b)) # XXX flicker
   end
 
   it 'returns anyway after the timeout with some results missing' do
