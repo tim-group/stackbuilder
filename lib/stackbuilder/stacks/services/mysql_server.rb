@@ -27,7 +27,9 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @vcpus = '2'
     @version = '5.1.49-1ubuntu8'
     @virtual_service = virtual_service
-    @monitoring_checks = []
+    master_monitoring_checks = %w(heartbeat)
+    slave_monitoring_checks = %w(replication_running replication_delay)
+    @monitoring_checks = (role == :master) ? master_monitoring_checks : slave_monitoring_checks
 
     storage = {
       '/tmp' => {
