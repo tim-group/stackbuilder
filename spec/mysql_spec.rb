@@ -626,3 +626,29 @@ describe_stack 'should provide the correct monitoring checks for master and slav
     expect(enc['monitoring_checks']).to eql(%w(replication_running replication_delay))
   end
 end
+
+describe_stack 'should provide an option to allow user rights' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.backup_instances = 0
+        self.secondary_site_slave_instances = 0
+        each_machine do |machine|
+          machine.grant_user_rights = false if machine.mgmt_fqdn == 'production-mydb-002.mgmt.space.net.local'
+        end
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(true)
+  end
+  host("production-mydb-002.mgmt.space.net.local") do |host|
+    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(false)
+  end
+end
