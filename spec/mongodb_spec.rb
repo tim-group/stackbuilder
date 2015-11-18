@@ -39,22 +39,18 @@ describe_stack 'mongodb' do
 
   host("e1-mongodb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
-    expect(host.to_enc['mongodb::users']['environment']).to eql('e1')
   end
 
   host("latest-mongodb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
-    expect(host.to_enc['mongodb::users']['environment']).to eql('latest')
   end
 
   host("latest-mongodbarbiter-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
-    expect(host.to_enc['mongodb::users']['environment']).to eql('latest')
   end
 
   host("prodbackup-mongodb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
     expect(host.to_enc['mongodb::backup']).to eql('ensure' => 'present')
-    expect(host.to_enc['mongodb::users']['environment']).to eql('prodbackup')
   end
 end
