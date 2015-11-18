@@ -18,6 +18,9 @@ module Stacks::Services::MysqlCluster
   attr_accessor :supported_requirements
   attr_accessor :enable_percona_checksum_tools
   attr_accessor :percona_checksum_ignore_tables
+  attr_accessor :user_access_instances
+  attr_accessor :secondary_site_user_access_instances
+  attr_reader :grant_user_rights_by_default
 
   def configure
     @database_name = ''
@@ -33,12 +36,16 @@ module Stacks::Services::MysqlCluster
     @supported_requirements = {}
     @enable_percona_checksum_tools = false
     @percona_checksum_ignore_tables = ''
+    @user_access_instances = 0
+    @secondary_site_user_access_instances = 0
+    @grant_user_rights_by_default = true
   end
 
   def instantiate_machine(name, type, i, environment, location)
     index = sprintf("%03d", i)
     server_name = "#{name}-#{index}"
     server_name = "#{name}#{type}-#{index}" if type == :backup
+    server_name = "#{name}useraccess-#{index}" if type == :user_access
     server = @type.new(server_name, i, self, type, location)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
@@ -64,6 +71,16 @@ module Stacks::Services::MysqlCluster
     i = 0
     @secondary_site_slave_instances.times do
       instantiate_machine(name, :slave, i += 1, environment, :secondary_site)
+    end
+    i = 0
+    @user_access_instances.times do
+      @grant_user_rights_by_default = false
+      instantiate_machine(name, :user_access, i += 1, environment, :primary_site)
+    end
+    i = 0
+    @secondary_site_user_access_instances.times do
+      @grant_user_rights_by_default = false
+      instantiate_machine(name, :user_access, i += 1, environment, :secondary_site)
     end
   end
 

@@ -4,7 +4,7 @@ AllCops:
     - 'build/**/*'
 
 Metrics/AbcSize:
-  Max: 65
+  Max: 66
 
 Metrics/BlockNesting:
   Max: 6
