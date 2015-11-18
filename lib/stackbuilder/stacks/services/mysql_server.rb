@@ -9,7 +9,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :use_gtids
   attr_accessor :monitoring_checks
 
-  def initialize(base_hostname, i, virtual_service, role, location)
+  def initialize(base_hostname, i, mysql_cluster, role, location)
     index = sprintf("%03d", i)
     @master = (role == :master) ? true : false
     @backup = (role == :backup) ? true : false
@@ -26,7 +26,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @use_gtids = false
     @vcpus = '2'
     @version = '5.1.49-1ubuntu8'
-    @virtual_service = virtual_service
+    @mysql_cluster = mysql_cluster
     master_monitoring_checks = %w(heartbeat)
     slave_monitoring_checks = %w(replication_running replication_delay)
     @monitoring_checks = (role == :master) ? master_monitoring_checks : slave_monitoring_checks
@@ -62,12 +62,12 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     if @server_id.nil?
       case @role
       when :master
-        @server_id = @i + @virtual_service.server_id_offset
+        @server_id = @i + @mysql_cluster.server_id_offset
       when :slave
-        @server_id = @i + @virtual_service.server_id_offset
-        @server_id = @i + @virtual_service.server_id_offset + 100 if @location == :secondary_site
+        @server_id = @i + @mysql_cluster.server_id_offset
+        @server_id = @i + @mysql_cluster.server_id_offset + 100 if @location == :secondary_site
       when :backup
-        @server_id = @i + @virtual_service.server_id_offset + 200
+        @server_id = @i + @mysql_cluster.server_id_offset + 200
       end
     end
     @server_id
@@ -110,34 +110,34 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     enc = super()
     enc.merge!('role::mysql_server' => {
                  'backup'                   => backup?,
-                 'database_name'            => @virtual_service.database_name,
+                 'database_name'            => @mysql_cluster.database_name,
                  'datadir'                  => '/mnt/data/mysql',
                  'environment'              => environment.name,
                  'master'                   => master?,
                  'server_id'                => server_id,
-                 'charset'                  => @virtual_service.charset,
+                 'charset'                  => @mysql_cluster.charset,
                  'version'                  => @version,
                  'monitoring_checks'        => @monitoring_checks
                },
                'server::default_new_mgmt_net_local' => nil)
     enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
-    dependant_instances = @virtual_service.dependant_instance_fqdns(location, [:prod], false)
-    dependant_instances.concat(@virtual_service.fqdn_list(@virtual_service.children))
+    dependant_instances = @mysql_cluster.dependant_instance_fqdns(location, [:prod], false)
+    dependant_instances.concat(@mysql_cluster.fqdn_list(@mysql_cluster.children))
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::mysql_server'].merge!('dependencies' => @virtual_service.dependency_config(fabric),
+      enc['role::mysql_server'].merge!('dependencies' => @mysql_cluster.dependency_config(fabric),
                                        'dependant_instances' => dependant_instances)
       unless backup?
-        enc.merge!(@virtual_service.dependant_instance_mysql_rights(location))
+        enc.merge!(@mysql_cluster.dependant_instance_mysql_rights(location))
       end
     end
     @config = merge_gtid_config if @use_gtids
 
-    unless @virtual_service.allowed_hosts.empty?
+    unless @mysql_cluster.allowed_hosts.empty?
       enc['role::mysql_allow_hosts'] = {
-        'hosts' => @virtual_service.allowed_hosts
+        'hosts' => @mysql_cluster.allowed_hosts
       }
     end
 
@@ -147,21 +147,21 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         'restart_mysql' => !@environment.production
       }
     end
-    if @virtual_service.enable_percona_checksum_tools
+    if @mysql_cluster.enable_percona_checksum_tools
       enc['percona::checksum_tools'] = {
-        'database_name' => @virtual_service.database_name,
-        'master_fqdns'  => @virtual_service.master_servers,
+        'database_name' => @mysql_cluster.database_name,
+        'master_fqdns'  => @mysql_cluster.master_servers,
         'is_master'     => master?,
-        'ignore_tables' => @virtual_service.percona_checksum_ignore_tables
+        'ignore_tables' => @mysql_cluster.percona_checksum_ignore_tables
       }
     end
 
-    if @role == :user_access || @virtual_service.grant_user_rights_by_default == true
+    if @role == :user_access || @mysql_cluster.grant_user_rights_by_default == true
       enc['role::mysql_multiple_rights'] = {
         'rights' => {
-          @virtual_service.database_name => {
+          @mysql_cluster.database_name => {
             'environment'   => environment.name,
-            'database_name' => @virtual_service.database_name
+            'database_name' => @mysql_cluster.database_name
           }
         }
       }
@@ -170,7 +170,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     replication_rights_class = 'mysql_hacks::replication_rights_wrapper'
     enc[replication_rights_class] = {} if enc[replication_rights_class].nil?
     enc[replication_rights_class]['rights'] = {} if enc[replication_rights_class]['rights'].nil?
-    enc[replication_rights_class]['rights'].merge!(@virtual_service.dependant_children_replication_mysql_rights(self))
+    enc[replication_rights_class]['rights'].merge!(@mysql_cluster.dependant_children_replication_mysql_rights(self))
     enc
   end
 end
