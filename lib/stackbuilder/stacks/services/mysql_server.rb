@@ -68,6 +68,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         @server_id = @i + @mysql_cluster.server_id_offset + 100 if @location == :secondary_site
       when :backup
         @server_id = @i + @mysql_cluster.server_id_offset + 200
+      when :user
+        @server_id = @i + @mysql_cluster.server_id_offset + 300
       end
     end
     @server_id
