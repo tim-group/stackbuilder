@@ -31,7 +31,7 @@ class Stacks::Services::ElasticsearchNode < Stacks::Services::AppServer
                  'cluster_name' =>  @virtual_service.cluster_name
                })
     enc['role::http_app'].merge!('dependencies' => {
-                                   'elasticsearch_cluster_nodes' => @virtual_service.children.map(&:prod_fqdn)
+                                   'elasticsearch_cluster_nodes' => @virtual_service.children.map(&:prod_fqdn).sort
                                  })
     enc['role::http_app'].merge!('elasticsearch_cluster_name' => @virtual_service.cluster_name)
     enc
