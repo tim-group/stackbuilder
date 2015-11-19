@@ -8,6 +8,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :server_id
   attr_accessor :use_gtids
   attr_accessor :monitoring_checks
+  attr_accessor :grant_user_rights_by_default
 
   def initialize(base_hostname, i, mysql_cluster, role, location)
     index = sprintf("%03d", i)
@@ -30,6 +31,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     master_monitoring_checks = %w(heartbeat)
     slave_monitoring_checks = %w(replication_running replication_delay)
     @monitoring_checks = (role == :master) ? master_monitoring_checks : slave_monitoring_checks
+    @grant_user_rights_by_default = false
 
     storage = {
       '/tmp' => {
@@ -158,7 +160,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       }
     end
 
-    if @role == :user_access || @mysql_cluster.grant_user_rights_by_default == true
+    if @role == :user_access || @mysql_cluster.grant_user_rights_by_default || @grant_user_rights_by_default
       enc['role::mysql_multiple_rights'] = {
         'rights' => {
           @mysql_cluster.database_name => {

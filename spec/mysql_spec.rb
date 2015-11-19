@@ -708,3 +708,32 @@ describe_stack 'should grant_user_rights_by_default when no user_access_servers 
     ])
   end
 end
+
+describe_stack 'should grant_user_rights_by_default when no user_access_servers exist' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.user_access_instances = 1
+        self.slave_instances = 0
+        self.backup_instances = 0
+        each_machine do |machine|
+          machine.grant_user_rights_by_default = true if %w(production-mydb-001).include?(machine.hostname)
+        end
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(true)
+  end
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts([
+      'production-mydb-001.mgmt.space.net.local',
+      'production-mydbuseraccess-001.mgmt.space.net.local'
+    ])
+  end
+end
