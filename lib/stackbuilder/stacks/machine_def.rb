@@ -135,6 +135,12 @@ class Stacks::MachineDef
     end
   end
 
+  def recurse_merge!(a, b)
+    a.merge!(b) do |_, x, y|
+      (x.is_a?(Hash) && y.is_a?(Hash)) ? recurse_merge(x, y) : y
+    end
+  end
+
   def add_route(route_name)
     @routes << route_name unless @routes.include? route_name
   end

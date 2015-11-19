@@ -113,7 +113,65 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         'log_bin'                  => 'mysqld-bin'
       }
     }
-    recurse_merge(@config, gtid_config)
+    recurse_merge!(@config, gtid_config)
+  end
+
+  def percona_checksum_tools_enc
+    return {} unless @mysql_cluster.enable_percona_checksum_tools
+    {
+      'percona::checksum_tools' => {
+        'database_name' => @mysql_cluster.database_name,
+        'master_fqdns'  => @mysql_cluster.master_servers,
+        'is_master'     => master?,
+        'ignore_tables' => @mysql_cluster.percona_checksum_ignore_tables
+      }
+    }
+  end
+
+  def user_rights_enc
+    if @role == :user_access || @mysql_cluster.grant_user_rights_by_default || @grant_user_rights_by_default
+      {
+        'role::mysql_multiple_rights' => {
+          'rights' => {
+            @mysql_cluster.database_name => {
+              'environment'   => environment.name,
+              'database_name' => @mysql_cluster.database_name
+            }
+          }
+        }
+      }
+    else
+      {}
+    end
+  end
+
+  def config_enc
+    merge_gtid_config if @use_gtids
+    return {} if @config.empty?
+    {
+      'role::stacks_mysql_config' => {
+        'config'        => @config,
+        'restart_mysql' => !@environment.production
+      }
+    }
+  end
+
+  def dependant_instances_enc(dependant_instances)
+    {
+      'role::mysql_server' =>  {
+        'dependencies' => @mysql_cluster.dependency_config(fabric),
+        'dependant_instances' => dependant_instances
+      }
+    }
+  end
+
+  def allowed_hosts_enc
+    return {} if @mysql_cluster.allowed_hosts.empty?
+    {
+      'role::mysql_allow_hosts' => {
+        'hosts' => @mysql_cluster.allowed_hosts
+      }
+    }
   end
 
   def to_enc
@@ -130,52 +188,23 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'monitoring_checks'        => @monitoring_checks
                },
                'server::default_new_mgmt_net_local' => nil)
-    enc.merge!(@environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
 
     dependant_instances = @mysql_cluster.dependant_instance_fqdns(location, [:prod], false)
     dependant_instances.concat(@mysql_cluster.fqdn_list(@mysql_cluster.children))
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::mysql_server'].merge!('dependencies' => @mysql_cluster.dependency_config(fabric),
-                                       'dependant_instances' => dependant_instances)
+      recurse_merge!(enc, dependant_instances_enc(dependant_instances))
       unless backup? || role_of?(:user_access)
-        enc.merge!(@mysql_cluster.dependant_instance_mysql_rights(location))
+        recurse_merge!(enc, @mysql_cluster.dependant_instance_mysql_rights(location))
       end
     end
-    @config = merge_gtid_config if @use_gtids
 
-    unless @mysql_cluster.allowed_hosts.empty?
-      enc['role::mysql_allow_hosts'] = {
-        'hosts' => @mysql_cluster.allowed_hosts
-      }
-    end
-
-    unless @config.empty?
-      enc['role::stacks_mysql_config'] = {
-        'config'        => @config,
-        'restart_mysql' => !@environment.production
-      }
-    end
-    if @mysql_cluster.enable_percona_checksum_tools
-      enc['percona::checksum_tools'] = {
-        'database_name' => @mysql_cluster.database_name,
-        'master_fqdns'  => @mysql_cluster.master_servers,
-        'is_master'     => master?,
-        'ignore_tables' => @mysql_cluster.percona_checksum_ignore_tables
-      }
-    end
-
-    if @role == :user_access || @mysql_cluster.grant_user_rights_by_default || @grant_user_rights_by_default
-      enc['role::mysql_multiple_rights'] = {
-        'rights' => {
-          @mysql_cluster.database_name => {
-            'environment'   => environment.name,
-            'database_name' => @mysql_cluster.database_name
-          }
-        }
-      }
-    end
+    recurse_merge!(enc, @environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?
+    recurse_merge!(enc, allowed_hosts_enc)
+    recurse_merge!(enc, config_enc)
+    recurse_merge!(enc, percona_checksum_tools_enc)
+    recurse_merge!(enc, user_rights_enc)
 
     replication_rights_class = 'mysql_hacks::replication_rights_wrapper'
     enc[replication_rights_class] = {} if enc[replication_rights_class].nil?
