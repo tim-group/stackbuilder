@@ -768,3 +768,31 @@ describe_stack 'mysql servers must provide required params to role::mysql_server
     expect(role['monitoring_checks']).to be_an(Array)
   end
 end
+
+describe_stack 'should not allow applications to depend_on user_access servers' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.user_access_instances = 1
+        self.slave_instances = 0
+        self.backup_instances = 0
+      end
+    end
+    stack "app_server" do
+      virtual_appserver "app" do
+        self.application = "app"
+        depend_on 'mydb'
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+      instantiate_stack "app_server"
+    end
+  end
+  host("production-app-001.mgmt.space.net.local") do |host|
+    rights = host.to_enc['role::http_app']['dependencies']
+    expect(rights['db.test.read_only_cluster']).to eql('production-mydb-001.space.net.local')
+  end
+end

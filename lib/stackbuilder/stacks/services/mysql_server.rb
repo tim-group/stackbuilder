@@ -92,6 +92,10 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                    }) if backup?
   end
 
+  def type_of?(type)
+    @role == type
+  end
+
   def master?
     @master
   end

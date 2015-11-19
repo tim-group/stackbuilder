@@ -189,10 +189,14 @@ module Stacks::Services::MysqlCluster
     children.select do |server|
       if server.master? && !@include_master_in_read_only_cluster
         false
+      elsif server.type_of?(:user_access)
+        false
+      elsif server.backup?
+        false
       else
         true
       end
-    end.select { |server| !server.backup? && server.fabric == fabric }.inject([]) do |prod_fqdns, server|
+    end.select { |server| server.fabric == fabric }.inject([]) do |prod_fqdns, server|
       prod_fqdns << server.prod_fqdn
       prod_fqdns
     end
