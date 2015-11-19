@@ -92,8 +92,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                    }) if backup?
   end
 
-  def type_of?(type)
-    @role == type
+  def role_of?(role)
+    @role == role
   end
 
   def master?
@@ -139,7 +139,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::mysql_server'].merge!('dependencies' => @mysql_cluster.dependency_config(fabric),
                                        'dependant_instances' => dependant_instances)
-      unless backup?
+      unless backup? || role_of?(:user_access)
         enc.merge!(@mysql_cluster.dependant_instance_mysql_rights(location))
       end
     end

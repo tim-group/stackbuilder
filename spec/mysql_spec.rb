@@ -795,4 +795,7 @@ describe_stack 'should not allow applications to depend_on user_access servers' 
     rights = host.to_enc['role::http_app']['dependencies']
     expect(rights['db.test.read_only_cluster']).to eql('production-mydb-001.space.net.local')
   end
+  host("production-mydbuseraccess-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc).not_to include('mysql_hacks::application_rights_wrapper')
+  end
 end

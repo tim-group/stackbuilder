@@ -189,7 +189,7 @@ module Stacks::Services::MysqlCluster
     children.select do |server|
       if server.master? && !@include_master_in_read_only_cluster
         false
-      elsif server.type_of?(:user_access)
+      elsif server.role_of?(:user_access)
         false
       elsif server.backup?
         false
