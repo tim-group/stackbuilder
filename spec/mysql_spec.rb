@@ -737,3 +737,34 @@ describe_stack 'should grant_user_rights_by_default when no user_access_servers 
     ])
   end
 end
+describe_stack 'mysql servers must provide required params to role::mysql_server' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.secondary_site_slave_instances = 1
+        self.user_access_instances = 1
+        self.secondary_site_user_access_instances = 1
+        self.backup_instances = 1
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  all_hosts do |host|
+    enc = host.to_enc
+    expect(enc.key?('role::mysql_server')).to eql(true)
+    role = enc['role::mysql_server']
+    expect(role['backup']).to be_truthy.or be_falsey
+    expect(role['database_name']).to be_an(String)
+    expect(role['datadir']).to be_an(String)
+    expect(role['master']).to be_truthy.or be_falsey
+    expect(role['server_id']).to be_an(Integer)
+    expect(role['charset']).to be_an(String)
+    expect(role['version']).to be_an(String)
+    expect(role['monitoring_checks']).to be_an(Array)
+  end
+end
