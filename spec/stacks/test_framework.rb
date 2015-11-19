@@ -16,6 +16,15 @@ module Stacks::TestFramework
     end
   end
 
+  def all_hosts(&block)
+    subject = @subject
+    it "all hosts" do
+      subject.all_hosts.each do |host|
+        block.call(host)
+      end
+    end
+  end
+
   def xhost(host, &block)
     subject = @subject
     xit "#{host}" do

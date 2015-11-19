@@ -52,6 +52,14 @@ module Stacks
       hosts
     end
 
+    def all_hosts
+      hosts = []
+      accept do |machine_def|
+        hosts << machine_def if machine_def.respond_to?(:to_enc)
+      end
+      hosts
+    end
+
     def exist?(fqdn)
       found = false
       accept do |machine_def|
