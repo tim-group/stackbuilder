@@ -1,6 +1,5 @@
 require 'stackbuilder/support/zamls'
 require 'stackbuilder/support/cmd_audit'
-require 'stackbuilder/support/cmd_find_rogue'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_orc'
 require 'stackbuilder/support/cmd_nagios'
@@ -11,17 +10,15 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit find_rogue ls lsenv dump_enc dump_spec enc clean provision reprovision)
+    @cmds = %w(audit ls lsenv dump_enc dump_spec enc clean provision reprovision)
   end
   include CMDAudit
-  include CMDFindRogue # XXX work in progress
   include CMDLs
   include CMDOrc # XXX work in progress
   include CMDNagios # XXX work in progress
 
   def dump_enc(_argv)
     $factory.inventory.environments.sort.each do |envname, env|
-      next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
         puts "running to_enc on #{stack.hostname}.#{stack.domain}/#{envname}:"
         puts ZAMLS.to_zamls(stack.to_enc)
@@ -31,7 +28,6 @@ class CMD
 
   def dump_spec(_argv)
     $factory.inventory.environments.sort.each do |envname, env|
-      next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
         puts "running to_spec on #{stack.hostname}.#{stack.domain}/#{envname}:"
         puts ZAMLS.to_zamls(stack.to_spec)
