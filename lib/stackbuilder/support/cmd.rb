@@ -1,6 +1,5 @@
 require 'stackbuilder/support/zamls'
 require 'stackbuilder/support/cmd_audit'
-require 'stackbuilder/support/cmd_find_rogue'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_orc'
 require 'stackbuilder/support/cmd_nagios'
@@ -11,10 +10,9 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit find_rogue ls lsenv dump_enc dump_spec enc clean provision reprovision)
+    @cmds = %w(audit ls lsenv dump_enc dump_spec enc clean provision reprovision)
   end
   include CMDAudit
-  include CMDFindRogue # XXX work in progress
   include CMDLs
   include CMDOrc # XXX work in progress
   include CMDNagios # XXX work in progress
