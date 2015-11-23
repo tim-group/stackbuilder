@@ -21,6 +21,7 @@ module Support
         @rpc = MCollectiveRPC.new
         @options = options
         @mco_options = ::MCollective::Util.default_options
+        # XXX 08.05.2015 mmazurek -- facter is no more, what to do about the line below now?
         @mco_options[:disctimeout] = 5 # Facter can take aaages to respond
         @mco_options[:timeout] = options[:timeout] if options.key?(:timeout)
       end
