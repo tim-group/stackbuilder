@@ -2,6 +2,7 @@
 # This file is a copy of /usr/lib/ruby/vendor_ruby/puppet/util/zaml.rb with the following modifications:
 # * renamed 'ZAML' to 'ZAMLS', 'ZAML_ESCAPES' to 'ZAMLS_ESCAPES' and 'to_zaml' to 'to_zamls'
 # * made to_zamls on a Hash sort the output.
+# * don't prepend symbol names with "!ruby/sym ". This is for the 'compile' stacks command.
 # * added this comment
 #
 # XXX this can probably be removed when we move away from ruby 1.8
@@ -241,7 +242,7 @@ end
 
 class Symbol
   def to_zamls(z)
-    z.emit("!ruby/sym ")
+    # z.emit("!ruby/sym ")
     to_s.to_zamls(z)
   end
 end
