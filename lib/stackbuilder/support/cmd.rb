@@ -19,7 +19,6 @@ class CMD
 
   def dump_enc(_argv)
     $factory.inventory.environments.sort.each do |envname, env|
-      next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
         puts "running to_enc on #{stack.hostname}.#{stack.domain}/#{envname}:"
         puts ZAMLS.to_zamls(stack.to_enc)
@@ -29,7 +28,6 @@ class CMD
 
   def dump_spec(_argv)
     $factory.inventory.environments.sort.each do |envname, env|
-      next if envname == 'lon' # XXX 15.07.15 mmazurek/scarytom: special case 'lon' until it's fixed
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
         puts "running to_spec on #{stack.hostname}.#{stack.domain}/#{envname}:"
         puts ZAMLS.to_zamls(stack.to_spec)
