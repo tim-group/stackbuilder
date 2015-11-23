@@ -24,6 +24,7 @@ class Stacks::Services::ProxyVHost
     instance_eval(&block) if block
   end
 
+  # XXX looks like this method is never used
   def with_redirect(redirect_fqdn)
     @redirects << redirect_fqdn
   end
