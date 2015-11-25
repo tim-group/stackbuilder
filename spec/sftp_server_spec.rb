@@ -49,6 +49,7 @@ describe_stack 'sftp servers should support load balancing and dependant instanc
     expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['persistent_ports']).
       to eql([])
     expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['ports']).to eql(['2222'])
+    expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['monitor_warn']).to eql('1')
   end
 end
 describe_stack 'sftp servers should provide specific mounts' do
@@ -77,5 +78,29 @@ describe_stack 'sftp servers should provide specific mounts' do
     expect(storage[:"/home"][:persistent]).to eql true
     expect(storage.key?(:"/tmp")).to eql true
     expect(storage[:"/tmp"][:size]).to eql '10G'
+  end
+end
+describe_stack 'sftp servers should allow monitor_warn to be override when non-HA' do
+  given do
+    stack "lb" do
+      loadbalancer
+    end
+
+    stack "secureftp" do
+      virtual_sftpserver 'sftp' do
+        self.ports = ['2222']
+        self.override_monitor_warn = 0
+      end
+    end
+
+    env "mirror", :primary_site => "oy", :secondary_site => "bs" do
+      instantiate_stack "lb"
+      instantiate_stack "secureftp"
+    end
+  end
+
+  host("mirror-lb-001.mgmt.oy.net.local") do |load_balancer|
+    lb_enc = load_balancer.to_enc
+    expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['monitor_warn']).to eql('0')
   end
 end

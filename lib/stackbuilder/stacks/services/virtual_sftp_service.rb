@@ -3,6 +3,7 @@ require 'stackbuilder/stacks/namespace'
 module Stacks::Services::VirtualSftpService
   attr_reader :proxy_vhosts
   attr_reader :proxy_vhosts_lookup
+  attr_accessor :override_monitor_warn
 
   def self.extended(object)
     object.configure
@@ -14,6 +15,8 @@ module Stacks::Services::VirtualSftpService
   end
 
   def to_loadbalancer_config(location, fabric)
+    monitor_warn = override_monitor_warn.nil? ? monitor_warn(realservers(location)) : override_monitor_warn
+
     grouped_realservers = realservers(location).group_by do |_|
       'blue'
     end
@@ -25,10 +28,11 @@ module Stacks::Services::VirtualSftpService
 
     {
       vip_fqdn(:prod, fabric) => {
-        'type'         => 'sftp',
-        'ports'        => @ports,
-        'realservers'  => realservers,
-        'persistent_ports'  => @persistent_ports
+        'type'              => 'sftp',
+        'ports'             => @ports,
+        'realservers'       => realservers,
+        'persistent_ports'  => @persistent_ports,
+        'monitor_warn'      => monitor_warn.to_s
       }
     }
   end

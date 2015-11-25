@@ -91,6 +91,10 @@ module Stacks::Services::VirtualService
     true
   end
 
+  def monitor_warn(servers)
+    servers == 1 ? 0 : 1
+  end
+
   private
 
   def loadbalancer_config(location, fabric)
@@ -102,14 +106,12 @@ module Stacks::Services::VirtualService
       [group, realserver_fqdns]
     end]
 
-    monitor_warn = fewest_servers_in_a_group == 1 ? 0 : 1
-
     {
       vip_fqdn(:prod, fabric) => {
-        'env' => environment.name,
-        'app' => application,
-        'realservers' => realservers_hash,
-        'monitor_warn' => monitor_warn,
+        'env'                 => environment.name,
+        'app'                 => application,
+        'realservers'         => realservers_hash,
+        'monitor_warn'        => monitor_warn(fewest_servers_in_a_group),
         'healthcheck_timeout' => healthcheck_timeout
       }
     }
