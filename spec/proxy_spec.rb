@@ -7,6 +7,9 @@ describe_stack 'exampleproxy' do
       virtual_proxyserver 'exampleproxy' do
         vhost('exampleapp')
         vhost('exampleapp2', 'example.overridden')
+        vhost('exampleapp', 'example.absent') do
+          absent
+        end
         enable_nat
         self.ports = [80, 443, 8443]
       end
@@ -30,8 +33,9 @@ describe_stack 'exampleproxy' do
     expect(role_enc['default_ssl_cert']).to eql('wildcard_timgroup_com')
     expect(role_enc['environment']).to eql('e1')
     expect(role_enc['prod_vip_fqdn']).to eql('e1-exampleproxy-vip.space.net.local')
-    expect(role_enc['vhosts'].size).to eql(2)
+    expect(role_enc['vhosts'].size).to eql(3)
     vhost1_enc = role_enc['vhosts']['e1-exampleproxy-vip.front.space.net.local']
+    expect(vhost1_enc['ensure']).to eql('present')
     expect(vhost1_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
     expect(vhost1_enc['aliases']).to include('e1-exampleproxy-vip.space.net.local')
     expect(vhost1_enc['aliases'].size).to eql(1)
@@ -53,6 +57,9 @@ describe_stack 'exampleproxy' do
     expect(vhost2_enc['type']).to eql('default')
     expect(vhost2_enc['vhost_properties']).to eql({})
     expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com')
+
+    vhost3_enc = role_enc['vhosts']['example.absent']
+    expect(vhost3_enc['ensure']).to eql('absent')
   end
 end
 

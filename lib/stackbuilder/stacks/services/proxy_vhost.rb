@@ -21,6 +21,7 @@ class Stacks::Services::ProxyVHost
     @environment = environment
     @virtual_proxy_service = virtual_proxy_service
     @location = location
+    @ensure = 'present'
     instance_eval(&block) if block
   end
 
@@ -74,6 +75,7 @@ class Stacks::Services::ProxyVHost
     envs = environment.all_environments
     fabric = envs[@environment].options[location]
     [fqdn(fabric), {
+      'ensure'           => @ensure,
       'aliases'          => aliases(fabric),
       'redirects'        => redirects,
       'application'      => @virtual_proxy_service.find_virtual_service(service, @environment).application,
@@ -82,5 +84,9 @@ class Stacks::Services::ProxyVHost
       'vhost_properties' => properties,
       'cert'             => cert
     }]
+  end
+
+  def absent
+    @ensure = 'absent'
   end
 end
