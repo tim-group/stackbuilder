@@ -32,6 +32,9 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     slave_monitoring_checks = %w(replication_running replication_delay)
     @monitoring_checks = (role == :master) ? master_monitoring_checks : slave_monitoring_checks
     @grant_user_rights_by_default = false
+    @upload_backups = false
+    @snapshot_capable = false
+    @db_refresher = false
 
     storage = {
       '/tmp' => {
@@ -104,6 +107,18 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @backup
   end
 
+  def upload_backups
+    @upload_backups = true if backup?
+  end
+
+  def snapshot_capable
+    @snapshot_capable = true
+  end
+
+  def db_refresher
+    @db_refresher = true
+  end
+
   def merge_gtid_config
     gtid_config = {
       'mysqld' => {
@@ -174,6 +189,22 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     }
   end
 
+  def backup_enc
+    enc = {}
+    return enc if !backup?
+    enc['db_snapshot'] = {} if @snapshot_capable
+    enc['dbrefresh'] = {} if @db_refresher
+    if @upload_backups
+      enc['s3_backup'] = {
+        'hour'   => 15,
+        'minute' => 10,
+        'dir'    => '/mnt/storage/database-dumps/daily',
+        'mailto' => 'sysadmin@youdevise.com'
+      }
+    end
+    enc
+  end
+
   def to_enc
     enc = super()
     enc.merge!('role::mysql_server' => {
@@ -210,6 +241,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     enc[replication_rights_class] = {} if enc[replication_rights_class].nil?
     enc[replication_rights_class]['rights'] = {} if enc[replication_rights_class]['rights'].nil?
     enc[replication_rights_class]['rights'].merge!(@mysql_cluster.dependant_children_replication_mysql_rights(self))
+
+    enc.merge! backup_enc
     enc
   end
 end
