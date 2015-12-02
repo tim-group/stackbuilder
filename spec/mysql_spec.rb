@@ -799,3 +799,41 @@ describe_stack 'should not allow applications to depend_on user_access servers' 
     expect(host.to_enc).not_to include('mysql_hacks::application_rights_wrapper')
   end
 end
+
+describe_stack 'should create two masters' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 2
+        self.user_access_instances = 0
+        self.slave_instances = 0
+        self.backup_instances = 0
+        self.enable_percona_checksum_tools = true
+      end
+    end
+    stack "app_server" do
+      virtual_appserver "app" do
+        self.application = "app"
+        depend_on 'mydb'
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack 'app_server'
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc['percona::checksum_tools']['master_fqdns']
+    expect(enc).to eql(%w(production-mydb-001.space.net.local production-mydb-002.space.net.local))
+  end
+  host("production-mydb-002.mgmt.space.net.local") do |host|
+    enc = host.to_enc['percona::checksum_tools']['master_fqdns']
+    expect(enc).to eql(%w(production-mydb-001.space.net.local production-mydb-002.space.net.local))
+  end
+  host("production-app-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc
+    expect(enc['role::http_app']['dependencies']['db.test.hostname']).to eql('production-mydb-001.space.net.local')
+    pp enc
+  end
+end

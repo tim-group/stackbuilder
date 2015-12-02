@@ -161,7 +161,7 @@ module Stacks::Services::MysqlCluster
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
     fail "No masters were not found! #{children}" if masters.empty?
-    [masters.first.prod_fqdn]
+    masters.collect { |master| master.prod_fqdn }
   end
 
   private
@@ -217,7 +217,7 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_given_no_requirement(dependent, fabric)
-    config_properties(dependent, master_servers, all_servers(fabric))
+    config_properties(dependent, [master_servers.first], all_servers(fabric))
   end
 
   def requirement_of(dependant)
