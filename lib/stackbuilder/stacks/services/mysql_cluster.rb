@@ -161,7 +161,7 @@ module Stacks::Services::MysqlCluster
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
     fail "No masters were not found! #{children}" if masters.empty?
-    masters.collect { |master| master.prod_fqdn }
+    masters.collect(&:prod_fqdn)
   end
 
   private
