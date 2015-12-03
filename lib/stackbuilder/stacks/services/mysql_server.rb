@@ -210,6 +210,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     enc[replication_rights_class] = {} if enc[replication_rights_class].nil?
     enc[replication_rights_class]['rights'] = {} if enc[replication_rights_class]['rights'].nil?
     enc[replication_rights_class]['rights'].merge!(@mysql_cluster.dependant_children_replication_mysql_rights(self))
+
     enc
   end
 end

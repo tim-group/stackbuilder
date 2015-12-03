@@ -6,6 +6,7 @@ module Stacks::Services::MysqlCluster
   end
 
   attr_accessor :backup_instances
+  attr_accessor :primary_site_backup_instances
   attr_accessor :charset
   attr_accessor :database_name
   attr_accessor :master_instances
@@ -28,6 +29,7 @@ module Stacks::Services::MysqlCluster
     @slave_instances = 1
     @secondary_site_slave_instances = 0
     @backup_instances = 1
+    @primary_site_backup_instances = 0
     @charset = 'utf8'
     @server_id_offset = 0
     @include_master_in_read_only_cluster = true
@@ -67,6 +69,10 @@ module Stacks::Services::MysqlCluster
     i = 0
     @backup_instances.times do
       instantiate_machine(name, :backup, i += 1, environment, @backup_instance_site)
+    end
+    i = 0
+    @primary_site_backup_instances.times do
+      instantiate_machine(name, :backup, i += 1, environment, :primary_site)
     end
     i = 0
     @secondary_site_slave_instances.times do

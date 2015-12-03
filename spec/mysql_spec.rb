@@ -837,3 +837,25 @@ describe_stack 'should create two masters' do
     pp enc
   end
 end
+
+describe_stack 'create primary site backup instances' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.user_access_instances = 0
+        self.slave_instances = 0
+        self.backup_instances = 0
+        self.primary_site_backup_instances = 1
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydbbackup-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc
+    expect(enc).not_to be_nil
+  end
+end
