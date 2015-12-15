@@ -643,10 +643,10 @@ describe_stack 'should allow creation of user_access_servers in primary_site' do
     end
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(false)
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('absent')
   end
   host("production-mydbuseraccess-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(true)
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('present')
   end
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
@@ -672,10 +672,10 @@ describe_stack 'should allow creation of user_access_servers in secondary_site' 
     end
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(false)
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('absent')
   end
   host("production-mydbuseraccess-001.mgmt.earth.net.local") do |host|
-    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(true)
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('present')
   end
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
@@ -834,7 +834,6 @@ describe_stack 'should create two masters' do
   host("production-app-001.mgmt.space.net.local") do |host|
     enc = host.to_enc
     expect(enc['role::http_app']['dependencies']['db.test.hostname']).to eql('production-mydb-001.space.net.local')
-    pp enc
   end
 end
 
