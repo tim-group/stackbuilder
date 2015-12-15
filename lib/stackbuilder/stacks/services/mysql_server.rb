@@ -129,7 +129,11 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def user_rights_enc
-    resource_ensure = (@role == :user_access || @mysql_cluster.grant_user_rights_by_default || @grant_user_rights_by_default) ? 'present' : 'absent'
+    resource_ensure = 'absent'
+    resource_ensure = 'present' if  @role == :user_access ||
+                                    @mysql_cluster.grant_user_rights_by_default ||
+                                    @grant_user_rights_by_default
+
     {
       'role::mysql_multiple_rights' => {
         'rights' => {
