@@ -129,18 +129,18 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def user_rights_enc
-    resource_ensure = 'absent'
-    resource_ensure = 'present' if  @role == :user_access ||
-                                    @mysql_cluster.grant_user_rights_by_default ||
-                                    @grant_user_rights_by_default
+    create_read_only_users = false
+    create_read_only_users = true if @role == :user_access ||
+                                     @mysql_cluster.grant_user_rights_by_default ||
+                                     @grant_user_rights_by_default
 
     {
       'role::mysql_multiple_rights' => {
         'rights' => {
           @mysql_cluster.database_name => {
-            'ensure'        => resource_ensure,
-            'environment'   => environment.name,
-            'database_name' => @mysql_cluster.database_name
+            'create_read_only_users' => create_read_only_users,
+            'environment'            => environment.name,
+            'database_name'          => @mysql_cluster.database_name
           }
         }
       }

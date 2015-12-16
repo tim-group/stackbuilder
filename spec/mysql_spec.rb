@@ -643,10 +643,10 @@ describe_stack 'should allow creation of user_access_servers in primary_site' do
     end
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('absent')
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['create_read_only_users']).to be false
   end
   host("production-mydbuseraccess-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('present')
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['create_read_only_users']).to be true
   end
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
@@ -672,10 +672,10 @@ describe_stack 'should allow creation of user_access_servers in secondary_site' 
     end
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('absent')
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['create_read_only_users']).to be false
   end
   host("production-mydbuseraccess-001.mgmt.earth.net.local") do |host|
-    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['ensure']).to eql('present')
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['create_read_only_users']).to be true
   end
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
@@ -700,7 +700,7 @@ describe_stack 'should grant_user_rights_by_default when no user_access_servers 
     end
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(true)
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['create_read_only_users']).to be(true)
   end
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
@@ -709,7 +709,7 @@ describe_stack 'should grant_user_rights_by_default when no user_access_servers 
   end
 end
 
-describe_stack 'should grant_user_rights_by_default when no user_access_servers exist' do
+describe_stack 'should grant_user_rights_by_default when machine.grant_user_rights_by_default is set true' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
@@ -728,7 +728,7 @@ describe_stack 'should grant_user_rights_by_default when no user_access_servers 
     end
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc.key?('role::mysql_multiple_rights')).to eql(true)
+    expect(host.to_enc['role::mysql_multiple_rights']['rights']['test']['create_read_only_users']).to be(true)
   end
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
