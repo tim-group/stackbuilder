@@ -271,7 +271,7 @@ describe_stack 'stack-with-dependencies' do
       "e5-fictionaldb-002.earth.net.local,e5-fictionaldbbackup-001.space.net.local]."
   end
 
-  describe_stack 'should fail to instantiate cluster if there are no supported dependencies but appserver specifies ' \
+  describe_stack 'should fail to instantiate cluster if there are no supported requirements but appserver specifies ' \
     'requirement' do
     given do
       stack 'cluster_with_no_supported_requirements' do
@@ -303,6 +303,40 @@ describe_stack 'stack-with-dependencies' do
       expect { host.to_enc['role::http_app']['dependencies'] }.to raise_error \
         "Stack 'fictionaldb' does not support requirement 'i_made_this_up' in environment 'e6'. " \
         "supported_requirements is empty or unset."
+    end
+  end
+
+  describe_stack 'should fail to instantiate app if it depends on cluster that declares supported requirements but '\
+    'appserver does not specify requirement' do
+    given do
+      stack 'cluster_with_supported_requirements' do
+        mysql_cluster 'fictionaldb' do
+          self.database_name = 'fictionaldb'
+          self.master_instances = 1
+          self.supported_requirements = {
+            :some_requirement => %w(e7-fictionaldb-001.earth.net.local)
+          }
+        end
+      end
+
+      stack 'no_requirement_declared' do
+        virtual_appserver 'badapp' do
+          self.groups = ['blue']
+          self.application = 'badapp'
+          depend_on 'fictionaldb', environment.name
+        end
+      end
+
+      env 'e7', :primary_site => 'earth', :secondary_site => 'space' do
+        instantiate_stack('cluster_with_supported_requirements')
+        instantiate_stack('no_requirement_declared')
+      end
+    end
+
+    host('e7-badapp-001.mgmt.earth.net.local') do |host|
+      expect { host.to_enc['role::http_app']['dependencies'] }.to raise_error \
+        "'badapp' must declare it's requirement on 'fictionaldb' as it declares supported requirements in "\
+        "environment 'e7'. Supported requirements: [some_requirement]."
     end
   end
 end

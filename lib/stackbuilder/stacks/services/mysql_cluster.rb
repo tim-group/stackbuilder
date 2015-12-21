@@ -148,13 +148,16 @@ module Stacks::Services::MysqlCluster
     if @supported_requirements.empty? && !requirement.nil?
       fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
         "supported_requirements is empty or unset."
-    elsif @supported_requirements.empty? || requirement.nil?
+    elsif !@supported_requirements.empty? && requirement.nil?
+      fail "'#{dependent.name}' must declare it's requirement on '#{name}' as it declares supported requirements "\
+        "in environment '#{environment.name}'. "\
+        "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
+    elsif !@supported_requirements.include?(requirement)
+      fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
+        "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
+    elsif @supported_requirements.empty? && requirement.nil?
       config_given_no_requirement(dependent, fabric)
     else
-      if !@supported_requirements.include?(requirement)
-        fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
-          "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
-      end
 
       servers_in_fabric = children.select { |server| server.fabric == fabric }
       hostnames_for_requirement = @supported_requirements[requirement]
