@@ -152,11 +152,11 @@ module Stacks::Services::MysqlCluster
       fail "'#{dependent.name}' must declare it's requirement on '#{name}' as it declares supported requirements "\
         "in environment '#{environment.name}'. "\
         "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
+    elsif @supported_requirements.empty? && requirement.nil?
+      config_given_no_requirement(dependent, fabric)
     elsif !@supported_requirements.include?(requirement)
       fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
         "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
-    elsif @supported_requirements.empty? && requirement.nil?
-      config_given_no_requirement(dependent, fabric)
     else
 
       servers_in_fabric = children.select { |server| server.fabric == fabric }
