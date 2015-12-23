@@ -198,7 +198,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       recurse_merge!(enc, dependant_instances_enc(dependant_instances))
       unless backup? || role_of?(:user_access)
-        recurse_merge!(enc, @mysql_cluster.dependant_instance_mysql_rights(location))
+        recurse_merge!(enc, @mysql_cluster.dependant_instance_mysql_rights)
       end
     end
 

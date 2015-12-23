@@ -38,42 +38,18 @@ module Stacks::Dependencies
 
   def dependant_instances(location, reject_nodes_in_different_location = true)
     get_children_for_virtual_services(
-      virtual_services_that_depend_on_me(location),
+      virtual_services_that_depend_on_me,
       location,
       reject_nodes_in_different_location)
   end
 
-  def virtual_services(environments = find_all_environments)
-    virtual_services = []
-    environments.each do |env|
-      env.accept do |virtual_service|
-        virtual_services.push virtual_service
-      end
-    end
-    virtual_services
+  def virtual_services(environments = environment.find_all_environments)
+    environment.virtual_services(environments)
   end
 
-  # the @@eligible_virtual_services_cache variable is used for caching a semi-processed list.
-  # this reduces runs of sbx:dump_enc from 4-5 minutes to under 4 seconds (as of 24.04.2015)
-  # rubocop:disable Style/ClassVars
-  def virtual_services_that_depend_on_me(location)
-    # FIXME: Re-enable caching when we understand how best to fix it.
-    @@eligible_virtual_services_cache = []
-    virtual_services.each do |virtual_service|
-      next if !virtual_service.is_a?(Stacks::MachineDefContainer)
-      next if !virtual_service.respond_to?(:depends_on)
-
-      if virtual_service.respond_to?(:establish_dependencies)
-        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.establish_dependencies(location)]
-      else
-        @@eligible_virtual_services_cache.push [virtual_service, virtual_service.depends_on]
-      end
-    end
-
-    # the variable part
+  def virtual_services_that_depend_on_me
     virtual_services_that_depend_on_me = []
-
-    @@eligible_virtual_services_cache.each do |virtual_service, depends_on|
+    environment.calculated_dependencies.each do |virtual_service, depends_on|
       next if !depends_on.any? { |depend| depend[0] == name && depend[1] == environment.name }
 
       virtual_services_that_depend_on_me.push virtual_service
@@ -81,7 +57,6 @@ module Stacks::Dependencies
 
     virtual_services_that_depend_on_me.uniq
   end
-  # rubocop:enable Style/ClassVars
 
   def get_children_for_virtual_services(virtual_services,
                                         location = :primary_site,
@@ -103,27 +78,14 @@ module Stacks::Dependencies
     nodes
   end
 
-  def virtual_services_that_i_depend_on(environments = find_all_environments)
+  def virtual_services_that_i_depend_on(environments = environment.find_all_environments)
     depends_on.map do |dependency|
       find_virtual_service_that_i_depend_on(dependency, environments)
     end
   end
 
-  private
-
-  def find_all_environments(environments = environment.environments.values)
-    environment_set = Set.new
-    environments.each do |env|
-      unless environment_set.include? env
-        environment_set.merge(env.children)
-        environment_set.add(env)
-      end
-    end
-    environment_set
-  end
-
-  def find_environment(environment_name, environments = environment.environments.values)
-    env = find_all_environments(environments).select do |environment|
+  def find_environment(environment_name)
+    env = environment.find_all_environments.select do |environment|
       environment.name == environment_name
     end
     if env.size == 1
@@ -132,6 +94,8 @@ module Stacks::Dependencies
       fail "Cannot find environment '#{environment_name}'"
     end
   end
+
+  private
 
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|

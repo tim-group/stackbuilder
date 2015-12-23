@@ -129,11 +129,11 @@ module Stacks::Services::MysqlCluster
     rights
   end
 
-  def dependant_instance_mysql_rights(location)
+  def dependant_instance_mysql_rights
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
     }
-    virtual_services_that_depend_on_me(location).each do |service|
+    virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].
           merge!("#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>

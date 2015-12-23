@@ -29,6 +29,7 @@ class Stacks::Environment
     @parent = parent
     @children = []
     @production = options[:production].nil? ? false : options[:production]
+    @calculated_dependencies_cache = nil
   end
 
   def child?(environment)
@@ -134,6 +135,27 @@ class Stacks::Environment
     @definitions[name].instance_eval(&block) unless block.nil?
   end
 
+  def find_all_environments
+    environment_set = Set.new
+    environment.environments.values.each do |env|
+      unless environment_set.include? env
+        environment_set.merge(env.children)
+        environment_set.add(env)
+      end
+    end
+    environment_set
+  end
+
+  def virtual_services(environments)
+    virtual_services = []
+    environments.each do |env|
+      env.accept do |virtual_service|
+        virtual_services.push virtual_service
+      end
+    end
+    virtual_services
+  end
+
   def instantiate_stack(stack_name)
     factory = @stack_procs[stack_name]
     fail "no stack found '#{stack_name}'" if factory.nil?
@@ -159,5 +181,27 @@ class Stacks::Environment
       end
     end
     node
+  end
+
+  def calculated_dependencies
+    @calculated_dependencies_cache ||= calculate_dependencies_across_environments
+  end
+
+  private
+
+  def calculate_dependencies_across_environments
+    dependencies = []
+    virtual_services(find_all_environments).each do |virtual_service|
+      next if !virtual_service.is_a?(Stacks::MachineDefContainer)
+      next if !virtual_service.respond_to?(:depends_on)
+
+      if virtual_service.respond_to?(:establish_dependencies)
+        dependencies.push [virtual_service, virtual_service.establish_dependencies]
+      else
+        dependencies.push [virtual_service, virtual_service.depends_on]
+      end
+    end
+
+    dependencies
   end
 end

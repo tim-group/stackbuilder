@@ -8,7 +8,7 @@ module Stacks::Services::LoadBalancerCluster
   def configure
   end
 
-  def establish_dependencies(_location)
+  def establish_dependencies
     services = virtual_services.select do |node|
       node.respond_to?(:to_loadbalancer_config) &&
       node.respond_to?(:load_balanced_service?)
