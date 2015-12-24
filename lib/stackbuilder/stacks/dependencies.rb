@@ -1,4 +1,3 @@
-require 'securerandom'
 require 'stackbuilder/stacks/namespace'
 
 module Stacks::Dependencies
@@ -30,17 +29,6 @@ module Stacks::Dependencies
 
   def dependant_instance_fqdns(location, networks = [:prod], reject_nodes_in_different_location = true)
     fqdn_list(dependant_instances(location, reject_nodes_in_different_location), networks).sort
-  end
-
-  def dependant_instances_of_type(type, location)
-    dependant_instances(location).reject { |machine_def| machine_def.class != type }
-  end
-
-  def dependant_instances(location, reject_nodes_in_different_location = true)
-    get_children_for_virtual_services(
-      virtual_services_that_depend_on_me,
-      location,
-      reject_nodes_in_different_location)
   end
 
   def virtual_services_that_depend_on_me
@@ -81,6 +69,17 @@ module Stacks::Dependencies
   end
 
   private
+
+  def dependant_instances_of_type(type, location)
+    dependant_instances(location).reject { |machine_def| machine_def.class != type }
+  end
+
+  def dependant_instances(location, reject_nodes_in_different_location = true)
+    get_children_for_virtual_services(
+        virtual_services_that_depend_on_me,
+        location,
+        reject_nodes_in_different_location)
+  end
 
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
     environments.each do |env|
