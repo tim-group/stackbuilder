@@ -131,12 +131,12 @@ class Stacks::Environment
 
   def env(name, options = {}, &block)
     @definitions[name] = Stacks::Environment.new(
-        name,
-        self.options.merge(options),
-        self,
-        @environments,
-        @stack_procs,
-        @calculated_dependencies_cache)
+      name,
+      self.options.merge(options),
+      self,
+      @environments,
+      @stack_procs,
+      @calculated_dependencies_cache)
     @children << @definitions[name]
     @definitions[name].instance_eval(&block) unless block.nil?
   end
@@ -191,23 +191,5 @@ class Stacks::Environment
 
   def calculated_dependencies
     @calculated_dependencies_cache.get
-  end
-
-  private
-
-  def calculate_dependencies_across_environments
-    dependencies = []
-    virtual_services(find_all_environments).each do |virtual_service|
-      next if !virtual_service.is_a?(Stacks::MachineDefContainer)
-      next if !virtual_service.respond_to?(:depends_on)
-
-      if virtual_service.respond_to?(:establish_dependencies)
-        dependencies.push [virtual_service, virtual_service.establish_dependencies]
-      else
-        dependencies.push [virtual_service, virtual_service.depends_on]
-      end
-    end
-
-    dependencies
   end
 end

@@ -1,5 +1,4 @@
 class Stacks::CalculatedDependenciesCache
-
   def initialize
     @cache = nil
     @environments = nil
@@ -31,5 +30,4 @@ class Stacks::CalculatedDependenciesCache
 
     dependencies
   end
-
 end

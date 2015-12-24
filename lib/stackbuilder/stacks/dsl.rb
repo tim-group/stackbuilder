@@ -22,7 +22,13 @@ module Stacks
     end
 
     def env(name, options, &block)
-      environments[name] = Stacks::Environment.new(name, options, nil, environments, stack_procs, @calculated_dependencies_cache)
+      environments[name] = Stacks::Environment.new(
+        name,
+        options,
+        nil,
+        environments,
+        stack_procs,
+        @calculated_dependencies_cache)
       environments[name].instance_eval(&block) unless block.nil?
       calculated_dependencies_cache.reset(environments[name])
     end
