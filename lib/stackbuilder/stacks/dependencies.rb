@@ -43,10 +43,6 @@ module Stacks::Dependencies
       reject_nodes_in_different_location)
   end
 
-  def virtual_services(environments = environment.find_all_environments)
-    environment.virtual_services(environments)
-  end
-
   def virtual_services_that_depend_on_me
     virtual_services_that_depend_on_me = []
     environment.calculated_dependencies.each do |virtual_service, depends_on|

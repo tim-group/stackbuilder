@@ -163,9 +163,9 @@ class Stacks::Environment
     environment_set
   end
 
-  def virtual_services(environments)
+  def virtual_services
     virtual_services = []
-    environments.each do |env|
+    find_all_environments.each do |env|
       env.accept do |virtual_service|
         virtual_services.push virtual_service
       end

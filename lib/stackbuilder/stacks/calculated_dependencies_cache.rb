@@ -17,7 +17,7 @@ class Stacks::CalculatedDependenciesCache
 
   def calculate_dependencies_across_environments
     dependencies = []
-    @environments.virtual_services(@environments.find_all_environments).each do |virtual_service|
+    @environments.virtual_services.each do |virtual_service|
       next if !virtual_service.is_a?(Stacks::MachineDefContainer)
       next if !virtual_service.respond_to?(:depends_on)
 

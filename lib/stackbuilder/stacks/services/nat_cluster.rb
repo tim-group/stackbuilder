@@ -37,7 +37,7 @@ module Stacks::Services::NatCluster
   private
 
   def find_services_that_require_nat
-    virtual_services.select do |node|
+    @environment.virtual_services.select do |node|
       node.respond_to?(:nat) &&
         node.nat == true
     end
