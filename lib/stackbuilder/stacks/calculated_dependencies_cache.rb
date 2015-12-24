@@ -1,7 +1,6 @@
 require 'stackbuilder/stacks/dependencies'
 
 class Stacks::CalculatedDependenciesCache
-
   def initialize
     @cache = nil
     @environment = nil

@@ -76,9 +76,9 @@ module Stacks::Dependencies
 
   def dependant_instances(location, reject_nodes_in_different_location = true)
     get_children_for_virtual_services(
-        virtual_services_that_depend_on_me,
-        location,
-        reject_nodes_in_different_location)
+      virtual_services_that_depend_on_me,
+      location,
+      reject_nodes_in_different_location)
   end
 
   def find_virtual_service_that_i_depend_on(dependency)
