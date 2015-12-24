@@ -114,7 +114,7 @@ class Stacks::Environment
     fail "Un-supported cross site routing network #{network}" if network != 'prod'
     site = (fabric == @primary_site) ? @secondary_site : @primary_site
     {
-      "networking::routing::to_site" => {
+      'networking::routing::to_site' => {
         'network' => network,
         'site'    => site
       }
@@ -139,6 +139,17 @@ class Stacks::Environment
       @calculated_dependencies_cache)
     @children << @definitions[name]
     @definitions[name].instance_eval(&block) unless block.nil?
+  end
+
+  def find_environment(environment_name)
+    env = environment.find_all_environments.select do |environment|
+      environment.name == environment_name
+    end
+    if env.size == 1
+      return env.first
+    else
+      fail "Cannot find environment '#{environment_name}'"
+    end
   end
 
   def find_all_environments

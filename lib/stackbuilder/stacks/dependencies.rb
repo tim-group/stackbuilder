@@ -84,17 +84,6 @@ module Stacks::Dependencies
     end
   end
 
-  def find_environment(environment_name)
-    env = environment.find_all_environments.select do |environment|
-      environment.name == environment_name
-    end
-    if env.size == 1
-      return env.first
-    else
-      fail "Cannot find environment '#{environment_name}'"
-    end
-  end
-
   private
 
   def find_virtual_service_that_i_depend_on(service, environments = [environment])
