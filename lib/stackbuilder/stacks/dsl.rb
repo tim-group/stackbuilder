@@ -30,6 +30,7 @@ module Stacks
         stack_procs,
         @calculated_dependencies_cache)
       environments[name].instance_eval(&block) unless block.nil?
+
       calculated_dependencies_cache.reset(environments[name])
     end
 

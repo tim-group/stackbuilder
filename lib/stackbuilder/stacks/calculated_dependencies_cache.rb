@@ -1,23 +1,24 @@
+require 'stackbuilder/stacks/dependencies'
+
 class Stacks::CalculatedDependenciesCache
+
   def initialize
     @cache = nil
-    @environments = nil
+    @environment = nil
   end
 
   def reset(environment)
     @cache = nil
-    @environments = environment
+    @environment = environment
   end
 
   def get
-    @cache ||= calculate_dependencies_across_environments
+    @cache ||= calculate_dependencies
   end
 
-  private
-
-  def calculate_dependencies_across_environments
+  def calculate_dependencies
     dependencies = []
-    @environments.virtual_services.each do |virtual_service|
+    @environment.virtual_services.each do |virtual_service|
       next if !virtual_service.is_a?(Stacks::MachineDefContainer)
       next if !virtual_service.respond_to?(:depends_on)
 
