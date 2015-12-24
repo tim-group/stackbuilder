@@ -1,4 +1,5 @@
 module Stacks
+  require 'stackbuilder/stacks/calculated_dependencies_cache'
   require 'stackbuilder/stacks/dependencies'
   require 'stackbuilder/stacks/dsl'
   require 'stackbuilder/stacks/environment'

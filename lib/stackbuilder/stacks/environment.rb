@@ -13,7 +13,7 @@ class Stacks::Environment
 
   include Stacks::MachineDefContainer
 
-  def initialize(name, options, parent, environments, stack_procs)
+  def initialize(name, options, parent, environments, stack_procs, calculated_dependencies_cache)
     @name = name
     @options = options
     @environments = environments
@@ -29,7 +29,7 @@ class Stacks::Environment
     @parent = parent
     @children = []
     @production = options[:production].nil? ? false : options[:production]
-    @calculated_dependencies_cache = nil
+    @calculated_dependencies_cache = calculated_dependencies_cache
   end
 
   def child?(environment)
@@ -130,7 +130,13 @@ class Stacks::Environment
   end
 
   def env(name, options = {}, &block)
-    @definitions[name] = Stacks::Environment.new(name, self.options.merge(options), self, @environments, @stack_procs)
+    @definitions[name] = Stacks::Environment.new(
+        name,
+        self.options.merge(options),
+        self,
+        @environments,
+        @stack_procs,
+        @calculated_dependencies_cache)
     @children << @definitions[name]
     @definitions[name].instance_eval(&block) unless block.nil?
   end
@@ -184,7 +190,7 @@ class Stacks::Environment
   end
 
   def calculated_dependencies
-    @calculated_dependencies_cache ||= calculate_dependencies_across_environments
+    @calculated_dependencies_cache.get
   end
 
   private

@@ -4,10 +4,12 @@ module Stacks
   module DSL
     attr_accessor :stack_procs
     attr_accessor :environments
+    attr_accessor :calculated_dependencies_cache
 
     def self.extended(object)
       object.stack_procs = {}
       object.environments = {}
+      object.calculated_dependencies_cache = Stacks::CalculatedDependenciesCache.new
     end
 
     def stack(name, &block)
@@ -20,8 +22,9 @@ module Stacks
     end
 
     def env(name, options, &block)
-      environments[name] = Stacks::Environment.new(name, options, nil, environments, stack_procs)
+      environments[name] = Stacks::Environment.new(name, options, nil, environments, stack_procs, @calculated_dependencies_cache)
       environments[name].instance_eval(&block) unless block.nil?
+      calculated_dependencies_cache.reset(environments[name])
     end
 
     def find_by_hostname(hostname)

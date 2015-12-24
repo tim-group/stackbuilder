@@ -38,7 +38,7 @@ describe Puppet::Node::Stacks do
     node = node_for(hostname)
     expect(@delegate).to receive(:find).with(request).and_return(node)
     machine = double('machine')
-    allow(machine).to receive(:environment).and_return(Stacks::Environment.new("testenv", {}, nil, {}, {}))
+    allow(machine).to receive(:environment).and_return(Stacks::Environment.new("testenv", {}, nil, {}, {}, Stacks::CalculatedDependenciesCache.new))
     expect(@stacks_inventory).to receive(:find).with(hostname).and_return(machine)
     expect(machine).to receive(:to_enc).and_return("role::http_app" => { "application" => "JavaHttpRef" })
 
@@ -65,7 +65,7 @@ describe Puppet::Node::Stacks do
       node = node_for(hostname)
       expect(@delegate).to receive(:find).with(request).and_return(node)
       machine = double('machine')
-      allow(machine).to receive(:environment).and_return(Stacks::Environment.new("testenv", {}, nil, {}, {}))
+      allow(machine).to receive(:environment).and_return(Stacks::Environment.new("testenv", {}, nil, {}, {}, Stacks::CalculatedDependenciesCache.new))
       expect(@stacks_inventory).to receive(:find).with(hostname).and_return(machine)
       expect(machine).to receive(:to_enc).and_return("role::http_app" => { "application" => "JavaHttpRef" })
       indirector = Puppet::Node::Stacks.new(@stacks_inventory, @delegate, true, enc_dir, log_file)
