@@ -25,8 +25,8 @@ task :package do
   arguments = [
     '--description', 'stackbuilder',
     '--url', 'https://github.com/tim-group/stackbuilder',
-    '-p', "build/stackbuilder-transition_#{version}.deb",
-    '-n', 'stackbuilder-transition',
+    '-p', "build/stackbuilder_#{version}.deb",
+    '-n', 'stackbuilder',
     '-v', "#{version}",
     '-m', 'Infrastructure <infra@timgroup.com>',
     '-d', 'ruby-bundle',
