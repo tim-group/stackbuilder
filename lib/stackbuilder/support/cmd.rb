@@ -34,9 +34,9 @@ class CMD
   # dump to yaml, as that's what puppet reads in
   def compile(_argv)
     output = {}
-    $factory.inventory.environments.sort.each do |envname, env|
+    $factory.inventory.environments.sort.each do |_envname, env|
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        box_id = "#{stack.hostname}.#{stack.domain}/#{envname}"
+        box_id = "#{stack.hostname}.#{stack.domain}"
         output[box_id] = {}
         output[box_id]["enc"] = stack.to_enc
         output[box_id]["spec"] = stack.to_spec
