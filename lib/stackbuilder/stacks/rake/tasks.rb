@@ -107,14 +107,9 @@ namespace :sbx do
     system("stacks -e #{environment.name} -p . audit")
   end
 
-  desc 'run to_enc on all nodes'
-  task :dump_enc do
-    system("stacks -p . dump_enc")
-  end
-
-  desc 'run to_spec on all nodes'
-  task :dump_spec do
-    system("stacks -p . dump_spec")
+  desc 'create a yaml file describing the entire infrastructure'
+  task :compile do
+    system('stacks -p . compile')
   end
 
   require 'set'

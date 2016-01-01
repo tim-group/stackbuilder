@@ -10,28 +10,15 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile ls lsenv dump_enc dump_spec enc clean provision reprovision)
+    @cmds = %w(audit compile ls lsenv enc clean provision reprovision)
   end
   include CMDAudit
   include CMDLs
   include CMDOrc # XXX work in progress
   include CMDNagios # XXX work in progress
 
-  # 2015.11.23 mmazurek: this is an experiment.
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
-  # if successful this will replace dump_enc, dump_spec, the puppet indirector and perhaps even some of the spec tests.
-  # * this includes all the information output by dump_enc and dump_spec, and therefore replaces them.
-  # * the puppet indirector, instead of running a big ruby program with many files and dependencies would just print
-  #   the relevant enc from this file.
-  # * some specs define a stack and then test if the output hash equals to some predefined values. it is simpler to
-  #   define an e.g. "stackbuilder-config-spec", run stackbuilder on it, and compare the compiled output file to a known
-  #   correct one.
-  #
-  # if this functionality proves to be usable futher work can be done to split stacks up into smaller bits. generating
-  # puppet encs and communicating with kvm hosts should be done by two separate programs. such a split would increase
-  # maintainability.
-  #
-  # dump to yaml, as that's what puppet reads in
+  # use yaml, as that's what puppet reads in
   def compile(_argv)
     output = {}
     $factory.inventory.environments.sort.each do |_envname, env|
@@ -43,24 +30,6 @@ class CMD
       end
     end
     puts ZAMLS.to_zamls(output)
-  end
-
-  def dump_enc(_argv)
-    $factory.inventory.environments.sort.each do |envname, env|
-      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        puts "running to_enc on #{stack.hostname}.#{stack.domain}/#{envname}:"
-        puts ZAMLS.to_zamls(stack.to_enc)
-      end
-    end
-  end
-
-  def dump_spec(_argv)
-    $factory.inventory.environments.sort.each do |envname, env|
-      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        puts "running to_spec on #{stack.hostname}.#{stack.domain}/#{envname}:"
-        puts ZAMLS.to_zamls(stack.to_spec)
-      end
-    end
   end
 
   def enc(_argv)
