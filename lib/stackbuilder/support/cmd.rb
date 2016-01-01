@@ -23,7 +23,7 @@ class CMD
     output = {}
     $factory.inventory.environments.sort.each do |_envname, env|
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        box_id = "#{stack.hostname}.#{stack.domain}"
+        box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
         output[box_id] = {}
         output[box_id]["enc"] = stack.to_enc
         output[box_id]["spec"] = stack.to_spec
