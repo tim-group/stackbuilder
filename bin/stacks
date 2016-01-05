@@ -39,6 +39,7 @@ Options:
     audit [-e]                show the state of the KVM host machines
     clean [-e] -s             shuts down and removes a stack, but retains configuration (nagios, dns)
     compile                   create a yaml file describing the entire infrastructure
+    terminus                  create a yaml puppet terminus
     enc [-e] -s               print the enc of the specified stack. Used for debugging
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,
                               skip stacks of type "machine".

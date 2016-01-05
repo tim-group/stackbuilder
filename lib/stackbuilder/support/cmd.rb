@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile ls lsenv enc clean provision reprovision)
+    @cmds = %w(audit compile ls lsenv enc clean provision reprovision terminus)
   end
   include CMDAudit
   include CMDLs
@@ -27,6 +27,17 @@ class CMD
         output[box_id] = {}
         output[box_id]["enc"] = stack.to_enc
         output[box_id]["spec"] = stack.to_spec
+      end
+    end
+    puts ZAMLS.to_zamls(output)
+  end
+
+  def terminus(_argv)
+    output = {}
+    $factory.inventory.environments.sort.each do |_envname, env|
+      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
+        box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
+        output[box_id] = stack.to_enc
       end
     end
     puts ZAMLS.to_zamls(output)
