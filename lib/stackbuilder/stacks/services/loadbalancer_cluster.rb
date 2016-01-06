@@ -11,7 +11,8 @@ module Stacks::Services::LoadBalancerCluster
   def establish_dependencies
     services = @environment.virtual_services.select do |node|
       node.respond_to?(:to_loadbalancer_config) &&
-      node.respond_to?(:load_balanced_service?)
+      node.respond_to?(:load_balanced_service?) &&
+      node.load_balanced_service?
     end
     services.map do |node|
       [node.name, environment.name]

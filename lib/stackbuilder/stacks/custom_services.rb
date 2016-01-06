@@ -128,6 +128,11 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::StandardServer, &block)
   end
 
+  def vpn_service(name, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VpnService],
+                    Stacks::Services::StandardServer, &block)
+  end
+
   def [](key)
     @definitions[key]
   end
