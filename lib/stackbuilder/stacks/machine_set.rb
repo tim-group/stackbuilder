@@ -17,6 +17,8 @@ class Stacks::MachineSet
   attr_reader :default_networks
   attr_reader :depends_on
 
+  attr_accessor :database_username
+
   include Stacks::MachineDefContainer
 
   def initialize(name, &config_block)
@@ -84,6 +86,10 @@ class Stacks::MachineSet
         block.call(machine) if machine.is_a? Stacks::MachineDef
       end
     end
+  end
+
+  def database_dependent(username)
+    self.database_username = username
   end
 
   public

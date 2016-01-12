@@ -7,6 +7,9 @@ module Stacks::Services::AppService
   attr_accessor :sso_port
   attr_accessor :tomcat_session_replication
 
+  alias_method :database_username, :application
+  alias_method :database_username=, :application=
+
   def self.extended(object)
     object.configure
   end

@@ -136,8 +136,9 @@ module Stacks::Services::MysqlCluster
     virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].
-          merge!("#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
-                 { 'password_hiera_key' => "enc/#{service.environment.name}/#{service.application}/mysql_password" })
+          merge!(
+            "#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
+            { 'password_hiera_key' => "enc/#{service.environment.name}/#{service.database_username}/mysql_password" })
       end
     end
     rights
@@ -222,7 +223,7 @@ module Stacks::Services::MysqlCluster
 
   def mysql_username(service)
     # MySQL user names can be up to 16 characters long: https://dev.mysql.com/doc/refman/5.5/en/user-names.html
-    service.application[0..15]
+    service.database_username[0..15]
   end
 
   def config_given_no_requirement(dependent, fabric)
