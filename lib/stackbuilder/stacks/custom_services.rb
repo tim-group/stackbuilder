@@ -130,7 +130,7 @@ class Stacks::CustomServices
 
   def vpn_service(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VpnService],
-                    Stacks::Services::StandardServer, &block)
+                    Stacks::Services::VpnServer, &block)
   end
 
   def [](key)

@@ -5,6 +5,7 @@ module Stacks::Services::VpnService
 
   def configure
     @ports = [500, 4500]
+    add_vip_network :mgmt
     @tcp = false
     @udp = true
   end

@@ -15,6 +15,11 @@ describe_stack 'test enc of vpn servers' do
     stack 'vpn_stack' do
       vpn_service 'vpn' do
         enable_nat
+        each_machine do |machine|
+          machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '10.108.0.0/16')
+          machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '10.111.0.0/16')
+          machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '172.20.0.0/16')
+        end
       end
     end
 
@@ -29,7 +34,30 @@ describe_stack 'test enc of vpn servers' do
   host("oymigration-vpn-001.mgmt.oy.net.local") do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to eql({})
-    #   expect(enc['role::vpn']).to eql({})
+    expect(enc['role::vpn']).to(
+      eql('vpns' => {
+            'oymigration-vpn-vip.oy.net.local' => {
+              'ldn-office.youdevise.com' => {
+                '172.16.0.0/21' => [
+                  '10.108.0.0/16',
+                  '10.111.0.0/16',
+                  '172.20.0.0/16'
+                ]
+              }
+            }
+          },
+          'virtual_servers' => {
+            'oymigration-vpn-vip.oy.net.local' => {
+              'type' => 'racoon'
+            },
+            'oymigration-vpn-vip.mgmt.oy.net.local' => {
+              'type' => 'racoon'
+            },
+            'oymigration-vpn-vip.front.oy.net.local' => {
+              'type' => 'racoon'
+            }
+          })
+    )
   end
 
   host('oymigration-lb-001.mgmt.oy.net.local') do |host|
