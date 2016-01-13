@@ -13,7 +13,9 @@ class Stacks::Services::VpnServer < Stacks::MachineDef
     enc.merge!('server::default_new_mgmt_net_local' => {})
     virtual_servers = {}
     @virtual_service.vip_networks.each do |vip_network|
-      virtual_servers[@virtual_service.vip_fqdn(vip_network, fabric)] = { 'type' => 'racoon' }
+      if vip_network != :front
+        virtual_servers[@virtual_service.vip_fqdn(vip_network, fabric)] = { 'type' => 'racoon' }
+      end
     end
     enc.merge!('role::vpn' => {
                  'virtual_servers' => virtual_servers,

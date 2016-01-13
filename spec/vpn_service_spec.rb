@@ -52,9 +52,6 @@ describe_stack 'test enc of vpn servers' do
             },
             'oymigration-vpn-vip.mgmt.oy.net.local' => {
               'type' => 'racoon'
-            },
-            'oymigration-vpn-vip.front.oy.net.local' => {
-              'type' => 'racoon'
             }
           })
     )
