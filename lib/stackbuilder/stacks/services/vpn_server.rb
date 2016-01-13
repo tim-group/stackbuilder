@@ -8,6 +8,14 @@ class Stacks::Services::VpnServer < Stacks::MachineDef
     @vpns = {}
   end
 
+  def bind_to(environment)
+    super(environment)
+    if environment.options[:vpn_virtual_router_id].nil?
+      fail "Environment '#{environment.name}' needs vpn_virtual_router_id to be set"
+    end
+    @virtual_router_id = environment.options[:vpn_virtual_router_id]
+  end
+
   def to_enc
     enc = super
     enc.merge!('server::default_new_mgmt_net_local' => {})
@@ -18,6 +26,7 @@ class Stacks::Services::VpnServer < Stacks::MachineDef
       end
     end
     enc.merge!('role::vpn' => {
+                 'virtual_router_id' => @virtual_router_id,
                  'virtual_servers' => virtual_servers,
                  'vpns' => @vpns
                })

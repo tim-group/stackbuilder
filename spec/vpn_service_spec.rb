@@ -23,7 +23,7 @@ describe_stack 'test enc of vpn servers' do
       end
     end
 
-    env "oymigration", :primary_site => "oy" do
+    env "oymigration", :primary_site => "oy", :vpn_virtual_router_id => 101 do
       instantiate_stack "lb"
       instantiate_stack "vpn_stack"
       instantiate_stack 'nat'
@@ -35,25 +35,28 @@ describe_stack 'test enc of vpn servers' do
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to eql({})
     expect(enc['role::vpn']).to(
-      eql('vpns' => {
-            'oymigration-vpn-vip.oy.net.local' => {
-              'ldn-office.youdevise.com' => {
-                '172.16.0.0/21' => [
-                  '10.108.0.0/16',
-                  '10.111.0.0/16',
-                  '172.20.0.0/16'
-                ]
-              }
+      eql(
+        'vpns' => {
+          'oymigration-vpn-vip.oy.net.local' => {
+            'ldn-office.youdevise.com' => {
+              '172.16.0.0/21' => [
+                '10.108.0.0/16',
+                '10.111.0.0/16',
+                '172.20.0.0/16'
+              ]
             }
+          }
+        },
+        'virtual_servers' => {
+          'oymigration-vpn-vip.oy.net.local' => {
+            'type' => 'racoon'
           },
-          'virtual_servers' => {
-            'oymigration-vpn-vip.oy.net.local' => {
-              'type' => 'racoon'
-            },
-            'oymigration-vpn-vip.mgmt.oy.net.local' => {
-              'type' => 'racoon'
-            }
-          })
+          'oymigration-vpn-vip.mgmt.oy.net.local' => {
+            'type' => 'racoon'
+          }
+        },
+        'virtual_router_id' => 101
+      )
     )
   end
 
