@@ -273,23 +273,23 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     snat_1 = snat['prod']
     expect(snat_1['to_source']).to eql('nat-vip.front.st.net.local')
     snat_2 = snat['eg-withnat-vip.st.net.local 443']
-    expect(snat_2['to_source']).to eql('eg-withnat-vip.front.st.net.local 443')
+    expect(snat_2['to_source']).to eql('eg-withnat-vip.front.st.net.local:443')
     expect(snat_2['udp']).to eql(false)
     expect(snat_2['tcp']).to eql(true)
     snat_3 = snat['eg-withnat-vip.st.net.local 80']
-    expect(snat_3['to_source']).to eql('eg-withnat-vip.front.st.net.local 80')
+    expect(snat_3['to_source']).to eql('eg-withnat-vip.front.st.net.local:80')
     expect(snat_3['udp']).to eql(false)
     expect(snat_3['tcp']).to eql(true)
     snat_4 = snat['eg-sftp-vip.st.net.local 21']
-    expect(snat_4['to_source']).to eql('eg-sftp-vip.front.st.net.local 21')
+    expect(snat_4['to_source']).to eql('eg-sftp-vip.front.st.net.local:21')
     expect(snat_4['tcp']).to eql(true)
     expect(snat_4['udp']).to eql(false)
     snat_5 = snat['eg-sftp-vip.st.net.local 22']
-    expect(snat_5['to_source']).to eql('eg-sftp-vip.front.st.net.local 22')
+    expect(snat_5['to_source']).to eql('eg-sftp-vip.front.st.net.local:22')
     expect(snat_5['tcp']).to eql(true)
     expect(snat_5['udp']).to eql(false)
     snat_6 = snat['eg-sftp-vip.st.net.local 2222']
-    expect(snat_6['to_source']).to eql('eg-sftp-vip.front.st.net.local 2222')
+    expect(snat_6['to_source']).to eql('eg-sftp-vip.front.st.net.local:2222')
     expect(snat_6['tcp']).to eql(true)
     expect(snat_6['udp']).to eql(false)
   end
@@ -303,12 +303,12 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     expect(snat['prod']['to_source']).to eql('nat-vip.front.st.net.local')
 
     snat_1 = snat['sub-blahnat-vip.st.net.local 8008']
-    expect(snat_1['to_source']).to eql('sub-blahnat-vip.front.st.net.local 8008')
+    expect(snat_1['to_source']).to eql('sub-blahnat-vip.front.st.net.local:8008')
     expect(snat_1['tcp']).to eql(true)
     expect(snat_1['udp']).to eql(false)
 
     snat_2 = snat['sub-defaultport-vip.st.net.local 8000']
-    expect(snat_2['to_source']).to eql('sub-defaultport-vip.front.st.net.local 8000')
+    expect(snat_2['to_source']).to eql('sub-defaultport-vip.front.st.net.local:8000')
     expect(snat_2['tcp']).to eql(true)
     expect(snat_2['udp']).to eql(false)
   end

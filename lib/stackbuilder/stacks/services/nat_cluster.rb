@@ -12,7 +12,7 @@ module Stacks::Services::NatCluster
     rules = {}
     find_snat_rules.each do |rule|
       rules["#{rule.from.host} #{rule.from.port}"] = {
-        'to_source' => "#{rule.to.host} #{rule.to.port}",
+        'to_source' => "#{rule.to.host}:#{rule.to.port}",
         'tcp'       => rule.tcp,
         'udp'       => rule.udp
       }
