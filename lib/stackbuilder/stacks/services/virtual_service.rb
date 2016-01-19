@@ -10,13 +10,16 @@ module Stacks::Services::VirtualService
     object.configure
   end
 
-  attr_accessor :ehcache, :nat, :persistent_ports, :healthcheck_timeout, :proto
+  attr_accessor :ehcache, :nat, :nat_out, :nat_out_exclusive, :persistent_ports,
+                :healthcheck_timeout, :proto
   attr_reader :vip_networks, :included_classes
 
   def configure
     @included_classes = {}
     @ehcache = false
     @nat = false
+    @nat_out = false
+    @nat_out_exclusive = false
     @persistent_ports = []
     @port_map = {}
     @healthcheck_timeout = 10
@@ -59,8 +62,15 @@ module Stacks::Services::VirtualService
 
   def enable_nat
     @nat = true
-    add_vip_network :front
-    add_vip_network :prod
+    add_networks_for_nat
+  end
+
+  # nat_out means setup a specific outgoing snat rule from the prod vip of the
+  # virtual service to the front vip of the virtual service (rather than the
+  # default nat vip, if there is one)
+  def enable_nat_out
+    @nat_out = true
+    add_networks_for_nat
   end
 
   def include_class(class_name, class_hash = {})
@@ -71,14 +81,30 @@ module Stacks::Services::VirtualService
     @persistent_ports << port
   end
 
-  def nat_rules(location)
+  def dnat_rules(location)
     rules = []
     fabric = environment.options[location]
-    @ports.map do |back_port|
-      front_port = @port_map[back_port] || back_port
-      front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
-      prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
-      rules << Stacks::Services::Nat.new(front_uri, prod_uri, @tcp, @udp)
+    if @nat
+      @ports.map do |back_port|
+        front_port = @port_map[back_port] || back_port
+        front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
+        prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
+        rules << Stacks::Services::Nat.new(front_uri, prod_uri, @tcp, @udp)
+      end
+    end
+    rules
+  end
+
+  def snat_rules(location)
+    rules = []
+    fabric = environment.options[location]
+    if @nat_out
+      @ports.map do |back_port|
+        front_port = @port_map[back_port] || back_port
+        front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
+        prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
+        rules << Stacks::Services::Nat.new(prod_uri, front_uri, @tcp, @udp)
+      end
     end
     rules
   end
@@ -96,6 +122,11 @@ module Stacks::Services::VirtualService
   end
 
   private
+
+  def add_networks_for_nat
+    add_vip_network :front
+    add_vip_network :prod
+  end
 
   def loadbalancer_config(location, fabric)
     fewest_servers_in_a_group = realservers(location).size
