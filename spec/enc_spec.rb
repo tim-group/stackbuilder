@@ -261,20 +261,6 @@ describe Stacks::DSL do
     expect(find_environment("e1").flatten.map(&:name)).to include("e1-lb-001", "e1-lb-002", "e1-nat-001", "e1-nat-002")
   end
 
-  it 'can build forward proxy servers' do
-    stack "mystack" do
-      rate_limited_forward_proxy 's3proxy'
-    end
-
-    env "e1", :primary_site => "space" do
-      instantiate_stack "mystack"
-    end
-
-    expect(find("e1-s3proxy-001.mgmt.space.net.local").to_enc).to eql('role::rate_limited_forward_proxy' => {})
-
-    expect(find("e1-s3proxy-001.mgmt.space.net.local").networks).to eql([:mgmt, :prod])
-  end
-
   it 'things that are part of virtual services are given availability groups' do
     stack "mystack" do
       virtual_appserver "x"
