@@ -128,10 +128,6 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
-    env 'e4', :primary_site => 'space', :secondary_site => 'moon' do
-      instantiate_stack 'read_only_second_site_cluster'
-    end
-
     env 'minimalenv', :primary_site => 'earth', :secondary_site => 'space' do
       instantiate_stack 'example_db_depended_on_in_different_ways'
 
@@ -189,7 +185,7 @@ describe_stack 'stack-with-dependencies' do
     deps = host.to_enc['role::http_app']['dependencies']
 
     expect(deps['db.dependedondb.read_only_cluster']).to eql(
-      'e3-dependedondb-003.earth.net.local,e3-dependedondb-004.earth.net.local'
+      'e3-dependedondb-001.space.net.local,e3-dependedondb-003.earth.net.local,e3-dependedondb-004.earth.net.local'
     )
   end
 
@@ -197,12 +193,6 @@ describe_stack 'stack-with-dependencies' do
     deps = host.to_enc['role::http_app']['dependencies']
 
     expect(deps['db.dependedondb.read_only_cluster']).to eql('e3-dependedondb-005.earth.net.local')
-  end
-
-  host('e4-rosecondaryapp-001.mgmt.space.net.local') do |host|
-    deps = host.to_enc['role::http_app']['dependencies']
-
-    expect(deps['db.dependedondb.hostname']).to eql('e3-dependedondb-001.space.net.local')
   end
 
   host('minimalenv-rwapp-001.mgmt.earth.net.local') do |host|

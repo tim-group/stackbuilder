@@ -160,9 +160,8 @@ module Stacks::Services::MysqlCluster
         "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
     else
 
-      servers_in_fabric = children.select { |server| server.fabric == fabric }
       hostnames_for_requirement = @supported_requirements[requirement]
-      matching_hostnames = servers_in_fabric.select { |server| hostnames_for_requirement.include?(server.prod_fqdn) }
+      matching_hostnames = children.select { |server| hostnames_for_requirement.include?(server.prod_fqdn) }
 
       config_to_fulfil_requirement(dependent, matching_hostnames)
     end
