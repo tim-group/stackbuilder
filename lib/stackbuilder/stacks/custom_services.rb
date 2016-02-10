@@ -78,6 +78,10 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::PuppetMaster, &block)
   end
 
+  def puppetserver(name = "puppetserver", &block)
+    machineset_with(name, [], Stacks::Services::PuppetServer, &block)
+  end
+
   def loadbalancer(&block)
     machineset_with('lb', [Stacks::Services::LoadBalancerCluster], Stacks::Services::LoadBalancer, &block)
   end

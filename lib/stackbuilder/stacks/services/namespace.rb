@@ -29,6 +29,7 @@ module Stacks
     require 'stackbuilder/stacks/services/proxy_server'
     require 'stackbuilder/stacks/services/proxy_vhost'
     require 'stackbuilder/stacks/services/puppetmaster'
+    require 'stackbuilder/stacks/services/puppetserver'
     require 'stackbuilder/stacks/services/quantapp_server'
     require 'stackbuilder/stacks/services/rabbitmq_server'
     require 'stackbuilder/stacks/services/rate_limited_forward_proxy_server'
