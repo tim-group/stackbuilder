@@ -35,12 +35,10 @@ describe_stack 'basic dev puppetserver without cname' do
     end
   end
 
-  it_stack 'puppetserver should have the correct enc data' do
-    host("e1-pm-001.mgmt.space.net.local") do |host|
-      expect(host.to_enc).to eql({})
-      expect(host.to_specs.first[:template]).to eql('puppetserver')
-      expect(host.to_specs.first[:cnames]).to eql({})
-    end
+  host("e1-pm-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc).to eql({})
+    expect(host.to_specs.first[:template]).to eql('puppetserver')
+    expect(host.to_specs.first[:cnames]).to eql({})
   end
 
   it_stack 'should contain 1 puppetserver' do |stack|
