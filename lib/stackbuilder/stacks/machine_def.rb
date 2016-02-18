@@ -176,6 +176,10 @@ class Stacks::MachineDef
     [to_spec]
   end
 
+  def type_of?
+    :machine_def
+  end
+
   def to_enc
     enc = {}
     enc.merge! @included_classes

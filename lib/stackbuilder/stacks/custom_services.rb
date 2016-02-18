@@ -12,6 +12,10 @@ class Stacks::CustomServices
     @definitions = {}
   end
 
+  def type_of?
+    :custom_service
+  end
+
   def virtual_appserver(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                     Stacks::Services::AppServer, &block)

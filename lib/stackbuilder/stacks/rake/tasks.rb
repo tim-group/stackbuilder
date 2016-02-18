@@ -33,7 +33,8 @@ include Support::MCollective
 extend Stacks::Core::Actions
 
 environment_name = ENV.fetch('env', 'dev')
-if (environment = @factory.inventory.find_environment(environment_name)).nil?
+@environment = @factory.inventory.find_environment(environment_name)
+if @environment.nil?
   logger(Logger::ERROR) { "environment \"#{environment_name}\" does not exist" }
   exit 1
 end
@@ -112,15 +113,47 @@ namespace :sbx do
     system('stacks -p . compile')
   end
 
+  desc 'show a tree describing the internal hierachy in stackbuilder'
+  task :show_tree do
+    show_tree
+  end
+
+  def rake_task_name(machine_def, indent_char = '')
+    case machine_def.type_of?
+    when :environment
+      indent(machine_def.name.to_sym, 1, indent_char)
+    when :custom_service
+      indent("#{machine_def.environment.name}_#{machine_def.name.to_sym}", 2, indent_char)
+    when :virtual_service
+      indent("#{machine_def.environment.name}_#{machine_def.name.to_sym}", 3, indent_char)
+    when :machine_set
+      indent("#{machine_def.environment.name}_#{machine_def.name.to_sym}", 4, indent_char)
+    when :machine_def
+      indent("#{machine_def.mgmt_fqdn.to_sym}", 5, indent_char)
+    else
+      fail "Unknown machine_def type detected #{machine_def.type_of?}"
+    end
+  end
+
+  def indent(text, n, char)
+    n.times do
+      text = char + text.to_s
+    end
+    text
+  end
+
+  def show_tree
+    puts 'top'
+    @environment.accept do |machine_def|
+      puts "#{rake_task_name(machine_def, ' ')} (#{machine_def.class} -> #{machine_def.type_of?})"
+    end
+  end
+
   require 'set'
   machine_names = Set.new
   rake_task_names = Set.new
-  environment.accept do |machine_def|
-    if machine_def.respond_to?(:mgmt_fqdn)
-      rake_task_name = machine_def.mgmt_fqdn.to_sym
-    else
-      rake_task_name = machine_def.name.to_sym
-    end
+  @environment.accept do |machine_def|
+    rake_task_name = rake_task_name(machine_def)
 
     if rake_task_names.include?(rake_task_name)
       fail "Duplicate rake task detected: #{rake_task_name} in #{machine_def.environment.name}. " \

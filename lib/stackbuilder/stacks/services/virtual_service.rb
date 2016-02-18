@@ -32,6 +32,10 @@ module Stacks::Services::VirtualService
     'virtualservice'
   end
 
+  def type_of?
+    :virtual_service
+  end
+
   def realservers(location)
     @definitions.values.select { |server| server.location == location }
   end

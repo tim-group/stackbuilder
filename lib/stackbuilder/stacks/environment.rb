@@ -75,6 +75,10 @@ class Stacks::Environment
     self
   end
 
+  def type_of?
+    :environment
+  end
+
   def all_environments
     @environments.inject([]) do |acc, (_, env)|
       add_sub_environments(acc, top_level_env_of(env))
