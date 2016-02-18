@@ -118,20 +118,11 @@ namespace :sbx do
     show_tree
   end
 
-  def rake_task_name(machine_def, indent_char = '')
-    case machine_def.type_of?
-    when :environment
-      indent(machine_def.name.to_sym, 1, indent_char)
-    when :custom_service
-      indent("#{machine_def.environment.name}_#{machine_def.name.to_sym}", 2, indent_char)
-    when :virtual_service
-      indent("#{machine_def.environment.name}_#{machine_def.name.to_sym}", 3, indent_char)
-    when :machine_set
-      indent("#{machine_def.environment.name}_#{machine_def.name.to_sym}", 4, indent_char)
-    when :machine_def
-      indent("#{machine_def.mgmt_fqdn.to_sym}", 5, indent_char)
+  def rake_task_name(machine_def)
+    if machine_def.respond_to?(:identity)
+      machine_def.identity
     else
-      fail "Unknown machine_def type detected #{machine_def.type_of?}"
+      fail "#{machine_def} does not respond to identity. Unknown type detected"
     end
   end
 
@@ -145,7 +136,7 @@ namespace :sbx do
   def show_tree
     puts 'top'
     @environment.accept do |machine_def|
-      puts "#{rake_task_name(machine_def, ' ')} (#{machine_def.class} -> #{machine_def.type_of?})"
+      puts "#{rake_task_name(machine_def)} (#{machine_def.class} -> #{machine_def.type_of?})"
     end
   end
 

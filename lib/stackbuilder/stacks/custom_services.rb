@@ -16,6 +16,10 @@ class Stacks::CustomServices
     :custom_service
   end
 
+  def identity
+    "#{environment.name}_#{name.to_sym}"
+  end
+
   def virtual_appserver(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                     Stacks::Services::AppServer, &block)

@@ -180,6 +180,10 @@ class Stacks::MachineDef
     :machine_def
   end
 
+  def identity
+    mgmt_fqdn.to_sym
+  end
+
   def to_enc
     enc = {}
     enc.merge! @included_classes

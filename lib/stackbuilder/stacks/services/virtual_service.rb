@@ -36,6 +36,10 @@ module Stacks::Services::VirtualService
     :virtual_service
   end
 
+  def identity
+    "#{environment.name}_#{name.to_sym}"
+  end
+
   def realservers(location)
     @definitions.values.select { |server| server.location == location }
   end

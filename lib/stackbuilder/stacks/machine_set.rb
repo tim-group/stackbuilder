@@ -44,6 +44,10 @@ class Stacks::MachineSet
     :machine_set
   end
 
+  def identity
+    "#{environment.name}_#{name.to_sym}"
+  end
+
   def instantiate_machines(environment)
     @instances.times do |i|
       @definitions[random_name] = instantiate_machine(i, environment, default_networks, :primary_site)
