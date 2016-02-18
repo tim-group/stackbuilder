@@ -114,20 +114,12 @@ namespace :sbx do
 
   require 'set'
   machine_names = Set.new
-  rake_task_names = Set.new
   environment.accept do |machine_def|
     if machine_def.respond_to?(:mgmt_fqdn)
       rake_task_name = machine_def.mgmt_fqdn.to_sym
     else
       rake_task_name = machine_def.name.to_sym
     end
-
-    if rake_task_names.include?(rake_task_name)
-      fail "Duplicate rake task detected: #{rake_task_name} in #{machine_def.environment.name}. " \
-           "Look for a stack that has the same name as the server being created.\neg.\n" \
-           " stack '#{rake_task_name}' do\n  app '#{rake_task_name}'"
-    end
-    rake_task_names << rake_task_name
 
     namespace rake_task_name do
       RSpec::Core::Runner.disable_autorun! # XXX wtf does this do
