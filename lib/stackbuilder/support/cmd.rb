@@ -92,19 +92,19 @@ class CMD
   # XXX do this properly
   def clean(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:clean")
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean")
   end
 
   # XXX do this properly
   def provision(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:provision")
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:provision")
   end
 
   # XXX do this properly
   def reprovision(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{to_rake_stack_name(machine_def)}:reprovision")
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:reprovision")
   end
 
   private
@@ -122,11 +122,6 @@ class CMD
     end
 
     machine_def
-  end
-
-  # XXX won't be needed if system("...rake...") is no longer used in the commands above
-  def to_rake_stack_name(machine_def)
-    machine_def.respond_to?(:mgmt_fqdn) ? machine_def.mgmt_fqdn : machine_def.name
   end
 end
 
