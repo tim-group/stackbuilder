@@ -31,18 +31,17 @@ module CMDLs
   private
 
   def traverse(indent, is_last, machine_def)
-    case machine_def.clazz
-    when 'container'
-      if machine_def.respond_to?(:domain_suffix) # environment
-        name = machine_def.name
-        type = machine_def.parent.nil? ? '[0;35mE[0m' : '[0;35me[0m'
-      else
-        type = '[0;36mC[0m'
-        name = machine_def.name
-      end
-    when 'machine'
-      type = '[0;32mm[0m'
-      name = machine_def.mgmt_fqdn
+    case machine_def.type_of?
+    when :environment
+      name = machine_def.identity
+      sub = machine_def.parent.nil? ? '' : '(sub)'
+      type = "[0;35m#{machine_def.type_of?}#{sub}[0m"
+    when :custom_service, :machine_set, :virtual_service
+      type = "[0;36m#{machine_def.type_of?}[0m"
+      name = machine_def.name
+    when :machine_def
+      type = "[0;32m#{machine_def.type_of?}[0m"
+      name = machine_def.identity
     else
       type = "[0;36m#{machine_def.clazz}[0m"
       name = machine_def.name
