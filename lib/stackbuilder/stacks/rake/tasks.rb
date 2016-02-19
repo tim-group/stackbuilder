@@ -113,9 +113,9 @@ namespace :sbx do
     system('stacks -p . compile')
   end
 
-  desc 'show a tree describing the internal hierachy in stackbuilder'
-  task :show_tree do
-    show_tree
+  desc 'list describing the internal hierachy in stackbuilder'
+  task :ls do
+    system("stacks -e #{environment.name} -p . ls")
   end
 
   def rake_task_name(machine_def)
