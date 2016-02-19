@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile ls lsenv enc clean provision reprovision terminus)
+    @cmds = %w(audit compile ls lsenv enc clean provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -99,6 +99,12 @@ class CMD
   def provision(_argv)
     machine_def = check_and_get_stack
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:provision")
+  end
+
+  # XXX do this properly
+  def test(_argv)
+    machine_def = check_and_get_stack
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:test")
   end
 
   # XXX do this properly
