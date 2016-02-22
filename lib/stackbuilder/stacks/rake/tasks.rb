@@ -444,6 +444,12 @@ namespace :sbx do
           mco.compound_filter '!domain=mgmt.dev.net.local'
           mco.compound_filter '!domain=mgmt.st.net.local'
           hosts.each { |fqdn| mco.puppet_cleanup(:fqdn => fqdn) }
+
+          mco.reset_filter
+          mco.compound_filter 'role::puppetserver'
+          mco.compound_filter '!domain=mgmt.dev.net.local'
+          mco.compound_filter '!domain=mgmt.st.net.local'
+          hosts.each { |fqdn| mco.puppet_cleanup(:fqdn => fqdn) }
         end
       end
 
