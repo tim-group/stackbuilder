@@ -456,3 +456,38 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
     )
   end
 end
+
+describe_stack 'generates the correct proxy_pass and add_pass rules when env not specified' do
+  given do
+    stack 'bse_api' do
+      virtual_appserver 'bseapiapp' do
+        self.application = 'bse'
+      end
+    end
+    stack 'bse' do
+      virtual_appserver 'bseapiapp' do
+        self.application = 'bse'
+      end
+    end
+    stack 'bse_proxy' do
+      virtual_proxyserver 'bseproxy' do
+        vhost('bseapp', 'foo.timgroup.com') do
+          add_pass_rule '/api-external', :service => 'bseapiapp'
+        end
+      end
+    end
+
+    env "production", :primary_site => "pg", :secondary_site => "oy" do
+      instantiate_stack 'bse'
+      instantiate_stack 'bse_api'
+      instantiate_stack 'bse_proxy'
+    end
+  end
+  host("production-bseapiapp-001.mgmt.pg.net.local") do |app|
+    enc = app.to_enc['role::http_app']
+    expect(enc['application_dependant_instances']).to include(
+      'production-bseproxy-001.pg.net.local',
+      'production-bseproxy-002.pg.net.local'
+    )
+  end
+end
