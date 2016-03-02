@@ -193,6 +193,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'datadir'                  => '/mnt/data/mysql',
                  'environment'              => environment.name,
                  'master'                   => master?,
+                 'role'                     => @role,
                  'server_id'                => server_id,
                  'charset'                  => @mysql_cluster.charset,
                  'version'                  => @version,

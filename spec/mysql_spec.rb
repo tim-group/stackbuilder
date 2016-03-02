@@ -878,5 +878,6 @@ describe_stack 'create standalone mysql servers' do
     enc = host.to_enc['role::mysql_server']
     expect(enc['master']).to eql(false)
     expect(enc['monitoring_checks']).to be_empty
+    expect(enc['role']).to eql(:standalone)
   end
 end
