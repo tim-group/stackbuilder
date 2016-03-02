@@ -5,42 +5,44 @@ module Stacks::Services::MysqlCluster
     object.configure
   end
 
-  attr_accessor :backup_instances
-  attr_accessor :primary_site_backup_instances
+  attr_accessor :backup_instance_site
   attr_accessor :charset
   attr_accessor :database_name
-  attr_accessor :master_instances
-  attr_accessor :secondary_site_slave_instances
+  attr_accessor :enable_percona_checksum_tools
+  attr_accessor :include_master_in_read_only_cluster
+  attr_accessor :percona_checksum_ignore_tables
   attr_accessor :server_id_base
   attr_accessor :server_id_offset
-  attr_accessor :slave_instances
-  attr_accessor :include_master_in_read_only_cluster
-  attr_accessor :backup_instance_site
   attr_accessor :supported_requirements
-  attr_accessor :enable_percona_checksum_tools
-  attr_accessor :percona_checksum_ignore_tables
-  attr_accessor :user_access_instances
-  attr_accessor :secondary_site_user_access_instances
   attr_reader :grant_user_rights_by_default
 
+  attr_accessor :master_instances
+  attr_accessor :slave_instances
+  attr_accessor :secondary_site_slave_instances
+  attr_accessor :backup_instances
+  attr_accessor :primary_site_backup_instances
+  attr_accessor :user_access_instances
+  attr_accessor :secondary_site_user_access_instances
+
   def configure
+    @backup_instance_site = :secondary_site
+    @charset = 'utf8'
     @database_name = ''
+    @enable_percona_checksum_tools = false
+    @grant_user_rights_by_default = true
+    @include_master_in_read_only_cluster = true
+    @master_index_offset = 0
+    @percona_checksum_ignore_tables = ''
+    @server_id_offset = 0
+    @supported_requirements = {}
+
     @master_instances = 1
     @slave_instances = 1
     @secondary_site_slave_instances = 0
     @backup_instances = 1
     @primary_site_backup_instances = 0
-    @charset = 'utf8'
-    @server_id_offset = 0
-    @include_master_in_read_only_cluster = true
-    @master_index_offset = 0
-    @backup_instance_site = :secondary_site
-    @supported_requirements = {}
-    @enable_percona_checksum_tools = false
-    @percona_checksum_ignore_tables = ''
     @user_access_instances = 0
     @secondary_site_user_access_instances = 0
-    @grant_user_rights_by_default = true
   end
 
   def instantiate_machine(name, type, i, environment, location)
