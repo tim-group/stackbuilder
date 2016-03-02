@@ -858,3 +858,25 @@ describe_stack 'create primary site backup instances' do
     expect(enc).not_to be_nil
   end
 end
+
+describe_stack 'create standalone mysql servers' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 0
+        self.slave_instances = 0
+        self.backup_instances = 0
+        self.standalone_instances = 1
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc['role::mysql_server']
+    expect(enc['master']).to eql(false)
+    expect(enc['monitoring_checks']).to be_empty
+  end
+end

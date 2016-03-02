@@ -23,6 +23,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :primary_site_backup_instances
   attr_accessor :user_access_instances
   attr_accessor :secondary_site_user_access_instances
+  attr_accessor :standalone_instances
 
   def configure
     @backup_instance_site = :secondary_site
@@ -43,6 +44,7 @@ module Stacks::Services::MysqlCluster
     @primary_site_backup_instances = 0
     @user_access_instances = 0
     @secondary_site_user_access_instances = 0
+    @standalone_instances = 0
   end
 
   def instantiate_machine(name, type, i, environment, location)
@@ -89,6 +91,10 @@ module Stacks::Services::MysqlCluster
     @secondary_site_user_access_instances.times do
       @grant_user_rights_by_default = false
       instantiate_machine(name, :user_access, i += 1, environment, :secondary_site)
+    end
+    i = 0
+    @standalone_instances.times do
+      instantiate_machine(name, :standalone, i += 1, environment, :primary_site)
     end
   end
 

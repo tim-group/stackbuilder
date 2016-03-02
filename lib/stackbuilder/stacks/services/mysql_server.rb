@@ -58,6 +58,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     case @role
     when :master
       %w(heartbeat)
+    when :standalone
+      []
     else
       %w(replication_running replication_delay)
     end
@@ -70,7 +72,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   def server_id
     if @server_id.nil?
       case @role
-      when :master
+      when :master, :standalone
         @server_id = @i + @mysql_cluster.server_id_offset
       when :slave
         @server_id = @i + @mysql_cluster.server_id_offset
