@@ -154,11 +154,12 @@ class Stacks::MachineDef
     @destroyable = true if environment.every_machine_destroyable?
 
     spec = {
-      :hostname => @hostname,
-      :domain => @domain,
-      :fabric => @fabric,
-      :availability_group => availability_group,
-      :networks => @networks,
+      :hostname            => @hostname,
+      :domain              => @domain,
+      :fabric              => @fabric,
+      :logicalenv          => @environment.name,
+      :availability_group  => availability_group,
+      :networks            => @networks,
       :qualified_hostnames => Hash[@networks.map { |network| [network, qualified_hostname(network)] }]
     }
 

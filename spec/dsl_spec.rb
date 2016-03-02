@@ -54,4 +54,17 @@ describe Stacks::DSL do
     expect(find_environment("sub").name).to eql("sub")
     expect(find_environment("parent").name).to eql("parent")
   end
+
+  it 'spec always provides logicalenv' do
+    stack "app" do
+      virtual_appserver "appx"
+    end
+
+    env "ci", :primary_site => "st", :secondary_site => "bs" do
+      instantiate_stack "app"
+    end
+
+    spec = find("ci-appx-001.mgmt.st.net.local").to_spec
+    expect(spec[:logicalenv]).to eql('ci')
+  end
 end
