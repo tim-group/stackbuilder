@@ -56,20 +56,17 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
   end
 
   host("testing-frdb-001.mgmt.space.net.local") do |host|
-    expect(host.master?).to eql true
-    expect(host.backup?).to eql false
+    expect(host.role).to eql(:master)
     expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql([
       'testing-frdb-002.space.net.local',
       'testing-frdbbackup-001.earth.net.local'
     ])
   end
   host("testing-frdb-002.mgmt.space.net.local") do |host|
-    expect(host.master?).to eql false
-    expect(host.backup?).to eql false
+    expect(host.role).to eql(:slave)
   end
   host("testing-frdbbackup-001.mgmt.earth.net.local") do |host|
-    expect(host.master?).to eql false
-    expect(host.backup?).to eql true
+    expect(host.role).to eql(:backup)
     expect(host.to_specs.shift[:storage][:"/mnt/storage"][:size]).to eql '10G'
   end
 end
@@ -122,11 +119,10 @@ describe_stack 'should provide correct enc data' do
   end
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    expect(enc_server_role['backup']).to eql(false)
+    expect(enc_server_role['role']).to eql(:master)
     expect(enc_server_role['database_name']).to eql('mydb')
     expect(enc_server_role['datadir']).to eql('/mnt/data/mysql')
     expect(enc_server_role['environment']).to eql('testing')
-    expect(enc_server_role['master']).to eql(true)
 
     enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
     expect(enc_rights['mydb']['environment']).to eql('testing')
@@ -144,11 +140,10 @@ describe_stack 'should provide correct enc data' do
   end
   host("testing-mydb-002.mgmt.space.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    expect(enc_server_role['backup']).to eql(false)
+    expect(enc_server_role['role']).to eql(:slave)
     expect(enc_server_role['database_name']).to eql('mydb')
     expect(enc_server_role['datadir']).to eql('/mnt/data/mysql')
     expect(enc_server_role['environment']).to eql('testing')
-    expect(enc_server_role['master']).to eql(false)
 
     enc_rights = host.to_enc['role::mysql_multiple_rights']['rights']
     expect(enc_rights['mydb']['environment']).to eql('testing')
@@ -169,11 +164,10 @@ describe_stack 'should provide correct enc data' do
   end
   host("testing-mydbbackup-001.mgmt.earth.net.local") do |host|
     enc_server_role = host.to_enc['role::mysql_server']
-    expect(enc_server_role['backup']).to eql(true)
+    expect(enc_server_role['role']).to eql(:backup)
     expect(enc_server_role['database_name']).to eql('mydb')
     expect(enc_server_role['datadir']).to eql('/mnt/data/mysql')
     expect(enc_server_role['environment']).to eql('testing')
-    expect(enc_server_role['master']).to eql(false)
 
     expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-001.space.net.local' => {
@@ -876,7 +870,6 @@ describe_stack 'create standalone mysql servers' do
   end
   host("production-mydb-001.mgmt.space.net.local") do |host|
     enc = host.to_enc['role::mysql_server']
-    expect(enc['master']).to eql(false)
     expect(enc['monitoring_checks']).to be_empty
     expect(enc['role']).to eql(:standalone)
   end

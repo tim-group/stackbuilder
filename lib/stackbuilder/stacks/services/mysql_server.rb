@@ -3,7 +3,7 @@ require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :config
-  attr_accessor :master
+  attr_accessor :role
   attr_accessor :version
   attr_accessor :server_id
   attr_accessor :use_gtids
@@ -12,8 +12,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
 
   def initialize(base_hostname, i, mysql_cluster, role, location)
     index = sprintf("%03d", i)
-    @master = (role == :master) ? true : false
-    @backup = (role == :backup) ? true : false
     super(base_hostname, [:mgmt, :prod], location)
 
     @config = {}
@@ -51,7 +49,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       }
     }
     modify_storage(storage)
-    modify_storage(backup_storage) if @backup
+    modify_storage(backup_storage) if role_of?(:backup)
   end
 
   def monitoring_checks
@@ -66,7 +64,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def backup_size(size)
-    modify_storage('/mnt/storage' => { :size => size }) if @backup
+    modify_storage('/mnt/storage' => { :size => size }) if role_of?(:backup)
   end
 
   def server_id
@@ -98,7 +96,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                    })
     modify_storage('/mnt/storage' => {
                      :persistence_options => { :on_storage_not_found => 'create_new' }
-                   }) if backup?
+                   }) if role_of?(:backup)
   end
 
   def role_of?(role)
@@ -106,11 +104,11 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def master?
-    @master
+    role_of?(:master)
   end
 
   def backup?
-    @backup
+    role_of?(:backup)
   end
 
   def merge_gtid_config
@@ -131,7 +129,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       'percona::checksum_tools' => {
         'database_name' => @mysql_cluster.database_name,
         'master_fqdns'  => @mysql_cluster.master_servers,
-        'is_master'     => master?,
+        'is_master'     => role_of?(:master),
         'ignore_tables' => @mysql_cluster.percona_checksum_ignore_tables
       }
     }
@@ -188,11 +186,9 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   def to_enc
     enc = super()
     enc.merge!('role::mysql_server' => {
-                 'backup'                   => backup?,
                  'database_name'            => @mysql_cluster.database_name,
                  'datadir'                  => '/mnt/data/mysql',
                  'environment'              => environment.name,
-                 'master'                   => master?,
                  'role'                     => @role,
                  'server_id'                => server_id,
                  'charset'                  => @mysql_cluster.charset,
@@ -207,7 +203,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       recurse_merge!(enc, dependant_instances_enc(dependant_instances))
-      unless backup? || role_of?(:user_access)
+      unless role_of?(:backup) || role_of?(:user_access)
         recurse_merge!(enc, @mysql_cluster.dependant_instance_mysql_rights)
       end
     end
