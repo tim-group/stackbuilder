@@ -28,9 +28,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @vcpus = '2'
     @version = '5.1.49-1ubuntu8'
     @mysql_cluster = mysql_cluster
-    master_monitoring_checks = %w(heartbeat)
-    slave_monitoring_checks = %w(replication_running replication_delay)
-    @monitoring_checks = (role == :master) ? master_monitoring_checks : slave_monitoring_checks
+    @monitoring_checks = monitoring_checks
     @grant_user_rights_by_default = false
 
     storage = {
@@ -54,6 +52,15 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     }
     modify_storage(storage)
     modify_storage(backup_storage) if @backup
+  end
+
+  def monitoring_checks
+    case @role
+    when :master
+      %w(heartbeat)
+    else
+      %w(replication_running replication_delay)
+    end
   end
 
   def backup_size(size)
