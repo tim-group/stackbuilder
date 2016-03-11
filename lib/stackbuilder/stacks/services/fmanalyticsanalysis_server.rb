@@ -13,7 +13,7 @@ class Stacks::Services::FmAnalyticsAnalysisServer < Stacks::MachineDef
     enc.merge!('role::fmanalyticsanalysis_server' => {
                  'datadir'     => @data_directory,
                  'environment' => environment.name
-               }, 'role::shiny_server'=> {})
+               }, 'role::shiny_server' => {})
 
     enc
   end
