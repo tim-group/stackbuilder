@@ -16,6 +16,6 @@ describe_stack 'analytics' do
     expect(host.to_enc).to eql('role::fmanalyticsanalysis_server' => {
                                  'datadir'     => false,
                                  'environment' => 'e1'
-                               })
+                               }, 'role::shiny_server' => {})
   end
 end
