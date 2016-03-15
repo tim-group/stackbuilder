@@ -14,8 +14,10 @@ module Stacks::Services::PuppetdbCluster
     @instances = 1
   end
 
-  def instantiate_machine(i, _environment, _network, location)
+  def instantiate_machine(i, environment, _network, location)
     index = sprintf("%03d", i + 1)
-    @type.new(self, index, location)
+    server = @type.new(self, index, location)
+    server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
+    server
   end
 end
