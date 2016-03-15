@@ -20,7 +20,7 @@ module Stacks::Services::PuppetserverCluster
       machine_def.class != Stacks::Services::Puppetdb
     end
     return if puppetdbs.empty?
-    puppetdbs.first.qualified_hostname(:mgmt)
+    puppetdbs.sort { |a, b| a.name <=> b.name }.first.qualified_hostname(:mgmt)
   end
 
   def instantiate_machine(i, environment, _network, location)

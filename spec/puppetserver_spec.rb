@@ -53,7 +53,9 @@ describe_stack 'basic puppetserver_cluster with puppetdb' do
     end
 
     stack 'puppetdb_cluster' do
-      puppetdb_cluster 'puppetdb'
+      puppetdb_cluster 'puppetdb' do
+        @instances = 2
+      end
     end
 
     env "e1", :primary_site => "space" do
@@ -73,6 +75,10 @@ describe_stack 'basic puppetserver_cluster with puppetdb' do
     expect(host.to_specs.shift[:availability_group]).to eql('e1-puppetserver')
   end
   it_stack 'should contain 1 puppetserver' do |stack|
-    expect(stack).to have_hosts(['e1-puppetserver-001.mgmt.space.net.local', 'e1-puppetdb-001.mgmt.space.net.local'])
+    expect(stack).to have_hosts([
+      'e1-puppetserver-001.mgmt.space.net.local',
+      'e1-puppetdb-001.mgmt.space.net.local',
+      'e1-puppetdb-002.mgmt.space.net.local'
+    ])
   end
 end
