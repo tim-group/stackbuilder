@@ -1,30 +1,33 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
-describe_stack 'basic dev puppetmaster' do
+describe_stack 'basic puppetserver_cluster' do
   given do
-    stack 'puppetserver' do
-      puppetserver 'basic'
+    stack 'puppetserver_cluster' do
+      puppetserver_cluster 'puppetserver' do
+      end
     end
+
     env "e1", :primary_site => "space" do
-      instantiate_stack "puppetserver"
+      instantiate_stack "puppetserver_cluster"
     end
   end
 
-  host("e1-basic-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc).to eql({})
+  host("e1-puppetserver-001.mgmt.space.net.local") do |host|
     expect(host.to_specs.first[:template]).to eql('puppetserver')
     expect(host.to_specs.first[:cnames]).to eql(:mgmt => {
-                                                  "puppet" => "e1-basic-001.mgmt.space.net.local"
+                                                  "puppet" => "e1-puppetserver-001.mgmt.space.net.local"
                                                 })
+  end
+  it_stack 'should contain 1 puppetserver' do |stack|
+    expect(stack).to have_hosts(['e1-puppetserver-001.mgmt.space.net.local'])
   end
 end
 
 describe_stack 'basic dev puppetserver without cname' do
   given do
     stack 'puppetserver' do
-      puppetserver 'pm' do
-        @instances = 1
+      puppetserver_cluster 'pm' do
         each_machine do |machine|
           machine.cnames = {}
         end
@@ -36,13 +39,39 @@ describe_stack 'basic dev puppetserver without cname' do
   end
 
   host("e1-pm-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc).to eql({})
     expect(host.to_specs.first[:template]).to eql('puppetserver')
     expect(host.to_specs.first[:cnames]).to eql({})
   end
+end
 
+describe_stack 'basic puppetserver_cluster with puppetdb' do
+  given do
+    stack 'puppetserver_cluster' do
+      puppetserver_cluster 'puppetserver' do
+        depend_on 'puppetdb'
+      end
+    end
+
+    stack 'puppetdb_cluster' do
+      puppetdb_cluster 'puppetdb'
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "puppetserver_cluster"
+      instantiate_stack "puppetdb_cluster"
+    end
+  end
+
+  host("e1-puppetserver-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc['role::puppetserver']
+    expect(enc['storedconfigs']).to eql(true)
+    expect(enc['puppetdb_server']).to eql('e1-puppetdb-001.mgmt.space.net.local')
+    expect(host.to_specs.first[:template]).to eql('puppetserver')
+    expect(host.to_specs.first[:cnames]).to eql(:mgmt => {
+                                                  "puppet" => "e1-puppetserver-001.mgmt.space.net.local"
+                                                })
+  end
   it_stack 'should contain 1 puppetserver' do |stack|
-    expect(stack).to have_host('e1-pm-001.mgmt.space.net.local')
-    expect(stack).not_to have_host('e1-pm-002.mgmt.space.net.local')
+    expect(stack).to have_hosts(['e1-puppetserver-001.mgmt.space.net.local', 'e1-puppetdb-001.mgmt.space.net.local'])
   end
 end
