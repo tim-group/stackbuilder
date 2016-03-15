@@ -16,9 +16,11 @@ module Stacks::Services::PuppetserverCluster
 
   def puppetdb_that_i_depend_on
     machine_defs_i_depend_on = get_children_for_virtual_services(virtual_services_that_i_depend_on)
-    machine_defs_i_depend_on.reject do |machine_def|
+    puppetdbs = machine_defs_i_depend_on.reject do |machine_def|
       machine_def.class != Stacks::Services::Puppetdb
-    end.first.qualified_hostname(:mgmt)
+    end
+    return if puppetdbs.empty?
+    puppetdbs.first.qualified_hostname(:mgmt)
   end
 
   def instantiate_machine(i, environment, _network, location)

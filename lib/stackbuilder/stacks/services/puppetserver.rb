@@ -27,7 +27,7 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
     enc.merge!('role::puppetserver' => {
                  'storedconfigs' => true
                })
-    enc['role::puppetserver']['puppetdb_server'] = puppetdb_mgmt_fqdn unless puppetdb_mgmt_fqdn.empty?
+    enc['role::puppetserver']['puppetdb_server'] = puppetdb_mgmt_fqdn unless puppetdb_mgmt_fqdn.nil?
     enc
   end
 
