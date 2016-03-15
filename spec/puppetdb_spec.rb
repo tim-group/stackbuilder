@@ -39,6 +39,8 @@ describe_stack 'basic puppetdb_cluster with puppetserver_cluster' do
   end
 
   host("e1-puppetdb-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc).to have_key('timgroup::puppetdb')
+    expect(host.to_enc).to have_key('server::default_new_mgmt_net_local')
     enc = host.to_enc['timgroup::puppetdb']
     expect(enc['allowed_hosts']).to eql(['e1-puppetserver-001.mgmt.space.net.local'])
     expect(host.to_specs.first[:cnames][:mgmt]).to eql("puppetdb" => "e1-puppetdb-001.mgmt.space.net.local")

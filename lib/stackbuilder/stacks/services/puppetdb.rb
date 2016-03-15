@@ -25,7 +25,8 @@ class Stacks::Services::Puppetdb < Stacks::MachineDef
     dependant_instances = @puppetdb_cluster.dependant_instance_fqdns(location, [:mgmt], false)
     enc.merge!('timgroup::puppetdb' => {
                  'allowed_hosts' => dependant_instances
-               })
+               },
+               'server::default_new_mgmt_net_local' => {})
     enc
   end
 
