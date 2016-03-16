@@ -8,10 +8,12 @@ module Stacks::Services::PuppetdbCluster
   end
 
   attr_accessor :cluster_name
+  attr_accessor :version
 
   def configure
     @cluster_name = @name
     @instances = 1
+    @version = '2.3.8-1puppetlabs1'
   end
 
   def instantiate_machine(i, environment, _network, location)
