@@ -23,10 +23,9 @@ class Stacks::Services::Puppetdb < Stacks::MachineDef
   def to_enc
     enc = super()
     dependant_instances = @puppetdb_cluster.dependant_instance_fqdns(location, [:mgmt], false)
-    enc.merge!('timgroup::puppetdb' => {
+    enc.merge!('role::puppetdb' => {
                  'allowed_hosts' => dependant_instances
-               },
-               'server::default_new_mgmt_net_local' => {})
+               })
     enc
   end
 
