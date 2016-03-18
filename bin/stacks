@@ -37,7 +37,8 @@ Options:
   The list of commands follows. Optional and mandatory options are outlined.
 
     audit [-e]                show the state of the KVM host machines
-    clean [-e] -s             shuts down and removes a stack, but retains configuration (nagios, dns)
+    clean [-e] -s             shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
+    clean_all [-e] -s         shuts down and removes a stack, puppet, nagios and mongo
     compile                   create a yaml file describing the entire infrastructure
     enc [-e] -s               print the enc of the specified stack. Used for debugging
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,

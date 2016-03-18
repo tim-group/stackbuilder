@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile ls lsenv enc clean provision reprovision terminus test)
+    @cmds = %w(audit compile ls lsenv enc clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -83,6 +83,8 @@ class CMD
       pctl.run(machine_def)
     when 'clean'
       pctl.clean(machine_def)
+    when 'clean_all'
+      pctl.clean_all(machine_def)
     else
       logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
       exit 1
@@ -93,6 +95,13 @@ class CMD
   def clean(_argv)
     machine_def = check_and_get_stack
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean")
+  end
+
+  # XXX do this properly
+  def clean_all(_argv)
+    machine_def = check_and_get_stack
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean")
+    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean_traces")
   end
 
   # XXX do this properly
