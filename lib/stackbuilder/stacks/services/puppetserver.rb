@@ -10,7 +10,7 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
     # the puppet repo takes over 15GB as of 25.03.2015
     modify_storage('/' => { :size => '25G' })
     @vcpus = '8'
-    @ram = '8388608' # 8GB
+    @ram = '16777216'
   end
 
   def needs_signing?
