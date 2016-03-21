@@ -82,3 +82,46 @@ describe_stack 'basic puppetserver_cluster with puppetdb' do
     ])
   end
 end
+
+describe_stack 'puppetservers get persistent /var/lib/puppet/ssl' do
+  given do
+    stack 'puppetserver_cluster' do
+      puppetserver_cluster 'puppetserver' do
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "puppetserver_cluster"
+    end
+  end
+
+  host("e1-puppetserver-001.mgmt.space.net.local") do |host|
+    specs = host.to_specs.first
+    expect(specs[:hostname]).to eql('e1-puppetserver-001')
+    expect(specs[:storage][:'/var/lib/puppet/ssl']).to eql(:type       => 'data',
+                                                           :size       => '1G',
+                                                           :persistent => true)
+  end
+end
+
+describe_stack 'allow override of persistent /var/lib/puppet/ssl' do
+  given do
+    stack 'puppetserver_cluster' do
+      puppetserver_cluster 'puppetserver' do
+        each_machine(&:dont_persist_certs)
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "puppetserver_cluster"
+    end
+  end
+
+  host("e1-puppetserver-001.mgmt.space.net.local") do |host|
+    specs = host.to_specs.first
+    expect(specs[:hostname]).to eql('e1-puppetserver-001')
+    expect(specs[:storage][:'/var/lib/puppet/ssl']).to eql(:type       => 'data',
+                                                           :size       => '1G',
+                                                           :persistent => false)
+  end
+end

@@ -9,6 +9,11 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
     @puppetserver_cluster = machineset
     # the puppet repo takes over 15GB as of 25.03.2015
     modify_storage('/' => { :size => '25G' })
+    modify_storage('/var/lib/puppet/ssl' => {
+                     :type       => 'data',
+                     :size       => '1G',
+                     :persistent => true
+                   })
     @vcpus = '8'
     @ram = '16777216'
   end
@@ -19,6 +24,12 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
 
   def needs_poll_signing?
     false
+  end
+
+  def dont_persist_certs
+    modify_storage('/var/lib/puppet/ssl' => {
+                     :persistent => false
+                   })
   end
 
   def to_enc
