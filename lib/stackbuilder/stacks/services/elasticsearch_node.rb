@@ -1,39 +1,44 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
-class Stacks::Services::ElasticsearchNode < Stacks::Services::AppServer
-  def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)
-    @virtual_service = virtual_service
-    super(virtual_service, index, networks, location)
+class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
+  attr_accessor :role
 
-    @ram = '16777216' # 16GB
-    @vcpus = '4'
+  def initialize(base_hostname, _i, elasticsearch_cluster, role, location)
+    super(base_hostname, [:mgmt, :prod], location)
 
-    storage = {
-      '/tmp' => {
-        :type       => 'os',
-        :size       => '10G',
-        :persistent => false
-      },
+    @elasticsearch_cluster = elasticsearch_cluster
+    @role = role
+    @version = '2.2.0'
+
+    data_storage = {
       '/mnt/data' => {
         :type       => 'data',
-        :size       => '10G',
+        :size       => @elasticsearch_cluster.data_storage,
         :persistent => true
       }
     }
-    modify_storage(storage)
+    modify_storage(data_storage) if role?(:data)
+  end
+
+  def role?(role)
+    @role == role
   end
 
   def to_enc
     enc = super()
-    enc.merge!('role::elasticsearch_node' => {
-                 'cluster_nodes' =>  @virtual_service.children.map(&:prod_fqdn).sort,
-                 'cluster_name' =>  @virtual_service.cluster_name
+    minimum_master_nodes = (@elasticsearch_cluster.nodes_with_role(:master).size / 2) + 1
+    masters = @elasticsearch_cluster.nodes_with_role(:master).reject { |fqdn| fqdn == prod_fqdn }
+    all_nodes = @elasticsearch_cluster.all_nodes
+
+    enc.merge!("role::elasticsearch::#{@role}" => {
+                 'version' => @version,
+                 'master_nodes'  => masters,
+                 'minimum_master_nodes' => minimum_master_nodes,
+                 'cluster_name'  =>  @elasticsearch_cluster.cluster_name,
+                 'marvel_target' => @elasticsearch_cluster.marvel_target,
+                 'all_nodes' => all_nodes
                })
-    enc['role::http_app'].merge!('dependencies' => {
-                                   'elasticsearch_cluster_nodes' => @virtual_service.children.map(&:prod_fqdn).sort
-                                 })
-    enc['role::http_app'].merge!('elasticsearch_cluster_name' => @virtual_service.cluster_name)
     enc
   end
 end
