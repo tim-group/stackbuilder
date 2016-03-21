@@ -68,6 +68,13 @@ module Stacks::Dependencies
     end
   end
 
+  def vip_i_depend_on_for_clazz(clazz, location, network = :prod)
+    container_defs = virtual_services_that_i_depend_on
+    container_defs.reject! { |container| container.clazz != clazz }
+    fabric = environment.options[location]
+    container_defs.first.vip_fqdn(network, fabric)
+  end
+
   private
 
   def dependant_instances_of_type(type, location)
