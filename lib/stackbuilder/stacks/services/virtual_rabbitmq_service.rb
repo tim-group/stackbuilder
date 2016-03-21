@@ -13,6 +13,10 @@ module Stacks::Services::VirtualRabbitMQService
     @ports = [5672]
   end
 
+  def clazz
+    'rabbitmqcluster'
+  end
+
   def realserver_prod_fqdns(location)
     realservers(location).map(&:prod_fqdn).sort
   end
