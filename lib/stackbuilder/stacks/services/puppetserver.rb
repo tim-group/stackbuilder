@@ -35,8 +35,9 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
   def to_enc
     enc = super()
     puppetdb_mgmt_fqdn = @puppetserver_cluster.puppetdb_that_i_depend_on
+    stored_configs = puppetdb_mgmt_fqdn.nil? ? false : true
     enc.merge!('role::puppetserver' => {
-                 'storedconfigs' => true
+                 'storedconfigs' => stored_configs
                })
     enc['role::puppetserver']['puppetdb_server'] = puppetdb_mgmt_fqdn unless puppetdb_mgmt_fqdn.nil?
     enc

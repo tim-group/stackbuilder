@@ -18,6 +18,9 @@ describe_stack 'basic puppetserver_cluster' do
     expect(host.to_specs.first[:cnames]).to eql(:mgmt => {
                                                   "puppet" => "e1-puppetserver-001.mgmt.space.net.local"
                                                 })
+    enc = host.to_enc['role::puppetserver']
+    expect(enc['storedconfigs']).to eql(false)
+    expect(enc['puppetdb_server']).to eql(nil)
   end
   it_stack 'should contain 1 puppetserver' do |stack|
     expect(stack).to have_hosts(['e1-puppetserver-001.mgmt.space.net.local'])
