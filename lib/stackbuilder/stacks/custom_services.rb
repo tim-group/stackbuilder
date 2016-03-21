@@ -102,6 +102,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::ElasticsearchCluster], Stacks::Services::ElasticsearchNode, &block)
   end
 
+  def logstash_cluster(name = 'logstash', &block)
+    machineset_with(name, [Stacks::Services::LogstashCluster], Stacks::Services::LogstashServer, &block)
+  end
+
   def rate_limited_forward_proxy(name = 'rate_limited_forward_proxy', &block)
     machineset_with(name, [], Stacks::Services::RateLimitedForwardProxyServer, &block)
   end

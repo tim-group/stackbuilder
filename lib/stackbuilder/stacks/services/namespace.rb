@@ -17,6 +17,7 @@ module Stacks
     require 'stackbuilder/stacks/services/loadbalancer'
     require 'stackbuilder/stacks/services/loadbalancer_cluster'
     require 'stackbuilder/stacks/services/logstash_server'
+    require 'stackbuilder/stacks/services/logstash_cluster'
     require 'stackbuilder/stacks/services/mail_server'
     require 'stackbuilder/stacks/services/mongodb_cluster'
     require 'stackbuilder/stacks/services/mongodb_server'
