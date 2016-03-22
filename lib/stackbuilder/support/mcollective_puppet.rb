@@ -141,21 +141,18 @@ module Support::MCollectivePuppet
 
   # XXX the machine_fqdn argument might need to be removed if moving puppet to a vm
   def puppetca(machine_fqdn = nil, &block)
-    puppetmaster = case machine_fqdn
-                   when /\.mgmt\.st\.net\.local$/ then ["st-puppetmaster-001.mgmt.st.net.local",
-                                                        "staging-puppetmaster-001.mgmt.st.net.local",
-                                                        "staging-puppetserver-001.mgmt.st.net.local"]
-                   when /\.mgmt\.oy\.net\.local$/ then ["oy-puppetmaster-001.mgmt.oy.net.local",
-                                                        "oy-puppetserver-001.mgmt.oy.net.local"]
-                   when /\.mgmt\.pg\.net\.local$/ then ["australia.pgldn.youdevise.com",
-                                                        "pg-puppetserver-001.mgmt.pg.net.local"]
+    puppetserver = case machine_fqdn
+                   when /\.mgmt\.st\.net\.local$/ then ["staging-puppetserver-001.mgmt.st.net.local"]
+                   when /\.mgmt\.oy\.net\.local$/ then ["oy-puppetserver-001.mgmt.oy.net.local"]
+                   when /\.mgmt\.pg\.net\.local$/ then ["pg-puppetserver-001.mgmt.pg.net.local"]
+                   when /\.mgmt\.lon\.net\.local$/ then ["lon-puppetserver-001.mgmt.lon.net.local"]
                    when /\.mgmt\.ci\.net\.local$/ then ["ldn-puppet-001.youdevise.com"]
     end
 
-    if puppetmaster.nil?
+    if puppetserver.nil?
       mco_client("puppetca", &block)
     else
-      mco_client("puppetca", :nodes => puppetmaster, &block)
+      mco_client("puppetca", :nodes => puppetserver, &block)
     end
   end
 
