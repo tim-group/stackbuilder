@@ -13,7 +13,7 @@ class Stacks::Services::Puppetdb < Stacks::MachineDef
   end
 
   def needs_signing?
-    false
+    true
   end
 
   def needs_poll_signing?
