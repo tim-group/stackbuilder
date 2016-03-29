@@ -47,13 +47,8 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
     specs = super
     puppetmaster_special = {
       :template            => 'puppetserver',
-      :cnames              => {
-        :mgmt => {
-          'puppet' => "#{qualified_hostname(:mgmt)}"
-        }
-      }
+      :cnames              => {}
     }
-    puppetmaster_special[:cnames] = cnames unless cnames.nil?
     specs.merge!(puppetmaster_special)
     specs
   end

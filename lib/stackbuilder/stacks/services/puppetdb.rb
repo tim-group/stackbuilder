@@ -1,6 +1,7 @@
 require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::Puppetdb < Stacks::MachineDef
+  # FIXME: Clean up this accessor
   attr_accessor :cnames
 
   def initialize(machineset, index, location)
@@ -28,18 +29,5 @@ class Stacks::Services::Puppetdb < Stacks::MachineDef
                  'version'       => @puppetdb_cluster.version
                })
     enc
-  end
-
-  def to_spec
-    specs = super
-    puppetdb_specs = {
-      :cnames => {
-        :mgmt => {
-          'puppetdb' => "#{qualified_hostname(:mgmt)}"
-        }
-      }
-    }
-    puppetdb_specs[:cnames] = cnames unless cnames.nil?
-    specs.merge!(puppetdb_specs)
   end
 end

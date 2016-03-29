@@ -43,7 +43,6 @@ describe_stack 'basic puppetdb_cluster with puppetserver_cluster' do
     enc = host.to_enc['role::puppetdb']
     expect(enc['allowed_hosts']).to eql(['e1-puppetserver-001.mgmt.space.net.local'])
     expect(enc['version']).to eql('2.3.8-1puppetlabs1')
-    expect(host.to_specs.first[:cnames][:mgmt]).to eql("puppetdb" => "e1-puppetdb-001.mgmt.space.net.local")
     expect(host.to_specs.shift[:availability_group]).to eql('e1-puppetdb')
   end
   it_stack 'should contain 1 puppetserver' do |stack|
@@ -76,7 +75,6 @@ describe_stack 'basic puppetdb_cluster with puppetserver_cluster and custom vers
     enc = host.to_enc['role::puppetdb']
     expect(enc['allowed_hosts']).to eql(['e1-puppetserver-001.mgmt.space.net.local'])
     expect(enc['version']).to eql('foobar')
-    expect(host.to_specs.first[:cnames][:mgmt]).to eql("puppetdb" => "e1-puppetdb-001.mgmt.space.net.local")
     expect(host.to_specs.shift[:availability_group]).to eql('e1-puppetdb')
   end
   it_stack 'should contain 1 puppetserver' do |stack|
