@@ -82,10 +82,6 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::FmAnalyticsReportingServer, &block)
   end
 
-  def puppetmaster(name = "puppetmaster", &block)
-    machineset_with(name, [], Stacks::Services::PuppetMaster, &block)
-  end
-
   def puppetserver_cluster(name, &block)
     machineset_with(name, [Stacks::Services::PuppetserverCluster], Stacks::Services::Puppetserver, &block)
   end

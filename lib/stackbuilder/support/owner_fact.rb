@@ -7,7 +7,6 @@ module OwnerFact
     case @@localhost_hostname
     when /^\w{3}-dev-(\w+)$/            then $1
     when /^(\w+)-desktop$/              then $1
-    when /^dev-puppetmaster-\d+-(\w+)$/ then $1
     when /^dev-puppetserver-\d+-(\w+)$/ then $1
     else 'OWNER-FACT-NOT-FOUND'
     end

@@ -45,11 +45,11 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
 
   def to_spec
     specs = super
-    puppetmaster_special = {
+    puppetserver_special = {
       :template            => 'puppetserver',
       :cnames              => {}
     }
-    specs.merge!(puppetmaster_special)
+    specs.merge!(puppetserver_special)
     specs
   end
 end

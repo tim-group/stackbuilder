@@ -391,7 +391,7 @@ namespace :sbx do
           fail("some nodes have failed their puppet runs") unless success
         end
 
-        desc "Remove signed certs from puppetmaster"
+        desc "Remove signed certs from puppetserver"
         sbtask :clean do
           puppet_certs_to_clean = []
           machine_def.accept do |child_machine_def|
@@ -439,12 +439,6 @@ namespace :sbx do
           hosts.each { |fqdn| mco.mongodb_cleanup(:fqdn => fqdn) }
 
           # Clean puppet
-          mco.reset_filter
-          mco.fact_filter 'puppetmaster=true'
-          mco.compound_filter '!domain=mgmt.dev.net.local'
-          mco.compound_filter '!domain=mgmt.st.net.local'
-          hosts.each { |fqdn| mco.puppet_cleanup(:fqdn => fqdn) }
-
           mco.reset_filter
           mco.compound_filter 'role::puppetserver'
           mco.compound_filter '!domain=mgmt.dev.net.local'

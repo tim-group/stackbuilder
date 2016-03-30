@@ -28,7 +28,6 @@ module Stacks
     require 'stackbuilder/stacks/services/pentaho_server'
     require 'stackbuilder/stacks/services/proxy_server'
     require 'stackbuilder/stacks/services/proxy_vhost'
-    require 'stackbuilder/stacks/services/puppetmaster'
     require 'stackbuilder/stacks/services/puppetdb'
     require 'stackbuilder/stacks/services/puppetdb_cluster'
     require 'stackbuilder/stacks/services/puppetserver'
