@@ -146,7 +146,7 @@ module Support::MCollectivePuppet
                    when /\.mgmt\.oy\.net\.local$/ then ["oy-puppetserver-001.mgmt.oy.net.local"]
                    when /\.mgmt\.pg\.net\.local$/ then ["pg-puppetserver-001.mgmt.pg.net.local"]
                    when /\.mgmt\.lon\.net\.local$/ then ["lon-puppetserver-001.mgmt.lon.net.local"]
-                   when /\.mgmt\.ci\.net\.local$/ then ["ldn-puppet-001.youdevise.com"]
+                   when /\.mgmt\.ci\.net\.local$/ then ["ci-puppetserver-001.mgmt.ci.net.local"]
     end
 
     if puppetserver.nil?
