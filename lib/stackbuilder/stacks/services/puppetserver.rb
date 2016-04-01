@@ -14,7 +14,7 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
                      :size       => '1G',
                      :persistent => true
                    })
-    @vcpus = '8'
+    @vcpus = '9'
     @ram = '16777216'
   end
 
