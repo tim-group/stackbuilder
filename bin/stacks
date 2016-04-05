@@ -112,7 +112,7 @@ logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", optio
 # this is to make error messages more meaningful
 if !system("cd \"#{$options[:path]}\" && " \
            "(echo $(git config remote.origin.url) | grep -q 'stackbuilder-config')")
-  logger.fatal(app) { "\"#{$options[:path]}\" is not a stackbuilder-config repo. use -p." }
+  logger(Logger::FATAL) { "\"#{$options[:path]}\" is not a stackbuilder-config repo. use -p." }
   exit 1
 end
 
