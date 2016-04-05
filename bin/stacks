@@ -127,7 +127,11 @@ logger(Logger::DEBUG) { "environment \"#{$environment.name}\" has #{$environment
 commands = CMD.new
 if commands.cmds.include? cmd
   logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
-  commands.method(cmd).call(argv)
+  success = commands.method(cmd).call(argv)
+  unless success
+    logger(Logger::FATAL) { "#{cmd} failed, check the output above" }
+    exit 1
+  end
 else
   if cmd.nil?
     logger(Logger::FATAL) { "no command specified, see --help" }
@@ -137,4 +141,5 @@ else
   exit 1
 end
 
+exit 0
 logger(Logger::DEBUG) { 'exiting gracefuly' }
