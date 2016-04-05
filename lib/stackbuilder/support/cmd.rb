@@ -100,8 +100,9 @@ class CMD
   # XXX do this properly
   def clean_all(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean")
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean_traces")
+    system("cd #{$options[:path]}" \
+           " && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean" \
+           " && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean_traces")
   end
 
   # XXX do this properly
