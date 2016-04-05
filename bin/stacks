@@ -112,7 +112,7 @@ logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", optio
 # this is to make error messages more meaningful
 if !system("cd \"#{$options[:path]}\" && " \
            "(echo $(git config remote.origin.url) | grep -q 'stackbuilder-config')")
-  logger(Logger::FATAL) { "\"#{$options[:path]}\" is not a stackbuilder-config repo. use -p." }
+  logger.fatal(app) { "\"#{$options[:path]}\" is not a stackbuilder-config repo. use -p." }
   exit 1
 end
 
@@ -128,9 +128,12 @@ commands = CMD.new
 if commands.cmds.include? cmd
   logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
   success = commands.method(cmd).call(argv)
-  unless success
-    logger(Logger::FATAL) { "#{cmd} failed, check the output above" }
-    exit 1
+  # FIXME: These are all the command that simply call system and return true/false.
+  if %w(clean clean_all provision test reprovision).include? cmd
+    unless success
+      logger(Logger::FATAL) { "#{cmd} failed, check the output above" }
+      exit 1
+    end
   end
 else
   if cmd.nil?
