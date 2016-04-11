@@ -24,7 +24,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @server_id = nil
     @use_gtids = false
     @vcpus = '2'
-    @version = '5.1.49-1ubuntu8'
+    @version = '5.6.25-1ubuntu12.04'
     @mysql_cluster = mysql_cluster
     @monitoring_checks = monitoring_checks
     @grant_user_rights_by_default = false

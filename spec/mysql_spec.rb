@@ -296,7 +296,7 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
   end
 end
 
-describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysql' do
+describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of mysql' do
   given do
     stack "mysql51" do
       mysql_cluster "my51" do
@@ -313,7 +313,7 @@ describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysq
     end
   end
   host("testing-my51-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['version']).to eql('5.1.49-1ubuntu8')
+    expect(host.to_enc['role::mysql_server']['version']).to eql('5.6.25-1ubuntu12.04')
   end
   host("testing-my55-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mysql_server']['version']).to eql('5.5.43-0ubuntu0.12.04.1')
