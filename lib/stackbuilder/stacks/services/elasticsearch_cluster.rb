@@ -62,6 +62,17 @@ module Stacks::Services::ElasticsearchCluster
     children.collect(&:prod_fqdn)
   end
 
+  def to_vip_spec(location)
+    fabric = environment.options[location]
+    qualified_hostnames = Hash[@vip_networks.sort.map { |network| [network, vip_fqdn(network, fabric)] }]
+    {
+      :hostname => "#{environment.name}-#{name}",
+      :fabric => fabric,
+      :networks => @vip_networks,
+      :qualified_hostnames => qualified_hostnames
+    }
+  end
+
   def vip_fqdn(network, fabric)
     domain = environment.domain(fabric, network)
     "#{environment.name}-#{name}-vip.#{domain}"
