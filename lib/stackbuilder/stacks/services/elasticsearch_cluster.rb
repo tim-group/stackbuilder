@@ -53,13 +53,13 @@ module Stacks::Services::ElasticsearchCluster
     'elasticsearchcluster'
   end
 
+  def cluster_name(fabric)
+    "#{fabric}-#{@cluster_name}"
+  end
+
   def nodes_with_role(role)
     nodes = children.reject { |node| !node.role?(role) }
     nodes.collect(&:prod_fqdn)
-  end
-
-  def all_nodes
-    children.collect(&:prod_fqdn)
   end
 
   def to_vip_spec(location)
@@ -71,6 +71,10 @@ module Stacks::Services::ElasticsearchCluster
       :networks => @vip_networks,
       :qualified_hostnames => qualified_hostnames
     }
+  end
+
+  def marvel_target_vip
+    vip_fqdn(:prod, @marvel_target) unless @marvel_target.empty?
   end
 
   def vip_fqdn(network, fabric)

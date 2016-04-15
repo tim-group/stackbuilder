@@ -27,20 +27,20 @@ class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    minimum_master_nodes = (@elasticsearch_cluster.nodes_with_role(:master).size / 2) + 1
+    minimum_master_nodes = ((@elasticsearch_cluster.nodes_with_role(:master).size / 2) + 1).floor
     masters = @elasticsearch_cluster.nodes_with_role(:master).reject { |fqdn| fqdn == prod_fqdn }
-    all_nodes = @elasticsearch_cluster.all_nodes
     vip_fqdn = @elasticsearch_cluster.vip_fqdn(:prod, fabric)
+    marvel_target = @elasticsearch_cluster.marvel_target_vip
+    cluster = @elasticsearch_cluster.cluster_name(fabric)
 
     enc.merge!("role::elasticsearch::#{@role}" => {
-                 'version' => @version,
-                 'master_nodes'  => masters,
+                 'version'              => @version,
+                 'master_nodes'         => masters,
                  'minimum_master_nodes' => minimum_master_nodes,
-                 'cluster_name'  =>  @elasticsearch_cluster.cluster_name,
-                 'marvel_target' => @elasticsearch_cluster.marvel_target,
-                 'all_nodes' => all_nodes,
-                 'vip_fqdn' => vip_fqdn
+                 'cluster_name'         => cluster,
+                 'vip_fqdn'             => vip_fqdn
                })
+    enc["role::elasticsearch::#{@role}"].merge!('marvel_target' => marvel_target) unless marvel_target.nil?
     enc
   end
 end
