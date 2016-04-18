@@ -142,7 +142,7 @@ module Support::MCollectivePuppet
   # XXX the machine_fqdn argument might need to be removed if moving puppet to a vm
   def puppetca(machine_fqdn = nil, &block)
     puppetserver = case machine_fqdn
-                   when /\.mgmt\.st\.net\.local$/ then ["staging-puppetserver-001.mgmt.st.net.local"]
+                   when /\.mgmt\.st\.net\.local$/ then ["st-puppetserver-001.mgmt.st.net.local"]
                    when /\.mgmt\.oy\.net\.local$/ then ["oy-puppetserver-001.mgmt.oy.net.local"]
                    when /\.mgmt\.pg\.net\.local$/ then ["pg-puppetserver-001.mgmt.pg.net.local"]
                    when /\.mgmt\.lon\.net\.local$/ then ["lon-puppetserver-001.mgmt.lon.net.local"]
