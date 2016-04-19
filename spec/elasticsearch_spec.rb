@@ -20,8 +20,7 @@ describe_stack 'should provide default set of elasticsearch nodes' do
       'testing-logs-data-001.mgmt.space.net.local',
       'testing-logs-data-002.mgmt.space.net.local',
       'testing-logs-data-003.mgmt.space.net.local',
-      'testing-logs-data-004.mgmt.space.net.local',
-      'testing-logs-tribe-001.mgmt.space.net.local'
+      'testing-logs-data-004.mgmt.space.net.local'
     ])
   end
 

@@ -8,7 +8,6 @@ module Stacks::Services::ElasticsearchCluster
   attr_accessor :cluster_name
   attr_accessor :master_nodes
   attr_accessor :data_nodes
-  attr_accessor :tribe_nodes
   attr_accessor :marvel_target
   attr_accessor :data_storage
 
@@ -16,7 +15,6 @@ module Stacks::Services::ElasticsearchCluster
     @cluster_name = @name
     @master_nodes = 3
     @data_nodes = 4
-    @tribe_nodes = 1
     @vip_networks = [:prod]
     @ports = [9200]
     @marvel_target = ''
@@ -41,11 +39,6 @@ module Stacks::Services::ElasticsearchCluster
     i = 0
     @data_nodes.times do
       instantiate_machine(name, :data, i += 1, environment, :primary_site)
-    end
-
-    i = 0
-    @tribe_nodes.times do
-      instantiate_machine(name, :tribe, i += 1, environment, :primary_site)
     end
   end
 
