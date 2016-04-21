@@ -15,7 +15,7 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
                      :persistent => true
                    })
     @vcpus = '9'
-    @ram = '8777216'
+    @ram = '10740000'
   end
 
   def needs_signing?
