@@ -46,8 +46,8 @@ module Stacks::Services::ElasticsearchCluster
     'elasticsearchcluster'
   end
 
-  def cluster_name(fabric)
-    "#{fabric}-#{@cluster_name}"
+  def cluster_name(environment)
+    "#{environment.name}-#{@cluster_name}"
   end
 
   def nodes_with_role(role)

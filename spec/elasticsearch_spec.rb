@@ -49,7 +49,7 @@ describe_stack 'should provide default set of elasticsearch nodes' do
   end
 
   host("testing-logs-master-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::elasticsearch::master']['cluster_name']).to eql("space-logs")
+    expect(host.to_enc['role::elasticsearch::master']['cluster_name']).to eql("testing-logs")
   end
 
   host("testing-logs-data-001.mgmt.space.net.local") do |host|

@@ -45,6 +45,7 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
       end
       node.classes = classes if classes
       node.parameters['logicalenv'] = machine.environment.name
+      node.parameters['stackname'] = machine.stackname if machine.respond_to?(:stackname)
     end
 
     duration = "#{((Time.now - start_time) * 1000)}ms"

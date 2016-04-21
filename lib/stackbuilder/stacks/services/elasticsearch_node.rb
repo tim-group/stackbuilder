@@ -21,6 +21,10 @@ class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
     modify_storage(data_storage) if role?(:data)
   end
 
+  def stackname
+    @elasticsearch_cluster.name
+  end
+
   def role?(role)
     @role == role
   end
@@ -31,7 +35,7 @@ class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
     masters = @elasticsearch_cluster.nodes_with_role(:master).reject { |fqdn| fqdn == prod_fqdn }
     vip_fqdn = @elasticsearch_cluster.vip_fqdn(:prod, fabric)
     marvel_target = @elasticsearch_cluster.marvel_target_vip
-    cluster = @elasticsearch_cluster.cluster_name(fabric)
+    cluster = @elasticsearch_cluster.cluster_name(environment)
 
     enc.merge!("role::elasticsearch::#{@role}" => {
                  'version'              => @version,
