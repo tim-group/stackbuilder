@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'mongodb' do
   given do
     stack "rabbit" do
-      virtual_rabbitmqserver 'rabbitmq'
+      rabbitmq_cluster 'rabbitmq'
     end
 
     stack "example" do

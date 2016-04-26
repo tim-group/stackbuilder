@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'stack-with-dependencies' do
   given do
     stack "rabbit" do
-      virtual_rabbitmqserver 'rabbitmq'
+      rabbitmq_cluster 'rabbitmq'
     end
     stack "external" do
       external_server "oy-mon-001.oy.net.local" do

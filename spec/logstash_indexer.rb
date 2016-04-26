@@ -14,8 +14,8 @@ describe_stack 'logstash indexer' do
     end
 
     stack 'elastic_mq' do
-      virtual_rabbitmqserver 'elasticmq' do
-        # FIXME: - this should be default in virtual_rabbitmqserver
+      rabbitmq_cluster 'elasticmq' do
+        # FIXME: - this should be default in rabbitmq_cluster
         self.ports = [5672]
 
         storage = {
