@@ -152,25 +152,29 @@ module Stacks::Services::MysqlCluster
     rights
   end
 
+  def validate_dependant_requirement(dependent, requirement)
+    fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
+         "supported_requirements is empty or unset." if @supported_requirements.empty? && !requirement.nil?
+    fail "'#{dependent.name}' must declare it's requirement on '#{name}' as it declares supported requirements "\
+         "in environment '#{environment.name}'. Supported requirements: "\
+         "[#{@supported_requirements.keys.sort.join(',')}]." if !@supported_requirements.empty? && requirement.nil?
+  end
+
   def config_params(dependent, fabric)
     requirement = requirement_of(dependent)
-    if @supported_requirements.empty? && !requirement.nil?
-      fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
-        "supported_requirements is empty or unset."
-    elsif !@supported_requirements.empty? && requirement.nil?
-      fail "'#{dependent.name}' must declare it's requirement on '#{name}' as it declares supported requirements "\
-        "in environment '#{environment.name}'. "\
-        "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
-    elsif @supported_requirements.empty? && requirement.nil?
+    validate_dependant_requirement(dependent, requirement)
+
+    ### FIXME: rpearce 26/04/2016
+    ### This can be removed when all apps specify a requirement
+    if @supported_requirements.empty? && requirement.nil?
       config_given_no_requirement(dependent, fabric)
+    ### This can be moved to validate_dependant_requirement when all apps specify a requirement
     elsif !@supported_requirements.include?(requirement)
       fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
         "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
     else
-
       hostnames_for_requirement = @supported_requirements[requirement]
       matching_hostnames = children.select { |server| hostnames_for_requirement.include?(server.prod_fqdn) }
-
       config_to_fulfil_requirement(dependent, matching_hostnames)
     end
   end
