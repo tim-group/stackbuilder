@@ -17,8 +17,10 @@ module Stacks::Services::RabbitMQCluster
     'rabbitmqcluster'
   end
 
-  def realserver_prod_fqdns(location)
-    realservers(location).map(&:prod_fqdn).sort
+  def cluster_nodes(location)
+    realservers(location).map(&:prod_fqdn).sort.map do |fqdn|
+      fqdn.split('.')[0]
+    end
   end
 
   def to_loadbalancer_config(location, fabric)
