@@ -44,7 +44,7 @@ module Stacks
     require 'stackbuilder/stacks/services/virtual_bind_service'
     require 'stackbuilder/stacks/services/virtual_mail_service'
     require 'stackbuilder/stacks/services/virtual_proxy_service'
-    require 'stackbuilder/stacks/services/virtual_rabbitmq_service'
+    require 'stackbuilder/stacks/services/rabbitmq_cluster'
     require 'stackbuilder/stacks/services/virtual_service'
     require 'stackbuilder/stacks/services/virtual_sftp_service'
     require 'stackbuilder/stacks/services/vpn_server'

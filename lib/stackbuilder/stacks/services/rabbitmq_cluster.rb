@@ -1,6 +1,6 @@
 require 'stackbuilder/stacks/namespace'
 
-module Stacks::Services::VirtualRabbitMQService
+module Stacks::Services::RabbitMQCluster
   def self.extended(object)
     object.configure
   end

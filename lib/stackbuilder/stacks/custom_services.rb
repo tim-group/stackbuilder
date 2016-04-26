@@ -39,8 +39,14 @@ class Stacks::CustomServices
                     Stacks::Services::SftpServer, &block)
   end
 
+  # FIXME: rpearce 26/04/2016 Remove virtual_rabbitmqserver when rabbitmq_cluster code is rolled out
   def virtual_rabbitmqserver(name = 'rabbitmq', &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualRabbitMQService],
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::RabbitMQCluster],
+                    Stacks::Services::RabbitMQServer, &block)
+  end
+
+  def rabbitmq_cluster(name = 'rabbitmq', &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::RabbitMQCluster],
                     Stacks::Services::RabbitMQServer, &block)
   end
 
