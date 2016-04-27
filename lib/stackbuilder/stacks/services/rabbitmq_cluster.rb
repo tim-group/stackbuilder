@@ -32,7 +32,7 @@ module Stacks::Services::RabbitMQCluster
         'type' => 'rabbitmq',
         'ports' => @ports,
         'realservers' => {
-          'blue' => realserver_prod_fqdns(location)
+          'blue' => cluster_nodes(location)
         }
       }
     }
