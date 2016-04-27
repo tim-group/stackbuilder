@@ -21,7 +21,7 @@ describe_stack 'basic rabbitmq cluster' do
   end
 end
 
-describe_stack 'app with legacy rabbitmq dependency' do
+describe_stack 'app without requirement' do
   given do
     stack "rabbit" do
       rabbitmq_cluster 'rabbitmq'
@@ -39,22 +39,15 @@ describe_stack 'app with legacy rabbitmq dependency' do
     end
   end
 
-  host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to \
-      eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
-  end
-
   host("e1-exampleapp-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::http_app']['dependencies']).to be_empty
+    expect { host.to_enc }.to raise_error(RuntimeError)
   end
 end
 
 describe_stack 'app with rabbitmq dependency' do
   given do
     stack 'test' do
-      rabbitmq_cluster 'rabbitmq' do
-        self.supported_requirements = :accept_any_requirement_default_all_servers
-      end
+      rabbitmq_cluster 'rabbitmq'
       virtual_appserver 'exampleapp' do
         self.application = 'example'
         depend_on 'rabbitmq', 'e1', :magic

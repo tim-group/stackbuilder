@@ -12,8 +12,7 @@ module Stacks::Services::RabbitMQCluster
   def configure
     @downstream_services = []
     @ports = [5672]
-    # FIXME: Remove this when all rabbitmq's are specified with requirement
-    @supported_requirements = :default
+    @supported_requirements = :accept_any_requirement_default_all_servers
   end
 
   def clazz
@@ -40,13 +39,15 @@ module Stacks::Services::RabbitMQCluster
 
   def requirement_of(dependant)
     dependent_on_this_cluster = dependant.depends_on.find { |dependency| dependency[0] == name }
-    return dependent_on_this_cluster[2] unless dependent_on_this_cluster[2].nil?
+    fail "Stack '#{dependant.name}' must specify requirement when using depend_on #{name} "\
+          "in environment '#{environment.name}'. Usage: depend_on <environment>, <requirement>" \
+          if dependent_on_this_cluster[2].nil?
+    dependent_on_this_cluster[2]
   end
 
   def config_params(dependent, _fabric)
-    # FIXME: Remove :default when all rabbitmq's are specified with requirement
-    acceptable_supported_requirements = [:accept_any_requirement_default_all_servers, :default]
-    fail "'Stack '#{name}' invalid supported requirements: #{supported_requirements} "\
+    acceptable_supported_requirements = [:accept_any_requirement_default_all_servers]
+    fail "Stack '#{name}' invalid supported requirements: #{supported_requirements} "\
           "in environment '#{environment.name}'. Acceptable supported requirements: "\
           "#{acceptable_supported_requirements}." \
           unless acceptable_supported_requirements.include?(@supported_requirements)
@@ -56,8 +57,6 @@ module Stacks::Services::RabbitMQCluster
 
   def config_properties(dependent, fqdns)
     requirement = requirement_of(dependent)
-    # FIXME: Remove when all rabbitmq's are specified with requirement
-    return {} if requirement.nil?
     config_params = {
       "#{requirement}.messaging.enabled" => 'true',
       "#{requirement}.messaging.broker_fqdns" => fqdns.sort.join(','),
