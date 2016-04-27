@@ -1,7 +1,27 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
-describe_stack 'mongodb' do
+describe_stack 'basic rabbitmq cluster' do
+  given do
+    stack "rabbit" do
+      rabbitmq_cluster 'rabbitmq'
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "rabbit"
+    end
+  end
+
+  host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::rabbitmq_server']['vip_fqdn']).to eql("e1-rabbitmq-vip.space.net.local")
+    expect(host.to_enc['role::rabbitmq_server']['cluster_nodes']).to eql(['e1-rabbitmq-001', 'e1-rabbitmq-002'])
+    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to be_nil
+    expect(host.to_enc['role::rabbitmq_server']['dependencies']).to be_nil
+    expect(host.to_enc.key?('server::default_new_mgmt_net_local')).to eql true
+  end
+end
+
+describe_stack 'app with legacy rabbitmq dependency' do
   given do
     stack "rabbit" do
       rabbitmq_cluster 'rabbitmq'
@@ -20,11 +40,43 @@ describe_stack 'mongodb' do
   end
 
   host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::rabbitmq_server']['vip_fqdn']).to eql("e1-rabbitmq-vip.space.net.local")
-    expect(host.to_enc['role::rabbitmq_server']['cluster_nodes']).to eql(['e1-rabbitmq-001', 'e1-rabbitmq-002'])
     expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to \
       eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
-    expect(host.to_enc['role::rabbitmq_server']['dependencies']).to eql({})
-    expect(host.to_enc.key?('server::default_new_mgmt_net_local')).to eql true
+  end
+
+  host("e1-exampleapp-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::http_app']['dependencies']).to be_empty
+  end
+end
+
+describe_stack 'app with rabbitmq dependency' do
+  given do
+    stack 'test' do
+      rabbitmq_cluster 'rabbitmq' do
+        self.supported_requirements = :accept_any_requirement_default_all_servers
+      end
+      virtual_appserver 'exampleapp' do
+        self.application = 'example'
+        depend_on 'rabbitmq', 'e1', :magic
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack 'test'
+    end
+  end
+
+  host("e1-exampleapp-001.mgmt.space.net.local") do |host|
+    dependencies = host.to_enc['role::http_app']['dependencies']
+    expect(dependencies['magic.messaging.enabled']).to eql('false')
+    expect(dependencies['magic.messaging.broker_fqdns']).to \
+      eql('e1-rabbitmq-001.space.net.local,e1-rabbitmq-002.space.net.local')
+    expect(dependencies['magic.messaging.username']).to eql('example')
+    expect(dependencies['magic.messaging.password_hiera_key']).to eql('enc/e1/example/messaging_magic_password')
+  end
+
+  host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to \
+      eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
   end
 end
