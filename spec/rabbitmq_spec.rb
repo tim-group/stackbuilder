@@ -68,7 +68,7 @@ describe_stack 'app with rabbitmq dependency' do
 
   host("e1-exampleapp-001.mgmt.space.net.local") do |host|
     dependencies = host.to_enc['role::http_app']['dependencies']
-    expect(dependencies['magic.messaging.enabled']).to eql('false')
+    expect(dependencies['magic.messaging.enabled']).to eql('true')
     expect(dependencies['magic.messaging.broker_fqdns']).to \
       eql('e1-rabbitmq-001.space.net.local,e1-rabbitmq-002.space.net.local')
     expect(dependencies['magic.messaging.username']).to eql('example')

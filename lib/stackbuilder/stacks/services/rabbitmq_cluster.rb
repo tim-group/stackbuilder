@@ -59,7 +59,7 @@ module Stacks::Services::RabbitMQCluster
     # FIXME: Remove when all rabbitmq's are specified with requirement
     return {} if requirement.nil?
     config_params = {
-      "#{requirement}.messaging.enabled" => 'false',
+      "#{requirement}.messaging.enabled" => 'true',
       "#{requirement}.messaging.broker_fqdns" => fqdns.sort.join(','),
       "#{requirement}.messaging.username" => dependent.application,
       "#{requirement}.messaging.password_hiera_key" =>
