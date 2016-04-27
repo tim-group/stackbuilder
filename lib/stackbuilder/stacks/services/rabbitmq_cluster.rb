@@ -57,6 +57,8 @@ module Stacks::Services::RabbitMQCluster
 
   def config_properties(dependent, fqdns)
     requirement = requirement_of(dependent)
+    temporary_workaround_to_broken_merc_config = true
+    return {} if temporary_workaround_to_broken_merc_config
     config_params = {
       "#{requirement}.messaging.enabled" => 'true',
       "#{requirement}.messaging.broker_fqdns" => fqdns.sort.join(','),

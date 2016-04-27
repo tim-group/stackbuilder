@@ -44,7 +44,7 @@ describe_stack 'app without requirement' do
   end
 end
 
-describe_stack 'app with rabbitmq dependency' do
+x_describe_stack 'app with rabbitmq dependency' do
   given do
     stack 'test' do
       rabbitmq_cluster 'rabbitmq'
