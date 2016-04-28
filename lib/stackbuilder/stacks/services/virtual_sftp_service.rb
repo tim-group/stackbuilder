@@ -40,6 +40,6 @@ module Stacks::Services::VirtualSftpService
   def config_params(dependant, _fabric)
     fail "#{type} is not configured to provide config_params to #{dependant.type}" \
       unless dependant.type.eql?(Stacks::Services::AppServer)
-    { 'sftp_servers' => fqdn_list(children, [:mgmt]) }
+    { 'sftp_servers' =>  children.map(&:mgmt_fqdn).sort }
   end
 end
