@@ -6,6 +6,7 @@ module Stacks::Services::MongoDBCluster
   attr_accessor :backup_instances
   ### FIXME: Remove this temporary workaround when backup server is rebuilt in the correct logicalenv
   attr_accessor :backup_server_site
+  attr_accessor :backup_server_legacy_naming
 
   def self.extended(object)
     object.configure
@@ -19,6 +20,7 @@ module Stacks::Services::MongoDBCluster
     @database_name = ''
     ### FIXME: Remove this temporary workaround when backup server is rebuilt in the correct logicalenv
     @backup_server_site = :secondary_site
+    @backup_server_legacy_naming = false
   end
 
   def instantiate_machines(environment)
@@ -38,8 +40,9 @@ module Stacks::Services::MongoDBCluster
 
   def instantiate_machine(name, type, i, environment, location)
     index = sprintf("%03d", i)
+
     server_name = "#{name}-#{index}"
-    server_name = "#{name}#{type}-#{index}" if [:backup, :arbiter].include?(type)
+    server_name = "#{name}#{type}-#{index}" if [:backup, :arbiter].include?(type) && !@backup_server_legacy_naming
     server = @type.new(server_name, i, self, type, location)
     server.group = groups[i % groups.size] if server.respond_to?(:group)
     server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
