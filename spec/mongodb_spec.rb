@@ -73,8 +73,12 @@ describe_stack 'mongodb with dependencies' do
   end
 
   host("e1-mongodb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mongodb_server']['dependant_instances']).to \
-      eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
+    expect(host.to_enc['role::mongodb_server']['dependant_instances']).to include(
+      'e1-exampleapp-001.space.net.local',
+      'e1-exampleapp-002.space.net.local',
+      'e1-mongodb-002.space.net.local')
+    expect(host.to_enc['role::mongodb_server']['dependant_instances']).not_to include(
+      'e1-mongodb-001.space.net.local')
   end
 
   host("e1-exampleapp-001.mgmt.space.net.local") do |host|
