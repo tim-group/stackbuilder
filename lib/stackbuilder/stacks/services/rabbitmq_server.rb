@@ -1,24 +1,22 @@
 require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::RabbitMQServer < Stacks::MachineDef
-  attr_reader :virtual_service
-
-  def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)
-    super(virtual_service.name + "-" + index, networks, location)
-    @virtual_service = virtual_service
+  def initialize(rabbitmq_cluster, index, networks = [:mgmt, :prod], location = :primary_site)
+    super(rabbitmq_cluster.name + "-" + index, networks, location)
+    @rabbitmq_cluster = rabbitmq_cluster
   end
 
   def to_enc
     enc = super()
     enc.merge!('role::rabbitmq_server' => {
-                 'cluster_nodes' =>  @virtual_service.cluster_nodes(location),
-                 'vip_fqdn' => @virtual_service.vip_fqdn(:prod, fabric)
+                 'cluster_nodes' =>  @rabbitmq_cluster.cluster_nodes(location),
+                 'vip_fqdn' => @rabbitmq_cluster.vip_fqdn(:prod, fabric)
                },
                'server::default_new_mgmt_net_local' => nil)
-    dependant_instances = @virtual_service.dependant_instance_fqdns(location)
+    dependant_instances = @rabbitmq_cluster.dependant_instance_fqdns(location)
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::rabbitmq_server'].merge!('dependant_instances' => dependant_instances,
-                                          'dependencies' => @virtual_service.dependency_config(fabric))
+                                          'dependencies' => @rabbitmq_cluster.dependency_config(fabric))
     end
     enc
   end
