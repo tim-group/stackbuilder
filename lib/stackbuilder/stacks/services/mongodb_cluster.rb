@@ -4,6 +4,9 @@ module Stacks::Services::MongoDBCluster
   attr_accessor :master_instances
   attr_accessor :arbiter_instances
   attr_accessor :backup_instances
+  ### FIXME: Remove this temporary workaround when backup server is rebuilt in the correct logicalenv
+  attr_accessor :backup_server_site
+
   def self.extended(object)
     object.configure
   end
@@ -14,6 +17,8 @@ module Stacks::Services::MongoDBCluster
     @backup_instances = 1
     @arbiter_instances = 1
     @database_name = ''
+    ### FIXME: Remove this temporary workaround when backup server is rebuilt in the correct logicalenv
+    @backup_server_site = :secondary_site
   end
 
   def instantiate_machines(environment)
@@ -27,7 +32,7 @@ module Stacks::Services::MongoDBCluster
     end
     i = 0
     @backup_instances.times do
-      instantiate_machine(name, :backup, i += 1, environment, :secondary_site)
+      instantiate_machine(name, :backup, i += 1, environment, @backup_server_site)
     end
   end
 
