@@ -15,8 +15,11 @@ describe_stack 'basic rabbitmq cluster' do
   host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::rabbitmq_server']['vip_fqdn']).to eql("e1-rabbitmq-vip.space.net.local")
     expect(host.to_enc['role::rabbitmq_server']['cluster_nodes']).to eql(['e1-rabbitmq-001', 'e1-rabbitmq-002'])
-    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to be_nil
-    expect(host.to_enc['role::rabbitmq_server']['dependencies']).to be_nil
+    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to include(
+      'e1-rabbitmq-002.space.net.local')
+    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).not_to include(
+      'e1-rabbitmq-001.space.net.local')
+    expect(host.to_enc['role::rabbitmq_server']['dependencies']).to be_empty
     expect(host.to_enc.key?('server::default_new_mgmt_net_local')).to eql true
   end
 end
@@ -69,7 +72,11 @@ x_describe_stack 'app with rabbitmq dependency' do
   end
 
   host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to \
-      eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
+    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).to include(
+      'e1-exampleapp-001.space.net.local',
+      'e1-exampleapp-002.space.net.local',
+      'e1-rabbitmq-002.space.net.local')
+    expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).not_to include(
+      'e1-rabbitmq-001.space.net.local')
   end
 end
