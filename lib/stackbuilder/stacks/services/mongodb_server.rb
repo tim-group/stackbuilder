@@ -16,7 +16,7 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
                })
     enc['mongodb::backup'] = { 'ensure' => 'present' } if @backup
     dependant_instances = @mongodb_cluster.dependant_instance_fqdns(location)
-    dependant_instances.concat(@mongodb_cluster.children.map(&:prod_fqdn))
+    dependant_instances.concat(@mongodb_cluster.children.map(&:prod_fqdn)).sort
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
