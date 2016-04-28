@@ -79,7 +79,6 @@ describe_stack 'mongodb with dependencies' do
 
   host("e1-exampleapp-001.mgmt.space.net.local") do |host|
     dependencies = host.to_enc['role::http_app']['dependencies']
-    pp dependencies
     expect(dependencies['magic.mongodb.enabled']).to eql('true')
     expect(dependencies['magic.mongodb.server_fqdns']).to \
       eql('e1-mongodb-001.space.net.local,e1-mongodb-002.space.net.local')
