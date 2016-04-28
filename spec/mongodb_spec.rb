@@ -5,52 +5,28 @@ describe_stack 'mongodb' do
   given do
     stack "mongo" do
       mongodb "mongodb" do
-        self.application = 'myapp'
+        self.database_name  = 'myapp'
       end
     end
-
-    stack "mongo_backup" do
-      mongodb "mongodb" do
-        self.application = 'myapp'
-        each_machine do |machine|
-          machine.backup = true
-        end
-      end
-    end
-
-    stack "mongo_arbiter" do
-      mongodb "mongodbarbiter" do
-        self.application = 'myapp'
-      end
-    end
-
-    env "e1", :primary_site => "space" do
+    env "e1", :primary_site => "space", :secondary_site => 'moon'  do
       instantiate_stack "mongo"
     end
+  end
 
-    env "latest", :primary_site => "space" do
-      instantiate_stack "mongo"
-      instantiate_stack "mongo_arbiter"
-    end
-    env "prodbackup", :primary_site => "space" do
-      instantiate_stack "mongo_backup"
-    end
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts(
+      [
+        'e1-mongodb-001.mgmt.space.net.local',
+        'e1-mongodb-002.mgmt.space.net.local',
+        'e1-mongodbarbiter-001.mgmt.space.net.local',
+        'e1-mongodbbackup-001.mgmt.moon.net.local'
+      ])
   end
 
   host("e1-mongodb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
   end
-
-  host("latest-mongodb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
-  end
-
-  host("latest-mongodbarbiter-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
-  end
-
-  host("prodbackup-mongodb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mongodb_server']['application']).to eql("myapp")
+  host("e1-mongodbbackup-001.mgmt.moon.net.local") do |host|
     expect(host.to_enc['mongodb::backup']).to eql('ensure' => 'present')
   end
 end
@@ -63,7 +39,10 @@ describe_stack 'mongodb with dependencies' do
         depend_on "mongodb", environment.name, 'magic'
       end
       mongodb "mongodb" do
-        self.application = 'myapp'
+        self.database_name = 'myapp'
+        self.master_instances = 2
+        self.arbiter_instances = 0
+        self.backup_instances = 0
       end
     end
 

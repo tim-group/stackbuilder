@@ -2,19 +2,46 @@ require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::MongoDBServer < Stacks::MachineDef
-  attr_accessor :backup
-  def initialize(mongodb_cluster, index)
+  def initialize(base_hostname, i, mongodb_cluster, role, location)
+    index = sprintf("%03d", i)
+    super(base_hostname, [:mgmt, :prod], location)
+    @index = index
+    @location = location
     @mongodb_cluster = mongodb_cluster
-    super(mongodb_cluster.name + "-" + index)
-    @backup = false
+    @ram = '4194304' # 4GB
+    @role = role
+    @vcpus = '2'
+    data_size = '350G'
+    data_size = '5G' if role_of?(:arbiter)
+
+    storage = {
+      '/mnt/data' => {
+        :type       => 'data',
+        :size       => data_size,
+        :persistent => true
+      }
+    }
+    backup_storage = {
+      '/var/backups' => {
+        :type       => 'data',
+        :size       => '458G',
+        :persistent => true
+      }
+    }
+    modify_storage(storage)
+    modify_storage(backup_storage) if role_of?(:backup)
+  end
+
+  def role_of?(role)
+    @role == role
   end
 
   def to_enc
     enc = super()
     enc.merge!('role::mongodb_server' => {
-                 'application' => @mongodb_cluster.application
+                 'application' => @mongodb_cluster.database_name
                })
-    enc['mongodb::backup'] = { 'ensure' => 'present' } if @backup
+    enc['mongodb::backup'] = { 'ensure' => 'present' } if role_of?(:backup)
     dependant_instances = @mongodb_cluster.dependant_instance_fqdns(location)
     dependant_instances.concat(@mongodb_cluster.children.map(&:prod_fqdn)).sort
     dependant_instances.delete prod_fqdn
