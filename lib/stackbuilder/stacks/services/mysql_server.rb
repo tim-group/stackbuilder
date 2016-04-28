@@ -198,7 +198,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                'server::default_new_mgmt_net_local' => nil)
 
     dependant_instances = @mysql_cluster.dependant_instance_fqdns(location, [:prod], false)
-    dependant_instances.concat(@mysql_cluster.fqdn_list(@mysql_cluster.children))
+    dependant_instances.concat(@mysql_cluster.children.map(&:prod_fqdn))
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
