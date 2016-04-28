@@ -37,6 +37,11 @@ module Stacks::Services::LogstashCluster
     receivers.collect(&:prod_fqdn)
   end
 
+  def indexer_nodes
+    receivers = children.reject { |nodes| !nodes.role?(:indexer) }
+    receivers.collect(&:prod_fqdn)
+  end
+
   def vip_fqdn(network, fabric)
     domain = environment.domain(fabric, network)
     "#{environment.name}-#{name}-vip.#{domain}"

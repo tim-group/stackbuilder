@@ -13,6 +13,10 @@ class Stacks::Services::LogstashServer < Stacks::MachineDef
     @location = location
   end
 
+  def stackname
+    @logstash_cluster.name
+  end
+
   def role?(role)
     @role == role
   end
@@ -22,9 +26,9 @@ class Stacks::Services::LogstashServer < Stacks::MachineDef
 
     elastic_vip = @logstash_cluster.vip_i_depend_on_for_clazz('elasticsearchcluster', @location) if role?(:indexer)
     rabbitmq_vip = @logstash_cluster.vip_i_depend_on_for_clazz('rabbitmqcluster', @location)
-    enc.merge!('role::logstash_node' => {
+
+    enc.merge!("role::logstash::#{@role}" => {
                  'version'      => @version,
-                 'role'         => @role.to_s,
                  'rabbitmq_vip' => rabbitmq_vip,
                  'elastic_vip'  => elastic_vip
                })
