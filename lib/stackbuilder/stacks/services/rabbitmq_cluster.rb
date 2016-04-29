@@ -75,11 +75,11 @@ module Stacks::Services::RabbitMQCluster
   end
 
   def dependant_users
-    rights = {}
+    users = {}
     virtual_services_that_depend_on_me.each do |service|
       next unless service.respond_to?(:application)
       requirement = requirement_of(service)
-      rights.merge!(
+      users.merge!(
         service.application => {
           'password_hiera_key' =>
             "enc/#{service.environment.name}/#{service.application}/messaging_#{requirement}_password",
@@ -87,6 +87,6 @@ module Stacks::Services::RabbitMQCluster
         }
       )
     end
-    { 'dependant_users' => rights }
+    { 'dependant_users' => users }
   end
 end
