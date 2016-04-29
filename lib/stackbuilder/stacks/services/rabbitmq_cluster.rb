@@ -8,11 +8,15 @@ module Stacks::Services::RabbitMQCluster
   attr_reader :proxy_vhosts
   attr_reader :proxy_vhosts_lookup
   attr_accessor :supported_requirements
+  ### FIXME: rpearce 29/04/2016 remove when applications can accept new config
+  attr_accessor :temporary_workaround_to_broken_merc_config
 
   def configure
     @downstream_services = []
     @ports = [5672]
     @supported_requirements = :accept_any_requirement_default_all_servers
+    ### FIXME: rpearce 29/04/2016 remove when applications can accept new config
+    @temporary_workaround_to_broken_merc_config = true
   end
 
   def clazz
@@ -57,8 +61,8 @@ module Stacks::Services::RabbitMQCluster
 
   def config_properties(dependent, fqdns)
     requirement = requirement_of(dependent)
-    temporary_workaround_to_broken_merc_config = true
-    return {} if temporary_workaround_to_broken_merc_config
+    ### FIXME: rpearce 29/04/2016 remove when applications can accept new config
+    return {} if @temporary_workaround_to_broken_merc_config
     config_params = {
       "#{requirement}.messaging.enabled" => 'true',
       "#{requirement}.messaging.broker_fqdns" => fqdns.sort.join(','),

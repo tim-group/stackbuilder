@@ -20,6 +20,7 @@ describe_stack 'basic rabbitmq cluster' do
     expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).not_to include(
       'e1-rabbitmq-001.space.net.local')
     expect(host.to_enc['role::rabbitmq_server']['dependencies']).to be_empty
+    expect(host.to_enc['role::rabbitmq_server']['users']).to be_nil
     expect(host.to_enc.key?('server::default_new_mgmt_net_local')).to eql true
   end
 end
@@ -47,10 +48,31 @@ describe_stack 'app without requirement' do
   end
 end
 
-x_describe_stack 'app with rabbitmq dependency' do
+describe_stack 'temporary workaround to broken merc config' do
   given do
     stack 'test' do
       rabbitmq_cluster 'rabbitmq'
+      virtual_appserver 'exampleapp' do
+        self.application = 'example'
+        depend_on 'rabbitmq', 'e1', :magic
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack 'test'
+    end
+  end
+
+  host("e1-exampleapp-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::http_app']['dependencies']).to eql({})
+  end
+end
+describe_stack 'app with rabbitmq dependency' do
+  given do
+    stack 'test' do
+      rabbitmq_cluster 'rabbitmq' do
+        self.temporary_workaround_to_broken_merc_config = false
+      end
       virtual_appserver 'exampleapp' do
         self.application = 'example'
         depend_on 'rabbitmq', 'e1', :magic
