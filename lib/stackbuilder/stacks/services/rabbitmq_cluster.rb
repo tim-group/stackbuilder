@@ -15,6 +15,7 @@ module Stacks::Services::RabbitMQCluster
     @downstream_services = []
     @ports = [5672]
     @supported_requirements = :accept_any_requirement_default_all_servers
+
     ### FIXME: rpearce 29/04/2016 remove when applications can accept new config
     @temporary_workaround_to_broken_merc_config = true
   end
@@ -76,12 +77,12 @@ module Stacks::Services::RabbitMQCluster
   def dependant_users
     rights = {}
     virtual_services_that_depend_on_me.each do |service|
+      next unless service.respond_to?(:application)
       requirement = requirement_of(service)
-      key = service.name
-      key = service.application if service.respond_to?(:application)
       rights.merge!(
-        key => {
-          'password_hiera_key' => "enc/#{service.environment.name}/#{key}/messaging_#{requirement}_password",
+        service.application => {
+          'password_hiera_key' =>
+            "enc/#{service.environment.name}/#{service.application}/messaging_#{requirement}_password",
           'tags' => []
         }
       )

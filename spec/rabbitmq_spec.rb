@@ -100,10 +100,75 @@ describe_stack 'app with rabbitmq dependency' do
       'e1-rabbitmq-002.space.net.local')
     expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).not_to include(
       'e1-rabbitmq-001.space.net.local')
-    expect(host.to_enc['role::rabbitmq_server']['dependant_users']).to include 'example'
+  end
+end
+
+describe_stack 'rabbitmq users are created from dependencies' do
+  given do
+    stack 'test' do
+      rabbitmq_cluster 'rabbitmq' do
+        self.temporary_workaround_to_broken_merc_config = false
+      end
+      virtual_appserver 'exampleapp' do
+        self.application = 'example'
+        depend_on 'rabbitmq', 'e1', :magic
+      end
+      virtual_appserver 'eggapp' do
+        self.application = 'egg'
+        depend_on 'rabbitmq', 'e1', :spoon
+      end
+      external_server "oy-mon-001.oy.net.local" do
+        depend_on 'rabbitmq', 'e1', 'external'
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack 'test'
+    end
+  end
+
+  host("e1-exampleapp-001.mgmt.space.net.local") do |host|
+    dependencies = host.to_enc['role::http_app']['dependencies']
+    expect(dependencies['magic.messaging.username']).to eql('example')
+    expect(dependencies['magic.messaging.password_hiera_key']).to eql('enc/e1/example/messaging_magic_password')
+  end
+
+  host("e1-eggapp-001.mgmt.space.net.local") do |host|
+    dependencies = host.to_enc['role::http_app']['dependencies']
+    expect(dependencies['spoon.messaging.username']).to eql('egg')
+    expect(dependencies['spoon.messaging.password_hiera_key']).to eql('enc/e1/egg/messaging_spoon_password')
+  end
+
+  host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::rabbitmq_server']['dependant_users']).to include 'example', 'egg'
     expect(host.to_enc['role::rabbitmq_server']['dependant_users']['example']).to eql(
       'password_hiera_key' => 'enc/e1/example/messaging_magic_password',
       'tags'               => []
     )
+    expect(host.to_enc['role::rabbitmq_server']['dependant_users']['egg']).to eql(
+      'password_hiera_key' => 'enc/e1/egg/messaging_spoon_password',
+      'tags'               => []
+    )
+  end
+end
+
+describe_stack 'rabbitmq users are not created unless services have application' do
+  given do
+    stack 'test' do
+      rabbitmq_cluster 'rabbitmq' do
+        self.temporary_workaround_to_broken_merc_config = false
+      end
+      external_server "oy-mon-001.oy.net.local" do
+        depend_on 'rabbitmq', 'e1', 'external'
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack 'test'
+    end
+  end
+
+  host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::rabbitmq_server']['dependant_users']).to be_empty
   end
 end
