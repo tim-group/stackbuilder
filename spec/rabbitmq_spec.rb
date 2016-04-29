@@ -100,5 +100,10 @@ describe_stack 'app with rabbitmq dependency' do
       'e1-rabbitmq-002.space.net.local')
     expect(host.to_enc['role::rabbitmq_server']['dependant_instances']).not_to include(
       'e1-rabbitmq-001.space.net.local')
+    expect(host.to_enc['role::rabbitmq_server']['dependant_users']).to include 'example'
+    expect(host.to_enc['role::rabbitmq_server']['dependant_users']['example']).to eql(
+      'password_hiera_key' => 'enc/e1/example/messaging_magic_password',
+      'tags'               => []
+    )
   end
 end

@@ -8,7 +8,7 @@ describe_stack 'stack-with-dependencies' do
     end
     stack "external" do
       external_server "oy-mon-001.oy.net.local" do
-        depend_on 'rabbitmq'
+        depend_on 'rabbitmq', environment.name, 'external'
       end
     end
 

@@ -72,4 +72,20 @@ module Stacks::Services::RabbitMQCluster
     }
     config_params
   end
+
+  def dependant_users
+    rights = {}
+    virtual_services_that_depend_on_me.each do |service|
+      requirement = requirement_of(service)
+      key = service.name
+      key = service.application if service.respond_to?(:application)
+      rights.merge!(
+        key => {
+          'password_hiera_key' => "enc/#{service.environment.name}/#{key}/messaging_#{requirement}_password",
+          'tags' => []
+        }
+      )
+    end
+    { 'dependant_users' => rights }
+  end
 end
