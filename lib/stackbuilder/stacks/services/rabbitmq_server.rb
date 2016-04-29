@@ -21,6 +21,9 @@ class Stacks::Services::RabbitMQServer < Stacks::MachineDef
       enc['role::rabbitmq_server'].merge!('dependant_instances' => dependant_instances,
                                           'dependencies' => @rabbitmq_cluster.dependency_config(fabric))
       enc['role::rabbitmq_server'].merge!(@rabbitmq_cluster.dependant_users)
+      ### FIXME: Ensure we don't duplicate users with thoose old ones that come from hiera
+      #          Remove this legacy option when removed from puppet code in role::rabitmq_server
+      enc['role::rabbitmq_server'].merge!('rabbit_users' => [])
     end
     enc
   end
