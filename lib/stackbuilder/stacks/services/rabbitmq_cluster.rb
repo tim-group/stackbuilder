@@ -87,6 +87,6 @@ module Stacks::Services::RabbitMQCluster
         }
       )
     end
-    { 'dependant_users' => users }
+    users
   end
 end
