@@ -39,7 +39,7 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
   def to_enc
     enc = super()
     enc.merge!('role::mongodb_server' => {
-                 'application' => @mongodb_cluster.database_name
+                 'database_name' => @mongodb_cluster.database_name
                })
     enc['mongodb::backup'] = { 'ensure' => 'present' } if role_of?(:backup)
     dependant_instances = @mongodb_cluster.dependant_instance_fqdns(location)
