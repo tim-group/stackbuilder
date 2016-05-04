@@ -42,12 +42,18 @@ module Stacks::Services::RabbitMQCluster
     }
   end
 
-  def requirement_of(dependant)
-    dependent_on_this_cluster = dependant.depends_on.find { |dependency| dependency[0] == name }
+  def validate_dependency(dependant, dependency)
     fail "Stack '#{dependant.name}' must specify requirement when using depend_on #{name} "\
           "in environment '#{environment.name}'. Usage: depend_on <environment>, <requirement>" \
-          if dependent_on_this_cluster[2].nil?
-    dependent_on_this_cluster[2]
+          if dependency[2].nil?
+  end
+
+  def requirements_of(dependant)
+    dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency[0] == name }
+    dependent_on_this_cluster.inject([]) do |requirements, dependency|
+      validate_dependency(dependant, dependency)
+      requirements << dependency[2]
+    end
   end
 
   def config_params(dependent, _fabric)
@@ -61,16 +67,19 @@ module Stacks::Services::RabbitMQCluster
   end
 
   def config_properties(dependent, fqdns)
-    requirement = requirement_of(dependent)
+    requirements = requirements_of(dependent)
+    config_params = {}
     ### FIXME: rpearce 29/04/2016 remove when applications can accept new config
-    return {} if @temporary_workaround_to_broken_merc_config
-    config_params = {
-      "#{requirement}.messaging.enabled" => 'true',
-      "#{requirement}.messaging.broker_fqdns" => fqdns.sort.join(','),
-      "#{requirement}.messaging.username" => dependent.application,
-      "#{requirement}.messaging.password_hiera_key" =>
-        "enc/#{dependent.environment.name}/#{dependent.application}/messaging_#{requirement}_password"
-    }
+    return config_params if @temporary_workaround_to_broken_merc_config
+    requirements.each do |requirement|
+      config_params.merge!(
+        "#{requirement}.messaging.enabled" => 'true',
+        "#{requirement}.messaging.broker_fqdns" => fqdns.sort.join(','),
+        "#{requirement}.messaging.username" => "#{dependent.application}",
+        "#{requirement}.messaging.password_hiera_key" =>
+          "enc/#{dependent.environment.name}/#{dependent.application}/messaging_password"
+      )
+    end
     config_params
   end
 
@@ -78,12 +87,11 @@ module Stacks::Services::RabbitMQCluster
     users = {}
     virtual_services_that_depend_on_me.each do |service|
       next unless service.respond_to?(:application)
-      requirement = requirement_of(service)
       users.merge!(
         service.application => {
+          'tags'               => [],
           'password_hiera_key' =>
-            "enc/#{service.environment.name}/#{service.application}/messaging_#{requirement}_password",
-          'tags' => []
+            "enc/#{service.environment.name}/#{service.application}/messaging_password"
         }
       )
     end
