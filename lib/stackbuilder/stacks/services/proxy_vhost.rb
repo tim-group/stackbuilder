@@ -1,6 +1,7 @@
 class Stacks::Services::ProxyVHost
   attr_accessor :aliases
   attr_accessor :cert
+  attr_accessor :monitor_vhost
   attr_reader :properties
   attr_reader :proxy_pass_rules
   attr_reader :redirects
@@ -22,6 +23,7 @@ class Stacks::Services::ProxyVHost
     @virtual_proxy_service = virtual_proxy_service
     @location = location
     @ensure = 'present'
+    @monitor_vhost = true
     instance_eval(&block) if block
   end
 
@@ -83,7 +85,8 @@ class Stacks::Services::ProxyVHost
       'proxy_pass_rules' => proxy_pass_rules(location, envs),
       'type'             => type,
       'vhost_properties' => properties,
-      'cert'             => cert
+      'cert'             => cert,
+      'monitor_vhost'    => @monitor_vhost
     }]
   end
 
