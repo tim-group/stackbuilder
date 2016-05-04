@@ -67,7 +67,7 @@ Files:
                             use due to blockers
 
 Examples:
-  stacks dump_enc > /tmp/enc_test
+  stacks compile > /tmp/enc_test
   stacks -e test ls -s refapp
   stacks -e test enc -s test-refapp-002.mgmt.st.net.local
 
