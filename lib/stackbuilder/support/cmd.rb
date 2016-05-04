@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile ls lsenv enc clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile ls lsenv enc spec clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -48,6 +48,17 @@ class CMD
 
     if machine_def.respond_to?(:to_enc)
       puts ZAMLS.to_zamls(machine_def.to_enc)
+    else
+      logger(Logger::FATAL) { "\"#{$options[:stack]}\" is not a machine fqdn" }
+      exit 1
+    end
+  end
+
+  def spec(_argv)
+    machine_def = check_and_get_stack
+
+    if machine_def.respond_to?(:to_spec)
+      puts ZAMLS.to_zamls(machine_def.to_spec)
     else
       logger(Logger::FATAL) { "\"#{$options[:stack]}\" is not a machine fqdn" }
       exit 1

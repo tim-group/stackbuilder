@@ -40,7 +40,8 @@ Options:
     clean [-e] -s             shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
     clean_all [-e] -s         shuts down and removes a stack, puppet, nagios and mongo
     compile                   create a yaml file describing the entire infrastructure
-    enc [-e] -s               print the enc of the specified stack. Used for debugging
+    enc [-e] -s               print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
+    spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,
                               skip stacks of type "machine".
     provision [-e] -s         allocates and spins up a stack
