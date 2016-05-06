@@ -63,8 +63,8 @@ module Stacks::Services::MongoDBCluster
           "in environment '#{environment.name}'. Acceptable supported requirements: "\
           "#{acceptable_supported_requirements}." \
           unless acceptable_supported_requirements.include?(@supported_requirements)
-
-    config_properties(dependent, children.map(&:prod_fqdn))
+    masters = children.reject { |child| !child.role_of?(:master) }
+    config_properties(dependent, masters.map(&:prod_fqdn))
   end
 
   def config_properties(dependent, fqdns)

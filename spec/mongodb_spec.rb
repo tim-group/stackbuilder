@@ -41,8 +41,8 @@ describe_stack 'mongodb with dependencies' do
       mongodb "mongodb" do
         self.database_name = 'myapp'
         self.master_instances = 2
-        self.arbiter_instances = 0
-        self.backup_instances = 0
+        self.arbiter_instances = 1
+        self.backup_instances = 1
       end
     end
 
