@@ -85,7 +85,6 @@ module Stacks::Services::MongoDBCluster
       next unless service.respond_to?(:application)
       users.merge!(
         service.application => {
-          'tags'               => [],
           'password_hiera_key' =>
             "enc/#{service.environment.name}/#{service.application}/mongodb_password"
         }

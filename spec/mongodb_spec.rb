@@ -97,12 +97,10 @@ describe_stack 'mongodb users are created from dependencies' do
   host("e1-mongodb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['dependant_users']).to include('example', 'egg')
     expect(host.to_enc['role::mongodb_server']['dependant_users']['example']).to eql(
-      'password_hiera_key' => 'enc/e1/example/mongodb_password',
-      'tags'               => []
+      'password_hiera_key' => 'enc/e1/example/mongodb_password'
     )
     expect(host.to_enc['role::mongodb_server']['dependant_users']['egg']).to eql(
-      'password_hiera_key' => 'enc/e1/egg/mongodb_password',
-      'tags'               => []
+      'password_hiera_key' => 'enc/e1/egg/mongodb_password'
     )
   end
 end
