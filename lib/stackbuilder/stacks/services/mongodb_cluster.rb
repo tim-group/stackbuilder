@@ -78,4 +78,19 @@ module Stacks::Services::MongoDBCluster
     }
     config_params
   end
+
+  def dependant_users
+    users = {}
+    virtual_services_that_depend_on_me.each do |service|
+      next unless service.respond_to?(:application)
+      users.merge!(
+        service.application => {
+          'tags'               => [],
+          'password_hiera_key' =>
+            "enc/#{service.environment.name}/#{service.application}/mongodb_password"
+        }
+      )
+    end
+    users
+  end
 end

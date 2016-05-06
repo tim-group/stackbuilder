@@ -48,6 +48,7 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::mongodb_server'].merge!('dependant_instances' => dependant_instances,
+                                         'dependant_users'     => @mongodb_cluster.dependant_users,
                                          'dependencies' => @mongodb_cluster.dependency_config(fabric))
     end
     enc
