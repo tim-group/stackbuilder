@@ -66,7 +66,7 @@ describe_stack 'mongodb with dependencies' do
     expect(dependencies['magic.mongodb.server_fqdns']).to \
       eql('e1-mongodb-001.space.net.local,e1-mongodb-002.space.net.local')
     expect(dependencies['magic.mongodb.username']).to eql('example')
-    expect(dependencies['magic.mongodb.password_hiera_key']).to eql('enc/e1/example/mongodb_magic_password')
+    expect(dependencies['magic.mongodb.password_hiera_key']).to eql('enc/e1/example/mongodb_password')
   end
 end
 

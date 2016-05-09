@@ -74,7 +74,7 @@ module Stacks::Services::MongoDBCluster
       "#{requirement}.mongodb.server_fqdns" => fqdns.sort.join(','),
       "#{requirement}.mongodb.username" => dependent.application,
       "#{requirement}.mongodb.password_hiera_key" =>
-        "enc/#{dependent.environment.name}/#{dependent.application}/mongodb_#{requirement}_password"
+        "enc/#{dependent.environment.name}/#{dependent.application}/mongodb_password"
     }
     config_params
   end
