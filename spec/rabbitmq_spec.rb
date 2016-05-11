@@ -51,7 +51,10 @@ end
 describe_stack 'temporary workaround to broken merc config' do
   given do
     stack 'test' do
-      rabbitmq_cluster 'rabbitmq'
+      rabbitmq_cluster 'rabbitmq' do
+        self.temporary_workaround_to_broken_merc_config = true
+      end
+
       virtual_appserver 'exampleapp' do
         self.application = 'example'
         depend_on 'rabbitmq', 'e1', :magic
@@ -71,9 +74,7 @@ end
 describe_stack 'app with rabbitmq dependency' do
   given do
     stack 'test' do
-      rabbitmq_cluster 'rabbitmq' do
-        self.temporary_workaround_to_broken_merc_config = false
-      end
+      rabbitmq_cluster 'rabbitmq'
       virtual_appserver 'exampleapp' do
         self.application = 'example'
         depend_on 'rabbitmq', 'e1', :magic
@@ -107,9 +108,7 @@ end
 describe_stack 'rabbitmq users are created from dependencies' do
   given do
     stack 'test' do
-      rabbitmq_cluster 'rabbitmq' do
-        self.temporary_workaround_to_broken_merc_config = false
-      end
+      rabbitmq_cluster 'rabbitmq'
       virtual_appserver 'exampleapp' do
         self.application = 'example'
         depend_on 'rabbitmq', 'e1', :wizard
@@ -159,9 +158,7 @@ end
 describe_stack 'rabbitmq users are not created unless services have application' do
   given do
     stack 'test' do
-      rabbitmq_cluster 'rabbitmq' do
-        self.temporary_workaround_to_broken_merc_config = false
-      end
+      rabbitmq_cluster 'rabbitmq'
       external_server "oy-mon-001.oy.net.local" do
         depend_on 'rabbitmq', 'e1', 'external'
       end

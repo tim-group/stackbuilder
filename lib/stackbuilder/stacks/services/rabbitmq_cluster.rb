@@ -17,7 +17,7 @@ module Stacks::Services::RabbitMQCluster
     @supported_requirements = :accept_any_requirement_default_all_servers
 
     ### FIXME: rpearce 29/04/2016 remove when applications can accept new config
-    @temporary_workaround_to_broken_merc_config = true
+    @temporary_workaround_to_broken_merc_config = false
   end
 
   def clazz
