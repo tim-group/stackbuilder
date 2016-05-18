@@ -8,11 +8,11 @@ class Stacks::Services::QuantAppServer < Stacks::MachineDef
   end
 
   def to_enc
-    {
-      'role::quantapp_server' => {
-        'allowed_hosts' => @virtual_service.allowed_hosts,
-        'environment'   => environment.name
-      }
+    enc = super
+    enc['role::quantapp_server'] = {
+      'allowed_hosts' => @virtual_service.allowed_hosts,
+      'environment'   => environment.name
     }
+    enc
   end
 end
