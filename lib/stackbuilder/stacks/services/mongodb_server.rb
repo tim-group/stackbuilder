@@ -42,14 +42,18 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
                  'database_name' => @mongodb_cluster.database_name
                })
     enc['mongodb::backup'] = { 'ensure' => 'present' } if role_of?(:backup)
-    dependant_instances = @mongodb_cluster.dependant_instance_fqdns(location)
-    dependant_instances.concat(@mongodb_cluster.children.map(&:prod_fqdn)).sort
+    dependant_instances = @mongodb_cluster.children.map(&:prod_fqdn)
     dependant_instances.delete prod_fqdn
+    dependant_users = {}
+    if role_of?(:master)
+      dependant_instances.concat(@mongodb_cluster.dependant_instance_fqdns(location)).sort
+      dependant_users = @mongodb_cluster.dependant_users
+    end
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::mongodb_server'].merge!('dependant_instances' => dependant_instances,
-                                         'dependant_users'     => @mongodb_cluster.dependant_users,
-                                         'dependencies' => @mongodb_cluster.dependency_config(fabric))
+                                         'dependant_users'     => dependant_users,
+                                         'dependencies'        => @mongodb_cluster.dependency_config(fabric))
     end
     enc
   end

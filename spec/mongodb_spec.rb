@@ -31,7 +31,7 @@ describe_stack 'mongodb' do
   end
 end
 
-describe_stack 'mongodb with dependencies' do
+describe_stack 'provides dependency information to masters(only) and dependants' do
   given do
     stack 'test' do
       virtual_appserver 'exampleapp' do
@@ -46,7 +46,7 @@ describe_stack 'mongodb with dependencies' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", :primary_site => "space", :secondary_site => 'moon' do
       instantiate_stack 'test'
     end
   end
@@ -60,6 +60,22 @@ describe_stack 'mongodb with dependencies' do
       'e1-mongodb-001.space.net.local')
   end
 
+  host("e1-mongodbarbiter-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::mongodb_server']['dependant_instances'].size).to eql(3)
+    expect(host.to_enc['role::mongodb_server']['dependant_instances']).to include(
+      'e1-mongodb-001.space.net.local',
+      'e1-mongodb-002.space.net.local',
+      'e1-mongodbbackup-001.moon.net.local')
+  end
+
+  host("e1-mongodbbackup-001.mgmt.moon.net.local") do |host|
+    expect(host.to_enc['role::mongodb_server']['dependant_instances'].size).to eql(3)
+    expect(host.to_enc['role::mongodb_server']['dependant_instances']).to include(
+      'e1-mongodb-001.space.net.local',
+      'e1-mongodb-002.space.net.local',
+      'e1-mongodbarbiter-001.space.net.local')
+  end
+
   host("e1-exampleapp-001.mgmt.space.net.local") do |host|
     dependencies = host.to_enc['role::http_app']['dependencies']
     expect(dependencies['magic.mongodb.enabled']).to eql('true')
@@ -70,7 +86,7 @@ describe_stack 'mongodb with dependencies' do
   end
 end
 
-describe_stack 'mongodb users are created from dependencies' do
+describe_stack 'mongodb users are created on masters from dependencies' do
   given do
     stack 'test' do
       virtual_appserver 'exampleapp' do
@@ -89,7 +105,7 @@ describe_stack 'mongodb users are created from dependencies' do
       end
     end
 
-    env "e1", :primary_site => "space" do
+    env "e1", :primary_site => "space", :secondary_site => 'moon' do
       instantiate_stack 'test'
     end
   end
@@ -102,6 +118,12 @@ describe_stack 'mongodb users are created from dependencies' do
     expect(host.to_enc['role::mongodb_server']['dependant_users']['egg']).to eql(
       'password_hiera_key' => 'enc/e1/egg/mongodb_password'
     )
+  end
+  host("e1-mongodbarbiter-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::mongodb_server']['dependant_users']).to eql({})
+  end
+  host("e1-mongodbbackup-001.mgmt.moon.net.local") do |host|
+    expect(host.to_enc['role::mongodb_server']['dependant_users']).to eql({})
   end
 end
 
