@@ -14,7 +14,7 @@ describe_stack 'rate limiting forward proxy' do
     end
 
     host('e1-s3proxy-001.mgmt.space.net.local') do |host|
-      expect(host.to_enc).to eql('role::rate_limited_forward_proxy' => { 'tc_rate' => '8Mbit' })
+      expect(host.to_enc['role::rate_limited_forward_proxy']).to eql('tc_rate' => '8Mbit')
       expect(host.networks).to eql([:mgmt, :prod])
     end
   end
@@ -35,7 +35,7 @@ describe_stack 'rate limiting forward proxy' do
     end
 
     host('e2-s3proxy-001.mgmt.space.net.local') do |host|
-      expect(host.to_enc).to eql('role::rate_limited_forward_proxy' => { 'tc_rate' => '42jigawatts' })
+      expect(host.to_enc['role::rate_limited_forward_proxy']).to eql('tc_rate' => '42jigawatts')
     end
   end
 end

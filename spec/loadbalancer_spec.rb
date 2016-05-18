@@ -126,7 +126,7 @@ describe_stack 'load balancer stack create a secondary server with the correct e
       },
       "healthcheck_timeout" => 10
     )
-    expect(host.to_enc['routes']).to eql("to" => ["mgmt_pg_from_mgmt_oy"])
+    expect(host.to_enc['routes']['to']).to include 'mgmt_pg_from_mgmt_oy'
     expect(host.to_specs.shift[:qualified_hostnames]).to eql(:mgmt => "e1-lb-002.mgmt.space.net.local",
                                                              :prod => "e1-lb-002.space.net.local")
     expect(host.to_specs.shift[:availability_group]).to eql('e1-lb')

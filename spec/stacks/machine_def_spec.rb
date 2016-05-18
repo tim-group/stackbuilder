@@ -61,7 +61,7 @@ describe Stacks::MachineDef do
     machinedef.add_route('mgmt_pg')
     env = new_environment('noenv', :primary_site => 'local')
     machinedef.bind_to(env)
-    expect(machinedef.to_enc).to eql('routes' => { 'to' => ['mgmt_pg'] })
+    expect(machinedef.to_enc['routes']['to']).to include 'mgmt_pg'
   end
 
   it 'allows cnames to be added' do
@@ -82,5 +82,25 @@ describe Stacks::MachineDef do
         'baz' => 'env-test.ps.net.local'
       }
     )
+  end
+
+  it 'should always provide routes to the ldn office' do
+    machinedef = Stacks::MachineDef.new('test')
+    env = new_environment('env', :primary_site => 'oy')
+    machinedef.bind_to(env)
+    expect(machinedef.to_enc['routes']['to'].size).to eql(1)
+    expect(machinedef.to_enc['routes']['to']).to include 'ldn_office_from_mgmt_oy'
+  end
+
+  it 'should not provide routes to the ldn office when in ci and local' do
+    machinedef = Stacks::MachineDef.new('test')
+    env = new_environment('env', :primary_site => 'local')
+    machinedef.bind_to(env)
+    expect(machinedef.to_enc['routes']).to be_nil
+
+    machinedef = Stacks::MachineDef.new('test')
+    env = new_environment('env', :primary_site => 'ci')
+    machinedef.bind_to(env)
+    expect(machinedef.to_enc['routes']).to be_nil
   end
 end

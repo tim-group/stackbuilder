@@ -13,6 +13,6 @@ describe_stack 'analytics' do
   end
 
   host("e1-fmanalyticsreporting-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc).to eql('role::fmanalyticsreporting_server' => {})
+    expect(host.to_enc['role::fmanalyticsreporting_server']).to eql({})
   end
 end

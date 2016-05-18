@@ -62,10 +62,8 @@ describe_stack 'test enc of vpn servers' do
 
   host('oymigration-lb-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
-    expect(enc).to eql("role::loadbalancer" => {
-                         "virtual_router_id" => 1,
-                         "virtual_servers" => {}
-                       })
+    expect(enc['role::loadbalancer']).to eql("virtual_router_id" => 1,
+                                             "virtual_servers" => {})
   end
 
   host('oymigration-nat-001.mgmt.oy.net.local') do |host|

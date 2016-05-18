@@ -25,10 +25,8 @@ describe_stack 'jenkins' do
   end
 
   host('e1-jenkinsslave-002.mgmt.space.net.local') do |host|
-    expect(host.to_enc).to eql('role::cinode_precise' => {
-                                 'mysql_version' => '5.1.49-1ubuntu8',
-                                 'node_labels'   => ''
-                               })
+    expect(host.to_enc['role::cinode_precise']).to eql('mysql_version' => '5.1.49-1ubuntu8',
+                                                       'node_labels'   => '')
   end
 
   host('e1-jenkinsslavewithlabels-001.mgmt.space.net.local') do |host|

@@ -91,31 +91,28 @@ describe Stacks::DSL do
       instantiate_stack "oneapp"
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    expect(loadbalancer.to_enc).to eql(
-      "role::loadbalancer" => {
-        "virtual_router_id" => 1,
-        "virtual_servers" => {
-          "st-twoapp-vip.st.net.local" => {
-            "healthcheck_timeout" => 10,
-            "realservers" => {
-              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
-            },
-            "env" => "st",
-            "app" => nil,
-            "monitor_warn" => 1 },
-          "st-oneapp-vip.st.net.local" => {
-            "healthcheck_timeout" => 10,
-            "realservers" => {
-              "green" => ["st-oneapp-002.st.net.local"],
-              "blue" => ["st-oneapp-001.st.net.local"]
-            },
-            "env" => "st",
-            "app" => nil,
-            "monitor_warn" => 0
-          }
-        }
-      }
-    )
+    expect(loadbalancer.to_enc['role::loadbalancer']).to eql("virtual_router_id" => 1,
+                                                             "virtual_servers" => {
+                                                               "st-twoapp-vip.st.net.local" => {
+                                                                 "healthcheck_timeout" => 10,
+                                                                 "realservers" => {
+                                                                   "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
+                                                                 },
+                                                                 "env" => "st",
+                                                                 "app" => nil,
+                                                                 "monitor_warn" => 1 },
+                                                               "st-oneapp-vip.st.net.local" => {
+                                                                 "healthcheck_timeout" => 10,
+                                                                 "realservers" => {
+                                                                   "green" => ["st-oneapp-002.st.net.local"],
+                                                                   "blue" => ["st-oneapp-001.st.net.local"]
+                                                                 },
+                                                                 "env" => "st",
+                                                                 "app" => nil,
+                                                                 "monitor_warn" => 0
+                                                               }
+                                                             }
+                                                            )
   end
 
   it 'generates load balancer enc data with the a different healthcheck_timeout if specified' do
@@ -140,33 +137,30 @@ describe Stacks::DSL do
       instantiate_stack "oneapp"
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    expect(loadbalancer.to_enc).to eql(
-      "role::loadbalancer" => {
-        "virtual_router_id" => 1,
-        "virtual_servers" => {
-          "st-twoapp-vip.st.net.local" => {
-            "healthcheck_timeout" => 10,
-            "realservers" => {
-              "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
-            },
-            "env" => "st",
-            "app" => nil,
-            "monitor_warn" => 1
-          },
-          "st-oneapp-vip.st.net.local" => {
-            "healthcheck_timeout" => 10,
-            "realservers" => {
-              "green" => ["st-oneapp-002.st.net.local"],
-              "blue" => ["st-oneapp-001.st.net.local"]
-            },
-            "env" => "st",
-            "app" => nil,
-            "monitor_warn" => 0,
-            "healthcheck_timeout" => 999
-          }
-        }
-      }
-    )
+    expect(loadbalancer.to_enc['role::loadbalancer']).to eql("virtual_router_id" => 1,
+                                                             "virtual_servers" => {
+                                                               "st-twoapp-vip.st.net.local" => {
+                                                                 "healthcheck_timeout" => 10,
+                                                                 "realservers" => {
+                                                                   "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
+                                                                 },
+                                                                 "env" => "st",
+                                                                 "app" => nil,
+                                                                 "monitor_warn" => 1
+                                                               },
+                                                               "st-oneapp-vip.st.net.local" => {
+                                                                 "healthcheck_timeout" => 10,
+                                                                 "realservers" => {
+                                                                   "green" => ["st-oneapp-002.st.net.local"],
+                                                                   "blue" => ["st-oneapp-001.st.net.local"]
+                                                                 },
+                                                                 "env" => "st",
+                                                                 "app" => nil,
+                                                                 "monitor_warn" => 0,
+                                                                 "healthcheck_timeout" => 999
+                                                               }
+                                                             }
+                                                            )
   end
 
   it 'round robins the groups foreach instance' do
@@ -199,17 +193,15 @@ describe Stacks::DSL do
     end
 
     server = find("ci-appx-001.mgmt.st.net.local")
-    expect(server.to_enc).to eql('role::http_app' => {
-                                   'application' => 'JavaHttpRef',
-                                   'group' => 'blue',
-                                   'cluster' => 'ci-appx',
-                                   'vip_fqdn' => 'ci-appx-vip.st.net.local',
-                                   'environment' => 'ci',
-                                   'port'        => '8000',
-                                   'dependencies' => {},
-                                   'application_dependant_instances' => [],
-                                   'participation_dependant_instances' => []
-                                 })
+    expect(server.to_enc['role::http_app']).to eql('application' => 'JavaHttpRef',
+                                                   'group' => 'blue',
+                                                   'cluster' => 'ci-appx',
+                                                   'vip_fqdn' => 'ci-appx-vip.st.net.local',
+                                                   'environment' => 'ci',
+                                                   'port'        => '8000',
+                                                   'dependencies' => {},
+                                                   'application_dependant_instances' => [],
+                                                   'participation_dependant_instances' => [])
   end
 
   it 'generates app servers that are not part of a virtual service' do
@@ -224,16 +216,14 @@ describe Stacks::DSL do
     end
 
     server = find("ci-appx-001.mgmt.st.net.local")
-    expect(server.to_enc).to eql('role::http_app' => {
-                                   'application' => 'JavaHttpRef',
-                                   'group' => 'blue',
-                                   'cluster' => 'ci-appx',
-                                   'environment' => 'ci',
-                                   'port'        => '8000',
-                                   'dependencies' => {},
-                                   'application_dependant_instances' => [],
-                                   'participation_dependant_instances' => []
-                                 })
+    expect(server.to_enc['role::http_app']).to eql('application' => 'JavaHttpRef',
+                                                   'group' => 'blue',
+                                                   'cluster' => 'ci-appx',
+                                                   'environment' => 'ci',
+                                                   'port'        => '8000',
+                                                   'dependencies' => {},
+                                                   'application_dependant_instances' => [],
+                                                   'participation_dependant_instances' => [])
   end
 
   it 'returns nil if asked for a machine that does not exist' do
