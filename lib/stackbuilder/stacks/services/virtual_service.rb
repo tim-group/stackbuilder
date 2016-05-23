@@ -45,7 +45,8 @@ module Stacks::Services::VirtualService
   end
 
   def vip_fqdn(network, fabric)
-    domain = environment.domain(fabric, network)
+    actual_network = (@vip_networks.include? network) ? network : @vip_networks[0]
+    domain = environment.domain(fabric, actual_network)
     "#{environment.name}-#{name}-vip.#{domain}"
   end
 

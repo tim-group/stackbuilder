@@ -71,6 +71,7 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
         vhost('exampleapp') do
           @cert = 'test_vhost_cert_change'
         end
+        add_vip_network :front
       end
 
       virtual_appserver 'exampleapp' do
@@ -246,6 +247,7 @@ describe_stack 'generates proxyserver enc data' do
       end
       virtual_appserver "downstreamapp"
       virtual_proxyserver "refproxy" do
+        add_vip_network :front
         vhost('refapp') do
           @aliases << 'example.timgroup.com'
           with_redirect "old-example.timgroup.com"
@@ -260,6 +262,7 @@ describe_stack 'generates proxyserver enc data' do
       virtual_appserver "refapp3" do
       end
       virtual_proxyserver "refproxy2" do
+        add_vip_network :front
         vhost('refapp3', 'example2.timgroup.com') do
           add_pass_rule "/somewhere", :service => "downstreamapp", :environment => 'env'
         end
