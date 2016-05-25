@@ -9,7 +9,7 @@ class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
 
     @elasticsearch_cluster = elasticsearch_cluster
     @role = role
-    @version = '2.3.1'
+    @version = '2.3.3'
 
     data_storage = {
       '/mnt/data' => {
