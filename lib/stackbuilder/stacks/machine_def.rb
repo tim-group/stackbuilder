@@ -95,8 +95,7 @@ class Stacks::MachineDef
       @hostname = "#{@environment.name}-#{@base_hostname}"
     end
     @domain = environment.domain(@fabric)
-    @routes << "ldn_office_from_mgmt_#{@fabric}" unless %w(ci local).include? @fabric
-    @routes << "mgmt_lon_from_mgmt_#{@fabric}" unless %w(ci local).include? @fabric
+    @routes << "default_routes_from_#{@fabric}"
   end
 
   def disable_persistent_storage

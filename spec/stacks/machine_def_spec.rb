@@ -88,20 +88,7 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new('test')
     env = new_environment('env', :primary_site => 'oy')
     machinedef.bind_to(env)
-    expect(machinedef.to_enc['routes']['to'].size).to eql(2)
-    expect(machinedef.to_enc['routes']['to']).to include 'ldn_office_from_mgmt_oy'
-    expect(machinedef.to_enc['routes']['to']).to include 'mgmt_lon_from_mgmt_oy'
-  end
-
-  it 'should not provide routes to the ldn office when in ci and local' do
-    machinedef = Stacks::MachineDef.new('test')
-    env = new_environment('env', :primary_site => 'local')
-    machinedef.bind_to(env)
-    expect(machinedef.to_enc['routes']).to be_nil
-
-    machinedef = Stacks::MachineDef.new('test')
-    env = new_environment('env', :primary_site => 'ci')
-    machinedef.bind_to(env)
-    expect(machinedef.to_enc['routes']).to be_nil
+    expect(machinedef.to_enc['routes']['to'].size).to eql(1)
+    expect(machinedef.to_enc['routes']['to']).to include 'default_routes_from_oy'
   end
 end
