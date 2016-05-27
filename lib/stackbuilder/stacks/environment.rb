@@ -10,6 +10,7 @@ class Stacks::Environment
   attr_reader :primary_site
   attr_reader :secondary_site
   attr_accessor :production
+  attr_reader :routes
 
   include Stacks::MachineDefContainer
 
@@ -30,6 +31,14 @@ class Stacks::Environment
     @children = []
     @production = options[:production].nil? ? false : options[:production]
     @calculated_dependencies_cache = calculated_dependencies_cache
+    @routes = {
+      @primary_site   => [],
+      @secondary_site => []
+    }
+  end
+
+  def add_route(fabric, route_name)
+    @routes[fabric] << route_name unless @routes[fabric].include? route_name
   end
 
   def child?(environment)

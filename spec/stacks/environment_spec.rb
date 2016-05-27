@@ -80,3 +80,29 @@ describe_stack 'sub environments' do
     expect(latest.sub_environments).to eql([])
   end
 end
+
+describe_stack 'routes can be added' do
+  given do
+    stack "x" do
+      virtual_appserver "appx" do
+        self.enable_secondary_site = true
+      end
+    end
+
+    env "staging", :primary_site => "st", :secondary_site => "bs" do
+      add_route('st', 'mgmt_oy_from_mgmt_st')
+      add_route('bs', 'mgmt_oy_from_mgmt_bs')
+      instantiate_stack "x"
+    end
+  end
+  environment('staging', 'routes') do |staging|
+    expect(staging.routes['st']).to include 'mgmt_oy_from_mgmt_st'
+    expect(staging.routes['bs']).to include 'mgmt_oy_from_mgmt_bs'
+  end
+  host("staging-appx-001.mgmt.st.net.local") do |host|
+    expect(host.to_enc['routes']['to']).to include 'mgmt_oy_from_mgmt_st'
+  end
+  host("staging-appx-001.mgmt.bs.net.local") do |host|
+    expect(host.to_enc['routes']['to']).to include 'mgmt_oy_from_mgmt_bs'
+  end
+end
