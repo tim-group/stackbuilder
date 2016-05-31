@@ -31,11 +31,9 @@ class Stacks::Environment
     @children = []
     @production = options[:production].nil? ? false : options[:production]
     @calculated_dependencies_cache = calculated_dependencies_cache
-    @routes = {
-      @primary_site   => [],
-      @secondary_site => []
-    }
-    [@primary_site, @secondary_site].each do |site|
+    @routes = { @primary_site   => [] }
+    @routes[@secondary_site] = [] unless @secondary_site.nil?
+    @routes.keys.each do |site|
       @routes[site].concat(@parent.routes[site]) if @parent.routes.key?(site)
     end unless @parent.nil?
   end

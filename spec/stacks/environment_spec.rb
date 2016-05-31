@@ -139,3 +139,28 @@ describe_stack 'sub envs adopt parent env routes' do
     expect(host.to_enc['routes']['to']).to include 'mgmt_oy_from_mgmt_bs'
   end
 end
+
+describe_stack 'sub envs adopt parent env routes with no secondary_site' do
+  given do
+    stack "x" do
+      virtual_appserver "appx"
+    end
+
+    env "staging", :primary_site => "st" do
+      add_route(primary_site, "mgmt_oy_from_mgmt_#{primary_site}")
+
+      env "sub" do
+        add_route(primary_site, "mgmt_foo_from_mgmt_#{primary_site}")
+        instantiate_stack "x"
+      end
+    end
+  end
+  environment('sub', 'routes') do |staging|
+    expect(staging.routes['st']).to include 'mgmt_oy_from_mgmt_st'
+    expect(staging.routes['st']).to include 'mgmt_foo_from_mgmt_st'
+  end
+  host("sub-appx-001.mgmt.st.net.local") do |host|
+    expect(host.to_enc['routes']['to']).to include 'mgmt_oy_from_mgmt_st'
+    expect(host.to_enc['routes']['to']).to include 'mgmt_foo_from_mgmt_st'
+  end
+end
