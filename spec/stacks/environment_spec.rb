@@ -106,3 +106,36 @@ describe_stack 'routes can be added' do
     expect(host.to_enc['routes']['to']).to include 'mgmt_oy_from_mgmt_bs'
   end
 end
+
+describe_stack 'sub envs adopt parent env routes' do
+  given do
+    stack "x" do
+      virtual_appserver "appx" do
+        self.enable_secondary_site = true
+      end
+    end
+
+    env "staging", :primary_site => "st", :secondary_site => "bs" do
+      [primary_site, secondary_site].each do |site|
+        add_route(site, "mgmt_oy_from_mgmt_#{site}")
+        add_route(site, "mgmt_oy_from_mgmt_#{site}")
+      end
+      env "sub" do
+        add_route(primary_site, "mgmt_foo_from_mgmt_#{primary_site}")
+        instantiate_stack "x"
+      end
+    end
+  end
+  environment('sub', 'routes') do |staging|
+    expect(staging.routes['bs']).to include 'mgmt_oy_from_mgmt_bs'
+    expect(staging.routes['st']).to include 'mgmt_oy_from_mgmt_st'
+    expect(staging.routes['st']).to include 'mgmt_foo_from_mgmt_st'
+  end
+  host("sub-appx-001.mgmt.st.net.local") do |host|
+    expect(host.to_enc['routes']['to']).to include 'mgmt_oy_from_mgmt_st'
+    expect(host.to_enc['routes']['to']).to include 'mgmt_foo_from_mgmt_st'
+  end
+  host("sub-appx-001.mgmt.bs.net.local") do |host|
+    expect(host.to_enc['routes']['to']).to include 'mgmt_oy_from_mgmt_bs'
+  end
+end

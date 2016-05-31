@@ -35,6 +35,9 @@ class Stacks::Environment
       @primary_site   => [],
       @secondary_site => []
     }
+    [@primary_site, @secondary_site].each do |site|
+      @routes[site].concat(@parent.routes[site]) if @parent.routes.key?(site)
+    end unless @parent.nil?
   end
 
   def add_route(fabric, route_name)
