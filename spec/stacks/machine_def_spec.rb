@@ -89,7 +89,7 @@ describe Stacks::MachineDef do
     env = new_environment('env', :primary_site => 'oy')
     machinedef.bind_to(env)
     expect(machinedef.to_enc['routes']['to'].size).to eql(1)
-    expect(machinedef.to_enc['routes']['to']).to include('to_ldn_office_from_mgmt_oy')
+    expect(machinedef.to_enc['routes']['to']).to include('ldn_office_from_mgmt_oy')
   end
 
   it 'should always provide routes to the ldn office' do
