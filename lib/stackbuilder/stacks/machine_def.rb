@@ -47,6 +47,14 @@ class Stacks::MachineDef
     fail "illegal hostname: \"#{@base_hostname}\". hostnames can only contain letters, digits and hyphens"
   end
 
+  def validate_storage
+    @storage.each do |mount, values|
+      [:type, :size].each do |attribute|
+        fail "Mount point #{mount} on #{hostname} must specify a #{attribute.to_sym} attribute. #{@storage}" unless values.key?(attribute)
+      end
+    end
+  end
+
   def include_class(class_name, class_hash = {})
     @included_classes[class_name] = class_hash
   end
@@ -153,6 +161,7 @@ class Stacks::MachineDef
   end
 
   def to_spec
+    validate_storage
     disable_persistent_storage unless environment.persistent_storage_supported?
     @destroyable = true if environment.every_machine_destroyable?
 

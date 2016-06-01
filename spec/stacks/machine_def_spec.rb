@@ -45,7 +45,7 @@ describe Stacks::MachineDef do
   it 'should disable persistent if the environment does not support it' do
     machinedef = Stacks::MachineDef.new('test')
     machinedef.modify_storage('/'.to_sym         => { :persistent => true },
-                              '/mnt/data'.to_sym => { :persistent => true })
+                              '/mnt/data'.to_sym => { :persistent => true, :type => :os, :size => '100G' })
     env_opts = {
       :primary_site                 => 'local',
       :persistent_storage_supported => false
@@ -99,5 +99,24 @@ describe Stacks::MachineDef do
     machinedef.bind_to(env)
     expect(machinedef.to_enc['routes']['to'].size).to eql(2)
     expect(machinedef.to_enc['routes']['to']).to include('mgmt_foo')
+  end
+
+  it 'should validate storage' do
+    env = new_environment('foo', :primary_site => 'oy')
+    machinedef = Stacks::MachineDef.new('test')
+    storage_without_type = {
+      '/home'.to_sym => { :size => '100G' }
+    }
+    machinedef.bind_to(env)
+    machinedef.modify_storage(storage_without_type)
+    expect { machinedef.to_spec }.to raise_error(RuntimeError, /Mount point \/home on foo-test must specify a type attribute/)
+
+    machinedef = Stacks::MachineDef.new('test')
+    storage_without_type = {
+      '/home'.to_sym => { :type => 'os' }
+    }
+    machinedef.bind_to(env)
+    machinedef.modify_storage(storage_without_type)
+    expect { machinedef.to_spec }.to raise_error(RuntimeError, /Mount point \/home on foo-test must specify a size attribute/)
   end
 end
