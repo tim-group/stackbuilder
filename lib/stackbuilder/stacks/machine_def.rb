@@ -104,8 +104,6 @@ class Stacks::MachineDef
     end
     @domain = environment.domain(@fabric)
     @routes.concat(@environment.routes[@fabric]) unless @environment.routes.nil? || !@environment.routes.key?(@fabric)
-    # FIXME: rpearce - Maintain backwards compatibility, move this to environment in stackbuilder-config
-    add_route("ldn_office_from_mgmt_#{@fabric}") unless %w(ci local).include? @fabric
   end
 
   def disable_persistent_storage

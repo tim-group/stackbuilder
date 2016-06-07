@@ -84,20 +84,12 @@ describe Stacks::MachineDef do
     )
   end
 
-  it 'should always provide routes to the ldn office' do
-    machinedef = Stacks::MachineDef.new('test')
-    env = new_environment('env', :primary_site => 'oy')
-    machinedef.bind_to(env)
-    expect(machinedef.to_enc['routes']['to'].size).to eql(1)
-    expect(machinedef.to_enc['routes']['to']).to include('ldn_office_from_mgmt_oy')
-  end
-
-  it 'should always provide routes to the ldn office' do
+  it 'should support adding routes to a machine' do
     machinedef = Stacks::MachineDef.new('test')
     env = new_environment('env', :primary_site => 'oy')
     env.add_route('oy', 'mgmt_foo')
     machinedef.bind_to(env)
-    expect(machinedef.to_enc['routes']['to'].size).to eql(2)
+    expect(machinedef.to_enc['routes']['to'].size).to eql(1)
     expect(machinedef.to_enc['routes']['to']).to include('mgmt_foo')
   end
 
