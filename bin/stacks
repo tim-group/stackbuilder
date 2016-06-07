@@ -23,7 +23,7 @@ Options:
   General options:
 
     -h, --help                display this help and exit
-    -p, --path=VALUE          path to the stackbuilder-config repository. "/etc/stacks" is the default
+    -p, --path=VALUE          path to the stackbuilder-config repository. "/etc/stacks" is the default. See also STACKBUILDER_CONFIG_PATH
     -v, --verbose             increase logging verbosity. Can be specified multiple times (e.g. -vvv)
 
   Options that may affect commands. Depending on "command", some of these may be mandatory, optional, or ignored.
@@ -57,7 +57,7 @@ Environment:
 
 Files:
   ~/.mc/                    directory with mcollective keys
-  /etc/stacks/              default path to stackbuilder-config
+  /etc/stacks/              default path to stackbuilder-confi
   /usr/local/bin/stacks     the stacks executable
   /usr/local/lib/site_ruby/timgroup/stackbuilder/
                             the stackbuilder library on production hosts
@@ -110,10 +110,22 @@ cmd = ARGV.shift
 argv = ARGV
 logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", options: \"#{$options}\", argv: #{argv}" }
 
-# this is to make error messages more meaningful
-if !system("cd \"#{$options[:path]}\" && " \
-           "(echo $(git config remote.origin.url) | grep -q 'stackbuilder-config')")
-  logger(Logger::FATAL) { "\"#{$options[:path]}\" is not a stackbuilder-config repo. use -p." }
+if File.directory?($options[:path])
+  if !system("cd \"#{$options[:path]}\" && " \
+            "(echo $(git config remote.origin.url) | grep -q 'stackbuilder-config')")
+    logger(Logger::FATAL) do
+      "stackbuilder-config path \"#{$options[:path]}\" is not a valid git repository.\n" \
+      "Please specify a valid git repository using -p <stackbuilder-config-path>\n" \
+      "See --help for more information."
+    end
+    exit 1
+  end
+else
+  logger(Logger::FATAL) do
+    "stackbuilder-config path \"#{$options[:path]}\" is not valid directory.\n" \
+    "Please specify a valid git repository using -p <stackbuilder-config-path>\n" \
+    "See --help for more information."
+  end
   exit 1
 end
 
@@ -138,9 +150,9 @@ if commands.cmds.include? cmd
   end
 else
   if cmd.nil?
-    logger(Logger::FATAL) { "no command specified, see --help" }
+    logger(Logger::FATAL) { "no command specified.\nSee --help for more information." }
   else
-    logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
+    logger(Logger::FATAL) { "invalid command \"#{cmd}\".\nSee --help for more information." }
   end
   exit 1
 end
