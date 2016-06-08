@@ -13,6 +13,7 @@ class Stacks::MachineSet
   attr_accessor :port_map
   attr_accessor :ports
   attr_accessor :type
+  attr_accessor :server_offset
   attr_reader :allowed_hosts
   attr_reader :default_networks
   attr_reader :depends_on
@@ -34,6 +35,7 @@ class Stacks::MachineSet
     @default_networks = [:mgmt, :prod]
     @depends_on = []
     @enable_secondary_site = false
+    @server_offset = 0
   end
 
   def secondary_site?
@@ -50,9 +52,10 @@ class Stacks::MachineSet
 
   def instantiate_machines(environment)
     @instances.times do |i|
-      @definitions[random_name] = instantiate_machine(i, environment, default_networks, :primary_site)
+      server_id = i + @server_offset
+      @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :primary_site)
       if @enable_secondary_site
-        @definitions[random_name] = instantiate_machine(i, environment, default_networks, :secondary_site)
+        @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :secondary_site)
       end
     end
   end
