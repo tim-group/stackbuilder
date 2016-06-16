@@ -29,7 +29,7 @@ class CMD
         output[box_id]["spec"] = stack.to_spec
       end
     end
-    puts ZAMLS.to_zamls(output)
+    puts ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
   end
 
   def terminus(_argv)
@@ -149,6 +149,25 @@ class CMD
     end
 
     machine_def
+  end
+
+  def deep_dup_to_avoid_yaml_aliases(output)
+    ddup(output)
+  end
+
+  def ddup(object)
+    case object
+      when Hash
+        object.inject({}) { |hash, (k, v)| hash[ddup(k)] = ddup(v); hash }
+      when Array
+        object.inject([]) { |array, element| array << ddup(element) }
+      when NilClass, Numeric, TrueClass, FalseClass, Method
+        object
+      when Symbol
+        object.to_s
+      else
+        object.dup
+    end
   end
 end
 
