@@ -157,16 +157,19 @@ class CMD
 
   def ddup(object)
     case object
-      when Hash
-        object.inject({}) { |hash, (k, v)| hash[ddup(k)] = ddup(v); hash }
-      when Array
-        object.inject([]) { |array, element| array << ddup(element) }
-      when NilClass, Numeric, TrueClass, FalseClass, Method
-        object
-      when Symbol
-        object.to_s
-      else
-        object.dup
+    when Hash
+      object.inject({}) do |hash, (k, v)|
+        hash[ddup(k)] = ddup(v)
+        hash
+      end
+    when Array
+      object.inject([]) { |a, e| a << ddup(e) }
+    when NilClass, Numeric, TrueClass, FalseClass, Method
+      object
+    when Symbol
+      object.to_s
+    else
+      object.dup
     end
   end
 end
