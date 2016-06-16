@@ -53,14 +53,18 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def monitoring_checks
+    checks = []
     case @role
-    when :master
-      %w(heartbeat)
     when :standalone
-      []
+      return []
+    when :master
+      checks = %w(heartbeat)
+      checks << 'checksum' if @mysql_cluster.enable_percona_checksum_tools
     else
-      %w(replication_running replication_delay)
+      checks = %w(replication_running replication_delay)
+      checks << 'checksum' if @mysql_cluster.enable_percona_checksum_tools
     end
+    checks
   end
 
   def backup_size(size)
