@@ -59,7 +59,7 @@ describe_stack 'logstash indexer' do
       'e1-elasticlogs-data-004.mgmt.space.net.local',
       'e1-elasticlogs-master-001.mgmt.space.net.local',
       'e1-elasticlogs-master-002.mgmt.space.net.local',
-      'e1-elasticlogs-master-003.mgmt.space.net.local',
+      'e1-elasticlogs-master-003.mgmt.space.net.local'
     ])
   end
 
