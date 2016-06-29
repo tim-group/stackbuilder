@@ -123,6 +123,10 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::FmAnalyticsAnalysisServer, &block)
   end
 
+  def fmanalyticsanalysis_service(name = 'fmanalyticsanalysis', &block)
+    machineset_with(name, [], Stacks::Services::FmAnalyticsAnalysisServer, &block)
+  end
+
   def fmanalyticsreporting(name = 'fmanalyticsreporting', &block)
     machineset_with(name, [], Stacks::Services::FmAnalyticsReportingServer, &block)
   end
