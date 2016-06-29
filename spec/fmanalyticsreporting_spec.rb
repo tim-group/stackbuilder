@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'analytics' do
   given do
     stack "analytics" do
-      fmanalyticsreporting
+      fmanalyticsreporting_service
     end
 
     env "e1", :primary_site => "space" do
