@@ -5,7 +5,7 @@ require 'stacks/test_framework'
 describe_stack 'test enc of vpn servers' do
   given do
     stack "nat" do
-      natserver
+      nat_service
     end
 
     stack "lb" do

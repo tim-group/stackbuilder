@@ -155,6 +155,10 @@ class Stacks::CustomServices
     machineset_with('nat', [Stacks::Services::NatCluster], Stacks::Services::NatServer, &block)
   end
 
+  def nat_service(&block)
+    machineset_with('nat', [Stacks::Services::NatCluster], Stacks::Services::NatServer, &block)
+  end
+
   def elasticsearch_cluster(name = 'elasticsearch', &block)
     machineset_with(name, [Stacks::Services::ElasticsearchCluster], Stacks::Services::ElasticsearchNode, &block)
   end

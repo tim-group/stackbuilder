@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'nat servers should have all 3 networks' do
   given do
     stack 'fabric' do
-      natserver
+      nat_service
       proxy_service 'proxy' do
         enable_nat
       end
@@ -59,7 +59,7 @@ end
 describe_stack 'nat servers cannot suppot enable_secondary_site' do
   given do
     stack 'nat' do
-      natserver do
+      nat_service do
         @enable_secondary_site = true
       end
     end
@@ -78,7 +78,7 @@ end
 describe_stack 'nat servers should provide natting for secondary_site services in my location' do
   given do
     stack 'nat' do
-      natserver
+      nat_service
     end
 
     stack 'example' do
@@ -127,7 +127,7 @@ end
 describe_stack 'configures NAT boxes to NAT incoming public IPs' do
   given do
     stack "frontexample" do
-      natserver
+      nat_service
       proxy_service 'withnat' do
         enable_nat
       end
@@ -139,7 +139,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     end
 
     stack "example2" do
-      natserver
+      nat_service
       app_service 'blahnat' do
         enable_nat
         self.ports = [8008]
@@ -147,7 +147,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     end
 
     stack "exampledefaultport" do
-      natserver
+      nat_service
       app_service 'defaultport' do
         enable_nat
       end
@@ -230,7 +230,7 @@ end
 describe_stack 'configures NAT boxes to NAT specific outgoing things to specific public IPs' do
   given do
     stack "frontexample" do
-      natserver
+      nat_service
       proxy_service 'withnat' do
         enable_nat_out
       end
@@ -242,7 +242,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     end
 
     stack "example2" do
-      natserver
+      nat_service
       app_service 'blahnat' do
         enable_nat_out
         self.ports = [8008]
@@ -250,7 +250,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     end
 
     stack "exampledefaultport" do
-      natserver
+      nat_service
       app_service 'defaultport' do
         enable_nat_out
       end

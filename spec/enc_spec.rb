@@ -9,7 +9,7 @@ describe Stacks::DSL do
   it 'can pass in virtual_router_id for the loadbalancers and nat boxes to the stack instantiation' do
     stack "fabric" do
       loadbalancer_service
-      natserver
+      nat_service
     end
 
     env "parent", :primary_site => "st", :secondary_site => "bs" do
@@ -241,7 +241,7 @@ describe Stacks::DSL do
   it 'can be converted to an array of machine_defs (actual machines)' do
     stack "mystack" do
       loadbalancer_service
-      natserver
+      nat_service
     end
 
     env "e1", :primary_site => "space" do

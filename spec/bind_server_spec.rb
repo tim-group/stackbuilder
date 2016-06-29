@@ -300,7 +300,7 @@ end
 describe_stack 'nameservers should have working load balancer and nat configuration' do
   given do
     stack "nat" do
-      natserver
+      nat_service
     end
 
     stack "lb" do
@@ -366,7 +366,7 @@ end
 describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
   given do
     stack "nat" do
-      natserver
+      nat_service
     end
 
     stack "lb" do
