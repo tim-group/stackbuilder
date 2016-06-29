@@ -1,10 +1,10 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
-describe_stack 'stack.virtual_appserver.to_loadbalancer_config' do
+describe_stack 'stack.app_service.to_loadbalancer_config' do
   given do
     stack 'fr' do
-      virtual_appserver 'frapp' do
+      app_service 'frapp' do
         enable_ehcache
         self.application = 'futuresroll'
         self.instances = 2
@@ -30,7 +30,7 @@ end
 describe_stack 'enabling tomcat session replication creates the right enc' do
   given do
     stack 'funds' do
-      virtual_appserver 'fundsuserapp' do
+      app_service 'fundsuserapp' do
         @tomcat_session_replication = true
         self.application = 'tfunds'
         self.instances = 3

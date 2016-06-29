@@ -1,7 +1,7 @@
 # this is a test stack file for the benefit of stacks_spec.rb
 
 stack "ststack" do
-  virtual_appserver "stapp" do
+  app_service "stapp" do
     self.application = 'JavaHttpRef'
   end
 end

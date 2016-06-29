@@ -1,10 +1,10 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
-describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
+describe_stack 'stack.app_service.to_loadbalancer_config for sso' do
   given do
     stack 'test' do
-      virtual_appserver 'testapp' do
+      app_service 'testapp' do
         enable_ehcache
         enable_sso('8443')
         enable_ajp('8009')
@@ -15,7 +15,7 @@ describe_stack 'stack.virtual_appserver.to_loadbalancer_config for sso' do
     end
 
     stack 'test_stack_2' do
-      virtual_appserver 'testapp2' do
+      app_service 'testapp2' do
         enable_ehcache
         enable_sso('8443')
         self.application = 'test_application'

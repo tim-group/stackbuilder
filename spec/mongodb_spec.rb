@@ -34,7 +34,7 @@ end
 describe_stack 'provides dependency information to masters(only) and dependants' do
   given do
     stack 'test' do
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.application = 'example'
         depend_on "mongodb", environment.name, 'magic'
       end
@@ -89,11 +89,11 @@ end
 describe_stack 'mongodb users are created on masters from dependencies' do
   given do
     stack 'test' do
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.application = 'example'
         depend_on "mongodb", environment.name, 'magic'
       end
-      virtual_appserver 'eggapp' do
+      app_service 'eggapp' do
         self.application = 'egg'
         depend_on "mongodb", environment.name, 'omelette'
       end

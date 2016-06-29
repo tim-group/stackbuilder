@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'basic environment' do
   given do
     stack "x" do
-      virtual_appserver "appx"
+      app_service "appx"
     end
 
     env "e", :primary_site => "st", :secondary_site => "bs" do
@@ -29,13 +29,13 @@ end
 describe_stack 'sub environments' do
   given do
     stack "x" do
-      virtual_appserver "appx"
+      app_service "appx"
     end
     stack "y" do
-      virtual_appserver "appy"
+      app_service "appy"
     end
     stack "z" do
-      virtual_appserver "appz"
+      app_service "appz"
     end
 
     env "daddy", :primary_site => "st", :secondary_site => "bs" do
@@ -84,7 +84,7 @@ end
 describe_stack 'routes can be added' do
   given do
     stack "x" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.enable_secondary_site = true
       end
     end
@@ -110,7 +110,7 @@ end
 describe_stack 'sub envs adopt parent env routes' do
   given do
     stack "x" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.enable_secondary_site = true
       end
     end
@@ -143,7 +143,7 @@ end
 describe_stack 'sub envs adopt parent env routes with no secondary_site' do
   given do
     stack "x" do
-      virtual_appserver "appx"
+      app_service "appx"
     end
 
     env "staging", :primary_site => "st" do

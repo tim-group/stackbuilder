@@ -190,7 +190,7 @@ describe_stack 'should provide the correct application rights' do
       end
     end
     stack "app_server" do
-      virtual_appserver "applong" do
+      app_service "applong" do
         self.application = "SuperLongLengthName"
         depend_on 'mydb'
       end
@@ -323,7 +323,7 @@ end
 describe_stack 'should support dependencies' do
   given do
     stack 'fr' do
-      virtual_appserver 'frapp' do
+      app_service 'frapp' do
         self.application = 'futuresroll'
         depend_on 'frdb'
       end
@@ -334,7 +334,7 @@ describe_stack 'should support dependencies' do
       end
     end
     stack 'hr' do
-      virtual_appserver 'hrapp' do
+      app_service 'hrapp' do
         self.application = 'huturesroll'
       end
     end
@@ -785,7 +785,7 @@ describe_stack 'should not allow applications to depend_on user_access servers' 
       end
     end
     stack "app_server" do
-      virtual_appserver "app" do
+      app_service "app" do
         self.application = "app"
         depend_on 'mydb'
       end
@@ -817,7 +817,7 @@ describe_stack 'should create two masters' do
       end
     end
     stack "app_server" do
-      virtual_appserver "app" do
+      app_service "app" do
         self.application = "app"
         depend_on 'mydb'
       end

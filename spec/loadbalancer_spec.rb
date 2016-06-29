@@ -10,13 +10,13 @@ describe_stack 'load balancers in multiple sites create the correct load balanci
     end
 
     stack "funds" do
-      virtual_appserver 'fundsapp' do
+      app_service 'fundsapp' do
         @enable_secondary_site = true if %w(e1).include? environment.name
       end
     end
 
     stack 'example' do
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.application = 'example'
       end
     end
@@ -102,7 +102,7 @@ describe_stack 'load balancer stack create a secondary server with the correct e
     end
 
     stack 'fr' do
-      virtual_appserver 'frapp' do
+      app_service 'frapp' do
         enable_ehcache
         self.application = 'futuresroll'
         self.instances = 2
@@ -148,14 +148,14 @@ describe_stack 'load balancer will generate config for a sub environment' do
     end
 
     stack "blahx" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.application = "JavaHttpRef"
         self.groups = %w(blue green)
       end
     end
 
     stack 'blahy' do
-      virtual_appserver "app2x" do
+      app_service "app2x" do
         self.application = "MySuperCoolApp"
       end
     end

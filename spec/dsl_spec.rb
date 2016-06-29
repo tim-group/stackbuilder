@@ -4,8 +4,8 @@ describe Stacks::DSL do
   before do
     extend Stacks::DSL
     stack "blah" do
-      virtual_appserver "appx"
-      virtual_appserver "dbx"
+      app_service "appx"
+      app_service "dbx"
     end
     env "ci", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "blah"
@@ -57,7 +57,7 @@ describe Stacks::DSL do
 
   it 'spec always provides logicalenv' do
     stack "app" do
-      virtual_appserver "appx"
+      app_service "appx"
     end
 
     env "ci", :primary_site => "st", :secondary_site => "bs" do

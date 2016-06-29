@@ -76,11 +76,11 @@ describe Stacks::DSL do
     end
 
     stack "twoapp" do
-      virtual_appserver "twoapp"
+      app_service "twoapp"
     end
 
     stack "oneapp" do
-      virtual_appserver "oneapp" do
+      app_service "oneapp" do
         self.groups = %w(blue green)
       end
     end
@@ -121,11 +121,11 @@ describe Stacks::DSL do
     end
 
     stack "twoapp" do
-      virtual_appserver "twoapp"
+      app_service "twoapp"
     end
 
     stack "oneapp" do
-      virtual_appserver "oneapp" do
+      app_service "oneapp" do
         self.groups = %w(blue green)
         self.healthcheck_timeout = 999
       end
@@ -165,7 +165,7 @@ describe Stacks::DSL do
 
   it 'round robins the groups foreach instance' do
     stack "blah" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.instances = 4
         self.application = "JavaHttpRef"
         self.groups = %w(blue green)
@@ -183,7 +183,7 @@ describe Stacks::DSL do
 
   it 'generates app server configuration appropriately' do
     stack "blah" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.application = "JavaHttpRef"
       end
     end
@@ -253,7 +253,7 @@ describe Stacks::DSL do
 
   it 'things that are part of virtual services are given availability groups' do
     stack "mystack" do
-      virtual_appserver "x"
+      app_service "x"
       virtual_proxyserver "px"
       virtual_sftpserver "sx"
     end
@@ -267,9 +267,9 @@ describe Stacks::DSL do
     expect(find("e1-sx-001.mgmt.space.net.local").availability_group).to eql("e1-sx")
   end
 
-  it 'adds ehcache settings to the enc if enable_ehcache is set inside a virtual_appserver' do
+  it 'adds ehcache settings to the enc if enable_ehcache is set inside a app_service' do
     stack "mystack" do
-      virtual_appserver "x" do
+      app_service "x" do
         enable_ehcache
       end
     end
@@ -287,7 +287,7 @@ describe Stacks::DSL do
 
   it 'allows specification of additional classes that should be included on the host' do
     stack "mystack" do
-      virtual_appserver "x" do
+      app_service "x" do
         include_class 'test::puppet::class'
         each_machine do |_machine|
           include_class 'test::puppet::class2'
@@ -306,7 +306,7 @@ describe Stacks::DSL do
 
   it 'allows specification of aditional classes with additional parameters that should be included on the host' do
     stack "mystack" do
-      virtual_appserver "x" do
+      app_service "x" do
         include_class 'test::puppet::class', 'test_key' => 'test_value'
         each_machine do |_machine|
           include_class 'test::puppet::class2', 'test_key2' => 'test_value2'

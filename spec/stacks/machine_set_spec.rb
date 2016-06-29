@@ -5,7 +5,7 @@ describe 'Stacks::MachineSet' do
   describe_stack 'allows creation of secondary servers' do
     given do
       stack "funds" do
-        virtual_appserver 'fundsapp' do
+        app_service 'fundsapp' do
           self.instances = 1
           @enable_secondary_site = true
         end
@@ -20,10 +20,10 @@ describe 'Stacks::MachineSet' do
       expect(stack).to have_host('env-fundsapp-001.mgmt.jupiter.net.local')
     end
   end
-  describe_stack 'provides an allowed host mechanism that can be used by virtual_appservers' do
+  describe_stack 'provides an allowed host mechanism that can be used by app_services' do
     given do
       stack "mystack" do
-        virtual_appserver "x" do
+        app_service "x" do
           allow_host '1.1.1.1'
           each_machine do |_machine|
             allow_host '2.2.2.2'

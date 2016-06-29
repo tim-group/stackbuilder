@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'test_app_server' do
   given do
     stack "test_app_server" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.application = "JavaHttpRef"
         each_machine do |machine|
           machine.launch_config['specify_config_as_system_property'] = 'yes'
@@ -25,7 +25,7 @@ end
 describe_stack 'test_app_server should default to no jvm args' do
   given do
     stack "test_app_server" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.application = "JavaHttpRef"
       end
     end
@@ -43,7 +43,7 @@ end
 describe_stack 'test_app_server with custom jvm args' do
   given do
     stack "test_app_server" do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.application = "JavaHttpRef"
         @jvm_args = '-Xms256m -Xmx256m -XX:CMSInitiatingOccupancyFraction=55 -XX:+UseCompressedOops ' \
           '-XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -XX:+CMSClassUnloadingEnabled'
@@ -67,7 +67,7 @@ describe_stack 'test_app_server with only one instance in the load balancer' do
     stack "test_app_server" do
       loadbalancer do
       end
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.application = "JavaHttpRef"
         @one_instance_in_lb = true
       end
@@ -92,10 +92,10 @@ describe_stack 'should have the correct app_dependant_instances and participatio
     end
 
     stack 'example' do
-      virtual_appserver "appx" do
+      app_service "appx" do
         self.application = "JavaHttpRef"
       end
-      virtual_appserver "appy" do
+      app_service "appy" do
         self.application = "JavaHttpRef"
         depend_on "appx"
       end

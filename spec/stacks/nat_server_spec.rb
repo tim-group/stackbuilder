@@ -8,7 +8,7 @@ describe_stack 'nat servers should have all 3 networks' do
       virtual_proxyserver 'proxy' do
         enable_nat
       end
-      virtual_appserver 'app' do
+      app_service 'app' do
         enable_nat
       end
     end
@@ -82,7 +82,7 @@ describe_stack 'nat servers should provide natting for secondary_site services i
     end
 
     stack 'example' do
-      virtual_appserver 'exampleuserapp' do
+      app_service 'exampleuserapp' do
         self.application = 'example'
         @enable_secondary_site = true
       end
@@ -134,13 +134,13 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
       virtual_sftpserver 'sftp' do
         enable_nat
       end
-      virtual_appserver 'withoutnat' do
+      app_service 'withoutnat' do
       end
     end
 
     stack "example2" do
       natserver
-      virtual_appserver 'blahnat' do
+      app_service 'blahnat' do
         enable_nat
         self.ports = [8008]
       end
@@ -148,7 +148,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
 
     stack "exampledefaultport" do
       natserver
-      virtual_appserver 'defaultport' do
+      app_service 'defaultport' do
         enable_nat
       end
     end
@@ -237,13 +237,13 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
       virtual_sftpserver 'sftp' do
         enable_nat_out
       end
-      virtual_appserver 'withoutnat' do
+      app_service 'withoutnat' do
       end
     end
 
     stack "example2" do
       natserver
-      virtual_appserver 'blahnat' do
+      app_service 'blahnat' do
         enable_nat_out
         self.ports = [8008]
       end
@@ -251,7 +251,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
 
     stack "exampledefaultport" do
       natserver
-      virtual_appserver 'defaultport' do
+      app_service 'defaultport' do
         enable_nat_out
       end
     end

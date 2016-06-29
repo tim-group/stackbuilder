@@ -9,7 +9,7 @@ describe_stack 'tim' do
     end
 
     stack 'timflow' do
-      virtual_appserver 'timflowapp' do
+      app_service 'timflowapp' do
         self.application = 'TIMFlow'
         self.instances = 1
         self.groups = ['blue']

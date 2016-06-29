@@ -25,6 +25,11 @@ class Stacks::CustomServices
                     Stacks::Services::AppServer, &block)
   end
 
+  def app_service(name, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
+                    Stacks::Services::AppServer, &block)
+  end
+
   def standalone_appserver(name, &block)
     machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
   end

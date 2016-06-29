@@ -32,7 +32,7 @@ describe_stack 'app without requirement' do
     end
 
     stack "example" do
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         depend_on "rabbitmq"
       end
     end
@@ -52,7 +52,7 @@ describe_stack 'app with rabbitmq dependency' do
   given do
     stack 'test' do
       rabbitmq_cluster 'rabbitmq'
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.application = 'example'
         depend_on 'rabbitmq', 'e1', :magic
       end
@@ -86,12 +86,12 @@ describe_stack 'rabbitmq users are created from dependencies' do
   given do
     stack 'test' do
       rabbitmq_cluster 'rabbitmq'
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.application = 'example'
         depend_on 'rabbitmq', 'e1', :wizard
         depend_on 'rabbitmq', 'e1', :magic
       end
-      virtual_appserver 'eggapp' do
+      app_service 'eggapp' do
         self.application = 'egg'
         depend_on 'rabbitmq', 'e1', :spoon
       end

@@ -5,7 +5,7 @@ describe 'Stacks::Services::VirtualService' do
   describe_stack 'provides the default vips when to_vip_spec is run' do
     given do
       stack "test" do
-        virtual_appserver 'myvs'
+        app_service 'myvs'
       end
 
       env 'env', :primary_site => 'mars' do
@@ -22,7 +22,7 @@ describe 'Stacks::Services::VirtualService' do
   describe_stack 'provides the both front and prod vips when if enable_nat is turned on' do
     given do
       stack "test" do
-        virtual_appserver 'myvs' do
+        app_service 'myvs' do
           enable_nat
         end
       end
@@ -44,7 +44,7 @@ describe 'Stacks::Services::VirtualService' do
   describe_stack 'allows a virtual service to add a vip on additional networks' do
     given do
       stack "test" do
-        virtual_appserver 'myvs' do
+        app_service 'myvs' do
           add_vip_network :mgmt
         end
       end

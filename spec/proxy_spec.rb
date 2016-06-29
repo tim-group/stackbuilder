@@ -14,11 +14,11 @@ describe_stack 'exampleproxy' do
         self.ports = [80, 443, 8443]
       end
 
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.application = 'example'
       end
 
-      virtual_appserver 'exampleapp2' do
+      app_service 'exampleapp2' do
         self.application = 'example'
       end
     end
@@ -74,7 +74,7 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
         add_vip_network :front
       end
 
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.groups = ['blue']
         self.application = 'example'
       end
@@ -110,12 +110,12 @@ describe_stack 'proxy pass rules without an environment default to the environme
       end
     end
     stack 'funds' do
-      virtual_appserver 'blondinapp' do
+      app_service 'blondinapp' do
         self.groups = ['blue']
         self.application = 'Blondin'
       end
 
-      virtual_appserver 'fundsuserapp' do
+      app_service 'fundsuserapp' do
         self.groups = ['blue']
         self.application = 'tfunds'
         self.ports = [8443]
@@ -146,7 +146,7 @@ end
 describe_stack 'proxy servers can exist in multiple sites' do
   given do
     stack 'blondin' do
-      virtual_appserver 'blondinapp' do
+      app_service 'blondinapp' do
         self.application = 'Blondin'
         @enable_secondary_site = true
       end
@@ -163,7 +163,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
       end
     end
     stack 'funds' do
-      virtual_appserver 'fundsuserapp' do
+      app_service 'fundsuserapp' do
         @enable_secondary_site = true
         self.application = 'tfunds'
       end
@@ -239,13 +239,13 @@ end
 describe_stack 'generates proxyserver enc data' do
   given do
     stack "ref" do
-      virtual_appserver "refapp" do
+      app_service "refapp" do
         self.application = "MyApp"
       end
-      virtual_appserver "ref2app" do
+      app_service "ref2app" do
         self.application = "MyOtherApp"
       end
-      virtual_appserver "downstreamapp"
+      app_service "downstreamapp"
       virtual_proxyserver "refproxy" do
         add_vip_network :front
         vhost('refapp') do
@@ -259,7 +259,7 @@ describe_stack 'generates proxyserver enc data' do
     end
 
     stack 'ref2' do
-      virtual_appserver "refapp3" do
+      app_service "refapp3" do
       end
       virtual_proxyserver "refproxy2" do
         add_vip_network :front
@@ -353,14 +353,14 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
     end
 
     stack 'foo' do
-      virtual_appserver 'blondinapp' do
+      app_service 'blondinapp' do
         self.groups = ['blue']
         self.application = 'Blondin'
         depend_on 'foouserapp'
         @one_instance_in_lb = true
         @enable_secondary_site = true if %w(production).include? environment.name
       end
-      virtual_appserver 'foouserapp' do
+      app_service 'foouserapp' do
         self.groups = ['blue']
         self.application = 'tfoo'
         self.ports = [8443]
@@ -463,12 +463,12 @@ end
 describe_stack 'generates the correct proxy_pass and add_pass rules when env not specified' do
   given do
     stack 'bse_api' do
-      virtual_appserver 'bseapiapp' do
+      app_service 'bseapiapp' do
         self.application = 'bse'
       end
     end
     stack 'bse' do
-      virtual_appserver 'bseapiapp' do
+      app_service 'bseapiapp' do
         self.application = 'bse'
       end
     end

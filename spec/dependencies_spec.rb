@@ -14,18 +14,18 @@ describe_stack 'stack-with-dependencies' do
         enable_nat
       end
 
-      virtual_appserver 'exampleapp' do
+      app_service 'exampleapp' do
         self.groups = ['blue']
         self.application = 'ExAmPLE'
       end
 
-      virtual_appserver 'exampleapp2' do
+      app_service 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
         depend_on "exampleapp"
         depend_on "exampledb"
       end
-      virtual_appserver 'exampleapp2' do
+      app_service 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
         depend_on "exampleapp"
@@ -97,12 +97,12 @@ end
 describe_stack 'stack with dependencies that does not provide config params when specified ' do
   given do
     stack "example" do
-      virtual_appserver 'configapp' do
+      app_service 'configapp' do
         self.groups = ['blue']
         self.application = 'example'
         depend_on "exampledb"
       end
-      virtual_appserver 'noconfigapp' do
+      app_service 'noconfigapp' do
         self.groups = ['blue']
         self.application = 'example'
         depend_on "exampledb"
@@ -138,7 +138,7 @@ end
 describe_stack 'stack with cross environment dependencies' do
   given do
     stack "example" do
-      virtual_appserver 'noconfigapp' do
+      app_service 'noconfigapp' do
         self.groups = ['blue']
         self.application = 'example'
         case environment.name
@@ -177,14 +177,14 @@ end
 describe_stack 'stack with sub environment dependencies' do
   given do
     stack "blondin" do
-      virtual_appserver 'blondinapp' do
+      app_service 'blondinapp' do
         self.groups = ['blue']
         self.application = 'Blondin'
       end
     end
 
     stack 'funds' do
-      virtual_appserver 'fundsuserapp' do
+      app_service 'fundsuserapp' do
         self.groups = ['blue']
         self.application = 'tfunds'
         self.ports = [8443]

@@ -8,7 +8,7 @@ describe StackBuilder::Allocator::HostRepository do
 
   def test_env_with_refstack
     stack "ref" do
-      virtual_appserver "refapp"
+      app_service "refapp"
     end
 
     env "test", :primary_site => "t" do

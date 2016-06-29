@@ -9,7 +9,7 @@ describe_stack 'stack-with-dependencies' do
     end
 
     stack 'example' do
-      virtual_appserver 'exampleapp2' do
+      app_service 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
         if 'e1' == environment.name
@@ -80,7 +80,7 @@ describe_stack 'stack-with-dependencies' do
     end
 
     stack 'read_write_example' do
-      virtual_appserver 'rwapp' do
+      app_service 'rwapp' do
         self.groups = ['blue']
         self.application = 'rw-app'
         depend_on 'dependedondb', environment.name, :active_master
@@ -88,7 +88,7 @@ describe_stack 'stack-with-dependencies' do
     end
 
     stack 'read_only_example' do
-      virtual_appserver 'roapp' do
+      app_service 'roapp' do
         self.groups = ['blue']
         self.application = 'ro-app'
         depend_on 'dependedondb', environment.name, :read_only
@@ -96,7 +96,7 @@ describe_stack 'stack-with-dependencies' do
     end
 
     stack 'read_only_bulkhead_example' do
-      virtual_appserver 'robulkheadapp' do
+      app_service 'robulkheadapp' do
         self.groups = ['blue']
         self.application = 'ro-bulkhead-app'
         depend_on 'dependedondb', environment.name, :read_only_bulkhead
@@ -104,7 +104,7 @@ describe_stack 'stack-with-dependencies' do
     end
 
     stack 'declares_requirement_that_is_not_supported' do
-      virtual_appserver 'badapp' do
+      app_service 'badapp' do
         self.groups = ['blue']
         self.application = 'badapp'
         depend_on 'dependedondb', environment.name, :i_made_this_up
@@ -121,7 +121,7 @@ describe_stack 'stack-with-dependencies' do
     end
 
     stack 'read_only_second_site_cluster' do
-      virtual_appserver 'rosecondaryapp' do
+      app_service 'rosecondaryapp' do
         self.groups = ['blue']
         self.application = 'ro-secondary-app'
         depend_on 'dependedondb', 'e3', :read_only
@@ -276,7 +276,7 @@ describe_stack 'stack-with-dependencies' do
       end
 
       stack 'declares_requirement' do
-        virtual_appserver 'badapp' do
+        app_service 'badapp' do
           self.groups = ['blue']
           self.application = 'badapp'
           depend_on 'fictionaldb', environment.name, :i_made_this_up
@@ -310,7 +310,7 @@ describe_stack 'stack-with-dependencies' do
       end
 
       stack 'no_requirement_declared' do
-        virtual_appserver 'badapp' do
+        app_service 'badapp' do
           self.groups = ['blue']
           self.application = 'badapp'
           depend_on 'fictionaldb', environment.name
