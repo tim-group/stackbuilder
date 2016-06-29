@@ -95,7 +95,7 @@ describe_stack 'rabbitmq users are created from dependencies' do
         self.application = 'egg'
         depend_on 'rabbitmq', 'e1', :spoon
       end
-      external_server "oy-mon-001.oy.net.local" do
+      external_service "oy-mon-001.oy.net.local" do
         depend_on 'rabbitmq', 'e1', 'external'
       end
     end
@@ -136,7 +136,7 @@ describe_stack 'rabbitmq users are not created unless services have application'
   given do
     stack 'test' do
       rabbitmq_cluster 'rabbitmq'
-      external_server "oy-mon-001.oy.net.local" do
+      external_service "oy-mon-001.oy.net.local" do
         depend_on 'rabbitmq', 'e1', 'external'
       end
     end

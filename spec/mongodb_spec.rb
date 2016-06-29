@@ -130,7 +130,7 @@ end
 describe_stack 'mongodb users are not created unless services have application' do
   given do
     stack 'test' do
-      external_server "oy-mon-001.oy.net.local" do
+      external_service "oy-mon-001.oy.net.local" do
         depend_on 'mongodb', environment.name, 'external'
       end
       mongodb "mongodb" do

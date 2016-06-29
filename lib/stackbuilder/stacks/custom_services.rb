@@ -87,6 +87,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::ExternalServerCluster], Stacks::Services::ExternalServer, &block)
   end
 
+  def external_service(name, &block)
+    machineset_with(name, [Stacks::Services::ExternalServerCluster], Stacks::Services::ExternalServer, &block)
+  end
+
   def mongodb(name = 'mongodb', &block)
     machineset_with(name, [Stacks::Services::MongoDBCluster], Stacks::Services::MongoDBServer, &block)
   end

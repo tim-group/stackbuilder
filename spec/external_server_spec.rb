@@ -7,7 +7,7 @@ describe_stack 'stack-with-dependencies' do
       rabbitmq_cluster 'rabbitmq'
     end
     stack "external" do
-      external_server "oy-mon-001.oy.net.local" do
+      external_service "oy-mon-001.oy.net.local" do
         depend_on 'rabbitmq', environment.name, 'external'
       end
     end
