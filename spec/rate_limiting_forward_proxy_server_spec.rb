@@ -5,7 +5,7 @@ describe_stack 'rate limiting forward proxy' do
   describe_stack 'default' do
     given do
       stack 'mystack' do
-        rate_limited_forward_proxy 's3proxy'
+        rate_limited_forward_proxy_service 's3proxy'
       end
 
       env 'e1', :primary_site => 'space' do
@@ -22,7 +22,7 @@ describe_stack 'rate limiting forward proxy' do
   describe_stack 'with custom traffic control rate' do
     given do
       stack 'mystack' do
-        rate_limited_forward_proxy 's3proxy' do
+        rate_limited_forward_proxy_service 's3proxy' do
           each_machine do |machine|
             machine.tc_rate = '42jigawatts'
           end
