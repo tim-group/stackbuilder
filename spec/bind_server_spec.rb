@@ -8,7 +8,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     end
 
     stack "nameserver" do
-      virtual_bindserver 'ns' do
+      bind_service 'ns' do
         enable_nat
         forwarder_zone(['youdevise.com'])
         case environment.name
@@ -165,7 +165,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     end
 
     stack "nameserver" do
-      virtual_bindserver 'ns' do
+      bind_service 'ns' do
         enable_nat
         forwarder_zone(['youdevise.com'])
         case environment.name
@@ -308,7 +308,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
     end
 
     stack "nameserver" do
-      virtual_bindserver 'ns' do
+      bind_service 'ns' do
         enable_nat
       end
     end
@@ -374,7 +374,7 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
     end
 
     stack "nameserver" do
-      virtual_bindserver 'ns' do
+      bind_service 'ns' do
         each_machine do |machine|
           machine.remove_network :prod
         end
@@ -410,7 +410,7 @@ end
 describe_stack 'bind servers with zones removed should have the right zone files' do
   given do
     stack "nameserver" do
-      virtual_bindserver 'ns' do
+      bind_service 'ns' do
         remove_zone :front
         remove_zone :prod
       end
@@ -431,7 +431,7 @@ end
 describe_stack 'test @slave_instances = 2' do
   given do
     stack "nameserver" do
-      virtual_bindserver 'ns' do
+      bind_service 'ns' do
         self.slave_instances = 2
       end
     end

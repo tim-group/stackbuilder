@@ -68,6 +68,11 @@ class Stacks::CustomServices
                     Stacks::Services::BindServer, &block)
   end
 
+  def bind_service(name, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualBindService],
+                    Stacks::Services::BindServer, &block)
+  end
+
   def virtual_mailserver(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualMailService],
                     Stacks::Services::MailServer, &block)
