@@ -254,7 +254,7 @@ describe Stacks::DSL do
   it 'things that are part of virtual services are given availability groups' do
     stack "mystack" do
       app_service "x"
-      virtual_proxyserver "px"
+      proxy_service "px"
       virtual_sftpserver "sx"
     end
 

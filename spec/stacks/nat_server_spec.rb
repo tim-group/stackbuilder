@@ -5,7 +5,7 @@ describe_stack 'nat servers should have all 3 networks' do
   given do
     stack 'fabric' do
       natserver
-      virtual_proxyserver 'proxy' do
+      proxy_service 'proxy' do
         enable_nat
       end
       app_service 'app' do
@@ -89,7 +89,7 @@ describe_stack 'nat servers should provide natting for secondary_site services i
     end
 
     stack 'example_proxy' do
-      virtual_proxyserver 'exampleproxy' do
+      proxy_service 'exampleproxy' do
         @enable_secondary_site = true
         vhost('exampleuserapp', 'example-mirror.timgroup.com', 'production')
         enable_nat
@@ -128,7 +128,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
   given do
     stack "frontexample" do
       natserver
-      virtual_proxyserver 'withnat' do
+      proxy_service 'withnat' do
         enable_nat
       end
       virtual_sftpserver 'sftp' do
@@ -231,7 +231,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
   given do
     stack "frontexample" do
       natserver
-      virtual_proxyserver 'withnat' do
+      proxy_service 'withnat' do
         enable_nat_out
       end
       virtual_sftpserver 'sftp' do

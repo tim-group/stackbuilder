@@ -43,6 +43,11 @@ class Stacks::CustomServices
                     Stacks::Services::ProxyServer, &block)
   end
 
+  def proxy_service(name, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualProxyService],
+                    Stacks::Services::ProxyServer, &block)
+  end
+
   def virtual_sftpserver(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualSftpService],
                     Stacks::Services::SftpServer, &block)

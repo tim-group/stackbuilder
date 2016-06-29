@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'exampleproxy' do
   given do
     stack "exampleproxy" do
-      virtual_proxyserver 'exampleproxy' do
+      proxy_service 'exampleproxy' do
         vhost('exampleapp')
         vhost('exampleapp2', 'example.overridden')
         vhost('exampleapp', 'example.absent') do
@@ -66,7 +66,7 @@ end
 describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs overriden' do
   given do
     stack "exampleproxy" do
-      virtual_proxyserver 'exampleproxy' do
+      proxy_service 'exampleproxy' do
         @cert = 'test_cert_change'
         vhost('exampleapp') do
           @cert = 'test_vhost_cert_change'
@@ -96,7 +96,7 @@ end
 describe_stack 'proxy pass rules without an environment default to the environment set (if any) of the vhost' do
   given do
     stack 'funds_proxy' do
-      virtual_proxyserver 'fundsproxy' do
+      proxy_service 'fundsproxy' do
         @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
           @cert = 'wildcard_timgroup_com'
@@ -152,7 +152,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
       end
     end
     stack 'funds_proxy' do
-      virtual_proxyserver 'fundsproxy' do
+      proxy_service 'fundsproxy' do
         @enable_secondary_site = true
         @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'shared') do
@@ -246,7 +246,7 @@ describe_stack 'generates proxyserver enc data' do
         self.application = "MyOtherApp"
       end
       app_service "downstreamapp"
-      virtual_proxyserver "refproxy" do
+      proxy_service "refproxy" do
         add_vip_network :front
         vhost('refapp') do
           @aliases << 'example.timgroup.com'
@@ -261,7 +261,7 @@ describe_stack 'generates proxyserver enc data' do
     stack 'ref2' do
       app_service "refapp3" do
       end
-      virtual_proxyserver "refproxy2" do
+      proxy_service "refproxy2" do
         add_vip_network :front
         vhost('refapp3', 'example2.timgroup.com') do
           add_pass_rule "/somewhere", :service => "downstreamapp", :environment => 'env'
@@ -320,7 +320,7 @@ describe_stack 'generates proxy server enc data with persistent when enable_pers
     end
 
     stack "proxyserver" do
-      virtual_proxyserver "proxy" do
+      proxy_service "proxy" do
         enable_persistence '443'
       end
     end
@@ -371,7 +371,7 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
       end
     end
     stack 'foo_proxy' do
-      virtual_proxyserver 'fooproxy' do
+      proxy_service 'fooproxy' do
         @cert = 'wildcard_youdevise_com'
         @enable_secondary_site = true if %w(production).include? environment.name
         @override_vhost_location = { 'production' => :secondary_site } if environment.name == 'shared'
@@ -473,7 +473,7 @@ describe_stack 'generates the correct proxy_pass and add_pass rules when env not
       end
     end
     stack 'bse_proxy' do
-      virtual_proxyserver 'bseproxy' do
+      proxy_service 'bseproxy' do
         vhost('bseapp', 'foo.timgroup.com') do
           add_pass_rule '/api-external', :service => 'bseapiapp'
         end

@@ -8,7 +8,7 @@ describe_stack 'stack-with-dependencies' do
       loadbalancer
     end
     stack "example" do
-      virtual_proxyserver 'exampleproxy' do
+      proxy_service 'exampleproxy' do
         vhost('exampleapp') do
         end
         enable_nat
@@ -195,7 +195,7 @@ describe_stack 'stack with sub environment dependencies' do
     end
 
     stack 'funds_proxy' do
-      virtual_proxyserver 'fundsproxy' do
+      proxy_service 'fundsproxy' do
         @cert = 'wildcard_youdevise_com'
         case environment.name
         when 'shared'
