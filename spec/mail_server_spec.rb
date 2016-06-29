@@ -8,7 +8,7 @@ describe_stack 'test enc of the mail servers' do
     end
 
     stack 'mail_stack' do
-      virtual_mailserver 'mail' do
+      mail_service 'mail' do
         case environment.name
         when 'oymigration'
           allow_host '172.16.0.0/21'

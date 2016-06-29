@@ -78,6 +78,11 @@ class Stacks::CustomServices
                     Stacks::Services::MailServer, &block)
   end
 
+  def mail_service(name, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualMailService],
+                    Stacks::Services::MailServer, &block)
+  end
+
   def external_server(name, &block)
     machineset_with(name, [Stacks::Services::ExternalServerCluster], Stacks::Services::ExternalServer, &block)
   end
