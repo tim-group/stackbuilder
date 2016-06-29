@@ -60,12 +60,11 @@ describe_stack 'logstash indexer' do
       'e1-elasticlogs-master-001.mgmt.space.net.local',
       'e1-elasticlogs-master-002.mgmt.space.net.local',
       'e1-elasticlogs-master-003.mgmt.space.net.local',
-      'e1-elasticlogs-tribe-001.mgmt.space.net.local'
     ])
   end
 
   host("e1-logstash-indexer-001.mgmt.space.net.local") do |host|
-    enc = host.to_enc['role::logstash_node']
+    enc = host.to_enc['role::logstash::indexer']
     expect(enc['version']).to eql('2.2.0')
     expect(enc['rabbitmq_vip']).to eql('e1-elasticmq-vip.space.net.local')
     expect(enc['elastic_vip']).to eql('e1-elasticlogs-vip.space.net.local')
