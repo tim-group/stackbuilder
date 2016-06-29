@@ -8,7 +8,7 @@ describe_stack 'sftp servers should support load balancing and dependant instanc
     end
 
     stack "secureftp" do
-      virtual_sftpserver 'sftp' do
+      sftp_service 'sftp' do
         self.ports = ['2222']
       end
     end
@@ -55,7 +55,7 @@ end
 describe_stack 'sftp servers should provide specific mounts' do
   given do
     stack "secureftp" do
-      virtual_sftpserver 'sftp' do
+      sftp_service 'sftp' do
         self.ports = ['2222']
       end
     end
@@ -87,7 +87,7 @@ describe_stack 'sftp servers should allow monitor_warn to be override when non-H
     end
 
     stack "secureftp" do
-      virtual_sftpserver 'sftp' do
+      sftp_service 'sftp' do
         self.ports = ['2222']
         self.override_monitor_warn = 0
       end

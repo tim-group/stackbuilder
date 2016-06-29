@@ -141,7 +141,7 @@ describe_stack 'load balancer will generate config for a sub environment' do
       loadbalancer
     end
     stack 'secureftp' do
-      virtual_sftpserver 'sftp'
+      sftp_service 'sftp'
     end
     stack "proxystack" do
       proxy_service "myproxy"

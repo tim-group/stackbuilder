@@ -53,6 +53,11 @@ class Stacks::CustomServices
                     Stacks::Services::SftpServer, &block)
   end
 
+  def sftp_service(name, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualSftpService],
+                    Stacks::Services::SftpServer, &block)
+  end
+
   def rabbitmq_cluster(name = 'rabbitmq', &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::RabbitMQCluster],
                     Stacks::Services::RabbitMQServer, &block)

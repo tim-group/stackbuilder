@@ -131,7 +131,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
       proxy_service 'withnat' do
         enable_nat
       end
-      virtual_sftpserver 'sftp' do
+      sftp_service 'sftp' do
         enable_nat
       end
       app_service 'withoutnat' do
@@ -234,7 +234,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
       proxy_service 'withnat' do
         enable_nat_out
       end
-      virtual_sftpserver 'sftp' do
+      sftp_service 'sftp' do
         enable_nat_out
       end
       app_service 'withoutnat' do

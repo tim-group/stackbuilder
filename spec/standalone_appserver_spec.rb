@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'tim' do
   given do
     stack "secureftp" do
-      virtual_sftpserver 'sftp' do
+      sftp_service 'sftp' do
       end
     end
 

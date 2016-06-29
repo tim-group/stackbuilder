@@ -52,7 +52,7 @@ describe Stacks::DSL do
     end
 
     stack "sftp" do
-      virtual_sftpserver "sftp" do
+      sftp_service "sftp" do
         enable_persistence '21'
       end
     end
@@ -255,7 +255,7 @@ describe Stacks::DSL do
     stack "mystack" do
       app_service "x"
       proxy_service "px"
-      virtual_sftpserver "sx"
+      sftp_service "sx"
     end
 
     env "e1", :primary_site => "space" do
