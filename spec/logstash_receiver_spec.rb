@@ -41,7 +41,7 @@ describe_stack 'logstash receiver' do
   end
 
   host("e1-logstash-receiver-001.mgmt.space.net.local") do |host|
-    enc = host.to_enc['role::logstash_node']
+    enc = host.to_enc['role::logstash::receiver']
     expect(enc['version']).to eql('2.2.0')
     expect(enc['rabbitmq_vip']).to eql('e1-elasticmq-vip.space.net.local')
     expect(enc['elastic_vip']).to eql(nil)
