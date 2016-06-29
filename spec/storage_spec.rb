@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'should default root storage size to 3G' do
   given do
     stack 'demo' do
-      loadbalancer
+      loadbalancer_service
     end
     env "e1", :primary_site => "space" do
       instantiate_stack "demo"

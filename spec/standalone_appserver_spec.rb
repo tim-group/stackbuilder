@@ -17,8 +17,7 @@ describe_stack 'tim' do
     end
 
     stack 'tim' do
-      loadbalancer do
-      end
+      loadbalancer_service
       standalone_app_service 'timcyclic' do
         self.application = 'TIM'
         self.instances = environment.options[:tim_instances] || 1
@@ -101,7 +100,7 @@ end
 describe_stack 'standalone servers should not provide a configuration to load balancers' do
   given do
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
     stack 'tim_cyclic' do
       standalone_app_service 'timcyclic'

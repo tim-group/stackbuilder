@@ -5,7 +5,7 @@ require 'stacks/test_framework'
 describe_stack 'stack-with-dependencies' do
   given do
     stack 'loadbalancer' do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack 'example' do

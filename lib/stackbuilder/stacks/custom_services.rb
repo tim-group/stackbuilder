@@ -147,6 +147,10 @@ class Stacks::CustomServices
     machineset_with('lb', [Stacks::Services::LoadBalancerCluster], Stacks::Services::LoadBalancer, &block)
   end
 
+  def loadbalancer_service(&block)
+    machineset_with('lb', [Stacks::Services::LoadBalancerCluster], Stacks::Services::LoadBalancer, &block)
+  end
+
   def natserver(&block)
     machineset_with('nat', [Stacks::Services::NatCluster], Stacks::Services::NatServer, &block)
   end

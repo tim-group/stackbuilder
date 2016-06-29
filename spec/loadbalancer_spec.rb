@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'load balancers in multiple sites create the correct load balancing config in each site' do
   given do
     stack "lb" do
-      loadbalancer  do
+      loadbalancer_service  do
         @enable_secondary_site = true if %w(e1).include? environment.name
       end
     end
@@ -94,7 +94,7 @@ end
 describe_stack 'load balancer stack create a secondary server with the correct enc and spec information' do
   given do
     stack "lb" do
-      loadbalancer  do
+      loadbalancer_service  do
         each_machine do |machine|
           machine.add_route('mgmt_pg_from_mgmt_oy')
         end
@@ -138,7 +138,7 @@ end
 describe_stack 'load balancer will generate config for a sub environment' do
   given do
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
     stack 'secureftp' do
       sftp_service 'sftp'

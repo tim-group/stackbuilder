@@ -8,7 +8,7 @@ describe Stacks::DSL do
 
   it 'can pass in virtual_router_id for the loadbalancers and nat boxes to the stack instantiation' do
     stack "fabric" do
-      loadbalancer
+      loadbalancer_service
       natserver
     end
 
@@ -37,7 +37,7 @@ describe Stacks::DSL do
 
   it 'can generate a pair of loadbalancers' do
     stack "fabric" do
-      loadbalancer
+      loadbalancer_service
     end
     env "rah", :primary_site => "st", :secondary_site => "bs" do
       instantiate_stack "fabric"
@@ -48,7 +48,7 @@ describe Stacks::DSL do
 
   it 'generates load balancer enc data with persistent when enable_persistent is specified' do
     stack "loadbalancer" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "sftp" do
@@ -72,7 +72,7 @@ describe Stacks::DSL do
 
   it 'generates load balancer enc data with the correct warn_level based on fewest number of servers in a group' do
     stack "fabric" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "twoapp" do
@@ -117,7 +117,7 @@ describe Stacks::DSL do
 
   it 'generates load balancer enc data with the a different healthcheck_timeout if specified' do
     stack "fabric" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "twoapp" do
@@ -240,7 +240,7 @@ describe Stacks::DSL do
 
   it 'can be converted to an array of machine_defs (actual machines)' do
     stack "mystack" do
-      loadbalancer
+      loadbalancer_service
       natserver
     end
 

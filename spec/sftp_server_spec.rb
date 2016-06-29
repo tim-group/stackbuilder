@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'sftp servers should support load balancing and dependant instances' do
   given do
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "secureftp" do
@@ -83,7 +83,7 @@ end
 describe_stack 'sftp servers should allow monitor_warn to be override when non-HA' do
   given do
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "secureftp" do

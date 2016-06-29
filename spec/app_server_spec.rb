@@ -65,8 +65,7 @@ end
 describe_stack 'test_app_server with only one instance in the load balancer' do
   given do
     stack "test_app_server" do
-      loadbalancer do
-      end
+      loadbalancer_service
       app_service "appx" do
         self.application = "JavaHttpRef"
         @one_instance_in_lb = true
@@ -87,8 +86,7 @@ end
 describe_stack 'should have the correct app_dependant_instances and participation_dependant_instances' do
   given do
     stack 'loadbalancer' do
-      loadbalancer do
-      end
+      loadbalancer_service
     end
 
     stack 'example' do

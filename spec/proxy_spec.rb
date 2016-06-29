@@ -316,7 +316,7 @@ end
 describe_stack 'generates proxy server enc data with persistent when enable_persistent is specified' do
   given do
     stack "loadbalancer" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "proxyserver" do
@@ -347,7 +347,7 @@ end
 describe_stack 'generates the correct proxy_pass rules when using override_vhost_location' do
   given do
     stack "test" do
-      loadbalancer do
+      loadbalancer_service do
         @enable_secondary_site = true if %w(production).include? environment.name
       end
     end

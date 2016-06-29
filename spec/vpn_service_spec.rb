@@ -9,7 +9,7 @@ describe_stack 'test enc of vpn servers' do
     end
 
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack 'vpn_stack' do

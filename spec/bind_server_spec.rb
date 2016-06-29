@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'nameservers with bi-directional slave_from dependencies' do
   given do
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "nameserver" do
@@ -161,7 +161,7 @@ end
 describe_stack 'nameservers with single slave_from dependency' do
   given do
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "nameserver" do
@@ -304,7 +304,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
     end
 
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "nameserver" do
@@ -370,7 +370,7 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
     end
 
     stack "lb" do
-      loadbalancer
+      loadbalancer_service
     end
 
     stack "nameserver" do
