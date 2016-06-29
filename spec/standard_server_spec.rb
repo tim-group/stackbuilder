@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'standard' do
   given do
     stack "standard" do
-      standard "mymachine"
+      standard_service "mymachine"
     end
 
     env "e1", :primary_site => "space" do
@@ -20,7 +20,7 @@ end
 describe_stack 'standard with offset' do
   given do
     stack "standard" do
-      standard "mymachine" do
+      standard_service "mymachine" do
         self.server_offset = 10
       end
     end
