@@ -14,7 +14,7 @@ describe_stack 'sftp servers should support load balancing and dependant instanc
     end
 
     stack 'tim_cyclic' do
-      standalone_appserver 'timcyclic' do
+      standalone_app_service 'timcyclic' do
         self.groups = ['grey']
         self.application = 'TIM'
         self.instances = 2

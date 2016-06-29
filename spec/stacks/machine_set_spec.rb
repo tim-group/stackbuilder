@@ -40,10 +40,10 @@ describe 'Stacks::MachineSet' do
       end
     end
   end
-  describe_stack 'provides an allowed host mechanism that can be used by standalone_appservers' do
+  describe_stack 'provides an allowed host mechanism that can be used by standalone_app_services' do
     given do
       stack "mystack" do
-        standalone_appserver "x" do
+        standalone_app_service "x" do
           allow_host '1.1.1.1'
           each_machine do |_machine|
             allow_host '2.2.2.2'

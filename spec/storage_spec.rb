@@ -19,7 +19,7 @@ end
 describe_stack 'should default appserver storage size to 5G' do
   given do
     stack 'demo' do
-      standalone_appserver 'default'
+      standalone_app_service 'default'
     end
     env "e1", :primary_site => "space" do
       instantiate_stack "demo"
@@ -34,7 +34,7 @@ end
 describe_stack 'can specify app server system storage size' do
   given do
     stack 'demo' do
-      standalone_appserver 'default' do
+      standalone_app_service 'default' do
         each_machine do |machine|
           machine.modify_storage('/' => { :size => '10G' })
         end
@@ -53,7 +53,7 @@ end
 describe_stack 'allow additional storage to be specified' do
   given do
     stack 'demo' do
-      standalone_appserver 'mysqldb' do
+      standalone_app_service 'mysqldb' do
         each_machine do |machine|
           machine.modify_storage('/var/lib/mysql' => { :type => 'data', :size => '50G' })
         end
@@ -73,7 +73,7 @@ end
 describe_stack 'allow all existing storage options to be modified' do
   given do
     stack 'demo' do
-      standalone_appserver 'mysqldb' do
+      standalone_app_service 'mysqldb' do
         each_machine do |machine|
           machine.modify_storage('/'              => {
                                    :type => 'wizzy',
@@ -119,7 +119,7 @@ end
 describe_stack 'allow persistence to be set' do
   given do
     stack 'demo' do
-      standalone_appserver 'mysqldb' do
+      standalone_app_service 'mysqldb' do
         each_machine do |machine|
           machine.modify_storage('/var/lib/mysql' => {
                                    :type       => 'data',

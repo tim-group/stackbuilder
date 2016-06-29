@@ -206,7 +206,7 @@ describe Stacks::DSL do
 
   it 'generates app servers that are not part of a virtual service' do
     stack "blah" do
-      standalone_appserver "appx" do
+      standalone_app_service "appx" do
         self.application = "JavaHttpRef"
       end
     end

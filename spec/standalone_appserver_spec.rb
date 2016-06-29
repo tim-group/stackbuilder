@@ -19,7 +19,7 @@ describe_stack 'tim' do
     stack 'tim' do
       loadbalancer do
       end
-      standalone_appserver 'timcyclic' do
+      standalone_app_service 'timcyclic' do
         self.application = 'TIM'
         self.instances = environment.options[:tim_instances] || 1
         self.idea_positions_exports = true
@@ -65,7 +65,7 @@ end
 describe_stack 'app with sso port' do
   given do
     stack 'app' do
-      standalone_appserver 'testssoapp' do
+      standalone_app_service 'testssoapp' do
         self.application = 'testapp'
         enable_sso('8444')
       end
@@ -83,7 +83,7 @@ end
 describe_stack 'app with ajp port' do
   given do
     stack 'app' do
-      standalone_appserver 'testajpapp' do
+      standalone_app_service 'testajpapp' do
         self.application = 'testapp'
         enable_ajp('8444')
       end
@@ -104,7 +104,7 @@ describe_stack 'standalone servers should not provide a configuration to load ba
       loadbalancer
     end
     stack 'tim_cyclic' do
-      standalone_appserver 'timcyclic'
+      standalone_app_service 'timcyclic'
     end
 
     env "mirror", :primary_site => "oy", :secondary_site => "bs" do

@@ -34,6 +34,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
   end
 
+  def standalone_app_service(name, &block)
+    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
+  end
+
   def virtual_proxyserver(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualProxyService],
                     Stacks::Services::ProxyServer, &block)
