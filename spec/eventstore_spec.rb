@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'eventstore' do
   given do
     stack "eventstore_stack" do
-      eventstore "eventstore" do |cluster|
+      eventstore_cluster "eventstore" do |cluster|
         cluster.instances = 3
         cluster.enable_secondary_site = true
       end
