@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'quant' do
   given do
     stack "quant" do
-      quantapp "quantapp" do
+      quantapp_service "quantapp" do
         allow_host '0.0.0.0'
       end
     end
