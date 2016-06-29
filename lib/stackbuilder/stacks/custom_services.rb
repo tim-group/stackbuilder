@@ -95,6 +95,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::MongoDBCluster], Stacks::Services::MongoDBServer, &block)
   end
 
+  def mongodb_cluster(name = 'mongodb', &block)
+    machineset_with(name, [Stacks::Services::MongoDBCluster], Stacks::Services::MongoDBServer, &block)
+  end
+
   def mysql_cluster(name = 'mysqldb', &block)
     machineset_with(name, [Stacks::Services::MysqlCluster], Stacks::Services::MysqlServer, &block)
   end

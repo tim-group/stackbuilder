@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'mongodb' do
   given do
     stack "mongo" do
-      mongodb "mongodb" do
+      mongodb_cluster "mongodb" do
         self.database_name  = 'myapp'
       end
     end
@@ -38,7 +38,7 @@ describe_stack 'provides dependency information to masters(only) and dependants'
         self.application = 'example'
         depend_on "mongodb", environment.name, 'magic'
       end
-      mongodb "mongodb" do
+      mongodb_cluster "mongodb" do
         self.database_name = 'myapp'
         self.master_instances = 2
         self.arbiter_instances = 1
@@ -97,7 +97,7 @@ describe_stack 'mongodb users are created on masters from dependencies' do
         self.application = 'egg'
         depend_on "mongodb", environment.name, 'omelette'
       end
-      mongodb "mongodb" do
+      mongodb_cluster "mongodb" do
         self.database_name = 'myapp'
         self.master_instances = 2
         self.arbiter_instances = 1
@@ -133,7 +133,7 @@ describe_stack 'mongodb users are not created unless services have application' 
       external_service "oy-mon-001.oy.net.local" do
         depend_on 'mongodb', environment.name, 'external'
       end
-      mongodb "mongodb" do
+      mongodb_cluster "mongodb" do
         self.database_name = 'myapp'
         self.master_instances = 2
         self.arbiter_instances = 1
