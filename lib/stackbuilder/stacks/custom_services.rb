@@ -115,6 +115,10 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::LogstashServer, &block)
   end
 
+  def logstash_cluster(name = 'logstash', &block)
+    machineset_with(name, [], Stacks::Services::LogstashServer, &block)
+  end
+
   def fmanalyticsanalysis(name = 'fmanalyticsanalysis', &block)
     machineset_with(name, [], Stacks::Services::FmAnalyticsAnalysisServer, &block)
   end
