@@ -4,7 +4,7 @@ require 'stacks/test_framework'
 describe_stack 'should default to disallow destory' do
   given do
     stack "mysql" do
-      legacy_mysqldb "mydb"
+      legacy_mysql_cluster "mydb"
     end
 
     env "testing", :primary_site => "space" do
@@ -21,7 +21,7 @@ end
 describe_stack 'should allow destroy to be overwritten' do
   given do
     stack "mysql" do
-      legacy_mysqldb "mydb" do
+      legacy_mysql_cluster "mydb" do
         each_machine(&:allow_destroy)
       end
     end
@@ -38,7 +38,7 @@ end
 describe_stack 'should provide correct enc data' do
   given do
     stack "mysql" do
-      legacy_mysqldb "mydb" do
+      legacy_mysql_cluster "mydb" do
         self.database_name = "mydb"
         each_machine(&:allow_destroy)
       end
@@ -60,7 +60,7 @@ end
 describe_stack 'should allow storage options to be overwritten' do
   given do
     stack "mysql" do
-      legacy_mysqldb "mydb" do
+      legacy_mysql_cluster "mydb" do
         self.database_name = "mydb"
         each_machine do |machine|
           machine.modify_storage('/'              => { :size => '5G' },
@@ -83,7 +83,7 @@ end
 describe_stack 'should always provide a default data mount of /mnt/data with sensible defaults' do
   given do
     stack "mysql" do
-      legacy_mysqldb "mydb" do
+      legacy_mysql_cluster "mydb" do
       end
     end
     env "testing", :primary_site => "space" do
@@ -102,7 +102,7 @@ end
 describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
   given do
     stack "mysql" do
-      legacy_mysqldb "mydb" do
+      legacy_mysql_cluster "mydb" do
       end
     end
     env "testing", :primary_site => "space" do
@@ -124,7 +124,7 @@ describe_stack 'should support dependencies' do
       end
     end
     stack 'fr_db' do
-      legacy_mysqldb 'frdb' do
+      legacy_mysql_cluster 'frdb' do
         self.database_name = "futuresroll"
       end
     end
@@ -134,7 +134,7 @@ describe_stack 'should support dependencies' do
       end
     end
     stack 'hr_db' do
-      legacy_mysqldb 'hrdb' do
+      legacy_mysql_cluster 'hrdb' do
         self.database_name = "huturesroll"
       end
     end
@@ -160,12 +160,12 @@ end
 describe_stack 'should have mysql 5.1.49-1ubuntu8 as the default version of mysql' do
   given do
     stack 'fr_db' do
-      legacy_mysqldb 'frdb' do
+      legacy_mysql_cluster 'frdb' do
         self.database_name = "futuresroll"
       end
     end
     stack 'hr_db' do
-      legacy_mysqldb 'hrdb' do
+      legacy_mysql_cluster 'hrdb' do
         self.database_name = "huturesroll"
         each_machine { |machine| machine.version = '5.5.43-0ubuntu0.12.04.1' }
       end

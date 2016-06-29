@@ -107,6 +107,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::LegacyMysqlCluster], Stacks::Services::LegacyMysqlDBServer, &block)
   end
 
+  def legacy_mysql_cluster(name = 'mysqldb', &block)
+    machineset_with(name, [Stacks::Services::LegacyMysqlCluster], Stacks::Services::LegacyMysqlDBServer, &block)
+  end
+
   def logstash(name = 'logstash', &block)
     machineset_with(name, [], Stacks::Services::LogstashServer, &block)
   end
