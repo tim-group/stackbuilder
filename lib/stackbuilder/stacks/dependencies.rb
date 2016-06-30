@@ -3,6 +3,11 @@ require 'stackbuilder/stacks/namespace'
 module Stacks::Dependencies
   public
 
+  # FIXME: rpearce: This does not belong here but is needed to provide a mechanism for late binding through composition.
+  def self.extended(object)
+    object.configure
+  end
+
   def config_params(_dependant, _fabric)
     {} # parameters for config.properties of apps depending on this service
   end

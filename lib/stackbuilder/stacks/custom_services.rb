@@ -234,7 +234,6 @@ class Stacks::CustomServices
 
   def machineset_with(name, extends, type, &block)
     machineset = Stacks::MachineSet.new(name, &block)
-    machineset.extend(Stacks::MachineGroup)
     machineset.extend(Stacks::Dependencies)
     extends.each { |e| machineset.extend(e) }
     machineset.type = type
