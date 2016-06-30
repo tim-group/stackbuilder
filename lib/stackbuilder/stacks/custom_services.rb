@@ -20,37 +20,18 @@ class Stacks::CustomServices
     "#{environment.name}_#{name.to_sym}"
   end
 
-  def virtual_appserver(name, &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
-                    Stacks::Services::AppServer, &block)
-  end
-
   def app_service(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                     Stacks::Services::AppServer, &block)
-  end
-
-  def standalone_appserver(name, &block)
-    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
   end
 
   def standalone_app_service(name, &block)
     machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
   end
 
-  def virtual_proxyserver(name, &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualProxyService],
-                    Stacks::Services::ProxyServer, &block)
-  end
-
   def proxy_service(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualProxyService],
                     Stacks::Services::ProxyServer, &block)
-  end
-
-  def virtual_sftpserver(name, &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualSftpService],
-                    Stacks::Services::SftpServer, &block)
   end
 
   def sftp_service(name, &block)
@@ -63,19 +44,9 @@ class Stacks::CustomServices
                     Stacks::Services::RabbitMQServer, &block)
   end
 
-  def virtual_bindserver(name, &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualBindService],
-                    Stacks::Services::BindServer, &block)
-  end
-
   def bind_service(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualBindService],
                     Stacks::Services::BindServer, &block)
-  end
-
-  def virtual_mailserver(name, &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::VirtualMailService],
-                    Stacks::Services::MailServer, &block)
   end
 
   def mail_service(name, &block)
@@ -83,16 +54,8 @@ class Stacks::CustomServices
                     Stacks::Services::MailServer, &block)
   end
 
-  def external_server(name, &block)
-    machineset_with(name, [Stacks::Services::ExternalServerCluster], Stacks::Services::ExternalServer, &block)
-  end
-
   def external_service(name, &block)
     machineset_with(name, [Stacks::Services::ExternalServerCluster], Stacks::Services::ExternalServer, &block)
-  end
-
-  def mongodb(name = 'mongodb', &block)
-    machineset_with(name, [Stacks::Services::MongoDBCluster], Stacks::Services::MongoDBServer, &block)
   end
 
   def mongodb_cluster(name = 'mongodb', &block)
@@ -103,28 +66,12 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::MysqlCluster], Stacks::Services::MysqlServer, &block)
   end
 
-  def legacy_mysqldb(name = 'mysqldb', &block)
-    machineset_with(name, [Stacks::Services::LegacyMysqlCluster], Stacks::Services::LegacyMysqlDBServer, &block)
-  end
-
   def legacy_mysql_cluster(name = 'mysqldb', &block)
     machineset_with(name, [Stacks::Services::LegacyMysqlCluster], Stacks::Services::LegacyMysqlDBServer, &block)
   end
 
-  def logstash(name = 'logstash', &block)
-    machineset_with(name, [], Stacks::Services::LogstashServer, &block)
-  end
-
-  def fmanalyticsanalysis(name = 'fmanalyticsanalysis', &block)
-    machineset_with(name, [], Stacks::Services::FmAnalyticsAnalysisServer, &block)
-  end
-
   def fmanalyticsanalysis_service(name = 'fmanalyticsanalysis', &block)
     machineset_with(name, [], Stacks::Services::FmAnalyticsAnalysisServer, &block)
-  end
-
-  def fmanalyticsreporting(name = 'fmanalyticsreporting', &block)
-    machineset_with(name, [], Stacks::Services::FmAnalyticsReportingServer, &block)
   end
 
   def fmanalyticsreporting_service(name = 'fmanalyticsreporting', &block)
@@ -139,16 +86,8 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::PuppetdbCluster], Stacks::Services::Puppetdb, &block)
   end
 
-  def loadbalancer(&block)
-    machineset_with('lb', [Stacks::Services::LoadBalancerCluster], Stacks::Services::LoadBalancer, &block)
-  end
-
   def loadbalancer_service(&block)
     machineset_with('lb', [Stacks::Services::LoadBalancerCluster], Stacks::Services::LoadBalancer, &block)
-  end
-
-  def natserver(&block)
-    machineset_with('nat', [Stacks::Services::NatCluster], Stacks::Services::NatServer, &block)
   end
 
   def nat_service(&block)
@@ -161,10 +100,6 @@ class Stacks::CustomServices
 
   def logstash_cluster(name = 'logstash', &block)
     machineset_with(name, [Stacks::Services::LogstashCluster], Stacks::Services::LogstashServer, &block)
-  end
-
-  def rate_limited_forward_proxy(name = 'rate_limited_forward_proxy', &block)
-    machineset_with(name, [], Stacks::Services::RateLimitedForwardProxyServer, &block)
   end
 
   def rate_limited_forward_proxy_service(name = 'rate_limited_forward_proxy', &block)
@@ -189,32 +124,16 @@ class Stacks::CustomServices
     machineset_with(name, [], Stacks::Services::CiSlave, &block)
   end
 
-  def eventstore(name = 'eventstore', &block)
-    machineset_with(name, [Stacks::Services::EventStoreCluster], Stacks::Services::EventStoreServer, &block)
-  end
-
   def eventstore_cluster(name = 'eventstore', &block)
     machineset_with(name, [Stacks::Services::EventStoreCluster], Stacks::Services::EventStoreServer, &block)
-  end
-
-  def pentaho_server(name = 'pentaho_server', &block)
-    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::PentahoServer, &block)
   end
 
   def pentaho_service(name = 'pentaho_server', &block)
     machineset_with(name, [Stacks::Services::AppService], Stacks::Services::PentahoServer, &block)
   end
 
-  def quantapp(name = 'quantapp', &block)
-    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::QuantAppServer, &block)
-  end
-
   def quantapp_service(name = 'quantapp', &block)
     machineset_with(name, [Stacks::Services::AppService], Stacks::Services::QuantAppServer, &block)
-  end
-
-  def standard(name, &block)
-    machineset_with(name, [], Stacks::Services::StandardServer, &block)
   end
 
   def standard_service(name, &block)
