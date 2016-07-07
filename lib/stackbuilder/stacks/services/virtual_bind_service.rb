@@ -17,6 +17,10 @@ module Stacks::Services::VirtualBindService
     @slave_instances = 1
   end
 
+  def add_zone(zone)
+    @zones << zone unless @zones.include? zone
+  end
+
   def remove_zone(zone)
     @zones.delete zone
   end

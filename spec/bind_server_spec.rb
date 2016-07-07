@@ -428,6 +428,28 @@ describe_stack 'bind servers with zones removed should have the right zone files
   end
 end
 
+describe_stack 'bind servers with zones added should have the right zone files' do
+  given do
+    stack "nameserver" do
+      bind_service 'ns' do
+        add_zone :glue
+        add_zone :crosssite
+        add_zone :glue
+      end
+    end
+
+    env "o", :primary_site => "oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+      end
+    end
+  end
+
+  host("oy-ns-001.mgmt.oy.net.local") do |host|
+    expect(host.virtual_service.zones).to be_eql [:mgmt, :prod, :front, :glue, :crosssite]
+  end
+end
+
 describe_stack 'test @slave_instances = 2' do
   given do
     stack "nameserver" do
