@@ -136,12 +136,15 @@ module Stacks::Services::VirtualBindService
       'url_path'    => '/participation'
     }
     zones_fqdn(location).each do |zone|
-      if zone =~ /mgmt/
+      case zone
+      when /mgmt/
         healthchecks << {
           'healthcheck' => 'MISC_CHECK',
           'arg_style'   => 'APPEND_HOST',
           'path'        => "/usr/bin/host -4 -W 3 -t A -s apt.#{zone}"
         }
+      when /crosssite/, /glue/
+        # do nothing
       else
         healthchecks << {
           'healthcheck' => 'MISC_CHECK',
