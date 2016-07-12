@@ -132,10 +132,6 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::AppService], Stacks::Services::PentahoServer, &block)
   end
 
-  def quantapp_service(name = 'quantapp', &block)
-    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::QuantAppServer, &block)
-  end
-
   def standard_service(name, &block)
     machineset_with(name, [], Stacks::Services::StandardServer, &block)
   end
