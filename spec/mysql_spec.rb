@@ -482,7 +482,7 @@ describe_stack 'should provide a default mysql config' do
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
     expect(stacks_mysql_config['config']['mysqld']['replicate-do-db'].size).to eql(2)
-    expect(stacks_mysql_config['config']['mysqld']['replicate-do-db']).to include('percona','magic')
+    expect(stacks_mysql_config['config']['mysqld']['replicate-do-db']).to include('percona', 'magic')
   end
 end
 

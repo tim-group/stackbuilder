@@ -59,10 +59,10 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       return []
     when :master
       checks = %w(heartbeat)
-      checks << 'checksum' if @mysql_cluster.percona_checksum and @mysql_cluster.percona_checksum_monitoring
+      checks << 'checksum' if @mysql_cluster.percona_checksum && @mysql_cluster.percona_checksum_monitoring
     else
       checks = %w(replication_running replication_delay)
-      checks << 'checksum' if @mysql_cluster.percona_checksum and @mysql_cluster.percona_checksum_monitoring
+      checks << 'checksum' if @mysql_cluster.percona_checksum && @mysql_cluster.percona_checksum_monitoring
     end
     checks
   end
@@ -130,14 +130,14 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   def merge_default_config
     default_config = {
       'mysqld' => {
-        'replicate-do-db'=> [ @mysql_cluster.database_name, 'percona'],
+        'replicate-do-db' => [@mysql_cluster.database_name, 'percona']
       }
     }
     recurse_merge!(@config, default_config)
   end
 
   def percona_checksum_enc
-    return {} if !@mysql_cluster.percona_checksum or @mysql_cluster.master_instances == 0
+    return {} if !@mysql_cluster.percona_checksum || @mysql_cluster.master_instances == 0
     ignore_tables = ["#{@mysql_cluster.database_name}.heartbeat"]
     ignore_tables.push(@mysql_cluster.percona_checksum_ignore_tables.flatten)
     {
