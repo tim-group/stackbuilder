@@ -29,7 +29,7 @@ module Stacks::Services::MysqlCluster
     @backup_instance_site = :secondary_site
     @charset = 'utf8'
     @database_name = ''
-    @enable_percona_checksum_tools = false
+    @enable_percona_checksum_tools = true
     @grant_user_rights_by_default = true
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0
