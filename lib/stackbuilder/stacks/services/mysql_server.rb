@@ -59,10 +59,10 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       return []
     when :master
       checks = %w(heartbeat)
-      checks << 'checksum' if @mysql_cluster.enable_percona_checksum_tools
+      checks << 'checksum' if @mysql_cluster.percona_checksum_tools
     else
       checks = %w(replication_running replication_delay)
-      checks << 'checksum' if @mysql_cluster.enable_percona_checksum_tools
+      checks << 'checksum' if @mysql_cluster.percona_checksum_tools
     end
     checks
   end
@@ -137,9 +137,9 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def percona_checksum_tools_enc
+    return {} if !@mysql_cluster.percona_checksum_tools or @mysql_cluster.master_instances == 0
     ignore_tables = ["#{@mysql_cluster.database_name}.heartbeat"]
     ignore_tables.push(@mysql_cluster.percona_checksum_ignore_tables.flatten)
-    return {} unless @mysql_cluster.enable_percona_checksum_tools
     {
       'percona::checksum_tools' => {
         'database_name' => @mysql_cluster.database_name,

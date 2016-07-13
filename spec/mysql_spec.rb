@@ -582,7 +582,6 @@ describe_stack 'should allow percona_checksum_tools flag to be specified' do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.database_name = 'test'
-        self.enable_percona_checksum_tools = true
         self.percona_checksum_ignore_tables = ['test.ignore']
         self.master_instances = 1
         self.slave_instances = 1
@@ -609,6 +608,25 @@ describe_stack 'should allow percona_checksum_tools flag to be specified' do
   end
 end
 
+describe_stack 'should allow percona_checksum_tools flag to be specified' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.percona_checksum_tools = false
+        self.master_instances = 1
+        self.slave_instances = 1
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc.key?('percona::checksum_tools')).to eql(false)
+  end
+end
+
 describe_stack 'should provide the correct monitoring checks for master and slave' do
   given do
     stack "mysql" do
@@ -627,22 +645,22 @@ describe_stack 'should provide the correct monitoring checks for master and slav
   host("production-mydb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc.key?('role::mysql_server')).to eql(true)
     enc = host.to_enc['role::mysql_server']
-    expect(enc['monitoring_checks']).to eql(%w(heartbeat))
+    expect(enc['monitoring_checks']).to eql(%w(heartbeat checksum))
   end
   host("production-mydb-002.mgmt.space.net.local") do |host|
     expect(host.to_enc.key?('role::mysql_server')).to eql(true)
     enc = host.to_enc['role::mysql_server']
-    expect(enc['monitoring_checks']).to eql(%w(replication_running replication_delay))
+    expect(enc['monitoring_checks']).to eql(%w(replication_running replication_delay checksum))
   end
   host("production-mydb-001.mgmt.earth.net.local") do |host|
     expect(host.to_enc.key?('role::mysql_server')).to eql(true)
     enc = host.to_enc['role::mysql_server']
-    expect(enc['monitoring_checks']).to eql(%w(replication_running replication_delay))
+    expect(enc['monitoring_checks']).to eql(%w(replication_running replication_delay checksum))
   end
   host("production-mydbbackup-001.mgmt.earth.net.local") do |host|
     expect(host.to_enc.key?('role::mysql_server')).to eql(true)
     enc = host.to_enc['role::mysql_server']
-    expect(enc['monitoring_checks']).to eql(%w(replication_running replication_delay))
+    expect(enc['monitoring_checks']).to eql(%w(replication_running replication_delay checksum))
   end
 end
 
@@ -828,7 +846,6 @@ describe_stack 'should create two masters' do
         self.user_access_instances = 0
         self.slave_instances = 0
         self.backup_instances = 0
-        self.enable_percona_checksum_tools = true
       end
     end
     stack "app_server" do
