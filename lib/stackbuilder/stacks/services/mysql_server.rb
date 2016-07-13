@@ -127,6 +127,15 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     recurse_merge!(@config, gtid_config)
   end
 
+  def merge_default_config
+    default_config = {
+      'mysqld' => {
+        'replicate-do-db'=> [ @mysql_cluster.database_name, 'percona'],
+      }
+    }
+    recurse_merge!(@config, default_config)
+  end
+
   def percona_checksum_tools_enc
     return {} unless @mysql_cluster.enable_percona_checksum_tools
     {
@@ -160,6 +169,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
 
   def config_enc
     merge_gtid_config if @use_gtids
+    merge_default_config
     return {} if @config.empty?
     {
       'role::stacks_mysql_config' => {

@@ -466,8 +466,23 @@ describe_stack 'should allow use_gtids to be specified' do
     expect(stacks_mysql_config['config']['mysqld']['gtid_mode']).to eql('ON')
     expect(stacks_mysql_config['config']['mysqld']['enforce_gtid_consistency']).to eql('ON')
   end
-  host("testing-mydb-002.mgmt.space.net.local") do |host|
-    expect(host.to_enc.key?('role::stacks_mysql_config')).to eql(false)
+end
+
+describe_stack 'should provide a default mysql config' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'magic'
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    stacks_mysql_config = host.to_enc['role::stacks_mysql_config']
+    expect(stacks_mysql_config['config']['mysqld']['replicate-do-db'].size).to eql(2)
+    expect(stacks_mysql_config['config']['mysqld']['replicate-do-db']).to include('percona','magic')
   end
 end
 
