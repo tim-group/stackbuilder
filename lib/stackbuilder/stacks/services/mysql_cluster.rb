@@ -33,7 +33,7 @@ module Stacks::Services::MysqlCluster
     @grant_user_rights_by_default = true
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0
-    @percona_checksum_ignore_tables = ''
+    @percona_checksum_ignore_tables = []
     @server_id_offset = 0
     @supported_requirements = {}
 

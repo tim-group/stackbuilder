@@ -583,7 +583,7 @@ describe_stack 'should allow percona_checksum_tools flag to be specified' do
       mysql_cluster "mydb" do
         self.database_name = 'test'
         self.enable_percona_checksum_tools = true
-        self.percona_checksum_ignore_tables = 'test.ignore'
+        self.percona_checksum_ignore_tables = ['test.ignore']
         self.master_instances = 1
         self.slave_instances = 1
       end
@@ -597,7 +597,7 @@ describe_stack 'should allow percona_checksum_tools flag to be specified' do
     pct = host.to_enc['percona::checksum_tools']
     expect(pct['database_name']).to eql('test')
     expect(pct['master_fqdns']).to eql(['production-mydb-001.space.net.local'])
-    expect(pct['ignore_tables']).to eql('test.ignore')
+    expect(pct['ignore_tables']).to eql('test.heartbeat,test.ignore')
     expect(host.to_enc.key?('role::mysql_server')).to eql(true)
     role = host.to_enc['role::mysql_server']
     expect(role['monitoring_checks']).to include('checksum')

@@ -137,13 +137,15 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def percona_checksum_tools_enc
+    ignore_tables = ["#{@mysql_cluster.database_name}.heartbeat"]
+    ignore_tables.push(@mysql_cluster.percona_checksum_ignore_tables.flatten)
     return {} unless @mysql_cluster.enable_percona_checksum_tools
     {
       'percona::checksum_tools' => {
         'database_name' => @mysql_cluster.database_name,
         'master_fqdns'  => @mysql_cluster.master_servers,
         'is_master'     => role_of?(:master),
-        'ignore_tables' => @mysql_cluster.percona_checksum_ignore_tables
+        'ignore_tables' => ignore_tables.join(',')
       }
     }
   end
