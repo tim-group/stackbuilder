@@ -8,8 +8,8 @@ module Stacks::Services::MysqlCluster
   attr_accessor :backup_instance_site
   attr_accessor :charset
   attr_accessor :database_name
-  attr_accessor :percona_checksum_tools
   attr_accessor :include_master_in_read_only_cluster
+  attr_accessor :percona_checksum
   attr_accessor :percona_checksum_ignore_tables
   attr_accessor :percona_checksum_monitoring
   attr_accessor :server_id_base
@@ -30,7 +30,7 @@ module Stacks::Services::MysqlCluster
     @backup_instance_site = :secondary_site
     @charset = 'utf8'
     @database_name = ''
-    @percona_checksum_tools = true
+    @percona_checksum = true
     @grant_user_rights_by_default = true
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0

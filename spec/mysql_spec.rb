@@ -577,12 +577,13 @@ describe_stack 'should create secondary_sited slave databases' do
   end
 end
 
-describe_stack 'should allow percona_checksum_tools flag to be specified' do
+describe_stack 'should allow percona_checksum flag to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.database_name = 'test'
         self.percona_checksum_ignore_tables = ['test.ignore']
+        self.percona_checksum_monitoring = true
         self.master_instances = 1
         self.slave_instances = 1
       end
@@ -608,12 +609,12 @@ describe_stack 'should allow percona_checksum_tools flag to be specified' do
   end
 end
 
-describe_stack 'should allow percona_checksum_tools flag to be specified' do
+describe_stack 'should allow percona_checksum flag to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.database_name = 'test'
-        self.percona_checksum_tools = false
+        self.percona_checksum = false
         self.master_instances = 1
         self.slave_instances = 1
       end
@@ -636,6 +637,7 @@ describe_stack 'should provide the correct monitoring checks for master and slav
         self.slave_instances = 1
         self.backup_instances = 1
         self.secondary_site_slave_instances = 1
+        self.percona_checksum_monitoring = true
       end
     end
     env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
