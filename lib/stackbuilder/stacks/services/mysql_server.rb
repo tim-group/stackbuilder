@@ -59,10 +59,10 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       return []
     when :master
       checks = %w(heartbeat)
-      checks << 'checksum' if @mysql_cluster.percona_checksum_tools
+      checks << 'checksum' if @mysql_cluster.percona_checksum_tools and @mysql_cluster.percona_checksum_monitoring
     else
       checks = %w(replication_running replication_delay)
-      checks << 'checksum' if @mysql_cluster.percona_checksum_tools
+      checks << 'checksum' if @mysql_cluster.percona_checksum_tools and @mysql_cluster.percona_checksum_monitoring
     end
     checks
   end

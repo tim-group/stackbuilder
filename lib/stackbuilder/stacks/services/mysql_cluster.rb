@@ -11,6 +11,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :percona_checksum_tools
   attr_accessor :include_master_in_read_only_cluster
   attr_accessor :percona_checksum_ignore_tables
+  attr_accessor :percona_checksum_monitoring
   attr_accessor :server_id_base
   attr_accessor :server_id_offset
   attr_accessor :supported_requirements
@@ -34,6 +35,7 @@ module Stacks::Services::MysqlCluster
     @include_master_in_read_only_cluster = true
     @master_index_offset = 0
     @percona_checksum_ignore_tables = []
+    @percona_checksum_monitoring = false
     @server_id_offset = 0
     @supported_requirements = {}
 
