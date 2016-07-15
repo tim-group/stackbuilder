@@ -167,9 +167,11 @@ namespace :sbx do
         puts ZAMLS.to_zamls(machine_def.to_specs)
       end
 
-      desc "outputs the specs for these machines, in the format to feed to the provisioning tools"
+      # FIXME : Take this terrible, un-testable code out of rake
+      desc "outputs the vip spec for these machines in a human readable format (dns allocation consumes the hash)"
       task :to_vip_spec do
         puts ZAMLS.to_zamls(machine_def.to_vip_spec(:primary_site))
+        puts ZAMLS.to_zamls(machine_def.to_vip_spec(:secondary_site)) unless machine_def.enable_secondary_site
       end
 
       if machine_def.respond_to? :to_enc
@@ -251,11 +253,15 @@ namespace :sbx do
         computecontroller.enable_notify(machine_def.to_specs)
       end
 
+      # FIXME : Take this terrible, un-testable code out of rake
       desc "allocate IPs for these virtual services"
       sbtask :allocate_vips do
         vips = []
         machine_def.accept do |child_machine_def|
-          vips << child_machine_def.to_vip_spec(:primary_site) if child_machine_def.respond_to?(:to_vip_spec)
+          if child_machine_def.respond_to?(:to_vip_spec)
+            vips << child_machine_def.to_vip_spec(:primary_site)
+            vips << child_machine_def.to_vip_spec(:secondary_site) if child_machine_def.enable_secondary_site
+          end
         end
         if vips.empty?
           logger(Logger::INFO) { 'no vips to allocate' }
@@ -264,11 +270,15 @@ namespace :sbx do
         end
       end
 
+      # FIXME : Take this terrible, un-testable code out of rake
       desc "free IPs for these virtual services"
       sbtask :free_vips do
         vips = []
         machine_def.accept do |child_machine_def|
-          vips << child_machine_def.to_vip_spec(:primary_site) if child_machine_def.respond_to?(:to_vip_spec)
+          if child_machine_def.respond_to?(:to_vip_spec)
+            vips << child_machine_def.to_vip_spec(:primary_site)
+            vips << child_machine_def.to_vip_spec(:secondary_site) if child_machine_def.enable_secondary_site
+          end
         end
         @factory.services.dns.free(vips)
       end
