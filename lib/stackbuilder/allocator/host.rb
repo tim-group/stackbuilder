@@ -4,6 +4,7 @@ require 'stackbuilder/allocator/host_policies'
 class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines
   attr_accessor :allocation_disabled
+  attr_accessor :allocation_tag
   attr_accessor :domains # set externally
   attr_accessor :policies
   attr_accessor :preference_functions
@@ -15,6 +16,7 @@ class StackBuilder::Allocator::Host
   def initialize(fqdn, args = { :preference_functions => [], :policies => [], :ram => '0', :storage => {} })
     @allocated_machines = []
     @allocation_disabled = args[:allocation_disabled] || false
+    @allocation_tag = args[:allocation_tag] || 'normal'
     @domains = Hash
     @fqdn = fqdn
     @policies = args[:policies]

@@ -28,4 +28,24 @@ module StackBuilder::Allocator::PolicyHelpers
     }
     result
   end
+
+  def self.allocation_tag_of(host)
+    result = {
+      :tag => host.allocation_tag
+    }
+    result
+  end
+
+  def self.allocation_status_of(host)
+    if host.allocation_disabled
+      status = 'Disabled'
+    else
+      status = 'Enabled'
+    end
+
+    result = {
+      :allocation_status => status
+    }
+    result
+  end
 end

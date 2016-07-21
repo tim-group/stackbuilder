@@ -53,8 +53,10 @@ class Compute::Client
       "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
 
     response_hash = Hash[response]
+    allocation_tag_fact_hash = Hash[get_fact('allocation_tag', hosts)]
     allocation_disabled_fact_hash = Hash[get_fact('allocation_disabled', hosts)]
-    response_hash = merge_attributes_by_fqdn(allocation_disabled_fact_hash, response_hash)
+    response_hash_1 = merge_attributes_by_fqdn(allocation_disabled_fact_hash, response_hash)
+    response_hash = merge_attributes_by_fqdn(allocation_tag_fact_hash, response_hash_1)
 
     libvirt_response_hash = Hash[response_hash]
 
