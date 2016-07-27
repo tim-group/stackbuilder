@@ -22,6 +22,7 @@ class Stacks::Factory
 
   def policies
     @policies ||= [
+      StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags,
       StackBuilder::Allocator::HostPolicies.ensure_mount_points_have_specified_storage_types_policy,
       StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy,
       StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy,
@@ -34,6 +35,7 @@ class Stacks::Factory
 
   def preference_functions
     @preference_functions ||= [
+      StackBuilder::Allocator::HostPreference.prefer_not_g9,
       StackBuilder::Allocator::HostPreference.prefer_no_data,
       StackBuilder::Allocator::HostPreference.fewest_machines,
       StackBuilder::Allocator::HostPreference.alphabetical_fqdn

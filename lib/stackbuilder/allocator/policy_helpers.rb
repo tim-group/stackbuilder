@@ -29,9 +29,9 @@ module StackBuilder::Allocator::PolicyHelpers
     result
   end
 
-  def self.allocation_tag_of(host)
+  def self.allocation_tags_of(host)
     result = {
-      :tag => host.allocation_tag
+      :tags => host.allocation_tags.join(" ")
     }
     result
   end
@@ -44,7 +44,7 @@ module StackBuilder::Allocator::PolicyHelpers
     end
 
     result = {
-      :allocation_status => status
+      :status => status
     }
     result
   end

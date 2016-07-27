@@ -34,7 +34,7 @@ class StackBuilder::Allocator::HostRepository
                                                :ram => attr[:memory],
                                                :storage => attr[:storage],
                                                :allocation_disabled => attr[:allocation_disabled],
-                                               :allocation_tag => attr[:allocation_tag])
+                                               :allocation_tags => attr[:allocation_tags])
 
       host.allocated_machines = vms
       host.domains = attr[:domains]

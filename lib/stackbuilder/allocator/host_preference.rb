@@ -19,4 +19,9 @@ module StackBuilder::Allocator::HostPreference
 
   def self.most_available_disk
   end
+
+  # FIXME: Need to change this in the future
+  def self.prefer_not_g9
+    Proc.new { |host| host.allocation_tags.include?('Gen9') ? 10 : 0 }
+  end
 end

@@ -15,6 +15,8 @@ class Stacks::MachineDef
   attr_accessor :ram
   attr_accessor :storage
   attr_accessor :vcpus
+  attr_accessor :allocation_tags
+  attr_accessor :machine_allocation_tags
 
   def initialize(base_hostname, networks = [:mgmt, :prod], location = :primary_site)
     @base_hostname = base_hostname
@@ -39,6 +41,7 @@ class Stacks::MachineDef
     @routes = []
     @included_classes = {}
     @added_cnames = {}
+    @allocation_tags = []
     validate_name
   end
 
@@ -104,6 +107,10 @@ class Stacks::MachineDef
     end
     @domain = environment.domain(@fabric)
     @routes.concat(@environment.routes[@fabric]) unless @environment.routes.nil? || !@environment.routes.key?(@fabric)
+
+    @allocation_tags = @environment.allocation_tags[@fabric] if !@environment.allocation_tags.nil? &&
+                                                                @environment.allocation_tags.key?(fabric) &&
+                                                                !@environment.allocation_tags[$fabric].nil?
   end
 
   def disable_persistent_storage
@@ -179,6 +186,7 @@ class Stacks::MachineDef
     spec[:storage] = storage
     spec[:dont_start] = true if @dont_start
     spec[:cnames] = Hash[@added_cnames.map { |n, cnames| [n, Hash[cnames.map { |c| [c, qualified_hostname(n)] }]] }]
+    spec[:allocation_tags] = @allocation_tags if @allocation_tags
     spec
   end
 

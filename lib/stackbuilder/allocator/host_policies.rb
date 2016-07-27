@@ -181,6 +181,36 @@ module StackBuilder::Allocator::HostPolicies
     end
   end
 
+  # Policy
+  # If tag(s) don't exist = explode
+  # If tag(s) don't exist but no capacity = explode
+  #
+  # Preference
+  # If I dont have that tag -10
+  # If I have the tag then 10
+  #
+  # Preference ordering by HP model (G6, G7, G9) etc.
+  #
+  def self.allocate_on_host_with_tags
+    Proc.new do |host, machine|
+      host_supplied_tags = host.allocation_tags
+      vm_requested_tags = machine[:allocation_tags]
+      tag_found = true
+      #   Loop through all tags supplied by the VM
+      if vm_requested_tags
+        vm_requested_tags.each do |tag|
+          # For each tag from the VM, check if its in the tag list of the KVM host
+          tag_found = false if !host_supplied_tags.include?(tag)
+        end
+      end
+      if tag_found == false
+        { :passed => false, :reason => "Requested tags #{vm_requested_tags} not found in supported list #{host_supplied_tags}" }
+      else
+        { :passed => true }
+      end
+    end
+  end
+
   private
 
   def self.kb_to_gb(value)

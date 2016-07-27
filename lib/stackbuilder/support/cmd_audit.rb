@@ -21,7 +21,7 @@ module CMDAudit
       when 'os(GB)'.to_sym              then order[3] = header
       when 'data(GB)'.to_sym            then order[4] = header
       when 'allocation disabled'.to_sym then order[5] = header
-      when 'tag'.to_sym                 then order[6] = header
+      when 'tags'.to_sym                then order[6] = header
       else order.push(header)
       end
       order
@@ -116,9 +116,9 @@ module CMDAudit
     ram_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host))
     storage_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host))
     vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
-    allocation_tag = StackBuilder::Allocator::PolicyHelpers.allocation_tag_of(host)
+    allocation_tags_host = StackBuilder::Allocator::PolicyHelpers.allocation_tags_of(host)
     allocation_status = StackBuilder::Allocator::PolicyHelpers.allocation_status_of(host)
-    merge = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats), allocation_status, allocation_tag]
+    merge = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats), allocation_status, allocation_tags_host]
     merged_stats = Hash[*merge.map(&:to_a).flatten]
 
     merged_stats[:fqdn] = host.fqdn

@@ -11,6 +11,7 @@ class Stacks::Environment
   attr_reader :secondary_site
   attr_accessor :production
   attr_reader :routes
+  attr_accessor :allocation_tags
 
   include Stacks::MachineDefContainer
 
@@ -31,6 +32,9 @@ class Stacks::Environment
     @children = []
     @production = options[:production].nil? ? false : options[:production]
     @calculated_dependencies_cache = calculated_dependencies_cache
+    @allocation_tags = { @primary_site => [] }
+    @allocation_tags[@secondary_site] = [] unless @secondary_site.nil?
+
     @routes = { @primary_site   => [] }
     @routes[@secondary_site] = [] unless @secondary_site.nil?
     @routes.keys.each do |site|
@@ -40,6 +44,10 @@ class Stacks::Environment
 
   def add_route(fabric, route_name)
     @routes[fabric] << route_name unless @routes[fabric].include? route_name
+  end
+
+  def set_allocation_tags(fabric, tags)
+    @allocation_tags[fabric] = tags
   end
 
   def child?(environment)
