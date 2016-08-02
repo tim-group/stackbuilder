@@ -18,7 +18,6 @@ class Stacks::Services::VpnServer < Stacks::MachineDef
 
   def to_enc
     enc = super
-    enc.merge!('server::default_new_mgmt_net_local' => {})
     virtual_servers = {}
     @virtual_service.vip_networks.each do |vip_network|
       if vip_network != :front
