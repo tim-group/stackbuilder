@@ -33,7 +33,6 @@ describe_stack 'test enc of vpn servers' do
   # OY Master
   host("oymigration-vpn-001.mgmt.oy.net.local") do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to eql({})
     expect(enc['role::vpn']).to(
       eql(
         'vpns' => {
