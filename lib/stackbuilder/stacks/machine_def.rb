@@ -72,7 +72,7 @@ class Stacks::MachineDef
       '/'.to_sym =>  {
         :prepare     => {
           :options => {
-            :path => '/var/local/images/gold-trusty/generic.img'
+            :path => '/var/local/images/ubuntu-trusty.img'
           }
         }
       }
