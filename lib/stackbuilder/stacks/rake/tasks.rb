@@ -140,6 +140,31 @@ namespace :sbx do
     end
   end
 
+  # FIXME: Stolen from hostcleanup application, this does not belong here
+  def hostcleanup(fqdn, action)
+    begin
+      mco_client('hostcleanup') do |hostcleanup_mc|
+      hostcleanup_mc.progress = false
+      hostcleanup_mc.reset_filter
+      case action
+      when 'puppet'
+        hostcleanup_mc.class_filter('role::puppetserver')
+        hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
+      when 'mongodb'
+        hostcleanup_mc.class_filter('role::mcollective_registrationdb')
+        hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
+      when 'nagios'
+        hostcleanup_mc.class_filter('nagios')
+        hostcleanup_mc.fact_filter 'domain', '/(oy|pg)/'
+      when 'metrics'
+        hostcleanup_mc.class_filter('metrics')
+      end
+      output_result hostcleanup_mc.send(action, :fqdn => fqdn)
+    ensure
+      hostcleanup_mc.disconnect
+    end
+  end
+
   require 'set'
   machine_names = Set.new
   rake_task_names = Set.new
@@ -437,23 +462,8 @@ namespace :sbx do
         machine_def.accept do |child_machine_def|
           hosts << child_machine_def.mgmt_fqdn if child_machine_def.respond_to?(:mgmt_fqdn)
         end
-
-        mco_client('hostcleanup') do |mco|
-          # Clean nagios
-          mco.class_filter 'nagios'
-          hosts.each { |fqdn| mco.nagios_cleanup(:fqdn => fqdn) }
-
-          # Clean mongo
-          mco.reset_filter
-          mco.agent_filter 'registration'
-          hosts.each { |fqdn| mco.mongodb_cleanup(:fqdn => fqdn) }
-
-          # Clean puppet
-          mco.reset_filter
-          mco.compound_filter 'role::puppetserver'
-          mco.compound_filter '!domain=mgmt.dev.net.local'
-          mco.compound_filter '!domain=mgmt.st.net.local'
-          hosts.each { |fqdn| mco.puppet_cleanup(:fqdn => fqdn) }
+        %w(nagios mongodb puppet metrics).each do |action|
+        hosts.each { |fqdn| hostcleanup(fqdn, action) }
         end
       end
 
