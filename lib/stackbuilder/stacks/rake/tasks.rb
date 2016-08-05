@@ -157,26 +157,22 @@ namespace :sbx do
   # FIXME: Stolen from hostcleanup application, this does not belong here
   def hostcleanup(fqdn, action)
     mco_client('hostcleanup') do |hostcleanup_mc|
-      begin
-        hostcleanup_mc.progress = false
-        hostcleanup_mc.reset_filter
-        case action
-        when 'puppet'
-          hostcleanup_mc.class_filter('role::puppetserver')
-          hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
-        when 'mongodb'
-          hostcleanup_mc.class_filter('role::mcollective_registrationdb')
-          hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
-        when 'nagios'
-          hostcleanup_mc.class_filter('nagios')
-          hostcleanup_mc.fact_filter 'domain', '/(oy|pg)/'
-        when 'metrics'
-          hostcleanup_mc.class_filter('metrics')
-        end
-        output_result hostcleanup_mc.send(action, :fqdn => fqdn)
-      ensure
-        hostcleanup_mc.disconnect
+      hostcleanup_mc.progress = false
+      hostcleanup_mc.reset_filter
+      case action
+      when 'puppet'
+        hostcleanup_mc.class_filter('role::puppetserver')
+        hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
+      when 'mongodb'
+        hostcleanup_mc.class_filter('role::mcollective_registrationdb')
+        hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
+      when 'nagios'
+        hostcleanup_mc.class_filter('nagios')
+        hostcleanup_mc.fact_filter 'domain', '/(oy|pg)/'
+      when 'metrics'
+        hostcleanup_mc.class_filter('metrics')
       end
+      output_result hostcleanup_mc.send(action, :fqdn => fqdn)
     end
   end
 
