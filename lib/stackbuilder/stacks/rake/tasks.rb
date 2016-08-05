@@ -144,7 +144,10 @@ namespace :sbx do
   def output_result(responses)
     responses.each do |resp|
       if resp.results[:statuscode] == 0
-        printf(" %-48s: %s - %s, output: %s\n", resp.results[:sender], resp.action, status_code(resp.results[:data][:statuscode]), resp.results[:data][:status])
+        printf(" %-48s: %s - %s, output: %s\n", resp.results[:sender], \
+               resp.action, \
+               status_code(resp.results[:data][:statuscode]), \
+               resp.results[:data][:status])
       else
         printf(" %-48s: %s - ERROR %s\n", resp.results[:sender], resp.action, resp.results[:statusmsg])
       end
