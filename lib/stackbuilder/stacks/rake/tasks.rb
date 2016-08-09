@@ -141,6 +141,12 @@ namespace :sbx do
   end
 
   # FIXME: Stolen from hostcleanup application, this does not belong here
+  def status_code(status)
+    return 'OK' if status
+    'ERROR'
+  end
+
+  # FIXME: Stolen from hostcleanup application, this does not belong here
   def output_result(responses)
     responses.each do |resp|
       if resp.results[:statuscode] == 0
