@@ -264,9 +264,6 @@ namespace :sbx do
         Rake::Task[namespace + ':cancel_downtime'].invoke
       end
 
-      desc "create the machine and make it ready for configuring with puppet"
-      task :provision_ready_for_puppet => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign']
-
       desc "perform a clean followed by a provision"
       task :reprovision => %w(clean provision)
 
