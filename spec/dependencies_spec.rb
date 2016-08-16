@@ -66,7 +66,7 @@ describe_stack 'stack-with-dependencies' do
     deps = host.to_enc["role::http_app"]["dependencies"]
     expect(deps["db.example.database"]).to eql("example")
     expect(deps["db.example.hostname"]).to eql("e1-exampledb-001.space.net.local")
-    expect(deps["db.example.password_hiera_key"]).to eql("enc/e1/example2/mysql_password")
+    expect(deps["db.example.password_hiera_key"]).to eql("e1/example2/mysql_password")
     expect(deps["db.example.username"]).to eql("example2")
     expect(deps['example.url']).to eql('http://e1-exampleapp-vip.space.net.local:8000')
   end
@@ -88,9 +88,9 @@ describe_stack 'stack-with-dependencies' do
     ])
     rights = host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']
     expect(rights['example2@e1-exampleapp2-001.space.net.local/example']).to eql(
-      'password_hiera_key' => 'enc/e1/example2/mysql_password')
+      'password_hiera_key' => 'e1/example2/mysql_password')
     expect(rights['example2@e1-exampleapp2-002.space.net.local/example']).to eql(
-      'password_hiera_key' => 'enc/e1/example2/mysql_password')
+      'password_hiera_key' => 'e1/example2/mysql_password')
   end
 end
 
@@ -127,7 +127,7 @@ describe_stack 'stack with dependencies that does not provide config params when
       eql('db.example.database'           => 'example',
           'db.example.hostname'           => 'e1-exampledb-001.space.net.local',
           'db.example.port'               => '3306',
-          'db.example.password_hiera_key' => 'enc/e1/example/mysql_password',
+          'db.example.password_hiera_key' => 'e1/example/mysql_password',
           'db.example.username'           => 'example')
   end
   host("e1-noconfigapp-001.mgmt.space.net.local") do |host|

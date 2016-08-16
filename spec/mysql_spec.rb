@@ -131,10 +131,10 @@ describe_stack 'should provide correct enc data' do
     expect(host.to_enc).to include('server::default_new_mgmt_net_local')
     expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-002.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'testing/mydb/replication/mysql_password'
       },
       'replicant@testing-mydbbackup-001.earth.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'testing/mydb/replication/mysql_password'
       }
     )
   end
@@ -155,10 +155,10 @@ describe_stack 'should provide correct enc data' do
 
     expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-001.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'testing/mydb/replication/mysql_password'
       },
       'replicant@testing-mydbbackup-001.earth.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'testing/mydb/replication/mysql_password'
       }
     )
   end
@@ -171,10 +171,10 @@ describe_stack 'should provide correct enc data' do
 
     expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-001.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'testing/mydb/replication/mysql_password'
       },
       'replicant@testing-mydb-002.space.net.local' => {
-        'password_hiera_key' => 'enc/testing/mydb/replication/mysql_password'
+        'password_hiera_key' => 'testing/mydb/replication/mysql_password'
       }
     )
     expect(host.to_enc).to include('server::default_new_mgmt_net_local')
@@ -203,7 +203,7 @@ describe_stack 'should provide the correct application rights' do
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
     expect(rights['SuperLongLengthN@testing-applong-001.space.net.local/ref']['password_hiera_key']).to \
-      eql('enc/testing/SuperLongLengthName/mysql_password')
+      eql('testing/SuperLongLengthName/mysql_password')
   end
   host("testing-applong-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['role::http_app']['dependencies']
@@ -211,7 +211,7 @@ describe_stack 'should provide the correct application rights' do
     expect(rights['db.ref.driver']).to eql('com.mysql.jdbc.Driver')
     expect(rights['db.ref.hostname']).to eql('testing-mydb-001.space.net.local')
     expect(rights['db.ref.port']).to eql('3306')
-    expect(rights['db.ref.password_hiera_key']).to eql('enc/testing/SuperLongLengthName/mysql_password')
+    expect(rights['db.ref.password_hiera_key']).to eql('testing/SuperLongLengthName/mysql_password')
     expect(rights['db.ref.username']).to eql('SuperLongLengthN')
   end
 end

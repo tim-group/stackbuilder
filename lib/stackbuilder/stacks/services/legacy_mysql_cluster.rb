@@ -36,7 +36,7 @@ module Stacks::Services::LegacyMysqlCluster
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].
           merge!("#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
-                 { 'password_hiera_key' => "enc/#{service.environment.name}/#{service.application}/mysql_password" })
+                 { 'password_hiera_key' => "#{service.environment.name}/#{service.application}/mysql_password" })
       end
     end
     rights
@@ -50,7 +50,7 @@ module Stacks::Services::LegacyMysqlCluster
       "db.#{@database_name}.port"               => '3306',
       "db.#{@database_name}.username"           => "#{mysql_username(dependant)}",
       "db.#{@database_name}.password_hiera_key" =>
-        "enc/#{dependant.environment.name}/#{dependant.application}/mysql_password"
+        "#{dependant.environment.name}/#{dependant.application}/mysql_password"
     }
   end
 end

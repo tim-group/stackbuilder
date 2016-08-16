@@ -133,7 +133,7 @@ module Stacks::Services::MysqlCluster
 
       rights.merge!(
         "replicant@#{dependant.prod_fqdn}" => {
-          'password_hiera_key' => "enc/#{dependant.environment.name}/#{database_name}/replication/mysql_password"
+          'password_hiera_key' => "#{dependant.environment.name}/#{database_name}/replication/mysql_password"
         })
     end
     rights
@@ -148,7 +148,7 @@ module Stacks::Services::MysqlCluster
         rights['mysql_hacks::application_rights_wrapper']['rights'].
           merge!(
             "#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
-            { 'password_hiera_key' => "enc/#{service.environment.name}/#{service.database_username}/mysql_password" })
+            { 'password_hiera_key' => "/#{service.environment.name}/#{service.database_username}/mysql_password" })
       end
     end
     rights
@@ -261,7 +261,7 @@ module Stacks::Services::MysqlCluster
       "db.#{@database_name}.port"               => '3306',
       "db.#{@database_name}.username"           => mysql_username(dependent),
       "db.#{@database_name}.password_hiera_key" =>
-        "enc/#{dependent.environment.name}/#{dependent.application}/mysql_password"
+        "#{dependent.environment.name}/#{dependent.application}/mysql_password"
     }
     config_params["db.#{@database_name}.read_only_cluster"] =
         read_only_cluster.join(",") unless read_only_cluster.empty?

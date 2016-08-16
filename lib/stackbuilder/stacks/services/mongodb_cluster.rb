@@ -74,7 +74,7 @@ module Stacks::Services::MongoDBCluster
       "#{requirement}.mongodb.server_fqdns" => fqdns.sort.join(','),
       "#{requirement}.mongodb.username" => dependent.application,
       "#{requirement}.mongodb.password_hiera_key" =>
-        "enc/#{dependent.environment.name}/#{dependent.application}/mongodb_password"
+        "#{dependent.environment.name}/#{dependent.application}/mongodb_password"
     }
     config_params
   end
@@ -86,7 +86,7 @@ module Stacks::Services::MongoDBCluster
       users.merge!(
         service.application => {
           'password_hiera_key' =>
-            "enc/#{service.environment.name}/#{service.application}/mongodb_password"
+            "#{service.environment.name}/#{service.application}/mongodb_password"
         }
       )
     end

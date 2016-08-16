@@ -69,7 +69,7 @@ describe_stack 'app with rabbitmq dependency' do
     expect(dependencies['magic.messaging.broker_fqdns']).to \
       eql('e1-rabbitmq-001.space.net.local,e1-rabbitmq-002.space.net.local')
     expect(dependencies['magic.messaging.username']).to eql('example')
-    expect(dependencies['magic.messaging.password_hiera_key']).to eql('enc/e1/example/messaging_password')
+    expect(dependencies['magic.messaging.password_hiera_key']).to eql('e1/example/messaging_password')
   end
 
   host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
@@ -108,25 +108,25 @@ describe_stack 'rabbitmq users are created from dependencies' do
   host("e1-exampleapp-001.mgmt.space.net.local") do |host|
     dependencies = host.to_enc['role::http_app']['dependencies']
     expect(dependencies['magic.messaging.username']).to eql('example')
-    expect(dependencies['magic.messaging.password_hiera_key']).to eql('enc/e1/example/messaging_password')
+    expect(dependencies['magic.messaging.password_hiera_key']).to eql('e1/example/messaging_password')
     expect(dependencies['wizard.messaging.username']).to eql('example')
-    expect(dependencies['wizard.messaging.password_hiera_key']).to eql('enc/e1/example/messaging_password')
+    expect(dependencies['wizard.messaging.password_hiera_key']).to eql('e1/example/messaging_password')
   end
 
   host("e1-eggapp-001.mgmt.space.net.local") do |host|
     dependencies = host.to_enc['role::http_app']['dependencies']
     expect(dependencies['spoon.messaging.username']).to eql('egg')
-    expect(dependencies['spoon.messaging.password_hiera_key']).to eql('enc/e1/egg/messaging_password')
+    expect(dependencies['spoon.messaging.password_hiera_key']).to eql('e1/egg/messaging_password')
   end
 
   host("e1-rabbitmq-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::rabbitmq_server']['dependant_users']).to include 'example', 'egg'
     expect(host.to_enc['role::rabbitmq_server']['dependant_users']['example']).to eql(
-      'password_hiera_key' => 'enc/e1/example/messaging_password',
+      'password_hiera_key' => 'e1/example/messaging_password',
       'tags'               => []
     )
     expect(host.to_enc['role::rabbitmq_server']['dependant_users']['egg']).to eql(
-      'password_hiera_key' => 'enc/e1/egg/messaging_password',
+      'password_hiera_key' => 'e1/egg/messaging_password',
       'tags'               => []
     )
   end

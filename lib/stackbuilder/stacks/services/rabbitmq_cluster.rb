@@ -70,7 +70,7 @@ module Stacks::Services::RabbitMQCluster
         "#{requirement}.messaging.broker_fqdns" => fqdns.sort.join(','),
         "#{requirement}.messaging.username" => "#{dependent.application}",
         "#{requirement}.messaging.password_hiera_key" =>
-          "enc/#{dependent.environment.name}/#{dependent.application}/messaging_password"
+          "#{dependent.environment.name}/#{dependent.application}/messaging_password"
       )
     end
     config_params
@@ -84,7 +84,7 @@ module Stacks::Services::RabbitMQCluster
         service.application => {
           'tags'               => [],
           'password_hiera_key' =>
-            "enc/#{service.environment.name}/#{service.application}/messaging_password"
+            "#{service.environment.name}/#{service.application}/messaging_password"
         }
       )
     end

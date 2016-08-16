@@ -82,7 +82,7 @@ describe_stack 'provides dependency information to masters(only) and dependants'
     expect(dependencies['magic.mongodb.server_fqdns']).to \
       eql('e1-mongodb-001.space.net.local,e1-mongodb-002.space.net.local')
     expect(dependencies['magic.mongodb.username']).to eql('example')
-    expect(dependencies['magic.mongodb.password_hiera_key']).to eql('enc/e1/example/mongodb_password')
+    expect(dependencies['magic.mongodb.password_hiera_key']).to eql('e1/example/mongodb_password')
   end
 end
 
@@ -113,10 +113,10 @@ describe_stack 'mongodb users are created on masters from dependencies' do
   host("e1-mongodb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['dependant_users']).to include('example', 'egg')
     expect(host.to_enc['role::mongodb_server']['dependant_users']['example']).to eql(
-      'password_hiera_key' => 'enc/e1/example/mongodb_password'
+      'password_hiera_key' => 'e1/example/mongodb_password'
     )
     expect(host.to_enc['role::mongodb_server']['dependant_users']['egg']).to eql(
-      'password_hiera_key' => 'enc/e1/egg/mongodb_password'
+      'password_hiera_key' => 'e1/egg/mongodb_password'
     )
   end
   host("e1-mongodbarbiter-001.mgmt.space.net.local") do |host|
