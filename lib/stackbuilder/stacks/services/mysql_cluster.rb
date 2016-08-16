@@ -148,7 +148,7 @@ module Stacks::Services::MysqlCluster
         rights['mysql_hacks::application_rights_wrapper']['rights'].
           merge!(
             "#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
-            { 'password_hiera_key' => "/#{service.environment.name}/#{service.database_username}/mysql_password" })
+            { 'password_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_password" })
       end
     end
     rights
