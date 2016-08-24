@@ -2,7 +2,6 @@ require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::CiSlave < Stacks::MachineDef
-  attr_accessor :mysql_version
   attr_accessor :node_labels
   attr_accessor :allow_matrix_host
 
