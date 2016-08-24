@@ -4,10 +4,12 @@ require 'stackbuilder/stacks/machine_def'
 class Stacks::Services::CiSlave < Stacks::MachineDef
   attr_accessor :mysql_version
   attr_accessor :node_labels
+  attr_accessor :allow_matrix_host
 
   def initialize(server_group, index)
     super(server_group.name + '-' + index, [:mgmt])
     @node_labels = []
+    @allow_matrix_host = nil
     self
   end
 
@@ -22,7 +24,8 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
   def to_enc
     enc = super()
     enc.merge!('role::cinode_precise' => {
-                 'node_labels'   => @node_labels.join(' ')
+                 'node_labels'   => @node_labels.join(' '),
+                 'allow_matrix_host' => @allow_matrix_host
                })
     enc
   end
