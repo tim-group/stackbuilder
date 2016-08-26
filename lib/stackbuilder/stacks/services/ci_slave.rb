@@ -22,7 +22,7 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    enc.merge!('role::cinode_precise' => {
+    enc.merge!('role::cinode' => {
                  'node_labels'   => @node_labels.join(' '),
                  'allow_matrix_host' => @allow_matrix_host
                })
