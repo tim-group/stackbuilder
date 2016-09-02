@@ -4,6 +4,7 @@ shared_examples_for "ping" do |machine|
     deadline = 10 # seconds; with this set, count is the count of successful responses required, not requests to send
     required_count = 3 # seconds
     output = `/bin/ping -i #{interval} -w #{deadline} -c #{required_count} -n #{machine.mgmt_fqdn} 2>&1`
-    expect { $CHILD_STATUS.exitstatus }.to eql(0), "exitstatus = #{$CHILD_STATUS.exitstatus}\n#{output}"
+    expect($CHILD_STATUS.exitstatus).to eql(0)
+    expect(output).to include('3 packets transmitted, 3 received')
   end
 end
