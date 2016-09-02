@@ -595,7 +595,7 @@ namespace :sbx do
             end
           end
         end
-        RSpec::Core::Runner.run(['--format', 'CI::Reporter::RSpec'], $stderr, $stdout)
+        RSpec::Core::Runner.run([], $stderr, $stdout)
       end
     end
   end
