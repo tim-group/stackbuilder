@@ -471,3 +471,27 @@ describe_stack 'test @slave_instances = 2' do
       to eql('oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'])
   end
 end
+
+describe_stack 'test allow_host entries are supported' do
+  given do
+    stack "nameserver" do
+      bind_service 'ns' do
+        allow_host '1.1.1.1'
+        each_machine do |_machine|
+          allow_host '2.2.2.2'
+        end
+      end
+    end
+
+    env "o", :primary_site => "oy" do
+      env 'oy' do
+        instantiate_stack "nameserver"
+      end
+    end
+  end
+
+  host("oy-ns-001.mgmt.oy.net.local") do |host|
+    enc = host.to_enc
+    expect(enc['role::bind_server']['allowed_hosts']).to eql ['1.1.1.1', '2.2.2.2']
+  end
+end
