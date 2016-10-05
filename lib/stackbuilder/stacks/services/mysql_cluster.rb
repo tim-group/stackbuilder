@@ -249,16 +249,16 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_to_fulfil_requirement(dependent, hosts, requirement)
-   hostnames = []
-   hosts_fqdns = []
+    hostnames = []
+    hosts_fqdns = []
 
-   if (requirement == :master_with_slaves)
-     hostnames = [hosts.reject {|host| !host.master?}.map(&:prod_fqdn).first]
-     hosts_fqdns = hosts.reject{|host| host.master?}.map(&:prod_fqdn)
-   else
-     hostnames = hosts_fqdns = hosts.map(&:prod_fqdn)
-   end
-   config_properties(dependent, hostnames, hosts_fqdns)
+    if (requirement == :master_with_slaves)
+      hostnames = [hosts.select(&:master?).map(&:prod_fqdn).first]
+      hosts_fqdns = hosts.reject(&:master?).map(&:prod_fqdn)
+    else
+      hostnames = hosts_fqdns = hosts.map(&:prod_fqdn)
+    end
+    config_properties(dependent, hostnames, hosts_fqdns)
   end
 
   def config_properties(dependent, hostnames, read_only_cluster)

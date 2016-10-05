@@ -202,7 +202,6 @@ describe_stack 'stack-with-dependencies' do
     expect(deps['db.dependedondb.read_only_cluster']).to eql('e3-dependedondb-003.earth.net.local,e3-dependedondb-004.earth.net.local')
   end
 
-
   host('e3-roapp-001.mgmt.earth.net.local') do |host|
     deps = host.to_enc['role::http_app']['dependencies']
 
