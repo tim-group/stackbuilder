@@ -177,7 +177,7 @@ module Stacks::Services::MysqlCluster
     else
       hostnames_for_requirement = @supported_requirements[requirement]
       matching_hostnames = children.select { |server| hostnames_for_requirement.include?(server.prod_fqdn) }
-      config_to_fulfil_requirement(dependent, matching_hostnames)
+      config_to_fulfil_requirement(dependent, matching_hostnames, requirement)
     end
   end
 
@@ -248,9 +248,17 @@ module Stacks::Services::MysqlCluster
     dependent_on_this_cluster[2]
   end
 
-  def config_to_fulfil_requirement(dependent, hosts)
-    hosts_fqdns = hosts.map(&:prod_fqdn)
-    config_properties(dependent, hosts_fqdns, hosts_fqdns)
+  def config_to_fulfil_requirement(dependent, hosts, requirement)
+   hostnames = []
+   hosts_fqdns = []
+
+   if (requirement == :master_with_slaves)
+     hostnames = [hosts.reject {|host| !host.master?}.map(&:prod_fqdn).first]
+     hosts_fqdns = hosts.reject{|host| host.master?}.map(&:prod_fqdn)
+   else
+     hostnames = hosts_fqdns = hosts.map(&:prod_fqdn)
+   end
+   config_properties(dependent, hostnames, hosts_fqdns)
   end
 
   def config_properties(dependent, hostnames, read_only_cluster)
