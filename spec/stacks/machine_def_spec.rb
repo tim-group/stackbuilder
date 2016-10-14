@@ -116,12 +116,11 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new('test')
     machinedef.use_trusty
 
-    env = new_environment('noenv', {:persistent_storage_supported => true, :primary_site => 'st'})
-    env.set_allocation_tags('st', ['trusty', 'precise'])
+    env = new_environment('noenv', :persistent_storage_supported => true, :primary_site => 'st')
+    env.set_allocation_tags('st', %w(trusty precise))
     machinedef.bind_to(env)
 
     expect(machinedef.allocation_tags).to include('trusty')
     expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to include('ubuntu-trusty')
-
   end
 end
