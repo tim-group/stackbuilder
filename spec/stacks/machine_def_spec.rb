@@ -111,4 +111,17 @@ describe Stacks::MachineDef do
     machinedef.modify_storage(storage_without_type)
     expect { machinedef.to_spec }.to raise_error(RuntimeError, /Mount point \/home on foo-test must specify a size attribute/)
   end
+
+  it 'should configure gold image and allocation tag when instructed to use trusty' do
+    machinedef = Stacks::MachineDef.new('test')
+    machinedef.use_trusty
+
+    env = new_environment('noenv', {:persistent_storage_supported => true, :primary_site => 'st'})
+    env.set_allocation_tags('st', ['trusty', 'precise'])
+    machinedef.bind_to(env)
+
+    expect(machinedef.allocation_tags).to include('trusty')
+    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to include('ubuntu-trusty')
+
+  end
 end
