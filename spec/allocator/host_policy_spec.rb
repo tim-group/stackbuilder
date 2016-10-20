@@ -131,7 +131,7 @@ describe StackBuilder::Allocator::HostPolicies do
       :ram => 2_097_152
     }
 
-    h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304', :allocation_disabled => true) # 4GB
+    h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304', :facts => { 'allocation_disabled' => true }) # 4GB
     h1.allocated_machines << existing_machine
     h1.provisionally_allocated_machines << provisionally_allocated_machine
 
@@ -288,36 +288,36 @@ describe StackBuilder::Allocator::HostPolicies do
 
   it 'accepts hosts with correct allocation tag' do
     machine = {
-      :hostname => 'test-db-001',
-      :allocation_tags => ['tag1']
+      :hostname        => 'test-db-001',
+      :allocation_tags => %w(tag1)
     }
 
-    h1 = StackBuilder::Allocator::Host.new("h1", :allocation_tags => %w(tag1 tag2))
-    h2 = StackBuilder::Allocator::Host.new("h2", :allocation_tags => ['tag1'])
+    h1 = StackBuilder::Allocator::Host.new("h1", :facts => { 'allocation_tags' => %w(tag1 tag2) })
+    h2 = StackBuilder::Allocator::Host.new("h2", :facts => { 'allocation_tags' => %w(tag1) })
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h1, machine)[:passed]).to eql(true)
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h2, machine)[:passed]).to eql(true)
   end
 
   it 'accepts hosts with multiple correct allocation tags' do
     machine = {
-      :hostname => 'test-db-001',
+      :hostname        => 'test-db-001',
       :allocation_tags => %w(tag1 tag2)
     }
 
-    h1 = StackBuilder::Allocator::Host.new("h1", :allocation_tags => %w(tag1 tag2))
-    h2 = StackBuilder::Allocator::Host.new("h2", :allocation_tags => ['tag1'])
+    h1 = StackBuilder::Allocator::Host.new("h1", :facts => { 'allocation_tags' => %w(tag1 tag2) })
+    h2 = StackBuilder::Allocator::Host.new("h2", :facts => { 'allocation_tags' => %w(tag1) })
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h1, machine)[:passed]).to eql(true)
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h2, machine)[:passed]).to eql(false)
   end
 
   it 'rejects hosts with the wrong allocation tag' do
     machine = {
-      :hostname => 'test-db-001',
-      :allocation_tags => ['tag1']
+      :hostname        => 'test-db-001',
+      :allocation_tags => %w(tag1)
     }
 
-    h1 = StackBuilder::Allocator::Host.new("h1", :allocation_tags => ['tag2'])
-    h2 = StackBuilder::Allocator::Host.new("h2", :allocation_tags => ['tag3'])
+    h1 = StackBuilder::Allocator::Host.new("h1", :facts => { 'allocation_tags' => %w(tag2) })
+    h2 = StackBuilder::Allocator::Host.new("h2", :facts => { 'allocation_tags' => %w(tag3) })
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h1, machine)[:passed]).to eql(false)
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h2, machine)[:passed]).to eql(false)
   end
@@ -327,8 +327,8 @@ describe StackBuilder::Allocator::HostPolicies do
       :hostname => 'test-db-001'
     }
 
-    h1 = StackBuilder::Allocator::Host.new("h1", :allocation_tags => ['tag2'])
-    h2 = StackBuilder::Allocator::Host.new("h2", :allocation_tags => ['tag3'])
+    h1 = StackBuilder::Allocator::Host.new("h1", :facts => { 'allocation_tags' => %w(tag2) })
+    h2 = StackBuilder::Allocator::Host.new("h2", :facts => { 'allocation_tags' => %w(tag3) })
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h1, machine)[:passed]).to eql(true)
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h2, machine)[:passed]).to eql(true)
   end

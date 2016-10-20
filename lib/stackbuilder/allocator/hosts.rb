@@ -4,13 +4,16 @@ require 'stackbuilder/support/logger'
 
 class StackBuilder::Allocator::Hosts
   attr_reader :hosts
+  attr_reader :availability_group_rack_distribution
 
   def initialize(args)
     @hosts = args[:hosts]
-
     fail 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
+    @availability_group_rack_distribution = establish_availability_group_rack_distribution
+
     hosts.each do |host|
       host.preference_functions = args[:preference_functions]
+      host.hosts = self
     end
   end
 
@@ -34,6 +37,24 @@ class StackBuilder::Allocator::Hosts
   end
 
   private
+
+  def establish_availability_group_rack_distribution
+    rack_availability_groups = {}
+    hosts.each do |host|
+      rack = host.facts['rack']
+      rack_availability_groups[rack] = {} unless rack_availability_groups.key? rack
+
+      host.machines.each do |machine|
+        next if !machine[:availability_group]
+        if rack_availability_groups[rack].key?(machine[:availability_group])
+          rack_availability_groups[rack][machine[:availability_group]] += 1
+        else
+          rack_availability_groups[rack][machine[:availability_group]] = 1
+        end
+      end
+    end
+    rack_availability_groups
+  end
 
   def find_suitable_host_for(machine)
     allocation_denials = []
@@ -60,7 +81,7 @@ class StackBuilder::Allocator::Hosts
       fail "Unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}"
     end
 
-    candidate_hosts = candidate_hosts.sort_by(&:preference)
+    candidate_hosts = candidate_hosts.sort_by { |host| host.preference(machine) }
 
     logger(Logger::DEBUG) { "kvm host preference list (data storage preference, number of vms, fqdn):" }
     candidate_hosts.each { |p| logger(Logger::DEBUG) { "  #{p.preference}" } }

@@ -5,14 +5,18 @@ require 'stackbuilder/support/mcollective'
 class Compute::Client
   include Support::MCollective
 
-  def get_fact(fact, hosts)
-    fact_response = mco_client('rpcutil', :nodes => hosts) do |mco|
-      result = mco.get_fact(:fact => fact)
+  def get_inventory(hosts)
+    response = mco_client('rpcutil', :nodes => hosts) do |mco|
+      result = mco.inventory
       result.map do |resp|
-        [resp[:sender], { fact.to_sym => resp[:data][:value] }]
+        [resp[:sender], {
+          :facts   => resp[:data][:facts],
+          :classes => resp[:data][:classes],
+          :agents  => resp[:data][:agents]
+        }]
       end
     end
-    fact_response
+    response
   end
 
   def merge_attributes_by_fqdn(source_hash, target_hash)
@@ -39,7 +43,7 @@ class Compute::Client
     hosts = discover_compute_nodes(fabric)
     fail "unable to find any compute nodes in fabric #{fabric}" if hosts.empty?
 
-    response = mco_client("libvirt", :nodes => hosts) do |mco|
+    libvirt_response = mco_client("libvirt", :nodes => hosts) do |mco|
       mco.hvinfo.map do |hv|
         fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
@@ -48,19 +52,18 @@ class Compute::Client
         [hv[:sender], hv[:data].merge(:domains => domains)]
       end
     end
+    fail "libvirt - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+      "(#{libvirt_response.map { |x| x[0] }.join(', ')})" unless hosts.size == libvirt_response.size
 
-    fail "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-      "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
+    response_hash = Hash[libvirt_response]
 
-    response_hash = Hash[response]
-    allocation_tag_fact_hash = Hash[get_fact('allocation_tags', hosts)]
-    allocation_disabled_fact_hash = Hash[get_fact('allocation_disabled', hosts)]
-    response_hash_1 = merge_attributes_by_fqdn(allocation_disabled_fact_hash, response_hash)
-    response_hash = merge_attributes_by_fqdn(allocation_tag_fact_hash, response_hash_1)
+    inventory_response = get_inventory(hosts)
+    fail "inventory - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+      "(#{inventory_response.map { |x| x[0] }.join(', ')})" unless hosts.size == inventory_response.size
 
-    libvirt_response_hash = Hash[response_hash]
+    response_hash = merge_attributes_by_fqdn(response_hash, Hash[inventory_response])
 
-    response = mco_client("computenodestorage", :nodes => hosts) do |mco|
+    storage_response = mco_client("computenodestorage", :nodes => hosts) do |mco|
       result = mco.details
       result.map do |resp|
         fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
@@ -69,15 +72,12 @@ class Compute::Client
         [resp[:sender], { :storage => resp[:data] }]
       end
     end
+    storage_response_hash = Hash[storage_response]
 
-    fail "not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-      "(#{response.map { |x| x[0] }.join(', ')})" unless hosts.size == response.size
+    fail "storage - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+      "(#{storage_response.map { |x| x[0] }.join(', ')})" unless hosts.size == storage_response.size
 
-    storage_response_hash = Hash[response]
-
-    libvirt_response_hash.each { |fqdn, attr| libvirt_response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
-
-    libvirt_response_hash
+    response_hash.each { |fqdn, attr| response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
   end
 
   def discover_compute_nodes(fabric)

@@ -120,7 +120,6 @@ module CMDAudit
     allocation_status = StackBuilder::Allocator::PolicyHelpers.allocation_status_of(host)
     merge = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats), allocation_status, allocation_tags_host]
     merged_stats = Hash[*merge.map(&:to_a).flatten]
-
     merged_stats[:fqdn] = host.fqdn
     merged_stats
   end

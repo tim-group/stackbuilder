@@ -30,22 +30,12 @@ module StackBuilder::Allocator::PolicyHelpers
   end
 
   def self.allocation_tags_of(host)
-    result = {
-      :tags => host.allocation_tags.join(" ")
-    }
-    result
+    return { :tags => host.facts['allocation_tags'].join(" ") } if host.facts.key?('allocation_tags')
+    { :tags => '' }
   end
 
   def self.allocation_status_of(host)
-    if host.allocation_disabled
-      status = 'Disabled'
-    else
-      status = 'Enabled'
-    end
-
-    result = {
-      :status => status
-    }
-    result
+    return { :status => 'Disabled' } if host.facts.key?('allocation_disabled') && host.facts['allocation_disabled']
+    { :status => 'Enabled' }
   end
 end

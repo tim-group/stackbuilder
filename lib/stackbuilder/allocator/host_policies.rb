@@ -21,7 +21,7 @@ module StackBuilder::Allocator::HostPolicies
 
   def self.allocation_temporarily_disabled_policy
     Proc.new do |host, _machine|
-      if host.allocation_disabled
+      if host.facts['allocation_disabled']
         { :passed => false, :reason => "Allocation disabled" }
       else
         { :passed => true }
@@ -193,7 +193,7 @@ module StackBuilder::Allocator::HostPolicies
   #
   def self.allocate_on_host_with_tags
     Proc.new do |host, machine|
-      host_supplied_tags = host.allocation_tags
+      host_supplied_tags = host.facts['allocation_tags']
       vm_requested_tags = machine[:allocation_tags]
       tag_found = true
       #   Loop through all tags supplied by the VM

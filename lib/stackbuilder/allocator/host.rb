@@ -3,20 +3,19 @@ require 'stackbuilder/allocator/host_policies'
 
 class StackBuilder::Allocator::Host
   attr_accessor :allocated_machines
-  attr_accessor :allocation_disabled
-  attr_accessor :allocation_tags
+  attr_accessor :facts
   attr_accessor :domains # set externally
   attr_accessor :policies
   attr_accessor :preference_functions
   attr_accessor :provisionally_allocated_machines
+  attr_accessor :hosts
   attr_reader :fqdn
   attr_reader :ram
   attr_reader :storage
 
   def initialize(fqdn, args = { :preference_functions => [], :policies => [], :ram => '0', :storage => {} })
     @allocated_machines = []
-    @allocation_disabled = args[:allocation_disabled] || false
-    @allocation_tags = args[:allocation_tags] || ['normal']
+    @facts = args[:facts] || {}
     @domains = Hash
     @fqdn = fqdn
     @policies = args[:policies]
@@ -24,6 +23,12 @@ class StackBuilder::Allocator::Host
     @provisionally_allocated_machines = []
     @ram = args[:ram]
     @storage = args[:storage]
+    @hosts = nil
+    @vm_rack_allocation = {}
+  end
+
+  def availability_groups_in_rack
+    @hosts.availability_group_rack_distribution[@facts['rack']]
   end
 
   def machines
@@ -67,7 +72,7 @@ class StackBuilder::Allocator::Host
     end
   end
 
-  def preference
-    @preference_functions.map { |function| function.call(self) }
+  def preference(machine_spec)
+    @preference_functions.map { |function| function.call(self, machine_spec) }
   end
 end
