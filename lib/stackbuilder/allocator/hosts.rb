@@ -84,7 +84,7 @@ class StackBuilder::Allocator::Hosts
     candidate_hosts = candidate_hosts.sort_by { |host| host.preference(machine) }
 
     logger(Logger::DEBUG) { "kvm host preference list (data storage preference, number of vms, fqdn):" }
-    candidate_hosts.each { |p| logger(Logger::DEBUG) { "  #{p.preference}" } }
+    candidate_hosts.each { |p| logger(Logger::DEBUG) { "  #{p.preference(machine)}" } }
 
     candidate_hosts[0]
   end
