@@ -38,8 +38,8 @@ class Stacks::Factory
       StackBuilder::Allocator::HostPreference.prefer_not_g9,
       StackBuilder::Allocator::HostPreference.prefer_no_data,
       StackBuilder::Allocator::HostPreference.fewest_machines,
-      StackBuilder::Allocator::HostPreference.alphabetical_fqdn,
-      StackBuilder::Allocator::HostPreference.prefer_diverse_vm_rack_distribution
+      StackBuilder::Allocator::HostPreference.prefer_diverse_vm_rack_distribution,
+      StackBuilder::Allocator::HostPreference.alphabetical_fqdn
     ]
   end
 
