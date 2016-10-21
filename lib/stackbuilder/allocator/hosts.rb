@@ -9,7 +9,6 @@ class StackBuilder::Allocator::Hosts
   def initialize(args)
     @hosts = args[:hosts]
     fail 'Cannot initialise Host Allocator with no hosts to allocate!' if hosts.empty?
-    @availability_group_rack_distribution = establish_availability_group_rack_distribution
 
     hosts.each do |host|
       host.preference_functions = args[:preference_functions]
@@ -36,9 +35,7 @@ class StackBuilder::Allocator::Hosts
     }
   end
 
-  private
-
-  def establish_availability_group_rack_distribution
+  def availability_group_rack_distribution
     rack_availability_groups = {}
     hosts.each do |host|
       rack = host.facts['rack']
@@ -55,6 +52,8 @@ class StackBuilder::Allocator::Hosts
     end
     rack_availability_groups
   end
+
+  private
 
   def find_suitable_host_for(machine)
     allocation_denials = []
