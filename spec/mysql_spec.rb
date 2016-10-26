@@ -296,7 +296,7 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
   end
 end
 
-describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of mysql' do
+describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of mysql on precise' do
   given do
     stack "mysql51" do
       mysql_cluster "my51" do
@@ -304,7 +304,7 @@ describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of 
     end
     stack "mysql55" do
       mysql_cluster "my55" do
-        each_machine { |machine| machine.version = '5.5.43-0ubuntu0.12.04.1' }
+        each_machine { |machine| machine.version = '5.5.43-0' }
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -316,7 +316,35 @@ describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of 
     expect(host.to_enc['role::mysql_server']['version']).to eql('5.6.25-1ubuntu12.04')
   end
   host("testing-my55-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['version']).to eql('5.5.43-0ubuntu0.12.04.1')
+    expect(host.to_enc['role::mysql_server']['version']).to eql('5.5.43-0ubuntu12.04')
+  end
+end
+
+describe_stack 'should have mysql 5.6.25-1ubuntu14.04 as the default version of mysql on trusty' do
+  given do
+    stack "mysql51" do
+      mysql_cluster "my51" do
+        each_machine(&:use_trusty)
+      end
+    end
+    stack "mysql55" do
+      mysql_cluster "my55" do
+        each_machine do |machine|
+          machine.version = '5.5.43-0'
+          machine.use_trusty
+        end
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql51"
+      instantiate_stack "mysql55"
+    end
+  end
+  host("testing-my51-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['version']).to eql('5.6.25-1ubuntu14.04')
+  end
+  host("testing-my55-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['version']).to eql('5.5.43-0ubuntu14.04')
   end
 end
 

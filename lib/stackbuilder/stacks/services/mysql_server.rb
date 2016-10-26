@@ -24,7 +24,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @server_id = nil
     @use_gtids = false
     @vcpus = '2'
-    @version = '5.6.25-1ubuntu12.04'
+    @version = '5.6.25-1'
     @mysql_cluster = mysql_cluster
     @monitoring_checks = monitoring_checks
     @grant_user_rights_by_default = false
@@ -200,6 +200,16 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def to_enc
+    dist_version = case @lsbdistcodename
+                   when 'precise'
+                     "#{version}ubuntu12.04"
+                   when 'trusty'
+                     "#{version}ubuntu14.04"
+                   when 'xenial'
+                     "#{version}ubuntu16.04"
+                   else
+                     fail "Unable to establish version for mysql version #{version} on #{@lsbdistcodename}"
+    end
     enc = super()
     enc.merge!('role::mysql_server' => {
                  'database_name'            => @mysql_cluster.database_name,
@@ -208,7 +218,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'role'                     => @role,
                  'server_id'                => server_id,
                  'charset'                  => @mysql_cluster.charset,
-                 'version'                  => @version,
+                 'version'                  => dist_version,
                  'monitoring_checks'        => @monitoring_checks
                },
                'server::default_new_mgmt_net_local' => nil)

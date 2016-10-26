@@ -42,6 +42,7 @@ class Stacks::MachineDef
     @included_classes = {}
     @added_cnames = {}
     @allocation_tags = []
+    @lsbdistcodename = 'precise'
     validate_name
   end
 
@@ -68,6 +69,7 @@ class Stacks::MachineDef
   end
 
   def use_trusty
+    @lsbdistcodename = 'trusty'
     trusty_gold_image = {
       '/'.to_sym =>  {
         :prepare     => {
