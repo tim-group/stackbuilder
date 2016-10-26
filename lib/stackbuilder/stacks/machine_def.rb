@@ -27,7 +27,7 @@ class Stacks::MachineDef
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',
-        :size        => '3G',
+        :size        => '5G',
         :prepare     => {
           :method => 'image',
           :options => {
