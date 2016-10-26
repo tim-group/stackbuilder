@@ -1,7 +1,7 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
-describe_stack 'should default root storage size to 3G' do
+describe_stack 'should default root storage size to 5G' do
   given do
     stack 'demo' do
       loadbalancer_service
@@ -12,7 +12,7 @@ describe_stack 'should default root storage size to 3G' do
   end
 
   host("e1-lb-002.mgmt.space.net.local") do |host|
-    expect(host.to_specs.first[:storage]['/'.to_sym][:size]).to eql('3G')
+    expect(host.to_specs.first[:storage]['/'.to_sym][:size]).to eql('5G')
   end
 end
 
