@@ -200,15 +200,18 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def to_enc
-    dist_version = case @lsbdistcodename
-                   when 'precise'
-                     "#{version}ubuntu12.04"
-                   when 'trusty'
-                     "#{version}ubuntu14.04"
-                   when 'xenial'
-                     "#{version}ubuntu16.04"
-                   else
-                     fail "Unable to establish version for mysql version #{version} on #{@lsbdistcodename}"
+    dist_version = version
+    unless version == '5.1.49-1ubuntu8'
+      dist_version = case @lsbdistcodename
+                     when 'precise'
+                       "#{version}ubuntu12.04"
+                     when 'trusty'
+                       "#{version}ubuntu14.04"
+                     when 'xenial'
+                       "#{version}ubuntu16.04"
+                     else
+                       fail "Unable to establish version for mysql version #{version} on #{@lsbdistcodename}"
+      end
     end
     enc = super()
     enc.merge!('role::mysql_server' => {
