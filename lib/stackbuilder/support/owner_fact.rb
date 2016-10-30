@@ -5,8 +5,8 @@ module OwnerFact
   def self.owner_fact
     @@localhost_hostname = `hostname` if !defined? @@localhost_hostname
     case @@localhost_hostname
-    when /^\w{3}-dev-(\w+)$/            then $1
-    when /^(\w+)-desktop$/              then $1
+    when /^\w{3}-dev-(\w+)/            then $1
+    when /^(\w+)-desktop/              then $1
     when /^dev-puppetserver-\d+-(\w+)$/ then $1
     else 'OWNER-FACT-NOT-FOUND'
     end
