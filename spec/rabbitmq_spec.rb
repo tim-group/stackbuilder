@@ -182,5 +182,4 @@ describe_stack 'applications can depend on rabbitmq clusters in different enviro
     expect(dependencies['magic.messaging.broker_fqdns']).to \
       eql('e2-rabbitmq-001.space.net.local,e2-rabbitmq-002.space.net.local')
   end
-
 end

@@ -44,7 +44,7 @@ module Stacks::Services::RabbitMQCluster
   end
 
   def requirements_of(dependant)
-    dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency[0] == name && dependency[1] == environment.name}
+    dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency[0] == name && dependency[1] == environment.name }
     dependent_on_this_cluster.inject([]) do |requirements, dependency|
       validate_dependency(dependant, dependency)
       requirements << dependency[2]
