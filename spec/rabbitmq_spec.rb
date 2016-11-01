@@ -150,3 +150,37 @@ describe_stack 'rabbitmq users are not created unless services have application'
     expect(host.to_enc['role::rabbitmq_server']['dependant_users']).to be_empty
   end
 end
+
+describe_stack 'applications can depend on rabbitmq clusters in different environments' do
+  given do
+    stack 'rabbit' do
+      rabbitmq_cluster 'rabbitmq'
+    end
+    stack 'depends_on_rabbit' do
+      app_service 'exampleapp' do
+        self.application = 'example'
+        depend_on 'rabbitmq', 'e1', :wizard
+        depend_on 'rabbitmq', 'e2', :magic
+      end
+    end
+
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'rabbit'
+    end
+    env 'e2', :primary_site => 'space' do
+      instantiate_stack 'rabbit'
+    end
+    env 'e3', :primary_site => 'space' do
+      instantiate_stack 'depends_on_rabbit'
+    end
+  end
+
+  host('e3-exampleapp-001.mgmt.space.net.local') do |host|
+    dependencies = host.to_enc['role::http_app']['dependencies']
+    expect(dependencies['wizard.messaging.broker_fqdns']).to \
+      eql('e1-rabbitmq-001.space.net.local,e1-rabbitmq-002.space.net.local')
+    expect(dependencies['magic.messaging.broker_fqdns']).to \
+      eql('e2-rabbitmq-001.space.net.local,e2-rabbitmq-002.space.net.local')
+  end
+
+end
