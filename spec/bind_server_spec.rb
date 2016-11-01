@@ -3,11 +3,11 @@ require 'stacks/test_framework'
 
 describe_stack 'nameservers with bi-directional slave_from dependencies' do
   given do
-    stack "lb" do
+    stack 'lb' do
       loadbalancer_service
     end
 
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         enable_nat
         forwarder_zone(['youdevise.com'])
@@ -20,17 +20,17 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
-        instantiate_stack "lb"
+        instantiate_stack 'nameserver'
+        instantiate_stack 'lb'
       end
     end
 
-    env "p", :primary_site => "pg" do
+    env 'p', :primary_site => 'pg' do
       env 'pg' do
-        instantiate_stack "nameserver"
-        instantiate_stack "lb"
+        instantiate_stack 'nameserver'
+        instantiate_stack 'lb'
       end
     end
   end
@@ -51,7 +51,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   end
 
   # OY Master - Slaves from PG Master
-  host("oy-ns-001.mgmt.oy.net.local") do |host|
+  host('oy-ns-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
@@ -78,7 +78,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     expect(enc['role::bind_server']['forwarder_zones']).to eql(['youdevise.com'])
   end
   # OY Slave - Slaves from OY Master, PG Master
-  host("oy-ns-002.mgmt.oy.net.local") do |host|
+  host('oy-ns-002.mgmt.oy.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
@@ -103,7 +103,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   end
 
   # PG Master - Slaves from OY Master
-  host("pg-ns-001.mgmt.pg.net.local") do |host|
+  host('pg-ns-001.mgmt.pg.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
@@ -131,7 +131,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   end
 
   # PG Slave - Slaves from PG Master, OY Master
-  host("pg-ns-002.mgmt.pg.net.local") do |host|
+  host('pg-ns-002.mgmt.pg.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
@@ -160,11 +160,11 @@ end
 
 describe_stack 'nameservers with single slave_from dependency' do
   given do
-    stack "lb" do
+    stack 'lb' do
       loadbalancer_service
     end
 
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         enable_nat
         forwarder_zone(['youdevise.com'])
@@ -175,22 +175,22 @@ describe_stack 'nameservers with single slave_from dependency' do
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
-        instantiate_stack "lb"
+        instantiate_stack 'nameserver'
+        instantiate_stack 'lb'
       end
     end
 
-    env "p", :primary_site => "pg" do
+    env 'p', :primary_site => 'pg' do
       env 'pg' do
-        instantiate_stack "nameserver"
-        instantiate_stack "lb"
+        instantiate_stack 'nameserver'
+        instantiate_stack 'lb'
       end
     end
   end
   # OY Master
-  host("oy-ns-001.mgmt.oy.net.local") do |host|
+  host('oy-ns-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
@@ -219,7 +219,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     expect(host.virtual_service.vip_networks).to be_eql [:mgmt, :front, :prod]
   end
   # OY Slave - Slaves from OY Master
-  host("oy-ns-002.mgmt.oy.net.local") do |host|
+  host('oy-ns-002.mgmt.oy.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
@@ -240,7 +240,7 @@ describe_stack 'nameservers with single slave_from dependency' do
   end
 
   # PG Master - Slaves from OY Master
-  host("pg-ns-001.mgmt.pg.net.local") do |host|
+  host('pg-ns-001.mgmt.pg.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
@@ -267,7 +267,7 @@ describe_stack 'nameservers with single slave_from dependency' do
   end
 
   # PG Slave - Slaves from PG Master, OY Master
-  host("pg-ns-002.mgmt.pg.net.local") do |host|
+  host('pg-ns-002.mgmt.pg.net.local') do |host|
     enc = host.to_enc
     expect(enc['server::default_new_mgmt_net_local']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
@@ -299,38 +299,38 @@ end
 
 describe_stack 'nameservers should have working load balancer and nat configuration' do
   given do
-    stack "nat" do
+    stack 'nat' do
       nat_service
     end
 
-    stack "lb" do
+    stack 'lb' do
       loadbalancer_service
     end
 
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         enable_nat
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
-        instantiate_stack "nat"
-        instantiate_stack "lb"
+        instantiate_stack 'nameserver'
+        instantiate_stack 'nat'
+        instantiate_stack 'lb'
       end
     end
 
-    env "p", :primary_site => "pg" do
+    env 'p', :primary_site => 'pg' do
       env 'pg' do
-        instantiate_stack "nameserver"
-        instantiate_stack "nat"
-        instantiate_stack "lb"
+        instantiate_stack 'nameserver'
+        instantiate_stack 'nat'
+        instantiate_stack 'lb'
       end
     end
   end
 
-  host("oy-nat-001.mgmt.oy.net.local") do |host|
+  host('oy-nat-001.mgmt.oy.net.local') do |host|
     expect(host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['dest_host']).
       to eql('oy-ns-vip.oy.net.local')
     expect(host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['dest_port']).to eql('53')
@@ -338,7 +338,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
     expect(host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']['udp']).to eql(true)
   end
 
-  host("oy-lb-001.mgmt.oy.net.local") do |host|
+  host('oy-lb-001.mgmt.oy.net.local') do |host|
     expect(host.to_enc['role::loadbalancer']['virtual_servers']['oy-ns-vip.oy.net.local']['healthchecks']).to include(
       {
         'healthcheck' => 'MISC_CHECK',
@@ -365,15 +365,15 @@ end
 
 describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
   given do
-    stack "nat" do
+    stack 'nat' do
       nat_service
     end
 
-    stack "lb" do
+    stack 'lb' do
       loadbalancer_service
     end
 
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         each_machine do |machine|
           machine.remove_network :prod
@@ -381,27 +381,27 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
-        instantiate_stack "nat"
-        instantiate_stack "lb"
+        instantiate_stack 'nameserver'
+        instantiate_stack 'nat'
+        instantiate_stack 'lb'
       end
     end
   end
 
-  host("oy-ns-001.mgmt.oy.net.local") do |host|
+  host('oy-ns-001.mgmt.oy.net.local') do |host|
     expect(host.virtual_service.vip_networks).to be_eql [:mgmt]
     expect(host.to_enc['role::bind_server']['vip_fqdns']).to eql(['oy-ns-vip.mgmt.oy.net.local'])
     expect(host.to_spec[:networks]).to eql([:mgmt])
     expect(host.to_spec[:qualified_hostnames]).to be_eql(:mgmt => 'oy-ns-001.mgmt.oy.net.local')
   end
 
-  host("oy-nat-001.mgmt.oy.net.local") do |host|
+  host('oy-nat-001.mgmt.oy.net.local') do |host|
     expect(host.to_enc['role::natserver']['rules']['DNAT']['oy-ns-vip.front.oy.net.local 53']).to be_nil
   end
 
-  host("oy-lb-001.mgmt.oy.net.local") do |host|
+  host('oy-lb-001.mgmt.oy.net.local') do |host|
     expect(host.to_enc['role::loadbalancer']['virtual_servers']['oy-ns-vip.oy.net.local']).to be_nil
     expect(host.to_enc['role::loadbalancer']['virtual_servers']['oy-ns-vip.mgmt.oy.net.local']).not_to be_nil
   end
@@ -409,28 +409,28 @@ end
 
 describe_stack 'bind servers with zones removed should have the right zone files' do
   given do
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         remove_zone :front
         remove_zone :prod
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
+        instantiate_stack 'nameserver'
       end
     end
   end
 
-  host("oy-ns-001.mgmt.oy.net.local") do |host|
+  host('oy-ns-001.mgmt.oy.net.local') do |host|
     expect(host.virtual_service.zones).to be_eql [:mgmt]
   end
 end
 
 describe_stack 'bind servers with zones added should have the right zone files' do
   given do
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         add_zone :glue
         add_zone :crosssite
@@ -438,34 +438,34 @@ describe_stack 'bind servers with zones added should have the right zone files' 
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
+        instantiate_stack 'nameserver'
       end
     end
   end
 
-  host("oy-ns-001.mgmt.oy.net.local") do |host|
+  host('oy-ns-001.mgmt.oy.net.local') do |host|
     expect(host.virtual_service.zones).to be_eql [:mgmt, :prod, :front, :glue, :crosssite]
   end
 end
 
 describe_stack 'test @slave_instances = 2' do
   given do
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         self.slave_instances = 2
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
+        instantiate_stack 'nameserver'
       end
     end
   end
 
-  host("oy-ns-003.mgmt.oy.net.local") do |host|
+  host('oy-ns-003.mgmt.oy.net.local') do |host|
     enc = host.to_enc
     expect(enc['role::bind_server']['slave_zones']).
       to eql('oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'])
@@ -474,7 +474,7 @@ end
 
 describe_stack 'test allow_host entries are supported' do
   given do
-    stack "nameserver" do
+    stack 'nameserver' do
       bind_service 'ns' do
         allow_host '1.1.1.1'
         each_machine do |_machine|
@@ -483,14 +483,14 @@ describe_stack 'test allow_host entries are supported' do
       end
     end
 
-    env "o", :primary_site => "oy" do
+    env 'o', :primary_site => 'oy' do
       env 'oy' do
-        instantiate_stack "nameserver"
+        instantiate_stack 'nameserver'
       end
     end
   end
 
-  host("oy-ns-001.mgmt.oy.net.local") do |host|
+  host('oy-ns-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
     expect(enc['role::bind_server']['allowed_hosts']).to eql ['1.1.1.1', '2.2.2.2']
   end
