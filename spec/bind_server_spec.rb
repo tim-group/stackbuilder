@@ -63,12 +63,11 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       to eql('pg-ns-001.mgmt.pg.net.local' => ['mgmt.pg.net.local', 'pg.net.local', 'front.pg.net.local'])
     expect(enc['role::bind_server']['vip_fqdns']).to include('oy-ns-vip.mgmt.oy.net.local')
     expect(enc['role::bind_server']['vip_fqdns']).to include('oy-ns-vip.oy.net.local')
-    expect(enc['role::bind_server']['dependant_instances']).to include(
+    expect(enc['role::bind_server']['dependant_instances']).to eql([
+      'oy-ns-002.mgmt.oy.net.local',
       'pg-ns-001.mgmt.pg.net.local',
-      'pg-ns-002.mgmt.pg.net.local',
-      'oy-ns-002.mgmt.oy.net.local'
-    )
-    expect(enc['role::bind_server']['dependant_instances'].size).to eql(3)
+      'pg-ns-002.mgmt.pg.net.local'
+    ])
     expect(enc['role::bind_server']['participation_dependant_instances']).to eql([
       'oy-lb-001.mgmt.oy.net.local',
       'oy-lb-001.oy.net.local',
@@ -88,11 +87,10 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
     )
     expect(enc['role::bind_server']['vip_fqdns']).to include('oy-ns-vip.mgmt.oy.net.local')
     expect(enc['role::bind_server']['vip_fqdns']).to include('oy-ns-vip.oy.net.local')
-    expect(enc['role::bind_server']['dependant_instances']).to include(
+    expect(enc['role::bind_server']['dependant_instances']).to eql([
       'oy-ns-001.mgmt.oy.net.local',
       'pg-ns-001.mgmt.pg.net.local'
-    )
-    expect(enc['role::bind_server']['dependant_instances'].size).to eql(2)
+    ])
     expect(enc['role::bind_server']['participation_dependant_instances']).to eql([
       'oy-lb-001.mgmt.oy.net.local',
       'oy-lb-001.oy.net.local',
@@ -115,12 +113,11 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       to eql('oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'])
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.mgmt.pg.net.local')
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.pg.net.local')
-    expect(enc['role::bind_server']['dependant_instances']).to include(
-      'pg-ns-002.mgmt.pg.net.local',
+    expect(enc['role::bind_server']['dependant_instances']).to eql([
       'oy-ns-001.mgmt.oy.net.local',
-      'oy-ns-002.mgmt.oy.net.local'
-    )
-    expect(enc['role::bind_server']['dependant_instances'].size).to eql(3)
+      'oy-ns-002.mgmt.oy.net.local',
+      'pg-ns-002.mgmt.pg.net.local'
+    ])
     expect(enc['role::bind_server']['participation_dependant_instances']).to eql([
       'pg-lb-001.mgmt.pg.net.local',
       'pg-lb-001.pg.net.local',
@@ -143,11 +140,10 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
                                                            ])
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.mgmt.pg.net.local')
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.pg.net.local')
-    expect(enc['role::bind_server']['dependant_instances']).to include(
-      'pg-ns-001.mgmt.pg.net.local',
-      'oy-ns-001.mgmt.oy.net.local'
-    )
-    expect(enc['role::bind_server']['dependant_instances'].size).to eql(2)
+    expect(enc['role::bind_server']['dependant_instances']).to eql([
+      'oy-ns-001.mgmt.oy.net.local',
+      'pg-ns-001.mgmt.pg.net.local'
+    ])
     expect(enc['role::bind_server']['participation_dependant_instances']).to eql([
       'pg-lb-001.mgmt.pg.net.local',
       'pg-lb-001.pg.net.local',
@@ -201,12 +197,11 @@ describe_stack 'nameservers with single slave_from dependency' do
     expect(enc['role::bind_server']).not_to have_key('slave_zones')
     expect(enc['role::bind_server']['vip_fqdns']).to include('oy-ns-vip.mgmt.oy.net.local')
     expect(enc['role::bind_server']['vip_fqdns']).to include('oy-ns-vip.oy.net.local')
-    expect(enc['role::bind_server']['dependant_instances']).to include(
+    expect(enc['role::bind_server']['dependant_instances']).to eql([
+      'oy-ns-002.mgmt.oy.net.local',
       'pg-ns-001.mgmt.pg.net.local',
-      'pg-ns-002.mgmt.pg.net.local',
-      'oy-ns-002.mgmt.oy.net.local'
-    )
-    expect(enc['role::bind_server']['dependant_instances'].size).to eql(3)
+      'pg-ns-002.mgmt.pg.net.local'
+    ])
     expect(enc['role::bind_server']['participation_dependant_instances']).to eql([
       'oy-lb-001.mgmt.oy.net.local',
       'oy-lb-001.oy.net.local',
@@ -252,11 +247,10 @@ describe_stack 'nameservers with single slave_from dependency' do
       to eql('oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'])
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.mgmt.pg.net.local')
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.pg.net.local')
-    expect(enc['role::bind_server']['dependant_instances']).to include(
-      'pg-ns-002.mgmt.pg.net.local',
-      'oy-ns-001.mgmt.oy.net.local'
-    )
-    expect(enc['role::bind_server']['dependant_instances'].size).to eql(2)
+    expect(enc['role::bind_server']['dependant_instances']).to eql([
+      'oy-ns-001.mgmt.oy.net.local',
+      'pg-ns-002.mgmt.pg.net.local'
+    ])
     expect(enc['role::bind_server']['participation_dependant_instances']).to eql([
       'pg-lb-001.mgmt.pg.net.local',
       'pg-lb-001.pg.net.local',
@@ -279,11 +273,10 @@ describe_stack 'nameservers with single slave_from dependency' do
                                                            ])
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.mgmt.pg.net.local')
     expect(enc['role::bind_server']['vip_fqdns']).to include('pg-ns-vip.pg.net.local')
-    expect(enc['role::bind_server']['dependant_instances']).to include(
-      'pg-ns-001.mgmt.pg.net.local',
-      'oy-ns-001.mgmt.oy.net.local'
-    )
-    expect(enc['role::bind_server']['dependant_instances'].size).to eql(2)
+    expect(enc['role::bind_server']['dependant_instances']).to eql([
+      'oy-ns-001.mgmt.oy.net.local',
+      'pg-ns-001.mgmt.pg.net.local'
+    ])
     expect(enc['role::bind_server']['participation_dependant_instances']).to eql([
       'pg-lb-001.mgmt.pg.net.local',
       'pg-lb-001.pg.net.local',

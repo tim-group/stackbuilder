@@ -75,7 +75,7 @@ module Stacks::Services::VirtualBindService
     indirect_deps = bind_servers_that_depend_on_me if machine_def.master?
     all_deps.merge(indirect_deps) unless indirect_deps.nil?
     all_deps.merge(bind_servers_that_i_depend_on)
-    all_deps.to_a
+    all_deps.to_a.sort
   end
 
   def slave_zones_fqdn(bind_server)
