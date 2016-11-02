@@ -42,20 +42,6 @@ describe Stacks::MachineDef do
     expect(machinedef.to_spec[:disallow_destroy]).to eql nil
   end
 
-  it 'should disable persistent if the environment does not support it' do
-    machinedef = Stacks::MachineDef.new('test')
-    machinedef.modify_storage('/'.to_sym         => { :persistent => true },
-                              '/mnt/data'.to_sym => { :persistent => true, :type => :os, :size => '100G' })
-    env_opts = {
-      :primary_site                 => 'local',
-      :persistent_storage_supported => false
-    }
-    env = new_environment('noenv', env_opts)
-    machinedef.bind_to(env)
-    expect(machinedef.to_spec[:storage]['/'.to_sym][:persistent]).to eql false
-    expect(machinedef.to_spec[:storage]['/mnt/data'.to_sym][:persistent]).to eql false
-  end
-
   it 'populates routes in the enc if routes are added' do
     machinedef = Stacks::MachineDef.new('test')
     machinedef.add_route('mgmt_pg')
@@ -116,7 +102,7 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new('test')
     machinedef.use_trusty
 
-    env = new_environment('noenv', :persistent_storage_supported => true, :primary_site => 'st')
+    env = new_environment('noenv', :primary_site => 'st')
     env.set_allocation_tags('st', %w(trusty precise))
     machinedef.bind_to(env)
 

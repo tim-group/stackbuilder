@@ -21,8 +21,6 @@ class Stacks::Environment
     @environments = environments
     @stack_procs = stack_procs
     @definitions = {}
-    @persistent_storage_supported =
-      options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
     @every_machine_destroyable =
       options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
     @primary_site = options[:primary_site]
@@ -145,10 +143,6 @@ class Stacks::Environment
         'site'    => site
       }
     }
-  end
-
-  def persistent_storage_supported?
-    @persistent_storage_supported
   end
 
   def every_machine_destroyable?

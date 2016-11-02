@@ -118,12 +118,6 @@ class Stacks::MachineDef
                                                                 !@environment.allocation_tags[$fabric].nil?
   end
 
-  def disable_persistent_storage
-    @storage.each do |mount_point, _values|
-      modify_storage(mount_point.to_sym => { :persistent => false })
-    end
-  end
-
   def accept(&block)
     block.call(self)
   end
@@ -172,7 +166,6 @@ class Stacks::MachineDef
 
   def to_spec
     validate_storage
-    disable_persistent_storage unless environment.persistent_storage_supported?
     @destroyable = true if environment.every_machine_destroyable?
 
     spec = {
