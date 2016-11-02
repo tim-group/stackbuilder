@@ -173,6 +173,7 @@ class Stacks::MachineDef
   def to_spec
     validate_storage
     disable_persistent_storage unless environment.persistent_storage_supported?
+    @destroyable = true if environment.every_machine_destroyable?
 
     spec = {
       :hostname                => @hostname,
