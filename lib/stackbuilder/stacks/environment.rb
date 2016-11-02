@@ -23,8 +23,6 @@ class Stacks::Environment
     @definitions = {}
     @persistent_storage_supported =
       options[:persistent_storage_supported].nil? ? true : options[:persistent_storage_supported]
-    @every_machine_destroyable =
-      options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
     @primary_site = options[:primary_site]
     @secondary_site = options[:secondary_site]
     @domain_suffix = options[:domain_suffix] || 'net.local'
@@ -149,10 +147,6 @@ class Stacks::Environment
 
   def persistent_storage_supported?
     @persistent_storage_supported
-  end
-
-  def every_machine_destroyable?
-    @every_machine_destroyable
   end
 
   def env(name, options = {}, &block)
