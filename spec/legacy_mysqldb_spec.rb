@@ -22,7 +22,7 @@ describe_stack 'should allow destroy to be overwritten' do
   given do
     stack "mysql" do
       legacy_mysql_cluster "mydb" do
-        each_machine(&:allow_destroy)
+        each_machine { |machine| machine.destroyable = true }
       end
     end
     env "testing", :primary_site => "space" do
@@ -40,7 +40,7 @@ describe_stack 'should provide correct enc data' do
     stack "mysql" do
       legacy_mysql_cluster "mydb" do
         self.database_name = "mydb"
-        each_machine(&:allow_destroy)
+        each_machine { |machine| machine.destroyable = true }
       end
     end
     env "testing", :primary_site => "space" do

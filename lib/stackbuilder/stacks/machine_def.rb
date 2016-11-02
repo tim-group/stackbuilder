@@ -17,6 +17,7 @@ class Stacks::MachineDef
   attr_accessor :vcpus
   attr_accessor :allocation_tags
   attr_accessor :machine_allocation_tags
+  attr_accessor :destroyable
 
   def initialize(base_hostname, networks = [:mgmt, :prod], location = :primary_site)
     @base_hostname = base_hostname

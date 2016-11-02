@@ -240,7 +240,7 @@ class Compute::Controller
     non_destroyable_specs.each do |spec|
       logger(Logger::FATAL) do
         "#{spec[:hostname]} is not destroyable\n To override this protection, " \
-        "please specify machine.allow_destroy(true)"
+        "please specify machine.destroyable = true"
       end
       fail "#{spec[:hostname]} is not destroyable"
     end
