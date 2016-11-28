@@ -594,7 +594,6 @@ namespace :sbx do
               it_behaves_like test, child_machine_def
             end
           end
-          raise ""
         end
         RSpec::Core::Runner.run([], $stderr, $stdout)
       end
