@@ -598,9 +598,10 @@ namespace :sbx do
         result = RSpec::Core::Runner.run([], $stderr, $stdout)
 
         if (result != 0)
-          logger(Logger::ERROR) {
-            "The 'test' task failed, indicating the stack is not functioning correctly. " +
-              "See the above test output for details."}
+          logger(Logger::ERROR) do
+            "The 'test' task failed, indicating the stack is not functioning correctly. " \
+              "See the above test output for details."
+          end
           abort
         end
       end
