@@ -595,7 +595,14 @@ namespace :sbx do
             end
           end
         end
-        RSpec::Core::Runner.run([], $stderr, $stdout)
+        result = RSpec::Core::Runner.run([], $stderr, $stdout)
+
+        if (result != 0)
+          logger(Logger::ERROR) {
+            "The 'test' task failed, indicating the stack is not functioning correctly. " +
+              "See the above test output for details."}
+          abort
+        end
       end
     end
   end
