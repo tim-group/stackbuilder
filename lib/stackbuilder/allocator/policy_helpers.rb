@@ -38,4 +38,23 @@ module StackBuilder::Allocator::PolicyHelpers
     return { :status => 'Disabled' } if host.facts.key?('allocation_disabled') && host.facts['allocation_disabled']
     { :status => 'Enabled' }
   end
+
+  def self.vcpu_usage(host)
+    host_vcpu = host.facts['processorcount'].to_i
+    host_reserve_vcpu = 0
+    if host_vcpu > 0
+      allocated_vcpu = 0
+      host.machines.each do |allocated_machine|
+        allocated_vcpu = (allocated_vcpu + allocated_machine[:vcpus].to_i)
+      end
+      available_vcpu = ((host_vcpu - allocated_vcpu) - host_reserve_vcpu)
+      result = {
+        :host_vcpu => host_vcpu,
+        :host_reserve_vcpu => host_reserve_vcpu,
+        :allocated_vcpu => allocated_vcpu,
+        :available_vcpu => available_vcpu
+      }
+    end
+    result
+  end
 end

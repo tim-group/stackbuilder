@@ -17,11 +17,12 @@ module CMDAudit
       case header
       when :fqdn                        then order[0] = header
       when :vms                         then order[1] = header
-      when 'memory(GB)'.to_sym          then order[2] = header
-      when 'os(GB)'.to_sym              then order[3] = header
-      when 'data(GB)'.to_sym            then order[4] = header
-      when 'allocation disabled'.to_sym then order[5] = header
-      when 'tags'.to_sym                then order[6] = header
+      when :vcpus                       then order[2] = header
+      when 'memory(GB)'.to_sym          then order[3] = header
+      when 'os(GB)'.to_sym              then order[4] = header
+      when 'data(GB)'.to_sym            then order[5] = header
+      when 'allocation disabled'.to_sym then order[6] = header
+      when 'tags'.to_sym                then order[7] = header
       else order.push(header)
       end
       order
@@ -36,6 +37,11 @@ module CMDAudit
     when 'vms'
       @total[:vms] += value.to_i
       total_width = @total[:vms].to_s.size
+    when 'vcpus'
+      re = /^(\d+)\/(\d+)/.match(value)
+      @total[:vcpu_used] += re[1].to_i
+      @total[:vcpu_avail] += re[2].to_i
+      total_width = @total_str.call(@total[:vcpu_used], @total[:vcpu_avail]).to_s.size
     when 'memory(GB)'
       re = /^(\d+)\/(\d+)/.match(value)
       @total[:mem_used] += re[1].to_i
@@ -89,6 +95,7 @@ module CMDAudit
     total_list = [
       "total",
       "#{@total[:vms]}",
+      @total_str.call(@total[:vcpu_used], @total[:vcpu_avail]),
       @total_str.call(@total[:mem_used], @total[:mem_avail]),
       @total_str.call(@total[:os_used], @total[:os_avail])
     ]
@@ -116,9 +123,12 @@ module CMDAudit
     ram_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.ram_stats_of(host))
     storage_stats = convert_hash_values_from_kb_to_gb(StackBuilder::Allocator::PolicyHelpers.storage_stats_of(host))
     vm_stats = StackBuilder::Allocator::PolicyHelpers.vm_stats_of(host)
+    cpu_stats = StackBuilder::Allocator::PolicyHelpers.vcpu_usage(host)
     allocation_tags_host = StackBuilder::Allocator::PolicyHelpers.allocation_tags_of(host)
     allocation_status = StackBuilder::Allocator::PolicyHelpers.allocation_status_of(host)
-    merge = [storage_stats_to_string(storage_stats), vm_stats, ram_stats_to_string(ram_stats), allocation_status, allocation_tags_host]
+    merge = [storage_stats_to_string(storage_stats), vm_stats,
+             ram_stats_to_string(ram_stats), vcpu_stats_to_string(cpu_stats),
+             allocation_status, allocation_tags_host]
     merged_stats = Hash[*merge.map(&:to_a).flatten]
     merged_stats[:fqdn] = host.fqdn
     merged_stats
@@ -147,6 +157,13 @@ module CMDAudit
     total = ram_stats[:host_ram]
     used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s.rjust(3)}%" rescue 0
     { 'memory(GB)'.to_sym => "#{used}/#{total} #{used_percentage}" }
+  end
+
+  def vcpu_stats_to_string(vcpu_stats)
+    used = vcpu_stats[:allocated_vcpu]
+    total = vcpu_stats[:host_vcpu]
+    used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s.rjust(3)}%" rescue 0
+    { 'vcpus'.to_sym => "#{used}/#{total} #{used_percentage}" }
   end
 
   def storage_stats_to_string(storage_stats)
