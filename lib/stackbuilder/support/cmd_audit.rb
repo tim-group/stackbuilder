@@ -15,14 +15,14 @@ module CMDAudit
   def order(headers)
     headers.inject([]) do |order, header|
       case header
-      when :fqdn                        then order[0] = header
-      when :vms                         then order[1] = header
-      when :vcpus                       then order[2] = header
-      when 'memory(GB)'.to_sym          then order[3] = header
-      when 'os(GB)'.to_sym              then order[4] = header
-      when 'data(GB)'.to_sym            then order[5] = header
-      when 'allocation disabled'.to_sym then order[6] = header
-      when 'tags'.to_sym                then order[7] = header
+      when :fqdn               then order[0] = header
+      when :vms                then order[1] = header
+      when :vcpus              then order[2] = header
+      when 'memory(GB)'.to_sym then order[3] = header
+      when 'os(GB)'.to_sym     then order[4] = header
+      when 'data(GB)'.to_sym   then order[5] = header
+      when 'status'.to_sym     then order[6] = header
+      when 'tags'.to_sym       then order[7] = header
       else order.push(header)
       end
       order
