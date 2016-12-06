@@ -106,7 +106,6 @@ describe Stacks::MachineDef do
     env.set_allocation_tags('st', %w(trusty precise))
     machinedef.bind_to(env)
 
-    expect(machinedef.allocation_tags).to include('trusty')
     expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to include('ubuntu-trusty')
   end
 end

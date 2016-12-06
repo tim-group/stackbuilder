@@ -81,8 +81,6 @@ class Stacks::MachineDef
       }
     }
     modify_storage(trusty_gold_image)
-
-    @allocation_tags << 'trusty'
   end
 
   def needs_signing?
