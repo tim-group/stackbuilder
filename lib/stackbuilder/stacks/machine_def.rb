@@ -1,4 +1,6 @@
 require 'stackbuilder/support/owner_fact'
+require 'stackbuilder/stacks/dependable_definer'
+require 'stackbuilder/stacks/dependent'
 require 'stackbuilder/stacks/namespace'
 
 class Stacks::MachineDef
@@ -45,6 +47,8 @@ class Stacks::MachineDef
     @allocation_tags = []
     @lsbdistcodename = 'precise'
     validate_name
+    extend Stacks::DependableDefiner
+    extend Stacks::Dependent
   end
 
   def validate_name

@@ -1,6 +1,8 @@
 require 'securerandom'
 require 'stackbuilder/stacks/machine_def_container'
+require 'stackbuilder/stacks/dependable_definer'
 require 'stackbuilder/stacks/dependencies'
+require 'stackbuilder/stacks/dependent'
 require 'stackbuilder/stacks/namespace'
 require 'uri'
 
@@ -36,6 +38,8 @@ class Stacks::MachineSet
     @depends_on = []
     @enable_secondary_site = false
     @server_offset = 0
+    extend Stacks::DependableDefiner
+    extend Stacks::Dependent
   end
 
   def secondary_site?
