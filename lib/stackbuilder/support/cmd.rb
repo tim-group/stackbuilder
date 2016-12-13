@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile dependables dependencies ls lsenv enc spec clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -114,6 +114,26 @@ class CMD
     system("cd #{$options[:path]}" \
            " && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean" \
            " && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean_traces")
+  end
+
+  def dependables(_argv)
+    node = check_and_get_stack
+    puts ZAMLS.to_zamls(node.dependables_to_hash)
+  end
+
+  def dependencies(_argv)
+    node = check_and_get_stack
+    if node.kind_of? Stacks::MachineDef
+      puts "Dependencies of machine #{node.mgmt_fqdn}:"
+      puts ZAMLS.to_zamls(node.dependencies_to_hash)
+      if node.respond_to? :virtual_service and not node.virtual_service.nil?
+        puts "Inherited dependencies of associated machine_set:"
+        puts ZAMLS.to_zamls(node.virtual_service.dependencies_to_hash)
+      end
+    elsif node.kind_of? Stacks::MachineSet
+      puts "Dependencies of machine_set '#{node.name}':"
+      puts ZAMLS.to_zamls(node.dependencies_to_hash)
+    end
   end
 
   # XXX do this properly

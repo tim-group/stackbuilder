@@ -44,6 +44,15 @@ module Stacks
       node
     end
 
+    def find_machine_set(name)
+      machine_sets = []
+      accept do |node|
+        machine_sets << node if node.kind_of?(Stacks::MachineSet) && node.name == name
+      end
+      fail("Tried to find machine_set named '#{name}'but found #{machine_sets.length} results") if machine_sets.length != 1
+      machine_sets.first
+    end
+
     def find(fqdn)
       node = nil
       accept do |machine_def|

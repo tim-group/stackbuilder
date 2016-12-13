@@ -16,6 +16,12 @@ module Stacks::TestFramework
     end
   end
 
+  def machine_set(name, &block)
+    subject = @subject
+    machine_set = subject.find_machine_set(name)
+    block.call(machine_set)
+  end
+
   def all_hosts(&block)
     subject = @subject
     it "all hosts" do

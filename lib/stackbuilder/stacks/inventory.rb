@@ -18,7 +18,7 @@ class Stacks::Inventory
     end
     # FIXME: I'm sure there's a better place for this to go?!
     @stacks.accept do |machine_def|
-      machine_def.resolve_dependencies if machine_def.type_of? Stacks::Dependent
+      machine_def.resolve_dependencies if machine_def.kind_of? Stacks::Dependent
     end
   end
 

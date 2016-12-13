@@ -5,4 +5,9 @@ class Stacks::Dependable
     @name = name
   end
 
+  def to_hash
+    {
+      @name => {}
+    }
+  end
 end

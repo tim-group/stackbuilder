@@ -10,4 +10,19 @@ class Stacks::Dependency
     @environment_name = environment_name
   end
 
+  def ==(dep)
+    return false unless @dependable_name == dep.dependable_name
+    return false unless @service_name == dep.service_name
+    return false unless @environment_name == dep.environment_name
+    true
+  end
+
+  def to_hash
+    {
+      @dependable_name => {
+        :service_name => @service_name,
+        :environment_name => @environment_name
+      }
+    }
+  end
 end
