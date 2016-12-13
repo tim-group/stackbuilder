@@ -51,12 +51,23 @@ class Stacks::MachineSet
   end
 
   def instantiate_machines(environment)
-    @instances.times do |i|
-      server_id = i + @server_offset
-      @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :primary_site)
-      if @enable_secondary_site
-        @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :secondary_site)
+    if @instances.is_a?(Integer)
+      @instances.times do |i|
+        server_id = i + @server_offset
+        @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :primary_site)
+        if @enable_secondary_site
+          @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :secondary_site)
+        end
       end
+    elsif @instances.is_a?(Hash)
+      @instances.each do |site, count|
+        count.times do |c|
+          server_id = c + @server_offset
+          @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, site)
+        end
+      end
+    else
+      fail "@instances was an un-supported type: #{instances.class}, expected Integer|Hash.\n@instances: #{@instances.inspect}"
     end
   end
 

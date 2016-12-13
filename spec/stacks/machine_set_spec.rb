@@ -61,3 +61,30 @@ describe 'Stacks::MachineSet' do
     end
   end
 end
+
+describe_stack 'should support instances as a hash' do
+  given do
+    stack 'example' do
+      app_service "appx" do
+        self.application = "JavaHttpRef"
+        self.instances = {
+          :primary_site   => 0,
+          :secondary_site => 2
+        }
+      end
+    end
+
+    env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+      instantiate_stack "example"
+    end
+  end
+
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts(
+      [
+        'e1-appx-001.mgmt.jupiter.net.local',
+        'e1-appx-002.mgmt.jupiter.net.local'
+      ]
+    )
+  end
+end
