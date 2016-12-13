@@ -25,6 +25,10 @@ class Stacks::Environment
       options[:every_machine_destroyable].nil? ? false : options[:every_machine_destroyable]
     @primary_site = options[:primary_site]
     @secondary_site = options[:secondary_site]
+
+    # Transitional site lookup array, allowing servers to translate sites (oy,pg) to legacy symbols
+    @sites = [options[:primary_site], options[:secondary_site]]
+
     @domain_suffix = options[:domain_suffix] || 'net.local'
     @parent = parent
     @children = []
@@ -38,6 +42,20 @@ class Stacks::Environment
     @routes.keys.each do |site|
       @routes[site].concat(@parent.routes[site]) if @parent.routes.key?(site)
     end unless @parent.nil?
+  end
+
+  # Transitional site lookup array, allowing servers to translate sites (oy,pg) to legacy symbols
+  def translate_site_symbol(site)
+    return :primary_site   if @sites.find_index(site) == 0
+    return :secondary_site if @sites.find_index(site) == 1
+    fail "Environment: #{environment.name} does not support site: #{site}. Environment is only available in: #{@sites.join(',')}"
+  end
+
+  def validate_instance_sites(requested_sites)
+    site_diff = requested_sites - @sites
+    fail "#{name} environment does not support site(s): #{site_diff.join(',')}" \
+         "\nSites requested: #{requested_sites}" \
+         "\nEnvironment provides: #{@sites}" unless site_diff.empty?
   end
 
   def add_route(fabric, route_name)

@@ -60,10 +60,12 @@ class Stacks::MachineSet
         end
       end
     elsif @instances.is_a?(Hash)
+      environment.validate_instance_sites(@instances.keys)
       @instances.each do |site, count|
+        site_symbol = environment.translate_site_symbol(site)
         count.times do |c|
           server_id = c + @server_offset
-          @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, site)
+          @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, site_symbol)
         end
       end
     else

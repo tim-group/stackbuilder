@@ -67,10 +67,7 @@ describe_stack 'should support instances as a hash' do
     stack 'example' do
       app_service "appx" do
         self.application = "JavaHttpRef"
-        self.instances = {
-          :primary_site   => 0,
-          :secondary_site => 2
-        }
+        self.instances = { 'earth' => 0, 'jupiter' => 2 }
       end
     end
 
@@ -87,4 +84,21 @@ describe_stack 'should support instances as a hash' do
       ]
     )
   end
+end
+
+describe_stack 'should raise exception for an un-supported site' do
+  expect do
+    given do
+      stack 'example' do
+        app_service "appx" do
+          self.application = "JavaHttpRef"
+          self.instances = { 'earth' => 0, 'jupiter' => 2, 'moon' => 0 }
+        end
+      end
+
+      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+        instantiate_stack("example")
+      end
+    end
+  end.to raise_error(/e1 environment does not support site\(s\): moon/)
 end
