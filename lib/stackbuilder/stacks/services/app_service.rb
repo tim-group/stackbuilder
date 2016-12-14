@@ -57,6 +57,7 @@ module Stacks::Services::AppService
     config = {}
     if respond_to?(:load_balanced_service?)
       config = loadbalancer_config(location, fabric)
+      return {} if config.empty?
       unless @sso_port.nil?
         if @disable_http_lb_hack
           config[vip_fqdn(:prod, fabric)]['type'] = 'sso_app'
