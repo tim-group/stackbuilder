@@ -139,6 +139,7 @@ module Stacks::Services::VirtualService
 
   def loadbalancer_config(location, fabric)
     fewest_servers_in_a_group = realservers(location).size
+    return {} if fewest_servers_in_a_group == 0
     grouped_realservers = realservers(location).group_by(&:group)
     realservers_hash = Hash[grouped_realservers.map do |group, rs|
       fewest_servers_in_a_group = rs.size unless rs.size > fewest_servers_in_a_group
