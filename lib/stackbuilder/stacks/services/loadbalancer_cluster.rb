@@ -33,12 +33,19 @@ module Stacks::Services::LoadBalancerCluster
       )
     end
     lb_services.uniq.map do |node|
-      config_hash.merge! node.to_loadbalancer_config(location, fabric)
+      node_lb_config = node.to_loadbalancer_config(location, fabric)
+      config_hash.merge! node_lb_config
     end
-    config_hash
+    reject_vips_without_realservers config_hash
   end
 
   def clazz
     'loadbalancercluster'
+  end
+
+  private
+
+  def reject_vips_without_realservers(lb_config)
+    lb_config.reject { |_vip, config| !config.key?('realservers') || config['realservers'].empty? }
   end
 end

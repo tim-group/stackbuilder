@@ -248,11 +248,25 @@ describe_stack 'should only load balance for services in the same site' do
         self.application = "JavaHttpRef"
         self.instances = { 'oy' => 2 }
       end
+      app_service "appy" do
+        self.application = "JavaHttpRef"
+        self.instances = 2
+      end
+    end
+    stack 'rabbit' do
+      rabbitmq_cluster 'rabbitmq'
+    end
+    stack 'proxy' do
+      proxy_service 'eproxy' do
+        vhost('appy')
+      end
     end
 
     env "e1", :primary_site => "pg", :secondary_site => 'oy' do
       instantiate_stack("lb")
       instantiate_stack("example")
+      instantiate_stack("rabbit")
+      instantiate_stack("proxy")
     end
   end
   it_stack 'should contain all the expected hosts' do |stack|
@@ -263,16 +277,26 @@ describe_stack 'should only load balance for services in the same site' do
         'e1-lb-001.mgmt.oy.net.local',
         'e1-lb-002.mgmt.oy.net.local',
         'e1-appx-001.mgmt.oy.net.local',
-        'e1-appx-002.mgmt.oy.net.local'
+        'e1-appx-002.mgmt.oy.net.local',
+        'e1-appy-001.mgmt.pg.net.local',
+        'e1-appy-002.mgmt.pg.net.local',
+        'e1-rabbitmq-001.mgmt.pg.net.local',
+        'e1-rabbitmq-002.mgmt.pg.net.local',
+        'e1-eproxy-001.mgmt.pg.net.local',
+        'e1-eproxy-002.mgmt.pg.net.local'
       ]
     )
   end
   host("e1-lb-001.mgmt.oy.net.local") do |host|
     virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
+    expect(virtual_servers.keys.size).to eql(1)
     expect(virtual_servers.keys).to include('e1-appx-vip.oy.net.local')
   end
   host("e1-lb-001.mgmt.pg.net.local") do |host|
     virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
-    expect(virtual_servers).to be_empty
+    expect(virtual_servers.keys.size).to eql(3)
+    expect(virtual_servers.keys).to include('e1-appy-vip.pg.net.local')
+    expect(virtual_servers.keys).to include('e1-eproxy-vip.pg.net.local')
+    expect(virtual_servers.keys).to include('e1-rabbitmq-vip.pg.net.local')
   end
 end
