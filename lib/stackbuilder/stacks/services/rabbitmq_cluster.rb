@@ -26,12 +26,14 @@ module Stacks::Services::RabbitMQCluster
   end
 
   def to_loadbalancer_config(location, fabric)
+    realservers = cluster_nodes(location)
+    return {} if realservers.size == 0
     {
       vip_fqdn(:prod, fabric) => {
         'type' => 'rabbitmq',
         'ports' => @ports,
         'realservers' => {
-          'blue' => cluster_nodes(location)
+          'blue' => realservers
         }
       }
     }
