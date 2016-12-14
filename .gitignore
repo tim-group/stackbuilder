@@ -9,3 +9,5 @@
 stackbuilder.iml
 /.buildpath
 spec/reports/*.xml
+.bundle
+.gems/

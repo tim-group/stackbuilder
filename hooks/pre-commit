@@ -1,7 +1,23 @@
 #!/bin/sh
 
+which bundle > /dev/null
+HAVE_BUNDLER=$?
+if [ $HAVE_BUNDLER -eq 0 ]; then
+  bundle show rubocop > /dev/null
+  HAVE_BUNDLE_RUBOCOP=$?
+  bundle show rake > /dev/null
+  HAVE_BUNDLE_RAKE=$?
+fi
+
 echo -n "Running rake spec: "
-SPEC_OUTPUT=`rake spec 2>&1`
+if [ $HAVE_BUNDLE_RUBOCOP -eq 0 ]; then
+  SPEC_OUTPUT=$(bundle exec rake spec 2>&1)
+elif which rake > /dev/null; then
+  SPEC_OUTPUT=`rake spec 2>&1`
+else
+  echo "[31mrake not found[0m" >&2
+  exit 1
+fi
 if [ $? -ne 0 ]; then
 	echo "[31mFAIL[0m" >&2
 	echo "$SPEC_OUTPUT" >&2
@@ -10,18 +26,20 @@ else
 	echo "[32mOK[0m"
 fi
 
-if which rubocop > /dev/null; then
-	# check only touched files
-	tmpdir=$(mktemp -d pre-commit.XXXXXXXXXX)
-	trap "rm -rf $tmpdir" EXIT
+# check only touched files
+tmpdir=$(mktemp -d pre-commit.XXXXXXXXXX)
+trap "rm -rf $tmpdir" EXIT
 
-	git diff --cached --name-only --diff-filter=ACM \
-	 | git checkout-index --stdin --prefix=$tmpdir/
+git diff --cached --name-only --diff-filter=ACM \
+  | git checkout-index --stdin --prefix=$tmpdir/
 
+if [ $HAVE_BUNDLE_RUBOCOP -eq 0 ]; then
+  bundle exec rubocop $tmpdir/ || exit 1
+elif which rubocop > /dev/null; then
 	rubocop $tmpdir/ || exit 1
 else
-	echo "[31mrubocop not found[0m" >&2
-	exit 1
+  echo "[31mrubocop not found[0m" >&2
+  exit 1
 fi
 
 echo -n "Running stacks compile: "
