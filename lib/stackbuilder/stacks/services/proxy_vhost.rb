@@ -24,7 +24,6 @@ class Stacks::Services::ProxyVHost
     @location = location
     @ensure = 'present'
     @monitor_vhost = true
-    @use_for_lb_healthcheck = false
     instance_eval(&block) if block
   end
 
@@ -79,28 +78,19 @@ class Stacks::Services::ProxyVHost
     envs = environment.all_environments
     fabric = envs[@environment].options[location]
     [fqdn(fabric), {
-      'ensure'                  => @ensure,
-      'aliases'                 => aliases(fabric),
-      'redirects'               => redirects,
-      'application'             => @virtual_proxy_service.find_virtual_service(service, @environment).application,
-      'proxy_pass_rules'        => proxy_pass_rules(location, envs),
-      'type'                    => type,
-      'vhost_properties'        => properties,
-      'cert'                    => cert,
-      'monitor_vhost'           => @monitor_vhost,
-      'used_for_lb_healthcheck' => use_for_lb_healthcheck?
+      'ensure'           => @ensure,
+      'aliases'          => aliases(fabric),
+      'redirects'        => redirects,
+      'application'      => @virtual_proxy_service.find_virtual_service(service, @environment).application,
+      'proxy_pass_rules' => proxy_pass_rules(location, envs),
+      'type'             => type,
+      'vhost_properties' => properties,
+      'cert'             => cert,
+      'monitor_vhost'    => @monitor_vhost
     }]
   end
 
   def absent
     @ensure = 'absent'
-  end
-
-  def use_for_lb_healthcheck
-    @use_for_lb_healthcheck = true
-  end
-
-  def use_for_lb_healthcheck?
-    @use_for_lb_healthcheck
   end
 end

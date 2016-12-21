@@ -144,11 +144,7 @@ describe_stack 'load balancer will generate config for a sub environment' do
       sftp_service 'sftp'
     end
     stack "proxystack" do
-      proxy_service "myproxy" do
-        vhost('exampleapp') do
-          use_for_lb_healthcheck
-        end
-      end
+      proxy_service "myproxy"
     end
 
     stack "blahx" do
@@ -262,9 +258,7 @@ describe_stack 'should only load balance for services in the same site' do
     end
     stack 'proxy' do
       proxy_service 'eproxy' do
-        vhost('appy') do
-          use_for_lb_healthcheck
-        end
+        vhost('appy')
       end
     end
 

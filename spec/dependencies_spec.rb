@@ -10,7 +10,6 @@ describe_stack 'stack-with-dependencies' do
     stack "example" do
       proxy_service 'exampleproxy' do
         vhost('exampleapp') do
-          use_for_lb_healthcheck
         end
         enable_nat
       end
