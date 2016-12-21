@@ -69,24 +69,23 @@ module Stacks::Services::VirtualProxyService
   end
 
   def vhost_for_lb_healthcheck_override_hack(vhost_name)
-    fail("vhost_for_lb_healthcheck_override_hack is already set to #{@vhost_for_lb_healthcheck_override_hack} " \
-         "for service '#{name}' in environment '#{environment.name}'") unless @vhost_for_lb_healthcheck_override_hack.nil?
+    fail("vhost_for_lb_healthcheck_override_hack is already set to #{@vhost_for_lb_healthcheck_override_hack} for service '#{name}' in environment '#{environment.name}'") unless @vhost_for_lb_healthcheck_override_hack.nil?
     @vhost_for_lb_healthcheck_override_hack = vhost_name
   end
 
   private
-
   def vhost_for_healthcheck(fabric)
     return @vhost_for_lb_healthcheck_override_hack unless @vhost_for_lb_healthcheck_override_hack.nil?
-    vhsts = @proxy_vhosts.select(&:use_for_lb_healthcheck?)
+    vhsts = @proxy_vhosts.select do |proxy_vhost|
+      proxy_vhost.use_for_lb_healthcheck?
+    end
     case vhsts.length
     when 0
       fail("No vhosts of service '#{name}' in environment '#{environment.name}' are configured to be used for load balancer healthchecks")
     when 1
       vhsts.first.fqdn(fabric)
     else
-      fail("More than one vhost of service '#{name}' in environment '#{environment.name}' are configured to be used for " \
-           "load balancer healthchecks: #{vhsts.map { |vhst| vhst.fqdn(fabric) }.join(',')}")
+      fail("More than one vhost of service '#{name}' in environment '#{environment.name}' are configured to be used for load balancer healthchecks: #{vhsts.map {|vhst| vhst.fqdn(fabric)}.join(',')}")
     end
   end
 end
