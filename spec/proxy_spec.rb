@@ -570,9 +570,9 @@ describe_stack 'fails if a proxy_service has no vhost thats configured to be use
   end
 
   host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
-    expect {
+    expect do
       loadbalancer.to_enc
-    }.to raise_error "No vhosts of service 'proxy' in environment 'st' are configured to be used for load balancer healthchecks"
+    end.to raise_error "No vhosts of service 'proxy' in environment 'st' are configured to be used for load balancer healthchecks"
   end
 end
 
@@ -616,8 +616,9 @@ describe_stack 'fails if a proxy_service has more than one vhost thats configure
   end
 
   host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
-    expect {
+    expect do
       loadbalancer.to_enc
-    }.to raise_error "More than one vhost of service 'proxy' in environment 'st' are configured to be used for load balancer healthchecks: st-proxy-vip.st.net.local,st-proxy-vip.st.net.local"
+    end.to raise_error "More than one vhost of service 'proxy' in environment 'st' are configured to be used for load balancer " \
+                       "healthchecks: st-proxy-vip.st.net.local,st-proxy-vip.st.net.local"
   end
 end
