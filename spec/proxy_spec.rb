@@ -322,6 +322,9 @@ describe_stack 'generates proxy server enc data with persistent when enable_pers
     stack "proxyserver" do
       proxy_service "proxy" do
         enable_persistence '443'
+        vhost('exampleapp') do
+          use_for_lb_healthcheck
+        end
       end
     end
 
@@ -492,5 +495,129 @@ describe_stack 'generates the correct proxy_pass and add_pass rules when env not
       'production-bseproxy-001.pg.net.local',
       'production-bseproxy-002.pg.net.local'
     )
+  end
+end
+
+describe_stack 'generates proxy server and load balancer enc data with a vhost specific for lb healthchecks' do
+  given do
+    stack "loadbalancer" do
+      loadbalancer_service
+    end
+
+    stack "proxyserver" do
+      proxy_service "proxy" do
+        vhost('app') do
+          use_for_lb_healthcheck
+        end
+      end
+    end
+
+    stack 'appserver' do
+      app_service 'app' do
+        self.application = 'app'
+      end
+    end
+
+    env "st", :primary_site => "st", :secondary_site => "bs" do
+      instantiate_stack "loadbalancer"
+      instantiate_stack "proxyserver"
+      instantiate_stack 'appserver'
+    end
+  end
+  host('st-proxy-001.mgmt.st.net.local') do |proxyserver|
+    vhost_enc = proxyserver.to_enc['role::proxyserver']['vhosts']['st-proxy-vip.st.net.local']
+    expect(vhost_enc['used_for_lb_healthcheck']).to be true
+  end
+
+  host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
+    vserver_enc = loadbalancer.to_enc['role::loadbalancer']["virtual_servers"]['st-proxy-vip.st.net.local']
+    expect(vserver_enc['type']).to eql('proxy')
+    expect(vserver_enc['ports']).to eql([80, 443])
+    expect(vserver_enc['realservers']['blue']).to eql(["st-proxy-001.st.net.local", "st-proxy-002.st.net.local"])
+    expect(vserver_enc['vhost_for_healthcheck']).to eql 'st-proxy-vip.st.net.local'
+  end
+end
+
+describe_stack 'fails if a proxy_service has no vhost thats configured to be used fo rlb healthchecks' do
+  given do
+    stack "loadbalancer" do
+      loadbalancer_service
+    end
+
+    stack "proxyserver" do
+      proxy_service "proxy" do
+        vhost('app') do
+        end
+      end
+    end
+
+    stack 'appserver' do
+      app_service 'app' do
+        self.application = 'app'
+      end
+    end
+
+    env "st", :primary_site => "st", :secondary_site => "bs" do
+      instantiate_stack "loadbalancer"
+      instantiate_stack "proxyserver"
+      instantiate_stack 'appserver'
+    end
+  end
+
+  host('st-proxy-001.mgmt.st.net.local') do |proxyserver|
+    vhost_enc = proxyserver.to_enc['role::proxyserver']['vhosts']['st-proxy-vip.st.net.local']
+    expect(vhost_enc['used_for_lb_healthcheck']).to be false
+  end
+
+  host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
+    expect {
+      loadbalancer.to_enc
+    }.to raise_error "No vhosts of service 'proxy' in environment 'st' are configured to be used for load balancer healthchecks"
+  end
+end
+
+describe_stack 'fails if a proxy_service has more than one vhost thats configured to be used for lb healthchecks' do
+  given do
+    stack "loadbalancer" do
+      loadbalancer_service
+    end
+
+    stack "proxyserver" do
+      proxy_service "proxy" do
+        vhost('app') do
+          use_for_lb_healthcheck
+        end
+        vhost('app2') do
+          use_for_lb_healthcheck
+        end
+      end
+    end
+
+    stack 'appserver' do
+      app_service 'app' do
+        self.application = 'app'
+      end
+      app_service 'app2' do
+        self.application = 'app'
+      end
+    end
+
+    env "st", :primary_site => "st", :secondary_site => "bs" do
+      instantiate_stack "loadbalancer"
+      instantiate_stack "proxyserver"
+      instantiate_stack 'appserver'
+    end
+  end
+
+  host('st-proxy-001.mgmt.st.net.local') do |proxyserver|
+    vhost_enc = proxyserver.to_enc['role::proxyserver']['vhosts']['st-proxy-vip.st.net.local']
+    pp proxyserver.to_enc['role::proxyserver']['vhosts']
+    expect(vhost_enc['used_for_lb_healthcheck']).to be true
+  end
+
+  host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
+    expect {
+      loadbalancer.to_enc
+    }.to raise_error "More than one vhost of service 'proxy' in environment 'st' are configured to be used for load balancer healthchecks: st-proxy-vip.st.net.local,st-proxy-vip.st.net.local"
   end
 end
