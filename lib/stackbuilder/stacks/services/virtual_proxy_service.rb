@@ -15,6 +15,7 @@ module Stacks::Services::VirtualProxyService
     @ports                   = [80, 443]
     @cert                    = 'wildcard_timgroup_com'
     @override_vhost_location = {}
+    @vhost_for_lb_healthcheck_override_hack = nil
   end
 
   def vhost(service, fqdn = nil, service_env_name = nil, service_location = :primary_site, &config_block)
@@ -53,7 +54,8 @@ module Stacks::Services::VirtualProxyService
     enc = {
       'type' => 'proxy',
       'ports' => @ports,
-      'realservers' => realservers
+      'realservers' => realservers,
+      'vhost_for_healthcheck' => vhost_for_healthcheck(fabric)
     }
 
     unless @persistent_ports.empty?
@@ -64,5 +66,27 @@ module Stacks::Services::VirtualProxyService
     {
       vip_fqdn(:prod, fabric) => enc
     }
+  end
+
+  def vhost_for_lb_healthcheck_override_hack(vhost_name)
+    fail("vhost_for_lb_healthcheck_override_hack is already set to #{@vhost_for_lb_healthcheck_override_hack} " \
+         "for service '#{name}' in environment '#{environment.name}'") unless @vhost_for_lb_healthcheck_override_hack.nil?
+    @vhost_for_lb_healthcheck_override_hack = vhost_name
+  end
+
+  private
+
+  def vhost_for_healthcheck(fabric)
+    return @vhost_for_lb_healthcheck_override_hack unless @vhost_for_lb_healthcheck_override_hack.nil?
+    vhsts = @proxy_vhosts.select(&:use_for_lb_healthcheck?)
+    case vhsts.length
+    when 0
+      fail("No vhosts of service '#{name}' in environment '#{environment.name}' are configured to be used for load balancer healthchecks")
+    when 1
+      vhsts.first.fqdn(fabric)
+    else
+      fail("More than one vhost of service '#{name}' in environment '#{environment.name}' are configured to be used for " \
+           "load balancer healthchecks: #{vhsts.map { |vhst| vhst.fqdn(fabric) }.join(',')}")
+    end
   end
 end
