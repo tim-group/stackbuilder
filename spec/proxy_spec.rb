@@ -322,7 +322,9 @@ describe_stack 'generates proxy server enc data with persistent when enable_pers
     stack "proxyserver" do
       proxy_service "proxy" do
         enable_persistence '443'
+        enable_use_for_lb_healthcheck
         vhost('exampleapp') do
+          enable_use_for_lb_healthcheck
           use_for_lb_healthcheck
         end
       end
@@ -506,7 +508,9 @@ describe_stack 'generates proxy server and load balancer enc data with a vhost s
 
     stack "proxyserver" do
       proxy_service "proxy" do
+        enable_use_for_lb_healthcheck
         vhost('app') do
+          enable_use_for_lb_healthcheck
           use_for_lb_healthcheck
         end
       end
@@ -546,7 +550,9 @@ describe_stack 'fails if a proxy_service has no vhost thats configured to be use
 
     stack "proxyserver" do
       proxy_service "proxy" do
+        enable_use_for_lb_healthcheck
         vhost('app') do
+          enable_use_for_lb_healthcheck
         end
       end
     end
@@ -584,10 +590,13 @@ describe_stack 'fails if a proxy_service has more than one vhost thats configure
 
     stack "proxyserver" do
       proxy_service "proxy" do
+        enable_use_for_lb_healthcheck
         vhost('app') do
+          enable_use_for_lb_healthcheck
           use_for_lb_healthcheck
         end
         vhost('app2') do
+          enable_use_for_lb_healthcheck
           use_for_lb_healthcheck
         end
       end
