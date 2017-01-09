@@ -87,8 +87,8 @@ class Stacks::Environment
     names
   end
 
-  def domain(fabric, network = nil)
-    case fabric
+  def domain(site, network = nil)
+    case site
     when 'local'
       case network
       when nil, :prod
@@ -99,9 +99,9 @@ class Stacks::Environment
     else
       case network
       when nil, :prod
-        "#{fabric}.#{@domain_suffix}"
+        "#{site}.#{@domain_suffix}"
       else
-        "#{network}.#{fabric}.#{@domain_suffix}"
+        "#{network}.#{site}.#{@domain_suffix}"
       end
     end
   end
