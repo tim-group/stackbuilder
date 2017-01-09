@@ -3,10 +3,9 @@ require 'stackbuilder/stacks/namespace'
 class Stacks::Services::NatServer < Stacks::MachineDef
   attr_reader :virtual_router_ids
 
-  def initialize(virtual_service, index, networks = [:mgmt, :prod, :front], location = :primary_site)
-    networks = [:mgmt, :prod, :front]
-    super(virtual_service.name + "-" + index, networks, location)
-    @virtual_service = virtual_service
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
+    @networks = [:mgmt, :prod, :front]
     @virtual_router_ids = {}
   end
 

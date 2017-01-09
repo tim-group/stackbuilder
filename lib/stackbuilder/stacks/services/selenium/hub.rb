@@ -4,7 +4,8 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
   attr_reader :options
 
   def initialize(base_hostname, nodes, options)
-    super(base_hostname, [:mgmt])
+    @base_hostname = base_hostname
+    @networks = [:mgmt]
     @nodes = nodes
     @options = options
   end

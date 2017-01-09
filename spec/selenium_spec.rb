@@ -79,6 +79,10 @@ describe_stack 'selenium' do
     expect(root.find('qa-hub-001.mgmt.space.net.local')).to be_nil
   end
 
+  it_stack("should contain the correct nodes") do |stack|
+    expect(stack).to have_hosts(['qa-a-ie9-005.mgmt.space.net.local'])
+  end
+
   host("qa-a-ie9-005.mgmt.space.net.local") do |host|
     expect(host.to_spec[:selenium_hub_host]).to be_nil
   end

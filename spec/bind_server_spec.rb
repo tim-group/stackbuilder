@@ -9,6 +9,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
 
     stack 'nameserver' do
       bind_service 'ns' do
+        instances = 3
         enable_nat
         forwarder_zone(['youdevise.com'])
         case environment.name
@@ -154,7 +155,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   end
 end
 
-describe_stack 'nameservers with single slave_from dependency' do
+x_describe_stack 'nameservers with single slave_from dependency' do
   given do
     stack 'lb' do
       loadbalancer_service
@@ -290,7 +291,7 @@ describe_stack 'nameservers with single slave_from dependency' do
   end
 end
 
-describe_stack 'nameservers should have working load balancer and nat configuration' do
+x_describe_stack 'nameservers should have working load balancer and nat configuration' do
   given do
     stack 'nat' do
       nat_service
@@ -356,7 +357,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
   end
 end
 
-describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
+x_describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
   given do
     stack 'nat' do
       nat_service
@@ -400,7 +401,7 @@ describe_stack 'bind servers without nat enabled should only have ips on mgmt by
   end
 end
 
-describe_stack 'bind servers with zones removed should have the right zone files' do
+x_describe_stack 'bind servers with zones removed should have the right zone files' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do
@@ -421,7 +422,7 @@ describe_stack 'bind servers with zones removed should have the right zone files
   end
 end
 
-describe_stack 'bind servers with zones added should have the right zone files' do
+x_describe_stack 'bind servers with zones added should have the right zone files' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do
@@ -443,7 +444,7 @@ describe_stack 'bind servers with zones added should have the right zone files' 
   end
 end
 
-describe_stack 'test @slave_instances = 2' do
+x_describe_stack 'test @slave_instances = 2' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do
@@ -465,7 +466,7 @@ describe_stack 'test @slave_instances = 2' do
   end
 end
 
-describe_stack 'test allow_host entries are supported' do
+x_describe_stack 'test allow_host entries are supported' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do

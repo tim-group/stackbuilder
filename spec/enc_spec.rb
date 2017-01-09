@@ -91,28 +91,23 @@ describe Stacks::DSL do
       instantiate_stack "oneapp"
     end
     loadbalancer = find("st-lb-001.mgmt.st.net.local")
-    expect(loadbalancer.to_enc['role::loadbalancer']).to eql("virtual_router_id" => 1,
-                                                             "virtual_servers" => {
-                                                               "st-twoapp-vip.st.net.local" => {
-                                                                 "healthcheck_timeout" => 10,
-                                                                 "realservers" => {
-                                                                   "blue" => ["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"]
-                                                                 },
-                                                                 "env" => "st",
-                                                                 "app" => nil,
-                                                                 "monitor_warn" => 1 },
-                                                               "st-oneapp-vip.st.net.local" => {
-                                                                 "healthcheck_timeout" => 10,
-                                                                 "realservers" => {
-                                                                   "green" => ["st-oneapp-002.st.net.local"],
-                                                                   "blue" => ["st-oneapp-001.st.net.local"]
-                                                                 },
-                                                                 "env" => "st",
-                                                                 "app" => nil,
-                                                                 "monitor_warn" => 0
-                                                               }
-                                                             }
-                                                            )
+    lb_enc = loadbalancer.to_enc['role::loadbalancer']
+    expect(lb_enc).to include('virtual_router_id' => 1)
+    expect(lb_enc['virtual_servers']).to include('st-twoapp-vip.st.net.local')
+
+    expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['healthcheck_timeout']).to eql(10)
+    expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['realservers']['blue']).to eql(["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"])
+    expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['env']).to eql('st')
+    expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['app']).to eql(nil)
+    expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['monitor_warn']).to eql(1)
+
+    expect(lb_enc['virtual_servers']).to include('st-oneapp-vip.st.net.local')
+    expect(lb_enc['virtual_servers']['st-oneapp-vip.st.net.local']['healthcheck_timeout']).to eql(10)
+    expect(lb_enc['virtual_servers']['st-oneapp-vip.st.net.local']['realservers']['blue']).to eql(["st-oneapp-001.st.net.local"])
+    expect(lb_enc['virtual_servers']['st-oneapp-vip.st.net.local']['realservers']['green']).to eql(["st-oneapp-002.st.net.local"])
+    expect(lb_enc['virtual_servers']['st-oneapp-vip.st.net.local']['env']).to eql('st')
+    expect(lb_enc['virtual_servers']['st-oneapp-vip.st.net.local']['app']).to eql(nil)
+    expect(lb_enc['virtual_servers']['st-oneapp-vip.st.net.local']['monitor_warn']).to eql(0)
   end
 
   it 'generates load balancer enc data with the a different healthcheck_timeout if specified' do

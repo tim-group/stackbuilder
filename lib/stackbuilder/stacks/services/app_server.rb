@@ -9,12 +9,10 @@ class Stacks::Services::AppServer < Stacks::MachineDef
   attr_accessor :group
   attr_accessor :launch_config
 
-  def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)
-    super(virtual_service.name + "-" + index, networks, location)
-    @virtual_service = virtual_service
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     @allowed_hosts = []
     @launch_config = {}
-    modify_storage('/' => { :size => '5G' })
   end
 
   def bind_to(environment)

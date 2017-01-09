@@ -2,14 +2,9 @@ require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
 class Stacks::Services::MongoDBServer < Stacks::MachineDef
-  def initialize(base_hostname, i, mongodb_cluster, role, location)
-    index = sprintf("%03d", i)
-    super(base_hostname, [:mgmt, :prod], location)
-    @index = index
-    @location = location
-    @mongodb_cluster = mongodb_cluster
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     @ram = '4194304' # 4GB
-    @role = role
     @vcpus = '2'
     data_size = '350G'
     data_size = '5G' if role_of?(:arbiter)
@@ -39,21 +34,21 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
   def to_enc
     enc = super()
     enc.merge!('role::mongodb_server' => {
-                 'database_name' => @mongodb_cluster.database_name
+                 'database_name' => @virtual_service.database_name
                })
     enc['mongodb::backup'] = { 'ensure' => 'present' } if role_of?(:backup)
-    dependant_instances = @mongodb_cluster.children.map(&:prod_fqdn)
+    dependant_instances = @virtual_service.children.map(&:prod_fqdn)
     dependant_instances.delete prod_fqdn
     dependant_users = {}
     if role_of?(:master)
-      dependant_instances.concat(@mongodb_cluster.dependant_instance_fqdns(location)).sort
-      dependant_users = @mongodb_cluster.dependant_users
+      dependant_instances.concat(@virtual_service.dependant_instance_fqdns(location)).sort
+      dependant_users = @virtual_service.dependant_users
     end
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::mongodb_server'].merge!('dependant_instances' => dependant_instances,
                                          'dependant_users'     => dependant_users,
-                                         'dependencies'        => @mongodb_cluster.dependency_config(fabric))
+                                         'dependencies'        => @virtual_service.dependency_config(fabric))
     end
     enc
   end

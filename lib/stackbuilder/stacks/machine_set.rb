@@ -14,6 +14,7 @@ class Stacks::MachineSet
   attr_accessor :ports
   attr_accessor :type
   attr_accessor :server_offset
+  attr_accessor :role_in_name
   attr_reader :allowed_hosts
   attr_reader :default_networks
   attr_reader :depends_on
@@ -36,6 +37,8 @@ class Stacks::MachineSet
     @depends_on = []
     @enable_secondary_site = false
     @server_offset = 0
+    @add_role_to_name = []
+    @role_in_name = false
   end
 
   def secondary_site?
@@ -52,26 +55,38 @@ class Stacks::MachineSet
 
   def instantiate_machines(environment)
     if @instances.is_a?(Integer)
-      @instances.times do |i|
-        server_id = i + @server_offset
-        @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :primary_site)
+      1.upto(@instances) do |i|
+        server_index = i + @server_offset
+        instantiate_machine(server_index, environment, environment.sites.first)
         if @enable_secondary_site
-          @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, :secondary_site)
+          instantiate_machine(server_index, environment, environment.sites.last)
         end
       end
     elsif @instances.is_a?(Hash)
       environment.validate_instance_sites(@instances.keys)
       @instances.each do |site, count|
-        site_symbol = environment.translate_site_symbol(site)
-        count.times do |c|
-          server_id = c + @server_offset
-          @definitions[random_name] = instantiate_machine(server_id, environment, default_networks, site_symbol)
+        if count.is_a?(Integer)
+          1.upto(count) do |c|
+            server_index = @server_offset + c
+            instantiate_machine(server_index, environment, site)
+          end
+        elsif count.is_a?(Hash)
+          count.each do |role, num|
+            1.upto(num) do |c|
+              server_index = @server_offset + c
+              instantiate_machine(server_index, environment, site, role)
+            end
+          end
+        else
+          fail "Instances hash contains invalid item #{count} which is a #{count.class} expected Integer / Symbol"
         end
       end
     else
       fail "@instances was an un-supported type: #{instances.class}, expected Integer|Hash.\n@instances: #{@instances.inspect}"
     end
   end
+
+
 
   def depend_on(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
@@ -144,26 +159,19 @@ class Stacks::MachineSet
 
   private
 
-  def instantiate_machine(i, environment, networks = @default_networks, location = :primary_site)
-    index = sprintf("%03d", i + 1)
-    server = nil
-    # FIXME: Temporary fix - Remove me when all stacks have a 4 param or use the default constructor.
-    # Not all stacks classes have a constructor that will take all 4 variables.
-    # Maintain backwards compatibility by checking the arity of the constructor.
-    # If the method expects a fixed number of arguments, this number is its arity.
-    # If the method expects a variable number of arguments, its arity is the additive inverse of its parameter count
-    # An arity >= 0 indicates a fixed number of parameters
-    # An arity < 0 indicates a variable number of parameters.
-    # Digested from source: http://readruby.io/methods
-    if @type.instance_method(:initialize).arity == -3
-      server = @type.new(self, index, networks, location)
-    else
-      server = @type.new(self, index)
-    end
-    server.group = groups[i % groups.size] if server.respond_to?(:group)
+  def instantiate_machine(index, environment, site, role=nil, custom_name='')
+    vm_name = name + "-" + sprintf("%03d", index)
+    vm_name = "#{name}#{custom_name}-"+sprintf("%03d", index)
+    vm_name = "#{name}-#{role.to_s}-"+sprintf("%03d", index) if @role_in_name
+    vm_name = "#{name}" if @type == Stacks::Services::ExternalServer
+    #puts "E:#{environment.name} N:#{name} V:#{vm_name} T:#{type} I:#{index} S:#{site}"
+    server = @type.new(self, vm_name, environment, site, role)
+    server.group = groups[(index-1) % groups.size] if server.respond_to?(:group)
     if server.respond_to?(:availability_group)
       server.availability_group = availability_group(environment)
     end
+    server.index = index
+    @definitions[random_name] = server
     server
   end
 end

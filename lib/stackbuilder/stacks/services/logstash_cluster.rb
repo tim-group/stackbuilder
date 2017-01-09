@@ -16,21 +16,11 @@ module Stacks::Services::LogstashCluster
     @instances = 1
   end
 
-  def instantiate_machine(name, type, i, environment, location)
-    index = sprintf("%03d", i)
-    server_name = "#{name}-#{type}-#{index}"
-    server = @type.new(server_name, i, self, type, location)
-    server.group = groups[i % groups.size] if server.respond_to?(:group)
-    server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
-    @definitions["#{server_name}-#{location}"] = server
-  end
-
-  def instantiate_machines(environment)
-    i = 0
-    @instances.times do
-      instantiate_machine(name, @role, i += 1, environment, :primary_site)
-    end
-  end
+  #def instantiate_machines(environment)
+  #  1.upto(@instances) do |i|
+  #    instantiate_machine(i, environment, environment.sites.first, @role)
+  #  end
+  #end
 
   def receiver_nodes
     receivers = children.reject { |nodes| !nodes.role?(:receiver) }

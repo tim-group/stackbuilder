@@ -11,6 +11,7 @@ class Stacks::Environment
   attr_reader :secondary_site
   attr_accessor :production
   attr_reader :routes
+  attr_reader :sites
   attr_accessor :allocation_tags
 
   include Stacks::MachineDefContainer

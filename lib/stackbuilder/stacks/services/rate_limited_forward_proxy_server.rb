@@ -4,14 +4,9 @@ require 'stackbuilder/stacks/machine_def'
 class Stacks::Services::RateLimitedForwardProxyServer < Stacks::MachineDef
   attr_accessor :tc_rate
 
-  def initialize(server_group, index)
-    super(server_group.name + "-" + index, [:mgmt, :prod])
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     @tc_rate = '8Mbit'
-    self
-  end
-
-  def bind_to(environment)
-    super(environment)
   end
 
   def to_enc

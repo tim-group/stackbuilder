@@ -49,54 +49,43 @@ module Stacks::Services::MysqlCluster
     @standalone_instances = 0
   end
 
-  def instantiate_machine(name, type, i, environment, location)
-    index = sprintf("%03d", i)
-    server_name = "#{name}-#{index}"
-    server_name = "#{name}#{type}-#{index}" if type == :backup
-    server_name = "#{name}useraccess-#{index}" if type == :user_access
-    server = @type.new(server_name, i, self, type, location)
-    server.group = groups[i % groups.size] if server.respond_to?(:group)
-    server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
-    @definitions["#{server_name}-#{location}"] = server
-  end
-
   def instantiate_machines(environment)
     fail 'MySQL clusters do not currently support enable_secondary_site' if @enable_secondary_site
     validate_supported_requirements_specify_at_least_one_server
     on_bind { validate_supported_requirements_servers_exist_on_bind }
 
-    i = @master_index_offset
+    server_index = @master_index_offset
     @master_instances.times do
-      instantiate_machine(name, :master, i += 1, environment, :primary_site)
+      instantiate_machine(server_index +=1, environment, environment.sites.first, :master)
     end
     @slave_instances.times do
-      instantiate_machine(name, :slave, i += 1, environment, :primary_site)
+      instantiate_machine(server_index +=1, environment, environment.sites.first, :slave)
     end
-    i = 0
+    server_index = 0
     @backup_instances.times do
-      instantiate_machine(name, :backup, i += 1, environment, @backup_instance_site)
+      instantiate_machine(server_index +=1, environment, environment.options[backup_instance_site], :backup, 'backup')
     end
-    i = 0
+    server_index = 0
     @primary_site_backup_instances.times do
-      instantiate_machine(name, :backup, i += 1, environment, :primary_site)
+      instantiate_machine(server_index +=1, environment, environment.sites.first, :backup, 'backup')
     end
-    i = 0
+    server_index = 0
     @secondary_site_slave_instances.times do
-      instantiate_machine(name, :slave, i += 1, environment, :secondary_site)
+      instantiate_machine(server_index +=1, environment, environment.sites.last, :slave)
     end
-    i = 0
+    server_index = 0
     @user_access_instances.times do
       @grant_user_rights_by_default = false
-      instantiate_machine(name, :user_access, i += 1, environment, :primary_site)
+      instantiate_machine(server_index +=1, environment, environment.sites.first, :user_access, 'useraccess')
     end
-    i = 0
+    server_index = 0
     @secondary_site_user_access_instances.times do
       @grant_user_rights_by_default = false
-      instantiate_machine(name, :user_access, i += 1, environment, :secondary_site)
+      instantiate_machine(server_index +=1, environment, environment.sites.last, :user_access, 'useraccess')
     end
-    i = 0
+    server_index = 0
     @standalone_instances.times do
-      instantiate_machine(name, :standalone, i += 1, environment, :primary_site)
+      instantiate_machine(server_index +=1, environment, environment.sites.first, :standalone)
     end
   end
 
@@ -184,7 +173,7 @@ module Stacks::Services::MysqlCluster
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
     fail "No masters were not found! #{children}" if masters.empty?
-    masters.collect(&:prod_fqdn)
+    masters.collect(&:prod_fqdn).sort
   end
 
   private
@@ -202,7 +191,7 @@ module Stacks::Services::MysqlCluster
       hosts.each do |host|
         if children.find { |server| server.prod_fqdn == host }.nil?
           fail "Attempting to support requirement '#{requirement}' with non-existent server '#{host}'. " \
-            "Available servers: [#{children.map(&:prod_fqdn).join(',')}]."
+            "Available servers: [#{children.map(&:prod_fqdn).sort.join(',')}]."
         end
       end
     end
@@ -272,7 +261,7 @@ module Stacks::Services::MysqlCluster
         "#{dependent.environment.name}/#{dependent.application}/mysql_password"
     }
     config_params["db.#{@database_name}.read_only_cluster"] =
-        read_only_cluster.join(",") unless read_only_cluster.empty?
+        read_only_cluster.sort.join(",") unless read_only_cluster.empty?
 
     config_params
   end

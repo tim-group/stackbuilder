@@ -5,11 +5,6 @@ require 'resolv'
 class Stacks::Services::MailServer < Stacks::MachineDef
   attr_reader :virtual_service
 
-  def initialize(virtual_service, index, networks = [:mgmt, :prod], location = :primary_site)
-    super(virtual_service.name + "-" + index, networks, location)
-    @virtual_service = virtual_service
-  end
-
   def to_enc
     enc = super()
     vip_fqdns = @virtual_service.vip_networks.map do |vip_network|

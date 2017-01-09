@@ -24,27 +24,6 @@ describe Stacks::DSL do
       to eql(:mgmt => "ci-appx-001.mgmt.st.net.local", :prod => "ci-appx-001.st.net.local")
   end
 
-  it 'can make an arbitrary specd machine' do
-    stack "fabric" do
-      @definitions["somenode"] = Stacks::Services::StandaloneServer.new("somenode-001") do
-        def to_specs
-          specs = super
-          specs.each do |spec|
-            spec[:bling] = true
-          end
-          specs
-        end
-      end
-    end
-
-    env "ci", :primary_site => "st", :secondary_site => "bs" do
-      instantiate_stack "fabric"
-    end
-
-    spec = environments["ci"]["fabric"].to_specs.first
-    expect(spec[:bling]).to eql(true)
-  end
-
   it 'can find sub environments' do
     env "parent", :primary_site => "st", :secondary_site => "bs" do
       env "sub" do

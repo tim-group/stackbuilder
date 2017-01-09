@@ -5,11 +5,10 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
   attr_accessor :node_labels
   attr_accessor :allow_matrix_host
 
-  def initialize(server_group, index)
-    super(server_group.name + '-' + index, [:mgmt])
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     @node_labels = []
     @allow_matrix_host = nil
-    self
   end
 
   def availability_group

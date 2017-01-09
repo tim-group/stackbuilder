@@ -5,8 +5,12 @@ describe_stack 'logstash indexer' do
   given do
     stack 'logstash_indexer' do
       logstash_cluster 'logstash' do
-        self.instances = 1
-        self.role = :indexer
+        self.role_in_name = true
+        self.instances = {
+          'space' => {
+            :indexer => 1
+          }
+        }
 
         depend_on 'elasticmq'
         depend_on 'elasticlogs'
@@ -65,6 +69,7 @@ describe_stack 'logstash indexer' do
 
   host("e1-logstash-indexer-001.mgmt.space.net.local") do |host|
     enc = host.to_enc['role::logstash::indexer']
+    pp enc
     expect(enc['version']).to eql('2.2.0')
     expect(enc['rabbitmq_vip']).to eql('e1-elasticmq-vip.space.net.local')
     expect(enc['elastic_vip']).to eql('e1-elasticlogs-vip.space.net.local')

@@ -171,8 +171,8 @@ describe_stack 'stack-with-dependencies' do
     expect(deps['db.example.port']).to eql('3306')
     expect(deps['db.example.password_hiera_key']).to eql('e1/example2/mysql_password')
     expect(deps['db.example.username']).to eql('example2')
-    expect(deps['db.example.read_only_cluster']).to eql(
-      'e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local' \
+    expect(deps['db.example.read_only_cluster']).to include(
+      'e1-exampledb-002.space.net.local,e1-exampledb-003.space.net.local'
     )
   end
 
