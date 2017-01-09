@@ -164,7 +164,6 @@ class Stacks::MachineSet
     vm_name = "#{name}#{custom_name}-"+sprintf("%03d", index)
     vm_name = "#{name}-#{role.to_s}-"+sprintf("%03d", index) if @role_in_name
     vm_name = "#{name}" if @type == Stacks::Services::ExternalServer
-    #puts "E:#{environment.name} N:#{name} V:#{vm_name} T:#{type} I:#{index} S:#{site}"
     server = @type.new(self, vm_name, environment, site, role)
     server.group = groups[(index-1) % groups.size] if server.respond_to?(:group)
     if server.respond_to?(:availability_group)

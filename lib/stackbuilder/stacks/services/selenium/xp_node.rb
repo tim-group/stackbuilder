@@ -9,6 +9,9 @@ class Stacks::Services::Selenium::XpNode < Stacks::MachineDef
     @networks = [:mgmt]
     @hub = hub
     @options = options
+    @routes = []
+    @location = :primary_site
+    @added_cnames = []
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',

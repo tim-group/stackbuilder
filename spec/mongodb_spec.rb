@@ -27,7 +27,6 @@ describe_stack 'mongodb' do
     expect(host.to_enc['role::mongodb_server']['database_name']).to eql("myapp")
   end
   host("e1-mongodbbackup-001.mgmt.moon.net.local") do |host|
-    puts host.to_enc
     expect(host.to_enc['mongodb::backup']).to eql('ensure' => 'present')
   end
 end

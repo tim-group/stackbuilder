@@ -155,7 +155,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   end
 end
 
-x_describe_stack 'nameservers with single slave_from dependency' do
+describe_stack 'nameservers with single slave_from dependency' do
   given do
     stack 'lb' do
       loadbalancer_service
@@ -291,7 +291,7 @@ x_describe_stack 'nameservers with single slave_from dependency' do
   end
 end
 
-x_describe_stack 'nameservers should have working load balancer and nat configuration' do
+describe_stack 'nameservers should have working load balancer and nat configuration' do
   given do
     stack 'nat' do
       nat_service
@@ -357,7 +357,7 @@ x_describe_stack 'nameservers should have working load balancer and nat configur
   end
 end
 
-x_describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
+describe_stack 'bind servers without nat enabled should only have ips on mgmt by default' do
   given do
     stack 'nat' do
       nat_service
@@ -401,7 +401,7 @@ x_describe_stack 'bind servers without nat enabled should only have ips on mgmt 
   end
 end
 
-x_describe_stack 'bind servers with zones removed should have the right zone files' do
+describe_stack 'bind servers with zones removed should have the right zone files' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do
@@ -422,7 +422,7 @@ x_describe_stack 'bind servers with zones removed should have the right zone fil
   end
 end
 
-x_describe_stack 'bind servers with zones added should have the right zone files' do
+describe_stack 'bind servers with zones added should have the right zone files' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do
@@ -444,7 +444,7 @@ x_describe_stack 'bind servers with zones added should have the right zone files
   end
 end
 
-x_describe_stack 'test @slave_instances = 2' do
+describe_stack 'test @slave_instances = 2' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do
@@ -466,7 +466,7 @@ x_describe_stack 'test @slave_instances = 2' do
   end
 end
 
-x_describe_stack 'test allow_host entries are supported' do
+describe_stack 'test allow_host entries are supported' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do

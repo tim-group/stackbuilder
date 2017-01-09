@@ -37,7 +37,6 @@ module Stacks::Gold
 
   def ubuntu(ubuntu_version)
     name = "ubuntu-#{ubuntu_version}-gold"
-    puts name
     node = Stacks::Gold::UbuntuNode.new(self, name, environment, environment.sites.first, nil)
     node.networks = [:mgmt]
     node.ubuntu_version = ubuntu_version

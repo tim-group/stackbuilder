@@ -9,6 +9,13 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
     @networks = [:mgmt]
     @hub = hub
     @options = options
+    @routes = []
+    @location = :primary_site
+    @added_cnames = []
+  end
+
+  def validate_storage
+    true
   end
 
   def bind_to(environment)

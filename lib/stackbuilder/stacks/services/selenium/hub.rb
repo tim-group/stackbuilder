@@ -8,10 +8,17 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
     @networks = [:mgmt]
     @nodes = nodes
     @options = options
+    @routes = []
+    @location = :primary_site
+    @added_cnames = []
   end
 
   def bind_to(environment)
     super(environment)
+  end
+
+  def validate_storage
+    true
   end
 
   def node_names

@@ -80,7 +80,44 @@ describe_stack 'selenium' do
   end
 
   it_stack("should contain the correct nodes") do |stack|
-    expect(stack).to have_hosts(['qa-a-ie9-005.mgmt.space.net.local'])
+    expect(stack).to have_hosts([
+                                'e1-a-browser-001.mgmt.space.net.local',
+                                'e1-a-browser-002.mgmt.space.net.local',
+                                'e1-a-browser-003.mgmt.space.net.local',
+                                'e1-a-browser-004.mgmt.space.net.local',
+                                'e1-a-browser-005.mgmt.space.net.local',
+                                'e1-a-ie10-001.mgmt.space.net.local',
+                                'e1-a-ie6-001.mgmt.space.net.local',
+                                'e1-a-ie6-002.mgmt.space.net.local',
+                                'e1-a-ie9-001.mgmt.space.net.local',
+                                'e1-a-ie9-002.mgmt.space.net.local',
+                                'e1-hub-001.mgmt.space.net.local',
+                                'qa-a-browser-001.mgmt.space.net.local',
+                                'qa-a-browser-002.mgmt.space.net.local',
+                                'qa-a-browser-003.mgmt.space.net.local',
+                                'qa-a-browser-004.mgmt.space.net.local',
+                                'qa-a-browser-005.mgmt.space.net.local',
+                                'qa-a-ie6-001.mgmt.space.net.local',
+                                'qa-a-ie6-002.mgmt.space.net.local',
+                                'qa-a-ie6-003.mgmt.space.net.local',
+                                'qa-a-ie6-004.mgmt.space.net.local',
+                                'qa-a-ie6-005.mgmt.space.net.local',
+                                'qa-a-ie6-006.mgmt.space.net.local',
+                                'qa-a-ie6-007.mgmt.space.net.local',
+                                'qa-a-ie6-008.mgmt.space.net.local',
+                                'qa-a-ie6-009.mgmt.space.net.local',
+                                'qa-a-ie6-010.mgmt.space.net.local',
+                                'qa-a-ie9-001.mgmt.space.net.local',
+                                'qa-a-ie9-002.mgmt.space.net.local',
+                                'qa-a-ie9-003.mgmt.space.net.local',
+                                'qa-a-ie9-004.mgmt.space.net.local',
+                                'qa-a-ie9-005.mgmt.space.net.local',
+                                'qa-a-ie9-006.mgmt.space.net.local',
+                                'qa-a-ie9-007.mgmt.space.net.local',
+                                'qa-a-ie9-008.mgmt.space.net.local',
+                                'qa-a-ie9-009.mgmt.space.net.local',
+                                'qa-a-ie9-010.mgmt.space.net.local'
+    ])
   end
 
   host("qa-a-ie9-005.mgmt.space.net.local") do |host|
