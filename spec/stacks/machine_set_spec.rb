@@ -121,7 +121,6 @@ describe_stack 'should support instances as a site hash' do
   end
 end
 
-
 describe_stack 'should raise exception for an un-supported site' do
   expect do
     given do

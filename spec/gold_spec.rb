@@ -26,7 +26,14 @@ describe_stack 'gold image' do
   end
 
   it_stack("should contain the correct nodes") do |stack|
-    expect(stack).to have_hosts(['e1-ubuntu-precise-gold.mgmt.space.net.local', 'e1-ubuntu-trusty-gold.mgmt.space.net.local', 'e1-win7-ie9-gold.mgmt.space.net.local', 'e1-xp-ie7-gold.mgmt.space.net.local'])
+    expect(stack).to have_hosts(
+      [
+        'e1-ubuntu-precise-gold.mgmt.space.net.local',
+        'e1-ubuntu-trusty-gold.mgmt.space.net.local',
+        'e1-win7-ie9-gold.mgmt.space.net.local',
+        'e1-xp-ie7-gold.mgmt.space.net.local'
+      ]
+    )
   end
 
   host("e1-ubuntu-precise-gold.mgmt.space.net.local") do |host|

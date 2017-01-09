@@ -96,7 +96,12 @@ describe Stacks::DSL do
     expect(lb_enc['virtual_servers']).to include('st-twoapp-vip.st.net.local')
 
     expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['healthcheck_timeout']).to eql(10)
-    expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['realservers']['blue']).to eql(["st-twoapp-001.st.net.local", "st-twoapp-002.st.net.local"])
+    expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['realservers']['blue']).to eql(
+      [
+        "st-twoapp-001.st.net.local",
+        "st-twoapp-002.st.net.local"
+      ]
+    )
     expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['env']).to eql('st')
     expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['app']).to eql(nil)
     expect(lb_enc['virtual_servers']['st-twoapp-vip.st.net.local']['monitor_warn']).to eql(1)
