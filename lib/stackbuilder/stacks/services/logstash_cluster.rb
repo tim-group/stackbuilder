@@ -16,12 +16,6 @@ module Stacks::Services::LogstashCluster
     @instances = 1
   end
 
-  # def instantiate_machines(environment)
-  #  1.upto(@instances) do |i|
-  #    instantiate_machine(i, environment, environment.sites.first, @role)
-  #  end
-  # end
-
   def receiver_nodes
     receivers = children.reject { |nodes| !nodes.role?(:receiver) }
     receivers.collect(&:prod_fqdn)

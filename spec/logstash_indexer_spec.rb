@@ -69,7 +69,6 @@ describe_stack 'logstash indexer' do
 
   host("e1-logstash-indexer-001.mgmt.space.net.local") do |host|
     enc = host.to_enc['role::logstash::indexer']
-    pp enc
     expect(enc['version']).to eql('2.2.0')
     expect(enc['rabbitmq_vip']).to eql('e1-elasticmq-vip.space.net.local')
     expect(enc['elastic_vip']).to eql('e1-elasticlogs-vip.space.net.local')

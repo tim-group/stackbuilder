@@ -67,7 +67,6 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
   end
   host("testing-frdbbackup-001.mgmt.earth.net.local") do |host|
     expect(host.role).to eql(:backup)
-    pp host.to_specs
     expect(host.to_specs.shift[:storage][:"/mnt/storage"][:size]).to eql '10G'
   end
 end
