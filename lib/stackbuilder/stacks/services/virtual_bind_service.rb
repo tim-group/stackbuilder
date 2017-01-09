@@ -44,6 +44,12 @@ module Stacks::Services::VirtualBindService
     fqdn_zones
   end
 
+  def zones_fqdn_for_site(site)
+    zones.inject([]) do |zones_fqdn, zone|
+      zones_fqdn << environment.domain(site, zone.to_sym)
+    end
+  end
+
   def bind_servers_that_depend_on_me
     machine_defs = get_children_for_virtual_services(virtual_services_that_depend_on_me)
     machine_defs.reject! { |machine_def| machine_def.class != Stacks::Services::BindServer }
@@ -79,14 +85,12 @@ module Stacks::Services::VirtualBindService
     all_deps.to_a.sort
   end
 
-  def slave_zones_fqdn(bind_server)
-    return nil if bind_server == master_server
-    { master_server.mgmt_fqdn => zones_fqdn(bind_server.location) }
+  def slave_zones_fqdn_for_site(site)
+    { master_server.mgmt_fqdn => zones_fqdn_for_site(site) }
   end
 
   def instantiate_machines(environment)
     fail 'Bind servers do not currently support enable_secondary_site' if @enable_secondary_site
-
     server_index = 0
     if @instances.is_a?(Integer)
       @instances.times do

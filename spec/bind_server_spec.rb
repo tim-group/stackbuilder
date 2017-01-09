@@ -9,7 +9,8 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
 
     stack 'nameserver' do
       bind_service 'ns' do
-        instances = 3
+        self.instances = 1
+        self.slave_instances = 1
         enable_nat
         forwarder_zone(['youdevise.com'])
         case environment.name

@@ -3,6 +3,8 @@ require 'stackbuilder/stacks/machine_def'
 require 'resolv'
 
 class Stacks::Services::BindServer < Stacks::MachineDef
+  attr_reader :site
+
   def master?
     @role == :master
   end
@@ -36,10 +38,9 @@ class Stacks::Services::BindServer < Stacks::MachineDef
                  'allowed_hosts'                    => @virtual_service.allowed_hosts
                },
                'server::default_new_mgmt_net_local'  => nil)
-    enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn(location) if master?
+    enc['role::bind_server']['master_zones'] = @virtual_service.zones_fqdn_for_site(site) if master?
+    enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn_for_site(site) unless master?
 
-    enc['role::bind_server']['slave_zones'] = @virtual_service.slave_zones_fqdn(self) \
-      unless @virtual_service.slave_zones_fqdn(self).nil?
     unless dependant_zones.nil?
       if enc['role::bind_server']['slave_zones'].nil?
         enc['role::bind_server']['slave_zones'] = dependant_zones
