@@ -4,9 +4,8 @@ require 'stackbuilder/stacks/machine_def'
 class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
   attr_accessor :version
 
-  def initialize(virtual_service, index)
-    @virtual_service = virtual_service
-    super(virtual_service.name + "-" + index)
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     storage = {
       '/mnt/data' => {
         :type                => 'data',

@@ -3,10 +3,8 @@ require 'stackbuilder/stacks/namespace'
 class Stacks::Services::Puppetserver < Stacks::MachineDef
   attr_accessor :cnames
 
-  def initialize(machineset, index, location)
-    super(machineset.name + "-" + index, [:mgmt], location)
-
-    @puppetserver_cluster = machineset
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     # the puppet repo takes over 15GB as of 25.03.2015
     modify_storage('/' => { :size => '25G' })
     modify_storage('/var/lib/puppet/ssl' => {
@@ -16,6 +14,7 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
                    })
     @vcpus = '9'
     @ram = '10740000'
+    @networks = [:mgmt]
   end
 
   def needs_signing?
@@ -34,7 +33,7 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    puppetdb_mgmt_fqdn = @puppetserver_cluster.puppetdb_that_i_depend_on
+    puppetdb_mgmt_fqdn = @virtual_service.puppetdb_that_i_depend_on
     stored_configs = puppetdb_mgmt_fqdn.nil? ? false : true
     enc.merge!('role::puppetserver' => {
                  'storedconfigs' => stored_configs

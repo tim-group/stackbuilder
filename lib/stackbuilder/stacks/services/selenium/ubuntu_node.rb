@@ -5,9 +5,17 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
   attr_reader :options
 
   def initialize(base_hostname, hub, options)
-    super(base_hostname, [:mgmt])
+    @base_hostname = base_hostname
+    @networks = [:mgmt]
     @hub = hub
     @options = options
+    @routes = []
+    @location = :primary_site
+    @added_cnames = []
+  end
+
+  def validate_storage
+    true
   end
 
   def bind_to(environment)

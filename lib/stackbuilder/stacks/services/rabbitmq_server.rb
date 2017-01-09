@@ -1,9 +1,9 @@
 require 'stackbuilder/stacks/namespace'
 
 class Stacks::Services::RabbitMQServer < Stacks::MachineDef
-  def initialize(rabbitmq_cluster, index, networks = [:mgmt, :prod], location = :primary_site)
-    super(rabbitmq_cluster.name + "-" + index, networks, location)
-    @rabbitmq_cluster = rabbitmq_cluster
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
+    @rabbitmq_cluster = virtual_service
   end
 
   def to_enc

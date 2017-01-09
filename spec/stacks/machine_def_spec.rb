@@ -6,23 +6,23 @@ describe Stacks::MachineDef do
   end
 
   it 'produces x.net.local for the prod network' do
-    machinedef = Stacks::MachineDef.new('test')
     env = new_environment('env', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
     machinedef.bind_to(env)
     expect(machinedef.prod_fqdn).to eql('env-test.st.net.local')
   end
 
   it 'should be destroyable by default' do
-    machinedef = Stacks::MachineDef.new('test')
     env = new_environment('noenv', :primary_site => 'local')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'local')
     machinedef.bind_to(env)
     expect(machinedef.destroyable?).to eql true
     expect(machinedef.to_spec[:disallow_destroy]).to eql nil
   end
 
   it 'should allow destroyable to be overriden' do
-    machinedef = Stacks::MachineDef.new('test')
     env = new_environment('noenv', :primary_site => 'local')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'local')
     machinedef.bind_to(env)
     machinedef.allow_destroy(false)
     expect(machinedef.destroyable?).to eql false
@@ -30,12 +30,12 @@ describe Stacks::MachineDef do
   end
 
   it 'should allow environment to override destroyable' do
-    machinedef = Stacks::MachineDef.new('test')
     env_opts = {
       :primary_site => 'local',
       :every_machine_destroyable => true
     }
     env = new_environment('noenv', env_opts)
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'local')
     machinedef.bind_to(env)
     machinedef.allow_destroy(false)
     expect(machinedef.destroyable?).to eql false
@@ -43,20 +43,19 @@ describe Stacks::MachineDef do
   end
 
   it 'populates routes in the enc if routes are added' do
-    machinedef = Stacks::MachineDef.new('test')
-    machinedef.add_route('mgmt_pg')
     env = new_environment('noenv', :primary_site => 'local')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'local')
+    machinedef.add_route('mgmt_pg')
     machinedef.bind_to(env)
     expect(machinedef.to_enc['routes']['to']).to include 'mgmt_pg'
   end
 
   it 'allows cnames to be added' do
-    machinedef = Stacks::MachineDef.new('test')
+    env = new_environment('env', :primary_site => 'ps')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'ps')
     machinedef.add_cname(:mgmt, 'foo')
     machinedef.add_cname(:mgmt, 'bar')
     machinedef.add_cname(:prod, 'baz')
-
-    env = new_environment('env', :primary_site => 'ps')
     machinedef.bind_to(env)
 
     expect(machinedef.to_specs.shift[:cnames]).to eql(
@@ -71,8 +70,8 @@ describe Stacks::MachineDef do
   end
 
   it 'should support adding routes to a machine' do
-    machinedef = Stacks::MachineDef.new('test')
     env = new_environment('env', :primary_site => 'oy')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'oy')
     env.add_route('oy', 'mgmt_foo')
     machinedef.bind_to(env)
     expect(machinedef.to_enc['routes']['to'].size).to eql(1)
@@ -81,7 +80,7 @@ describe Stacks::MachineDef do
 
   it 'should validate storage' do
     env = new_environment('foo', :primary_site => 'oy')
-    machinedef = Stacks::MachineDef.new('test')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'oy')
     storage_without_type = {
       '/home'.to_sym => { :size => '100G' }
     }
@@ -89,7 +88,7 @@ describe Stacks::MachineDef do
     machinedef.modify_storage(storage_without_type)
     expect { machinedef.to_spec }.to raise_error(RuntimeError, /Mount point \/home on foo-test must specify a type attribute/)
 
-    machinedef = Stacks::MachineDef.new('test')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'oy')
     storage_without_type = {
       '/home'.to_sym => { :type => 'os' }
     }
@@ -99,10 +98,9 @@ describe Stacks::MachineDef do
   end
 
   it 'should configure gold image and allocation tag when instructed to use trusty' do
-    machinedef = Stacks::MachineDef.new('test')
-    machinedef.use_trusty
-
     env = new_environment('noenv', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.use_trusty
     env.set_allocation_tags('st', %w(trusty precise))
     machinedef.bind_to(env)
 

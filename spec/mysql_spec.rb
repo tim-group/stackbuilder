@@ -57,16 +57,17 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
 
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     expect(host.role).to eql(:master)
-    expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql([
+    expect(host.to_enc['role::mysql_server']['dependant_instances']).to include(
       'testing-frdb-002.space.net.local',
       'testing-frdbbackup-001.earth.net.local'
-    ])
+    )
   end
   host("testing-frdb-002.mgmt.space.net.local") do |host|
     expect(host.role).to eql(:slave)
   end
   host("testing-frdbbackup-001.mgmt.earth.net.local") do |host|
     expect(host.role).to eql(:backup)
+    pp host.to_specs
     expect(host.to_specs.shift[:storage][:"/mnt/storage"][:size]).to eql '10G'
   end
 end

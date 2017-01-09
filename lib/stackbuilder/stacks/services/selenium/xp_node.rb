@@ -5,10 +5,25 @@ class Stacks::Services::Selenium::XpNode < Stacks::MachineDef
   attr_reader :options
 
   def initialize(base_hostname, hub, options)
-    super(base_hostname, [:mgmt])
+    @base_hostname = base_hostname
+    @networks = [:mgmt]
     @hub = hub
     @options = options
-    modify_storage('/'.to_sym => { :size => '8G' })
+    @routes = []
+    @location = :primary_site
+    @added_cnames = []
+    @storage = {
+      '/'.to_sym =>  {
+        :type        => 'os',
+        :size        => '8G',
+        :prepare     => {
+          :method => 'image',
+          :options => {
+            :path => '/var/local/images/gold-precise/generic.img'
+          }
+        }
+      }
+    }
   end
 
   def bind_to(environment)

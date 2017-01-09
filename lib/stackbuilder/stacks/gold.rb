@@ -28,12 +28,18 @@ module Stacks::Gold
   def win(win_version, app_version, options)
     name = "#{win_version}-#{app_version}-gold"
     options[:master_image_file] = "#{win_version}-#{app_version}-master.img"
-
-    @definitions[name] = Stacks::Gold::WinNode.new(name, win_version, options)
+    node = Stacks::Gold::WinNode.new(self, name, environment, environment.sites.first, nil)
+    node.options = options
+    node.networks = [:mgmt]
+    node.win_version = win_version
+    @definitions[random_name] = node
   end
 
   def ubuntu(ubuntu_version)
     name = "ubuntu-#{ubuntu_version}-gold"
-    @definitions[name] = Stacks::Gold::UbuntuNode.new(name, ubuntu_version)
+    node = Stacks::Gold::UbuntuNode.new(self, name, environment, environment.sites.first, nil)
+    node.networks = [:mgmt]
+    node.ubuntu_version = ubuntu_version
+    @definitions[random_name] = node
   end
 end

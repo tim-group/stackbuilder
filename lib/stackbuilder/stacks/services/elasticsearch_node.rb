@@ -4,17 +4,14 @@ require 'stackbuilder/stacks/machine_def'
 class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
   attr_accessor :role
 
-  def initialize(base_hostname, _i, elasticsearch_cluster, role, location)
-    super(base_hostname, [:mgmt, :prod], location)
-
-    @elasticsearch_cluster = elasticsearch_cluster
-    @role = role
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     @version = '2.3.3'
 
     data_storage = {
       '/mnt/data' => {
         :type       => 'data',
-        :size       => @elasticsearch_cluster.data_storage,
+        :size       => @virtual_service.data_storage,
         :persistent => true
       }
     }
@@ -22,7 +19,7 @@ class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
   end
 
   def stackname
-    @elasticsearch_cluster.name
+    @virtual_service.name
   end
 
   def role?(role)
@@ -31,11 +28,11 @@ class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    minimum_master_nodes = ((@elasticsearch_cluster.nodes_with_role(:master).size / 2) + 1).floor
-    masters = @elasticsearch_cluster.nodes_with_role(:master).reject { |fqdn| fqdn == prod_fqdn }
-    vip_fqdn = @elasticsearch_cluster.vip_fqdn(:prod, fabric)
-    marvel_target = @elasticsearch_cluster.marvel_target_vip
-    cluster = @elasticsearch_cluster.cluster_name(environment)
+    minimum_master_nodes = ((@virtual_service.nodes_with_role(:master).size / 2) + 1).floor
+    masters = @virtual_service.nodes_with_role(:master).reject { |fqdn| fqdn == prod_fqdn }
+    vip_fqdn = @virtual_service.vip_fqdn(:prod, fabric)
+    marvel_target = @virtual_service.marvel_target_vip
+    cluster = @virtual_service.cluster_name(environment)
 
     enc.merge!("role::elasticsearch::#{@role}" => {
                  'version'              => @version,

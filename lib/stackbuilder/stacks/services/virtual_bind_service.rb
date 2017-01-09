@@ -14,6 +14,7 @@ module Stacks::Services::VirtualBindService
     @udp = true
     @zones = [:mgmt, :prod, :front]
     @forwarder_zones = []
+    @instances = 1
     @slave_instances = 1
   end
 
@@ -83,22 +84,19 @@ module Stacks::Services::VirtualBindService
     { master_server.mgmt_fqdn => zones_fqdn(bind_server.location) }
   end
 
-  def instantiate_machine(type, i, environment, networks, location)
-    index = sprintf("%03d", i + 1)
-    server = @type.new(type, self, index, networks, location)
-    server.group = groups[i % groups.size] if server.respond_to?(:group)
-    server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
-    @definitions[random_name] = server
-    server
-  end
-
   def instantiate_machines(environment)
     fail 'Bind servers do not currently support enable_secondary_site' if @enable_secondary_site
 
-    i = 0
-    instantiate_machine(:master, i, environment, default_networks, :primary_site)
-    @slave_instances.times do
-      instantiate_machine(:slave, i += 1, environment, default_networks, :primary_site)
+    server_index = 0
+    if @instances.is_a?(Integer)
+      @instances.times do
+        instantiate_machine(server_index += 1, environment, environment.sites.first, :master)
+      end
+      @slave_instances.times do
+        instantiate_machine(server_index += 1, environment, environment.sites.first, :slave)
+      end
+    else
+      super(environment)
     end
   end
 

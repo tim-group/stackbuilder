@@ -9,6 +9,7 @@ class Stacks::MachineDef
   attr_reader :base_hostname
   attr_reader :virtual_service
   attr_reader :location
+  attr_accessor :index
   attr_accessor :availability_group
   attr_accessor :fabric
   attr_accessor :networks
@@ -18,11 +19,15 @@ class Stacks::MachineDef
   attr_accessor :allocation_tags
   attr_accessor :machine_allocation_tags
   attr_accessor :destroyable
+  attr_accessor :role
 
-  def initialize(base_hostname, networks = [:mgmt, :prod], location = :primary_site)
+  def initialize(virtual_service, base_hostname, environment, site, role = nil)
+    @virtual_service = virtual_service
     @base_hostname = base_hostname
-    @networks = networks
-    @location = location
+    @networks = [:mgmt, :prod]
+    @site = site
+    @role = role
+    @location = environment.translate_site_symbol(site)
     @availability_group = nil
     @ram = "2097152"
     @storage = {

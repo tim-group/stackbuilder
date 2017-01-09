@@ -4,9 +4,8 @@ class Stacks::Services::SftpServer < Stacks::MachineDef
   attr_reader :location
   attr_reader :virtual_service
 
-  def initialize(virtual_service, index)
-    super(virtual_service.name + "-" + index)
-    @virtual_service = virtual_service
+  def initialize(virtual_service, base_hostname, environment, site, _role)
+    super(virtual_service, base_hostname, environment, site)
     storage = {
       '/chroot' => {
         :type       => 'data',

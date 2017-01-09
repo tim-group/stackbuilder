@@ -2,11 +2,13 @@ require 'stackbuilder/stacks/namespace'
 
 class Stacks::Gold::WinNode < Stacks::MachineDef
   attr_reader :options
+  attr_accessor :options
+  attr_accessor :win_version
 
-  def initialize(base_hostname, win_version, options)
-    super(base_hostname, [:mgmt])
-    @options = options
-    @win_version = win_version
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
+    @options = {}
+    @win_version = nil
   end
 
   def bind_to(environment)

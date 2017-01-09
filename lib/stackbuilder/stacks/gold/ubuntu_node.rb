@@ -2,11 +2,11 @@ require 'stackbuilder/stacks/namespace'
 
 class Stacks::Gold::UbuntuNode < Stacks::MachineDef
   attr_reader :options
+  attr_accessor :ubuntu_version
 
-  def initialize(base_hostname, ubuntu_version)
-    super(base_hostname, [:mgmt])
-    @ubuntu_version = ubuntu_version
-    @options = options
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
+    @ubuntu_version = nil
     modify_storage('/'.to_sym => {
                      :prepare => {
                        :method =>  'format',

@@ -24,29 +24,18 @@ module Stacks::Services::MongoDBCluster
   end
 
   def instantiate_machines(environment)
-    i = 0
+    server_index = 0
     @master_instances.times do
-      instantiate_machine(name, :master, i += 1, environment, :primary_site)
+      instantiate_machine(server_index += 1, environment, environment.sites.first, :master)
     end
-    i = 0
+    server_index = 0
     @arbiter_instances.times do
-      instantiate_machine(name, :arbiter, i += 1, environment, :primary_site)
+      instantiate_machine(server_index += 1, environment, environment.sites.first, :arbiter, 'arbiter')
     end
-    i = 0
+    server_index = 0
     @backup_instances.times do
-      instantiate_machine(name, :backup, i += 1, environment, @backup_server_site)
+      instantiate_machine(server_index += 1, environment, environment.sites.last, :backup, 'backup')
     end
-  end
-
-  def instantiate_machine(name, type, i, environment, location)
-    index = sprintf("%03d", i)
-
-    server_name = "#{name}-#{index}"
-    server_name = "#{name}#{type}-#{index}" if [:backup, :arbiter].include?(type) && !@backup_server_legacy_naming
-    server = @type.new(server_name, i, self, type, location)
-    server.group = groups[i % groups.size] if server.respond_to?(:group)
-    server.availability_group = availability_group(environment) if server.respond_to?(:availability_group)
-    @definitions["#{server_name}-#{location}"] = server
   end
 
   def requirement_of(dependant)

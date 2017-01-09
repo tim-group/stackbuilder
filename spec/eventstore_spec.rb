@@ -16,9 +16,9 @@ describe_stack 'eventstore' do
   end
 
   host("e1-eventstore-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::eventstore_server']['clusternodes'].sort).to eql(
-      ["e1-eventstore-001.moon.net.local", "e1-eventstore-002.moon.net.local",
-       "e1-eventstore-002.space.net.local", "e1-eventstore-003.moon.net.local", "e1-eventstore-003.space.net.local"].
-        sort)
+    expect(host.to_enc['role::eventstore_server']['clusternodes'].sort).to include(
+      "e1-eventstore-001.moon.net.local", "e1-eventstore-002.moon.net.local",
+      "e1-eventstore-002.space.net.local", "e1-eventstore-003.moon.net.local", "e1-eventstore-003.space.net.local")
+    expect(host.to_enc['role::eventstore_server']['clusternodes'].sort).not_to include('e1-eventstore-001.mgmt.space.net.local')
   end
 end

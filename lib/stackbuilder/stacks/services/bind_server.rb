@@ -3,17 +3,6 @@ require 'stackbuilder/stacks/machine_def'
 require 'resolv'
 
 class Stacks::Services::BindServer < Stacks::MachineDef
-  attr_reader :environment
-  attr_reader :location
-  attr_reader :role
-  attr_reader :virtual_service
-
-  def initialize(role, virtual_service, index, networks, location)
-    super(virtual_service.name + "-" + index, networks, location)
-    @virtual_service = virtual_service
-    @role = role
-  end
-
   def master?
     @role == :master
   end

@@ -5,7 +5,12 @@ describe_stack 'logstash receiver' do
   given do
     stack "logstash_receiver" do
       logstash_cluster "logstash" do
-        self.role = :receiver
+        self.role_in_name = true
+        self.instances = {
+          'space' => {
+            :receiver => 1
+          }
+        }
 
         depend_on 'elasticmq'
       end

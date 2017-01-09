@@ -4,10 +4,8 @@ class Stacks::Services::Puppetdb < Stacks::MachineDef
   # FIXME: Clean up this accessor
   attr_accessor :cnames
 
-  def initialize(machineset, index, location)
-    super(machineset.name + "-" + index, [:mgmt], location)
-
-    @puppetdb_cluster = machineset
+  def initialize(virtual_service, base_hostname, environment, site, role)
+    super(virtual_service, base_hostname, environment, site, role)
     modify_storage('/' => { :size => '20G' })
     @vcpus = '16'
     @ram = '12582912' # 12GB
@@ -23,10 +21,10 @@ class Stacks::Services::Puppetdb < Stacks::MachineDef
 
   def to_enc
     enc = super()
-    dependant_instances = @puppetdb_cluster.dependant_instance_fqdns(location, [:mgmt], false)
+    dependant_instances = @virtual_service.dependant_instance_fqdns(location, [:mgmt], false)
     enc.merge!('role::puppetdb'  => {
                  'allowed_hosts' => dependant_instances,
-                 'version'       => @puppetdb_cluster.version
+                 'version'       => @virtual_service.version
                })
     enc
   end
