@@ -157,6 +157,47 @@ describe_stack 'should support instances as a site hash' do
   end
 end
 
+describe_stack 'should explode when using role in name with legacy instances (Integer)' do
+  expect do
+    given do
+      stack 'example' do
+        app_service "appx" do
+          self.role_in_name = true
+          self.application = "JavaHttpRef"
+          self.instances = 1
+        end
+      end
+
+      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+        instantiate_stack "example"
+      end
+    end
+
+  end.to raise_error(/You cannot specify self.role_in_name = true without defining roles in @instances/)
+end
+
+describe_stack 'should explode when using role in name with non-role containing instances (Hash)' do
+  expect do
+    given do
+      stack 'example' do
+        app_service "appx" do
+          self.role_in_name = true
+          self.application = "JavaHttpRef"
+          self.instances = {
+            'earth'   => 1,
+            'jupiter' => 1
+          }
+        end
+      end
+
+      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+        instantiate_stack "example"
+      end
+    end
+
+  end.to raise_error(/You cannot specify self.role_in_name = true without defining roles in @instances/)
+end
+
 describe_stack 'should raise exception for an un-supported site' do
   expect do
     given do
@@ -172,4 +213,60 @@ describe_stack 'should raise exception for an un-supported site' do
       end
     end
   end.to raise_error(/e1 environment does not support site\(s\): moon/)
+end
+
+describe_stack 'should raise exception if instance count provided is a string with basic @instances(Hash)' do
+  expect do
+    given do
+      stack 'example' do
+        app_service "appx" do
+          self.application = "JavaHttpRef"
+          self.instances = { 'earth' => '1' }
+        end
+      end
+
+      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+        instantiate_stack("example")
+      end
+    end
+
+  end.to raise_error(/You must specify Integers when using @instances in a hash format/)
+end
+
+describe_stack 'should raise exception if instance count provided is a string with role based @instances(Hash)' do
+  expect do
+    given do
+      stack 'example' do
+        app_service "appx" do
+          self.application = "JavaHttpRef"
+          self.instances = {
+            'earth' => {
+               :fish => '1'
+            }
+          }
+        end
+      end
+
+      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+        instantiate_stack("example")
+      end
+    end
+  end.to raise_error(/You must specify Integers when using @instances in a hash format/)
+end
+
+describe_stack 'should raise exception if @instances is not an Integer or Hash' do
+  expect do
+    given do
+      stack 'example' do
+        app_service "appx" do
+          self.application = "JavaHttpRef"
+          self.instances = 'go fish'
+        end
+      end
+
+      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+        instantiate_stack("example")
+      end
+    end
+  end.to raise_error(/You must specify Integer or Hash for @instances. You provided a String/)
 end

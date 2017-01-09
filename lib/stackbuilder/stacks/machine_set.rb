@@ -53,7 +53,56 @@ class Stacks::MachineSet
     "#{environment.name}_#{name.to_sym}"
   end
 
+  def instances_usage_with_role
+    "Below is an example of correct usage:\n \
+ @instances = {\n \
+   'oy' => {\n \
+     :master => 1,\n \
+     :slave  => 2\n \
+   },\n \
+   'st' => {\n \
+     :master => 1,\n \
+     :slave  => 0\n \
+   }\n \
+ }\n\
+ This is what you specified:\n @instances = #{@instances.inspect}\n"
+  end
+
+  def instances_usage
+    "Below is an example of correct usage:\n \
+ @instances = {\n\
+   'oy' => 1,\n\
+   'st' => 1\n\
+ }\n\
+ This is what you specified:\n @instances = #{@instances.inspect}\n"
+  end
+
+  def validate_instances(environment)
+    if @instances.is_a?(Integer)
+      fail "You cannot specify self.role_in_name = true without defining roles in @instances\n #{instances_usage_with_role}" if @role_in_name
+    elsif @instances.is_a?(Hash)
+      environment.validate_instance_sites(@instances.keys)
+      @instances.each do |site, count|
+        if count.is_a?(String)
+          fail "You must specify Integers when using @instances in a hash format\n #{instances_usage}"
+        elsif count.is_a?(Integer)
+          fail "You cannot specify self.role_in_name = true without defining roles in @instances\n #{instances_usage_with_role}" if @role_in_name
+        elsif count.is_a?(Hash)
+          count.each do |role, num|
+            fail "You must specify Integers when using @instances in a hash format\n #{instances_usage_with_role}" if num.is_a?(String)
+            fail "Role: #{role} must be a symbol\n #{instances_usage_with_role}" unless role.is_a?(Symbol)
+          end
+        else
+          fail "@instances hash contains invalid item #{count} which is a #{count.class} expected Integer / Symbol"
+        end
+      end
+    else
+      fail "You must specify Integer or Hash for @instances. You provided a #{instances.class}"
+    end
+  end
+
   def instantiate_machines(environment)
+    validate_instances(environment)
     if @instances.is_a?(Integer)
       1.upto(@instances) do |i|
         server_index = i + @server_offset
@@ -63,7 +112,6 @@ class Stacks::MachineSet
         end
       end
     elsif @instances.is_a?(Hash)
-      environment.validate_instance_sites(@instances.keys)
       @instances.each do |site, count|
         if count.is_a?(Integer)
           1.upto(count) do |c|
@@ -81,8 +129,6 @@ class Stacks::MachineSet
           fail "Instances hash contains invalid item #{count} which is a #{count.class} expected Integer / Symbol"
         end
       end
-    else
-      fail "@instances was an un-supported type: #{instances.class}, expected Integer|Hash.\n@instances: #{@instances.inspect}"
     end
   end
 
