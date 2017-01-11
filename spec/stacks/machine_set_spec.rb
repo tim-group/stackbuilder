@@ -172,7 +172,6 @@ describe_stack 'should explode when using role in name with legacy instances (In
         instantiate_stack "example"
       end
     end
-
   end.to raise_error(/You cannot specify self.role_in_name = true without defining roles in @instances/)
 end
 
@@ -194,7 +193,6 @@ describe_stack 'should explode when using role in name with non-role containing 
         instantiate_stack "example"
       end
     end
-
   end.to raise_error(/You cannot specify self.role_in_name = true without defining roles in @instances/)
 end
 
@@ -229,7 +227,6 @@ describe_stack 'should raise exception if instance count provided is a string wi
         instantiate_stack("example")
       end
     end
-
   end.to raise_error(/You must specify Integers when using @instances in a hash format/)
 end
 
@@ -241,7 +238,7 @@ describe_stack 'should raise exception if instance count provided is a string wi
           self.application = "JavaHttpRef"
           self.instances = {
             'earth' => {
-               :fish => '1'
+              :fish => '1'
             }
           }
         end

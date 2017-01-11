@@ -79,14 +79,16 @@ class Stacks::MachineSet
 
   def validate_instances(environment)
     if @instances.is_a?(Integer)
-      fail "You cannot specify self.role_in_name = true without defining roles in @instances\n #{instances_usage_with_role}" if @role_in_name
+      fail "You cannot specify self.role_in_name = true without defining roles in @instances\n \
+      #{instances_usage_with_role}" if @role_in_name
     elsif @instances.is_a?(Hash)
       environment.validate_instance_sites(@instances.keys)
-      @instances.each do |site, count|
+      @instances.each do |_site, count|
         if count.is_a?(String)
           fail "You must specify Integers when using @instances in a hash format\n #{instances_usage}"
         elsif count.is_a?(Integer)
-          fail "You cannot specify self.role_in_name = true without defining roles in @instances\n #{instances_usage_with_role}" if @role_in_name
+          fail "You cannot specify self.role_in_name = true without defining roles in @instances\n \
+          #{instances_usage_with_role}" if @role_in_name
         elsif count.is_a?(Hash)
           count.each do |role, num|
             fail "You must specify Integers when using @instances in a hash format\n #{instances_usage_with_role}" if num.is_a?(String)
