@@ -108,7 +108,7 @@ module Stacks::Services::VirtualBindService
     children.inject([]) do |servers, bind_server|
       servers << bind_server unless bind_server.master?
       servers
-    end.sort
+    end
   end
 
   def slave_servers_as_fqdns
