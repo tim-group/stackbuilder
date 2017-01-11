@@ -206,7 +206,7 @@ class Stacks::MachineDef
 
   def to_enc
     enc = {}
-    enc.merge! @included_classes
+    enc.merge! @included_classes unless @included_classes.nil?
     enc.merge! @virtual_service.included_classes if @virtual_service && @virtual_service.respond_to?(:included_classes)
     unless @routes.empty?
       enc['routes'] = {
