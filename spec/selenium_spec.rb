@@ -188,8 +188,5 @@ describe_stack 'selenium' do
     expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
     expect(host.to_spec[:selenium_version]).to eql '2.41.0'
     expect(host.to_spec[:firefox_version]).to eql '36.0+build2-0ubuntu0.12.04.5'
-    expect(host.to_spec[:ram]).to eql('2097152')
-    expect(host.to_spec[:storage][:/][:size]).to eql('5G')
-    expect(host.to_spec[:storage][:/][:type]).to eql('os')
   end
 end
