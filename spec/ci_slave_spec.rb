@@ -34,6 +34,10 @@ describe_stack 'jenkins' do
     expect(host.to_enc['role::cinode']).to eql('node_labels' => '', 'allow_matrix_host' => nil)
   end
 
+  host('e1-jenkinsslave-002.mgmt.space.net.local') do |host|
+    expect(host.to_spec[:networks]).to eql([:mgmt])
+  end
+
   host('e1-jenkinsslavewithlabels-001.mgmt.space.net.local') do |host|
     expect(host.to_enc['role::cinode']['node_labels']).to eql('first_label second_label')
   end

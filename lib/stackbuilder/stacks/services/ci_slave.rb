@@ -9,6 +9,7 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
     super(virtual_service, base_hostname, environment, site, role)
     @node_labels = []
     @allow_matrix_host = nil
+    @networks = [:mgmt]
   end
 
   def availability_group
