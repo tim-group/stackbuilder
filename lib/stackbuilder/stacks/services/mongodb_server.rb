@@ -41,12 +41,12 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
     dependant_instances.delete prod_fqdn
     dependant_users = {}
     if role_of?(:master)
-      dependant_instances.concat(@virtual_service.dependant_instance_fqdns(location)).sort
+      dependant_instances.concat(@virtual_service.dependant_instance_fqdns(location))
       dependant_users = @virtual_service.dependant_users
     end
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::mongodb_server'].merge!('dependant_instances' => dependant_instances,
+      enc['role::mongodb_server'].merge!('dependant_instances' => dependant_instances.sort,
                                          'dependant_users'     => dependant_users,
                                          'dependencies'        => @virtual_service.dependency_config(fabric))
     end

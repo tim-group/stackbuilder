@@ -52,10 +52,14 @@ describe_stack 'provides dependency information to masters(only) and dependants'
   end
 
   host("e1-mongodb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mongodb_server']['dependant_instances']).to include(
+    # Ordering should be idempotent
+    expect(host.to_enc['role::mongodb_server']['dependant_instances']).to eql([
       'e1-exampleapp-001.space.net.local',
       'e1-exampleapp-002.space.net.local',
-      'e1-mongodb-002.space.net.local')
+      'e1-mongodb-002.space.net.local',
+      'e1-mongodbarbiter-001.space.net.local',
+      'e1-mongodbbackup-001.moon.net.local'
+    ])
     expect(host.to_enc['role::mongodb_server']['dependant_instances']).not_to include(
       'e1-mongodb-001.space.net.local')
   end
