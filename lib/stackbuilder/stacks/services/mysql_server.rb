@@ -179,7 +179,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     {
       'role::mysql_server' =>  {
         'dependencies' => @virtual_service.dependency_config(fabric),
-        'dependant_instances' => dependant_instances
+        'dependant_instances' => dependant_instances.sort
       }
     }
   end
@@ -221,7 +221,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                'server::default_new_mgmt_net_local' => nil)
 
     dependant_instances = @virtual_service.dependant_instance_fqdns(location, [:prod], false)
-    dependant_instances.concat(@virtual_service.children.map(&:prod_fqdn)).sort
+    dependant_instances.concat(@virtual_service.children.map(&:prod_fqdn))
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
