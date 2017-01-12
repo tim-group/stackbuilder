@@ -164,9 +164,11 @@ module Stacks::Services::MysqlCluster
       fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
         "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
     else
-      hostnames_for_requirement = @supported_requirements[requirement]
-      matching_hostnames = children.select { |server| hostnames_for_requirement.include?(server.prod_fqdn) }
-      config_to_fulfil_requirement(dependent, matching_hostnames, requirement)
+      # Convert the fqdn array to an array of server objects ensuring the same order
+      servers = @supported_requirements[requirement].inject([]) do |s, fqdn|
+        s << children.find { |server| server.prod_fqdn == fqdn }
+      end
+      config_to_fulfil_requirement(dependent, servers, requirement)
     end
   end
 

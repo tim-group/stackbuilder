@@ -350,4 +350,46 @@ describe_stack 'stack-with-dependencies' do
         "environment 'e7'. Supported requirements: [some_requirement]."
     end
   end
+  describe_stack 'ordering of servers provided by supported requirements should not change' do
+    given do
+      stack "mysql" do
+        mysql_cluster "mydb" do
+          self.database_name = 'test'
+          self.master_instances = 1
+          self.slave_instances = 2
+          self.backup_instances = 0
+          self.supported_requirements = {
+            :master               => %w(production-mydb-001.space.net.local),
+            :read_only            => %w(production-mydb-003.space.net.local
+                                        production-mydb-001.space.net.local
+                                        production-mydb-002.space.net.local)
+          }
+        end
+      end
+      stack "app_server" do
+        app_service "app" do
+          self.application = "app"
+          self.instances = 1
+          depend_on 'mydb', 'production', :read_only
+        end
+      end
+      env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+        instantiate_stack "mysql"
+        instantiate_stack "app_server"
+      end
+    end
+
+    host("production-app-001.mgmt.space.net.local") do |host|
+      deps = host.to_enc['role::http_app']['dependencies']
+      expect(deps['db.test.hostname']).to eql('production-mydb-003.space.net.local,production-mydb-001.space.net.local,production-mydb-002.space.net.local')
+    end
+    it_stack 'should contain all the expected hosts' do |stack|
+      expect(stack).to have_hosts([
+        'production-mydb-001.mgmt.space.net.local',
+        'production-mydb-002.mgmt.space.net.local',
+        'production-mydb-003.mgmt.space.net.local',
+        'production-app-001.mgmt.space.net.local'
+      ])
+    end
+  end
 end
