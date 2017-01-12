@@ -11,6 +11,19 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
     @routes = []
     @location = :primary_site
     @added_cnames = []
+    @ram = "2097152"
+    @storage = {
+      '/'.to_sym =>  {
+        :type        => 'os',
+        :size        => '5G',
+        :prepare     => {
+          :method => 'image',
+          :options => {
+            :path => '/var/local/images/gold-precise/generic.img'
+          }
+        }
+      }
+    }
   end
 
   def bind_to(environment)
