@@ -134,6 +134,11 @@ describe_stack 'selenium' do
 
   host("e1-hub-001.mgmt.space.net.local") do |host|
     expect(host.to_spec[:template]).to eql "sehub"
+    expect(host.to_spec[:ram]).to eql('2097152')
+    expect(host.to_spec[:storage][:/][:size]).to eql('5G')
+    expect(host.to_spec[:storage][:/][:type]).to eql('os')
+    expect(host.to_spec[:disallow_destroy]).to be_nil
+
     expect(host.to_spec[:selenium_version]).to eql('2.41.0')
     expect(host.to_spec[:nodes]).to eql([
       'e1-a-browser-001',
