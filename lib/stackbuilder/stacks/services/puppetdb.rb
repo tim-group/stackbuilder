@@ -9,6 +9,7 @@ class Stacks::Services::Puppetdb < Stacks::MachineDef
     modify_storage('/' => { :size => '20G' })
     @vcpus = '16'
     @ram = '12582912' # 12GB
+    @networks = [:mgmt]
   end
 
   def needs_signing?
