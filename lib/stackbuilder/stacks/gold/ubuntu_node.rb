@@ -7,6 +7,19 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
   def initialize(virtual_service, base_hostname, environment, site, role)
     super(virtual_service, base_hostname, environment, site, role)
     @ubuntu_version = nil
+    @ram = "2097152"
+    @storage = {
+      '/'.to_sym =>  {
+        :type        => 'os',
+        :size        => '8G',
+        :prepare     => {
+          :method => 'image',
+          :options => {
+            :path => '/var/local/images/gold-precise/generic.img'
+          }
+        }
+      }
+    }
     modify_storage('/'.to_sym => {
                      :prepare => {
                        :method =>  'format',
