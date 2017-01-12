@@ -13,6 +13,7 @@ class Stacks::Services::Selenium::Win7Node < Stacks::MachineDef
     @location = :primary_site
     @added_cnames = []
     @destroyable = true
+    @ram = "2097152"
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',
