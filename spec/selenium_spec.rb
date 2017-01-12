@@ -138,7 +138,7 @@ describe_stack 'selenium' do
     expect(host.to_spec[:storage][:/][:size]).to eql('5G')
     expect(host.to_spec[:storage][:/][:type]).to eql('os')
     expect(host.to_spec[:disallow_destroy]).to be_nil
-
+    expect(host.to_spec[:allocation_tags]).to eql([])
     expect(host.to_spec[:selenium_version]).to eql('2.41.0')
     expect(host.to_spec[:nodes]).to eql([
       'e1-a-browser-001',
@@ -163,6 +163,7 @@ describe_stack 'selenium' do
     expect(host.to_spec[:ie_version]).to eql '6'
     expect(host.to_spec[:disallow_destroy]).to be_nil
     expect(host.to_spec[:ram]).to eql('2097152')
+    expect(host.to_spec[:allocation_tags]).to eql([])
   end
 
   host("e1-a-ie9-002.mgmt.space.net.local") do |host|
@@ -173,6 +174,7 @@ describe_stack 'selenium' do
     expect(host.to_spec[:ie_version]).to eql '9'
     expect(host.to_spec[:disallow_destroy]).to be_nil
     expect(host.to_spec[:ram]).to eql('2097152')
+    expect(host.to_spec[:allocation_tags]).to eql([])
   end
 
   host("e1-a-ie10-001.mgmt.space.net.local") do |host|
@@ -192,5 +194,6 @@ describe_stack 'selenium' do
     expect(host.to_spec[:storage][:/][:size]).to eql('5G')
     expect(host.to_spec[:storage][:/][:type]).to eql('os')
     expect(host.to_spec[:disallow_destroy]).to be_nil
+    expect(host.to_spec[:allocation_tags]).to eql([])
   end
 end

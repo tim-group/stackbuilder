@@ -14,6 +14,7 @@ class Stacks::Services::Selenium::Win7Node < Stacks::MachineDef
     @added_cnames = []
     @destroyable = true
     @ram = "2097152"
+    @allocation_tags = []
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',

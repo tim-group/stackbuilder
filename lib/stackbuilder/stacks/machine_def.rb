@@ -187,7 +187,7 @@ class Stacks::MachineDef
     spec[:storage] = storage
     spec[:dont_start] = true if @dont_start
     spec[:cnames] = Hash[@added_cnames.map { |n, cnames| [n, Hash[cnames.map { |c| [c, qualified_hostname(n)] }]] }]
-    spec[:allocation_tags] = @allocation_tags if @allocation_tags
+    spec[:allocation_tags] = @allocation_tags
     spec
   end
 
