@@ -161,6 +161,7 @@ describe_stack 'selenium' do
     expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
     expect(host.to_spec[:selenium_version]).to eql '2.41.0'
     expect(host.to_spec[:ie_version]).to eql '6'
+    expect(host.to_spec[:disallow_destroy]).to be_nil
   end
 
   host("e1-a-ie9-002.mgmt.space.net.local") do |host|
@@ -169,6 +170,7 @@ describe_stack 'selenium' do
     expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
     expect(host.to_spec[:selenium_version]).to eql '2.41.0'
     expect(host.to_spec[:ie_version]).to eql '9'
+    expect(host.to_spec[:disallow_destroy]).to be_nil
   end
 
   host("e1-a-ie10-001.mgmt.space.net.local") do |host|

@@ -12,6 +12,7 @@ class Stacks::Services::Selenium::Win7Node < Stacks::MachineDef
     @routes = []
     @location = :primary_site
     @added_cnames = []
+    @destroyable = true
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',
