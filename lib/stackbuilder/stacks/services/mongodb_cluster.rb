@@ -21,6 +21,7 @@ module Stacks::Services::MongoDBCluster
     ### FIXME: Remove this temporary workaround when backup server is rebuilt in the correct logicalenv
     @backup_server_site = :secondary_site
     @backup_server_legacy_naming = false
+    @backup_name = 'backup'
   end
 
   def instantiate_machines(environment)
@@ -34,7 +35,8 @@ module Stacks::Services::MongoDBCluster
     end
     server_index = 0
     @backup_instances.times do
-      instantiate_machine(server_index += 1, environment, environment.sites.last, :backup, 'backup')
+      @backup_name = '' if @backup_server_legacy_naming
+      instantiate_machine(server_index += 1, environment, environment.sites.last, :backup, @backup_name)
     end
   end
 
