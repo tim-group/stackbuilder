@@ -12,6 +12,7 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
     @location = :primary_site
     @added_cnames = []
     @ram = "2097152"
+    @destroyable = true
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',
