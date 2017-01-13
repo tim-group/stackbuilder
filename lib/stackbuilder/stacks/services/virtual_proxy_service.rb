@@ -59,6 +59,8 @@ module Stacks::Services::VirtualProxyService
     type = @is_use_deployapp_enabled && @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
 
     enc = {
+      'env' => environment.name,
+      'app' => 'apache2',
       'type' => type,
       'ports' => @ports,
       'realservers' => realservers
