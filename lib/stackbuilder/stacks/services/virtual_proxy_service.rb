@@ -55,7 +55,7 @@ module Stacks::Services::VirtualProxyService
       [group, grealserver_fqdns]
     end]
 
-    type = @is_use_deployapp_enabled and @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
+    type = @is_use_deployapp_enabled && @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
 
     enc = {
       'type' => type,
