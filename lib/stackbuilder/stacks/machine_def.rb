@@ -20,6 +20,7 @@ class Stacks::MachineDef
   attr_accessor :machine_allocation_tags
   attr_accessor :destroyable
   attr_accessor :role
+  attr_accessor :site
 
   def initialize(virtual_service, base_hostname, environment, site, role = nil)
     @virtual_service = virtual_service
