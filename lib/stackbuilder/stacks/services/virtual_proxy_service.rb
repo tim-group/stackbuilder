@@ -5,6 +5,7 @@ module Stacks::Services::VirtualProxyService
   attr_reader :cert
   attr_reader :proxy_vhosts
   attr_reader :is_use_deployapp_enabled
+  attr_reader :use_deployapp
   attr_accessor :override_vhost_location
 
   def self.extended(object)
