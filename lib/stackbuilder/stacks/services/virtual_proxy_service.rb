@@ -4,6 +4,7 @@ require 'stackbuilder/stacks/services/proxy_vhost'
 module Stacks::Services::VirtualProxyService
   attr_reader :cert
   attr_reader :proxy_vhosts
+  attr_reader :is_use_deployapp_enabled
   attr_accessor :override_vhost_location
 
   def self.extended(object)
@@ -17,6 +18,8 @@ module Stacks::Services::VirtualProxyService
     @override_vhost_location = {}
     @vhost_for_lb_healthcheck_override_hack = nil
     @enable_use_for_lb_healthcheck = false
+    @use_deployapp = true
+    @is_use_deployapp_enabled = false
   end
 
   def vhost(service, fqdn = nil, service_env_name = nil, service_location = :primary_site, &config_block)
@@ -52,8 +55,10 @@ module Stacks::Services::VirtualProxyService
       [group, grealserver_fqdns]
     end]
 
+    type = @is_use_deployapp_enabled and @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
+
     enc = {
-      'type' => 'proxy',
+      'type' => type,
       'ports' => @ports,
       'realservers' => realservers
     }
@@ -78,6 +83,14 @@ module Stacks::Services::VirtualProxyService
 
   def enable_use_for_lb_healthcheck
     @enable_use_for_lb_healthcheck = true
+  end
+
+  def enable_use_deployapp
+    @is_use_deployapp_enabled = true
+  end
+
+  def disable_using_deployapp
+    @use_deployapp = false
   end
 
   private

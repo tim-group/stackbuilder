@@ -29,6 +29,15 @@ class Stacks::Services::ProxyServer < Stacks::MachineDef
                    'vhosts'           => service_resources,
                    'environment'      => environment.name
                  })
+
+      if @virtual_service.is_use_deployapp_enabled
+        enc['role::proxyserver'].merge!(
+          'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
+          'cluster'                           => availability_group,
+          'use_deployapp'                     => @virtual_service.use_deployapp
+        )
+      end
+
       enc
     end
   end
