@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile diff ls lsenv enc spec clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -30,6 +30,21 @@ class CMD
       end
     end
     puts ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
+  end
+
+  def diff(argv)
+    diff_type = arg.shift if argv.size > 0
+    diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
+    sbc_path = ENV['STACKBUILDER_CONFIG_PATH'] || '.'
+
+    if diff_type == '-sb'
+      system("sudo apt-get install stackbuilder && stacks compile > /tmp/before")
+      system("rake package install  && stacks compile > /tmp/after")
+    else
+      system("cd #{sbc_path} && git checkout HEAD~1 && stacks compile > /tmp/before")
+      system("cd #{sbc_path} && git checkout master && stacks compile > /tmp/after")
+    end
+    system("#{diff_tool} /tmp/before /tmp/after")
   end
 
   def terminus(_argv)
