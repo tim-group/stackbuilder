@@ -25,7 +25,6 @@ class Stacks::Services::ProxyVHost
     @ensure = 'present'
     @monitor_vhost = true
     @use_for_lb_healthcheck = false
-    @enable_use_for_lb_healthcheck = false
     instance_eval(&block) if block
   end
 
@@ -90,7 +89,7 @@ class Stacks::Services::ProxyVHost
       'cert'                    => cert,
       'monitor_vhost'           => @monitor_vhost
     }
-    config['used_for_lb_healthcheck'] = use_for_lb_healthcheck? if @enable_use_for_lb_healthcheck
+    config['used_for_lb_healthcheck'] = use_for_lb_healthcheck?
     [fqdn(fabric), config]
   end
 
@@ -104,9 +103,5 @@ class Stacks::Services::ProxyVHost
 
   def use_for_lb_healthcheck?
     @use_for_lb_healthcheck
-  end
-
-  def enable_use_for_lb_healthcheck
-    @enable_use_for_lb_healthcheck = true
   end
 end

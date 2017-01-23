@@ -145,9 +145,7 @@ describe_stack 'load balancer will generate config for a sub environment' do
     end
     stack "proxystack" do
       proxy_service "myproxy" do
-        enable_use_for_lb_healthcheck
         vhost('exampleapp') do
-          enable_use_for_lb_healthcheck
           use_for_lb_healthcheck
         end
       end
@@ -264,9 +262,7 @@ describe_stack 'should only load balance for services in the same site' do
     end
     stack 'proxy' do
       proxy_service 'eproxy' do
-        enable_use_for_lb_healthcheck
         vhost('appy') do
-          enable_use_for_lb_healthcheck
           use_for_lb_healthcheck
         end
       end

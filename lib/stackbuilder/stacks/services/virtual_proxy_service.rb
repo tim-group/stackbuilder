@@ -18,7 +18,6 @@ module Stacks::Services::VirtualProxyService
     @cert                    = 'wildcard_timgroup_com'
     @override_vhost_location = {}
     @vhost_for_lb_healthcheck_override_hack = nil
-    @enable_use_for_lb_healthcheck = false
     @use_deployapp = true
     @is_use_deployapp_enabled = false
   end
@@ -66,7 +65,7 @@ module Stacks::Services::VirtualProxyService
       'realservers' => realservers
     }
 
-    enc['vhost_for_healthcheck'] = vhost_for_healthcheck(fabric) if @enable_use_for_lb_healthcheck
+    enc['vhost_for_healthcheck'] = vhost_for_healthcheck(fabric)
 
     unless @persistent_ports.empty?
       persistence = { 'persistent_ports' => @persistent_ports }
@@ -82,10 +81,6 @@ module Stacks::Services::VirtualProxyService
     fail("vhost_for_lb_healthcheck_override_hack is already set to #{@vhost_for_lb_healthcheck_override_hack} " \
          "for service '#{name}' in environment '#{environment.name}'") unless @vhost_for_lb_healthcheck_override_hack.nil?
     @vhost_for_lb_healthcheck_override_hack = vhost_name
-  end
-
-  def enable_use_for_lb_healthcheck
-    @enable_use_for_lb_healthcheck = true
   end
 
   def enable_use_deployapp
