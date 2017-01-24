@@ -341,8 +341,6 @@ describe_stack 'can depend_on nat' do
         nat_config.udp = true
         nat_config.port_map = { 8000 => 80 }
 
-        add_networks_for_nat
-
         depend_on 'nat', environment.name, :nat_to_vip
       end
 
@@ -358,6 +356,19 @@ describe_stack 'can depend_on nat' do
         nat_config.udp = false
 
         depend_on 'nat', environment.name, :nat_to_host
+      end
+
+      app_service 'appwith-snat' do
+        self.instances = 2
+        self.ports = [8000]
+        nat_config.inbound_enabled = false
+        nat_config.outbound_enabled = true
+        nat_config.public_network = :front
+        nat_config.private_network = :prod
+        nat_config.tcp = true
+        nat_config.udp = false
+
+        depend_on 'nat', environment.name, :nat_to_vip
       end
     end
 
@@ -393,5 +404,10 @@ describe_stack 'can depend_on nat' do
     expect(standard_host_snat_rules['to_source']).to eql('dep-standardwith-snat-001.front.st.net.local:22')
     expect(standard_host_snat_rules['tcp']).to eql(true)
     expect(standard_host_snat_rules['udp']).to eql(false)
+
+    vip_snat_rules = snat['dep-appwith-snat-vip.st.net.local 8000']
+    expect(vip_snat_rules['to_source']).to eql('dep-appwith-snat-vip.front.st.net.local:8000')
+    expect(vip_snat_rules['tcp']).to eql(true)
+    expect(vip_snat_rules['udp']).to eql(false)
   end
 end

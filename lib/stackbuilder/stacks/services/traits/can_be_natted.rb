@@ -12,23 +12,23 @@ module Stacks::Services::CanBeNatted
   end
 
   def dnat_rules_for_dependency(location, requirements)
-    rules = []
-    requirements.each do |requirement|
+    requirements.map do |requirement|
       if requirement == :nat_to_host
-        rules.concat(dnat_rules_for_host)
+        dnat_rules_for_host
       elsif requirement == :nat_to_vip
-        rules.concat(dnat_rules_for_vip(location))
+        dnat_rules_for_vip(location)
       end
-    end
-    rules
+    end.flatten
   end
 
-  def snat_rules_for_dependency(_location, requirements)
-    rules = []
-    requirements.each do |requirement|
-      rules.concat(snat_rules_for_host) if requirement == :nat_to_host
-    end
-    rules
+  def snat_rules_for_dependency(location, requirements)
+    requirements.map do |requirement|
+      if requirement == :nat_to_host
+        snat_rules_for_host
+      elsif requirement == :nat_to_vip
+        snat_rules_for_vip(location)
+      end
+    end.flatten
   end
 
   def dnat_rules_for_host
@@ -38,8 +38,8 @@ module Stacks::Services::CanBeNatted
         front_port = nat_config.port_map[back_port] || back_port
 
         children.each do |machine|
-          public_uri = URI.parse("http://#{machine.hostname}.#{nat_config.public_network}.#{machine.domain}:#{front_port}")
-          private_uri = URI.parse("http://#{machine.qualified_hostname(nat_config.private_network)}:#{back_port}")
+          public_uri = uri_for_host(machine, nat_config.public_network, front_port)
+          private_uri = uri_for_host(machine, nat_config.private_network, back_port)
           rules << Stacks::Services::Nat.new(public_uri, private_uri, nat_config.tcp, nat_config.udp)
         end
       end
@@ -53,9 +53,9 @@ module Stacks::Services::CanBeNatted
     if nat_config.inbound_enabled
       @ports.map do |back_port|
         front_port = nat_config.port_map[back_port] || back_port
-        front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
-        prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
-        rules << Stacks::Services::Nat.new(front_uri, prod_uri, nat_config.tcp, nat_config.udp)
+        public_uri = uri_for_vip(fabric, front_port, vip_hostname, nat_config.public_network)
+        private_uri = uri_for_vip(fabric, back_port, vip_hostname, nat_config.private_network)
+        rules << Stacks::Services::Nat.new(public_uri, private_uri, nat_config.tcp, nat_config.udp)
       end
     end
     rules
@@ -66,16 +66,31 @@ module Stacks::Services::CanBeNatted
     if nat_config.outbound_enabled
       ports.map do |back_port|
         front_port = nat_config.port_map[back_port] || back_port
-
         children.each do |machine|
-          public_uri = URI.parse("http://#{machine.hostname}.#{nat_config.public_network}.#{machine.domain}:#{front_port}")
-          private_uri = URI.parse("http://#{machine.qualified_hostname(nat_config.private_network)}:#{back_port}")
+          public_uri = uri_for_host(machine, nat_config.public_network, front_port)
+          private_uri = uri_for_host(machine, nat_config.private_network, back_port)
           rules << Stacks::Services::Nat.new(private_uri, public_uri, nat_config.tcp, nat_config.udp)
         end
       end
     end
     rules
   end
+
+  def snat_rules_for_vip(location)
+    rules = []
+    fabric = environment.options[location]
+    if nat_config.outbound_enabled
+      ports.map do |back_port|
+        front_port = nat_config.port_map[back_port] || back_port
+        public_uri = uri_for_vip(fabric, front_port, vip_hostname, nat_config.public_network)
+        private_uri = uri_for_vip(fabric, back_port, vip_hostname, nat_config.private_network)
+        rules << Stacks::Services::Nat.new(private_uri, public_uri, nat_config.tcp, nat_config.udp)
+      end
+    end
+    rules
+  end
+
+
 
   def to_vip_spec(location)
     networks = [nat_config.private_network, nat_config.public_network]
@@ -92,4 +107,19 @@ module Stacks::Services::CanBeNatted
       :qualified_hostnames => hostnames
     }
   end
+
+  private
+
+  def vip_hostname
+    "#{environment.name}-#{name}-vip"
+  end
+
+  def uri_for_vip(fabric, front_port, hostname, public_network)
+    URI.parse("http://#{hostname}.#{environment.domain(fabric, public_network)}:#{front_port}")
+  end
+
+  def uri_for_host(machine, network, port)
+    URI.parse("http://#{machine.hostname}.#{network}.#{machine.domain}:#{port}")
+  end
+
 end
