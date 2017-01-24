@@ -90,8 +90,6 @@ module Stacks::Services::CanBeNatted
     rules
   end
 
-
-
   def to_vip_spec(location)
     networks = [nat_config.private_network, nat_config.public_network]
     fabric = environment.options[location]
@@ -121,5 +119,4 @@ module Stacks::Services::CanBeNatted
   def uri_for_host(machine, network, port)
     URI.parse("http://#{machine.hostname}.#{network}.#{machine.domain}:#{port}")
   end
-
 end
