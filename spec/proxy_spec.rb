@@ -611,7 +611,6 @@ describe_stack 'fails if a proxy_service has more than one vhost thats configure
 
   host('st-proxy-001.mgmt.st.net.local') do |proxyserver|
     vhost_enc = proxyserver.to_enc['role::proxyserver']['vhosts']['st-proxy-vip.st.net.local']
-    pp proxyserver.to_enc['role::proxyserver']['vhosts']
     expect(vhost_enc['used_for_lb_healthcheck']).to be true
   end
 
