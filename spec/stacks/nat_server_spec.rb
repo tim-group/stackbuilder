@@ -320,6 +320,7 @@ describe_stack 'can depend_on nat' do
       nat_service
       standard_service 'withnat' do
         self.extend(Stacks::Services::CanBeNatted)
+        self.instances = 2
         self.ports = [22]
         self.nat_config.inbound_enabled = true
         self.nat_config.public_network = :front
@@ -336,13 +337,20 @@ describe_stack 'can depend_on nat' do
     end
   end
 
-  xhost('dep-nat-001.mgmt.st.net.local') do |host|
+  host('dep-nat-001.mgmt.st.net.local') do |host|
     enc = host.to_enc
     dnat = enc['role::natserver']['rules']['DNAT']
 
-    service_dnat = dnat['dep-withnat-001.front.st.net.local 443']
-    expect(service_dnat['to_source']).to eql('dep-withnat-001.mgmt.st.net.local')
-    expect(service_dnat['tcp']).to eql(true)
-    expect(service_dnat['udp']).to eql(false)
+    first_host_dnat_rules = dnat['dep-withnat-001.front.st.net.local 22']
+    expect(first_host_dnat_rules['dest_host']).to eql('dep-withnat-001.mgmt.st.net.local')
+    expect(first_host_dnat_rules['dest_port']).to eql('22')
+    expect(first_host_dnat_rules['tcp']).to eql(true)
+    expect(first_host_dnat_rules['udp']).to eql(false)
+
+    second_host_dnat_rules = dnat['dep-withnat-002.front.st.net.local 22']
+    expect(second_host_dnat_rules['dest_host']).to eql('dep-withnat-002.mgmt.st.net.local')
+    expect(second_host_dnat_rules['dest_port']).to eql('22')
+    expect(second_host_dnat_rules['tcp']).to eql(true)
+    expect(second_host_dnat_rules['udp']).to eql(false)
   end
 end

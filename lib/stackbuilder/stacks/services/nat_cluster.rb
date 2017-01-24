@@ -43,6 +43,10 @@ module Stacks::Services::NatCluster
 
   private
 
+  def find_dependencies_that_require_dnat
+    virtual_services_that_depend_on_me
+  end
+
   def find_services_that_require_dnat
     @environment.virtual_services.select do |node|
       node.respond_to?(:nat) &&
@@ -110,6 +114,10 @@ module Stacks::Services::NatCluster
     end
     secondary_site_services_that_require_dnat.uniq.each do |service|
       rules = rules.concat(service.dnat_rules(:secondary_site))
+    end
+
+    find_dependencies_that_require_dnat.each do |dependency|
+      rules = rules.concat(dependency.dnat_rules(:primary_site))
     end
     rules
   end
