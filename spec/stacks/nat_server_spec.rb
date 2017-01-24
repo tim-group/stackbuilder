@@ -313,3 +313,36 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     expect(snat_2['udp']).to eql(false)
   end
 end
+
+describe_stack 'can depend_on nat' do
+  given do
+    stack 'depend_on_example' do
+      nat_service
+      standard_service 'withnat' do
+        self.extend(Stacks::Services::CanBeNatted)
+        self.ports = [22]
+        self.nat_config.inbound_enabled = true
+        self.nat_config.public_network = :front
+        self.nat_config.private_network = :mgmt
+        self.nat_config.tcp = true
+        self.nat_config.udp = false
+
+        depend_on 'nat', environment.name, :nat_to_host
+      end
+    end
+
+    env 'dep', :primary_site => 'st', :secondary_site => 'bs' do
+      instantiate_stack 'depend_on_example'
+    end
+  end
+
+  xhost('dep-nat-001.mgmt.st.net.local') do |host|
+    enc = host.to_enc
+    dnat = enc['role::natserver']['rules']['DNAT']
+
+    service_dnat = dnat['dep-withnat-001.front.st.net.local 443']
+    expect(service_dnat['to_source']).to eql('dep-withnat-001.mgmt.st.net.local')
+    expect(service_dnat['tcp']).to eql(true)
+    expect(service_dnat['udp']).to eql(false)
+  end
+end
