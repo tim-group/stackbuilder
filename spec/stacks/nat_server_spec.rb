@@ -318,7 +318,7 @@ describe_stack 'can depend_on nat' do
   given do
     stack 'depend_on_example' do
       nat_service
-      standard_service 'withnat' do
+      standard_service 'standardwithnat' do
         extend(Stacks::Services::CanBeNatted)
         self.instances = 2
         self.ports = [22]
@@ -330,6 +330,19 @@ describe_stack 'can depend_on nat' do
 
         depend_on 'nat', environment.name, :nat_to_host
       end
+
+      app_service 'appwithnat' do
+        self.instances = 2
+        self.ports = [8000]
+        self.port_map = { 8000 => 80 }
+        nat_config.inbound_enabled = true
+        nat_config.public_network = :front
+        nat_config.private_network = :prod
+        nat_config.tcp = true
+        nat_config.udp = true
+
+        depend_on 'nat', environment.name, :nat_to_vip
+      end
     end
 
     env 'dep', :primary_site => 'st', :secondary_site => 'bs' do
@@ -337,20 +350,26 @@ describe_stack 'can depend_on nat' do
     end
   end
 
-  host('dep-nat-001.mgmt.st.net.local') do |host|
+  xhost('dep-nat-001.mgmt.st.net.local') do |host|
     enc = host.to_enc
     dnat = enc['role::natserver']['rules']['DNAT']
 
-    first_host_dnat_rules = dnat['dep-withnat-001.front.st.net.local 22']
-    expect(first_host_dnat_rules['dest_host']).to eql('dep-withnat-001.mgmt.st.net.local')
+    first_host_dnat_rules = dnat['dep-standardwithnat-001.front.st.net.local 22']
+    expect(first_host_dnat_rules['dest_host']).to eql('dep-standardwithnat-001.mgmt.st.net.local')
     expect(first_host_dnat_rules['dest_port']).to eql('22')
     expect(first_host_dnat_rules['tcp']).to eql(true)
     expect(first_host_dnat_rules['udp']).to eql(false)
 
-    second_host_dnat_rules = dnat['dep-withnat-002.front.st.net.local 22']
-    expect(second_host_dnat_rules['dest_host']).to eql('dep-withnat-002.mgmt.st.net.local')
+    second_host_dnat_rules = dnat['dep-standardwithnat-002.front.st.net.local 22']
+    expect(second_host_dnat_rules['dest_host']).to eql('dep-standardwithnat-002.mgmt.st.net.local')
     expect(second_host_dnat_rules['dest_port']).to eql('22')
     expect(second_host_dnat_rules['tcp']).to eql(true)
     expect(second_host_dnat_rules['udp']).to eql(false)
+
+    vip_dnat_rules = dnat['dep-appwithhnat-001.front.st.net.local 80']
+    expect(vip_dnat_rules['dest_host']).to eql('dep-appwithhnat-vip.st.net.local')
+    expect(vip_dnat_rules['dest_port']).to eql('8000')
+    expect(vip_dnat_rules['tcp']).to eql(true)
+    expect(vip_dnat_rules['udp']).to eql(true)
   end
 end

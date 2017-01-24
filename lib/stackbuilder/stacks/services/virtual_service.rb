@@ -5,12 +5,13 @@ end
 
 module Stacks::Services::VirtualService
   include Stacks::Services::AbstractVirtualService
+  include Stacks::Services::CanBeNatted
 
   def self.extended(object)
     object.configure
   end
 
-  attr_accessor :ehcache, :nat, :nat_out, :nat_out_exclusive, :persistent_ports,
+  attr_accessor :ehcache, :nat_config, :nat, :nat_out, :nat_out_exclusive, :persistent_ports,
                 :healthcheck_timeout, :proto
   attr_reader :vip_networks, :included_classes
 
@@ -26,6 +27,7 @@ module Stacks::Services::VirtualService
     @vip_networks = [:prod]
     @tcp = true
     @udp = false
+    @nat_config = NatConfig.new(false, :front, :prod, true, false, {})
   end
 
   def clazz
