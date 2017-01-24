@@ -27,7 +27,7 @@ module Stacks::Services::VirtualService
     @vip_networks = [:prod]
     @tcp = true
     @udp = false
-    @nat_config = NatConfig.new(false, :front, :prod, true, false, {})
+    @nat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
   end
 
   def clazz
