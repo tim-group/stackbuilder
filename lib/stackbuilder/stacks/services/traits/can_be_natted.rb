@@ -6,12 +6,10 @@ module Stacks::Services::CanBeNatted
   end
 
   attr_accessor :dnat_config, :snat_config
-  attr_accessor :nat_config # backwards compatibility
 
   def configure
-    @nat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
-    @dnat_config = @nat_config
-    @snat_config = @nat_config
+    @dnat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
+    @snat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
   end
 
   def configure_dnat(public_network, private_network, tcp, udp, portmap = {})
