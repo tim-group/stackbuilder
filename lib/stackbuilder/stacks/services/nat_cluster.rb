@@ -53,15 +53,13 @@ module Stacks::Services::NatCluster
 
   def find_services_that_require_dnat
     @environment.virtual_services.select do |node|
-      node.respond_to?(:nat) &&
-        node.nat == true
+      node.respond_to?(:dnat_enabled) && node.dnat_enabled
     end
   end
 
   def find_services_that_require_snat
     @environment.virtual_services.select do |node|
-      node.respond_to?(:nat_out) &&
-        node.nat_out == true
+      node.respond_to?(:snat_enabled) && node.snat_enabled
     end
   end
 

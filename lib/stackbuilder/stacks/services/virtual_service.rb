@@ -11,15 +11,15 @@ module Stacks::Services::VirtualService
     object.configure
   end
 
-  attr_accessor :ehcache, :nat, :nat_out, :nat_out_exclusive, :persistent_ports,
+  attr_accessor :nat_out_exclusive # appears to be unused
+
+  attr_accessor :ehcache, :nat, :nat_out, :persistent_ports,
                 :healthcheck_timeout, :proto
   attr_reader :vip_networks, :included_classes
 
   def configure
     @included_classes = {}
     @ehcache = false
-    @nat = false
-    @nat_out = false
     @nat_out_exclusive = false
     @persistent_ports = []
     @port_map = {}
@@ -27,7 +27,7 @@ module Stacks::Services::VirtualService
     @vip_networks = [:prod]
     @tcp = true
     @udp = false
-    @nat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
+    @nat_config = NatConfig.new(false, false, :front, :prod, true, false, @port_map)
     @dnat_config = @nat_config
     @snat_config = @nat_config
   end
@@ -75,29 +75,30 @@ module Stacks::Services::VirtualService
 
   def networks
     natting_networks = [:front, :prod]
-    dnat_networks = @nat ? natting_networks : []
-    snat_networks = @nat_out ? natting_networks : []
+    dnat_networks = @dnat_config.inbound_enabled ? natting_networks : []
+    snat_networks = @snat_config.outbound_enabled ? natting_networks : []
 
     (@vip_networks + dnat_networks + snat_networks).uniq
   end
 
+  def dnat_enabled
+    @dnat_config.inbound_enabled
+  end
+
+  def snat_enabled
+    @snat_config.outbound_enabled
+  end
+
   def enable_nat
-    @nat = true
-    # add_networks_for_nat
+    configure_dnat(:front, :prod, @tcp, @udp, @port_map)
   end
 
   # nat_out means setup a specific outgoing snat rule from the prod vip of the
   # virtual service to the front vip of the virtual service (rather than the
   # default nat vip, if there is one)
   def enable_nat_out
-    @nat_out = true
-    # add_networks_for_nat
+    configure_snat(:front, :prod, @tcp, @udp, @port_map)
   end
-
-  # def add_networks_for_nat
-  #   add_vip_network :front
-  #   add_vip_network :prod
-  # end
 
   def include_class(class_name, class_hash = {})
     @included_classes[class_name] = class_hash
@@ -110,12 +111,12 @@ module Stacks::Services::VirtualService
   def dnat_rules(location)
     rules = []
     fabric = environment.options[location]
-    if @nat
+    if @dnat_config.inbound_enabled
       @ports.map do |back_port|
-        front_port = @port_map[back_port] || back_port
+        front_port = @snat_config.port_map[back_port] || back_port
         front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
         prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
-        rules << Stacks::Services::Nat.new(front_uri, prod_uri, @tcp, @udp)
+        rules << Stacks::Services::Nat.new(front_uri, prod_uri, @dnat_config.tcp, @dnat_config.udp)
       end
     end
     rules
@@ -124,12 +125,12 @@ module Stacks::Services::VirtualService
   def snat_rules(location)
     rules = []
     fabric = environment.options[location]
-    if @nat_out
+    if @snat_config.outbound_enabled
       @ports.map do |back_port|
-        front_port = @port_map[back_port] || back_port
+        front_port = @snat_config.port_map[back_port] || back_port
         front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
         prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
-        rules << Stacks::Services::Nat.new(prod_uri, front_uri, @tcp, @udp)
+        rules << Stacks::Services::Nat.new(prod_uri, front_uri, @snat_config.tcp, @snat_config.udp)
       end
     end
     rules
