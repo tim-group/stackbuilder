@@ -76,4 +76,20 @@ module Stacks::Services::CanBeNatted
     end
     rules
   end
+
+  def to_vip_spec(location)
+    networks = [nat_config.private_network, nat_config.public_network]
+    fabric = environment.options[location]
+    hostnames = children.map do |machine|
+      public_uri = URI.parse("http://#{machine.hostname}.#{nat_config.public_network}.#{machine.domain}")
+      private_uri = URI.parse("http://#{machine.qualified_hostname(nat_config.private_network)}")
+      [public_uri.host, private_uri.host]
+    end.flatten
+    {
+      :hostname => "#{environment.name}-#{name}",
+      :fabric => fabric,
+      :networks => networks,
+      :qualified_hostnames => hostnames
+    }
+  end
 end
