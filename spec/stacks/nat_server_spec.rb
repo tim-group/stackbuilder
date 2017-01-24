@@ -319,14 +319,14 @@ describe_stack 'can depend_on nat' do
     stack 'depend_on_example' do
       nat_service
       standard_service 'withnat' do
-        self.extend(Stacks::Services::CanBeNatted)
+        extend(Stacks::Services::CanBeNatted)
         self.instances = 2
         self.ports = [22]
-        self.nat_config.inbound_enabled = true
-        self.nat_config.public_network = :front
-        self.nat_config.private_network = :mgmt
-        self.nat_config.tcp = true
-        self.nat_config.udp = false
+        nat_config.inbound_enabled = true
+        nat_config.public_network = :front
+        nat_config.private_network = :mgmt
+        nat_config.tcp = true
+        nat_config.udp = false
 
         depend_on 'nat', environment.name, :nat_to_host
       end
