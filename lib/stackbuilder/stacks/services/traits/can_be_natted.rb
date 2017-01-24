@@ -23,14 +23,10 @@ module Stacks::Services::CanBeNatted
     rules
   end
 
-  def snat_rules_for_dependency(location, requirements)
+  def snat_rules_for_dependency(_location, requirements)
     rules = []
     requirements.each do |requirement|
-      if requirement == :nat_to_host
-        rules.concat(snat_rules_for_host)
-      else
-
-      end
+      rules.concat(snat_rules_for_host) if requirement == :nat_to_host
     end
     rules
   end
