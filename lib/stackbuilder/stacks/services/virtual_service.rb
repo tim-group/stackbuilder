@@ -84,6 +84,11 @@ module Stacks::Services::VirtualService
     add_networks_for_nat
   end
 
+  def add_networks_for_nat
+    add_vip_network :front
+    add_vip_network :prod
+  end
+
   def include_class(class_name, class_hash = {})
     @included_classes[class_name] = class_hash
   end
@@ -133,11 +138,6 @@ module Stacks::Services::VirtualService
   end
 
   private
-
-  def add_networks_for_nat
-    add_vip_network :front
-    add_vip_network :prod
-  end
 
   def loadbalancer_config(location, fabric)
     fewest_servers_in_a_group = realservers(location).size

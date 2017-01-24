@@ -117,7 +117,7 @@ module Stacks::Services::NatCluster
     end
 
     find_dependencies_that_require_dnat.each do |dependency|
-      rules = rules.concat(dependency.dnat_rules(:primary_site))
+      rules = rules.concat(dependency.dnat_rules_for_dependency(:primary_site, requirements_of(dependency)))
     end
     rules
   end

@@ -105,4 +105,11 @@ module Stacks::Dependencies
     end
     fail "Cannot find service #{dependency[0]} in #{dependency[1]}, that I depend_on"
   end
+
+  def requirements_of(dependant)
+    dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency[0] == name && dependency[1] == environment.name }
+    dependent_on_this_cluster.inject([]) do |requirements, dependency|
+      requirements << dependency[2]
+    end
+  end
 end

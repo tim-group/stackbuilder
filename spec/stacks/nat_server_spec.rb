@@ -334,12 +334,14 @@ describe_stack 'can depend_on nat' do
       app_service 'appwithnat' do
         self.instances = 2
         self.ports = [8000]
-        self.port_map = { 8000 => 80 }
         nat_config.inbound_enabled = true
         nat_config.public_network = :front
         nat_config.private_network = :prod
         nat_config.tcp = true
         nat_config.udp = true
+        nat_config.port_map = { 8000 => 80 }
+
+        add_networks_for_nat
 
         depend_on 'nat', environment.name, :nat_to_vip
       end
@@ -350,7 +352,7 @@ describe_stack 'can depend_on nat' do
     end
   end
 
-  xhost('dep-nat-001.mgmt.st.net.local') do |host|
+  host('dep-nat-001.mgmt.st.net.local') do |host|
     enc = host.to_enc
     dnat = enc['role::natserver']['rules']['DNAT']
 
@@ -366,8 +368,8 @@ describe_stack 'can depend_on nat' do
     expect(second_host_dnat_rules['tcp']).to eql(true)
     expect(second_host_dnat_rules['udp']).to eql(false)
 
-    vip_dnat_rules = dnat['dep-appwithhnat-001.front.st.net.local 80']
-    expect(vip_dnat_rules['dest_host']).to eql('dep-appwithhnat-vip.st.net.local')
+    vip_dnat_rules = dnat['dep-appwithnat-vip.front.st.net.local 80']
+    expect(vip_dnat_rules['dest_host']).to eql('dep-appwithnat-vip.st.net.local')
     expect(vip_dnat_rules['dest_port']).to eql('8000')
     expect(vip_dnat_rules['tcp']).to eql(true)
     expect(vip_dnat_rules['udp']).to eql(true)
