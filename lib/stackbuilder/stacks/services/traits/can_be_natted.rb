@@ -90,7 +90,7 @@ module Stacks::Services::CanBeNatted
   def snat_rules_for_vip(location)
     rules = []
     fabric = environment.options[location]
-    if self.snat_config.outbound_enabled
+    if snat_config.outbound_enabled
       ports.map do |back_port|
         front_port = snat_config.port_map[back_port] || back_port
         public_uri = uri_for_vip(fabric, front_port, vip_hostname, snat_config.public_network)

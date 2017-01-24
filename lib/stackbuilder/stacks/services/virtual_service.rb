@@ -170,5 +170,4 @@ module Stacks::Services::VirtualService
       }
     }
   end
-
 end

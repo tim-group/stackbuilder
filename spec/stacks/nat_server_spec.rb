@@ -331,7 +331,7 @@ describe_stack 'can depend_on nat' do
         self.instances = 2
         self.ports = [8000]
 
-        configure_dnat(:front, :prod, true, true, { 8000 => 80})
+        configure_dnat(:front, :prod, true, true, 8000 => 80)
         depend_on 'nat', environment.name, :nat_to_vip
       end
 
