@@ -159,7 +159,7 @@ module Stacks::Services::VirtualBindService
   end
 
   def to_loadbalancer_config(location, fabric)
-    vip_nets = @vip_networks.select do |vip_network|
+    vip_nets = networks.select do |vip_network|
       ![:front].include? vip_network
     end
     lb_config = {}

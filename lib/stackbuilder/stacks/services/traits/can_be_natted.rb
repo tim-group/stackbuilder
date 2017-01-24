@@ -5,10 +5,21 @@ module Stacks::Services::CanBeNatted
     object.configure
   end
 
-  attr_accessor :nat_config
+  attr_accessor :dnat_config, :snat_config
+  attr_accessor :nat_config # backwards compatibility
 
   def configure
     @nat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
+    @dnat_config = @nat_config
+    @snat_config = @nat_config
+  end
+
+  def configure_dnat(public_network, private_network, tcp, udp, portmap = {})
+    @dnat_config = NatConfig.new(true, false, public_network, private_network, tcp, udp, portmap)
+  end
+
+  def configure_snat(public_network, private_network, tcp, udp, portmap = {})
+    @snat_config = NatConfig.new(false, true, public_network, private_network, tcp, udp, portmap)
   end
 
   def dnat_rules_for_dependency(location, requirements)
@@ -33,14 +44,14 @@ module Stacks::Services::CanBeNatted
 
   def dnat_rules_for_host
     rules = []
-    if nat_config.inbound_enabled
+    if dnat_config.inbound_enabled
       ports.each do |back_port|
-        front_port = nat_config.port_map[back_port] || back_port
+        front_port = dnat_config.port_map[back_port] || back_port
 
         children.each do |machine|
-          public_uri = uri_for_host(machine, nat_config.public_network, front_port)
-          private_uri = uri_for_host(machine, nat_config.private_network, back_port)
-          rules << Stacks::Services::Nat.new(public_uri, private_uri, nat_config.tcp, nat_config.udp)
+          public_uri = uri_for_host(machine, dnat_config.public_network, front_port)
+          private_uri = uri_for_host(machine, dnat_config.private_network, back_port)
+          rules << Stacks::Services::Nat.new(public_uri, private_uri, dnat_config.tcp, dnat_config.udp)
         end
       end
     end
@@ -50,12 +61,12 @@ module Stacks::Services::CanBeNatted
   def dnat_rules_for_vip(location)
     rules = []
     fabric = environment.options[location]
-    if nat_config.inbound_enabled
-      @ports.map do |back_port|
-        front_port = nat_config.port_map[back_port] || back_port
-        public_uri = uri_for_vip(fabric, front_port, vip_hostname, nat_config.public_network)
-        private_uri = uri_for_vip(fabric, back_port, vip_hostname, nat_config.private_network)
-        rules << Stacks::Services::Nat.new(public_uri, private_uri, nat_config.tcp, nat_config.udp)
+    if dnat_config.inbound_enabled
+      ports.map do |back_port|
+        front_port = dnat_config.port_map[back_port] || back_port
+        public_uri = uri_for_vip(fabric, front_port, vip_hostname, dnat_config.public_network)
+        private_uri = uri_for_vip(fabric, back_port, vip_hostname, dnat_config.private_network)
+        rules << Stacks::Services::Nat.new(public_uri, private_uri, dnat_config.tcp, dnat_config.udp)
       end
     end
     rules
@@ -63,13 +74,13 @@ module Stacks::Services::CanBeNatted
 
   def snat_rules_for_host
     rules = []
-    if nat_config.outbound_enabled
+    if snat_config.outbound_enabled
       ports.map do |back_port|
-        front_port = nat_config.port_map[back_port] || back_port
+        front_port = snat_config.port_map[back_port] || back_port
         children.each do |machine|
-          public_uri = uri_for_host(machine, nat_config.public_network, front_port)
-          private_uri = uri_for_host(machine, nat_config.private_network, back_port)
-          rules << Stacks::Services::Nat.new(private_uri, public_uri, nat_config.tcp, nat_config.udp)
+          public_uri = uri_for_host(machine, snat_config.public_network, front_port)
+          private_uri = uri_for_host(machine, snat_config.private_network, back_port)
+          rules << Stacks::Services::Nat.new(private_uri, public_uri, snat_config.tcp, snat_config.udp)
         end
       end
     end
@@ -79,12 +90,12 @@ module Stacks::Services::CanBeNatted
   def snat_rules_for_vip(location)
     rules = []
     fabric = environment.options[location]
-    if nat_config.outbound_enabled
+    if self.snat_config.outbound_enabled
       ports.map do |back_port|
-        front_port = nat_config.port_map[back_port] || back_port
-        public_uri = uri_for_vip(fabric, front_port, vip_hostname, nat_config.public_network)
-        private_uri = uri_for_vip(fabric, back_port, vip_hostname, nat_config.private_network)
-        rules << Stacks::Services::Nat.new(private_uri, public_uri, nat_config.tcp, nat_config.udp)
+        front_port = snat_config.port_map[back_port] || back_port
+        public_uri = uri_for_vip(fabric, front_port, vip_hostname, snat_config.public_network)
+        private_uri = uri_for_vip(fabric, back_port, vip_hostname, snat_config.private_network)
+        rules << Stacks::Services::Nat.new(private_uri, public_uri, snat_config.tcp, snat_config.udp)
       end
     end
     rules

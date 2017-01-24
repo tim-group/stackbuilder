@@ -11,7 +11,7 @@ module Stacks::Services::VirtualService
     object.configure
   end
 
-  attr_accessor :ehcache, :nat_config, :nat, :nat_out, :nat_out_exclusive, :persistent_ports,
+  attr_accessor :ehcache, :nat, :nat_out, :nat_out_exclusive, :persistent_ports,
                 :healthcheck_timeout, :proto
   attr_reader :vip_networks, :included_classes
 
@@ -28,6 +28,8 @@ module Stacks::Services::VirtualService
     @tcp = true
     @udp = false
     @nat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
+    @dnat_config = @nat_config
+    @snat_config = @nat_config
   end
 
   def clazz
@@ -47,33 +49,41 @@ module Stacks::Services::VirtualService
   end
 
   def vip_fqdn(network, fabric)
-    actual_network = (@vip_networks.include? network) ? network : @vip_networks[0]
+    actual_network = (networks.include? network) ? network : networks[0]
     domain = environment.domain(fabric, actual_network)
     "#{environment.name}-#{name}-vip.#{domain}"
   end
 
   def to_vip_spec(location)
     fabric = environment.options[location]
-    qualified_hostnames = Hash[@vip_networks.sort.map { |network| [network, vip_fqdn(network, fabric)] }]
+    qualified_hostnames = Hash[networks.sort.map { |network| [network, vip_fqdn(network, fabric)] }]
     {
       :hostname => "#{environment.name}-#{name}",
       :fabric => fabric,
-      :networks => @vip_networks,
+      :networks => networks,
       :qualified_hostnames => qualified_hostnames
     }
   end
 
   def add_vip_network(network)
-    @vip_networks << network unless @vip_networks.include? network
+    @vip_networks << network unless networks.include? network
   end
 
   def remove_vip_network(network)
     @vip_networks.delete network
   end
 
+  def networks
+    natting_networks = [:front, :prod]
+    dnat_networks = @nat ? natting_networks : []
+    snat_networks = @nat_out ? natting_networks : []
+
+    (@vip_networks + dnat_networks + snat_networks).uniq
+  end
+
   def enable_nat
     @nat = true
-    add_networks_for_nat
+    # add_networks_for_nat
   end
 
   # nat_out means setup a specific outgoing snat rule from the prod vip of the
@@ -81,13 +91,13 @@ module Stacks::Services::VirtualService
   # default nat vip, if there is one)
   def enable_nat_out
     @nat_out = true
-    add_networks_for_nat
+    # add_networks_for_nat
   end
 
-  def add_networks_for_nat
-    add_vip_network :front
-    add_vip_network :prod
-  end
+  # def add_networks_for_nat
+  #   add_vip_network :front
+  #   add_vip_network :prod
+  # end
 
   def include_class(class_name, class_hash = {})
     @included_classes[class_name] = class_hash
@@ -159,4 +169,5 @@ module Stacks::Services::VirtualService
       }
     }
   end
+
 end

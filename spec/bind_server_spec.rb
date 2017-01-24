@@ -213,7 +213,7 @@ describe_stack 'nameservers with single slave_from dependency' do
     expect(enc['role::bind_server']['forwarder_zones']).to eql(['youdevise.com'])
     Resolv.stub(:getaddress).with('oy-ns-002.mgmt.oy.net.local').and_return('4.3.2.1')
     expect(host.to_spec[:nameserver]).to eql('4.3.2.1')
-    expect(host.virtual_service.vip_networks).to be_eql [:mgmt, :front, :prod]
+    expect(host.virtual_service.networks).to be_eql [:mgmt, :front, :prod]
   end
   # OY Slave - Slaves from OY Master
   host('oy-ns-002.mgmt.oy.net.local') do |host|

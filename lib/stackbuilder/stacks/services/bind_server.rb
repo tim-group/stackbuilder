@@ -21,7 +21,7 @@ class Stacks::Services::BindServer < Stacks::MachineDef
     dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on(location)
 
     enc = super()
-    vip_fqdns = @virtual_service.vip_networks.map do |vip_network|
+    vip_fqdns = @virtual_service.networks.map do |vip_network|
       if [:front].include? vip_network
         nil
       else

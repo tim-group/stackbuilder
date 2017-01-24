@@ -322,25 +322,16 @@ describe_stack 'can depend_on nat' do
         extend(Stacks::Services::CanBeNatted)
         self.instances = 2
         self.ports = [22]
-        nat_config.inbound_enabled = true
-        nat_config.public_network = :front
-        nat_config.private_network = :mgmt
-        nat_config.tcp = true
-        nat_config.udp = false
 
+        configure_dnat(:front, :mgmt, true, false)
         depend_on 'nat', environment.name, :nat_to_host
       end
 
       app_service 'appwith-dnat' do
         self.instances = 2
         self.ports = [8000]
-        nat_config.inbound_enabled = true
-        nat_config.public_network = :front
-        nat_config.private_network = :prod
-        nat_config.tcp = true
-        nat_config.udp = true
-        nat_config.port_map = { 8000 => 80 }
 
+        configure_dnat(:front, :prod, true, true, { 8000 => 80})
         depend_on 'nat', environment.name, :nat_to_vip
       end
 
@@ -348,26 +339,16 @@ describe_stack 'can depend_on nat' do
         extend(Stacks::Services::CanBeNatted)
         self.instances = 2
         self.ports = [22]
-        nat_config.inbound_enabled = false
-        nat_config.outbound_enabled = true
-        nat_config.public_network = :front
-        nat_config.private_network = :mgmt
-        nat_config.tcp = true
-        nat_config.udp = false
 
+        configure_snat(:front, :mgmt, true, false)
         depend_on 'nat', environment.name, :nat_to_host
       end
 
       app_service 'appwith-snat' do
         self.instances = 2
         self.ports = [8000]
-        nat_config.inbound_enabled = false
-        nat_config.outbound_enabled = true
-        nat_config.public_network = :front
-        nat_config.private_network = :prod
-        nat_config.tcp = true
-        nat_config.udp = false
 
+        configure_snat(:front, :prod, true, false)
         depend_on 'nat', environment.name, :nat_to_vip
       end
     end
