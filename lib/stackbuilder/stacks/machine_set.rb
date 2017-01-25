@@ -10,7 +10,6 @@ class Stacks::MachineSet
   attr_accessor :groups
   attr_accessor :instances
   attr_accessor :name
-  attr_accessor :port_map
   attr_accessor :ports
   attr_accessor :type
   attr_accessor :server_offset

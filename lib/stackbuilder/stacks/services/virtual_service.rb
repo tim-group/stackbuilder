@@ -18,10 +18,9 @@ module Stacks::Services::VirtualService
     @included_classes = {}
     @ehcache = false
     @persistent_ports = []
-    @port_map = {}
     @healthcheck_timeout = 10
     @vip_networks = [:prod]
-    @nat_config = NatConfig.new(false, false, :front, :prod, true, false, @port_map)
+    @nat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
   end
 
   def clazz
