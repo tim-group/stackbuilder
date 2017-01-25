@@ -21,11 +21,7 @@ module Stacks::Services::VirtualService
     @port_map = {}
     @healthcheck_timeout = 10
     @vip_networks = [:prod]
-    @tcp = true
-    @udp = false
     @nat_config = NatConfig.new(false, false, :front, :prod, true, false, @port_map)
-    @dnat_config = @nat_config
-    @snat_config = @nat_config
   end
 
   def clazz
@@ -70,22 +66,19 @@ module Stacks::Services::VirtualService
   end
 
   def networks
-    natting_networks = [:front, :prod]
-    dnat_networks = @dnat_config.inbound_enabled ? natting_networks : []
-    snat_networks = @snat_config.outbound_enabled ? natting_networks : []
-
-    (@vip_networks + dnat_networks + snat_networks).uniq
+    natting_networks = @nat_config.dnat_enabled || @nat_config.snat_enabled ? @nat_config.networks : []
+    (@vip_networks + natting_networks).uniq
   end
 
   def enable_nat
-    configure_dnat(:front, :prod, @tcp, @udp, @port_map)
+    configure_dnat(:front, :prod, nat_config.tcp, nat_config.udp, nat_config.port_map)
   end
 
   # nat_out means setup a specific outgoing snat rule from the prod vip of the
   # virtual service to the front vip of the virtual service (rather than the
   # default nat vip, if there is one)
   def enable_nat_out
-    configure_snat(:front, :prod, @tcp, @udp, @port_map)
+    configure_snat(:front, :prod, nat_config.tcp, nat_config.udp, nat_config.port_map)
   end
 
   def include_class(class_name, class_hash = {})

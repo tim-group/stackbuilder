@@ -11,7 +11,7 @@ module Stacks::Services::VirtualBindService
     @ports = [53]
     add_vip_network :mgmt
     remove_vip_network :prod
-    @udp = true
+    @nat_config.udp = true
     @zones = [:mgmt, :prod, :front]
     @forwarder_zones = []
     @instances = 1

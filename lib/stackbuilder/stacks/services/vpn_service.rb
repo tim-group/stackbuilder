@@ -6,8 +6,8 @@ module Stacks::Services::VpnService
   def configure
     @ports = [500, 4500]
     add_vip_network :mgmt
-    @tcp = false
-    @udp = true
+    @nat_config.tcp = false
+    @nat_config.udp = true
   end
 
   def load_balanced_service?
