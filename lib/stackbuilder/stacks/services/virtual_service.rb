@@ -11,8 +11,7 @@ module Stacks::Services::VirtualService
     object.configure
   end
 
-  attr_accessor :ehcache, :nat, :nat_out, :persistent_ports,
-                :healthcheck_timeout, :proto
+  attr_accessor :ehcache, :persistent_ports, :healthcheck_timeout, :proto
   attr_reader :vip_networks, :included_classes
 
   def configure
