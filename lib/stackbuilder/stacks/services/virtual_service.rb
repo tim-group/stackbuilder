@@ -11,8 +11,6 @@ module Stacks::Services::VirtualService
     object.configure
   end
 
-  attr_accessor :nat_out_exclusive # appears to be unused
-
   attr_accessor :ehcache, :nat, :nat_out, :persistent_ports,
                 :healthcheck_timeout, :proto
   attr_reader :vip_networks, :included_classes
@@ -20,7 +18,6 @@ module Stacks::Services::VirtualService
   def configure
     @included_classes = {}
     @ehcache = false
-    @nat_out_exclusive = false
     @persistent_ports = []
     @port_map = {}
     @healthcheck_timeout = 10
