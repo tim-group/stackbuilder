@@ -78,14 +78,6 @@ module Stacks::Services::VirtualService
     (@vip_networks + dnat_networks + snat_networks).uniq
   end
 
-  def dnat_enabled
-    @dnat_config.inbound_enabled
-  end
-
-  def snat_enabled
-    @snat_config.outbound_enabled
-  end
-
   def enable_nat
     configure_dnat(:front, :prod, @tcp, @udp, @port_map)
   end
