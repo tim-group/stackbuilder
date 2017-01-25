@@ -305,6 +305,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
     stack 'nameserver' do
       bind_service 'ns' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
       end
     end
 

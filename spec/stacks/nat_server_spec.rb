@@ -7,13 +7,15 @@ describe_stack 'nat servers should have all 3 networks' do
       nat_service
       proxy_service 'proxy' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
       end
       app_service 'app' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
       end
     end
 
-    env "oy", :primary_site => "oy" do
+    env 'oy', :primary_site => 'oy' do
       instantiate_stack 'fabric'
     end
   end
@@ -31,7 +33,7 @@ describe_stack 'nat servers should have all 3 networks' do
     )
   end
 
-  host("oy-nat-001.mgmt.oy.net.local") do |host|
+  host('oy-nat-001.mgmt.oy.net.local') do |host|
     expect(host.to_specs.first[:networks]).to eql([:mgmt, :prod, :front])
     enc_rules = host.to_enc['role::natserver']['rules']
     expect(enc_rules['SNAT']['prod']['to_source']).to eql 'nat-vip.front.oy.net.local'
@@ -70,7 +72,7 @@ describe_stack 'nat servers cannot suppot enable_secondary_site' do
       instantiate_stack 'nat'
     end
   end
-  host("production-nat-001.mgmt.pg.net.local") do |nat|
+  host('production-nat-001.mgmt.pg.net.local') do |nat|
     expect { nat.to_enc }.to raise_error('Nat servers do not support secondary_site')
   end
 end
@@ -93,6 +95,7 @@ describe_stack 'nat servers should provide natting for secondary_site services i
         @enable_secondary_site = true
         vhost('exampleuserapp', 'example-mirror.timgroup.com', 'production')
         enable_nat
+        depend_on 'nat', 'shared', :nat_to_vip
       end
     end
 
@@ -109,7 +112,7 @@ describe_stack 'nat servers should provide natting for secondary_site services i
       instantiate_stack 'example'
     end
   end
-  host("shared-nat-001.mgmt.oy.net.local") do |nat|
+  host('shared-nat-001.mgmt.oy.net.local') do |nat|
     dnat = nat.to_enc['role::natserver']['rules']['DNAT']
     expect(dnat.keys).to include(
       'production-exampleproxy-vip.front.oy.net.local 80',
@@ -126,38 +129,42 @@ describe_stack 'nat servers should provide natting for secondary_site services i
 end
 describe_stack 'configures NAT boxes to NAT incoming public IPs' do
   given do
-    stack "frontexample" do
+    stack 'frontexample' do
       nat_service
       proxy_service 'withnat' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
       end
       sftp_service 'sftp' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
       end
       app_service 'withoutnat' do
       end
     end
 
-    stack "example2" do
+    stack 'example2' do
       nat_service
       app_service 'blahnat' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
         self.ports = [8008]
       end
     end
 
-    stack "exampledefaultport" do
+    stack 'exampledefaultport' do
       nat_service
       app_service 'defaultport' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
       end
     end
 
-    env "eg", :primary_site => "st", :secondary_site => "bs" do
-      instantiate_stack "frontexample"
-      env "sub" do
-        instantiate_stack "example2"
-        instantiate_stack "exampledefaultport"
+    env 'eg', :primary_site => 'st', :secondary_site => 'bs' do
+      instantiate_stack 'frontexample'
+      env 'sub' do
+        instantiate_stack 'example2'
+        instantiate_stack 'exampledefaultport'
       end
     end
   end
@@ -229,38 +236,42 @@ end
 
 describe_stack 'configures NAT boxes to NAT specific outgoing things to specific public IPs' do
   given do
-    stack "frontexample" do
+    stack 'frontexample' do
       nat_service
       proxy_service 'withnat' do
         enable_nat_out
+        depend_on 'nat', 'eg', :nat_to_vip
       end
       sftp_service 'sftp' do
         enable_nat_out
+        depend_on 'nat', 'eg', :nat_to_vip
       end
       app_service 'withoutnat' do
       end
     end
 
-    stack "example2" do
+    stack 'example2' do
       nat_service
       app_service 'blahnat' do
         enable_nat_out
+        depend_on 'nat', 'sub', :nat_to_vip
         self.ports = [8008]
       end
     end
 
-    stack "exampledefaultport" do
+    stack 'exampledefaultport' do
       nat_service
       app_service 'defaultport' do
         enable_nat_out
+        depend_on 'nat', 'sub', :nat_to_vip
       end
     end
 
-    env "eg", :primary_site => "st", :secondary_site => "bs" do
-      instantiate_stack "frontexample"
-      env "sub" do
-        instantiate_stack "example2"
-        instantiate_stack "exampledefaultport"
+    env 'eg', :primary_site => 'st', :secondary_site => 'bs' do
+      instantiate_stack 'frontexample'
+      env 'sub' do
+        instantiate_stack 'example2'
+        instantiate_stack 'exampledefaultport'
       end
     end
   end

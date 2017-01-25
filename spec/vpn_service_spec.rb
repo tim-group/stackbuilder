@@ -4,17 +4,18 @@ require 'stacks/test_framework'
 
 describe_stack 'test enc of vpn servers' do
   given do
-    stack "nat" do
+    stack 'nat' do
       nat_service
     end
 
-    stack "lb" do
+    stack 'lb' do
       loadbalancer_service
     end
 
     stack 'vpn_stack' do
       vpn_service 'vpn' do
         enable_nat
+        depend_on 'nat', environment.name, :nat_to_vip
         each_machine do |machine|
           machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '10.108.0.0/16')
           machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '10.111.0.0/16')
@@ -23,15 +24,15 @@ describe_stack 'test enc of vpn servers' do
       end
     end
 
-    env "oymigration", :primary_site => "oy", :vpn_virtual_router_id => 101 do
-      instantiate_stack "lb"
-      instantiate_stack "vpn_stack"
+    env 'oymigration', :primary_site => 'oy', :vpn_virtual_router_id => 101 do
+      instantiate_stack 'lb'
+      instantiate_stack 'vpn_stack'
       instantiate_stack 'nat'
     end
   end
 
   # OY Master
-  host("oymigration-vpn-001.mgmt.oy.net.local") do |host|
+  host('oymigration-vpn-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
     expect(enc['role::vpn']).to(
       eql(
@@ -61,8 +62,8 @@ describe_stack 'test enc of vpn servers' do
 
   host('oymigration-lb-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
-    expect(enc['role::loadbalancer']).to eql("virtual_router_id" => 1,
-                                             "virtual_servers" => {})
+    expect(enc['role::loadbalancer']).to eql('virtual_router_id' => 1,
+                                             'virtual_servers' => {})
   end
 
   host('oymigration-nat-001.mgmt.oy.net.local') do |host|
@@ -71,10 +72,10 @@ describe_stack 'test enc of vpn servers' do
     [500, 4500].each do |port|
       expect(nat_role_dnat["oymigration-vpn-vip.front.oy.net.local #{port}"]).to(
         eql(
-          "dest_host" => "oymigration-vpn-vip.oy.net.local",
-          "dest_port" => "#{port}",
-          "tcp" => false,
-          "udp" => true
+          'dest_host' => 'oymigration-vpn-vip.oy.net.local',
+          'dest_port' => "#{port}",
+          'tcp' => false,
+          'udp' => true
         )
       )
     end
