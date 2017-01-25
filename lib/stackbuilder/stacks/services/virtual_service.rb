@@ -108,34 +108,6 @@ module Stacks::Services::VirtualService
     @persistent_ports << port
   end
 
-  def dnat_rules(location)
-    rules = []
-    fabric = environment.options[location]
-    if @dnat_config.inbound_enabled
-      @ports.map do |back_port|
-        front_port = @snat_config.port_map[back_port] || back_port
-        front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
-        prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
-        rules << Stacks::Services::Nat.new(front_uri, prod_uri, @dnat_config.tcp, @dnat_config.udp)
-      end
-    end
-    rules
-  end
-
-  def snat_rules(location)
-    rules = []
-    fabric = environment.options[location]
-    if @snat_config.outbound_enabled
-      @ports.map do |back_port|
-        front_port = @snat_config.port_map[back_port] || back_port
-        front_uri = URI.parse("http://#{vip_fqdn(:front, fabric)}:#{front_port}")
-        prod_uri = URI.parse("http://#{vip_fqdn(:prod, fabric)}:#{back_port}")
-        rules << Stacks::Services::Nat.new(prod_uri, front_uri, @snat_config.tcp, @snat_config.udp)
-      end
-    end
-    rules
-  end
-
   def config_params(_dependant, _fabric)
     {}
   end
