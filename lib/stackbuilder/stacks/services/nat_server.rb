@@ -5,6 +5,7 @@ class Stacks::Services::NatServer < Stacks::MachineDef
 
   def initialize(virtual_service, base_hostname, environment, site, role)
     super(virtual_service, base_hostname, environment, site, role)
+    @nat_cluster = virtual_service
     @networks = [:mgmt, :prod, :front]
     @virtual_router_ids = {}
   end
@@ -16,11 +17,11 @@ class Stacks::Services::NatServer < Stacks::MachineDef
   end
 
   def to_enc
-    fail 'Nat servers do not support secondary_site' if @virtual_service.enable_secondary_site
+    fail 'Nat servers do not support secondary_site' if @nat_cluster.enable_secondary_site
     enc = super
     rules = {
-      'SNAT' => @virtual_service.snat_rules,
-      'DNAT' => @virtual_service.dnat_rules
+      'SNAT' => @nat_cluster.snat_rules,
+      'DNAT' => @nat_cluster.dnat_rules
     }
     enc.merge('role::natserver' => {
                 'rules'                   => rules,
