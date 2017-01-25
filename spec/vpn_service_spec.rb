@@ -14,7 +14,7 @@ describe_stack 'test enc of vpn servers' do
 
     stack 'vpn_stack' do
       vpn_service 'vpn' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
         each_machine do |machine|
           machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '10.108.0.0/16')

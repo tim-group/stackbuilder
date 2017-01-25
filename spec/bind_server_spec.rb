@@ -11,7 +11,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
       bind_service 'ns' do
         self.instances = 1
         self.slave_instances = 1
-        enable_nat
+        nat_config.dnat_enabled = true
         forwarder_zone(['youdevise.com'])
         case environment.name
         when 'pg'
@@ -164,7 +164,7 @@ describe_stack 'nameservers with single slave_from dependency' do
 
     stack 'nameserver' do
       bind_service 'ns' do
-        enable_nat
+        nat_config.dnat_enabled = true
         forwarder_zone(['youdevise.com'])
         case environment.name
         when 'pg'
@@ -304,7 +304,7 @@ describe_stack 'nameservers should have working load balancer and nat configurat
 
     stack 'nameserver' do
       bind_service 'ns' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
       end
     end

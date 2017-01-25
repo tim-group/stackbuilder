@@ -19,11 +19,11 @@ describe 'Stacks::Services::VirtualService' do
     end
   end
 
-  describe_stack 'provides the both front and prod vips when if enable_nat is turned on' do
+  describe_stack 'provides the both front and prod vips when dnat_enabled' do
     given do
       stack "test" do
         app_service 'myvs' do
-          enable_nat
+          nat_config.dnat_enabled = true
         end
       end
 

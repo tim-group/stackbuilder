@@ -70,17 +70,6 @@ module Stacks::Services::VirtualService
     (@vip_networks + natting_networks).uniq
   end
 
-  def enable_nat
-    configure_dnat(:front, :prod, nat_config.tcp, nat_config.udp, nat_config.port_map)
-  end
-
-  # nat_out means setup a specific outgoing snat rule from the prod vip of the
-  # virtual service to the front vip of the virtual service (rather than the
-  # default nat vip, if there is one)
-  def enable_nat_out
-    configure_snat(:front, :prod, nat_config.tcp, nat_config.udp, nat_config.port_map)
-  end
-
   def include_class(class_name, class_hash = {})
     @included_classes[class_name] = class_hash
   end

@@ -10,7 +10,7 @@ describe_stack 'exampleproxy' do
         vhost('exampleapp', 'example.absent') do
           absent
         end
-        enable_nat
+        nat_config.dnat_enabled = true
         self.ports = [80, 443, 8443]
       end
 
@@ -106,7 +106,7 @@ describe_stack 'proxy pass rules without an environment default to the environme
           add_pass_rule "/HIP/blah2", :service => "blondinapp", :environment => 'shared'
           add_pass_rule "/HIP/blah3", :service => "blondinapp"
         end
-        enable_nat
+        nat_config.dnat_enabled = true
       end
     end
     stack 'funds' do
@@ -159,7 +159,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
           add_properties 'is_hip' => true
           add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'shared'
         end
-        enable_nat
+        nat_config.dnat_enabled = true
       end
     end
     stack 'funds' do

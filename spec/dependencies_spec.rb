@@ -12,7 +12,7 @@ describe_stack 'stack-with-dependencies' do
         vhost('exampleapp') do
           use_for_lb_healthcheck
         end
-        enable_nat
+        nat_config.dnat_enabled = true
       end
 
       app_service 'exampleapp' do
@@ -206,7 +206,7 @@ describe_stack 'stack with sub environment dependencies' do
             add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
           end
         end
-        enable_nat
+        nat_config.dnat_enabled = true
       end
     end
 

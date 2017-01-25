@@ -6,11 +6,11 @@ describe_stack 'nat servers should have all 3 networks' do
     stack 'fabric' do
       nat_service
       proxy_service 'proxy' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
       end
       app_service 'app' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
       end
     end
@@ -94,7 +94,7 @@ describe_stack 'nat servers should provide natting for secondary_site services i
       proxy_service 'exampleproxy' do
         @enable_secondary_site = true
         vhost('exampleuserapp', 'example-mirror.timgroup.com', 'production')
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', 'shared', :nat_to_vip
       end
     end
@@ -132,11 +132,11 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     stack 'frontexample' do
       nat_service
       proxy_service 'withnat' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
       end
       sftp_service 'sftp' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
       end
       app_service 'withoutnat' do
@@ -146,7 +146,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     stack 'example2' do
       nat_service
       app_service 'blahnat' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
         self.ports = [8008]
       end
@@ -155,7 +155,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     stack 'exampledefaultport' do
       nat_service
       app_service 'defaultport' do
-        enable_nat
+        nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
       end
     end
@@ -239,11 +239,11 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     stack 'frontexample' do
       nat_service
       proxy_service 'withnat' do
-        enable_nat_out
+        nat_config.snat_enabled = true
         depend_on 'nat', 'eg', :nat_to_vip
       end
       sftp_service 'sftp' do
-        enable_nat_out
+        nat_config.snat_enabled = true
         depend_on 'nat', 'eg', :nat_to_vip
       end
       app_service 'withoutnat' do
@@ -253,7 +253,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     stack 'example2' do
       nat_service
       app_service 'blahnat' do
-        enable_nat_out
+        nat_config.snat_enabled = true
         depend_on 'nat', 'sub', :nat_to_vip
         self.ports = [8008]
       end
@@ -262,7 +262,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     stack 'exampledefaultport' do
       nat_service
       app_service 'defaultport' do
-        enable_nat_out
+        nat_config.snat_enabled = true
         depend_on 'nat', 'sub', :nat_to_vip
       end
     end
