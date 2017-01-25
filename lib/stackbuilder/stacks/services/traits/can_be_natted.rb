@@ -6,9 +6,9 @@ module Stacks::Services::CanBeNatted
 
       case type
       when :dnat
-        Stacks::Services::Nat.new(public_uri, private_uri, tcp, udp)
+        Stacks::Services::NatRule.new(public_uri, private_uri, tcp, udp)
       when :snat
-        Stacks::Services::Nat.new(private_uri, public_uri, tcp, udp)
+        Stacks::Services::NatRule.new(private_uri, public_uri, tcp, udp)
       end
     end
 
