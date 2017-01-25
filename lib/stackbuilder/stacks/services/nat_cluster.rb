@@ -45,26 +45,28 @@ module Stacks::Services::NatCluster
 
   def find_dnat_rules
     rules = []
+    nat_site = environment.primary_site
     virtual_services_that_depend_on_me.each do |dependency|
-      if dependency.environment.primary_site == environment.primary_site
-        rules = rules.concat(dependency.dnat_rules_for_dependency(:primary_site, requirements_of(dependency)))
-      end
-      if dependency.secondary_site? && dependency.environment.secondary_site == environment.primary_site
-        rules = rules.concat(dependency.dnat_rules_for_dependency(:secondary_site, requirements_of(dependency)))
+      dependency_sites = dependency.environment.sites
+      dependency_sites.each do |site|
+        if site == nat_site
+          rules = rules.concat(dependency.dnat_rules_for_dependency(site, requirements_of(dependency)))
+        end
       end
     end
-
     rules
   end
 
   def find_snat_rules
     rules = []
+    nat_site = environment.primary_site
+
     virtual_services_that_depend_on_me.each do |dependency|
-      if dependency.environment.primary_site == environment.primary_site
-        rules = rules.concat(dependency.snat_rules_for_dependency(:primary_site, requirements_of(dependency)))
-      end
-      if dependency.secondary_site? && dependency.environment.secondary_site == environment.primary_site
-        rules = rules.concat(dependency.snat_rules_for_dependency(:secondary_site, requirements_of(dependency)))
+      dependency_sites = dependency.environment.sites
+      dependency_sites.each do |site|
+        if site == nat_site
+          rules = rules.concat(dependency.snat_rules_for_dependency(site, requirements_of(dependency)))
+        end
       end
     end
     rules
