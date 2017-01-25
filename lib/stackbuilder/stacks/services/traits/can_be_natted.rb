@@ -1,5 +1,23 @@
 module Stacks::Services::CanBeNatted
-  NatConfig = Struct.new(:inbound_enabled, :outbound_enabled, :public_network, :private_network, :tcp, :udp, :port_map)
+  NatConfig = Struct.new(:inbound_enabled, :outbound_enabled, :public_network, :private_network, :tcp, :udp, :port_map) do
+    def create_rule(environment, type, hostname, site, front_port, back_port)
+      public_uri = uri(hostname, environment.domain(site, public_network), front_port)
+      private_uri = uri(hostname, environment.domain(site, private_network), back_port)
+
+      case type
+      when :dnat
+        Stacks::Services::Nat.new(public_uri, private_uri, tcp, udp)
+      when :snat
+        Stacks::Services::Nat.new(private_uri, public_uri, tcp, udp)
+      end
+    end
+
+    private
+
+    def uri(hostname, domain, port)
+      URI.parse("http://#{hostname}.#{domain}:#{port}")
+    end
+  end
 
   def self.extended(object)
     object.configure
@@ -21,86 +39,31 @@ module Stacks::Services::CanBeNatted
   end
 
   def calculate_nat_rules(type, site, requirements)
+    hostnames = requirements.map do |requirement|
+      case requirement
+      when :nat_to_host
+        children.map(&:hostname)
+      when :nat_to_vip
+        ["#{environment.name}-#{name}-vip"]
+      end
+    end.flatten
+
     case type
     when :dnat
-      dnat_config.inbound_enabled ? dnat_rules_for_dependency(site, requirements) : []
+      dnat_config.inbound_enabled ? create_rules_for_hosts(dnat_config, hostnames, site, :dnat) : []
     when :snat
-      snat_config.outbound_enabled ? snat_rules_for_dependency(site, requirements) : []
+      snat_config.outbound_enabled ? create_rules_for_hosts(snat_config, hostnames, site, :snat) : []
     end
   end
 
   private
 
-  def dnat_rules_for_dependency(site, requirements)
-    requirements.map do |requirement|
-      if requirement == :nat_to_host
-        dnat_rules_for_host(dnat_config.tcp, dnat_config.udp)
-      elsif requirement == :nat_to_vip
-        dnat_rules_for_vip(site, dnat_config.tcp, dnat_config.udp)
+  def create_rules_for_hosts(config, hostnames, site, type)
+    ports.map do |back_port|
+      hostnames.map do |hostname|
+        front_port = config.port_map[back_port] || back_port
+        config.create_rule(environment, type, hostname, site, front_port, back_port)
       end
     end.flatten
-  end
-
-  def snat_rules_for_dependency(site, requirements)
-    requirements.map do |requirement|
-      if requirement == :nat_to_host
-        snat_rules_for_host(snat_config.tcp, snat_config.udp)
-      elsif requirement == :nat_to_vip
-        snat_rules_for_vip(site, snat_config.tcp, snat_config.udp)
-      end
-    end.flatten
-  end
-
-  def dnat_rules_for_host(tcp, udp)
-    ports.map do |back_port|
-      front_port = dnat_config.port_map[back_port] || back_port
-
-      children.map do |machine|
-        public_uri = uri_for_host(machine, dnat_config.public_network, front_port)
-        private_uri = uri_for_host(machine, dnat_config.private_network, back_port)
-        Stacks::Services::Nat.new(public_uri, private_uri, tcp, udp)
-      end
-    end.flatten
-  end
-
-  def dnat_rules_for_vip(site, tcp, udp)
-    ports.map do |back_port|
-      front_port = dnat_config.port_map[back_port] || back_port
-      public_uri = uri_for_vip(vip_hostname, dnat_config.public_network, site, front_port)
-      private_uri = uri_for_vip(vip_hostname, dnat_config.private_network, site, back_port)
-      Stacks::Services::Nat.new(public_uri, private_uri, tcp, udp)
-    end
-  end
-
-  def snat_rules_for_host(tcp, udp)
-    ports.map do |back_port|
-      front_port = snat_config.port_map[back_port] || back_port
-      children.map do |machine|
-        public_uri = uri_for_host(machine, snat_config.public_network, front_port)
-        private_uri = uri_for_host(machine, snat_config.private_network, back_port)
-        Stacks::Services::Nat.new(private_uri, public_uri, tcp, udp)
-      end
-    end.flatten
-  end
-
-  def snat_rules_for_vip(site, tcp, udp)
-    ports.map do |back_port|
-      front_port = snat_config.port_map[back_port] || back_port
-      public_uri = uri_for_vip(vip_hostname, snat_config.public_network, site, front_port)
-      private_uri = uri_for_vip(vip_hostname, snat_config.private_network, site, back_port)
-      Stacks::Services::Nat.new(private_uri, public_uri, tcp, udp)
-    end
-  end
-
-  def vip_hostname
-    "#{environment.name}-#{name}-vip"
-  end
-
-  def uri_for_vip(hostname, public_network, site, port)
-    URI.parse("http://#{hostname}.#{environment.domain(site, public_network)}:#{port}")
-  end
-
-  def uri_for_host(machine, network, port)
-    URI.parse("http://#{machine.hostname}.#{network}.#{machine.domain}:#{port}")
   end
 end
