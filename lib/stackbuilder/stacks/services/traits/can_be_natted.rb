@@ -20,6 +20,17 @@ module Stacks::Services::CanBeNatted
     @snat_config = NatConfig.new(false, true, public_network, private_network, tcp, udp, portmap)
   end
 
+  def calculate_nat_rules(type, site, requirements)
+    case type
+      when :dnat
+        dnat_rules_for_dependency(site, requirements)
+      when :snat
+        snat_rules_for_dependency(site, requirements)
+    end
+  end
+
+  private
+
   def dnat_rules_for_dependency(site, requirements)
     requirements.map do |requirement|
       if requirement == :nat_to_host
@@ -96,8 +107,6 @@ module Stacks::Services::CanBeNatted
     end
     rules
   end
-
-  private
 
   def vip_hostname
     "#{environment.name}-#{name}-vip"

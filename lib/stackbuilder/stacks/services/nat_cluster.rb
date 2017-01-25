@@ -50,7 +50,7 @@ module Stacks::Services::NatCluster
       dependency_sites = dependency.environment.sites
       dependency_sites.each do |site|
         if site == nat_site
-          rules = rules.concat(dependency.dnat_rules_for_dependency(site, requirements_of(dependency)))
+          rules = rules.concat(dependency.calculate_nat_rules(:dnat, site, requirements_of(dependency)))
         end
       end
     end
@@ -65,7 +65,7 @@ module Stacks::Services::NatCluster
       dependency_sites = dependency.environment.sites
       dependency_sites.each do |site|
         if site == nat_site
-          rules = rules.concat(dependency.snat_rules_for_dependency(site, requirements_of(dependency)))
+          rules = rules.concat(dependency.calculate_nat_rules(:snat, site, requirements_of(dependency)))
         end
       end
     end
