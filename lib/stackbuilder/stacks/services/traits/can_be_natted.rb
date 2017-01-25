@@ -22,10 +22,10 @@ module Stacks::Services::CanBeNatted
 
   def calculate_nat_rules(type, site, requirements)
     case type
-      when :dnat
-        dnat_rules_for_dependency(site, requirements)
-      when :snat
-        snat_rules_for_dependency(site, requirements)
+    when :dnat
+      dnat_rules_for_dependency(site, requirements)
+    when :snat
+      snat_rules_for_dependency(site, requirements)
     end
   end
 

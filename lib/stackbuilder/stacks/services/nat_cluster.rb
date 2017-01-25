@@ -10,7 +10,7 @@ module Stacks::Services::NatCluster
 
   def snat_rules
     rules = {}
-    find_snat_rules.each do |rule|
+    find_rules_for(:snat).each do |rule|
       rules["#{rule.from.host} #{rule.from.port}"] = {
         'to_source' => "#{rule.to.host}:#{rule.to.port}",
         'tcp'       => rule.tcp,
@@ -24,7 +24,7 @@ module Stacks::Services::NatCluster
   end
 
   def dnat_rules
-    Hash[find_dnat_rules.map do |rule|
+    Hash[find_rules_for(:dnat).map do |rule|
       [
         "#{rule.from.host} #{rule.from.port}",
         {
@@ -43,32 +43,13 @@ module Stacks::Services::NatCluster
 
   private
 
-  def find_dnat_rules
-    rules = []
-    nat_site = environment.primary_site
-    virtual_services_that_depend_on_me.each do |dependency|
-      dependency_sites = dependency.environment.sites
-      dependency_sites.each do |site|
-        if site == nat_site
-          rules = rules.concat(dependency.calculate_nat_rules(:dnat, site, requirements_of(dependency)))
-        end
-      end
-    end
-    rules
-  end
-
-  def find_snat_rules
-    rules = []
+  def find_rules_for(nat_rule_type)
     nat_site = environment.primary_site
 
-    virtual_services_that_depend_on_me.each do |dependency|
-      dependency_sites = dependency.environment.sites
-      dependency_sites.each do |site|
-        if site == nat_site
-          rules = rules.concat(dependency.calculate_nat_rules(:snat, site, requirements_of(dependency)))
-        end
-      end
-    end
-    rules
+    virtual_services_that_depend_on_me.select do |dependency|
+      dependency.environment.sites.include? nat_site
+    end.map do |dependency_in_nat_site|
+      dependency_in_nat_site.calculate_nat_rules(nat_rule_type, nat_site, requirements_of(dependency_in_nat_site))
+    end.flatten
   end
 end
