@@ -119,8 +119,14 @@ module Stacks::Services::NatCluster
     end
 
     find_dependencies_that_require_dnat.each do |dependency|
-      rules = rules.concat(dependency.dnat_rules_for_dependency(:primary_site, requirements_of(dependency)))
+      if dependency.environment.primary_site == environment.primary_site
+        rules = rules.concat(dependency.dnat_rules_for_dependency(:primary_site, requirements_of(dependency)))
+      end
+      if dependency.secondary_site? && dependency.environment.secondary_site == environment.primary_site
+        rules = rules.concat(dependency.dnat_rules_for_dependency(:secondary_site, requirements_of(dependency)))
+      end
     end
+
     rules
   end
 
@@ -136,7 +142,12 @@ module Stacks::Services::NatCluster
     end
 
     find_dependencies_that_require_snat.each do |dependency|
-      rules = rules.concat(dependency.snat_rules_for_dependency(:primary_site, requirements_of(dependency)))
+      if dependency.environment.primary_site == environment.primary_site
+        rules = rules.concat(dependency.snat_rules_for_dependency(:primary_site, requirements_of(dependency)))
+      end
+      if dependency.secondary_site? && dependency.environment.secondary_site == environment.primary_site
+        rules = rules.concat(dependency.snat_rules_for_dependency(:secondary_site, requirements_of(dependency)))
+      end
     end
     rules
   end
