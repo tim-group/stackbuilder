@@ -112,7 +112,7 @@ module Stacks::Services::VirtualBindService
   end
 
   def slave_servers_as_fqdns
-    slave_servers.map(&:mgmt_fqdn)
+    slave_servers.map(&:mgmt_fqdn).sort
   end
 
   def cluster_dependant_instances(machine_def)

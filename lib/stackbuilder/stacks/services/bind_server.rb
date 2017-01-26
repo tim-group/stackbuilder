@@ -54,7 +54,7 @@ class Stacks::Services::BindServer < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:nameserver] = Resolv.getaddress(@virtual_service.slave_servers.first.mgmt_fqdn) if master?
+    spec[:nameserver] = Resolv.getaddress(@virtual_service.slave_servers_as_fqdns.first) if master?
     spec[:nameserver] = Resolv.getaddress(@virtual_service.master_server.mgmt_fqdn) unless master?
     spec
   end

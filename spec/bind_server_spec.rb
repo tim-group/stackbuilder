@@ -491,3 +491,25 @@ describe_stack 'test allow_host entries are supported' do
     expect(enc['role::bind_server']['allowed_hosts']).to eql ['1.1.1.1', '2.2.2.2']
   end
 end
+describe_stack 'nameserver should be determinitic and should not flicker' do
+  given do
+    stack 'nameserver' do
+      bind_service 'ns' do
+        self.instances = 1
+        self.slave_instances = 2
+      end
+    end
+
+    env 'o', :primary_site => 'oy' do
+      env 'oy' do
+        instantiate_stack 'nameserver'
+      end
+    end
+  end
+
+  host('oy-ns-001.mgmt.oy.net.local') do |host|
+    Resolv.stub(:getaddress).with('oy-ns-002.mgmt.oy.net.local').and_return('4.3.2.2')
+    Resolv.stub(:getaddress).with('oy-ns-003.mgmt.oy.net.local').and_return('4.3.2.3')
+    expect(host.to_spec[:nameserver]).to eql('4.3.2.2')
+  end
+end
