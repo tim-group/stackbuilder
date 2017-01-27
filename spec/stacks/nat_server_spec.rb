@@ -343,7 +343,7 @@ describe_stack 'can depend_on nat' do
         self.instances = 2
         self.ports = [8000]
 
-        configure_dnat(:front, :prod, true, true, 8000 => 80)
+        configure_dnat(:front, :prod, true, true)
         depend_on 'nat', environment.name, :nat_to_vip
       end
 
@@ -368,7 +368,7 @@ describe_stack 'can depend_on nat' do
         self.enable_secondary_site = true
         self.ports = [8443]
 
-        configure_dnat(:front, :prod, true, true, 8000 => 80)
+        configure_dnat(:front, :prod, true, true)
 
         each_machine do |machine|
           case machine.site
@@ -384,7 +384,7 @@ describe_stack 'can depend_on nat' do
         self.enable_secondary_site = true
         self.ports = [8443]
 
-        configure_snat(:front, :prod, true, true, 8000 => 80)
+        configure_snat(:front, :prod, true, true)
 
         each_machine do |machine|
           case machine.site
@@ -427,7 +427,7 @@ describe_stack 'can depend_on nat' do
     expect(second_host_dnat_rules['tcp']).to eql(true)
     expect(second_host_dnat_rules['udp']).to eql(false)
 
-    vip_dnat_rules = dnat['dep-appwith-dnat-vip.front.st.net.local 80']
+    vip_dnat_rules = dnat['dep-appwith-dnat-vip.front.st.net.local 8000']
     expect(vip_dnat_rules['dest_host']).to eql('dep-appwith-dnat-vip.st.net.local')
     expect(vip_dnat_rules['dest_port']).to eql('8000')
     expect(vip_dnat_rules['tcp']).to eql(true)

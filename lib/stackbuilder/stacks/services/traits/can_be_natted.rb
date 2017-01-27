@@ -1,8 +1,8 @@
 module Stacks::Services::CanBeNatted
-  NatConfig = Struct.new(:dnat_enabled, :snat_enabled, :public_network, :private_network, :tcp, :udp, :port_map) do
-    def create_rule(environment, type, hostname, site, front_port, back_port)
-      public_uri = uri(hostname, environment.domain(site, public_network), front_port)
-      private_uri = uri(hostname, environment.domain(site, private_network), back_port)
+  NatConfig = Struct.new(:dnat_enabled, :snat_enabled, :public_network, :private_network, :tcp, :udp) do
+    def create_rule(environment, type, hostname, site, port)
+      public_uri = uri(hostname, environment.domain(site, public_network), port)
+      private_uri = uri(hostname, environment.domain(site, private_network), port)
 
       case type
       when :dnat
@@ -30,19 +30,19 @@ module Stacks::Services::CanBeNatted
   attr_accessor :nat_config
 
   def configure
-    @nat_config = NatConfig.new(false, false, :front, :prod, true, false, {})
+    @nat_config = NatConfig.new(false, false, :front, :prod, true, false)
   end
 
-  def configure_nat(dnat_enabled, snat_enabled, public_network, private_network, tcp, udp, portmap = {})
-    @nat_config = NatConfig.new(dnat_enabled, snat_enabled, public_network, private_network, tcp, udp, portmap)
+  def configure_nat(dnat_enabled, snat_enabled, public_network, private_network, tcp, udp)
+    @nat_config = NatConfig.new(dnat_enabled, snat_enabled, public_network, private_network, tcp, udp)
   end
 
-  def configure_dnat(public_network, private_network, tcp, udp, portmap = {})
-    configure_nat(true, nat_config.snat_enabled, public_network, private_network, tcp, udp, portmap)
+  def configure_dnat(public_network, private_network, tcp, udp)
+    configure_nat(true, nat_config.snat_enabled, public_network, private_network, tcp, udp)
   end
 
-  def configure_snat(public_network, private_network, tcp, udp, portmap = {})
-    configure_nat(nat_config.dnat_enabled, true, public_network, private_network, tcp, udp, portmap)
+  def configure_snat(public_network, private_network, tcp, udp)
+    configure_nat(nat_config.dnat_enabled, true, public_network, private_network, tcp, udp)
   end
 
   def calculate_nat_rules(type, site, requirements)
@@ -66,10 +66,9 @@ module Stacks::Services::CanBeNatted
   private
 
   def create_rules_for_hosts(hostnames, site, type)
-    ports.map do |back_port|
+    ports.map do |port|
       hostnames.map do |hostname|
-        front_port = nat_config.port_map[back_port] || back_port
-        nat_config.create_rule(environment, type, hostname, site, front_port, back_port)
+        nat_config.create_rule(environment, type, hostname, site, port)
       end
     end.flatten
   end
