@@ -17,7 +17,7 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
       }
     }
     backup_storage = {
-      '/var/backups' => {
+      '/mnt/storage' => {
         :type       => 'data',
         :size       => '458G',
         :persistent => true
