@@ -7,11 +7,11 @@ describe_stack 'nat servers should have all 3 networks' do
       nat_service
       proxy_service 'proxy' do
         nat_config.dnat_enabled = true
-        depend_on 'nat', environment.name, :nat_to_vip
+        depend_on 'nat', environment.name
       end
       app_service 'app' do
         nat_config.dnat_enabled = true
-        depend_on 'nat', environment.name, :nat_to_vip
+        depend_on 'nat', environment.name
       end
     end
 
@@ -58,7 +58,7 @@ describe_stack 'nat servers should have all 3 networks' do
   end
 end
 
-describe_stack 'nat servers cannot suppot enable_secondary_site' do
+describe_stack 'nat servers cannot support enable_secondary_site' do
   given do
     stack 'nat' do
       nat_service do
@@ -95,7 +95,7 @@ describe_stack 'nat servers should provide natting for secondary_site services i
         @enable_secondary_site = true
         vhost('exampleuserapp', 'example-mirror.timgroup.com', 'production')
         nat_config.dnat_enabled = true
-        depend_on 'nat', 'shared', :nat_to_vip
+        depend_on 'nat', 'shared'
       end
     end
 
@@ -127,17 +127,18 @@ describe_stack 'nat servers should provide natting for secondary_site services i
     )
   end
 end
+
 describe_stack 'configures NAT boxes to NAT incoming public IPs' do
   given do
     stack 'frontexample' do
       nat_service
       proxy_service 'withnat' do
         nat_config.dnat_enabled = true
-        depend_on 'nat', environment.name, :nat_to_vip
+        depend_on 'nat', environment.name
       end
       sftp_service 'sftp' do
         nat_config.dnat_enabled = true
-        depend_on 'nat', environment.name, :nat_to_vip
+        depend_on 'nat', environment.name
       end
       app_service 'withoutnat' do
       end
@@ -147,7 +148,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
       nat_service
       app_service 'blahnat' do
         nat_config.dnat_enabled = true
-        depend_on 'nat', environment.name, :nat_to_vip
+        depend_on 'nat', environment.name
         self.ports = [8008]
       end
     end
@@ -156,7 +157,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
       nat_service
       app_service 'defaultport' do
         nat_config.dnat_enabled = true
-        depend_on 'nat', environment.name, :nat_to_vip
+        depend_on 'nat', environment.name
       end
     end
 
@@ -240,11 +241,11 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
       nat_service
       proxy_service 'withnat' do
         nat_config.snat_enabled = true
-        depend_on 'nat', 'eg', :nat_to_vip
+        depend_on 'nat', 'eg'
       end
       sftp_service 'sftp' do
         nat_config.snat_enabled = true
-        depend_on 'nat', 'eg', :nat_to_vip
+        depend_on 'nat', 'eg'
       end
       app_service 'withoutnat' do
       end
@@ -254,7 +255,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
       nat_service
       app_service 'blahnat' do
         nat_config.snat_enabled = true
-        depend_on 'nat', 'sub', :nat_to_vip
+        depend_on 'nat', 'sub'
         self.ports = [8008]
       end
     end
@@ -263,7 +264,7 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
       nat_service
       app_service 'defaultport' do
         nat_config.snat_enabled = true
-        depend_on 'nat', 'sub', :nat_to_vip
+        depend_on 'nat', 'sub'
       end
     end
 
@@ -322,143 +323,5 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
     expect(snat_2['to_source']).to eql('sub-defaultport-vip.front.st.net.local:8000')
     expect(snat_2['tcp']).to eql(true)
     expect(snat_2['udp']).to eql(false)
-  end
-end
-
-describe_stack 'can depend_on nat' do
-  given do
-    stack 'depend_on_example' do
-      nat_service
-
-      standard_service 'standardwith-dnat' do
-        extend(Stacks::Services::CanBeNatted)
-        self.instances = 2
-        self.ports = [22]
-
-        configure_dnat(:front, :mgmt, true, false)
-        depend_on 'nat', environment.name, :nat_to_host
-      end
-
-      app_service 'appwith-dnat' do
-        self.instances = 2
-        self.ports = [8000]
-
-        configure_dnat(:front, :prod, true, true)
-        depend_on 'nat', environment.name, :nat_to_vip
-      end
-
-      standard_service 'standardwith-snat' do
-        extend(Stacks::Services::CanBeNatted)
-        self.instances = 2
-        self.ports = [22]
-
-        configure_snat(:front, :mgmt, true, false)
-        depend_on 'nat', environment.name, :nat_to_host
-      end
-
-      app_service 'appwith-snat' do
-        self.instances = 2
-        self.ports = [8000]
-
-        configure_snat(:front, :prod, true, false)
-        depend_on 'nat', environment.name, :nat_to_vip
-      end
-
-      app_service 'othersitewith-dnat' do
-        self.enable_secondary_site = true
-        self.ports = [8443]
-
-        configure_dnat(:front, :prod, true, true)
-
-        each_machine do |machine|
-          case machine.site
-          when 'st'
-            depend_on 'nat', 'dep', :nat_to_vip
-          when 'bs'
-            depend_on 'nat', 'other', :nat_to_vip
-          end
-        end
-      end
-
-      app_service 'othersitewith-snat' do
-        self.enable_secondary_site = true
-        self.ports = [8443]
-
-        configure_snat(:front, :prod, true, true)
-
-        each_machine do |machine|
-          case machine.site
-          when 'st'
-            depend_on 'nat', 'dep', :nat_to_vip
-          when 'bs'
-            depend_on 'nat', 'other', :nat_to_vip
-          end
-        end
-      end
-    end
-
-    stack 'other_site_nat' do
-      nat_service
-    end
-
-    env 'dep', :primary_site => 'st', :secondary_site => 'bs' do
-      instantiate_stack 'depend_on_example'
-    end
-
-    env 'other', :primary_site => 'bs' do
-      instantiate_stack 'other_site_nat'
-    end
-  end
-
-  host('dep-nat-001.mgmt.st.net.local') do |host|
-    enc = host.to_enc
-    dnat = enc['role::natserver']['rules']['DNAT']
-    snat = enc['role::natserver']['rules']['SNAT']
-
-    first_host_dnat_rules = dnat['dep-standardwith-dnat-001.front.st.net.local 22']
-    expect(first_host_dnat_rules['dest_host']).to eql('dep-standardwith-dnat-001.mgmt.st.net.local')
-    expect(first_host_dnat_rules['dest_port']).to eql('22')
-    expect(first_host_dnat_rules['tcp']).to eql(true)
-    expect(first_host_dnat_rules['udp']).to eql(false)
-
-    second_host_dnat_rules = dnat['dep-standardwith-dnat-002.front.st.net.local 22']
-    expect(second_host_dnat_rules['dest_host']).to eql('dep-standardwith-dnat-002.mgmt.st.net.local')
-    expect(second_host_dnat_rules['dest_port']).to eql('22')
-    expect(second_host_dnat_rules['tcp']).to eql(true)
-    expect(second_host_dnat_rules['udp']).to eql(false)
-
-    vip_dnat_rules = dnat['dep-appwith-dnat-vip.front.st.net.local 8000']
-    expect(vip_dnat_rules['dest_host']).to eql('dep-appwith-dnat-vip.st.net.local')
-    expect(vip_dnat_rules['dest_port']).to eql('8000')
-    expect(vip_dnat_rules['tcp']).to eql(true)
-    expect(vip_dnat_rules['udp']).to eql(true)
-
-    standard_host_snat_rules = snat['dep-standardwith-snat-001.mgmt.st.net.local 22']
-    expect(standard_host_snat_rules['to_source']).to eql('dep-standardwith-snat-001.front.st.net.local:22')
-    expect(standard_host_snat_rules['tcp']).to eql(true)
-    expect(standard_host_snat_rules['udp']).to eql(false)
-
-    vip_snat_rules = snat['dep-appwith-snat-vip.st.net.local 8000']
-    expect(vip_snat_rules['to_source']).to eql('dep-appwith-snat-vip.front.st.net.local:8000')
-    expect(vip_snat_rules['tcp']).to eql(true)
-    expect(vip_snat_rules['udp']).to eql(false)
-
-    expect(dnat['dep-othersitewith-dnat-vip.front.bs.net.local 8443']).to be(nil)
-    expect(snat['dep-othersitewith-snat-vip.bs.net.local 8443']).to be(nil)
-    expect(dnat['dep-othersitewith-dnat-vip.front.st.net.local 8443']['dest_host']).to eql('dep-othersitewith-dnat-vip.st.net.local')
-    expect(snat['dep-othersitewith-snat-vip.st.net.local 8443']['to_source']).to eql('dep-othersitewith-snat-vip.front.st.net.local:8443')
-  end
-
-  host('other-nat-001.mgmt.bs.net.local') do |host|
-    enc = host.to_enc
-    dnat = enc['role::natserver']['rules']['DNAT']
-    snat = enc['role::natserver']['rules']['SNAT']
-    other_site_dnat = dnat['dep-othersitewith-dnat-vip.front.bs.net.local 8443']
-    expect(other_site_dnat['dest_host']).to eql('dep-othersitewith-dnat-vip.bs.net.local')
-    other_site_snat = snat['dep-othersitewith-snat-vip.bs.net.local 8443']
-    expect(other_site_snat['to_source']).to eql('dep-othersitewith-snat-vip.front.bs.net.local:8443')
-
-    expect(dnat['dep-othersitewith-dnat-vip.front.st.net.local 8443']).to be(nil)
-    expect(snat['dep-othersitewith-snat-vip.st.net.local 8443']).to be(nil)
   end
 end
