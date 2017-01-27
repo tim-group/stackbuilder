@@ -491,7 +491,7 @@ describe_stack 'test allow_host entries are supported' do
     expect(enc['role::bind_server']['allowed_hosts']).to eql ['1.1.1.1', '2.2.2.2']
   end
 end
-describe_stack 'nameserver should be determinitic and should not flicker' do
+describe_stack 'nameserver in master spec should be deterministic and should not flicker' do
   given do
     stack 'nameserver' do
       bind_service 'ns' do
