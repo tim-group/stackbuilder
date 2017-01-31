@@ -47,6 +47,7 @@ module Stacks
     require 'stackbuilder/stacks/services/rabbitmq_cluster'
     require 'stackbuilder/stacks/services/virtual_service'
     require 'stackbuilder/stacks/services/virtual_sftp_service'
+    require 'stackbuilder/stacks/services/virtual_ssh_service'
     require 'stackbuilder/stacks/services/vpn_server'
     require 'stackbuilder/stacks/services/vpn_service'
   end
