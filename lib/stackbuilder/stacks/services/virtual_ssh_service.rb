@@ -15,7 +15,7 @@ module Stacks::Services::VirtualSshService
       vip_fqdn(:prod, fabric) => {
         'type'              => 'ssh',
         'ports'             => '22',
-        'realservers'       => realservers,
+        'realservers'       => realservers
       }
     }
   end
