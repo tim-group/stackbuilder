@@ -64,8 +64,8 @@ describe Support::Nagios::Service::Http do
     def invoke_test_server_with_fixture_and_create_service(fixture_file)
       setup_test_server_with_fixture(fixture_file)
       Support::Nagios::Service::Http.new(:nagios_servers => {
-                                           'oy' => ['localhost'],
-                                           'pg' => ['localhost']
+                                           'oy' => 'localhost',
+                                           'pg' => 'localhost'
                                          },
                                          :nagios_api_port => 5152)
     end
