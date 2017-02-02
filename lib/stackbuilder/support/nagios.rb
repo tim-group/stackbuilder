@@ -32,8 +32,8 @@ module Support
       def initialize(options)
         ## FIXME: This does not belong here, but we dont know where it should go
         default_nagios_servers = {
-          'oy' => 'antarctica.mgmt.oy.net.local',
-          'pg' => 'australia.mgmt.pg.net.local'
+          'oy' => ['antarctica.mgmt.oy.net.local', 'oy-nagios-001.mgmt.oy.net.local'],
+          'pg' => ['australia.mgmt.pg.net.local']
         }
         default_api_port = 5152
         @nagios_servers = options[:nagios_servers] || default_nagios_servers
@@ -78,7 +78,7 @@ module Support
         result
       end
 
-      def get_nagios_server_for_fabric(fabric)
+      def get_nagios_servers_for_fabric(fabric)
         return @nagios_servers[fabric] rescue nil
       end
 
@@ -86,11 +86,15 @@ module Support
         body = { "host" => machine.mgmt_fqdn }
         body["duration"] = duration unless duration.nil?
         header = { 'Content-Type' => 'application/json' }
-        nagios_server = get_nagios_server_for_fabric(machine.fabric)
-        return "skipping #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_server.nil?
-        url = "http://#{nagios_server}:#{@nagios_api_port}/#{action}_downtime"
-        response = http_request(url, body.to_json, header)
-        "#{nagios_server} = #{process_response(response)}"
+        nagios_servers = get_nagios_servers_for_fabric(machine.fabric)
+        return "skipping #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_servers.nil? || nagios_servers.empty?
+        ret = []
+        nagios_servers.each do |nagios_server|
+          url = "http://#{nagios_server}:#{@nagios_api_port}/#{action}_downtime"
+          response = http_request(url, body.to_json, header)
+          ret << "#{nagios_server} = #{process_response(response)}"
+        end
+        ret.join(',')
       end
 
       def schedule_downtime(machine, duration = 600)
