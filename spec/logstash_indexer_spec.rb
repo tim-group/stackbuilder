@@ -34,6 +34,8 @@ describe_stack 'logstash indexer' do
 
     stack 'elasticsearch' do
       elasticsearch_cluster "elasticlogs" do
+        self.instances = { 'space' => { :master => 3, :data => 4 } }
+
         each_machine do |machine|
           machine.modify_storage(
             '/mnt/data' => {

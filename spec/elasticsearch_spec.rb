@@ -4,7 +4,9 @@ require 'stacks/test_framework'
 describe_stack 'should provide default set of elasticsearch nodes' do
   given do
     stack "elasticsearch" do
-      elasticsearch_cluster "logs"
+      elasticsearch_cluster "logs" do
+        self.instances = { 'space' => { :master => 3, :data => 4 } }
+      end
     end
 
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -66,7 +68,7 @@ describe_stack 'should provide default set of elasticsearch nodes with marvel ta
     stack "elasticsearch" do
       elasticsearch_cluster "logs" do
         self.marvel_target = 'foobar'
-        self.master_nodes = 1
+        self.instances = { 'space' => { :master => 3, :data => 4 } }
       end
     end
 
@@ -87,6 +89,6 @@ describe_stack 'should provide default set of elasticsearch nodes with marvel ta
 
     expect(host.to_enc['role::elasticsearch::master']['marvel_target']).to eql('testing-logs-vip.foobar.net.local')
 
-    expect(host.to_enc['role::elasticsearch::master']['minimum_master_nodes']).to eql(1)
+    expect(host.to_enc['role::elasticsearch::master']['minimum_master_nodes']).to eql(2)
   end
 end
