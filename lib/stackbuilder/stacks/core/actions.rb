@@ -26,12 +26,6 @@ module Stacks::Core::Actions
     end
 
     object.action 'launch' do |services, machine_def|
-      machine_def.flatten.each do |machine|
-        if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
-          fail "cannot instantiate machines in local site without owner fact"
-        end
-      end
-
       machine_specs = machine_def.flatten.map(&:to_spec)
       allocation_results = services.allocator.allocate(machine_specs)
 
