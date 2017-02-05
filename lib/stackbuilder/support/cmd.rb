@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile diff ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile diff init ls lsenv enc spec clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -45,6 +45,12 @@ class CMD
       system("cd #{sbc_path} && git checkout master && stacks compile > /tmp/after")
     end
     system("#{diff_tool} /tmp/before /tmp/after")
+  end
+
+  def init
+    sbc_path = ENV['STACKBUILDER_CONFIG_PATH'] || '.'
+    # cp init to .
+    #
   end
 
   def terminus(_argv)

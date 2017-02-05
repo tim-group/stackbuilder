@@ -43,6 +43,7 @@ Options:
     diff                      show compile diff between last commit and latest commit.
     diff -sb                  show compile diff between latest stackbuilder and local stackbuilder.
     enc [-e] -s               print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
+    init                      create a default stackbuilder config in the current directory
     spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,
                               skip stacks of type "machine".
