@@ -118,20 +118,9 @@ cmd = ARGV.shift
 argv = ARGV
 logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", options: \"#{$options}\", argv: #{argv}" }
 
-if File.directory?($options[:path])
-  if !system("cd \"#{$options[:path]}\" && " \
-            "(echo $(git config remote.origin.url) | grep -q 'stackbuilder-config')")
-    logger(Logger::FATAL) do
-      "stackbuilder-config path \"#{$options[:path]}\" is not a valid git repository.\n" \
-      "Please specify a valid git repository using -p <stackbuilder-config-path>\n" \
-      "See --help for more information."
-    end
-    exit 1
-  end
-else
+if !File.directory?($options[:path])
   logger(Logger::FATAL) do
-    "stackbuilder-config path \"#{$options[:path]}\" is not valid directory.\n" \
-    "Please specify a valid git repository using -p <stackbuilder-config-path>\n" \
+    "stackbuilder-config path \"#{$options[:path]}\" is not a directory.\n" \
     "See --help for more information."
   end
   exit 1
