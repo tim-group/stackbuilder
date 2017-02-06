@@ -14,6 +14,8 @@ class Stacks::MachineSet
   attr_accessor :type
   attr_accessor :server_offset
   attr_accessor :role_in_name
+  attr_accessor :monitoring
+  attr_accessor :monitoring_in_enc
   attr_reader :allowed_hosts
   attr_reader :default_networks
   attr_reader :depends_on
@@ -38,6 +40,11 @@ class Stacks::MachineSet
     @server_offset = 0
     @add_role_to_name = []
     @role_in_name = false
+    @monitoring = {
+      :checks     => true,
+      :importance => :low
+    }
+    @monitoring_in_enc = false # temporary flag
   end
 
   def secondary_site?
