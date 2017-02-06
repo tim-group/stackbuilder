@@ -21,6 +21,8 @@ class Stacks::MachineDef
   attr_accessor :destroyable
   attr_accessor :role
   attr_accessor :site
+  attr_accessor :monitoring
+  attr_accessor :monitoring_in_enc
 
   def initialize(virtual_service, base_hostname, environment, site, role = nil)
     @virtual_service = virtual_service
@@ -43,6 +45,14 @@ class Stacks::MachineDef
         }
       }
     }
+    @monitoring = {
+      'checks'     => true,
+      'importance' => 'low'
+    }
+    @monitoring = @virtual_service.monitoring if @virtual_service.respond_to?(:monitoring)
+    @monitoring_in_enc = false # temporary flag
+    @monitoring_in_enc = @virtual_service.monitoring_in_enc if @virtual_service.respond_to?(:monitoring_in_enc)
+
     @destroyable = true
     @dont_start = false
     @routes = []
@@ -207,6 +217,7 @@ class Stacks::MachineDef
 
   def to_enc
     enc = {}
+    enc['monitoring'] = @monitoring if @monitoring_in_enc
     enc.merge! @included_classes unless @included_classes.nil?
     enc.merge! @virtual_service.included_classes if @virtual_service && @virtual_service.respond_to?(:included_classes)
     unless @routes.empty?

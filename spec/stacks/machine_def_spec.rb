@@ -106,4 +106,16 @@ describe Stacks::MachineDef do
 
     expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to include('ubuntu-trusty')
   end
+
+  it 'should allow monitoring to be configured' do
+    env = new_environment('noenv', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.monitoring[:checks] = false
+    machinedef.monitoring[:importance] = :low
+    machinedef.monitoring_in_enc = true
+    machinedef.bind_to(env)
+    expect(machinedef.to_enc).to have_key('monitoring')
+    expect(machinedef.to_enc['monitoring'][:checks]).to eql(false)
+    expect(machinedef.to_enc['monitoring'][:importance]).to eql(:low)
+  end
 end
