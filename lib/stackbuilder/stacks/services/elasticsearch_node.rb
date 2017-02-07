@@ -29,7 +29,7 @@ class Stacks::Services::ElasticsearchNode < Stacks::MachineDef
   def to_enc
     enc = super()
     minimum_master_nodes = ((@virtual_service.nodes_with_role(:master).size / 2) + 1).floor
-    masters = @virtual_service.nodes_with_role(:master).reject { |fqdn| fqdn == prod_fqdn }
+    masters = @virtual_service.nodes_with_role(:master).reject { |fqdn| fqdn == prod_fqdn }.sort
     vip_fqdn = @virtual_service.vip_fqdn(:prod, fabric)
     marvel_target = @virtual_service.marvel_target_vip
     cluster = @virtual_service.cluster_name(environment)
