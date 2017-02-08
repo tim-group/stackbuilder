@@ -46,6 +46,7 @@ module Stacks::Services::LegacyMysqlCluster
     # This is where we can provide config params to App servers (only) to put into their config.properties
     {
       "db.#{@database_name}.hostname"           => mysqldb_server.prod_fqdn,
+      "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.port"               => '3306',
       "db.#{@database_name}.username"           => "#{mysql_username(dependant)}",

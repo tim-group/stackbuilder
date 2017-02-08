@@ -127,6 +127,7 @@ describe_stack 'stack with dependencies that does not provide config params when
     expect(host.to_enc['role::http_app']['dependencies']).to \
       eql('db.example.database'           => 'example',
           'db.example.hostname'           => 'e1-exampledb-001.space.net.local',
+          'db.example.driver'             => 'com.mysql.jdbc.Driver',
           'db.example.port'               => '3306',
           'db.example.password_hiera_key' => 'e1/example/mysql_password',
           'db.example.username'           => 'example')
