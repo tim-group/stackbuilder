@@ -15,6 +15,7 @@ class Stacks::MachineSet
   attr_accessor :server_offset
   attr_accessor :role_in_name
   attr_accessor :monitoring
+  attr_accessor :monitoring_options
   attr_accessor :monitoring_in_enc
   attr_reader :allowed_hosts
   attr_reader :default_networks
@@ -40,11 +41,12 @@ class Stacks::MachineSet
     @server_offset = 0
     @add_role_to_name = []
     @role_in_name = false
-    @monitoring = {
-      :checks     => true,
-      :importance => :low
+    @monitoring = true
+    @monitoring_options = {
+      'nagios_host_template'    => 'non-prod-host',
+      'nagios_service_template' => 'non-prod-service'
     }
-    @monitoring_in_enc = false # temporary flag
+    @monitoring_in_enc = false # temporary feature flag
   end
 
   def secondary_site?
