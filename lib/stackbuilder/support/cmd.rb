@@ -33,7 +33,7 @@ class CMD
   end
 
   def diff(argv)
-    diff_type = arg.shift if argv.size > 0
+    diff_type = argv.shift if argv.size > 0
     diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
     sbc_path = ENV['STACKBUILDER_CONFIG_PATH'] || '.'
 
