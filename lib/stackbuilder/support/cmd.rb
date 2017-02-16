@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile diff ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile diff sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -32,19 +32,32 @@ class CMD
     puts ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
   end
 
-  def diff(argv)
-    diff_type = argv.shift if argv.size > 0
+  def diff(_argv)
     diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
     sbc_path = ENV['STACKBUILDER_CONFIG_PATH'] || '.'
 
-    if diff_type == '-sb'
-      system("sudo apt-get install stackbuilder && stacks compile > /tmp/before")
-      system("rake package install  && stacks compile > /tmp/after")
-    else
-      system("cd #{sbc_path} && git checkout HEAD~1 && stacks compile > /tmp/before")
-      system("cd #{sbc_path} && git checkout master && stacks compile > /tmp/after")
-    end
-    system("#{diff_tool} /tmp/before /tmp/after")
+    require 'tempfile'
+    before_file = Tempfile.new('before')
+    after_file = Tempfile.new('after')
+
+    system("cd #{sbc_path} && git checkout HEAD~1 && stacks compile > #{before_file.path}")
+    system("cd #{sbc_path} && git checkout master && stacks compile > #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    before_file.unlink
+    after_file.unlink
+  end
+
+  def sbdiff(_argv)
+    diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
+
+    require 'tempfile'
+    before_file = Tempfile.new('before')
+    after_file = Tempfile.new('after')
+    system("sudo apt-get install stackbuilder && stacks compile > #{before_file.path}")
+    system("rake package install && stacks compile > #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    before_file.unlink
+    after_file.unlink
   end
 
   def terminus(_argv)
