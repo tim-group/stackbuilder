@@ -23,7 +23,6 @@ class Stacks::MachineDef
   attr_accessor :site
   attr_accessor :monitoring
   attr_accessor :monitoring_in_enc
-  attr_accessor :monitoring_options
 
   def initialize(virtual_service, base_hostname, environment, site, role = nil)
     @virtual_service = virtual_service
@@ -46,14 +45,12 @@ class Stacks::MachineDef
         }
       }
     }
-    @monitoring = true
-    @monitoring_options = {
-      'nagios_host_template'    => 'non-prod-host',
-      'nagios_service_template' => 'non-prod-service'
+    @monitoring = {
+      'checks'     => true,
+      'importance' => 'low'
     }
     @monitoring = @virtual_service.monitoring if @virtual_service.respond_to?(:monitoring)
-    @monitoring_options = @virtual_service.monitoring_options if @virtual_service.respond_to?(:monitoring_options)
-    @monitoring_in_enc = false # temporary feature flag
+    @monitoring_in_enc = false # temporary flag
     @monitoring_in_enc = @virtual_service.monitoring_in_enc if @virtual_service.respond_to?(:monitoring_in_enc)
 
     @destroyable = true
@@ -220,12 +217,7 @@ class Stacks::MachineDef
 
   def to_enc
     enc = {}
-    if @monitoring_in_enc
-      enc['monitoring'] = {
-        'checks'  => @monitoring,
-        'options' => @monitoring_options
-      }
-    end
+    enc['monitoring'] = @monitoring if @monitoring_in_enc
     enc.merge! @included_classes unless @included_classes.nil?
     enc.merge! @virtual_service.included_classes if @virtual_service && @virtual_service.respond_to?(:included_classes)
     unless @routes.empty?

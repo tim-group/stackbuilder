@@ -272,8 +272,7 @@ describe_stack 'should raise exception if @instances is not an Integer or Hash' 
       stack "mystack" do
         app_service "x" do
           self.monitoring_in_enc = true
-          self.monitoring = false
-          self.monitoring_options = {}
+          monitoring['checks'] = 'foo'
         end
       end
       env "e1", :primary_site => 'space' do
@@ -281,8 +280,7 @@ describe_stack 'should raise exception if @instances is not an Integer or Hash' 
       end
     end
     host("e1-x-001.mgmt.space.net.local") do |host|
-      expect(host.to_enc['monitoring']['checks']).to eql(false)
-      expect(host.to_enc['monitoring']['options']).to eql({})
+      expect(host.to_enc['monitoring']['checks']).to eql('foo')
     end
   end
 end
