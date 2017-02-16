@@ -266,21 +266,4 @@ describe_stack 'should raise exception if @instances is not an Integer or Hash' 
       end
     end
   end.to raise_error(/You must specify Integer or Hash for @instances. You provided a String/)
-
-  describe_stack 'allows monitoring to be changed at machineset level' do
-    given do
-      stack "mystack" do
-        app_service "x" do
-          self.monitoring_in_enc = true
-          monitoring['checks'] = 'foo'
-        end
-      end
-      env "e1", :primary_site => 'space' do
-        instantiate_stack "mystack"
-      end
-    end
-    host("e1-x-001.mgmt.space.net.local") do |host|
-      expect(host.to_enc['monitoring']['checks']).to eql('foo')
-    end
-  end
 end
