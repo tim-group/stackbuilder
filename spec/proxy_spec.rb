@@ -620,4 +620,29 @@ describe_stack 'fails if a proxy_service has more than one vhost thats configure
     end.to raise_error "More than one vhost of service 'proxy' in environment 'st' are configured to be used for load balancer " \
                        "healthchecks: st-proxy-vip.st.net.local,st-proxy-vip.st.net.local"
   end
+  describe_stack 'proxy servers have an option to specify logging to syslog' do
+    given do
+      stack "exampleproxy" do
+        proxy_service 'exampleproxy' do
+          vhost('exampleapp') do
+            @log_to_syslog = true
+          end
+        end
+
+        app_service 'exampleapp' do
+          self.groups = ['blue']
+          self.application = 'example'
+        end
+      end
+
+      env "e1", :primary_site => "space" do
+        instantiate_stack "exampleproxy"
+      end
+    end
+
+    host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
+      vhosts = host.to_enc['role::proxyserver']['vhosts']
+      expect(vhosts['e1-exampleproxy-vip.space.net.local']['log_to_syslog']).to eql(true)
+    end
+  end
 end

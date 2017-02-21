@@ -2,6 +2,7 @@ class Stacks::Services::ProxyVHost
   attr_accessor :aliases
   attr_accessor :cert
   attr_accessor :monitor_vhost
+  attr_accessor :log_to_sylog
   attr_reader :properties
   attr_reader :proxy_pass_rules
   attr_reader :redirects
@@ -25,6 +26,7 @@ class Stacks::Services::ProxyVHost
     @ensure = 'present'
     @monitor_vhost = true
     @use_for_lb_healthcheck = false
+    @log_to_syslog = false
     instance_eval(&block) if block
   end
 
@@ -87,7 +89,8 @@ class Stacks::Services::ProxyVHost
       'type'                    => type,
       'vhost_properties'        => properties,
       'cert'                    => cert,
-      'monitor_vhost'           => @monitor_vhost
+      'monitor_vhost'           => @monitor_vhost,
+      'log_to_syslog'           => @log_to_syslog
     }
     config['used_for_lb_healthcheck'] = use_for_lb_healthcheck?
     [fqdn(fabric), config]
