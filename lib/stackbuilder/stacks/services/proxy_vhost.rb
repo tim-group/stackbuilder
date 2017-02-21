@@ -7,10 +7,9 @@ class Stacks::Services::ProxyVHost
   attr_reader :proxy_pass_rules
   attr_reader :redirects
   attr_reader :service
-  attr_reader :type
   attr_reader :environment
 
-  def initialize(virtual_proxy_service, fqdn, service, environment, location, type = 'default', &block)
+  def initialize(virtual_proxy_service, fqdn, service, environment, location, &block)
     @aliases = []
     @add_default_aliases = true
     @cert = 'wildcard_timgroup_com'
@@ -18,7 +17,6 @@ class Stacks::Services::ProxyVHost
     @proxy_pass_rules = {}
     @redirects = []
     @service = service
-    @type = type
     @fqdn = fqdn
     @environment = environment
     @virtual_proxy_service = virtual_proxy_service
@@ -86,7 +84,6 @@ class Stacks::Services::ProxyVHost
       'redirects'               => redirects,
       'application'             => @virtual_proxy_service.find_virtual_service(service, @environment).application,
       'proxy_pass_rules'        => proxy_pass_rules(location, envs),
-      'type'                    => type,
       'vhost_properties'        => properties,
       'cert'                    => cert,
       'monitor_vhost'           => @monitor_vhost,

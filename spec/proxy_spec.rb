@@ -41,7 +41,6 @@ describe_stack 'exampleproxy' do
     expect(vhost1_enc['aliases'].size).to eql(1)
     expect(vhost1_enc['application']).to eql('example')
     expect(vhost1_enc['redirects'].size).to eql(0)
-    expect(vhost1_enc['type']).to eql('default')
     expect(vhost1_enc['vhost_properties']).to eql({})
     expect(vhost1_enc['cert']).to eql('wildcard_timgroup_com')
 
@@ -54,7 +53,6 @@ describe_stack 'exampleproxy' do
     expect(vhost2_enc['aliases'].size).to eql(2)
     expect(vhost2_enc['application']).to eql('example')
     expect(vhost2_enc['redirects'].size).to eql(0)
-    expect(vhost2_enc['type']).to eql('default')
     expect(vhost2_enc['vhost_properties']).to eql({})
     expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com')
 
@@ -210,7 +208,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
     expect(vhost_enc['redirects'].size).to eql(0)
-    expect(vhost_enc['type']).to eql('default')
     expect(vhost_enc['vhost_properties']).to eql('is_hip' => true)
     expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
@@ -231,7 +228,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
     expect(vhost_enc['redirects'].size).to eql(0)
-    expect(vhost_enc['type']).to eql('default')
     expect(vhost_enc['vhost_properties']).to eql('is_hip' => true)
     expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
@@ -290,7 +286,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc1['application']).to eql('MyApp')
     expect(vhost_enc1['redirects']).to include('old-example.timgroup.com')
     expect(vhost_enc1['redirects'].size).to eql(1)
-    expect(vhost_enc1['type']).to eql('default')
     expect(vhost_enc1['vhost_properties']).to eql({})
     expect(vhost_enc1['cert']).to eql('wildcard_timgroup_com')
 
@@ -301,7 +296,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc2['aliases'].size).to eql(2)
     expect(vhost_enc2['application']).to eql('MyOtherApp')
     expect(vhost_enc2['redirects'].size).to eql(0)
-    expect(vhost_enc2['type']).to eql('default')
     expect(vhost_enc2['vhost_properties']).to eql({})
     expect(vhost_enc2['cert']).to eql('wildcard_timgroup_com')
   end
