@@ -203,7 +203,6 @@ describe_stack 'stack with sub environment dependencies' do
         when 'shared'
           vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
             @cert = 'wildcard_timgroup_com'
-            add_properties 'is_hip' => true
             add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
           end
         end

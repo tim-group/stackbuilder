@@ -3,7 +3,6 @@ class Stacks::Services::ProxyVHost
   attr_accessor :cert
   attr_accessor :monitor_vhost
   attr_accessor :log_to_sylog
-  attr_reader :properties
   attr_reader :proxy_pass_rules
   attr_reader :redirects
   attr_reader :service
@@ -13,7 +12,6 @@ class Stacks::Services::ProxyVHost
     @aliases = []
     @add_default_aliases = true
     @cert = 'wildcard_timgroup_com'
-    @properties = {}
     @proxy_pass_rules = {}
     @redirects = []
     @service = service
@@ -37,10 +35,6 @@ class Stacks::Services::ProxyVHost
     config_hash[:location] = :primary_site if config_hash[:location].nil?
     @proxy_pass_rules[path] = config_hash
     @virtual_proxy_service.depend_on config_hash[:service], config_hash[:environment]
-  end
-
-  def add_properties(properties)
-    @properties.merge!(properties)
   end
 
   def aliases(fabric)
@@ -84,7 +78,6 @@ class Stacks::Services::ProxyVHost
       'redirects'               => redirects,
       'application'             => @virtual_proxy_service.find_virtual_service(service, @environment).application,
       'proxy_pass_rules'        => proxy_pass_rules(location, envs),
-      'vhost_properties'        => properties,
       'cert'                    => cert,
       'monitor_vhost'           => @monitor_vhost,
       'log_to_syslog'           => @log_to_syslog

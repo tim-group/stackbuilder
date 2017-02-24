@@ -41,7 +41,6 @@ describe_stack 'exampleproxy' do
     expect(vhost1_enc['aliases'].size).to eql(1)
     expect(vhost1_enc['application']).to eql('example')
     expect(vhost1_enc['redirects'].size).to eql(0)
-    expect(vhost1_enc['vhost_properties']).to eql({})
     expect(vhost1_enc['cert']).to eql('wildcard_timgroup_com')
 
     vhost2_enc = role_enc['vhosts']['example.overridden']
@@ -53,7 +52,6 @@ describe_stack 'exampleproxy' do
     expect(vhost2_enc['aliases'].size).to eql(2)
     expect(vhost2_enc['application']).to eql('example')
     expect(vhost2_enc['redirects'].size).to eql(0)
-    expect(vhost2_enc['vhost_properties']).to eql({})
     expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com')
 
     vhost3_enc = role_enc['vhosts']['example.absent']
@@ -98,7 +96,6 @@ describe_stack 'proxy pass rules without an environment default to the environme
         @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
           @cert = 'wildcard_timgroup_com'
-          add_properties 'is_hip' => true
           add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
           add_pass_rule "/HIP/blah", :service => "blondinapp", :environment => 'latest'
           add_pass_rule "/HIP/blah2", :service => "blondinapp", :environment => 'shared'
@@ -154,7 +151,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
         @enable_secondary_site = true
         @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'shared') do
-          add_properties 'is_hip' => true
           add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'shared'
         end
         nat_config.dnat_enabled = true
@@ -208,7 +204,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
     expect(vhost_enc['redirects'].size).to eql(0)
-    expect(vhost_enc['vhost_properties']).to eql('is_hip' => true)
     expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 
@@ -228,7 +223,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
     expect(vhost_enc['redirects'].size).to eql(0)
-    expect(vhost_enc['vhost_properties']).to eql('is_hip' => true)
     expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 end
@@ -286,7 +280,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc1['application']).to eql('MyApp')
     expect(vhost_enc1['redirects']).to include('old-example.timgroup.com')
     expect(vhost_enc1['redirects'].size).to eql(1)
-    expect(vhost_enc1['vhost_properties']).to eql({})
     expect(vhost_enc1['cert']).to eql('wildcard_timgroup_com')
 
     vhost_enc2 = role_enc['vhosts']['example.timgroup.com']
@@ -296,7 +289,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc2['aliases'].size).to eql(2)
     expect(vhost_enc2['application']).to eql('MyOtherApp')
     expect(vhost_enc2['redirects'].size).to eql(0)
-    expect(vhost_enc2['vhost_properties']).to eql({})
     expect(vhost_enc2['cert']).to eql('wildcard_timgroup_com')
   end
 
@@ -383,19 +375,16 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
         end
         vhost('foouserapp', 'foo.fooexample.com', 'production') do
           @cert = 'wildcard_fooexample.com'
-          add_properties 'is_hip' => true
           add_pass_rule '/HIP/resources', :service => 'blondinapp'
         end
         case environment.name
         when 'shared'
           vhost('foouserapp', 'foo-mirror.fooexample.com', 'mirror') do
             @cert = 'wildcard_fooexample.com'
-            add_properties 'is_hip' => true
             add_pass_rule '/HIP/resources', :service => 'blondinapp'
           end
           vhost('foouserapp', 'foo-latest.fooexample.com', 'latest') do
             @cert = 'wildcard_fooexample.com'
-            add_properties 'is_hip' => true
             add_pass_rule '/HIP/resources', :service => 'blondinapp'
           end
         end
