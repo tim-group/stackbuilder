@@ -23,3 +23,14 @@ else
 	echo "[31mrubocop not found[0m" >&2
 	exit 1
 fi
+
+echo -n "Running stacks compile: "
+OUTPUT=`stacks compile > /tmp/stacks-pre-commit`
+RC=$?
+if [ $RC -ne 0 ]; then
+  echo "FAIL"
+  echo "$OUTPUT"
+  exit 1
+else
+  echo "OK"
+fi
