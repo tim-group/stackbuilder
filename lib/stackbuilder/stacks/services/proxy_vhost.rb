@@ -4,7 +4,6 @@ class Stacks::Services::ProxyVHost
   attr_accessor :monitor_vhost
   attr_accessor :log_to_sylog
   attr_reader :proxy_pass_rules
-  attr_reader :redirects
   attr_reader :service
   attr_reader :environment
 
@@ -13,7 +12,6 @@ class Stacks::Services::ProxyVHost
     @add_default_aliases = true
     @cert = 'wildcard_timgroup_com'
     @proxy_pass_rules = {}
-    @redirects = []
     @service = service
     @fqdn = fqdn
     @environment = environment
@@ -24,10 +22,6 @@ class Stacks::Services::ProxyVHost
     @use_for_lb_healthcheck = false
     @log_to_syslog = false
     instance_eval(&block) if block
-  end
-
-  def with_redirect(redirect_fqdn)
-    @redirects << redirect_fqdn
   end
 
   def add_pass_rule(path, config_hash)
@@ -75,7 +69,6 @@ class Stacks::Services::ProxyVHost
     config = {
       'ensure'                  => @ensure,
       'aliases'                 => aliases(fabric),
-      'redirects'               => redirects,
       'application'             => @virtual_proxy_service.find_virtual_service(service, @environment).application,
       'proxy_pass_rules'        => proxy_pass_rules(location, envs),
       'cert'                    => cert,

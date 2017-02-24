@@ -40,7 +40,6 @@ describe_stack 'exampleproxy' do
     expect(vhost1_enc['aliases']).to include('e1-exampleproxy-vip.space.net.local')
     expect(vhost1_enc['aliases'].size).to eql(1)
     expect(vhost1_enc['application']).to eql('example')
-    expect(vhost1_enc['redirects'].size).to eql(0)
     expect(vhost1_enc['cert']).to eql('wildcard_timgroup_com')
 
     vhost2_enc = role_enc['vhosts']['example.overridden']
@@ -51,7 +50,6 @@ describe_stack 'exampleproxy' do
     )
     expect(vhost2_enc['aliases'].size).to eql(2)
     expect(vhost2_enc['application']).to eql('example')
-    expect(vhost2_enc['redirects'].size).to eql(0)
     expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com')
 
     vhost3_enc = role_enc['vhosts']['example.absent']
@@ -203,7 +201,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
     )
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
-    expect(vhost_enc['redirects'].size).to eql(0)
     expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 
@@ -222,7 +219,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
     )
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
-    expect(vhost_enc['redirects'].size).to eql(0)
     expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 end
@@ -240,7 +236,6 @@ describe_stack 'generates proxyserver enc data' do
         add_vip_network :front
         vhost('refapp') do
           @aliases << 'example.timgroup.com'
-          with_redirect "old-example.timgroup.com"
         end
         vhost('ref2app', 'example.timgroup.com') do
           add_pass_rule "/resources", :service => "downstreamapp"
@@ -278,8 +273,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc1['aliases']).to include('example.timgroup.com', 'env-refproxy-vip.st.net.local')
     expect(vhost_enc1['aliases'].size).to eql(2)
     expect(vhost_enc1['application']).to eql('MyApp')
-    expect(vhost_enc1['redirects']).to include('old-example.timgroup.com')
-    expect(vhost_enc1['redirects'].size).to eql(1)
     expect(vhost_enc1['cert']).to eql('wildcard_timgroup_com')
 
     vhost_enc2 = role_enc['vhosts']['example.timgroup.com']
@@ -288,7 +281,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc2['aliases']).to include('env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local')
     expect(vhost_enc2['aliases'].size).to eql(2)
     expect(vhost_enc2['application']).to eql('MyOtherApp')
-    expect(vhost_enc2['redirects'].size).to eql(0)
     expect(vhost_enc2['cert']).to eql('wildcard_timgroup_com')
   end
 
