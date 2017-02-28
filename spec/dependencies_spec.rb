@@ -7,7 +7,7 @@ describe_stack 'stack-with-dependencies' do
     stack 'loadbalancer' do
       loadbalancer_service
     end
-    stack "example" do
+    stack 'example' do
       proxy_service 'exampleproxy' do
         vhost('exampleapp') do
           use_for_lb_healthcheck
@@ -23,27 +23,27 @@ describe_stack 'stack-with-dependencies' do
       app_service 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        depend_on "exampleapp"
-        depend_on "exampledb"
+        depend_on 'exampleapp'
+        depend_on 'exampledb'
       end
       app_service 'exampleapp2' do
         self.groups = ['blue']
         self.application = 'example2'
-        depend_on "exampleapp"
-        depend_on "exampledb"
+        depend_on 'exampleapp'
+        depend_on 'exampledb'
       end
     end
-    stack "example_db" do
-      legacy_mysql_cluster "exampledb" do
+    stack 'example_db' do
+      legacy_mysql_cluster 'exampledb' do
         self.instances = 1
         self.database_name = 'example'
       end
     end
 
-    env "e1", :primary_site => "space" do
-      instantiate_stack "example"
-      instantiate_stack "example_db"
-      instantiate_stack "loadbalancer"
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'example'
+      instantiate_stack 'example_db'
+      instantiate_stack 'loadbalancer'
     end
   end
 
@@ -59,35 +59,35 @@ describe_stack 'stack-with-dependencies' do
     expect(ppr).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
   end
 
-  host("e1-exampleapp2-002.mgmt.space.net.local") do |host|
-    expect(host.to_enc["role::http_app"]["application_dependant_instances"]).to eql([
+  host('e1-exampleapp2-002.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
-    deps = host.to_enc["role::http_app"]["dependencies"]
-    expect(deps["db.example.database"]).to eql("example")
-    expect(deps["db.example.hostname"]).to eql("e1-exampledb-001.space.net.local")
-    expect(deps["db.example.password_hiera_key"]).to eql("e1/example2/mysql_password")
-    expect(deps["db.example.username"]).to eql("example2")
+    deps = host.to_enc['role::http_app']['dependencies']
+    expect(deps['db.example.database']).to eql('example')
+    expect(deps['db.example.hostname']).to eql('e1-exampledb-001.space.net.local')
+    expect(deps['db.example.password_hiera_key']).to eql('e1/example2/mysql_password')
+    expect(deps['db.example.username']).to eql('example2')
     expect(deps['example.url']).to eql('http://e1-exampleapp-vip.space.net.local:8000')
   end
-  host("e1-exampleapp-002.mgmt.space.net.local") do |host|
-    expect(host.to_enc["role::http_app"]["application_dependant_instances"]).to eql([
-      "e1-exampleapp2-001.space.net.local",
-      "e1-exampleapp2-002.space.net.local",
-      "e1-exampleproxy-001.space.net.local",
-      "e1-exampleproxy-002.space.net.local",
+  host('e1-exampleapp-002.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
+      'e1-exampleapp2-001.space.net.local',
+      'e1-exampleapp2-002.space.net.local',
+      'e1-exampleproxy-001.space.net.local',
+      'e1-exampleproxy-002.space.net.local',
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
-    expect(host.to_enc["role::http_app"]["dependencies"]).to eql({})
+    expect(host.to_enc['role::http_app']['dependencies']).to eql({})
   end
-  host("e1-exampledb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc["role::databaseserver"]["dependant_instances"]).to eql([
-      "e1-exampleapp2-001.space.net.local",
-      "e1-exampleapp2-002.space.net.local"
+  host('e1-exampledb-001.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::databaseserver']['dependant_instances']).to eql([
+      'e1-exampleapp2-001.space.net.local',
+      'e1-exampleapp2-002.space.net.local'
     ])
-    rights = host.to_enc["mysql_hacks::application_rights_wrapper"]['rights']
+    rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
     expect(rights['example2@e1-exampleapp2-001.space.net.local/example']).to eql(
       'password_hiera_key' => 'e1/example2/mysql_password')
     expect(rights['example2@e1-exampleapp2-002.space.net.local/example']).to eql(
@@ -97,35 +97,35 @@ end
 
 describe_stack 'stack with cross environment dependencies' do
   given do
-    stack "example" do
+    stack 'example' do
       app_service 'noconfigapp' do
         self.groups = ['blue']
         self.application = 'example'
         case environment.name
         when 'e1'
-          depend_on "noconfigapp", "e2"
+          depend_on 'noconfigapp', 'e2'
         when 'e2'
-          depend_on "noconfigapp", "e1"
+          depend_on 'noconfigapp', 'e1'
         end
       end
     end
 
-    env "e1", :primary_site => "space" do
-      instantiate_stack "example"
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'example'
     end
 
-    env "e2", :primary_site => "earth" do
-      instantiate_stack "example"
+    env 'e2', :primary_site => 'earth' do
+      instantiate_stack 'example'
     end
   end
 
-  host("e2-noconfigapp-001.mgmt.earth.net.local") do |host|
+  host('e2-noconfigapp-001.mgmt.earth.net.local') do |host|
     expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
       'e1-noconfigapp-001.space.net.local',
       'e1-noconfigapp-002.space.net.local'
     ])
   end
-  host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
+  host('e1-noconfigapp-001.mgmt.space.net.local') do |host|
     expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
       'e2-noconfigapp-001.earth.net.local',
       'e2-noconfigapp-002.earth.net.local'
@@ -135,7 +135,7 @@ end
 
 describe_stack 'stack with sub environment dependencies' do
   given do
-    stack "blondin" do
+    stack 'blondin' do
       app_service 'blondinapp' do
         self.groups = ['blue']
         self.application = 'Blondin'
@@ -160,7 +160,7 @@ describe_stack 'stack with sub environment dependencies' do
         when 'shared'
           vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
             @cert = 'wildcard_timgroup_com'
-            add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
+            add_pass_rule '/HIP/resources', :service => 'blondinapp', :environment => 'mirror'
           end
         end
         nat_config.dnat_enabled = true
@@ -181,7 +181,7 @@ describe_stack 'stack with sub environment dependencies' do
       end
     end
   end
-  host("mirror-blondinapp-001.mgmt.oy.net.local") do |host|
+  host('mirror-blondinapp-001.mgmt.oy.net.local') do |host|
     expect(host.to_enc['role::http_app']['application_dependant_instances']).to include(
       'shared-fundsproxy-001.oy.net.local',
       'shared-fundsproxy-002.oy.net.local')
