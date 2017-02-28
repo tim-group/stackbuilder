@@ -95,48 +95,6 @@ describe_stack 'stack-with-dependencies' do
   end
 end
 
-describe_stack 'stack with dependencies that does not provide config params when specified ' do
-  given do
-    stack "example" do
-      app_service 'configapp' do
-        self.groups = ['blue']
-        self.application = 'example'
-        depend_on "exampledb"
-      end
-      app_service 'noconfigapp' do
-        self.groups = ['blue']
-        self.application = 'example'
-        depend_on "exampledb"
-        self.auto_configure_dependencies = false
-      end
-    end
-    stack "example_db" do
-      legacy_mysql_cluster "exampledb" do
-        self.instances = 1
-        self.database_name = 'example'
-      end
-    end
-
-    env "e1", :primary_site => "space" do
-      instantiate_stack "example"
-      instantiate_stack "example_db"
-    end
-  end
-
-  host('e1-configapp-001.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::http_app']['dependencies']).to \
-      eql('db.example.database'           => 'example',
-          'db.example.hostname'           => 'e1-exampledb-001.space.net.local',
-          'db.example.driver'             => 'com.mysql.jdbc.Driver',
-          'db.example.port'               => '3306',
-          'db.example.password_hiera_key' => 'e1/example/mysql_password',
-          'db.example.username'           => 'example')
-  end
-  host("e1-noconfigapp-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc["role::http_app"]["dependencies"]).to eql({})
-  end
-end
-
 describe_stack 'stack with cross environment dependencies' do
   given do
     stack "example" do
@@ -149,7 +107,6 @@ describe_stack 'stack with cross environment dependencies' do
         when 'e2'
           depend_on "noconfigapp", "e1"
         end
-        self.auto_configure_dependencies = false
       end
     end
 

@@ -5,7 +5,6 @@ require 'stackbuilder/stacks/namespace'
 require 'uri'
 
 class Stacks::MachineSet
-  attr_accessor :auto_configure_dependencies
   attr_accessor :enable_secondary_site
   attr_accessor :groups
   attr_accessor :instances
@@ -23,7 +22,6 @@ class Stacks::MachineSet
   include Stacks::MachineDefContainer
 
   def initialize(name, &config_block)
-    @auto_configure_dependencies = true
     @bind_steps = []
     @config_block = config_block
     @definitions = {}
@@ -141,10 +139,8 @@ class Stacks::MachineSet
 
   def dependency_config(fabric)
     config = {}
-    if @auto_configure_dependencies
-      virtual_services_that_i_depend_on.each do |dependency|
-        config.merge! dependency.config_params(self, fabric)
-      end
+    virtual_services_that_i_depend_on.each do |dependency|
+      config.merge! dependency.config_params(self, fabric)
     end
     config
   end
