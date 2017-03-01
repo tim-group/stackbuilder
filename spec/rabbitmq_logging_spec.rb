@@ -92,3 +92,30 @@ describe_stack 'rabbitmq logging exchange is configurable' do
     expect(host.to_enc['role::logstash_receiver']['rabbitmq_logging_exchange']).to eql('my-logging-exchange')
   end
 end
+
+describe_stack 'rabbitmq logging can have arbitrary users added to it' do
+  given do
+    stack 'rabbitmq_logging' do
+      rabbitmq_logging 'user-added' do
+        add_rabbitmq_user(
+            'some-new-user',
+            'e2/some-new-user/messaging_password',
+            'e2-somenewusernode-001.space.net.local')
+      end
+    end
+
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'rabbitmq_logging'
+    end
+  end
+
+  host('e1-user-added-001.mgmt.space.net.local') do |host|
+    role_enc = host.to_enc['role::rabbitmq_logging']
+    expect(role_enc['dependant_users']).to eql('some-new-user' => {
+        'tags' => [],
+        'password_hiera_key' => 'e2/some-new-user/messaging_password'
+    })
+    expect(role_enc['dependant_instances']).to eql(['e1-user-added-002.space.net.local',
+                                                    'e2-somenewusernode-001.space.net.local'])
+  end
+end
