@@ -19,9 +19,10 @@ class Stacks::Services::LogstashReceiverServer < Stacks::MachineDef
     rabbitmq_config = @logstash_cluster.rabbitmq_config
 
     enc.merge!('role::logstash_receiver' => {
-                 'rabbitmq_logging_username' => rabbitmq_config.username,
+                 'rabbitmq_logging_username'     => rabbitmq_config.username,
                  'rabbitmq_logging_password_key' => rabbitmq_config.password_hiera_key,
-                 'rabbitmq_logging_exchange' => @logstash_cluster.exchange
+                 'rabbitmq_logging_exchange'     => @logstash_cluster.exchange,
+                 'rabbitmq_logging_hosts'        => @logstash_cluster.rabbitmq_logging_hosts
                })
     enc
   end

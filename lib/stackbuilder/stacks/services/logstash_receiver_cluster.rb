@@ -20,4 +20,12 @@ module Stacks::Services::LogstashReceiverCluster
   def rabbitmq_config
     create_rabbitmq_config('logstash_receiver')
   end
+
+  def rabbitmq_logging_hosts
+    virtual_services_that_i_depend_on.select do |service|
+      service.is_a?(Stacks::Services::RabbitMqLoggingCluster)
+    end.map do |service|
+      service.children.map(&:prod_fqdn)
+    end.flatten.sort
+  end
 end

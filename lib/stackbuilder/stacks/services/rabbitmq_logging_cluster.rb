@@ -1,6 +1,8 @@
 require 'stackbuilder/stacks/namespace'
 
 module Stacks::Services::RabbitMqLoggingCluster
+  include Stacks::Services::RabbitMqDependent
+
   def self.extended(object)
     object.configure
   end
@@ -28,5 +30,9 @@ module Stacks::Services::RabbitMqLoggingCluster
       )
     end
     users
+  end
+
+  def rabbitmq_config
+    create_rabbitmq_config('shovel')
   end
 end

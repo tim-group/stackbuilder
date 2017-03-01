@@ -8,13 +8,21 @@ describe_stack 'rabbitmq logging cluster' do
         depend_on 'rabbitmq-logging', 'e1'
       end
 
-      # TODO: add to custom_services, create classes, etc.
       rabbitmq_logging 'rabbitmq-logging' do
+        depend_on 'rabbitmq-elasticsearch', 'e2'
       end
+    end
+
+    stack 'centralised_logging_cluster' do
+      rabbitmq_logging 'rabbitmq-elasticsearch'
     end
 
     env 'e1', :primary_site => 'space' do
       instantiate_stack 'per_site_log_collecting'
+    end
+
+    env 'e2', :primary_site => 'earth' do
+      instantiate_stack 'centralised_logging_cluster'
     end
   end
 
@@ -23,7 +31,9 @@ describe_stack 'rabbitmq logging cluster' do
       'e1-rabbitmq-logging-001.mgmt.space.net.local',
       'e1-rabbitmq-logging-002.mgmt.space.net.local',
       'e1-logstash-receiver-001.mgmt.space.net.local',
-      'e1-logstash-receiver-002.mgmt.space.net.local'
+      'e1-logstash-receiver-002.mgmt.space.net.local',
+      'e2-rabbitmq-elasticsearch-001.mgmt.earth.net.local',
+      'e2-rabbitmq-elasticsearch-002.mgmt.earth.net.local'
     ])
   end
 
@@ -34,8 +44,8 @@ describe_stack 'rabbitmq logging cluster' do
     expect(role_enc['rabbitmq_logging_password_key']).to eql('e1/logstash_receiver/messaging_password')
     expect(role_enc['rabbitmq_logging_exchange']).to eql('logging')
 
-    # TODO: depend_on and get logging hosts
-    # expect(role_enc['rabbitmq_logging_hosts']).to eql(['e1-rabbitmq-logging-001.mgmt.space.net.local', 'e1-rabbitmq-logging-002.mgmt.space.net.local'])
+    expect(role_enc['rabbitmq_logging_hosts']).to eql(['e1-rabbitmq-logging-001.space.net.local',
+                                                       'e1-rabbitmq-logging-002.space.net.local'])
   end
 
   host('e1-rabbitmq-logging-001.mgmt.space.net.local') do |host|
@@ -51,6 +61,17 @@ describe_stack 'rabbitmq logging cluster' do
         'password_hiera_key' => 'e1/logstash_receiver/messaging_password',
         'tags' => []
       }})
+  end
+
+  host('e2-rabbitmq-elasticsearch-001.mgmt.earth.net.local') do |host|
+    expect(host.to_enc).to include('role::rabbitmq_logging')
+    role_enc = host.to_enc['role::rabbitmq_logging']
+
+    expect(role_enc['dependant_users']).to eql({
+      'shovel' => {
+        'password_hiera_key' => 'e1/shovel/messaging_password',
+        'tags' => []
+    }})
   end
 end
 
