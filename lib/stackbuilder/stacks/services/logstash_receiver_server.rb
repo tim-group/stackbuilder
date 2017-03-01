@@ -19,7 +19,8 @@ class Stacks::Services::LogstashReceiverServer < Stacks::MachineDef
 
     enc.merge!('role::logstash_receiver' => {
                  'rabbitmq_logging_username' => rabbitmq_config.username,
-                 'rabbitmq_logging_password_key' => rabbitmq_config.password_hiera_key
+                 'rabbitmq_logging_password_key' => rabbitmq_config.password_hiera_key,
+                 'rabbitmq_logging_exchange' => @virtual_service.exchange
                })
     enc
   end

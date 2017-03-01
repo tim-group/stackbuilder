@@ -9,10 +9,12 @@ module Stacks::Services::LogstashReceiverCluster
 
   attr_accessor :instances
   attr_accessor :ports
+  attr_accessor :exchange
 
   def configure
     @ports = [5044]
     @instances = 2
+    @exchange = 'logging'
   end
 
   def rabbitmq_config
