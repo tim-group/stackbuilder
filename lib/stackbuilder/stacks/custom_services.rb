@@ -107,6 +107,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::LogstashReceiverCluster], Stacks::Services::LogstashReceiverServer, &block)
   end
 
+  def rabbitmq_logging(name = 'rabbitmq_logging', &block)
+    machineset_with(name, [Stacks::Services::RabbitMqLoggingCluster], Stacks::Services::RabbitMqLoggingServer, &block)
+  end
+
   def rate_limited_forward_proxy_service(name = 'rate_limited_forward_proxy', &block)
     machineset_with(name, [], Stacks::Services::RateLimitedForwardProxyServer, &block)
   end

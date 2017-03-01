@@ -37,6 +37,8 @@ module Stacks
     require 'stackbuilder/stacks/services/puppetserver_cluster'
     require 'stackbuilder/stacks/services/rabbitmq_cluster'
     require 'stackbuilder/stacks/services/rabbitmq_server'
+    require 'stackbuilder/stacks/services/rabbitmq_logging_server'
+    require 'stackbuilder/stacks/services/rabbitmq_logging_cluster'
     require 'stackbuilder/stacks/services/rate_limited_forward_proxy_server'
     require 'stackbuilder/stacks/services/selenium/cluster'
     require 'stackbuilder/stacks/services/selenium/hub'
