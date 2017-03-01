@@ -5,6 +5,7 @@ describe_stack 'rabbitmq logging cluster' do
   given do
     stack 'per_site_log_collecting' do
       logstash_receiver 'logstash-receiver' do
+        depend_on 'rabbitmq-logging', 'e1'
       end
 
       # TODO: add to custom_services, create classes, etc.
@@ -17,6 +18,15 @@ describe_stack 'rabbitmq logging cluster' do
     end
   end
 
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts([
+        'e1-rabbitmq-logging-001.mgmt.space.net.local',
+        'e1-rabbitmq-logging-002.mgmt.space.net.local',
+        'e1-logstash-receiver-001.mgmt.space.net.local',
+        'e1-logstash-receiver-002.mgmt.space.net.local'
+    ])
+  end
+
   host('e1-logstash-receiver-001.mgmt.space.net.local') do |host|
     expect(host.to_enc).to include('role::logstash_receiver')
     role_enc = host.to_enc['role::logstash_receiver']
@@ -25,7 +35,7 @@ describe_stack 'rabbitmq logging cluster' do
     expect(role_enc['rabbitmq_logging_exchange']).to eql('logging')
 
     # TODO: depend_on and get logging hosts
-    # expect(role_enc['rabbitmq_logging_hosts']).to eql(['e1-rabbitmq-logging-001.mgmt.space.net.local', 'e1-rabbitmq-logging-001.mgmt.space.net.local'])
+    # expect(role_enc['rabbitmq_logging_hosts']).to eql(['e1-rabbitmq-logging-001.mgmt.space.net.local', 'e1-rabbitmq-logging-002.mgmt.space.net.local'])
   end
 end
 

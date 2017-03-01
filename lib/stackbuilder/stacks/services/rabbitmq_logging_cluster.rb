@@ -5,6 +5,9 @@ module Stacks::Services::RabbitMqLoggingCluster
     object.configure
   end
 
+  attr_accessor :instances
+
   def configure
+    @instances = 2
   end
 end
