@@ -37,6 +37,14 @@ describe_stack 'rabbitmq logging cluster' do
     # TODO: depend_on and get logging hosts
     # expect(role_enc['rabbitmq_logging_hosts']).to eql(['e1-rabbitmq-logging-001.mgmt.space.net.local', 'e1-rabbitmq-logging-002.mgmt.space.net.local'])
   end
+
+  host('e1-rabbitmq-logging-001.mgmt.space.net.local') do |host|
+    expect(host.to_enc).to include('role::rabbitmq_logging')
+    role_enc = host.to_enc['role::rabbitmq_logging']
+
+    expect(role_enc['cluster_nodes']).to eql(['e1-rabbitmq-logging-001', 'e1-rabbitmq-logging-002'])
+
+  end
 end
 
 describe_stack 'rabbitmq logging exchange is configurable' do

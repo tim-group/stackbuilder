@@ -14,5 +14,11 @@ class Stacks::Services::RabbitMqLoggingServer < Stacks::MachineDef
   end
 
   def to_enc
+
+    enc = super()
+
+    enc.merge!('role::rabbitmq_logging' => {
+      'cluster_nodes' =>  @rabbitmq_logging_cluster.cluster_nodes
+    })
   end
 end
