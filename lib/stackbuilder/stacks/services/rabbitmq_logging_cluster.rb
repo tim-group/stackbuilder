@@ -23,10 +23,10 @@ module Stacks::Services::RabbitMqLoggingCluster
       next unless service.is_a?(Stacks::Services::RabbitMqDependent)
       rabbitmq_config = service.rabbitmq_config
       users.merge!(
-          rabbitmq_config.username => {
-              'tags'               => [],
-              'password_hiera_key' => rabbitmq_config.password_hiera_key
-          }
+        rabbitmq_config.username => {
+          'tags'               => [],
+          'password_hiera_key' => rabbitmq_config.password_hiera_key
+        }
       )
     end
     users
