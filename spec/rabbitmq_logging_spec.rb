@@ -43,7 +43,9 @@ describe_stack 'rabbitmq logging cluster' do
     role_enc = host.to_enc['role::rabbitmq_logging']
 
     expect(role_enc['cluster_nodes']).to eql(['e1-rabbitmq-logging-001', 'e1-rabbitmq-logging-002'])
-
+    expect(role_enc['dependant_instances']).to eql(['e1-logstash-receiver-001.space.net.local',
+                                                    'e1-logstash-receiver-002.space.net.local',
+                                                    'e1-rabbitmq-logging-002.space.net.local'])
   end
 end
 

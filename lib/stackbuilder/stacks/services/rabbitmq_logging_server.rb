@@ -14,11 +14,15 @@ class Stacks::Services::RabbitMqLoggingServer < Stacks::MachineDef
   end
 
   def to_enc
-
     enc = super()
 
+    dependant_instances = @rabbitmq_logging_cluster.dependant_instance_fqdns(location)
+    dependant_instances.concat(@rabbitmq_logging_cluster.children.map(&:prod_fqdn)).sort
+    dependant_instances.delete prod_fqdn
+
     enc.merge!('role::rabbitmq_logging' => {
-      'cluster_nodes' =>  @rabbitmq_logging_cluster.cluster_nodes
-    })
+                 'cluster_nodes' =>  @rabbitmq_logging_cluster.cluster_nodes,
+                 'dependant_instances' => dependant_instances
+               })
   end
 end

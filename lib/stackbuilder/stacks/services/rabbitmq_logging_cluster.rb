@@ -12,6 +12,6 @@ module Stacks::Services::RabbitMqLoggingCluster
   end
 
   def cluster_nodes
-    @definitions.values.map(&:prod_fqdn).sort.map {|fqdn| fqdn.split('.')[0] }
+    @definitions.values.map(&:prod_fqdn).sort.map { |fqdn| fqdn.split('.')[0] }
   end
 end
