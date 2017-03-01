@@ -32,6 +32,14 @@ module Stacks::Services::RabbitMqLoggingCluster
     users
   end
 
+  def shovel_destinations
+    virtual_services_that_i_depend_on.select do |service|
+      service.is_a?(Stacks::Services::RabbitMqLoggingCluster)
+    end.map do |service|
+      service.children.map(&:prod_fqdn)
+    end.flatten.sort
+  end
+
   def rabbitmq_config
     create_rabbitmq_config('shovel')
   end
