@@ -63,5 +63,4 @@ module Stacks::Services::RabbitMqLoggingCluster
       service.children.map(&:prod_fqdn)
     end.flatten.sort
   end
-
 end
