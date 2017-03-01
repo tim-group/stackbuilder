@@ -20,10 +20,10 @@ describe_stack 'rabbitmq logging cluster' do
 
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts([
-        'e1-rabbitmq-logging-001.mgmt.space.net.local',
-        'e1-rabbitmq-logging-002.mgmt.space.net.local',
-        'e1-logstash-receiver-001.mgmt.space.net.local',
-        'e1-logstash-receiver-002.mgmt.space.net.local'
+      'e1-rabbitmq-logging-001.mgmt.space.net.local',
+      'e1-rabbitmq-logging-002.mgmt.space.net.local',
+      'e1-logstash-receiver-001.mgmt.space.net.local',
+      'e1-logstash-receiver-002.mgmt.space.net.local'
     ])
   end
 
@@ -45,7 +45,7 @@ describe_stack 'rabbitmq logging exchange is configurable' do
       logstash_receiver 'logstash-receiver' do
         self.exchange = 'my-logging-exchange'
       end
-  end
+    end
 
     env 'e1', :primary_site => 'space' do
       instantiate_stack 'logstash_receiver'
