@@ -18,8 +18,6 @@ module Stacks
     require 'stackbuilder/stacks/services/legacy_mysqldb_server'
     require 'stackbuilder/stacks/services/loadbalancer'
     require 'stackbuilder/stacks/services/loadbalancer_cluster'
-    require 'stackbuilder/stacks/services/logstash_server'
-    require 'stackbuilder/stacks/services/logstash_cluster'
     require 'stackbuilder/stacks/services/logstash_receiver_server'
     require 'stackbuilder/stacks/services/logstash_receiver_cluster'
     require 'stackbuilder/stacks/services/mail_server'

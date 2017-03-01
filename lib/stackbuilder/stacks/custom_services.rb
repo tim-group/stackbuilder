@@ -103,10 +103,6 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::ElasticsearchCluster], Stacks::Services::ElasticsearchNode, &block)
   end
 
-  def logstash_cluster(name = 'logstash', &block)
-    machineset_with(name, [Stacks::Services::LogstashCluster], Stacks::Services::LogstashServer, &block)
-  end
-
   def logstash_receiver(name = 'logstash_receiver', &block)
     machineset_with(name, [Stacks::Services::LogstashReceiverCluster], Stacks::Services::LogstashReceiverServer, &block)
   end
