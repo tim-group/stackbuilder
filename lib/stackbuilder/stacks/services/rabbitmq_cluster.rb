@@ -81,12 +81,12 @@ module Stacks::Services::RabbitMQCluster
   def dependant_users
     users = {}
     virtual_services_that_depend_on_me.each do |service|
-      next unless service.respond_to?(:application)
+      next unless service.is_a?(Stacks::Services::RabbitMqDependent)
+      rabbitmq_config = service.rabbitmq_config
       users.merge!(
-        service.application => {
+        rabbitmq_config.username => {
           'tags'               => [],
-          'password_hiera_key' =>
-            "#{service.environment.name}/#{service.application}/messaging_password"
+          'password_hiera_key' => rabbitmq_config.password_hiera_key
         }
       )
     end

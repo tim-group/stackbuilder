@@ -1,4 +1,8 @@
+require 'stackbuilder/stacks/namespace'
+
 module Stacks::Services::AppService
+  include Stacks::Services::RabbitMqDependent
+
   attr_accessor :ajp_port
   attr_accessor :application
   attr_accessor :ehcache
@@ -44,6 +48,10 @@ module Stacks::Services::AppService
 
   def disable_http_lb_hack
     @disable_http_lb_hack = true
+  end
+
+  def rabbitmq_config
+    create_rabbitmq_config(@application)
   end
 
   def config_params(_dependant, fabric)

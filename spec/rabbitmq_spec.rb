@@ -132,6 +132,32 @@ describe_stack 'rabbitmq users are created from dependencies' do
   end
 end
 
+describe_stack 'rabbitmq users are created from dependencies for any service mixing in rabbitmq dependent trait' do
+  given do
+    stack 'test' do
+      rabbitmq_cluster 'rabbitmq'
+      standard_service 'standard' do
+        extend(Stacks::Services::RabbitMqDependent)
+        configure_rabbitmq('my_rabbitmq_username')
+        depend_on 'rabbitmq', 'e1', :wizard
+      end
+    end
+
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'test'
+    end
+  end
+
+  host('e1-rabbitmq-001.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::rabbitmq_server']['dependant_users']).to include 'my_rabbitmq_username'
+    expect(host.to_enc['role::rabbitmq_server']['dependant_users']['my_rabbitmq_username']).
+      to eql(
+        'password_hiera_key' => 'e1/my_rabbitmq_username/messaging_password',
+        'tags'               => []
+      )
+  end
+end
+
 describe_stack 'rabbitmq users are not created unless services have application' do
   given do
     stack 'test' do
