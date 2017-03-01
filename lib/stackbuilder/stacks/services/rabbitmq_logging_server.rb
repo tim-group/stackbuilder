@@ -21,8 +21,9 @@ class Stacks::Services::RabbitMqLoggingServer < Stacks::MachineDef
     dependant_instances.delete prod_fqdn
 
     enc.merge!('role::rabbitmq_logging' => {
-                 'cluster_nodes' =>  @rabbitmq_logging_cluster.cluster_nodes,
-                 'dependant_instances' => dependant_instances
+                 'cluster_nodes'       =>  @rabbitmq_logging_cluster.cluster_nodes,
+                 'dependant_instances' => dependant_instances,
+                 'dependant_users'     => @rabbitmq_logging_cluster.dependant_users,
                })
   end
 end

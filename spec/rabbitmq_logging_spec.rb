@@ -46,6 +46,11 @@ describe_stack 'rabbitmq logging cluster' do
     expect(role_enc['dependant_instances']).to eql(['e1-logstash-receiver-001.space.net.local',
                                                     'e1-logstash-receiver-002.space.net.local',
                                                     'e1-rabbitmq-logging-002.space.net.local'])
+    expect(role_enc['dependant_users']).to eql({
+      'logstash_receiver' => {
+        'password_hiera_key' => 'e1/logstash_receiver/messaging_password',
+        'tags' => []
+      }})
   end
 end
 
