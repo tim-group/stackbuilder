@@ -15,7 +15,7 @@ class Stacks::Services::LogstashReceiverServer < Stacks::MachineDef
   def to_enc
     enc = super()
 
-    rabbitmq_config = @virtual_service.get_rabbitmq_config
+    rabbitmq_config = @virtual_service.rabbitmq_config
 
     enc.merge!('role::logstash_receiver' => {
                  'rabbitmq_logging_username' => rabbitmq_config.username,
