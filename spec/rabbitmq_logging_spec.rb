@@ -59,6 +59,10 @@ describe_stack 'rabbitmq logging cluster' do
     expect(role_enc['dependant_users']).to eql('logstash_receiver' => {
                                                  'password_hiera_key' => 'e1/logstash_receiver/messaging_password',
                                                  'tags' => []
+                                               },
+                                               'shovel' => {
+                                                 'password_hiera_key' => 'e1/shovel/messaging_password',
+                                                 'tags' => []
                                                })
     expect(role_enc['shovel_destinations']).to eql(['e2-rabbitmq-elasticsearch-001.earth.net.local',
                                                     'e2-rabbitmq-elasticsearch-002.earth.net.local'])

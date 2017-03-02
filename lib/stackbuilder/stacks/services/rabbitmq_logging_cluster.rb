@@ -35,6 +35,17 @@ module Stacks::Services::RabbitMqLoggingCluster
 
   def dependant_users
     users = {}
+    virtual_services_that_i_depend_on.each do |service|
+      next unless service.is_a?(Stacks::Services::RabbitMqDependent)
+      rabbitmq_config = self.rabbitmq_config
+      users.merge!(
+        rabbitmq_config.username => {
+          'tags'               => [],
+          'password_hiera_key' => rabbitmq_config.password_hiera_key
+        }
+      )
+    end
+
     virtual_services_that_depend_on_me.each do |service|
       next unless service.is_a?(Stacks::Services::RabbitMqDependent)
       rabbitmq_config = service.rabbitmq_config
