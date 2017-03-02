@@ -17,7 +17,7 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
     enc = super()
 
     enc.merge!('role::elasticsearch_data' => {
-                 'logstash_indexer_hosts' => @elasticsearch_cluster.logstash_indexer_hosts,
+                 'logstash_indexer_hosts' => @elasticsearch_cluster.logstash_indexer_hosts
                },
                'server::default_new_mgmt_net_local' => nil)
     enc
