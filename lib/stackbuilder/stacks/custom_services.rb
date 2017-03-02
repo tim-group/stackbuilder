@@ -107,6 +107,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::LogstashReceiverCluster], Stacks::Services::LogstashReceiverServer, &block)
   end
 
+  def logstash_indexer(name = 'logstash_indexer', &block)
+    machineset_with(name, [Stacks::Services::LogstashIndexerCluster], Stacks::Services::LogstashIndexerServer, &block)
+  end
+
   def rabbitmq_logging(name = 'rabbitmq_logging', &block)
     machineset_with(name, [Stacks::Services::RabbitMqLoggingCluster], Stacks::Services::RabbitMqLoggingServer, &block)
   end
