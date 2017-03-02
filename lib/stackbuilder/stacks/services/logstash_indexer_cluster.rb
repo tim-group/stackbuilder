@@ -28,4 +28,12 @@ module Stacks::Services::LogstashIndexerCluster
       service.children.map(&:prod_fqdn)
     end.flatten.sort
   end
+
+  def elasticsearch_data_hosts
+    virtual_services_that_i_depend_on.select do |service|
+      service.is_a?(Stacks::Services::ElasticsearchDataCluster)
+    end.map do |service|
+      service.children.map(&:prod_fqdn)
+    end.flatten.sort
+  end
 end
