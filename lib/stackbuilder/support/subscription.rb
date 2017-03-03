@@ -54,25 +54,15 @@ class Subscription
     end
     config = MCollective::Config.instance
 
-    Stomp::Client.new(config.pluginconf['rabbitmq.pool.1.user'],
-                      config.pluginconf['rabbitmq.pool.1.password'],
-                      config.pluginconf['rabbitmq.pool.1.host'],
-                      config.pluginconf['rabbitmq.pool.1.port'])
-  end
-
-  def self.create_stomp
-    configfile = MCollective::Util.config_file_for_user
-
-    unless @loaded
-      MCollective::Config.instance.loadconfig(configfile)
-      @loaded = true
-    end
-    config = MCollective::Config.instance
-
-    Stomp::Connection.new(config.pluginconf['rabbitmq.pool.1.user'],
-                          config.pluginconf['rabbitmq.pool.1.password'],
-                          config.pluginconf['rabbitmq.pool.1.host'],
-                          config.pluginconf['rabbitmq.pool.1.port'])
+    begin
+      Stomp::Client.new(config.pluginconf['rabbitmq.pool.1.user'],
+                        config.pluginconf['rabbitmq.pool.1.password'],
+                        config.pluginconf['rabbitmq.pool.1.host'],
+                        config.pluginconf['rabbitmq.pool.1.port'])
+      rescue ArgumentError => e
+        logger(Logger::ERROR) { "Unable to create stomp client, please check the mcollective client configuration"}
+        false
+      end
   end
 
   def start(topics)
@@ -82,7 +72,7 @@ class Subscription
       @stomp.subscribe("/topic/#{topic}") do |msg|
         @queues[topic] << msg
       end
-    end
+    end if @stomp
   end
 
   def wait_for_hosts(topic, hosts, timeout = 1)
