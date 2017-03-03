@@ -1,7 +1,3 @@
-$LOAD_PATH << '/usr/local/lib/site_ruby/timgroup'
-require 'orc/util/option_parser' # XXX decouple orc from stackbuiler somehow
-$LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup')
-
 module CMDOrc
   def resolve(_argv)
     machine_def = check_and_get_stack
@@ -27,14 +23,27 @@ module CMDOrc
     # rubocop:enable Style/GuardClause
   end
 
+  def enabled
+    begin
+      require 'orc/util/option_parser'
+      true
+    rescue LoadError
+      false
+    end
+  end
+
   private
 
   def do_resolve(app, envname)
-    factory = Orc::Factory.new(
-      :application => app,
-      :environment => envname
-    )
-    factory.cmdb_git.update
-    factory.engine.resolve
+    if enabled
+      factory = Orc::Factory.new(
+        :application => app,
+        :environment => envname
+      )
+      factory.cmdb_git.update
+      factory.engine.resolve
+    else
+      logger(Logger::ERROR) { "Orc support is not available, skipping resolve" }
+    end
   end
 end
