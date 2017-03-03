@@ -1,8 +1,12 @@
-require 'ci/reporter/rake/rspec'
-require 'rspec/core/rake_task'
 
-desc 'Run specs'
-RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec'])
+begin
+  require 'rspec/core/rake_task'
+  require 'ci/reporter/rake/rspec'
+  desc 'Run specs'
+  RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec'])
+rescue LoadError => e
+  puts "rspec or ci-reporter is not available: #{e} #{e.backtrace.inspect}"
+end
 
 desc 'Clean up the build directory'
 task :clean do
