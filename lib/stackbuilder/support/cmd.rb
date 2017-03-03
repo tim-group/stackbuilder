@@ -10,11 +10,11 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile diff init ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile diff init ls lsenv enc spec clean clean_all provision reprovision terminus test orc_resolve)
   end
   include CMDAudit
   include CMDLs
-  include CMDOrc # XXX work in progress
+  include CMDOrc
   include CMDNagios # XXX work in progress
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.

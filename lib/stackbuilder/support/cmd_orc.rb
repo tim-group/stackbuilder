@@ -1,5 +1,5 @@
 module CMDOrc
-  def resolve(_argv)
+  def orc_resolve(_argv)
     machine_def = check_and_get_stack
     valid = false
 

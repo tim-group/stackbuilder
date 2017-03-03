@@ -1,5 +1,4 @@
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup'
-require 'orc/util/option_parser' # XXX decouple orc from stackbuiler somehow
 $LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup')
 require 'rake'
 require 'pp'
@@ -225,35 +224,9 @@ namespace :sbx do
 
       # make orc resolve available on stacks (containers) that have app servers, and individual app servers
       namespace :orc do
-        if machine_def.is_a? Stacks::Services::AppServer
-          desc "orc resolve #{machine_def.virtual_service.application}"
-          sbtask :resolve do
-            factory = Orc::Factory.new(
-              :application => machine_def.virtual_service.application,
-              :environment => machine_def.environment.name
-            )
-            factory.cmdb_git.update
-            factory.engine.resolve
-          end
-        else
-          applications = Set.new
-          machine_def.accept do |child_machine_def|
-            next unless child_machine_def.is_a? Stacks::Services::AppServer
-            applications << child_machine_def.virtual_service.application
-          end
-          if applications.to_a.size > 0
-            desc "orc resolve #{applications.to_a.join(', ')}"
-            sbtask :resolve do
-              applications.to_a.each do |application|
-                factory = Orc::Factory.new(
-                  :application => application,
-                  :environment => machine_def.environment.name
-                )
-                factory.cmdb_git.update
-                factory.engine.resolve
-              end
-            end
-          end
+        desc 'list describing the internal hierachy in stackbuilder'
+        task :resolve do
+          system("stacks -e #{environment.name} -s #{machine_def} orc_resolve")
         end
       end
 

@@ -50,6 +50,7 @@ Options:
     provision [-e] -s         allocates and spins up a stack
     reprovision [-e] -s       "clean", and then "provision" a stack
     terminus                  create a yaml puppet terminus
+    orc_resolve [-e] -s       orc resolve (requires orc library)
 
   For further information about commands, read lib/stackbuilder/support/cmd*.rb
 
