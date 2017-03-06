@@ -107,6 +107,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::ElasticsearchDataCluster], Stacks::Services::ElasticsearchDataServer, &block)
   end
 
+  def elasticsearch_master(name = 'elasticsearch_master', &block)
+    machineset_with(name, [Stacks::Services::ElasticsearchMasterCluster], Stacks::Services::ElasticsearchMasterServer, &block)
+  end
+
   def logstash_receiver(name = 'logstash_receiver', &block)
     machineset_with(name, [Stacks::Services::LogstashReceiverCluster], Stacks::Services::LogstashReceiverServer, &block)
   end

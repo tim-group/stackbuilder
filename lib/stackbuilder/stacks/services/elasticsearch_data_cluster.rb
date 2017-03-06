@@ -20,4 +20,12 @@ module Stacks::Services::ElasticsearchDataCluster
       service.children.map(&:prod_fqdn)
     end.flatten.sort
   end
+
+  def elasticsearch_master_hosts
+    virtual_services_that_I_depend_on.select do |service|
+      service.is_a?(Stacks::Services::ElasticsearchMasterCluster)
+    end.map do |service|
+      service.children.map(&:prod_fqdn)
+    end.flatten.sort
+  end
 end

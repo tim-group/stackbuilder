@@ -9,6 +9,8 @@ module Stacks
     require 'stackbuilder/stacks/services/elasticsearch_cluster'
     require 'stackbuilder/stacks/services/elasticsearch_data_cluster'
     require 'stackbuilder/stacks/services/elasticsearch_data_server'
+    require 'stackbuilder/stacks/services/elasticsearch_master_cluster'
+    require 'stackbuilder/stacks/services/elasticsearch_master_server'
     require 'stackbuilder/stacks/services/elasticsearch_node'
     require 'stackbuilder/stacks/services/eventstore_cluster'
     require 'stackbuilder/stacks/services/eventstore_server'

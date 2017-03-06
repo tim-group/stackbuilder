@@ -1,7 +1,7 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def'
 
-class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
+class Stacks::Services::ElasticsearchMasterServer < Stacks::MachineDef
   attr_reader :logstash_cluster
 
   def initialize(virtual_service, base_hostname, environment, site, role)
@@ -16,9 +16,8 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
   def to_enc
     enc = super()
 
-    enc.merge!('role::elasticsearch_data' => {
-                 'elasticsearch_master_hosts' => @elasticsearch_cluster.elasticsearch_master_hosts,
-                 'logstash_indexer_hosts' => @elasticsearch_cluster.logstash_indexer_hosts
+    enc.merge!('role::elasticsearch_master' => {
+                 'elasticsearch_data_hosts' => @elasticsearch_cluster.elasticsearch_data_hosts
                },
                'server::default_new_mgmt_net_local' => nil)
     enc
