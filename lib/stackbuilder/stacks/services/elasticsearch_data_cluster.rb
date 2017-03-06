@@ -22,7 +22,7 @@ module Stacks::Services::ElasticsearchDataCluster
   end
 
   def elasticsearch_master_hosts
-    virtual_services_that_I_depend_on.select do |service|
+    virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::ElasticsearchMasterCluster)
     end.map do |service|
       service.children.map(&:prod_fqdn)
