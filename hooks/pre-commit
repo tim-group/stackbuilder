@@ -24,13 +24,20 @@ else
 	exit 1
 fi
 
-echo -n "Running stacks compile: "
-OUTPUT=`stacks compile > /tmp/stacks-pre-commit`
-RC=$?
-if [ $RC -ne 0 ]; then
-  echo "FAIL"
-  echo "$OUTPUT"
-  exit 1
-else
-  echo "OK"
+dpkg -s stackbuilder 2>&1 >/dev/null
+
+if [ $? -eq 0 ]; then
+  echo "The stackbuilder package is installed..."
+  echo "Ensuring it's the local copy."
+  rake package install
+  echo -n "Running stacks compile: "
+  OUTPUT=`stacks compile > /tmp/stacks-pre-commit`
+  RC=$?
+  if [ $RC -ne 0 ]; then
+    echo "FAIL"
+    echo "$OUTPUT"
+    exit 1
+  else
+    echo "OK"
+  fi
 fi
