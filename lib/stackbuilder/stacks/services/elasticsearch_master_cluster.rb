@@ -10,7 +10,7 @@ module Stacks::Services::ElasticsearchMasterCluster
 
   def configure
     @ports = [9300]
-    @instances = 2
+    @instances = 3
   end
 
   def elasticsearch_data_hosts
