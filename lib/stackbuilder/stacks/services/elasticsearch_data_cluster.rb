@@ -13,6 +13,14 @@ module Stacks::Services::ElasticsearchDataCluster
     @instances = 2
   end
 
+  def kibana_hosts
+    virtual_services_that_depend_on_me.select do |service|
+      service.is_a?(Stacks::Services::KibanaCluster)
+    end.map do |service|
+      service.children.map(&:prod_fqdn)
+    end.flatten.sort
+  end
+
   def logstash_indexer_hosts
     virtual_services_that_depend_on_me.select do |service|
       service.is_a?(Stacks::Services::LogstashIndexerCluster)

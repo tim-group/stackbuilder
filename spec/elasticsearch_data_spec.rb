@@ -8,6 +8,9 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
         depend_on 'elasticsearch-master'
       end
       elasticsearch_master 'elasticsearch-master'
+      kibana do
+        depend_on 'elasticsearch-data'
+      end
       logstash_indexer 'logstash-indexer' do
         depend_on 'elasticsearch-data'
       end
@@ -29,6 +32,16 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
         'oy-elasticsearch-master-001.oy.net.local',
         'oy-elasticsearch-master-002.oy.net.local',
         'oy-elasticsearch-master-003.oy.net.local'
+      ])
+    expect(enc['role::elasticsearch_data']['kibana_hosts']).to \
+      eql([
+        'oy-kibana-001.oy.net.local',
+        'oy-kibana-002.oy.net.local'
+      ])
+    expect(enc['role::elasticsearch_data']['loadbalancer_hosts']).to \
+      eql([
+        'oy-lb-001.oy.net.local',
+        'oy-lb-002.oy.net.local'
       ])
     expect(enc['role::elasticsearch_data']['logstash_indexer_hosts']).to \
       eql([
