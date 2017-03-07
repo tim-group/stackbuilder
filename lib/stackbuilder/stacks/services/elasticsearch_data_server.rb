@@ -17,11 +17,12 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
     enc = super()
 
     enc.merge!('role::elasticsearch_data' => {
-                 'elasticsearch_master_hosts' => @elasticsearch_cluster.elasticsearch_master_hosts,
-                 'kibana_hosts'               => @elasticsearch_cluster.kibana_hosts,
-                 'loadbalancer_hosts'         => @elasticsearch_cluster.dependant_load_balancer_fqdns(location),
-                 'logstash_indexer_hosts'     => @elasticsearch_cluster.logstash_indexer_hosts,
-                 'prod_vip_fqdn'              => @elasticsearch_cluster.vip_fqdn(:prod, fabric)
+                 'elasticsearch_master_hosts'     => @elasticsearch_cluster.elasticsearch_master_hosts,
+                 'other_elasticsearch_data_hosts' => @elasticsearch_cluster.other_elasticsearch_data_hosts(mgmt_fqdn),
+                 'kibana_hosts'                   => @elasticsearch_cluster.kibana_hosts,
+                 'loadbalancer_hosts'             => @elasticsearch_cluster.dependant_load_balancer_fqdns(location),
+                 'logstash_indexer_hosts'         => @elasticsearch_cluster.logstash_indexer_hosts,
+                 'prod_vip_fqdn'                  => @elasticsearch_cluster.vip_fqdn(:prod, fabric)
                },
                'server::default_new_mgmt_net_local' => nil)
     enc

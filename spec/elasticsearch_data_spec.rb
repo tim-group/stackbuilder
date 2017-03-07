@@ -34,6 +34,10 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
         'oy-elasticsearch-master-002.oy.net.local',
         'oy-elasticsearch-master-003.oy.net.local'
       ])
+    expect(role_enc['other_elasticsearch_data_hosts']).to \
+      eql([
+        'oy-elasticsearch-data-002.oy.net.local'
+      ])
     expect(role_enc['kibana_hosts']).to \
       eql([
         'oy-kibana-001.oy.net.local',

@@ -20,4 +20,10 @@ module Stacks::Services::ElasticsearchMasterCluster
       service.children.map(&:prod_fqdn)
     end.flatten.sort
   end
+
+  def other_elasticsearch_master_hosts(this_servers_hostname)
+    children.select do |child|
+      child.mgmt_fqdn != this_servers_hostname
+    end.map(&:prod_fqdn).flatten.sort
+  end
 end

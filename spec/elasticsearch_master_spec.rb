@@ -25,5 +25,10 @@ describe_stack 'elasticsearch master server enc is correct' do
         'oy-elasticsearch-data-001.oy.net.local',
         'oy-elasticsearch-data-002.oy.net.local'
       ])
+    expect(enc['role::elasticsearch_master']['other_elasticsearch_master_hosts']).to \
+      eql([
+        'oy-elasticsearch-master-002.oy.net.local',
+        'oy-elasticsearch-master-003.oy.net.local'
+      ])
   end
 end
