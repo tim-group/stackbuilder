@@ -51,6 +51,7 @@ describe_stack 'rabbitmq logging cluster' do
   host('e1-rabbitmq-logging-001.mgmt.space.net.local') do |host|
     expect(host.to_enc).to include('role::rabbitmq_logging')
     role_enc = host.to_enc['role::rabbitmq_logging']
+    pp role_enc
 
     expect(role_enc['cluster_nodes']).to eql(['e1-rabbitmq-logging-001', 'e1-rabbitmq-logging-002'])
     expect(role_enc['dependant_instances']).to eql(['e1-logstash-receiver-001.space.net.local',
@@ -72,6 +73,10 @@ describe_stack 'rabbitmq logging cluster' do
     expect(host.to_enc).to include('role::rabbitmq_logging')
     role_enc = host.to_enc['role::rabbitmq_logging']
 
+    expect(role_enc['cluster_nodes']).to eql(['e2-rabbitmq-elasticsearch-001', 'e2-rabbitmq-elasticsearch-002'])
+    expect(role_enc['dependant_instances']).to eql(['e1-rabbitmq-logging-001.space.net.local',
+                                                    'e1-rabbitmq-logging-002.space.net.local',
+                                                    'e2-rabbitmq-elasticsearch-002.earth.net.local'])
     expect(role_enc['dependant_users']).to eql('shovel' => {
                                                  'password_hiera_key' => 'e1/shovel/messaging_password',
                                                  'tags' => []
