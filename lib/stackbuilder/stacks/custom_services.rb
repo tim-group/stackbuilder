@@ -104,7 +104,7 @@ class Stacks::CustomServices
   end
 
   def elasticsearch_data(name = 'elasticsearch_data', &block)
-    machineset_with(name, [Stacks::Services::ElasticsearchDataCluster], Stacks::Services::ElasticsearchDataServer, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::ElasticsearchDataCluster], Stacks::Services::ElasticsearchDataServer, &block)
   end
 
   def elasticsearch_master(name = 'elasticsearch_master', &block)
@@ -117,6 +117,10 @@ class Stacks::CustomServices
 
   def logstash_indexer(name = 'logstash_indexer', &block)
     machineset_with(name, [Stacks::Services::LogstashIndexerCluster], Stacks::Services::LogstashIndexerServer, &block)
+  end
+
+  def kibana(name = 'kibana', &block)
+    machineset_with(name, [Stacks::Services::KibanaCluster], Stacks::Services::KibanaServer, &block)
   end
 
   def rabbitmq_logging(name = 'rabbitmq_logging', &block)

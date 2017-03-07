@@ -28,4 +28,20 @@ module Stacks::Services::ElasticsearchDataCluster
       service.children.map(&:prod_fqdn)
     end.flatten.sort
   end
+
+  def to_loadbalancer_config(location, fabric)
+    config = {}
+    config[vip_fqdn(:prod, fabric)] = {
+      'type'         => 'elasticsearch_data',
+      'ports'        => @ports,
+      'realservers'  => {
+        'blue' => realservers(location).map { |server| server.qualified_hostname(:prod) }.sort
+      },
+      'healthchecks' => [{
+        'healthcheck' => 'TCP_CHECK',
+        'connect_timeout' => '5'
+      }]
+    }
+    config
+  end
 end
