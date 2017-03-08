@@ -146,7 +146,7 @@ module Stacks::Services::MysqlCluster
   def validate_dependant_requirement(dependent, requirement)
     fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
          "supported_requirements is empty or unset." if @supported_requirements.empty? && !requirement.nil?
-    fail "'#{dependent.name}' must declare it's requirement on '#{name}' as it declares supported requirements "\
+    fail "'#{dependent.name}' must declare its requirement on '#{name}' as it declares supported requirements "\
          "in environment '#{environment.name}'. Supported requirements: "\
          "[#{@supported_requirements.keys.sort.join(',')}]." if !@supported_requirements.empty? && requirement.nil?
   end

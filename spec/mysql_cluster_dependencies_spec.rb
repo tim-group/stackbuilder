@@ -346,7 +346,7 @@ describe_stack 'stack-with-dependencies' do
 
     host('e7-badapp-001.mgmt.earth.net.local') do |host|
       expect { host.to_enc['role::http_app']['dependencies'] }.to raise_error \
-        "'badapp' must declare it's requirement on 'fictionaldb' as it declares supported requirements in "\
+        "'badapp' must declare its requirement on 'fictionaldb' as it declares supported requirements in "\
         "environment 'e7'. Supported requirements: [some_requirement]."
     end
   end
