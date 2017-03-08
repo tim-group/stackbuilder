@@ -30,5 +30,6 @@ describe_stack 'elasticsearch master server enc is correct' do
         'oy-elasticsearch-master-002.oy.net.local',
         'oy-elasticsearch-master-003.oy.net.local'
       ])
+    expect(enc['role::elasticsearch_master']['minimum_master_nodes']).to be_eql(2)
   end
 end

@@ -18,7 +18,8 @@ class Stacks::Services::ElasticsearchMasterServer < Stacks::MachineDef
 
     enc.merge!('role::elasticsearch_master' => {
                  'elasticsearch_data_hosts'         => @elasticsearch_cluster.elasticsearch_data_hosts,
-                 'other_elasticsearch_master_hosts' => @elasticsearch_cluster.other_elasticsearch_master_hosts(mgmt_fqdn)
+                 'other_elasticsearch_master_hosts' => @elasticsearch_cluster.other_elasticsearch_master_hosts(mgmt_fqdn),
+                 'minimum_master_nodes'             => @elasticsearch_cluster.elasticsearch_minimum_master_nodes
                },
                'server::default_new_mgmt_net_local' => nil)
     enc

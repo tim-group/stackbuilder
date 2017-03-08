@@ -54,6 +54,7 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
         'oy-logstash-indexer-002.oy.net.local'
       ])
     expect(role_enc['prod_vip_fqdn']).to eql('oy-elasticsearch-data-vip.oy.net.local')
+    expect(role_enc['minimum_master_nodes']).to eql(2)
   end
 
   host('oy-lb-001.mgmt.oy.net.local') do |host|

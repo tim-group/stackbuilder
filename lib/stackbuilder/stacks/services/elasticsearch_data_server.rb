@@ -22,7 +22,8 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
                  'kibana_hosts'                   => @elasticsearch_cluster.kibana_hosts,
                  'loadbalancer_hosts'             => @elasticsearch_cluster.dependant_load_balancer_fqdns(location),
                  'logstash_indexer_hosts'         => @elasticsearch_cluster.logstash_indexer_hosts,
-                 'prod_vip_fqdn'                  => @elasticsearch_cluster.vip_fqdn(:prod, fabric)
+                 'prod_vip_fqdn'                  => @elasticsearch_cluster.vip_fqdn(:prod, fabric),
+                 'minimum_master_nodes'           => @elasticsearch_cluster.elasticsearch_minimum_master_nodes
                },
                'server::default_new_mgmt_net_local' => nil)
     enc

@@ -26,4 +26,8 @@ module Stacks::Services::ElasticsearchMasterCluster
       child.mgmt_fqdn != this_servers_hostname
     end.map(&:prod_fqdn).flatten.sort
   end
+
+  def elasticsearch_minimum_master_nodes
+    (children.length.to_f / 2).ceil
+  end
 end

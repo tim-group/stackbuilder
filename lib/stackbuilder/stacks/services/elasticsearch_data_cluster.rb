@@ -37,6 +37,10 @@ module Stacks::Services::ElasticsearchDataCluster
     end.flatten.sort
   end
 
+  def elasticsearch_minimum_master_nodes
+    (elasticsearch_master_hosts.length.to_f / 2).ceil
+  end
+
   def other_elasticsearch_data_hosts(this_servers_hostname)
     children.select do |child|
       child.mgmt_fqdn != this_servers_hostname
