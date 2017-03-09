@@ -120,7 +120,7 @@ class Stacks::CustomServices
   end
 
   def kibana(name = 'kibana', &block)
-    machineset_with(name, [Stacks::Services::KibanaCluster], Stacks::Services::KibanaServer, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::KibanaCluster], Stacks::Services::KibanaServer, &block)
   end
 
   def rabbitmq_logging(name = 'rabbitmq_logging', &block)

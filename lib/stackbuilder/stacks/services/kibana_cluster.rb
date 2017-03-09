@@ -23,4 +23,16 @@ module Stacks::Services::KibanaCluster
     fail('Kibana cluster can only depend on one elasticsearch data cluster') if addrs.length > 1
     addrs.first
   end
+
+  def to_loadbalancer_config(location, fabric)
+    config = {}
+    config[vip_fqdn(:prod, fabric)] = {
+      'type'         => 'http',
+      'ports'        => @ports,
+      'realservers'  => {
+        'blue' => realservers(location).map { |server| server.qualified_hostname(:prod) }.sort
+      }
+    }
+    config
+  end
 end
