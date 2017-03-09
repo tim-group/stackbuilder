@@ -27,6 +27,7 @@ describe_stack 'kibana server enc is correct' do
       'oy-lb-001.oy.net.local',
       'oy-lb-002.oy.net.local'
     ])
+    expect(enc['role::kibana']['prod_vip_fqdn']).to eql('oy-kibana-vip.oy.net.local')
   end
 
   host('oy-lb-001.mgmt.oy.net.local') do |host|

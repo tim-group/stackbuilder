@@ -18,7 +18,8 @@ class Stacks::Services::KibanaServer < Stacks::MachineDef
 
     enc.merge!('role::kibana' => {
                  'elasticsearch_cluster_address' => @kibana_cluster.elasticsearch_data_address(@fabric),
-                 'loadbalancer_hosts'            => @kibana_cluster.dependant_load_balancer_fqdns(location)
+                 'loadbalancer_hosts'            => @kibana_cluster.dependant_load_balancer_fqdns(location),
+                 'prod_vip_fqdn'                 => @kibana_cluster.vip_fqdn(:prod, fabric)
                },
                'server::default_new_mgmt_net_local' => nil)
     enc
