@@ -14,6 +14,9 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
       logstash_indexer 'logstash-indexer' do
         depend_on 'elasticsearch-data'
       end
+      logstash_receiver 'logstash-receiver' do
+        depend_on 'elasticsearch-data'
+      end
       loadbalancer_service
     end
 
@@ -52,6 +55,11 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
       eql([
         'oy-logstash-indexer-001.oy.net.local',
         'oy-logstash-indexer-002.oy.net.local'
+      ])
+    expect(role_enc['logstash_receiver_hosts']).to \
+      eql([
+        'oy-logstash-receiver-001.oy.net.local',
+        'oy-logstash-receiver-002.oy.net.local'
       ])
     expect(role_enc['prod_vip_fqdn']).to eql('oy-elasticsearch-data-vip.oy.net.local')
     expect(role_enc['minimum_master_nodes']).to eql(2)

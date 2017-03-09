@@ -29,6 +29,14 @@ module Stacks::Services::ElasticsearchDataCluster
     end.flatten.sort
   end
 
+  def logstash_receiver_hosts
+    virtual_services_that_depend_on_me.select do |service|
+      service.is_a?(Stacks::Services::LogstashReceiverCluster)
+    end.map do |service|
+      service.children.map(&:prod_fqdn)
+    end.flatten.sort
+  end
+
   def elasticsearch_master_hosts
     virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::ElasticsearchMasterCluster)
