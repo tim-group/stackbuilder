@@ -18,11 +18,12 @@ class Stacks::Services::LogstashIndexerServer < Stacks::MachineDef
 
     rabbitmq_config = @logstash_cluster.rabbitmq_config
     enc.merge!('role::logstash_indexer' => {
+                 'elasticsearch_cluster_address' => @logstash_cluster.elasticsearch_data_address(@fabric),
+                 'elasticsearch_data_hosts'      => @logstash_cluster.elasticsearch_data_hosts,
                  'rabbitmq_central_username'     => rabbitmq_config.username,
                  'rabbitmq_central_password_key' => rabbitmq_config.password_hiera_key,
                  'rabbitmq_central_exchange'     => @logstash_cluster.exchange,
-                 'rabbitmq_central_hosts'        => @logstash_cluster.rabbitmq_logging_hosts,
-                 'elasticsearch_data_hosts'      => @logstash_cluster.elasticsearch_data_hosts
+                 'rabbitmq_central_hosts'        => @logstash_cluster.rabbitmq_logging_hosts
 
                },
                'server::default_new_mgmt_net_local' => nil)

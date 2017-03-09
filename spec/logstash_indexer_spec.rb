@@ -91,5 +91,6 @@ describe_stack 'logstash indexer server enc is correct' do
         'oy-elasticsearch-data-001.oy.net.local',
         'oy-elasticsearch-data-002.oy.net.local'
       ])
+    expect(enc['role::logstash_indexer']['elasticsearch_cluster_address']).to be_eql('oy-elasticsearch-data-vip.oy.net.local')
   end
 end
