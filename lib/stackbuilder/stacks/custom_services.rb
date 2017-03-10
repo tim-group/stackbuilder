@@ -75,14 +75,6 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::LegacyMysqlCluster], Stacks::Services::LegacyMysqlDBServer, &block)
   end
 
-  def fmanalyticsanalysis_service(name = 'fmanalyticsanalysis', &block)
-    machineset_with(name, [], Stacks::Services::FmAnalyticsAnalysisServer, &block)
-  end
-
-  def fmanalyticsreporting_service(name = 'fmanalyticsreporting', &block)
-    machineset_with(name, [], Stacks::Services::FmAnalyticsReportingServer, &block)
-  end
-
   def puppetserver_cluster(name, &block)
     machineset_with(name, [Stacks::Services::PuppetserverCluster], Stacks::Services::Puppetserver, &block)
   end
