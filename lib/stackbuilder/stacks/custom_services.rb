@@ -153,10 +153,6 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::EventStoreCluster], Stacks::Services::EventStoreServer, &block)
   end
 
-  def pentaho_service(name = 'pentaho_server', &block)
-    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::PentahoServer, &block)
-  end
-
   def standard_service(name, &block)
     machineset_with(name, [], Stacks::Services::StandardServer, &block)
   end

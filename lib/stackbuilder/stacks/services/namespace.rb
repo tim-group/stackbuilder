@@ -36,7 +36,6 @@ module Stacks
     require 'stackbuilder/stacks/services/nat_cluster'
     require 'stackbuilder/stacks/services/nat_rule'
     require 'stackbuilder/stacks/services/nat_server'
-    require 'stackbuilder/stacks/services/pentaho_server'
     require 'stackbuilder/stacks/services/proxy_server'
     require 'stackbuilder/stacks/services/proxy_vhost'
     require 'stackbuilder/stacks/services/puppetdb'
