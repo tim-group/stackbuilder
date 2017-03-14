@@ -13,6 +13,7 @@ class Stacks::Environment
   attr_reader :routes
   attr_reader :sites
   attr_accessor :allocation_tags
+  attr_reader :depends_on
 
   include Stacks::MachineDefContainer
 
@@ -43,6 +44,7 @@ class Stacks::Environment
     @routes.keys.each do |site|
       @routes[site].concat(@parent.routes[site]) if @parent.routes.key?(site)
     end unless @parent.nil?
+    @depends_on = []
   end
 
   # Transitional site lookup array, allowing servers to translate sites (oy,pg) to legacy symbols
@@ -241,5 +243,11 @@ class Stacks::Environment
 
   def calculated_dependencies
     @calculated_dependencies_cache.get
+  end
+
+  def depend_on(dependant, env = environment.name, requirement = nil)
+    fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
+    fail('Environment cannot be nil') if env.nil? || env.eql?('')
+    @depends_on << [dependant, env, requirement] unless @depends_on.include? [dependant, env, requirement]
   end
 end

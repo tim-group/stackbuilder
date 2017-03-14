@@ -220,6 +220,14 @@ class Stacks::MachineDef
 
   def to_enc
     enc = {}
+    if @virtual_service &&
+       @virtual_service.respond_to?(:logstash_receiver_hosts_for_filebeat) &&
+       !@virtual_service.logstash_receiver_hosts_for_filebeat.nil? &&
+       !@virtual_service.logstash_receiver_hosts_for_filebeat.empty?
+      enc['profiles::filebeat'] = {
+        'logstash_receiver_hosts' => @virtual_service.logstash_receiver_hosts_for_filebeat
+      }
+    end
     if @monitoring_in_enc
       enc['monitoring'] = {
         'checks'  => @monitoring,
