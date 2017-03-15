@@ -29,11 +29,11 @@ module Stacks::Services::LogstashReceiverCluster
     end.flatten.sort
   end
 
-  def elasticsearch_data_address(fabric)
+  def elasticsearch_data_address
     addrs = virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::ElasticsearchDataCluster)
     end.map do |service|
-      service.vip_fqdn(:prod, fabric)
+      service.vip_fqdn(:prod, service.environment.name)
     end.flatten.sort
 
     fail('Logstash recevier cluster can only depend on one elasticsearch data cluster') if addrs.length > 1

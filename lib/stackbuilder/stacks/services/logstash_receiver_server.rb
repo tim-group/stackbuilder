@@ -19,7 +19,7 @@ class Stacks::Services::LogstashReceiverServer < Stacks::MachineDef
     rabbitmq_config = @logstash_cluster.rabbitmq_config
 
     enc.merge!('role::logstash_receiver' => {
-                 'elasticsearch_cluster_address' => @logstash_cluster.elasticsearch_data_address(@fabric),
+                 'elasticsearch_cluster_address' => @logstash_cluster.elasticsearch_data_address,
                  'rabbitmq_logging_username'     => rabbitmq_config.username,
                  'rabbitmq_logging_password_key' => rabbitmq_config.password_hiera_key,
                  'rabbitmq_logging_exchange'     => @logstash_cluster.exchange,
