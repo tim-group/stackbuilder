@@ -68,7 +68,7 @@ module Stacks::Dependencies
   end
 
   def virtual_services_that_i_depend_on
-    @depends_on.map do |dependency|
+    (environment.depends_on + @depends_on).map do |dependency|
       find_virtual_service_that_i_depend_on(dependency)
     end
   end
