@@ -3,6 +3,8 @@ require 'stackbuilder/stacks/namespace'
 module Stacks::Dependencies
   public
 
+  DependencyId = Struct.new(:name, :environment_name)
+
   # FIXME: rpearce: This does not belong here but is needed to provide a mechanism for late binding through composition.
   def self.extended(object)
     object.configure
@@ -68,8 +70,8 @@ module Stacks::Dependencies
   end
 
   def virtual_services_that_i_depend_on
-    (environment.depends_on + @depends_on).map do |dependency|
-      find_virtual_service_that_i_depend_on(dependency)
+    (environment.depends_on + @depends_on).map do |depends_on|
+      find_virtual_service_that_i_depend_on(DependencyId.new(depends_on[0], depends_on[1]))
     end
   end
 
@@ -93,17 +95,12 @@ module Stacks::Dependencies
       reject_nodes_in_different_location)
   end
 
-  def find_virtual_service_that_i_depend_on(dependency)
-    @environment.find_all_environments.each do |env|
-      env.accept do |virtual_service|
-        if virtual_service.is_a?(Stacks::MachineSet) &&
-           dependency[0].eql?(virtual_service.name) &&
-           dependency[1].eql?(virtual_service.environment.name)
-          return virtual_service
-        end
-      end
-    end
-    fail "Cannot find service #{dependency[0]} in #{dependency[1]}, that I depend_on"
+  def find_virtual_service_that_i_depend_on(dependency_id)
+    virtual_service = @environment.lookup_dependency(dependency_id)
+
+    fail "Cannot find service #{dependency_id[0]} in #{dependency_id[1]}, that I depend_on" if virtual_service.nil?
+
+    virtual_service
   end
 
   def requirements_of(dependant)
