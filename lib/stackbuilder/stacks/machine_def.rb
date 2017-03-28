@@ -89,17 +89,18 @@ class Stacks::MachineDef
   end
 
   def use_trusty
-    @lsbdistcodename = 'trusty'
-    trusty_gold_image = {
-      '/'.to_sym =>  {
-        :prepare     => {
-          :options => {
-            :path => '/var/local/images/ubuntu-trusty.img'
-          }
-        }
-      }
-    }
-    modify_storage(trusty_gold_image)
+    template(:trusty)
+  end
+
+  def template(lsbdistcodename)
+    fail "Unknown template #{lsbdistcodename}" unless [:trusty, :precise].include? lsbdistcodename
+    @lsbdistcodename = lsbdistcodename.to_s
+    case lsbdistcodename
+    when :precise
+      @storage[:/][:prepare][:options][:path] = "/var/local/images/gold-#{@lsbdistcodename}/generic.img"
+    else
+      @storage[:/][:prepare][:options][:path] = "/var/local/images/ubuntu-#{@lsbdistcodename}.img"
+    end
   end
 
   def needs_signing?

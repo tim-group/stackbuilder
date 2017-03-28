@@ -97,14 +97,29 @@ describe Stacks::MachineDef do
     expect { machinedef.to_spec }.to raise_error(RuntimeError, /Mount point \/home on foo-test must specify a size attribute/)
   end
 
-  it 'should configure gold image and allocation tag when instructed to use trusty' do
+  it 'should configure gold image and allocation tag when instructed to use trusty - old way' do
     env = new_environment('noenv', :primary_site => 'st')
     machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
     machinedef.use_trusty
-    env.set_allocation_tags('st', %w(trusty precise))
     machinedef.bind_to(env)
+    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to eql('/var/local/images/ubuntu-trusty.img')
+  end
 
-    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to include('ubuntu-trusty')
+  it 'should configure gold image and allocation tag when instructed to use trusty' do
+    env = new_environment('noenv', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.template(:trusty)
+    machinedef.bind_to(env)
+    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to eql('/var/local/images/ubuntu-trusty.img')
+  end
+
+  it 'should configure gold image and allocation tag when instructed to use ubuntu_precise' do
+    env = new_environment('noenv', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.template(:precise)
+    machinedef.bind_to(env)
+    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to include('gold-precise/generic.img')
+    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to eql('/var/local/images/gold-precise/generic.img')
   end
 
   it 'should allow monitoring to be configured' do
