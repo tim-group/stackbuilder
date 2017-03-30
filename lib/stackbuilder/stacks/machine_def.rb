@@ -89,7 +89,7 @@ class Stacks::MachineDef
   end
 
   def use_trusty
-    template(:trusty)
+    fail "machine.use_trusty is no longer used.\nPlease use machine.template(:trusty) instead."
   end
 
   def template(lsbdistcodename)

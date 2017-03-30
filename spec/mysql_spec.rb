@@ -325,14 +325,16 @@ describe_stack 'should have mysql 5.6.25-1ubuntu14.04 as the default version of 
   given do
     stack "mysql51" do
       mysql_cluster "my51" do
-        each_machine(&:use_trusty)
+        each_machine do |machine|
+          machine.template(:trusty)
+        end
       end
     end
     stack "mysql55" do
       mysql_cluster "my55" do
         each_machine do |machine|
           machine.version = '5.5.43-0'
-          machine.use_trusty
+          machine.template(:trusty)
         end
       end
     end

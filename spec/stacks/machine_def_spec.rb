@@ -100,9 +100,7 @@ describe Stacks::MachineDef do
   it 'should configure gold image and allocation tag when instructed to use trusty - old way' do
     env = new_environment('noenv', :primary_site => 'st')
     machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
-    machinedef.use_trusty
-    machinedef.bind_to(env)
-    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to eql('/var/local/images/ubuntu-trusty.img')
+    expect { machinedef.use_trusty }.to raise_error(RuntimeError, /machine.use_trusty is no longer used/)
   end
 
   it 'should configure gold image and allocation tag when instructed to use trusty' do
