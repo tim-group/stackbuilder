@@ -41,7 +41,7 @@ class Stacks::MachineDef
         :prepare     => {
           :method => 'image',
           :options => {
-            :path => '/var/local/images/gold-precise/generic.img'
+            :path => '/var/local/images/ubuntu-trusty.img'
           }
         }
       }
@@ -62,7 +62,7 @@ class Stacks::MachineDef
     @included_classes = {}
     @added_cnames = {}
     @allocation_tags = []
-    @lsbdistcodename = 'precise'
+    @lsbdistcodename = 'trusty'
     validate_name
   end
 

@@ -301,11 +301,17 @@ describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of 
   given do
     stack "mysql51" do
       mysql_cluster "my51" do
+        each_machine do |machine|
+          machine.template(:precise)
+        end
       end
     end
     stack "mysql55" do
       mysql_cluster "my55" do
-        each_machine { |machine| machine.version = '5.5.43-0' }
+        each_machine do |machine|
+          machine.template(:precise)
+          machine.version = '5.5.43-0'
+        end
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do
