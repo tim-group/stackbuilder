@@ -7,10 +7,15 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
   def initialize(virtual_service, base_hostname, environment, site, role)
     super(virtual_service, base_hostname, environment, site, role)
     @elasticsearch_cluster = virtual_service
+    @node_attrs = {}
   end
 
   def stackname
     @elasticsearch_cluster.name
+  end
+
+  def add_node_attribute(attr_name, attr_setting)
+    @node_attrs[attr_name] = attr_setting
   end
 
   def to_enc
@@ -24,7 +29,8 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
                  'logstash_indexer_hosts'         => @elasticsearch_cluster.logstash_indexer_hosts,
                  'logstash_receiver_hosts'         => @elasticsearch_cluster.logstash_receiver_hosts,
                  'prod_vip_fqdn'                  => @elasticsearch_cluster.vip_fqdn(:prod, fabric),
-                 'minimum_master_nodes'           => @elasticsearch_cluster.elasticsearch_minimum_master_nodes
+                 'minimum_master_nodes'           => @elasticsearch_cluster.elasticsearch_minimum_master_nodes,
+                 'node_attrs'                     => @node_attrs
                },
                'server::default_new_mgmt_net_local' => nil)
     enc
