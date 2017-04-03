@@ -24,6 +24,7 @@ class Stacks::MachineDef
   attr_accessor :monitoring
   attr_accessor :monitoring_in_enc
   attr_accessor :monitoring_options
+  attr_accessor :maintainer
 
   def initialize(virtual_service, base_hostname, environment, site, role = nil)
     @virtual_service = virtual_service
@@ -46,6 +47,7 @@ class Stacks::MachineDef
         }
       }
     }
+    @maintainer = nil
     @monitoring = true
     @monitoring_options = {
       'nagios_host_template'    => 'non-prod-host',
@@ -231,9 +233,10 @@ class Stacks::MachineDef
     end
     if @monitoring_in_enc
       enc['monitoring'] = {
-        'checks'  => @monitoring,
-        'options' => @monitoring_options
+        'checks'     => @monitoring,
+        'options'    => @monitoring_options
       }
+      enc['monitoring']['maintainer'] = @maintainer unless @maintainer.nil?
     end
     enc.merge! @included_classes unless @included_classes.nil?
     enc.merge! @virtual_service.included_classes if @virtual_service && @virtual_service.respond_to?(:included_classes)

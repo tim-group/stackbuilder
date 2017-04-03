@@ -136,4 +136,15 @@ describe Stacks::MachineDef do
     expect(machinedef.to_enc['monitoring']['options']).to have_key('nagios_service_template')
     expect(machinedef.to_enc['monitoring']['options']['nagios_service_template']).to eql('non-prod-service')
   end
+
+  it 'should allow monitoring to be configured' do
+    env = new_environment('noenv', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.monitoring_in_enc = true
+    machinedef.maintainer = 'datalibre'
+    machinedef.bind_to(env)
+    expect(machinedef.to_enc).to have_key('monitoring')
+    expect(machinedef.to_enc['monitoring']).to have_key('maintainer')
+    expect(machinedef.to_enc['monitoring']['maintainer']).to eql('datalibre')
+  end
 end
