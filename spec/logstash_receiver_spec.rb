@@ -92,3 +92,65 @@ describe_stack 'logstash indexer server enc is correct' do
     expect(role_enc['elasticsearch_cluster_address']).to be_eql('pg-elasticsearch-data-vip.pg.net.local')
   end
 end
+
+describe_stack 'depend_on logstash receiver respects site of the logging node' do
+  given do
+    stack 'logging_site' do
+      logstash_receiver 'logstash-receiver'
+    end
+
+    stack 'multisite_appservice' do
+      app_service 'multisite' do
+        self.enable_secondary_site = true
+        self.instances = 1
+
+        depend_on 'logstash-receiver', 'pg'
+      end
+    end
+
+    env 'oy', :primary_site => 'oy' do
+      instantiate_stack 'logging_site'
+    end
+
+    env 'pg', :primary_site => 'pg', :secondary_site => 'oy' do
+      instantiate_stack 'logging_site'
+
+      env 'production' do
+        depend_on 'logstash-receiver', 'pg'
+        depend_on 'logstash-receiver', 'oy'
+        instantiate_stack 'multisite_appservice'
+      end
+    end
+  end
+
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts([
+      'oy-logstash-receiver-001.mgmt.oy.net.local',
+      'oy-logstash-receiver-002.mgmt.oy.net.local',
+      'pg-logstash-receiver-002.mgmt.pg.net.local',
+      'pg-logstash-receiver-001.mgmt.pg.net.local',
+      'production-multisite-001.mgmt.pg.net.local',
+      'production-multisite-001.mgmt.oy.net.local'
+    ])
+  end
+
+  host('production-multisite-001.mgmt.pg.net.local') do |host|
+    enc = host.to_enc
+
+    expect(enc['profiles::filebeat']).not_to be_nil
+    expect(enc['profiles::filebeat']['logstash_receiver_hosts']).to be_eql([
+      'pg-logstash-receiver-001.mgmt.pg.net.local',
+      'pg-logstash-receiver-002.mgmt.pg.net.local'
+    ])
+  end
+
+  host('production-multisite-001.mgmt.oy.net.local') do |host|
+    enc = host.to_enc
+
+    expect(enc['profiles::filebeat']).not_to be_nil
+    expect(enc['profiles::filebeat']['logstash_receiver_hosts']).to be_eql([
+      'oy-logstash-receiver-001.mgmt.oy.net.local',
+      'oy-logstash-receiver-002.mgmt.oy.net.local'
+    ])
+  end
+end

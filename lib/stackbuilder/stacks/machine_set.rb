@@ -207,13 +207,13 @@ class Stacks::MachineSet
     SecureRandom.hex(20)
   end
 
-  def logstash_receiver_hosts_for_filebeat
+  def logstash_receiver_hosts_for_filebeat(dependent_machine_site)
     return unless self.is_a? Stacks::Dependencies
     virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::LogstashReceiverCluster)
-    end.map do |service|
-      service.children.map(&:mgmt_fqdn)
-    end.flatten.sort
+    end.map(&:children).flatten.select do |machine|
+      machine.site == dependent_machine_site
+    end.map(&:mgmt_fqdn).sort.uniq
   end
 
   private
