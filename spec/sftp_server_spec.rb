@@ -89,7 +89,7 @@ describe_stack 'sftp servers should allow monitor_warn to be override when non-H
     stack "secureftp" do
       sftp_service 'sftp' do
         self.ports = ['2222']
-        self.override_monitor_warn = 0
+        self.vip_warning_members = 0
       end
     end
 

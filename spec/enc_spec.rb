@@ -146,7 +146,8 @@ describe Stacks::DSL do
                                                                  },
                                                                  "env" => "st",
                                                                  "app" => nil,
-                                                                 "monitor_warn" => 1
+                                                                 "monitor_warn" => 1,
+                                                                 "monitor_critical" => 0
                                                                },
                                                                "st-oneapp-vip.st.net.local" => {
                                                                  "healthcheck_timeout" => 10,
@@ -157,6 +158,7 @@ describe Stacks::DSL do
                                                                  "env" => "st",
                                                                  "app" => nil,
                                                                  "monitor_warn" => 0,
+                                                                 "monitor_critical" => 0,
                                                                  "healthcheck_timeout" => 999
                                                                }
                                                              }

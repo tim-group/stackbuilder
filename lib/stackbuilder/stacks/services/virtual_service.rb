@@ -12,6 +12,7 @@ module Stacks::Services::VirtualService
   end
 
   attr_accessor :ehcache, :persistent_ports, :healthcheck_timeout, :proto
+  attr_accessor :vip_warning_members, :vip_critical_members
   attr_reader :vip_networks, :included_classes
 
   def configure
@@ -21,6 +22,8 @@ module Stacks::Services::VirtualService
     @healthcheck_timeout = 10
     @vip_networks = [:prod]
     @nat_config = NatConfig.new(false, false, :front, :prod, true, false)
+    @vip_warning_members = nil
+    @vip_critical_members = 0
   end
 
   def clazz
@@ -85,18 +88,18 @@ module Stacks::Services::VirtualService
     true
   end
 
-  def monitor_warn(servers)
+  def calc_vip_warning_members(servers)
     servers == 1 ? 0 : 1
   end
 
   private
 
   def loadbalancer_config(location, fabric)
-    fewest_servers_in_a_group = realservers(location).size
-    return {} if fewest_servers_in_a_group == 0
+    servers = realservers(location).size
+    return {} if servers == 0
     grouped_realservers = realservers(location).group_by(&:group)
     realservers_hash = Hash[grouped_realservers.map do |group, rs|
-      fewest_servers_in_a_group = rs.size unless rs.size > fewest_servers_in_a_group
+      servers = rs.size unless rs.size > servers
       realserver_fqdns = rs.map(&:prod_fqdn).sort
       [group, realserver_fqdns]
     end]
@@ -106,7 +109,8 @@ module Stacks::Services::VirtualService
         'env'                 => environment.name,
         'app'                 => application,
         'realservers'         => realservers_hash,
-        'monitor_warn'        => monitor_warn(fewest_servers_in_a_group),
+        'monitor_warn'        => vip_warning_members.nil? ? calc_vip_warning_members(servers) : vip_warning_members,
+        'monitor_critical'    => vip_critical_members,
         'healthcheck_timeout' => healthcheck_timeout
       }
     }

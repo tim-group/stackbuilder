@@ -116,16 +116,22 @@ describe_stack 'load balancer stack create a secondary server with the correct e
   end
 
   host("e1-lb-002.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::loadbalancer']['virtual_router_id']).to eql(66)
-    expect(host.to_enc['role::loadbalancer']['virtual_servers']['e1-frapp-vip.space.net.local']).to eql(
-      "env" => "e1",
-      "monitor_warn" => 1,
-      "app" => "futuresroll",
-      "realservers" => {
-        "blue" => ["e1-frapp-001.space.net.local", "e1-frapp-002.space.net.local"]
-      },
-      "healthcheck_timeout" => 10
+    lb = host.to_enc['role::loadbalancer']
+    expect(lb['virtual_router_id']).to eql(66)
+    vs = lb['virtual_servers']
+    expect(vs.key?('e1-frapp-vip.space.net.local')).to eql true
+    expect(vs['e1-frapp-vip.space.net.local']['env']).to eql('e1')
+    expect(vs['e1-frapp-vip.space.net.local']['monitor_warn']).to eql(1)
+    expect(vs['e1-frapp-vip.space.net.local']['monitor_critical']).to eql(0)
+    expect(vs['e1-frapp-vip.space.net.local']['app']).to eql('futuresroll')
+    expect(vs['e1-frapp-vip.space.net.local']['realservers']).to eql(
+      "blue" => [
+        "e1-frapp-001.space.net.local",
+        "e1-frapp-002.space.net.local"
+      ]
     )
+    expect(vs['e1-frapp-vip.space.net.local']['healthcheck_timeout']).to eql(10)
+
     expect(host.to_enc['routes']['to']).to include 'mgmt_pg_from_mgmt_oy'
     expect(host.to_specs.shift[:qualified_hostnames]).to eql(:mgmt => "e1-lb-002.mgmt.space.net.local",
                                                              :prod => "e1-lb-002.space.net.local")
