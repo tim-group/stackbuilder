@@ -43,14 +43,15 @@ class Stacks::CalculatedDependenciesCache
   end
 
   def lookup_single_dependency(all_environments, dependency)
+    found_virtual_service = nil
     all_environments.each do |env|
       env.accept do |virtual_service|
-        if virtual_service.is_a?(Stacks::MachineSet) &&
-           dependency.name.eql?(virtual_service.name) &&
-           dependency.environment_name.eql?(virtual_service.environment.name)
-          return virtual_service
-        end
+        next unless virtual_service.is_a?(Stacks::MachineSet)
+        next unless dependency.name.eql?(virtual_service.name)
+        next unless dependency.environment_name.eql?(virtual_service.environment.name)
+        found_virtual_service = virtual_service
       end
     end
+    found_virtual_service
   end
 end

@@ -164,3 +164,20 @@ describe_stack 'sub envs adopt parent env routes with no secondary_site' do
     expect(host.to_enc['routes']['to']).to include 'mgmt_foo_from_mgmt_st'
   end
 end
+
+describe_stack 'missing dependencies should fail' do
+  given do
+    stack "x" do
+      app_service "appx" do
+        depend_on 'missing', 'staging'
+      end
+    end
+
+    env "staging", :primary_site => "st" do
+      instantiate_stack "x"
+    end
+  end
+  host("staging-appx-001.mgmt.st.net.local") do |host|
+    expect { host.to_enc }.to raise_error(RuntimeError, /Cannot find service missing in staging, that I depend_on/)
+  end
+end
