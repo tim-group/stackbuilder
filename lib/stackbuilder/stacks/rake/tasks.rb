@@ -479,7 +479,7 @@ namespace :sbx do
         machine_def.accept do |child_machine_def|
           hosts << child_machine_def.mgmt_fqdn if child_machine_def.respond_to?(:mgmt_fqdn)
         end
-        %w(nagios mongodb puppet metrics).each do |action|
+        %w(nagios mongodb puppet).each do |action|
           hosts.each { |fqdn| hostcleanup(fqdn, action) }
         end
       end
