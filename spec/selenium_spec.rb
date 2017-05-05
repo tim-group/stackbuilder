@@ -13,7 +13,8 @@ describe_stack 'selenium' do
         self.nodespecs = [
           {
             :type => "ubuntu",
-            :instances => 5
+            :instances => 5,
+            :firefox_version => "36.0+build2-0ubuntu0.12.04.5"
           },
           {
             :type => "winxp",

@@ -15,6 +15,10 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
     @destroyable = true
     @ram = "2097152"
     @allocation_tags = []
+
+    imagepath = '/var/local/images/gold-precise/generic.img'
+    imagepath = '/var/local/images/ubuntu-trusty.img' if options[:lsbdistcodename] == :trusty
+
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',
@@ -40,9 +44,11 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
   def to_spec
     spec = super
     spec[:template] = "senode"
+    spec[:template] = "senode_trusty" if options[:lsbdistcodename] == :trusty
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?
     spec[:selenium_version] = options[:selenium_version] || "2.32.0"
     spec[:firefox_version] = options[:firefox_version]
+    spec[:chrome_version] = options[:chrome_version]
 
     spec
   end

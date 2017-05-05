@@ -19,22 +19,28 @@ module Stacks::Services::Selenium::Cluster
     nodespec[:instances].times do |i|
       index = sprintf("%03d", i + 1)
       node = nil
+      selenium_version = @selenium_version
+      selenium_version = nodespec[:selenium_version] if nodespec[:selenium_version] != nil
+      firefox_version = @firefox_version
+      firefox_version = nodespec[:firefox_version] if nodespec[:firefox_version] != nil
       case nodespec[:type]
       when "ubuntu"
         node_name = "#{name}-browser-#{index}"
         node = Stacks::Services::Selenium::UbuntuNode.new(node_name, @hub,
-                                                          :selenium_version => @selenium_version,
-                                                          :firefox_version => @firefox_version)
+                                                          :selenium_version => selenium_version,
+                                                          :firefox_version => firefox_version,
+                                                          :chrome_version => nodespec[:chrome_version],
+                                                          :lsbdistcodename => nodespec[:lsbdistcodename])
       when "winxp"
         node_name = "#{name}-ie#{nodespec[:ie_version]}-#{index}"
         node = Stacks::Services::Selenium::XpNode.new(node_name, @hub,
-                                                      :selenium_version => @selenium_version,
+                                                      :selenium_version => selenium_version,
                                                       :gold_image => nodespec[:gold_image],
                                                       :ie_version => nodespec[:ie_version])
       when "win7"
         node_name = "#{name}-ie#{nodespec[:ie_version]}-#{index}"
         node = Stacks::Services::Selenium::Win7Node.new(node_name, @hub,
-                                                        :selenium_version => @selenium_version,
+                                                        :selenium_version => selenium_version,
                                                         :gold_image => nodespec[:gold_image],
                                                         :ie_version => nodespec[:ie_version])
       else
