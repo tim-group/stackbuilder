@@ -90,7 +90,9 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       enc['role::http_app']['launch_config'] = @launch_config
     end
 
-    @enc_hacks.inject(enc) {|enc, hack| hack.call(enc)}
+    @enc_hacks.inject(enc) do |_enc, hack|
+      hack.call(enc)
+    end
   end
 
   private

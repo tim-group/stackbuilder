@@ -12,14 +12,14 @@ describe_stack 'stack-with-dependencies' do
         self.secondary_site_slave_instances = 1
         self.include_master_in_read_only_cluster = false
         self.supported_requirements = {
-            :master_with_slaves => %w(
-              e-exampledb-001.earth.net.local
-              e-exampledb-003.earth.net.local
-              e-exampledb-004.earth.net.local
-            )
-          }
-        end
+          :master_with_slaves => %w(
+            e-exampledb-001.earth.net.local
+            e-exampledb-003.earth.net.local
+            e-exampledb-004.earth.net.local
+          )
+        }
       end
+    end
 
     stack 'master_with_slaves_example' do
       app_service 'myapp' do
@@ -27,17 +27,17 @@ describe_stack 'stack-with-dependencies' do
         self.application = 'rw-app'
         depend_on 'exampledb', environment.name, :master_with_slaves
 
-	each_machine do |machine|
-	  machine.enc_hack do |enc|
-	    cluster = enc["role::http_app"]["dependencies"]["db.exampledb.read_only_cluster"]
-	    slaves = cluster.split(",")
+        each_machine do |machine|
+          machine.enc_hack do |enc|
+            cluster = enc["role::http_app"]["dependencies"]["db.exampledb.read_only_cluster"]
+            slaves = cluster.split(",")
 
-	    if (machine.mgmt_fqdn.include?("002"))
-  	      enc["role::http_app"]["dependencies"]["db.exampledb.read_only_cluster"] = slaves.reverse.join(",")
-	    end
-	    enc
-	  end
-	end
+            if machine.mgmt_fqdn.include?("002")
+              enc["role::http_app"]["dependencies"]["db.exampledb.read_only_cluster"] = slaves.reverse.join(",")
+            end
+            enc
+          end
+        end
       end
     end
 
