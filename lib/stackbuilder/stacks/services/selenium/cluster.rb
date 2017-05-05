@@ -6,12 +6,10 @@ module Stacks::Services::Selenium::Cluster
     object.configure
   end
 
-  attr_accessor :hub, :selenium_version, :firefox_version, :nodespecs
+  attr_accessor :hub, :nodespecs
 
   def configure
     @hub = nil
-    @selenium_version = '2.32.0'
-    @firefox_version = nil
     @nodespecs = []
   end
 
@@ -19,16 +17,13 @@ module Stacks::Services::Selenium::Cluster
     nodespec[:instances].times do |i|
       index = sprintf("%03d", i + 1)
       node = nil
-      selenium_version = @selenium_version
-      selenium_version = nodespec[:selenium_version] if !nodespec[:selenium_version].nil?
-      firefox_version = @firefox_version
-      firefox_version = nodespec[:firefox_version] if !nodespec[:firefox_version].nil?
+      selenium_version = nodespec[:selenium_version].nil? ? '2.32.0' : nodespec[:selenium_version]
       case nodespec[:type]
       when "ubuntu"
         node_name = "#{name}-browser-#{index}"
         node = Stacks::Services::Selenium::UbuntuNode.new(node_name, @hub,
                                                           :selenium_version => selenium_version,
-                                                          :firefox_version => firefox_version,
+                                                          :firefox_version => nodespec[:firefox_version],
                                                           :chrome_version => nodespec[:chrome_version],
                                                           :lsbdistcodename => nodespec[:lsbdistcodename])
       when "winxp"
