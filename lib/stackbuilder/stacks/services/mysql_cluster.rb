@@ -242,7 +242,6 @@ module Stacks::Services::MysqlCluster
   def config_to_fulfil_requirement(dependent, hosts, requirement)
     hostnames = []
     hosts_fqdns = []
-
     if (requirement == :master_with_slaves)
       hostnames = [hosts.select(&:master?).map(&:prod_fqdn).first]
       hosts_fqdns = hosts.reject(&:master?).map(&:prod_fqdn)
