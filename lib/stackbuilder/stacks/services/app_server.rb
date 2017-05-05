@@ -13,6 +13,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     super(virtual_service, base_hostname, environment, site, role)
     @allowed_hosts = []
     @launch_config = {}
+    @enc_hacks = []
   end
 
   def bind_to(environment)
@@ -40,6 +41,10 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       modify_storage('/' => { :size => root_size_min.to_s.concat('G') })
     end
     nil
+  end
+
+  def enc_hack(&block)
+    @enc_hacks << block
   end
 
   def to_enc
@@ -85,7 +90,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       enc['role::http_app']['launch_config'] = @launch_config
     end
 
-    enc
+    @enc_hacks.inject(enc) {|enc, hack| hack.call(enc)}
   end
 
   private
