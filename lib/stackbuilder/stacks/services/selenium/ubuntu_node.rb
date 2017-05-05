@@ -25,7 +25,7 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
         }
       }
     }
-    template(options[:lsbdistcodename] == nil ? :precise : options[:lsbdistcodename])
+    template(options[:lsbdistcodename].nil? ? :precise : options[:lsbdistcodename])
   end
 
   def validate_storage

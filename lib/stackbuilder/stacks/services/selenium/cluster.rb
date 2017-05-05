@@ -20,9 +20,9 @@ module Stacks::Services::Selenium::Cluster
       index = sprintf("%03d", i + 1)
       node = nil
       selenium_version = @selenium_version
-      selenium_version = nodespec[:selenium_version] if nodespec[:selenium_version] != nil
+      selenium_version = nodespec[:selenium_version] if !nodespec[:selenium_version].nil?
       firefox_version = @firefox_version
-      firefox_version = nodespec[:firefox_version] if nodespec[:firefox_version] != nil
+      firefox_version = nodespec[:firefox_version] if !nodespec[:firefox_version].nil?
       case nodespec[:type]
       when "ubuntu"
         node_name = "#{name}-browser-#{index}"
