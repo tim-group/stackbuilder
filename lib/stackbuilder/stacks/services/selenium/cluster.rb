@@ -23,6 +23,7 @@ module Stacks::Services::Selenium::Cluster
         node_name = "#{name}-browser-#{index}"
         node = Stacks::Services::Selenium::UbuntuNode.new(node_name, @hub,
                                                           :selenium_version => selenium_version,
+                                                          :selenium_node_version => nodespec[:selenium_node_version],
                                                           :firefox_version => nodespec[:firefox_version],
                                                           :chrome_version => nodespec[:chrome_version],
                                                           :lsbdistcodename => nodespec[:lsbdistcodename])

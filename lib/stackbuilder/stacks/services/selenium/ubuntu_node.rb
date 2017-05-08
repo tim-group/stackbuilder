@@ -41,6 +41,7 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
     spec[:template] = options[:lsbdistcodename] == :trusty ? 'senode_trusty' : 'senode'
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?
     spec[:selenium_version] = options[:selenium_version] || "2.32.0"
+    spec[:selenium_node_version] = options[:selenium_node_version] || "3.0.7"
     spec[:firefox_version] = options[:firefox_version]
     spec[:chrome_version] = options[:chrome_version]
 
