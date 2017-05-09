@@ -51,7 +51,7 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
     spec = super
     spec[:template] = "sehub"
     spec[:nodes] = node_names
-    spec[:selenium_version] = options[:selenium_version] || "2.32.0"
+    spec[:selenium_deb_version] = options[:selenium_deb_version] || options[:selenium_version] || "2.32.0"
     spec
   end
 end

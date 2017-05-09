@@ -136,7 +136,7 @@ describe_stack 'selenium' do
   host("qa-a-browser-005.mgmt.space.net.local") do |host|
     expect(host.to_spec[:selenium_hub_host]).to be_nil
     expect(host.to_spec[:template]).to eql("senode")
-    expect(host.to_spec[:selenium_version]).to eql '2.32.0'
+    expect(host.to_spec[:selenium_deb_version]).to eql '2.32.0'
     expect(host.to_spec[:firefox_version]).to be_nil
     expect(host.to_spec[:chrome_version]).to be_nil
     expect(host.to_spec[:storage][:/][:prepare][:options][:path]).to eql '/var/local/images/gold-precise/generic.img'
@@ -154,7 +154,7 @@ describe_stack 'selenium' do
     expect(host.to_spec[:storage][:/][:type]).to eql('os')
     expect(host.to_spec[:disallow_destroy]).to be_nil
     expect(host.to_spec[:allocation_tags]).to eql([])
-    expect(host.to_spec[:selenium_version]).to eql('2.41.0')
+    expect(host.to_spec[:selenium_deb_version]).to eql('2.41.0')
     expect(host.to_spec[:nodes]).to eql([
       'e1-a-browser-001',
       'e1-a-browser-002',
@@ -203,7 +203,7 @@ describe_stack 'selenium' do
   host("e1-a-browser-001.mgmt.space.net.local") do |host|
     expect(host.to_spec[:template]).to eql("senode_trusty")
     expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
-    expect(host.to_spec[:selenium_version]).to eql '2.41.0'
+    expect(host.to_spec[:selenium_deb_version]).to eql '2.41.0'
     expect(host.to_spec[:firefox_version]).to eql '36.0+build2-0ubuntu0.12.04.5'
     expect(host.to_spec[:storage][:/][:prepare][:options][:path]).to eql '/var/local/images/ubuntu-trusty.img'
     expect(host.to_spec[:chrome_version]).to eql '12.4+banana'

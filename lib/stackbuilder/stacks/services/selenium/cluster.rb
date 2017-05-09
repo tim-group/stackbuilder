@@ -18,12 +18,14 @@ module Stacks::Services::Selenium::Cluster
       index = sprintf("%03d", i + 1)
       node = nil
       selenium_version = nodespec[:selenium_version].nil? ? '2.32.0' : nodespec[:selenium_version]
+      selenium_deb_version = nodespec[:selenium_deb_version].nil? ? selenium_version : nodespec[:selenium_deb_version]
+      selenium_node_deb_version = nodespec[:selenium_node_deb_version].nil? ? nodespec[:selenium_node_version] : nodespec[:selenium_node_deb_version]
       case nodespec[:type]
       when "ubuntu"
         node_name = "#{name}-browser-#{index}"
         node = Stacks::Services::Selenium::UbuntuNode.new(node_name, @hub,
-                                                          :selenium_version => selenium_version,
-                                                          :selenium_node_version => nodespec[:selenium_node_version],
+                                                          :selenium_deb_version => selenium_deb_version,
+                                                          :selenium_node_deb_version => selenium_node_deb_version,
                                                           :firefox_version => nodespec[:firefox_version],
                                                           :chrome_version => nodespec[:chrome_version],
                                                           :lsbdistcodename => nodespec[:lsbdistcodename])
