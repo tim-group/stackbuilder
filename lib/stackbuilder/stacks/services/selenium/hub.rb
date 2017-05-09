@@ -20,12 +20,11 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
         :size        => '5G',
         :prepare     => {
           :method => 'image',
-          :options => {
-            :path => '/var/local/images/gold-precise/generic.img'
-          }
+          :options => {}
         }
       }
     }
+    template(options[:lsbdistcodename].nil? ? :precise : options[:lsbdistcodename])
   end
 
   def bind_to(environment)
@@ -49,7 +48,7 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:template] = "sehub"
+    spec[:template] = options[:lsbdistcodename] == :trusty ? 'sehub_trusty' : 'sehub'
     spec[:nodes] = node_names
     spec[:selenium_deb_version] = options[:selenium_deb_version] || "2.32.0"
     spec
