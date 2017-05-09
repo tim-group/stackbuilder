@@ -5,7 +5,7 @@ describe_stack 'selenium' do
   given do
     stack "segrid" do
       selenium_version = "2.41.0"
-      hub = selenium_hub('hub-001', :selenium_version => selenium_version)
+      hub = selenium_hub('hub-001', :selenium_deb_version => selenium_version)
       selenium_node_cluster "a" do
         self.hub = hub
         self.nodespecs = [
@@ -14,7 +14,7 @@ describe_stack 'selenium' do
             :instances => 5,
             :firefox_version => "36.0+build2-0ubuntu0.12.04.5",
             :chrome_version => "12.4+banana",
-            :selenium_version => selenium_version,
+            :selenium_deb_version => selenium_version,
             :lsbdistcodename => :trusty
           },
           {
