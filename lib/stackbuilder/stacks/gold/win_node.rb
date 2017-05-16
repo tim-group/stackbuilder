@@ -27,6 +27,10 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
                      }
                    })
     case @win_version
+    when 'win10'
+      modify_storage('/'.to_sym => {
+                       :size => '15G'
+                     })
     when 'win7'
       modify_storage('/'.to_sym => {
                        :size => '15G'
