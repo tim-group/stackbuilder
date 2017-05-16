@@ -31,6 +31,7 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
       modify_storage('/'.to_sym => {
                        :size => '15G'
                      })
+      spec[:kvm_template] = 'kvm_nx_required'
     when 'win7'
       modify_storage('/'.to_sym => {
                        :size => '15G'
