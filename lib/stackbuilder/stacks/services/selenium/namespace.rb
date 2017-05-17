@@ -5,6 +5,7 @@ module Stacks
       require 'stackbuilder/stacks/services/selenium/ubuntu_node'
       require 'stackbuilder/stacks/services/selenium/xp_node'
       require 'stackbuilder/stacks/services/selenium/win7_node'
+      require 'stackbuilder/stacks/services/selenium/win10_node'
     end
   end
 end
