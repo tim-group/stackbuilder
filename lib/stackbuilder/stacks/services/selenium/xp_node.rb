@@ -35,7 +35,7 @@ class Stacks::Services::Selenium::XpNode < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:template] = "xpboot"
+    spec[:template] = "senode_xp"
     spec[:kvm_template] = 'kvm_no_virtio'
     spec[:gold_image_url] = options[:gold_image] # TODO: delete me
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?

@@ -171,7 +171,7 @@ describe_stack 'selenium' do
   end
 
   host("e1-a-ie6-002.mgmt.space.net.local") do |host|
-    expect(host.to_spec[:template]).to eql("xpboot")
+    expect(host.to_spec[:template]).to eql("senode_xp")
     expect(host.to_spec[:gold_image_url]).to eql 'file:///var/local/images/dev-sxp-gold.img'
     expect(host.to_spec[:kvm_template]).to eql 'kvm_no_virtio'
     expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
@@ -183,7 +183,7 @@ describe_stack 'selenium' do
   end
 
   host("e1-a-ie9-002.mgmt.space.net.local") do |host|
-    expect(host.to_spec[:template]).to eql("win7boot")
+    expect(host.to_spec[:template]).to eql("senode_win7")
     expect(host.to_spec[:gold_image_url]).to eql 'http://iso.youdevise.com/gold/win7-ie9-gold.img'
     expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
     expect(host.to_spec[:selenium_version]).to eql '2.41.0'
@@ -194,7 +194,7 @@ describe_stack 'selenium' do
   end
 
   host("e1-a-ie10-001.mgmt.space.net.local") do |host|
-    expect(host.to_spec[:template]).to eql("win7boot")
+    expect(host.to_spec[:template]).to eql("senode_win7")
     expect(host.to_spec[:gold_image_url]).to eql 'http://iso.youdevise.com/gold/win7-ie10-gold.img'
     expect(host.to_spec[:selenium_hub_host]).to eql 'e1-hub-001.mgmt.space.net.local'
     expect(host.to_spec[:selenium_version]).to eql '2.41.0'

@@ -35,7 +35,7 @@ class Stacks::Services::Selenium::Win7Node < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:template] = "win7boot"
+    spec[:template] = "senode_win7"
     spec[:gold_image_url] = options[:gold_image] # TODO: delete me
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?
     # TODO: Remove default once refstack has been updated to pass in :ie_version

@@ -35,7 +35,7 @@ class Stacks::Services::Selenium::Win10Node < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:template] = "win10boot"
+    spec[:template] = "senode_win10"
     spec[:kvm_template] = "kvm_nx_required"
     spec[:gold_image_url] = options[:gold_image]
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?
