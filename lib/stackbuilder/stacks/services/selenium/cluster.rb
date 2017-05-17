@@ -39,6 +39,11 @@ module Stacks::Services::Selenium::Cluster
                                                         :selenium_version => selenium_version,
                                                         :gold_image => nodespec[:gold_image],
                                                         :ie_version => nodespec[:ie_version])
+      when "win10"
+        node_name = "#{name}-edge-#{index}"
+        node = Stacks::Services::Selenium::Win10Node.new(node_name, @hub,
+                                                         :selenium_version => selenium_version,
+                                                         :gold_image => nodespec[:gold_image])
       else
         fail "unknown Selenium node type"
       end
