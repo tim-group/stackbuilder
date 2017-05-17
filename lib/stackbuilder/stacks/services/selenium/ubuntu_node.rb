@@ -38,7 +38,7 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:template] = options[:lsbdistcodename] == :trusty ? 'senode_trusty' : 'senode'
+    spec[:template] = "senode_#{options[:lsbdistcodename]}"
     spec[:selenium_hub_host] = hub.mgmt_fqdn unless hub.nil?
     spec[:selenium_deb_version] = options[:selenium_deb_version] || "2.32.0"
     spec[:selenium_node_deb_version] = options[:selenium_node_deb_version] || "3.0.7"

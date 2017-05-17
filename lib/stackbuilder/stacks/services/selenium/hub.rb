@@ -48,7 +48,7 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
 
   def to_spec
     spec = super
-    spec[:template] = options[:lsbdistcodename] == :trusty ? 'sehub_trusty' : 'sehub'
+    spec[:template] = "sehub_#{options[:lsbdistcodename]}"
     spec[:nodes] = node_names
     spec[:selenium_deb_version] = options[:selenium_deb_version] || "2.32.0"
     spec
