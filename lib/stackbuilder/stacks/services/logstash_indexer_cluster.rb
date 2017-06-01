@@ -47,4 +47,12 @@ module Stacks::Services::LogstashIndexerCluster
     fail('Logstash indexer cluster can only depend on one elasticsearch data cluster') if addrs.length > 1
     addrs.first
   end
+
+  def logstash_receiver_hosts # (dependent_machine_site)
+    virtual_services_that_i_depend_on.select do |service|
+      service.is_a?(Stacks::Services::LogstashReceiverCluster)
+    end.map do |service|
+      service.children.map(&:prod_fqdn)
+    end.flatten.sort
+  end
 end
