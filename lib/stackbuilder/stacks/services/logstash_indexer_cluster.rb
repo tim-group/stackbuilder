@@ -52,7 +52,7 @@ module Stacks::Services::LogstashIndexerCluster
     virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::LogstashReceiverCluster)
     end.map do |service|
-      service.children.map(&:prod_fqdn)
+      service.children.map(&:mgmt_fqdn)
     end.flatten.sort
   end
 end
