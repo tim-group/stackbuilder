@@ -22,7 +22,8 @@ module StackBuilder::Allocator::HostPolicies
   def self.allocation_temporarily_disabled_policy
     Proc.new do |host, _machine|
       if host.facts['allocation_disabled']
-        { :passed => false, :reason => "Allocation disabled" }
+        reason = "Allocation disabled by #{host.facts['allocation_disabled_user']}, reason: #{host.facts['allocation_disabled_reason']}"
+        { :passed => false, :reason => reason }
       else
         { :passed => true }
       end
