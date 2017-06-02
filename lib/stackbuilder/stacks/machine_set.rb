@@ -220,7 +220,7 @@ class Stacks::MachineSet
 
   def instantiate_machine(index, environment, site, role = nil, custom_name = '')
     vm_name = "#{name}#{custom_name}-" + sprintf("%03d", index)
-    vm_name = "#{name}-#{role}-" + sprintf("%03d", index) if @role_in_name
+    vm_name = "#{name}-#{role.to_s.sub(/_/, '')}-" + sprintf("%03d", index) if @role_in_name
     vm_name = "#{name}" if @type == Stacks::Services::ExternalServer
     server = @type.new(self, vm_name, environment, site, role)
     server.group = groups[(index - 1) % groups.size] if server.respond_to?(:group)
