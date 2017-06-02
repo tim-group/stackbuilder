@@ -65,7 +65,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     modify_storage('/mnt/storage' => { :size => size }) if role_of?(:backup)
   end
 
-  def server_id
+  def server_id_legacy
     if @server_id.nil?
       case @role
       when :master, :standalone
@@ -83,6 +83,31 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     end
     @server_id
   end
+
+  def server_id
+    return server_id_legacy unless @virtual_service.role_in_name
+    if @server_id.nil?
+      id = @virtual_service.server_id_offset + index
+      case @role
+      when :master, :standalone
+        id += 50 if @location == :secondary_site
+      when :slave
+        id += 100
+        id += 50 if @location == :secondary_site
+      when :backup
+        id += 200
+        id += 50 if @location == :secondary_site
+      when :user_access
+        id += 300
+        id += 50 if @location == :secondary_site
+      else
+        fail "Unable to establish server_id - Unknown type of mysql server #{@role}"
+      end
+      @server_id = id
+    end
+    @server_id
+  end
+
 
   def data_size(size)
     modify_storage('/mnt/data' => { :size => size })

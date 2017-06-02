@@ -58,6 +58,8 @@ module Stacks::Services::MysqlCluster
     @master_instances.times do
       instantiate_machine(server_index += 1, environment, environment.sites.first, :master)
     end
+
+    server_index = 0 if @role_in_name
     @slave_instances.times do
       instantiate_machine(server_index += 1, environment, environment.sites.first, :slave)
     end

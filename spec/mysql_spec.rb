@@ -404,7 +404,7 @@ describe_stack 'should support dependencies' do
   end
 end
 
-describe_stack 'should provide the correct server_ids' do
+describe_stack 'should not alter legacy server_ids' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
@@ -431,6 +431,71 @@ describe_stack 'should provide the correct server_ids' do
     expect(host.to_enc['role::mysql_server']['server_id']).to eql(201)
   end
 end
+describe_stack 'should allow server_id to be overwritten' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        each_machine { |machine| machine.server_id = 99 }
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    enc_server_role = host.to_enc['role::mysql_server']
+    expect(enc_server_role['server_id']).to eql(99)
+  end
+end
+
+describe_stack 'should provide the correct server_ids' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.role_in_name = true
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.backup_instances = 1
+        self.primary_site_backup_instances = 1
+        self.secondary_site_slave_instances = 1
+        self.secondary_site_user_access_instances = 1
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts([
+      'testing-mydb-master-001.mgmt.space.net.local',
+      'testing-mydb-slave-001.mgmt.space.net.local',
+      'testing-mydb-slave-001.mgmt.earth.net.local',
+      'testing-mydb-backup-001.mgmt.space.net.local',
+      'testing-mydb-backup-001.mgmt.earth.net.local',
+      'testing-mydb-useraccess-001.mgmt.earth.net.local',
+    ])
+  end
+  host("testing-mydb-master-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(1)
+  end
+  host("testing-mydb-slave-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(101)
+  end
+  host("testing-mydb-slave-001.mgmt.earth.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(151)
+  end
+  host("testing-mydb-backup-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(201)
+  end
+  host("testing-mydb-backup-001.mgmt.earth.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(251)
+  end
+  host("testing-mydb-useraccess-001.mgmt.earth.net.local") do |host|
+    expect(host.to_enc['role::mysql_server']['server_id']).to eql(351)
+  end
+end
+
 describe_stack 'should allow server_id to be overwritten' do
   given do
     stack "mysql" do
@@ -953,5 +1018,36 @@ describe_stack 'create standalone mysql servers' do
     enc = host.to_enc['role::mysql_server']
     expect(enc['monitoring_checks']).to be_empty
     expect(enc['role']).to eql(:standalone)
+  end
+end
+
+describe_stack 'should support instances as a site hash with roles' do
+  given do
+    stack 'mysql' do
+      mysql_cluster "mydb" do
+        self.role_in_name = true
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.backup_instances = 1
+        self.standalone_instances = 1
+        self.user_access_instances = 1
+      end
+    end
+
+    env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
+      instantiate_stack "mysql"
+    end
+  end
+
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts(
+      [
+        'e1-mydb-master-001.mgmt.earth.net.local',
+        'e1-mydb-slave-001.mgmt.earth.net.local',
+        'e1-mydb-standalone-001.mgmt.earth.net.local',
+        'e1-mydb-backup-001.mgmt.jupiter.net.local',
+        'e1-mydb-useraccess-001.mgmt.earth.net.local',
+      ]
+    )
   end
 end
