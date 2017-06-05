@@ -473,7 +473,7 @@ describe_stack 'should provide the correct server_ids' do
       'testing-mydb-slave-001.mgmt.earth.net.local',
       'testing-mydb-backup-001.mgmt.space.net.local',
       'testing-mydb-backup-001.mgmt.earth.net.local',
-      'testing-mydb-useraccess-001.mgmt.earth.net.local',
+      'testing-mydb-useraccess-001.mgmt.earth.net.local'
     ])
   end
   host("testing-mydb-master-001.mgmt.space.net.local") do |host|
@@ -1046,7 +1046,7 @@ describe_stack 'should support instances as a site hash with roles' do
         'e1-mydb-slave-001.mgmt.earth.net.local',
         'e1-mydb-standalone-001.mgmt.earth.net.local',
         'e1-mydb-backup-001.mgmt.jupiter.net.local',
-        'e1-mydb-useraccess-001.mgmt.earth.net.local',
+        'e1-mydb-useraccess-001.mgmt.earth.net.local'
       ]
     )
   end

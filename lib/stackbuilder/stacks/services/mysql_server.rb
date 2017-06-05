@@ -108,7 +108,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @server_id
   end
 
-
   def data_size(size)
     modify_storage('/mnt/data' => { :size => size })
   end
