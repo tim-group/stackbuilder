@@ -47,6 +47,7 @@ module Stacks::Services::MysqlCluster
     @user_access_instances = 0
     @secondary_site_user_access_instances = 0
     @standalone_instances = 0
+    @role_in_name = true
   end
 
   def instantiate_machines(environment)

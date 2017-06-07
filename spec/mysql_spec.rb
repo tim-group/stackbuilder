@@ -5,6 +5,7 @@ describe_stack 'should provide a single instance mode to be backwards compatible
   given do
     stack "mysql" do
       mysql_cluster "frdb" do
+        self.role_in_name = false
         single_instance
       end
     end
@@ -22,7 +23,9 @@ end
 describe_stack 'should provide the correct cross routing enc data' do
   given do
     stack "mysql" do
-      mysql_cluster "frdb"
+      mysql_cluster "frdb" do
+        self.role_in_name = false
+      end
     end
 
     env "testing", :primary_site => "pg", :secondary_site => "oy" do
@@ -47,7 +50,9 @@ end
 describe_stack 'should provide 3 mysql servers by default, one is a master' do
   given do
     stack "mysql" do
-      mysql_cluster "frdb"
+      mysql_cluster "frdb" do
+        self.role_in_name = false
+      end
     end
 
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -75,7 +80,9 @@ end
 describe_stack 'should default to disallow destory' do
   given do
     stack "mysql" do
-      mysql_cluster "spoondb"
+      mysql_cluster "spoondb" do
+        self.role_in_name = false
+      end
     end
 
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -93,6 +100,7 @@ describe_stack 'should allow destroy to be overwritten' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         each_machine { |machine| machine.destroyable = true }
       end
     end
@@ -111,6 +119,7 @@ describe_stack 'should provide correct enc data' do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.database_name = "mydb"
+        self.role_in_name = false
         each_machine { |machine| machine.destroyable = true }
       end
     end
@@ -187,6 +196,7 @@ describe_stack 'should provide the correct application rights' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = "ref"
       end
     end
@@ -221,6 +231,7 @@ describe_stack 'should allow storage options to be overwritten' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = "mydb"
         data_size('14G')
         backup_size('29G')
@@ -245,6 +256,7 @@ describe_stack 'should allow backup_instance_site to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.backup_instance_site = :primary_site
         self.master_instances = 1
         self.slave_instances = 0
@@ -268,6 +280,7 @@ describe_stack 'should always provide a default data mount of /mnt/data with sen
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -285,6 +298,7 @@ describe_stack 'should provide a default of 4GB of ram and 2 cpu cores' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do
@@ -301,6 +315,7 @@ describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of 
   given do
     stack "mysql51" do
       mysql_cluster "my51" do
+        self.role_in_name = false
         each_machine do |machine|
           machine.template(:precise)
         end
@@ -308,6 +323,7 @@ describe_stack 'should have mysql 5.6.25-1ubuntu12.04 as the default version of 
     end
     stack "mysql55" do
       mysql_cluster "my55" do
+        self.role_in_name = false
         each_machine do |machine|
           machine.template(:precise)
           machine.version = '5.5.43-0'
@@ -331,6 +347,7 @@ describe_stack 'should have mysql 5.6.25-1ubuntu14.04 as the default version of 
   given do
     stack "mysql51" do
       mysql_cluster "my51" do
+        self.role_in_name = false
         each_machine do |machine|
           machine.template(:trusty)
         end
@@ -338,6 +355,7 @@ describe_stack 'should have mysql 5.6.25-1ubuntu14.04 as the default version of 
     end
     stack "mysql55" do
       mysql_cluster "my55" do
+        self.role_in_name = false
         each_machine do |machine|
           machine.version = '5.5.43-0'
           machine.template(:trusty)
@@ -367,6 +385,7 @@ describe_stack 'should support dependencies' do
     end
     stack 'fr_db' do
       mysql_cluster 'frdb' do
+        self.role_in_name = false
         self.database_name = "futuresroll"
       end
     end
@@ -377,6 +396,7 @@ describe_stack 'should support dependencies' do
     end
     stack 'hr_db' do
       mysql_cluster 'hrdb' do
+        self.role_in_name = false
         self.database_name = "huturesroll"
       end
     end
@@ -408,6 +428,7 @@ describe_stack 'should not alter legacy server_ids' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.master_instances = 1
         self.slave_instances = 1
         self.backup_instances = 1
@@ -435,6 +456,7 @@ describe_stack 'should allow server_id to be overwritten' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         each_machine { |machine| machine.server_id = 99 }
       end
     end
@@ -500,6 +522,7 @@ describe_stack 'should allow server_id to be overwritten' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         each_machine { |machine| machine.server_id = 99 }
       end
     end
@@ -517,6 +540,7 @@ describe_stack 'should allow server_id_offset to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.master_instances = 1
         self.slave_instances = 0
         self.backup_instances = 0
@@ -537,6 +561,7 @@ describe_stack 'should allow index_offset' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         @server_id_offset = 1000
       end
     end
@@ -554,6 +579,7 @@ describe_stack 'should allow use_gtids to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         each_machine do |machine|
           machine.use_gtids = true if %w(testing-mydb-001).include? machine.hostname
         end
@@ -574,6 +600,7 @@ describe_stack 'should provide a default mysql config' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'magic'
       end
     end
@@ -592,6 +619,7 @@ describe_stack 'should allow custom mysql_config to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         each_machine do |machine|
           machine.config = {
             'mysqld' => {
@@ -627,6 +655,7 @@ describe_stack 'should merge mysql_config with gtid_config when using use_gtids'
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         each_machine do |machine|
           machine.use_gtids = true
           machine.config = {
@@ -656,6 +685,7 @@ describe_stack 'should create secondary_sited slave databases' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.master_instances = 1
         self.slave_instances = 1
         self.backup_instances = 1
@@ -683,6 +713,7 @@ describe_stack 'should allow percona_checksum flag to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.percona_checksum_ignore_tables = ['test.ignore']
         self.percona_checksum_monitoring = true
@@ -715,6 +746,7 @@ describe_stack 'should allow percona_checksum flag to be specified' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.percona_checksum = false
         self.master_instances = 1
@@ -734,6 +766,7 @@ describe_stack 'should provide the correct monitoring checks for master and slav
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 1
         self.slave_instances = 1
@@ -772,6 +805,7 @@ describe_stack 'should allow creation of user_access_servers in primary_site' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 1
         self.user_access_instances = 1
@@ -801,6 +835,7 @@ describe_stack 'should allow creation of user_access_servers in secondary_site' 
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 1
         self.secondary_site_user_access_instances = 1
@@ -830,6 +865,7 @@ describe_stack 'should grant_user_rights_by_default when no user_access_servers 
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 1
         self.slave_instances = 0
@@ -854,6 +890,7 @@ describe_stack 'should grant_user_rights_by_default when machine.grant_user_righ
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 1
         self.user_access_instances = 1
@@ -914,6 +951,7 @@ describe_stack 'should not allow applications to depend_on user_access servers' 
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 1
         self.user_access_instances = 1
@@ -945,6 +983,7 @@ describe_stack 'should create two masters' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 2
         self.user_access_instances = 0
@@ -981,6 +1020,7 @@ describe_stack 'create primary site backup instances' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 1
         self.user_access_instances = 0
@@ -1003,6 +1043,7 @@ describe_stack 'create standalone mysql servers' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
+        self.role_in_name = false
         self.database_name = 'test'
         self.master_instances = 0
         self.slave_instances = 0
@@ -1025,7 +1066,6 @@ describe_stack 'should support instances as a site hash with roles' do
   given do
     stack 'mysql' do
       mysql_cluster "mydb" do
-        self.role_in_name = true
         self.master_instances = 1
         self.slave_instances = 1
         self.backup_instances = 1

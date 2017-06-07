@@ -6,6 +6,7 @@ describe_stack 'stack-with-dependencies' do
   given do
     stack 'example_db_depended_on_in_different_ways' do
       mysql_cluster 'exampledb' do
+        self.role_in_name = false
         self.database_name = 'exampledb'
         self.master_instances = 2
         self.slave_instances = 3
