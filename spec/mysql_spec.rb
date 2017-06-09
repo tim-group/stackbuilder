@@ -1108,9 +1108,15 @@ describe_stack 'should allow snapshot backups' do
         self.backup_instances = 1
         self.standalone_instances = 0
         self.snapshot_backups = true
-        self.snapshot_pv_size = '60G'
-        self.snapshot_size = '256M'
-        self.snapshot_retention = '6 days'
+        each_machine do |machine|
+          if machine.role_of?(:backup)
+            machine.snapshot_pv_size('60G')
+            machine.snapshot_size = '256M'
+            machine.snapshot_retention = '6 days'
+            machine.snapshot_hour = '*'
+            machine.snapshot_minute = '*/30'
+          end
+        end
       end
     end
     env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
@@ -1133,6 +1139,8 @@ describe_stack 'should allow snapshot backups' do
     expect(enc.has_key? 'db_snapshot').to be true
     expect(enc['db_snapshot']['snapshot_size']).to eql '256M'
     expect(enc['db_snapshot']['keep_snapshots_until']).to eql '6 days'
+    expect(enc['db_snapshot']['cron_hour']).to eql '*'
+    expect(enc['db_snapshot']['cron_minute']).to eql '*/30'
 
     spec = host.to_spec
     expect(spec[:storage][:"/mnt/data"][:prepare][:options][:create_guest_lvm]).to be true

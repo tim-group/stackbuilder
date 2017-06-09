@@ -9,6 +9,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :use_gtids
   attr_accessor :monitoring_checks
   attr_accessor :grant_user_rights_by_default
+  attr_accessor :snapshot_retention, :snapshot_size, :snapshot_hour, :snapshot_minute, :snapshot_pv_size
 
   def initialize(virtual_service, base_hostname, environment, site, role)
     super(virtual_service, base_hostname, environment, site, role)
@@ -22,6 +23,12 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @version = '5.6.25-1'
     @monitoring_checks = monitoring_checks
     @grant_user_rights_by_default = false
+
+    @snapshot_pv_size = '20G'
+    @snapshot_retention = '7 days'
+    @snapshot_size = '512M'
+    @snapshot_hour = '0'
+    @snapshot_minute = '0'
 
     storage = {
       '/tmp' => {
@@ -42,19 +49,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         :persistent => true
       }
     }
-    snapshot_storage = {
-      '/mnt/data' => {
-        :prepare => {
-          :options => {
-            :create_guest_lvm  => true,
-            :guest_lvm_pv_size => @virtual_service.snapshot_pv_size,
-          }
-        }
-      },
-    }
     modify_storage(storage)
     modify_storage(backup_storage) if role_of?(:backup)
-    modify_storage(snapshot_storage) if role_of?(:backup) and @virtual_service.snapshot_backups
   end
 
   def monitoring_checks
@@ -72,8 +68,18 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     checks
   end
 
-  def backup_size(size)
-    modify_storage('/mnt/storage' => { :size => size }) if role_of?(:backup)
+  def snapshot_pv_size(size)
+    snapshot_storage = {
+      '/mnt/data' => {
+        :prepare => {
+          :options => {
+            :create_guest_lvm  => true,
+            :guest_lvm_pv_size => size,
+          }
+        }
+      },
+    }
+    modify_storage(snapshot_storage) if role_of?(:backup) and @virtual_service.snapshot_backups
   end
 
   def server_id_legacy
@@ -182,11 +188,11 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   def snapshot_enc
     {
       'db_snapshot' => {
-        'cron_hour'            => '0',
-        'cron_minute'          => '0',
+        'cron_hour'            => @snapshot_hour,
+        'cron_minute'          => @snapshot_minute,
         'lv_to_snapshot'       => '_mnt_data',
-        'snapshot_size'        => @virtual_service.snapshot_size,
-        'keep_snapshots_until' => @virtual_service.snapshot_retention
+        'snapshot_size'        => @snapshot_size,
+        'keep_snapshots_until' => @snapshot_retention
       }
     }
   end
