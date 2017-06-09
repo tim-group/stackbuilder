@@ -74,12 +74,12 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         :prepare => {
           :options => {
             :create_guest_lvm  => true,
-            :guest_lvm_pv_size => size,
+            :guest_lvm_pv_size => size
           }
         }
-      },
+      }
     }
-    modify_storage(snapshot_storage) if role_of?(:backup) and @virtual_service.snapshot_backups
+    modify_storage(snapshot_storage) if role_of?(:backup) && @virtual_service.snapshot_backups
   end
 
   def server_id_legacy

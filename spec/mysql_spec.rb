@@ -234,12 +234,8 @@ describe_stack 'should allow storage options to be overwritten' do
         self.role_in_name = false
         self.database_name = "mydb"
         each_machine do |machine|
-          machine.modify_storage({
-            '/mnt/data'   => { :size => '14G' },
-          })
-          machine.modify_storage({
-            '/mnt/storage' => { :size => '29G' },
-          }) if machine.role_of?(:backup)
+          machine.modify_storage('/mnt/data'   => { :size => '14G' })
+          machine.modify_storage('/mnt/storage' => { :size => '29G' }) if machine.role_of?(:backup)
         end
       end
     end
@@ -1109,13 +1105,12 @@ describe_stack 'should allow snapshot backups' do
         self.standalone_instances = 0
         self.snapshot_backups = true
         each_machine do |machine|
-          if machine.role_of?(:backup)
-            machine.snapshot_pv_size('60G')
-            machine.snapshot_size = '256M'
-            machine.snapshot_retention = '6 days'
-            machine.snapshot_hour = '*'
-            machine.snapshot_minute = '*/30'
-          end
+          next unless machine.role_of?(:backup)
+          machine.snapshot_pv_size('60G')
+          machine.snapshot_size = '256M'
+          machine.snapshot_retention = '6 days'
+          machine.snapshot_hour = '*'
+          machine.snapshot_minute = '*/30'
         end
       end
     end
@@ -1127,16 +1122,13 @@ describe_stack 'should allow snapshot backups' do
     expect(stack).to have_hosts(
       [
         'production-mydb-master-001.mgmt.space.net.local',
-        'production-mydb-backup-001.mgmt.earth.net.local',
+        'production-mydb-backup-001.mgmt.earth.net.local'
       ]
     )
   end
-  host("production-mydb-master-001.mgmt.space.net.local") do |host|
-    enc = host.to_enc['role::mysql_server']
-  end
   host("production-mydb-backup-001.mgmt.earth.net.local") do |host|
     enc = host.to_enc
-    expect(enc.has_key? 'db_snapshot').to be true
+    expect(enc.key? 'db_snapshot').to be true
     expect(enc['db_snapshot']['snapshot_size']).to eql '256M'
     expect(enc['db_snapshot']['keep_snapshots_until']).to eql '6 days'
     expect(enc['db_snapshot']['cron_hour']).to eql '*'
@@ -1147,4 +1139,3 @@ describe_stack 'should allow snapshot backups' do
     expect(spec[:storage][:"/mnt/data"][:prepare][:options][:guest_lvm_pv_size]).to eql '60G'
   end
 end
-
