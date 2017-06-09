@@ -1097,3 +1097,46 @@ describe_stack 'should support instances as a site hash with roles' do
     )
   end
 end
+
+describe_stack 'should allow snapshot backups' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.slave_instances = 0
+        self.backup_instances = 1
+        self.standalone_instances = 0
+        self.snapshot_backups = true
+        self.snapshot_pv_size = '60G'
+        self.snapshot_size = '256M'
+        self.snapshot_retention = '6 days'
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  it_stack 'should contain all the expected hosts' do |stack|
+    expect(stack).to have_hosts(
+      [
+        'production-mydb-master-001.mgmt.space.net.local',
+        'production-mydb-backup-001.mgmt.earth.net.local',
+      ]
+    )
+  end
+  host("production-mydb-master-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc['role::mysql_server']
+  end
+  host("production-mydb-backup-001.mgmt.earth.net.local") do |host|
+    enc = host.to_enc
+    expect(enc.has_key? 'db_snapshot').to be true
+    expect(enc['db_snapshot']['snapshot_size']).to eql '256M'
+    expect(enc['db_snapshot']['keep_snapshots_until']).to eql '6 days'
+
+    spec = host.to_spec
+    expect(spec[:storage][:"/mnt/data"][:prepare][:options][:create_guest_lvm]).to be true
+    expect(spec[:storage][:"/mnt/data"][:prepare][:options][:guest_lvm_pv_size]).to eql '60G'
+  end
+end
+

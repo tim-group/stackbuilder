@@ -42,8 +42,19 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
         :persistent => true
       }
     }
+    snapshot_storage = {
+      '/mnt/data' => {
+        :prepare => {
+          :options => {
+            :create_guest_lvm  => true,
+            :guest_lvm_pv_size => @virtual_service.snapshot_pv_size,
+          }
+        }
+      },
+    }
     modify_storage(storage)
     modify_storage(backup_storage) if role_of?(:backup)
+    modify_storage(snapshot_storage) if role_of?(:backup) and @virtual_service.snapshot_backups
   end
 
   def monitoring_checks
@@ -168,6 +179,18 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     }
   end
 
+  def snapshot_enc
+    {
+      'db_snapshot' => {
+        'cron_hour'            => '0',
+        'cron_minute'          => '0',
+        'lv_to_snapshot'       => '_mnt_data',
+        'snapshot_size'        => @virtual_service.snapshot_size,
+        'keep_snapshots_until' => @virtual_service.snapshot_retention
+      }
+    }
+  end
+
   def user_rights_enc
     create_read_only_users = false
     create_read_only_users = true if @role == :user_access ||
@@ -260,6 +283,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     recurse_merge!(enc, config_enc)
     recurse_merge!(enc, percona_checksum_enc)
     recurse_merge!(enc, user_rights_enc)
+    recurse_merge!(enc, snapshot_enc) if @virtual_service.snapshot_backups
 
     replication_rights_class = 'mysql_hacks::replication_rights_wrapper'
     enc[replication_rights_class] = {} if enc[replication_rights_class].nil?

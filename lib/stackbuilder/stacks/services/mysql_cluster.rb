@@ -25,6 +25,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :user_access_instances
   attr_accessor :secondary_site_user_access_instances
   attr_accessor :standalone_instances
+  attr_accessor :snapshot_backups, :snapshot_pv_size, :snapshot_retention, :snapshot_size
 
   def configure
     @backup_instance_site = :secondary_site
@@ -48,6 +49,11 @@ module Stacks::Services::MysqlCluster
     @secondary_site_user_access_instances = 0
     @standalone_instances = 0
     @role_in_name = true
+
+    @snapshot_backups = false
+    @snapshot_pv_size = '20G'
+    @snapshot_size = '512M'
+    @snapshot_retention = '7 days'
   end
 
   def instantiate_machines(environment)
