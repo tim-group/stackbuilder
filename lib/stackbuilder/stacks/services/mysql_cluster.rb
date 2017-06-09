@@ -102,18 +102,6 @@ module Stacks::Services::MysqlCluster
     'mysqlcluster'
   end
 
-  def data_size(size)
-    each_machine do |machine|
-      machine.data_size(size)
-    end
-  end
-
-  def backup_size(size)
-    each_machine do |machine|
-      machine.backup_size(size) if machine.backup?
-    end
-  end
-
   def create_persistent_storage_override
     each_machine(&:create_persistent_storage_override)
   end

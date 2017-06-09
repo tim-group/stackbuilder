@@ -233,8 +233,14 @@ describe_stack 'should allow storage options to be overwritten' do
       mysql_cluster "mydb" do
         self.role_in_name = false
         self.database_name = "mydb"
-        data_size('14G')
-        backup_size('29G')
+        each_machine do |machine|
+          machine.modify_storage({
+            '/mnt/data'   => { :size => '14G' },
+          })
+          machine.modify_storage({
+            '/mnt/storage' => { :size => '29G' },
+          }) if machine.role_of?(:backup)
+        end
       end
     end
     env "testing", :primary_site => "space", :secondary_site => "earth" do
