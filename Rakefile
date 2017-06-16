@@ -1,6 +1,7 @@
 require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
 
+
 desc 'Run specs'
 RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec'])
 
@@ -11,7 +12,8 @@ end
 
 desc 'Create a debian package'
 task :package do
-  version = "0.0.#{ENV['BUILD_NUMBER']}"
+  v = ENV['BUILD_NUMBER'] || "0.#{`git rev-parse --short HEAD`.chomp.hex}"
+  version = "0.0.#{v}"
 
   sh 'rm -rf build/package'
   sh 'mkdir -p build/package/usr/local/lib/site_ruby/timgroup/'
