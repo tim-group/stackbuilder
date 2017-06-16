@@ -10,7 +10,7 @@ class Stacks::Services::ProxyVHost
   def initialize(virtual_proxy_service, fqdn, service, environment, location, &block)
     @aliases = []
     @add_default_aliases = true
-    @cert = 'wildcard_timgroup_com'
+    @cert = virtual_proxy_service.cert
     @proxy_pass_rules = {}
     @service = service
     @fqdn = fqdn

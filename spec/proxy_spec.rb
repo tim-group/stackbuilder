@@ -149,6 +149,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
         @enable_secondary_site = true
         @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'shared') do
+          @cert = 'wildcard_timgroup_com'
           add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'shared'
         end
         nat_config.dnat_enabled = true
@@ -619,5 +620,31 @@ describe_stack 'fails if a proxy_service has more than one vhost thats configure
       vhosts = host.to_enc['role::proxyserver']['vhosts']
       expect(vhosts['e1-exampleproxy-vip.space.net.local']['log_to_syslog']).to eql(true)
     end
+  end
+end
+describe_stack 'vhosts should adopt default cert from proxy_service' do
+  given do
+    stack "proxyserver" do
+      proxy_service "proxy" do
+        vhost('app') do
+          @cert = 'super_cert'
+        end
+      end
+    end
+    stack 'appserver' do
+      app_service 'app' do
+        self.application = 'app'
+      end
+    end
+
+    env "st", :primary_site => "st", :secondary_site => "bs" do
+      instantiate_stack "proxyserver"
+      instantiate_stack "appserver"
+    end
+  end
+
+  host('st-proxy-001.mgmt.st.net.local') do |proxyserver|
+    vhost_enc = proxyserver.to_enc['role::proxyserver']['vhosts']['st-proxy-vip.st.net.local']
+    expect(vhost_enc['cert']).to eql 'super_cert'
   end
 end
