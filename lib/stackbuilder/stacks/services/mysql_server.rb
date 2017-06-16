@@ -289,7 +289,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     recurse_merge!(enc, config_enc)
     recurse_merge!(enc, percona_checksum_enc)
     recurse_merge!(enc, user_rights_enc)
-    recurse_merge!(enc, snapshot_enc) if @virtual_service.snapshot_backups
+    recurse_merge!(enc, snapshot_enc) if role_of?(:backup) and @virtual_service.snapshot_backups
 
     replication_rights_class = 'mysql_hacks::replication_rights_wrapper'
     enc[replication_rights_class] = {} if enc[replication_rights_class].nil?

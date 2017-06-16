@@ -1126,6 +1126,10 @@ describe_stack 'should allow snapshot backups' do
       ]
     )
   end
+  host("production-mydb-master-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc
+    expect(enc.key? 'db_snapshot').to be false
+  end
   host("production-mydb-backup-001.mgmt.earth.net.local") do |host|
     enc = host.to_enc
     expect(enc.key? 'db_snapshot').to be true
