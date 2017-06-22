@@ -30,7 +30,8 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
                  'logstash_receiver_hosts'         => @elasticsearch_cluster.logstash_receiver_hosts,
                  'prod_vip_fqdn'                  => @elasticsearch_cluster.vip_fqdn(:prod, fabric),
                  'minimum_master_nodes'           => @elasticsearch_cluster.elasticsearch_minimum_master_nodes,
-                 'node_attrs'                     => @node_attrs
+                 'node_attrs'                     => @node_attrs,
+                 'allowed_hosts'                  => @virtual_service.allowed_hosts
                },
                'server::default_new_mgmt_net_local' => nil)
     enc
