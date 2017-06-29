@@ -139,6 +139,7 @@ module Support::MCollectivePuppet
     end]
   end
 
+  # FIXME: This is a horrific hack
   # XXX the machine_fqdn argument might need to be removed if moving puppet to a vm
   def puppetca(machine_fqdn = nil, &block)
     puppetserver = case machine_fqdn
@@ -146,7 +147,7 @@ module Support::MCollectivePuppet
                    when /\.mgmt\.oy\.net\.local$/ then ["oy-puppetserver-001.mgmt.oy.net.local"]
                    when /\.mgmt\.pg\.net\.local$/ then ["pg-puppetserver-001.mgmt.pg.net.local"]
                    when /\.mgmt\.lon\.net\.local$/ then ["lon-puppetserver-001.mgmt.lon.net.local"]
-                   when /\.mgmt\.ci\.net\.local$/ then ["ci-puppetserver-001.mgmt.ci.net.local"]
+                   when /\.mgmt\.ci\.net\.local$/ then ["lon-puppetserver-001.mgmt.lon.net.local"]
     end
 
     if puppetserver.nil?
