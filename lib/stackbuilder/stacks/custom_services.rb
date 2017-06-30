@@ -20,7 +20,13 @@ class Stacks::CustomServices
     "#{environment.name}_#{name.to_sym}"
   end
 
+  # FIXME: Remove when all things have moved to loadbalanced_app_service it is just confusing
   def app_service(name, &block)
+    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
+                    Stacks::Services::AppServer, &block)
+  end
+
+  def loadbalanced_app_service(name, &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                     Stacks::Services::AppServer, &block)
   end
