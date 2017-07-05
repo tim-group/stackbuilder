@@ -30,7 +30,7 @@ module Stacks::Services::RabbitMqLoggingCluster
   end
 
   def dependent_instances(location)
-    (dependant_instance_fqdns(location) + @hardcoded_users.map(&:prod_fqdn))
+    (dependant_instance_fqdns(location, [:prod] ,false) + @hardcoded_users.map(&:prod_fqdn))
   end
 
   def dependant_users
