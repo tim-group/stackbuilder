@@ -74,4 +74,16 @@ module Stacks::Services::RabbitMqLoggingCluster
       service.children.map(&:prod_fqdn)
     end.flatten.sort
   end
+
+  def config_params(dependent, fabric)
+    config_params = {
+      "logging.rabbit.clusternodes" => @definitions.values.select { |server| server.fabric == fabric }.inject([]) do |prod_fqdns, server|
+        prod_fqdns << server.prod_fqdn
+        prod_fqdns.sort
+      end.join(','),
+      "logging.rabbit.username"      => dependent.application,
+      "logging.rabbit.password"      => "#{dependent.environment.name}/#{dependent.application}/messaging_password"
+    }
+    config_params
+  end
 end

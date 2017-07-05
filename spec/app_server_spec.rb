@@ -139,3 +139,41 @@ describe_stack 'should have the correct app_dependant_instances and participatio
     expect(enc['application_dependant_instances'].size).to eql(4)
   end
 end
+
+describe_stack 'test_app_server_with_rabbit_logging_dependencies' do
+  given do
+    stack "test_app_server" do
+      app_service 'myapp' do
+        self.groups = ['blue']
+        self.application = 'rw-app'
+        depend_on 'rabbitmq-elasticsearch', environment.name
+      end
+    end
+
+    stack 'centralised_logging_cluster' do
+      rabbitmq_logging 'rabbitmq-elasticsearch'
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "test_app_server"
+      instantiate_stack "centralised_logging_cluster"
+    end
+  end
+
+  host("e1-rabbitmq-elasticsearch-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc['role::rabbitmq_logging']
+    expect(enc['dependant_instances']).to include(
+      'e1-myapp-001.space.net.local',
+      'e1-myapp-002.space.net.local',
+      'e1-rabbitmq-elasticsearch-002.space.net.local')
+    expect(enc['dependant_users']).to have_key('rw-app')
+  end
+
+  host("e1-myapp-001.mgmt.space.net.local") do |host|
+    enc = host.to_enc['role::http_app']['dependencies']
+    expect(enc['logging.rabbit.clusternodes']).to include(
+      'e1-rabbitmq-elasticsearch-001.space.net.local,e1-rabbitmq-elasticsearch-002.space.net.local')
+    expect(enc['logging.rabbit.username']).to include('rw-app')
+    expect(enc['logging.rabbit.password']).to include('e1/rw-app/messaging_password')
+  end
+end
