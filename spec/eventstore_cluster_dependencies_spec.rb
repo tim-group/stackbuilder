@@ -8,7 +8,7 @@ describe_stack 'eventstore-stack-with-dependencies' do
     stack 'example_store' do
       eventstore_cluster 'examplestore' do |cluster|
         self.eventstore_name = 'examplestore'
-        cluster.instances = { 'earth' => 3 }
+        cluster.instances = { 'space' => 3 }
         cluster.each_machine do |machine|
           machine.template(:trusty)
           machine.ram = '4097152'
@@ -21,6 +21,7 @@ describe_stack 'eventstore-stack-with-dependencies' do
       app_service 'myapp' do
         self.groups = ['blue']
         self.application = 'rw-app'
+        self.instances = { 'space' => 2 }
         depend_on 'examplestore', environment.name
       end
     end
@@ -31,15 +32,16 @@ describe_stack 'eventstore-stack-with-dependencies' do
     end
   end
 
-  host('e-examplestore-001.mgmt.earth.net.local') do |host|
+  host('e-examplestore-001.mgmt.space.net.local') do |host|
     deps = host.to_enc['role::eventstore_server']
-    expect(deps['dependant_instances']).to eql(["e-myapp-001.earth.net.local", "e-myapp-002.earth.net.local"])
+    pp deps
+    expect(deps['dependant_instances']).to eql(["e-myapp-001.space.net.local", "e-myapp-002.space.net.local"])
   end
 
-  host('e-myapp-001.mgmt.earth.net.local') do |host|
+  host('e-myapp-001.mgmt.space.net.local') do |host|
     deps = host.to_enc['role::http_app']['dependencies']
     expect(deps['eventstore.examplestore.cluster']).to eql(
-      "e-examplestore-001.earth.net.local,e-examplestore-002.earth.net.local,e-examplestore-003.earth.net.local")
+      "e-examplestore-001.space.net.local,e-examplestore-002.space.net.local,e-examplestore-003.space.net.local")
     expect(deps['eventstore.examplestore.username']).to eql("admin")
     expect(deps['eventstore.examplestore.password']).to eql("changeit")
   end
