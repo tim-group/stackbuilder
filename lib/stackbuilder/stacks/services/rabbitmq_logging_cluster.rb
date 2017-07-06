@@ -82,7 +82,7 @@ module Stacks::Services::RabbitMqLoggingCluster
         prod_fqdns.sort
       end.join(','),
       "logging.rabbit.username"      => dependent.application,
-      "logging.rabbit.password"      => "#{dependent.environment.name}/#{dependent.application}/messaging_password"
+      "logging.rabbit.password_hiera_key"      => "#{dependent.environment.name}/#{dependent.application}/messaging_password"
     }
     config_params
   end
