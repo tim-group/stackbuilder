@@ -174,6 +174,6 @@ describe_stack 'test_app_server_with_rabbit_logging_dependencies' do
     expect(enc['logging.rabbit.clusternodes']).to include(
       'e1-rabbitmq-elasticsearch-001.space.net.local,e1-rabbitmq-elasticsearch-002.space.net.local')
     expect(enc['logging.rabbit.username']).to include('rw-app')
-    expect(enc['logging.rabbit.password']).to include('e1/rw-app/messaging_password')
+    expect(enc['logging.rabbit.password_hiera_key']).to include('e1/rw-app/messaging_password')
   end
 end
