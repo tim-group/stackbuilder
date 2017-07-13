@@ -160,6 +160,10 @@ class Stacks::MachineDef
     end
   end
 
+  def add_network(net)
+    @networks << net unless @networks.include? net
+  end
+
   def remove_network(net)
     @networks.delete net
   end
