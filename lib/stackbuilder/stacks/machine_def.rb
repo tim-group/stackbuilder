@@ -184,6 +184,10 @@ class Stacks::MachineDef
     @routes << route_name unless @routes.include? route_name
   end
 
+  def remove_route(route_name)
+    @routes.delete route_name
+  end
+
   def dont_start
     @dont_start = true
   end
