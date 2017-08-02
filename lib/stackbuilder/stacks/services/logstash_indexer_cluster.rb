@@ -38,14 +38,11 @@ module Stacks::Services::LogstashIndexerCluster
   end
 
   def elasticsearch_data_address(fabric)
-    addrs = virtual_services_that_i_depend_on.select do |service|
+    virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::ElasticsearchDataCluster)
     end.map do |service|
       service.vip_fqdn(:prod, fabric)
     end.flatten.sort
-
-    fail('Logstash indexer cluster can only depend on one elasticsearch data cluster') if addrs.length > 1
-    addrs.first
   end
 
   def logstash_receiver_hosts # (dependent_machine_site)
