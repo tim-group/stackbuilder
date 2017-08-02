@@ -29,20 +29,30 @@ module Stacks::Services::LogstashIndexerCluster
     end.flatten.sort
   end
 
-  def elasticsearch_data_hosts
+  def dependent_elasticsearch_data_clusters
     virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::ElasticsearchDataCluster)
-    end.map do |service|
-      service.children.map(&:prod_fqdn)
-    end.flatten.sort
+    end
   end
 
-  def elasticsearch_data_address(fabric)
-    virtual_services_that_i_depend_on.select do |service|
-      service.is_a?(Stacks::Services::ElasticsearchDataCluster)
-    end.map do |service|
+  def xpack_monitoring_elasticsearch_url(fabric)
+    addrs = dependent_elasticsearch_data_clusters.select(&:is_xpack_monitoring_destination).map! do |service|
       service.vip_fqdn(:prod, fabric)
     end.flatten.sort
+
+    fail('Logstash indexer cluster can only have one dependent elasticsearch cluster configured as the xpack_monitoring_destination') if addrs.length > 1
+    addrs.first
+  end
+
+  def elasticsearch_clusters(fabric)
+    clusters = {}
+    dependent_elasticsearch_data_clusters.each do |service|
+      clusters[service.vip_fqdn(:prod, fabric)] = service.children.map(&:prod_fqdn)
+    end
+    clusters.each do |_cluster, hosts|
+      hosts.sort!
+    end
+    clusters
   end
 
   def logstash_receiver_hosts # (dependent_machine_site)

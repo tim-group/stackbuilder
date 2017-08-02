@@ -7,10 +7,16 @@ module Stacks::Services::ElasticsearchDataCluster
 
   attr_accessor :instances
   attr_accessor :ports
+  attr_accessor :is_xpack_monitoring_destination
 
   def configure
     @ports = [9200]
     @instances = 2
+    @is_xpack_monitoring_destination = false
+  end
+
+  def xpack_monitoring_destination
+    @is_xpack_monitoring_destination = true
   end
 
   def kibana_hosts

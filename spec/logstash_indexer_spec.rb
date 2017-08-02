@@ -59,7 +59,9 @@ end
 describe_stack 'logstash indexer server enc is correct' do
   given do
     stack 'a_stack' do
-      elasticsearch_data 'elasticsearch-data'
+      elasticsearch_data 'elasticsearch-data' do
+        xpack_monitoring_destination
+      end
       elasticsearch_data 'elasticsearch-data2'
       rabbitmq_logging 'rabbitmq-elasticsearch'
       logstash_indexer 'logstash-indexer' do
@@ -88,17 +90,16 @@ describe_stack 'logstash indexer server enc is correct' do
         'oy-rabbitmq-elasticsearch-001.oy.net.local',
         'oy-rabbitmq-elasticsearch-002.oy.net.local'
       ])
-    expect(enc['role::logstash_indexer']['elasticsearch_data_hosts']).to \
-      be_eql([
+    expect(enc['role::logstash_indexer']['elasticsearch_data_hosts']).to be_nil
+    expect(enc['role::logstash_indexer']['xpack_monitoring_elasticsearch_url']).to be_eql('oy-elasticsearch-data-vip.oy.net.local')
+    expect(enc['role::logstash_indexer']['elasticsearch_clusters']).to \
+      be_eql('oy-elasticsearch-data-vip.oy.net.local' => [
         'oy-elasticsearch-data-001.oy.net.local',
-        'oy-elasticsearch-data-002.oy.net.local',
-        'oy-elasticsearch-data2-001.oy.net.local',
-        'oy-elasticsearch-data2-002.oy.net.local'
-      ])
-    expect(enc['role::logstash_indexer']['elasticsearch_cluster_address']).to \
-      be_eql([
-        'oy-elasticsearch-data-vip.oy.net.local',
-        'oy-elasticsearch-data2-vip.oy.net.local'
-      ])
+        'oy-elasticsearch-data-002.oy.net.local'
+      ],
+             'oy-elasticsearch-data2-vip.oy.net.local' => [
+               'oy-elasticsearch-data2-001.oy.net.local',
+               'oy-elasticsearch-data2-002.oy.net.local'
+             ])
   end
 end

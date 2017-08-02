@@ -36,7 +36,9 @@ end
 describe_stack 'logstash indexer server enc is correct' do
   given do
     stack 'logging_central' do
-      elasticsearch_data 'elasticsearch-data'
+      elasticsearch_data 'elasticsearch-data' do
+        xpack_monitoring_destination
+      end
       loadbalancer_service
     end
 
@@ -74,7 +76,8 @@ describe_stack 'logstash indexer server enc is correct' do
         'oy-rabbitmq-logging-001.oy.net.local',
         'oy-rabbitmq-logging-002.oy.net.local'
       ])
-    expect(role_enc['elasticsearch_cluster_address']).to be_eql('pg-elasticsearch-data-vip.pg.net.local')
+    expect(role_enc['xpack_monitoring_elasticsearch_url']).to be_eql('pg-elasticsearch-data-vip.pg.net.local')
+    expect(role_enc['elasticsearch_cluster_address']).to be_nil
   end
 
   host('pg-logstash-receiver-001.mgmt.pg.net.local') do |host|
@@ -89,7 +92,8 @@ describe_stack 'logstash indexer server enc is correct' do
         'pg-rabbitmq-logging-001.pg.net.local',
         'pg-rabbitmq-logging-002.pg.net.local'
       ])
-    expect(role_enc['elasticsearch_cluster_address']).to be_eql('pg-elasticsearch-data-vip.pg.net.local')
+    expect(role_enc['xpack_monitoring_elasticsearch_url']).to be_eql('pg-elasticsearch-data-vip.pg.net.local')
+    expect(role_enc['elasticsearch_cluster_address']).to be_nil
   end
 end
 
