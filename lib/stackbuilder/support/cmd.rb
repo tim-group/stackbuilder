@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile diff sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -126,6 +126,30 @@ class CMD
       pctl.clean_all(machine_def)
     else
       logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
+      exit 1
+    end
+  end
+
+  def dns(argv)
+    cmd = argv.shift
+    if cmd.nil? then
+      logger(Logger::FATAL) { 'dns needs a subcommand' }
+      exit 1
+    end
+
+    machine_def = check_and_get_stack
+
+    case cmd
+    when 'allocate_ips'
+      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:allocate_ips")
+    when 'free_ips'
+      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:free_ips")
+    when 'allocate_vips'
+      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:allocate_vips")
+    when 'free_vips'
+      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:free_vips")
+    else
+      logger(Logger::FATAL) { "invalid sub command \"#{cmd}\"" }
       exit 1
     end
   end

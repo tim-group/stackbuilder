@@ -295,8 +295,13 @@ namespace :sbx do
         computecontroller.enable_notify(machine_def.to_specs)
       end
 
+      desc "allocate IPs for these machines"
+      sbtask :allocate_ips do
+        get_action("allocate_ips").call(@factory.services, machine_def)
+      end
+
       # FIXME : Take this terrible, un-testable code out of rake
-      desc "allocate IPs for these virtual services"
+      desc "allocate VIPs for these virtual services"
       sbtask :allocate_vips do
         vips = []
         machine_def.accept do |child_machine_def|

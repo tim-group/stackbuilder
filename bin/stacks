@@ -42,6 +42,11 @@ Options:
     compile                   create a yaml file describing the entire infrastructure
     diff                      show compile diff between last commit and latest commit.
     diff -sb                  show compile diff between latest stackbuilder and local stackbuilder.
+    dns [-e] -s               perform DNS related tasks
+      allocate_ips            allocate all ip addresses for the specified stack (machine(s))
+      free_ips                free all ip addresses for the specified stack (machine(s))
+      allocate_vips           allocate all vip addresses for a stack (service(s))
+      free_vips               free all vip addresses for a stack (service(s))
     enc [-e] -s               print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
     spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,

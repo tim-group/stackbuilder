@@ -25,6 +25,11 @@ module Stacks::Core::Actions
       end
     end
 
+    object.action 'allocate_ips' do |services, machine_def|
+      machine_specs = machine_def.flatten.map(&:to_spec)
+      services.dns.do_ip_allocations('allocate', machine_specs)
+    end
+
     object.action 'launch' do |services, machine_def|
       machine_def.flatten.each do |machine|
         if machine.hostname.include? 'OWNER-FACT-NOT-FOUND'
