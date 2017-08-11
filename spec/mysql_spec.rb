@@ -803,6 +803,34 @@ describe_stack 'should provide the correct monitoring checks for master and slav
   end
 end
 
+describe_stack 'should provide replication checks for each master when there is more than one master in the cluster' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.role_in_name = false
+        self.database_name = 'test'
+        self.master_instances = 2
+        self.slave_instances = 0
+        self.backup_instances = 0
+        self.secondary_site_slave_instances = 0
+      end
+    end
+    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("production-mydb-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc.key?('role::mysql_server')).to eql(true)
+    enc = host.to_enc['role::mysql_server']
+    expect(enc['monitoring_checks']).to include('replication_running', 'replication_delay')
+  end
+  host("production-mydb-002.mgmt.space.net.local") do |host|
+    expect(host.to_enc.key?('role::mysql_server')).to eql(true)
+    enc = host.to_enc['role::mysql_server']
+    expect(enc['monitoring_checks']).to include('replication_running', 'replication_delay')
+  end
+end
+
 describe_stack 'should allow creation of user_access_servers in primary_site' do
   given do
     stack "mysql" do

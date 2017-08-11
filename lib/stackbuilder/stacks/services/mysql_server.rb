@@ -61,10 +61,15 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     when :master
       checks = %w(heartbeat)
       checks << 'checksum' if @virtual_service.percona_checksum && @virtual_service.percona_checksum_monitoring
+
+      if @virtual_service.master_instances > 1
+        checks += %w(replication_running replication_delay)
+      end
     else
       checks = %w(replication_running replication_delay)
       checks << 'checksum' if @virtual_service.percona_checksum && @virtual_service.percona_checksum_monitoring
     end
+
     checks
   end
 

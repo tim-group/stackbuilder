@@ -317,6 +317,14 @@ namespace :sbx do
         end
       end
 
+      desc "allocate cnames"
+      sbtask :allocate_cnames do
+        all_specs = machine_def.flatten.map(&:to_spec)
+        require 'pp'
+        pp all_specs
+        @factory.services.dns.do_cnames('add', all_specs)
+      end
+
       # FIXME : Take this terrible, un-testable code out of rake
       desc "free IPs for these virtual services"
       sbtask :free_vips do
