@@ -174,7 +174,7 @@ namespace :sbx do
         hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
       when 'nagios'
         hostcleanup_mc.class_filter('nagios')
-        hostcleanup_mc.fact_filter 'domain', '/(oy|pg)/'
+        hostcleanup_mc.fact_filter 'domain', '/(oy|pg|lon)/'
       when 'metrics'
         hostcleanup_mc.class_filter('metrics')
       end
