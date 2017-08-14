@@ -30,7 +30,7 @@ describe_stack 'exampleproxy' do
 
   host('e1-exampleproxy-001.mgmt.space.net.local') do |host|
     role_enc = host.to_enc['role::proxyserver']
-    expect(role_enc['default_ssl_cert']).to eql('wildcard_timgroup_com')
+    expect(role_enc['default_ssl_cert']).to eql('wildcard_timgroup_com_2017')
     expect(role_enc['environment']).to eql('e1')
     expect(role_enc['prod_vip_fqdn']).to eql('e1-exampleproxy-vip.space.net.local')
     expect(role_enc['vhosts'].size).to eql(3)
@@ -40,7 +40,7 @@ describe_stack 'exampleproxy' do
     expect(vhost1_enc['aliases']).to include('e1-exampleproxy-vip.space.net.local')
     expect(vhost1_enc['aliases'].size).to eql(1)
     expect(vhost1_enc['application']).to eql('example')
-    expect(vhost1_enc['cert']).to eql('wildcard_timgroup_com')
+    expect(vhost1_enc['cert']).to eql('wildcard_timgroup_com_2017')
 
     vhost2_enc = role_enc['vhosts']['example.overridden']
     expect(vhost2_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp2-vip.space.net.local:8000')
@@ -50,7 +50,7 @@ describe_stack 'exampleproxy' do
     )
     expect(vhost2_enc['aliases'].size).to eql(2)
     expect(vhost2_enc['application']).to eql('example')
-    expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com')
+    expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com_2017')
 
     vhost3_enc = role_enc['vhosts']['example.absent']
     expect(vhost3_enc['ensure']).to eql('absent')
@@ -264,7 +264,6 @@ describe_stack 'generates proxyserver enc data' do
 
   host('env-refproxy-001.mgmt.st.net.local') do |proxyserver|
     role_enc = proxyserver.to_enc['role::proxyserver']
-    expect(role_enc['default_ssl_cert']).to eql('wildcard_timgroup_com')
     expect(role_enc['environment']).to eql('env')
     expect(role_enc['prod_vip_fqdn']).to eql('env-refproxy-vip.st.net.local')
     expect(role_enc['vhosts'].size).to eql(2)
@@ -274,7 +273,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc1['aliases']).to include('example.timgroup.com', 'env-refproxy-vip.st.net.local')
     expect(vhost_enc1['aliases'].size).to eql(2)
     expect(vhost_enc1['application']).to eql('MyApp')
-    expect(vhost_enc1['cert']).to eql('wildcard_timgroup_com')
 
     vhost_enc2 = role_enc['vhosts']['example.timgroup.com']
     expect(vhost_enc2['proxy_pass_rules']).to eql('/'          => "http://env-ref2app-vip.st.net.local:8000",
@@ -282,7 +280,6 @@ describe_stack 'generates proxyserver enc data' do
     expect(vhost_enc2['aliases']).to include('env-refproxy-vip.front.st.net.local', 'env-refproxy-vip.st.net.local')
     expect(vhost_enc2['aliases'].size).to eql(2)
     expect(vhost_enc2['application']).to eql('MyOtherApp')
-    expect(vhost_enc2['cert']).to eql('wildcard_timgroup_com')
   end
 
   host("env2-refproxy2-001.mgmt.st.net.local") do |proxyserver|

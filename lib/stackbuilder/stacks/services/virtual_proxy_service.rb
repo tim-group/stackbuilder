@@ -15,7 +15,7 @@ module Stacks::Services::VirtualProxyService
   def configure
     @proxy_vhosts            = []
     @ports                   = [80, 443]
-    @cert                    = 'wildcard_timgroup_com'
+    @cert                    = 'wildcard_timgroup_com_2017'
     @override_vhost_location = {}
     @vhost_for_lb_healthcheck_override_hack = nil
     @use_deployapp = true
