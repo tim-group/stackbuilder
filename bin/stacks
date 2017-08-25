@@ -1,6 +1,10 @@
 #!/opt/ruby-bundle/bin/ruby
 
-$LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
+if ENV['dev']
+  $LOAD_PATH << 'lib/'
+else
+  $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
+end
 
 require 'getoptlong'
 
@@ -40,6 +44,8 @@ Options:
     clean [-e] -s             shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
     clean_all [-e] -s         shuts down and removes a stack, puppet, nagios and mongo
     compile                   create a yaml file describing the entire infrastructure
+    dependencies [-e] -s      list the machines that this machine depends on
+    dependents [-e] -s        list the machines that depend on this machine
     diff                      show compile diff between last commit and latest commit.
     diff -sb                  show compile diff between latest stackbuilder and local stackbuilder.
     dns [-e] -s               perform DNS related tasks
@@ -170,4 +176,4 @@ else
 end
 
 exit 0
-logger(Logger::DEBUG) { 'exiting gracefuly' }
+logger(Logger::DEBUG) { 'exiting gracefully' }

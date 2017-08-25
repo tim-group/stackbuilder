@@ -10,7 +10,7 @@ require 'stackbuilder/support/cmd_nagios'
 class CMD
   attr_reader :cmds # this list is just a safety check
   def initialize
-    @cmds = %w(audit compile diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
   end
   include CMDAudit
   include CMDLs
@@ -186,7 +186,31 @@ class CMD
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:reprovision")
   end
 
+  def dependencies(_argv)
+    machine_def = ensure_is_machine(check_and_get_stack)
+
+    service_dependencies = machine_def.virtual_service.virtual_services_that_i_depend_on
+    dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
+    puts ZAMLS.to_zamls(dependencies)
+  end
+
+  def dependents(_argv)
+    machine_def = ensure_is_machine(check_and_get_stack)
+
+    service_dependencies = machine_def.virtual_service.virtual_services_that_depend_on_me
+    dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
+    puts ZAMLS.to_zamls(dependencies)
+  end
+
   private
+
+  def ensure_is_machine(machine_def)
+    if !machine_def.is_a?(Stacks::MachineDef)
+      logger(Logger::FATAL) { "\"#{$options[:stack]}\" is not a machine fqdn" }
+      exit 1
+    end
+    machine_def
+  end
 
   def check_and_get_stack
     if $options[:stack].nil?
