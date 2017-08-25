@@ -1,8 +1,10 @@
 #!/opt/ruby-bundle/bin/ruby
 
-# A bit of a hack to allow us to run this with bundler installed gems directly
-# out of the git repo until we can run it under bunlder in a more sensible way
-if ENV['_'] == './bin/stacks'
+if ENV['dev']
+  $LOAD_PATH << 'lib/'
+elsif ENV['_'] == './bin/stacks'
+  # A bit of a hack to allow us to run this with bundler installed gems directly
+  # out of the git repo until we can run it under bunlder in a more sensible way
   $LOAD_PATH << './lib'
   require 'rubygems'
   require 'bundler/setup'
