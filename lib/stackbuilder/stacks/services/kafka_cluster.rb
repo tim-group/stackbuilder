@@ -1,15 +1,15 @@
 module Stacks::Services::KafkaCluster
   attr_accessor :primary_instances
   attr_accessor :secondary_instances
-  attr_accessor :name
+  attr_accessor :kafka_name
 
   def configure
-    @name = ''
+    @kafka_name = ''
   end
 
   def config_params(_dependent, fabric)
     config_params = {
-      "kafka.#{@name}.cluster" => all_servers(fabric).join(',')
+      "kafka.#{@kafka_name}.cluster" => all_servers(fabric).join(',')
     }
     config_params
   end

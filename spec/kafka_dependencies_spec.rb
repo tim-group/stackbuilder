@@ -7,7 +7,7 @@ describe_stack 'kafka-stack-with-dependencies' do
   given do
     stack 'example_store' do
       kafka_cluster 'examplestore' do |cluster|
-        self.name = 'examplestore'
+        self.kafka_name = 'examplestore'
         cluster.instances = { 'space' => 3 }
         cluster.each_machine do |machine|
           machine.template(:trusty)
