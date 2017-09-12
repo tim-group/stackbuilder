@@ -151,6 +151,10 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::EventStoreCluster], Stacks::Services::EventStoreServer, &block)
   end
 
+  def kafka_cluster(name = 'kafka', &block)
+    machineset_with(name, [Stacks::Services::KafkaCluster], Stacks::Services::KafkaServer, &block)
+  end
+
   def standard_service(name, &block)
     machineset_with(name, [], Stacks::Services::StandardServer, &block)
   end
