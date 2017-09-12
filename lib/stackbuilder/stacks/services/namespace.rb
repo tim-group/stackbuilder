@@ -16,6 +16,8 @@ module Stacks
     require 'stackbuilder/stacks/services/eventstore_server'
     require 'stackbuilder/stacks/services/external_server'
     require 'stackbuilder/stacks/services/external_server_cluster'
+    require 'stackbuilder/stacks/services/kafka_cluster'
+    require 'stackbuilder/stacks/services/kafka_server'
     require 'stackbuilder/stacks/services/kibana_cluster'
     require 'stackbuilder/stacks/services/kibana_server'
     require 'stackbuilder/stacks/services/legacy_mysql_cluster'
