@@ -6,6 +6,7 @@ class Stacks::Services::KafkaServer < Stacks::MachineDef
     enc = super()
     siblings = @virtual_service.children
     enc.merge!('role::kafka_server' => {
+                 'hostname'            => @hostname,
                  'clusternodes'        => siblings.map(&:prod_fqdn).sort,
                  'dependant_instances' => @virtual_service.dependant_instance_fqdns(location, [:prod], false)
                })

@@ -6,7 +6,6 @@ class Stacks::Services::EventStoreServer < Stacks::MachineDef
     enc = super()
     siblings = @virtual_service.children
     enc.merge!('role::eventstore_server' => {
-                 'hostname'            => :hostname,
                  'clusternodes'        => siblings.map(&:prod_fqdn).sort,
                  'dependant_instances' => @virtual_service.dependant_instance_fqdns(location, [:prod], false)
                })
