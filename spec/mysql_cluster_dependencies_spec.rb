@@ -22,11 +22,20 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
+    stack 'example_legacy_db' do
+      legacy_mysql_cluster 'examplelegacydb' do
+        self.instances = 1
+        self.database_name = 'examplelegacydb'
+        self.application = 'examplelegacy'
+      end
+    end
+
     stack 'master_with_slaves_example' do
       app_service 'myapp' do
         self.groups = ['blue']
         self.application = 'rw-app'
         depend_on 'exampledb', environment.name, :master_with_slaves
+        depend_on 'examplelegacydb', environment.name, :read_only
 
         each_machine do |machine|
           machine.enc_hack do |enc|
@@ -44,6 +53,7 @@ describe_stack 'stack-with-dependencies' do
 
     env 'e', :primary_site => 'earth', :secondary_site => 'space' do
       instantiate_stack 'example_db_depended_on_in_different_ways'
+      instantiate_stack 'example_legacy_db'
       instantiate_stack 'master_with_slaves_example'
     end
   end
@@ -53,6 +63,8 @@ describe_stack 'stack-with-dependencies' do
 
     expect(deps['db.exampledb.hostname']).to eql('e-exampledb-001.earth.net.local')
     expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-003.earth.net.local,e-exampledb-004.earth.net.local")
+    expect(deps['db.examplelegacydb.hostname']).to eql('e-examplelegacydb-001.earth.net.local')
+    expect(deps['db.examplelegacydb.read_only_cluster']).to eql("e-examplelegacydb-001.earth.net.local")
   end
 
   host('e-myapp-002.mgmt.earth.net.local') do |host|
@@ -60,5 +72,7 @@ describe_stack 'stack-with-dependencies' do
 
     expect(deps['db.exampledb.hostname']).to eql('e-exampledb-001.earth.net.local')
     expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-004.earth.net.local,e-exampledb-003.earth.net.local")
+    expect(deps['db.examplelegacydb.hostname']).to eql('e-examplelegacydb-001.earth.net.local')
+    expect(deps['db.examplelegacydb.read_only_cluster']).to eql("e-examplelegacydb-001.earth.net.local")
   end
 end
