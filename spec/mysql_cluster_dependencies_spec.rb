@@ -17,6 +17,10 @@ describe_stack 'stack-with-dependencies' do
             e-exampledb-001.earth.net.local
             e-exampledb-003.earth.net.local
             e-exampledb-004.earth.net.local
+          ),
+          :read_only => %w(
+            e-exampledb-003.earth.net.local
+            e-exampledb-004.earth.net.local
           )
         }
       end
@@ -51,10 +55,20 @@ describe_stack 'stack-with-dependencies' do
       end
     end
 
+    stack 'read_only_example' do
+      app_service 'myroapp' do
+        self.groups = ['blue']
+        self.application = 'ro-app'
+        depend_on 'exampledb', environment.name, :read_only
+        depend_on 'examplelegacydb', environment.name, :read_only
+      end
+    end
+
     env 'e', :primary_site => 'earth', :secondary_site => 'space' do
       instantiate_stack 'example_db_depended_on_in_different_ways'
       instantiate_stack 'example_legacy_db'
       instantiate_stack 'master_with_slaves_example'
+      instantiate_stack 'read_only_example'
     end
   end
 
@@ -72,6 +86,24 @@ describe_stack 'stack-with-dependencies' do
 
     expect(deps['db.exampledb.hostname']).to eql('e-exampledb-001.earth.net.local')
     expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-004.earth.net.local,e-exampledb-003.earth.net.local")
+    expect(deps['db.examplelegacydb.hostname']).to eql('e-examplelegacydb-001.earth.net.local')
+    expect(deps['db.examplelegacydb.read_only_cluster']).to eql("e-examplelegacydb-001.earth.net.local")
+  end
+
+  host('e-myroapp-001.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.exampledb.hostname']).to eql("e-exampledb-003.earth.net.local,e-exampledb-004.earth.net.local")
+    expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-003.earth.net.local,e-exampledb-004.earth.net.local")
+    expect(deps['db.examplelegacydb.hostname']).to eql('e-examplelegacydb-001.earth.net.local')
+    expect(deps['db.examplelegacydb.read_only_cluster']).to eql("e-examplelegacydb-001.earth.net.local")
+  end
+
+  host('e-myroapp-002.mgmt.earth.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+
+    expect(deps['db.exampledb.hostname']).to eql('e-exampledb-003.earth.net.local,e-exampledb-004.earth.net.local')
+    expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-003.earth.net.local,e-exampledb-004.earth.net.local")
     expect(deps['db.examplelegacydb.hostname']).to eql('e-examplelegacydb-001.earth.net.local')
     expect(deps['db.examplelegacydb.read_only_cluster']).to eql("e-examplelegacydb-001.earth.net.local")
   end
