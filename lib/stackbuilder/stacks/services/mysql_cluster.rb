@@ -207,7 +207,11 @@ module Stacks::Services::MysqlCluster
         true
       end
     end
-    servers.sort_by! { |server| server.master? ? 1 : 0 } if @read_only_cluster_master_last
+    if @read_only_cluster_master_last
+      servers.sort_by! { |server| server.master? ? 1 : 0 }
+    else
+      servers.sort_by! { |server| server.prod_fqdn }
+    end
     servers.select { |server| server.fabric == fabric }.inject([]) do |prod_fqdns, server|
       prod_fqdns << server.prod_fqdn
       prod_fqdns

@@ -1009,6 +1009,32 @@ describe_stack 'should not allow applications to depend_on user_access servers' 
   end
 end
 
+describe_stack 'should not sort read only cluster servers when option not set' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.slave_instances = 1
+      end
+    end
+    stack "app_server" do
+      app_service "app" do
+        self.application = "app"
+        depend_on 'mydb'
+      end
+    end
+    env "production", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+      instantiate_stack "app_server"
+    end
+  end
+  host("production-app-001.mgmt.space.net.local") do |host|
+    rights = host.to_enc['role::http_app']['dependencies']
+    expect(rights['db.test.read_only_cluster']).to eql('production-mydb-master-001.space.net.local,production-mydb-slave-001.space.net.local')
+  end
+end
+
 describe_stack 'should specify read only cluster members in order slaves then master when option set' do
   given do
     stack "mysql" do
