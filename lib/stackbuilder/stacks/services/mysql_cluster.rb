@@ -9,6 +9,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :charset
   attr_accessor :database_name
   attr_accessor :include_master_in_read_only_cluster
+  attr_accessor :read_only_cluster_master_last
   attr_accessor :percona_checksum
   attr_accessor :percona_checksum_ignore_tables
   attr_accessor :percona_checksum_monitoring
@@ -34,6 +35,7 @@ module Stacks::Services::MysqlCluster
     @percona_checksum = true
     @grant_user_rights_by_default = true
     @include_master_in_read_only_cluster = true
+    @read_only_cluster_master_last = false
     @master_index_offset = 0
     @percona_checksum_ignore_tables = []
     @percona_checksum_monitoring = false
@@ -193,8 +195,8 @@ module Stacks::Services::MysqlCluster
     end
   end
 
-  def all_servers(fabric)
-    children.select do |server|
+  def read_only_cluster_servers(fabric)
+    servers = children.select do |server|
       if server.master? && !@include_master_in_read_only_cluster
         false
       elsif server.role_of?(:user_access)
@@ -204,7 +206,9 @@ module Stacks::Services::MysqlCluster
       else
         true
       end
-    end.select { |server| server.fabric == fabric }.inject([]) do |prod_fqdns, server|
+    end
+    servers.sort_by! { |server| server.master? ? 1 : 0 } if @read_only_cluster_master_last
+    servers.select { |server| server.fabric == fabric }.inject([]) do |prod_fqdns, server|
       prod_fqdns << server.prod_fqdn
       prod_fqdns
     end
@@ -225,7 +229,7 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_given_no_requirement(dependent, fabric)
-    config_properties(dependent, [master_servers.first], all_servers(fabric))
+    config_properties(dependent, [master_servers.first], read_only_cluster_servers(fabric))
   end
 
   def requirement_of(dependant)
@@ -234,20 +238,20 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_to_fulfil_requirement(dependent, hosts, requirement)
-    hostnames = []
-    hosts_fqdns = []
+    master = []
+    read_only_slaves = []
     if (requirement == :master_with_slaves)
-      hostnames = [hosts.select(&:master?).map(&:prod_fqdn).first]
-      hosts_fqdns = hosts.reject(&:master?).map(&:prod_fqdn)
+      master = [hosts.select(&:master?).map(&:prod_fqdn).first]
+      read_only_slaves = hosts.reject(&:master?).map(&:prod_fqdn)
     else
-      hostnames = hosts_fqdns = hosts.map(&:prod_fqdn)
+      master = read_only_slaves = hosts.map(&:prod_fqdn)
     end
-    config_properties(dependent, hostnames, hosts_fqdns)
+    config_properties(dependent, master, read_only_slaves)
   end
 
-  def config_properties(dependent, hostnames, read_only_cluster)
+  def config_properties(dependent, master, read_only_cluster)
     config_params = {
-      "db.#{@database_name}.hostname"           => hostnames.join(','),
+      "db.#{@database_name}.hostname"           => master.join(','),
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
       "db.#{@database_name}.port"               => '3306',
@@ -256,7 +260,7 @@ module Stacks::Services::MysqlCluster
         "#{dependent.environment.name}/#{dependent.application}/mysql_password"
     }
     config_params["db.#{@database_name}.read_only_cluster"] =
-        read_only_cluster.sort.join(",") unless read_only_cluster.empty?
+        read_only_cluster.join(",") unless read_only_cluster.empty?
 
     config_params
   end
