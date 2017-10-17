@@ -1062,7 +1062,6 @@ describe_stack 'should specify read only cluster members in order slaves then ma
   end
 end
 
-
 describe_stack 'should specify read only cluster members in order slaves then master when option set' do
   given do
     stack "mysql" do

@@ -236,7 +236,7 @@ module Stacks::Services::MysqlCluster
 
   def config_given_no_requirement(dependent, fabric)
     masters = master_servers
-    masters.reject! { |master| master.site !=  dependent.environment.sites.first } if @master_only_in_same_site
+    masters.reject! { |master| master.site != dependent.environment.sites.first } if @master_only_in_same_site
     config_properties(dependent, [masters.map(&:prod_fqdn).sort.first], read_only_cluster_servers(fabric))
   end
 
