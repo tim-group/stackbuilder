@@ -9,6 +9,7 @@ module Stacks::Services::MysqlCluster
   attr_accessor :charset
   attr_accessor :database_name
   attr_accessor :include_master_in_read_only_cluster
+  attr_accessor :master_only_in_same_site
   attr_accessor :read_only_cluster_master_last
   attr_accessor :percona_checksum
   attr_accessor :percona_checksum_ignore_tables
@@ -35,6 +36,7 @@ module Stacks::Services::MysqlCluster
     @percona_checksum = true
     @grant_user_rights_by_default = true
     @include_master_in_read_only_cluster = true
+    @master_only_in_same_site = false
     @read_only_cluster_master_last = false
     @master_index_offset = 0
     @percona_checksum_ignore_tables = []
@@ -171,7 +173,7 @@ module Stacks::Services::MysqlCluster
   def master_servers
     masters = children.reject { |mysql_server| !mysql_server.master? }
     fail "No masters were not found! #{children}" if masters.empty?
-    masters.collect(&:prod_fqdn).sort
+    masters
   end
 
   private
@@ -233,7 +235,9 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_given_no_requirement(dependent, fabric)
-    config_properties(dependent, [master_servers.first], read_only_cluster_servers(fabric))
+    masters = master_servers
+    masters.reject! { |master| master.site !=  dependent.environment.sites.first } if @master_only_in_same_site
+    config_properties(dependent, [masters.map(&:prod_fqdn).sort.first], read_only_cluster_servers(fabric))
   end
 
   def requirement_of(dependant)

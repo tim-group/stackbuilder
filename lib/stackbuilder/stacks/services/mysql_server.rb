@@ -183,7 +183,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     {
       'percona::checksum_tools' => {
         'database_name' => @virtual_service.database_name,
-        'master_fqdns'  => @virtual_service.master_servers,
+        'master_fqdns'  => @virtual_service.master_servers.map(&:prod_fqdn).sort,
         'is_master'     => role_of?(:master),
         'ignore_tables' => ignore_tables.join(',')
       }

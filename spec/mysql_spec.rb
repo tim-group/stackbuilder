@@ -1062,6 +1062,35 @@ describe_stack 'should specify read only cluster members in order slaves then ma
   end
 end
 
+
+describe_stack 'should specify read only cluster members in order slaves then master when option set' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.database_name = 'test'
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.master_only_in_same_site = true
+      end
+    end
+    stack "app_server" do
+      app_service "app" do
+        self.application = "app"
+        depend_on 'mydb', 'production'
+      end
+    end
+    env "latest", :primary_site => "earth", :secondary_site => "space" do
+      instantiate_stack "app_server"
+    end
+    env "production", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+    end
+  end
+  host("latest-app-001.mgmt.earth.net.local") do |host|
+    rights = host.to_enc['role::http_app']['dependencies']
+    expect(rights['db.test.hostname']).to eql('')
+  end
+end
 describe_stack 'should create two masters' do
   given do
     stack "mysql" do
