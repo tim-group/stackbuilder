@@ -32,9 +32,11 @@ Options:
 
   Options that may affect commands. Depending on "command", some of these may be mandatory, optional, or ignored.
 
-    -e, --environment=VALUE   set the environment to operate on. "dev" is the default
-    -s, --stack=VALUE         select the stack
-    -t, --terse               shorten the output
+    -e, --environment=VALUE             set the environment to operate on. "dev" is the default
+    -s, --stack=VALUE                   select the stack
+    -t, --terse                         shorten the output
+    -c, --create-persistent-storage     allocate new persistent storage, instead of finding existing storage 
+		                                    (WARNING: normally only wanted when provisioning a stack for the first time)
 
   For further information about options, read bin/stacks.
 
