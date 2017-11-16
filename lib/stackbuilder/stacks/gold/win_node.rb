@@ -16,7 +16,6 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
   end
 
   def to_spec
-    spec = super
     modify_storage('/'.to_sym => {
                      :prepare => {
                        :options => {
@@ -31,7 +30,6 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
       modify_storage('/'.to_sym => {
                        :size => '15G'
                      })
-      spec[:kvm_template] = 'kvm_nx_required'
     when 'win7'
       modify_storage('/'.to_sym => {
                        :size => '15G'
@@ -48,7 +46,12 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
     else
       fail "Unkown version of Windows: #{win_version}"
     end
+
+    spec = super
     spec[:template] = "#{@win_version}gold"
+		if @win_version == 'win10'
+      spec[:kvm_template] = 'kvm_nx_required'
+		end
     spec[:wait_for_shutdown] = 600
     spec
   end

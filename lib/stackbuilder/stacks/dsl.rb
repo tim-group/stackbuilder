@@ -4,11 +4,15 @@ module Stacks
   module DSL
     attr_accessor :stack_procs
     attr_accessor :environments
+    attr_accessor :extra_options
     attr_accessor :calculated_dependencies_cache
 
     def self.extended(object)
       object.stack_procs = {}
       object.environments = {}
+			object.extra_options = {
+         :create_persistent_storage => ENV['CREATE_PERSISTENT_STORAGE'] == "true"
+			}
       object.calculated_dependencies_cache = Stacks::CalculatedDependenciesCache.new
     end
 
@@ -24,7 +28,7 @@ module Stacks
     def env(name, options, &block)
       environments[name] = Stacks::Environment.new(
         name,
-        options,
+        options.merge(extra_options),
         nil,
         environments,
         stack_procs,
