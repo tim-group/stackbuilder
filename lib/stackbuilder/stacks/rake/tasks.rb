@@ -40,7 +40,6 @@ if @environment.nil?
 end
 
 RSpec::Core::Runner.disable_autorun!
-ENV['CI_REPORTS'] = 'build/spec/reports/'
 
 ####
 # TODO
