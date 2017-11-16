@@ -35,8 +35,8 @@ Options:
     -e, --environment=VALUE         set the environment to operate on. "dev" is the default
     -s, --stack=VALUE               select the stack
     -t, --terse                     shorten the output
-    --create-persistent-storage     allocate new persistent storage, instead of finding existing storage 
-		                                (WARNING: normally only wanted when provisioning a stack for the first time)
+    --create-persistent-storage     allocate new persistent storage, instead of finding existing storage
+                                    (WARNING: normally only wanted when provisioning a stack for the first time)
 
   For further information about options, read bin/stacks.
 
@@ -152,8 +152,8 @@ end
 
 if $options[:'create-persistent-storage']
   ENV['CREATE_PERSISTENT_STORAGE'] = 'true'
-	logger(Logger::WARN) { '--create-persistent-storage is set so any persistent storage will be created, existing storage will not be reused' }
-end	
+  logger(Logger::WARN) { '--create-persistent-storage is set so any persistent storage will be created, existing storage will not be reused' }
+end
 
 logger(Logger::DEBUG) { 'initializing $factory' }
 $factory = Stacks::Factory.new

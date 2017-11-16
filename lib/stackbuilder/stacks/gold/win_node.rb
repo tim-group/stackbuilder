@@ -49,9 +49,7 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
 
     spec = super
     spec[:template] = "#{@win_version}gold"
-		if @win_version == 'win10'
-      spec[:kvm_template] = 'kvm_nx_required'
-		end
+    spec[:kvm_template] = 'kvm_nx_required' if @win_version == 'win10'
     spec[:wait_for_shutdown] = 600
     spec
   end

@@ -170,7 +170,7 @@ describe StackBuilder::Allocator::HostPolicies do
         :existing_storage => {}
       },
       'data' => {
-        :existing_storage => { }
+        :existing_storage => {}
       }
     }
     h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)

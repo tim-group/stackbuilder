@@ -10,9 +10,9 @@ module Stacks
     def self.extended(object)
       object.stack_procs = {}
       object.environments = {}
-			object.extra_options = {
-         :create_persistent_storage => ENV['CREATE_PERSISTENT_STORAGE'] == "true"
-			}
+      object.extra_options = {
+        :create_persistent_storage => ENV['CREATE_PERSISTENT_STORAGE'] == "true"
+      }
       object.calculated_dependencies_cache = Stacks::CalculatedDependenciesCache.new
     end
 

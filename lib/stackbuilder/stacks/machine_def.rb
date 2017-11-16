@@ -195,7 +195,7 @@ class Stacks::MachineDef
   def to_spec
     validate_storage
     @destroyable = true if environment.every_machine_destroyable?
-    
+
     spec = {
       :hostname                => @hostname,
       :domain                  => @domain,
@@ -209,22 +209,22 @@ class Stacks::MachineDef
     spec[:disallow_destroy] = true unless @destroyable
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
-    spec[:storage] = @environment.options[:create_persistent_storage] ? self.turn_on_persistent_storage_creation(storage) : storage
+    spec[:storage] = @environment.options[:create_persistent_storage] ? turn_on_persistent_storage_creation(storage) : storage
     spec[:dont_start] = true if @dont_start
     spec[:cnames] = Hash[@added_cnames.map { |n, cnames| [n, Hash[cnames.map { |c| [c, qualified_hostname(n)] }]] }]
     spec[:allocation_tags] = @allocation_tags
     spec
   end
 
-	def turn_on_persistent_storage_creation(storage)
-		Hash[storage.map do |mount_point, values|
-			if values[:persistent]
-				[mount_point, values.merge({ :persistence_options => { :on_storage_not_found => 'create_new' } })]
-			else
-				[mount_point, values]
-			end
-		end]
-	end
+  def turn_on_persistent_storage_creation(storage)
+    Hash[storage.map do |mount_point, values|
+      if values[:persistent]
+        [mount_point, values.merge(:persistence_options => { :on_storage_not_found => 'create_new' })]
+      else
+        [mount_point, values]
+      end
+    end]
+  end
 
   # XXX DEPRECATED for flatten / accept interface, remove me!
   def to_specs
