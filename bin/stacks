@@ -32,11 +32,11 @@ Options:
 
   Options that may affect commands. Depending on "command", some of these may be mandatory, optional, or ignored.
 
-    -e, --environment=VALUE             set the environment to operate on. "dev" is the default
-    -s, --stack=VALUE                   select the stack
-    -t, --terse                         shorten the output
-    -c, --create-persistent-storage     allocate new persistent storage, instead of finding existing storage 
-		                                    (WARNING: normally only wanted when provisioning a stack for the first time)
+    -e, --environment=VALUE         set the environment to operate on. "dev" is the default
+    -s, --stack=VALUE               select the stack
+    -t, --terse                     shorten the output
+    --create-persistent-storage     allocate new persistent storage, instead of finding existing storage 
+		                                (WARNING: normally only wanted when provisioning a stack for the first time)
 
   For further information about options, read bin/stacks.
 
@@ -111,7 +111,8 @@ GetoptLong.new(
   ['--path',        '-p', GetoptLong::REQUIRED_ARGUMENT],
   ['--stack',       '-s', GetoptLong::REQUIRED_ARGUMENT],
   ['--terse',       '-t', GetoptLong::NO_ARGUMENT],
-  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT]
+  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT],
+  ['--create-persistent-storage', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -148,6 +149,11 @@ else
   end
   exit 1
 end
+
+if $options[:'create-persistent-storage']
+  ENV['CREATE_PERSISTENT_STORAGE'] = 'true'
+	logger(Logger::WARN) { '--create-persistent-storage is set so any persistent storage will be created, existing storage will not be reused' }
+end	
 
 logger(Logger::DEBUG) { 'initializing $factory' }
 $factory = Stacks::Factory.new
