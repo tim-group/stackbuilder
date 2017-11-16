@@ -153,7 +153,32 @@ describe StackBuilder::Allocator::HostPolicies do
       to eql(true)
   end
 
-  it 'accept allocations where the hosts persistent storage does exist on this computenode' do
+  it 'accepts allocations irrespective of existing storage on the computenode if creating new persistent storage' do
+    machine = {
+      :hostname => 'test-db-001',
+      :storage => {
+        "/var/lib/mysql/".to_sym => {
+          :type => "data",
+          :size => "1G",
+          :persistent => true,
+          :persistence_options => { :on_storage_not_found => 'create_new' }
+        }
+      }
+    }
+    host_storage = {
+      'os' => {
+        :existing_storage => {}
+      },
+      'data' => {
+        :existing_storage => { }
+      }
+    }
+    h1 = StackBuilder::Allocator::Host.new("h1", :storage => host_storage)
+    expect(StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy.call(h1, machine)[:passed]).
+      to eql(true)
+  end
+
+  it 'accept allocations where the hosts persistent storage exists on this computenode' do
     machine = {
       :hostname => 'test-db-001',
       :storage => {
