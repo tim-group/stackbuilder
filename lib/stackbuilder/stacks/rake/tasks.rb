@@ -260,14 +260,14 @@ namespace :sbx do
       task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait']
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision => ['prepare_dependencies', 'provision_machine'] do |t|
+      task :provision => %w(prepare_dependencies provision_machine) do |t|
         namespace = t.name.sub(/:provision$/, '')
         Rake::Task[namespace + ':orc:resolve'].invoke if Rake::Task.task_defined?(namespace + ':orc:resolve')
         Rake::Task[namespace + ':cancel_downtime'].invoke
       end
 
       desc "perform a clean followed by a provision"
-      task :reprovision => ['clean', 'provision_machine']
+      task :reprovision => %w(clean provision_machine)
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
