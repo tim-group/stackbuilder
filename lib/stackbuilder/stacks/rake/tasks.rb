@@ -256,7 +256,7 @@ namespace :sbx do
         end
       end
 
-      task :prepare_dependencies => ['allocate_vips', 'puppet:prepare_dependencies']
+      task :prepare_dependencies => ['allocate_vips', 'allocate_ips', 'puppet:prepare_dependencies']
       task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait']
 
       desc "perform all steps required to create and configure the machine(s)"
