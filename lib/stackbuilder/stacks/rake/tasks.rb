@@ -256,15 +256,18 @@ namespace :sbx do
         end
       end
 
+      task :prepare_dependencies => ['allocate_vips', 'puppet:prepare_dependencies']
+      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait']
+
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision => ['allocate_vips', 'launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait'] do |t|
+      task :provision => ['prepare_dependencies', 'provision_machine'] do |t|
         namespace = t.name.sub(/:provision$/, '')
         Rake::Task[namespace + ':orc:resolve'].invoke if Rake::Task.task_defined?(namespace + ':orc:resolve')
         Rake::Task[namespace + ':cancel_downtime'].invoke
       end
 
       desc "perform a clean followed by a provision"
-      task :reprovision => %w(clean provision)
+      task :reprovision => ['clean', 'provision_machine']
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
@@ -382,6 +385,20 @@ namespace :sbx do
           result = @subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
           result.all.each do |vm, status|
             logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
+          end
+        end
+
+        desc "run puppet on all of a stack's dependencies"
+        sbtask :prepare_dependencies do
+          service_dependencies = machine_def.virtual_service.virtual_services_that_i_depend_on
+          dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
+
+          require 'tempfile'
+          Tempfile.open("mco_prepdeps") do |f|
+            f.puts dependencies.join("\n")
+            f.flush
+
+            system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
           end
         end
 
