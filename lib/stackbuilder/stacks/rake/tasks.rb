@@ -240,31 +240,25 @@ namespace :sbx do
             next unless child_machine_def.is_a? Stacks::Services::AppServer
             applications << child_machine_def.virtual_service.application
           end
-          if applications.to_a.size > 0
-            desc "orc resolve #{applications.to_a.join(', ')}"
-            sbtask :resolve do
-              applications.to_a.each do |application|
-                factory = Orc::Factory.new(
-                  :application => application,
-                  :environment => machine_def.environment.name
-                )
-                factory.cmdb_git.update
-                factory.engine.resolve
-              end
+          desc "orc resolve #{applications.to_a.join(', ')}"
+          sbtask :resolve do
+            applications.to_a.each do |application|
+              factory = Orc::Factory.new(
+                :application => application,
+                :environment => machine_def.environment.name
+              )
+              factory.cmdb_git.update
+              factory.engine.resolve
             end
           end
         end
       end
 
       task :prepare_dependencies => ['allocate_vips', 'allocate_ips', 'puppet:prepare_dependencies']
-      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait']
+      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision => %w(prepare_dependencies provision_machine) do |t|
-        namespace = t.name.sub(/:provision$/, '')
-        Rake::Task[namespace + ':orc:resolve'].invoke if Rake::Task.task_defined?(namespace + ':orc:resolve')
-        Rake::Task[namespace + ':cancel_downtime'].invoke
-      end
+      task :provision => %w(prepare_dependencies provision_machine)
 
       desc "perform a clean followed by a provision"
       task :reprovision => %w(clean provision_machine)
