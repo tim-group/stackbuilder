@@ -384,14 +384,17 @@ namespace :sbx do
 
         desc "run puppet on all of a stack's dependencies"
         sbtask :prepare_dependencies do
-          dependencies = machine_def.dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
+          all_machines_from_selection = machine_def.flatten
+          all_dependencies_at_any_level = all_machines_from_selection.map(&:dependencies)
+          all_machines_from_dependencies = all_dependencies_at_any_level.flatten.map(&:flatten)
+          dependencies = all_machines_from_dependencies.flatten.map(&:identity).sort.uniq
 
           require 'tempfile'
           Tempfile.open("mco_prepdeps") do |f|
             f.puts dependencies.join("\n")
             f.flush
 
-            # system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
+            system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
           end
         end
 

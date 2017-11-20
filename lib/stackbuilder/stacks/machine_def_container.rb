@@ -42,10 +42,4 @@ module Stacks::MachineDefContainer
   def [](key)
     @definitions[key]
   end
-
-  def dependencies
-    children.map do |child|
-      child.virtual_service.virtual_services_that_i_depend_on
-    end.flatten.uniq
-  end
 end
