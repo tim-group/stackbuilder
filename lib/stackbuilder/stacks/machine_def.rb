@@ -287,4 +287,8 @@ class Stacks::MachineDef
   def clazz
     "machine"
   end
+
+  def dependencies
+    virtual_service.virtual_services_that_i_depend_on
+  end
 end
