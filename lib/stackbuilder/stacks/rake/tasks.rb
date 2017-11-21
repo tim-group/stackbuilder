@@ -386,17 +386,13 @@ namespace :sbx do
         sbtask :prepare_dependencies do
           all_dependencies = Set.new
           machine_def.accept do |m|
-            if m.is_a? Stacks::MachineDef
-              all_dependencies += m.dependencies.flatten
-            end
+            all_dependencies += m.dependencies.flatten if m.is_a? Stacks::MachineDef
           end
 
           dependency_fqdns = []
           all_dependencies.map do |dependency|
             dependency.accept do |m|
-              if m.is_a? Stacks::MachineDef
-                dependency_fqdns << m.mgmt_fqdn
-              end
+              dependency_fqdns << m.mgmt_fqdn if m.is_a? Stacks::MachineDef
             end
           end
 
