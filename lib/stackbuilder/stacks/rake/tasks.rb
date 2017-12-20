@@ -602,14 +602,15 @@ namespace :sbx do
           if nagios_server_fqdns.nil? || nagios_server_fqdns.empty?
             logger(Logger::WARN) { "skipping #{machine_def.hostname} - No nagios server found for #{machine_def.fabric}" }
           else
-            logger(Logger::INFO) { "running puppet on nagios servers (#{nagios_server_fqdns}) so they will discover this node and include in monitoring" }
-
             require 'tempfile'
             Tempfile.open('mco_puppet_on_nagios') do |f|
               f.puts nagios_server_fqdns.join("\n")
               f.flush
 
-              system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
+              cmd = %w(mco puppetng run --concurrency 5 --nodes).push(f.path)
+              puppetng_pid = Process.spawn(*cmd, :err => :out, :out => '/dev/null')
+              Process.detach puppetng_pid
+              logger(Logger::INFO) { "puppetng run triggered for #{nagios_server_fqdns}" }
             end
           end
         end
