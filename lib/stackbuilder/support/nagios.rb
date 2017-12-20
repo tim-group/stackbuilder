@@ -26,10 +26,6 @@ module Support
           callback.invoke :success, :machine => machine.hostname, :result => response
         end
       end
-
-      def nagios_server_fqdns_for(site)
-        @service.get_nagios_servers_for_site(site)
-      end
     end
 
     class Service::Http
@@ -82,15 +78,15 @@ module Support
         result
       end
 
-      def get_nagios_servers_for_site(site)
-        return @nagios_servers[site] rescue nil
+      def get_nagios_servers_for_fabric(fabric)
+        return @nagios_servers[fabric] rescue nil
       end
 
       def modify_downtime(action, machine, duration = nil)
         body = { "host" => machine.mgmt_fqdn }
         body["duration"] = duration unless duration.nil?
         header = { 'Content-Type' => 'application/json' }
-        nagios_servers = get_nagios_servers_for_site(machine.fabric)
+        nagios_servers = get_nagios_servers_for_fabric(machine.fabric)
         return "skipping #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_servers.nil? || nagios_servers.empty?
         ret = []
         nagios_servers.each do |nagios_server|
