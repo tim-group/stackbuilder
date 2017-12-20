@@ -598,7 +598,7 @@ namespace :sbx do
 
           sites = hosts.map(&:fabric).uniq
           nagios_helper = Support::Nagios::Service.new
-          nagios_server_fqdns = sites.map { |s| nagios_helper.nagios_server_fqdns_for(s) }.reject { |s| s.nil? }.flatten
+          nagios_server_fqdns = sites.map { |s| nagios_helper.nagios_server_fqdns_for(s) }.reject(&:nil?).flatten
 
           if nagios_server_fqdns.empty?
             logger(Logger::WARN) { "skipping #{machine_def.identity} - No nagios servers found in #{sites}" }
