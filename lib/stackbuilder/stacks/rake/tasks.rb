@@ -255,7 +255,7 @@ namespace :sbx do
       end
 
       task :prepare_dependencies => ['allocate_vips', 'allocate_ips', 'puppet:prepare_dependencies']
-      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
+      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime', 'nagios:refresh']
 
       desc "perform all steps required to create and configure the machine(s)"
       task :provision => %w(prepare_dependencies provision_machine)
@@ -582,6 +582,35 @@ namespace :sbx do
             logger(Logger::INFO) do
               "failed to cancel downtime for #{response_hash[:machine]} " \
               "result: #{response_hash[:result]}"
+            end
+          end
+        end
+      end
+
+      namespace :nagios do
+        sbtask :refresh do
+          hosts = []
+          machine_def.accept do |child_machine_def|
+            if child_machine_def.respond_to?(:mgmt_fqdn)
+              hosts << child_machine_def
+            end
+          end
+
+          sites = hosts.map(&:fabric).uniq
+          nagios_helper = Support::Nagios::Service.new
+          nagios_server_fqdns = sites.map { |s| nagios_helper.nagios_server_fqdns_for(s) }.reject { |s| s.nil? }.flatten
+
+          if nagios_server_fqdns.empty?
+            logger(Logger::WARN) { "skipping #{machine_def.identity} - No nagios servers found in #{sites}" }
+          else
+            logger(Logger::INFO) { "running puppet on nagios servers (#{nagios_server_fqdns}) so they will discover this node and include in monitoring" }
+
+            require 'tempfile'
+            Tempfile.open('mco_puppet_on_nagios') do |f|
+              f.puts nagios_server_fqdns.join("\n")
+              f.flush
+
+              system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
             end
           end
         end
