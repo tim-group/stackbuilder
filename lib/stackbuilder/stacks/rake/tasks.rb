@@ -255,10 +255,10 @@ namespace :sbx do
       end
 
       task :prepare_dependencies => ['allocate_vips', 'allocate_ips', 'puppet:prepare_dependencies']
-      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime', 'nagios:refresh']
+      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
 
       desc "perform all steps required to create and configure the machine(s)"
-      task :provision => %w(prepare_dependencies provision_machine)
+      task :provision => %w(prepare_dependencies provision_machine nagios:refresh)
 
       desc "perform a clean followed by a provision"
       task :reprovision => %w(clean provision_machine)
