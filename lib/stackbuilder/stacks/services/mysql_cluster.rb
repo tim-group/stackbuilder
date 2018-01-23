@@ -37,7 +37,7 @@ module Stacks::Services::MysqlCluster
     @grant_user_rights_by_default = true
     @include_master_in_read_only_cluster = true
     @master_only_in_same_site = false
-    @read_only_cluster_master_last = false
+    @read_only_cluster_master_last = true
     @master_index_offset = 0
     @percona_checksum_ignore_tables = []
     @percona_checksum_monitoring = false

@@ -1009,13 +1009,14 @@ describe_stack 'should not allow applications to depend_on user_access servers' 
   end
 end
 
-describe_stack 'should not sort read only cluster servers when option not set' do
+describe_stack 'should not sort read only cluster servers when option false' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.database_name = 'test'
         self.master_instances = 1
         self.slave_instances = 1
+        self.read_only_cluster_master_last = false
       end
     end
     stack "app_server" do
@@ -1035,14 +1036,13 @@ describe_stack 'should not sort read only cluster servers when option not set' d
   end
 end
 
-describe_stack 'should specify read only cluster members in order slaves then master when option set' do
+describe_stack 'should by default provide read only cluster members in order slaves then master' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.database_name = 'test'
         self.master_instances = 1
         self.slave_instances = 1
-        self.read_only_cluster_master_last = true
       end
     end
     stack "app_server" do
