@@ -1,7 +1,6 @@
 module StackBuilder::Allocator::PolicyHelpers
-
   def self.host_reserve_ram
-    return 2_097_152 # 2 GB
+    2_097_152 # 2 GB
   end
 
   def self.ram_stats_of(host)

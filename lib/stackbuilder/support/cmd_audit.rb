@@ -25,13 +25,13 @@ module CMDAudit
 
   private
 
-    # FIXME: This is not sane
+  # FIXME: This is not sane
   def kvm_hosts_tabulate_sum_totals(header, value)
     return 0 if value.size == 0
 
     total_width = 0
     case header.to_s
-    when 'vms','mem_reserve', 'mem_total'
+    when 'vms', 'mem_reserve', 'mem_total'
       @total[header.to_sym] += value.to_i
       total_width = @total[header.to_sym].to_s.size
     when 'mem_reserve', 'mem_total'
@@ -68,8 +68,8 @@ module CMDAudit
   end
 
   def kvm_hosts_tabulate(hosts, site)
-    headers = [ :fqdn, :vms, :vcpus, :memory, :mem_reserve, :mem_total, :storage_os, :storage_data, :status, :tags ]
-    header_widths = hosts.sort.inject({}) do |header_widths, (_fqdn, values)|
+    headers = [:fqdn, :vms, :vcpus, :memory, :mem_reserve, :mem_total, :storage_os, :storage_data, :status, :tags]
+    header_width = hosts.sort.inject({}) do |header_widths, (_fqdn, values)|
       row = headers.inject([]) do |row_values, header|
         value = values[header] || ""
 
@@ -105,7 +105,7 @@ module CMDAudit
 
     Table.header("KVM host machines audit for site: #{site}")
     headers.each do |header|
-      width = header_widths[header] rescue header.to_s.size
+      width = header_width[header] rescue header.to_s.size
       Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
     end
     Table.tabulate
@@ -141,13 +141,13 @@ module CMDAudit
     cpu_stats = StackBuilder::Allocator::PolicyHelpers.vcpu_usage(host)
     allocation_tags_host = StackBuilder::Allocator::PolicyHelpers.allocation_tags_of(host)
     allocation_status = StackBuilder::Allocator::PolicyHelpers.allocation_status_of(host)
-    stats = [
-        { :memory  => ram_stats },
-        { :storage => storage_stats },
-        { :vcpus => cpu_stats },
-        vm_stats,
-        allocation_tags_host,
-        allocation_status
+    [
+      { :memory  => ram_stats },
+      { :storage => storage_stats },
+      { :vcpus => cpu_stats },
+      vm_stats,
+      allocation_tags_host,
+      allocation_status
     ].inject(&:merge)
   end
 
@@ -179,14 +179,14 @@ module CMDAudit
     unit = stats[:unit]
     total = (stats[:host_ram] - reserve)
     used_percentage = "#{(used.to_f / total.to_f * 100).round}" rescue 0
-    { :memory => "%03d/%03d %s %02d\%" % [used, total, unit, used_percentage] }
+    { :memory => sprintf('%03d/%03d %s %02d%%', used, total, unit, used_percentage) }
   end
 
   def vcpu_stats_to_string(stats)
     used = stats[:allocated_vcpu]
     total = stats[:host_vcpu]
     used_percentage = "#{(used.to_f / total.to_f * 100).round}" rescue 0
-    { :vcpus => "%02d/%02d %02d\%" %  [used, total, used_percentage] }
+    { :vcpus => sprintf('%02d/%02d %02d%%', used, total, used_percentage) }
   end
 
   def storage_stats_to_string(storage_stats)
@@ -195,7 +195,7 @@ module CMDAudit
       used = value_hash[:used]
       total = value_hash[:total]
       used_percentage = "#{(used.to_f / total.to_f * 100).round}" rescue 0
-      stats["storage_#{storage_type.to_s}".to_sym] = "%03d/%03d %s %02d\%" % [used, total, unit, used_percentage]
+      stats["storage_#{storage_type}".to_sym] = sprintf('%03d/%03d %s %02d%%', used, total, unit, used_percentage)
       stats
     end
   end
