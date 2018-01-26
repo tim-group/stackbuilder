@@ -3,60 +3,60 @@ module CMDAudit
     site = $environment.options[:primary_site]
     logger(Logger::DEBUG) { ":primary_site for \"#{$environment.name}\" is \"#{site}\"" }
 
+    # FIXME: This is not sane
+    @units = 'GiB' # used in totals
     @total = Hash.new(0)
     @total_str = lambda { |a, b| sprintf("%d/%d %2.0f%%", a, b, 100.0 * a / b) }
+    @total_str_with_units = lambda { |a, b| sprintf("%d/%d #{@units} %2.0f%%", a, b, 100.0 * a / b) }
 
-    hosts = details_for($factory.host_repository.find_compute_nodes(site).hosts)
-    kvm_hosts_tabulate(hosts, site)
+    hosts_raw = $factory.host_repository.find_compute_nodes(site).hosts
+    hosts_stats = hosts_raw.inject({}) do |data, host|
+      data[host.fqdn] = stats_for(host)
+      data
+    end
+
+    hosts_stats_rendered = hosts_stats.inject({}) do |data, (fqdn, stats)|
+      data[fqdn] = render_stats(fqdn, stats)
+      data
+    end
+
+    kvm_hosts_tabulate(hosts_stats_rendered, site)
   end
 
   private
 
-  def order(headers)
-    headers.inject([]) do |order, header|
-      case header
-      when :fqdn               then order[0] = header
-      when :vms                then order[1] = header
-      when :vcpus              then order[2] = header
-      when 'memory(GB)'.to_sym then order[3] = header
-      when 'os(GB)'.to_sym     then order[4] = header
-      when 'data(GB)'.to_sym   then order[5] = header
-      when 'status'.to_sym     then order[6] = header
-      when 'tags'.to_sym       then order[7] = header
-      else order.push(header)
-      end
-      order
-    end.select { |header| !header.nil? }
-  end
-
+    # FIXME: This is not sane
   def kvm_hosts_tabulate_sum_totals(header, value)
     return 0 if value.size == 0
 
     total_width = 0
     case header.to_s
-    when 'vms'
-      @total[:vms] += value.to_i
-      total_width = @total[:vms].to_s.size
+    when 'vms','mem_reserve', 'mem_total'
+      @total[header.to_sym] += value.to_i
+      total_width = @total[header.to_sym].to_s.size
+    when 'mem_reserve', 'mem_total'
+      @total[header.to_sym] += value.to_i
+      total_width = @total[header.to_sym].to_s.size
     when 'vcpus'
       re = /^(\d+)\/(\d+)/.match(value)
       @total[:vcpu_used] += re[1].to_i
       @total[:vcpu_avail] += re[2].to_i
       total_width = @total_str.call(@total[:vcpu_used], @total[:vcpu_avail]).to_s.size
-    when 'memory(GB)'
-      re = /^(\d+)\/(\d+)/.match(value)
+    when 'memory'
+      re = /^(\d+)\/(\d+)\s(\w)/.match(value)
       @total[:mem_used] += re[1].to_i
       @total[:mem_avail] += re[2].to_i
-      total_width = @total_str.call(@total[:mem_used], @total[:mem_avail]).to_s.size
-    when 'os(GB)'
-      re = /^\w+: (\d+)\/(\d+)/.match(value)
+      total_width = @total_str_with_units.call(@total[:mem_used], @total[:mem_avail]).to_s.size
+    when 'storage_os'
+      re = /^(\d+)\/(\d+)\s(\w)/.match(value)
       @total[:os_used] += re[1].to_i
       @total[:os_avail] += re[2].to_i
-      total_width = @total_str.call(@total[:os_used], @total[:os_avail]).to_s.size
-    when 'data(GB)'
-      re = /^\w+: (\d+)\/(\d+)/.match(value)
+      total_width = @total_str_with_units.call(@total[:os_used], @total[:os_avail]).to_s.size
+    when 'storage_data'
+      re = /^(\d+)\/(\d+)\s(\w)/.match(value)
       @total[:data_used] += re[1].to_i
       @total[:data_avail] += re[2].to_i
-      total_width = @total_str.call(@total[:data_used], @total[:data_avail]).to_s.size
+      total_width = @total_str_with_units.call(@total[:data_used], @total[:data_avail]).to_s.size
     end
     total_width + 1
   end
@@ -66,45 +66,45 @@ module CMDAudit
     include Collimator
     receiver.send :include, Collimator
   end
-  # XXX output not very pretty, percentages not aligned
-  def kvm_hosts_tabulate(data, site)
-    require 'set'
 
-    all_headers = data.inject(Set.new) { |acc, (_fqdn, header)| acc.merge(header.keys) }
-
-    ordered_headers = order(all_headers)
-    header_widths = data.sort.inject({}) do |ordered_header_widths, (_fqdn, data_values)|
-      row = ordered_headers.inject([]) do |row_values, header|
-        value = data_values[header] || ""
+  def kvm_hosts_tabulate(hosts, site)
+    headers = [ :fqdn, :vms, :vcpus, :memory, :mem_reserve, :mem_total, :storage_os, :storage_data, :status, :tags ]
+    header_widths = hosts.sort.inject({}) do |header_widths, (_fqdn, values)|
+      row = headers.inject([]) do |row_values, header|
+        value = values[header] || ""
 
         # determine greatest width
         total_width = kvm_hosts_tabulate_sum_totals(header, value)
         width = value.size > header.to_s.size ? value.size + 1 : header.to_s.size + 1
         width = total_width > width ? total_width : width
-        if !ordered_header_widths.key?(header)
-          ordered_header_widths[header] = width
+        if !header_widths.key?(header)
+          header_widths[header] = width
         else
-          ordered_header_widths[header] = width if ordered_header_widths[header] < width
+          header_widths[header] = width if header_widths[header] < width
         end
         row_values << value
         row_values
       end
       Table.row(row)
-      ordered_header_widths
+      header_widths
     end
+    # FIXME: This is not sane
     total_list = [
       "total",
-      "#{@total[:vms]}",
+      @total[:vms],
       @total_str.call(@total[:vcpu_used], @total[:vcpu_avail]),
-      @total_str.call(@total[:mem_used], @total[:mem_avail]),
-      @total_str.call(@total[:os_used], @total[:os_avail])
+      @total_str_with_units.call(@total[:mem_used], @total[:mem_avail]),
+      "#{@total[:mem_reserve]} #{@units}",
+      "#{@total[:mem_total]} #{@units}",
+      @total_str_with_units.call(@total[:os_used], @total[:os_avail]),
+      @total_str_with_units.call(@total[:data_used], @total[:data_avail])
     ]
-    # data(GB) not present in env=dev
-    total_list.push(@total_str.call(@total[:data_used], @total[:data_avail])) if @total[:data_avail] > 0
+    # storage_data not present in env=dev
+    total_list.push(@total_str.call(@total[:hosts_used], @total[:hosts_avail])) if @total[:hosts_avail] > 0
     Table.row(total_list)
 
     Table.header("KVM host machines audit for site: #{site}")
-    ordered_headers.each do |header|
+    headers.each do |header|
       width = header_widths[header] rescue header.to_s.size
       Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
     end
@@ -113,10 +113,25 @@ module CMDAudit
 
   def details_for(hosts)
     hosts.inject({}) do |data, host|
-      stats = stats_for(host)
-      data[host.fqdn] = stats
+      data[host.fqdn] = stats_for(host)
       data
     end
+  end
+
+  def render_stats(fqdn, stats)
+    merge = [
+      storage_stats_to_string(stats[:storage]),
+      { :vms         => stats[:vms] },
+      { :mem_reserve => "#{stats[:memory][:host_reserve_ram]} #{stats[:memory][:unit]}" },
+      { :mem_total   => "#{stats[:memory][:host_ram]} #{stats[:memory][:unit]}" },
+      ram_stats_to_string(stats[:memory]),
+      vcpu_stats_to_string(stats[:vcpus]),
+      { :status      => stats[:status] },
+      { :tags        => stats[:tags] }
+    ]
+    merged_stats = Hash[*merge.map(&:to_a).flatten]
+    merged_stats[:fqdn] = fqdn
+    merged_stats
   end
 
   def stats_for(host)
@@ -126,12 +141,14 @@ module CMDAudit
     cpu_stats = StackBuilder::Allocator::PolicyHelpers.vcpu_usage(host)
     allocation_tags_host = StackBuilder::Allocator::PolicyHelpers.allocation_tags_of(host)
     allocation_status = StackBuilder::Allocator::PolicyHelpers.allocation_status_of(host)
-    merge = [storage_stats_to_string(storage_stats), vm_stats,
-             ram_stats_to_string(ram_stats), vcpu_stats_to_string(cpu_stats),
-             allocation_status, allocation_tags_host]
-    merged_stats = Hash[*merge.map(&:to_a).flatten]
-    merged_stats[:fqdn] = host.fqdn
-    merged_stats
+    stats = [
+        { :memory  => ram_stats },
+        { :storage => storage_stats },
+        { :vcpus => cpu_stats },
+        vm_stats,
+        allocation_tags_host,
+        allocation_status
+    ].inject(&:merge)
   end
 
   def convert_hash_values_from_kb_to_gb(result_hash)
@@ -139,7 +156,11 @@ module CMDAudit
       if value.is_a?(Hash)
         result[key] = convert_hash_values_from_kb_to_gb(value)
       elsif value.is_a?(String) || value.is_a?(Symbol)
-        result[key] = value
+        if key == :unit
+          result[key] = 'GiB'
+        else
+          result[key] = value
+        end
       else
         result[key] = kb_to_gb(value).to_f.floor
       end
@@ -152,27 +173,29 @@ module CMDAudit
     (value.to_f / (1024 * 1024) * 100).round / 100.0
   end
 
-  def ram_stats_to_string(ram_stats)
-    used = ram_stats[:allocated_ram]
-    total = ram_stats[:host_ram]
-    used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s.rjust(3)}%" rescue 0
-    { 'memory(GB)'.to_sym => "#{used}/#{total} #{used_percentage}" }
+  def ram_stats_to_string(stats)
+    reserve = stats[:host_reserve_ram]
+    used = stats[:allocated_ram]
+    unit = stats[:unit]
+    total = (stats[:host_ram] - reserve)
+    used_percentage = "#{(used.to_f / total.to_f * 100).round}" rescue 0
+    { :memory => "%03d/%03d %s %02d\%" % [used, total, unit, used_percentage] }
   end
 
-  def vcpu_stats_to_string(vcpu_stats)
-    used = vcpu_stats[:allocated_vcpu]
-    total = vcpu_stats[:host_vcpu]
-    used_percentage = "#{(used.to_f / total.to_f * 100).round.to_s.rjust(3)}%" rescue 0
-    { 'vcpus'.to_sym => "#{used}/#{total} #{used_percentage}" }
+  def vcpu_stats_to_string(stats)
+    used = stats[:allocated_vcpu]
+    total = stats[:host_vcpu]
+    used_percentage = "#{(used.to_f / total.to_f * 100).round}" rescue 0
+    { :vcpus => "%02d/%02d %02d\%" %  [used, total, used_percentage] }
   end
 
   def storage_stats_to_string(storage_stats)
     storage_stats.inject({}) do |stats, (storage_type, value_hash)|
-      arch = value_hash[:arch]
+      unit = 'GiB'
       used = value_hash[:used]
       total = value_hash[:total]
-      used_percentage = "#{(used.to_f / total.to_f * 100).round}%" rescue 0
-      stats["#{storage_type}(GB)".to_sym] = "#{arch}: #{used}/#{total} #{used_percentage}"
+      used_percentage = "#{(used.to_f / total.to_f * 100).round}" rescue 0
+      stats["storage_#{storage_type.to_s}".to_sym] = "%03d/%03d %s %02d\%" % [used, total, unit, used_percentage]
       stats
     end
   end

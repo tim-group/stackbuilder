@@ -1,7 +1,11 @@
 module StackBuilder::Allocator::PolicyHelpers
+
+  def self.host_reserve_ram
+    return 2_097_152 # 2 GB
+  end
+
   def self.ram_stats_of(host)
     host_ram = host.ram.to_f
-    host_reserve_ram = 2_097_152 # 2 GB
     if host_ram > 0
       allocated_ram = 0
       host.machines.each do |allocated_machine|
@@ -12,7 +16,8 @@ module StackBuilder::Allocator::PolicyHelpers
         :host_ram => host_ram,
         :host_reserve_ram => host_reserve_ram,
         :allocated_ram => allocated_ram,
-        :available_ram => available_ram
+        :available_ram => available_ram,
+        :unit => 'KiB'
       }
     end
     result
