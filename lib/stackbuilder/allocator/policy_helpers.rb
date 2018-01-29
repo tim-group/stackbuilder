@@ -6,15 +6,11 @@ module StackBuilder::Allocator::PolicyHelpers
   def self.ram_stats_of(host)
     overhead_daemons = 190_880
     overhead_adhoc = 1_048_576
-    overhead = overhead_adhoc + overhead_daemons
 
     total = host.ram.to_f
     if total > 0
-      used = 0
-      host.machines.each do |allocated_machine|
-        used += allocated_machine[:ram].to_f
-        overhead += overhead_per_vm
-      end
+      used = host.machines.inject(0) { |total, machine| total + machine[:ram].to_f }
+      overhead = (host.machines.size * overhead_per_vm) + overhead_adhoc + overhead_daemons
       result = {
         :host_ram         => total,
         :host_reserve_ram => overhead,

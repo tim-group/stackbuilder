@@ -67,7 +67,7 @@ describe StackBuilder::Allocator::HostPolicies do
       to eql(true)
   end
 
-  describe 'do_not_overallocate_ram_policy works correctly' do
+  describe 'do_not_overallocate_ram_policy' do
     candidate_machine = {
       :hostname => "candidate_machine",
       :ram => 2_097_152
@@ -89,7 +89,7 @@ describe StackBuilder::Allocator::HostPolicies do
     # memory_per_vm    = 6_291_456  (2_097_152 x 3)
     # total required   = 7_956_912
 
-    it 'when host has insufficient memory' do
+    it 'rejects new machine when host has insufficient memory' do
       h1 = StackBuilder::Allocator::Host.new("h1", :ram => 7_956_911) # 1 byte under total required
       h1.allocated_machines << existing_machine
       h1.provisionally_allocated_machines << provisionally_allocated_machine
@@ -100,7 +100,7 @@ describe StackBuilder::Allocator::HostPolicies do
       expect(result[:reason]).to match(/Available \(includes reserve\): 2239151 KiB/) # total available
     end
 
-    it 'when host has sufficient memory' do
+    it 'accepts new machine when host has sufficient memory' do
       h2 = StackBuilder::Allocator::Host.new("h2", :ram => 7_956_912) # available is >= total required
       h2.allocated_machines << existing_machine
       h2.provisionally_allocated_machines << provisionally_allocated_machine
