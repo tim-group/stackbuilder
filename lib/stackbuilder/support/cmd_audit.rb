@@ -31,10 +31,7 @@ module CMDAudit
 
     total_width = 0
     case header.to_s
-    when 'vms', 'mem_reserve', 'mem_total'
-      @total[header.to_sym] += value.to_i
-      total_width = @total[header.to_sym].to_s.size
-    when 'mem_reserve', 'mem_total'
+    when 'vms'
       @total[header.to_sym] += value.to_i
       total_width = @total[header.to_sym].to_s.size
     when 'vcpus'
@@ -68,7 +65,7 @@ module CMDAudit
   end
 
   def kvm_hosts_tabulate(hosts, site)
-    headers = [:fqdn, :vms, :vcpus, :memory, :mem_reserve, :mem_total, :storage_os, :storage_data, :status, :tags]
+    headers = [:fqdn, :vms, :vcpus, :memory, :storage_os, :storage_data, :status, :tags]
     header_width = hosts.sort.inject({}) do |header_widths, (_fqdn, values)|
       row = headers.inject([]) do |row_values, header|
         value = values[header] || ""
@@ -94,8 +91,6 @@ module CMDAudit
       @total[:vms],
       @total_str.call(@total[:vcpu_used], @total[:vcpu_avail]),
       @total_str_with_units.call(@total[:mem_used], @total[:mem_avail]),
-      "#{@total[:mem_reserve]} #{@units}",
-      "#{@total[:mem_total]} #{@units}",
       @total_str_with_units.call(@total[:os_used], @total[:os_avail]),
       @total_str_with_units.call(@total[:data_used], @total[:data_avail])
     ]
@@ -122,8 +117,6 @@ module CMDAudit
     merge = [
       storage_stats_to_string(stats[:storage]),
       { :vms         => stats[:vms] },
-      { :mem_reserve => "#{stats[:memory][:host_reserve_ram]} #{stats[:memory][:unit]}" },
-      { :mem_total   => "#{stats[:memory][:host_ram]} #{stats[:memory][:unit]}" },
       ram_stats_to_string(stats[:memory]),
       vcpu_stats_to_string(stats[:vcpus]),
       { :status      => stats[:status] },
@@ -174,10 +167,9 @@ module CMDAudit
   end
 
   def ram_stats_to_string(stats)
-    reserve = stats[:host_reserve_ram]
     used = stats[:allocated_ram]
     unit = stats[:unit]
-    total = (stats[:host_ram] - reserve)
+    total = stats[:host_ram]
     used_percentage = "#{(used.to_f / total.to_f * 100).round}" rescue 0
     { :memory => sprintf('%03d/%03d %s %02d%%', used, total, unit, used_percentage) }
   end
