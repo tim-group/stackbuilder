@@ -9,7 +9,7 @@ module StackBuilder::Allocator::PolicyHelpers
 
     total = host.ram.to_f
     if total > 0
-      used = host.machines.inject(0) { |total, machine| total + machine[:ram].to_f }
+      used = host.machines.inject(0) { |a, e| a + e[:ram].to_f }
       overhead = (host.machines.size * overhead_per_vm) + overhead_adhoc + overhead_daemons
       result = {
         :host_ram         => total,
