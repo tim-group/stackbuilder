@@ -109,6 +109,18 @@ describe StackBuilder::Allocator::HostPolicies do
       expect(result[:passed]).to eql(true)
       expect(result[:reason]).to be_nil
     end
+
+    it 'supports ram provided as a String without exploding' do
+      candidate_machine = {
+        :hostname => "candidate_machine",
+        :ram      => '2097152'
+      }
+      h3 = StackBuilder::Allocator::Host.new("h3", :ram => 1)
+
+      result = StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h3, candidate_machine)
+      expect(result[:passed]).to eql(false)
+    end
+
   end
 
   it 'rejects allocations where the host provisioning has been disabled' do

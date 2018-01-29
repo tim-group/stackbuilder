@@ -39,7 +39,7 @@ module StackBuilder::Allocator::HostPolicies
       if host_ram_stats[:available_ram] < (machine[:ram].to_i + overhead)
         result = {
           :passed => false,
-          :reason => "Insufficient memory (required including overhead): #{machine[:ram] + overhead} KiB. " \
+          :reason => "Insufficient memory (required including overhead): #{machine[:ram].to_i + overhead} KiB. " \
                      "Available (includes reserve): #{host_ram_stats[:available_ram].to_i} KiB"
         }
       end
