@@ -1,22 +1,26 @@
 module StackBuilder::Allocator::PolicyHelpers
-  def self.host_reserve_ram
-    2_097_152 # 2 GB
+  def self.overhead_per_vm
+    142_000
   end
 
   def self.ram_stats_of(host)
-    host_ram = host.ram.to_f
-    if host_ram > 0
-      allocated_ram = 0
+    overhead_daemons = 190_880
+    overhead_adhoc = 1_048_576
+    overhead = overhead_adhoc + overhead_daemons
+
+    total = host.ram.to_f
+    if total > 0
+      used = 0
       host.machines.each do |allocated_machine|
-        allocated_ram = (allocated_ram + allocated_machine[:ram].to_f)
+        used += allocated_machine[:ram].to_f
+        overhead += overhead_per_vm
       end
-      available_ram = ((host_ram - allocated_ram) - host_reserve_ram)
       result = {
-        :host_ram => host_ram,
-        :host_reserve_ram => host_reserve_ram,
-        :allocated_ram => allocated_ram,
-        :available_ram => available_ram,
-        :unit => 'KiB'
+        :host_ram         => total,
+        :host_reserve_ram => overhead,
+        :allocated_ram    => used + overhead,
+        :available_ram    => total - (used + overhead),
+        :unit             => 'KiB'
       }
     end
     result

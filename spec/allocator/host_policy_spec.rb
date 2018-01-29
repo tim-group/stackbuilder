@@ -67,7 +67,7 @@ describe StackBuilder::Allocator::HostPolicies do
       to eql(true)
   end
 
-  it 'rejects allocations where the host ram is insufficient due to host reserve' do
+  describe 'do_not_overallocate_ram_policy works correctly' do
     candidate_machine = {
       :hostname => "candidate_machine",
       :ram => 2_097_152
@@ -83,36 +83,32 @@ describe StackBuilder::Allocator::HostPolicies do
       :ram => 2_097_152
     }
 
-    h1 = StackBuilder::Allocator::Host.new("h1", :ram => '8388607') # 1 byte under 8GB
-    h1.allocated_machines << existing_machine
-    h1.provisionally_allocated_machines << provisionally_allocated_machine
+    # overhead_daemons = 190_880
+    # overhead_adhoc   = 1_048_576
+    # overhead_per_vm  = 426_000    (142_000 x 3)
+    # memory_per_vm    = 6_291_456  (2_097_152 x 3)
+    # total required   = 7_956_912
 
-    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed]).
-      to eql(false)
-  end
+    it 'when host has insufficient memory' do
+      h1 = StackBuilder::Allocator::Host.new("h1", :ram => 7_956_911) # 1 byte under total required
+      h1.allocated_machines << existing_machine
+      h1.provisionally_allocated_machines << provisionally_allocated_machine
 
-  it 'rejects allocations where the host ram is insufficient' do
-    candidate_machine = {
-      :hostname => "candidate_machine",
-      :ram => 2_097_152
-    }
+      result = StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)
+      expect(result[:passed]).to eql(false)
+      expect(result[:reason]).to match(/Insufficient memory \(required including overhead\): 2239152 KiB/) # 142_000 + 2_097_152
+      expect(result[:reason]).to match(/Available \(includes reserve\): 2239151 KiB/) # total available
+    end
 
-    provisionally_allocated_machine = {
-      :hostname => "provisionally_allocated_machine",
-      :ram => 2_097_152
-    }
+    it 'when host has sufficient memory' do
+      h2 = StackBuilder::Allocator::Host.new("h2", :ram => 7_956_912) # available is >= total required
+      h2.allocated_machines << existing_machine
+      h2.provisionally_allocated_machines << provisionally_allocated_machine
 
-    existing_machine = {
-      :hostname => "existing machine",
-      :ram => 2_097_152
-    }
-
-    h1 = StackBuilder::Allocator::Host.new("h1", :ram => '4194304') # 4GB
-    h1.allocated_machines << existing_machine
-    h1.provisionally_allocated_machines << provisionally_allocated_machine
-
-    expect(StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h1, candidate_machine)[:passed]).
-      to eql(false)
+      result = StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h2, candidate_machine)
+      expect(result[:passed]).to eql(true)
+      expect(result[:reason]).to be_nil
+    end
   end
 
   it 'rejects allocations where the host provisioning has been disabled' do
