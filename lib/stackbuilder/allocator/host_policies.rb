@@ -35,11 +35,12 @@ module StackBuilder::Allocator::HostPolicies
     Proc.new do |host, machine|
       result = { :passed => true }
       host_ram_stats = helper.ram_stats_of(host)
-      if host_ram_stats[:available_ram] < Integer(machine[:ram])
+      overhead = helper.overhead_per_vm
+      if host_ram_stats[:available_ram] < (machine[:ram].to_i + overhead)
         result = {
           :passed => false,
-          :reason => "Insufficient memory (required: #{machine[:ram]} KiB " \
-                     "available (minus host_reserve_ram): #{host_ram_stats[:available_ram]} KiB)"
+          :reason => "Insufficient memory (required including overhead): #{machine[:ram] + overhead} KiB. " \
+                     "Available (includes reserve): #{host_ram_stats[:available_ram].to_i} KiB"
         }
       end
       result
