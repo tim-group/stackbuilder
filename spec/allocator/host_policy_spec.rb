@@ -70,17 +70,17 @@ describe StackBuilder::Allocator::HostPolicies do
   describe 'do_not_overallocate_ram_policy' do
     candidate_machine = {
       :hostname => "candidate_machine",
-      :ram => 2_097_152
+      :ram      => 2_097_152
     }
 
     provisionally_allocated_machine = {
       :hostname => "provisionally_allocated_machine",
-      :ram => 2_097_152
+      :ram      => 2_097_152
     }
 
     existing_machine = {
       :hostname => "existing machine",
-      :ram => 2_097_152
+      :ram      => 2_097_152
     }
 
     # overhead_daemons = 190_880
@@ -120,7 +120,6 @@ describe StackBuilder::Allocator::HostPolicies do
       result = StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy.call(h3, candidate_machine)
       expect(result[:passed]).to eql(false)
     end
-
   end
 
   it 'rejects allocations where the host provisioning has been disabled' do
