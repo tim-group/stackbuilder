@@ -1,4 +1,5 @@
 require 'stackbuilder/support/zamls'
+require 'stackbuilder/support/nagios'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_clean'
@@ -15,8 +16,8 @@ class CMD
   end
   include CMDAudit
   include CMDLs
-  include CMDClean
   include CMDNagios
+  include CMDClean
   include CMDOrc # XXX work in progress
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
