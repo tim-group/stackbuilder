@@ -51,5 +51,4 @@ module CMDClean
       end
     end
   end
-
 end
