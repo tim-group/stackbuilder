@@ -1,3 +1,5 @@
+require 'stackbuilder/support/nagios'
+
 module CMDNagios
   def nagios(argv)
     cmd = argv.shift
