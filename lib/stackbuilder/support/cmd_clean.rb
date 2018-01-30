@@ -1,3 +1,5 @@
+require 'stackbuilder/support/mcollective_puppet'
+
 module CMDClean
   def clean(_argv)
     machine_def = check_and_get_stack
@@ -29,6 +31,8 @@ module CMDClean
     end
   end
 
+  include Support::MCollectivePuppet
+
   def puppet_clean(machine_def)
     puppet_certs_to_clean = []
     machine_def.accept do |child_machine_def|
@@ -41,7 +45,6 @@ module CMDClean
       end
     end
 
-    include Support::MCollectivePuppet
     ca_clean(puppet_certs_to_clean) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully removed cert for #{machine}" }
