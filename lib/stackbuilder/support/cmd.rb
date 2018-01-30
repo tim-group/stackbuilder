@@ -246,7 +246,7 @@ class CMD
   end
 end
 
-# XXX
+# XXX ?
 module Opt
   def self.stack
     logger(Logger::DEBUG) { ":primary_site for \"#{$environment.name}\" is \"#{$environment.options[:primary_site]}\"" }
