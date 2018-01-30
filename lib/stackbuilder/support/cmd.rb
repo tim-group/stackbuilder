@@ -16,8 +16,8 @@ class CMD
   include CMDAudit
   include CMDLs
   include CMDClean
+  include CMDNagios
   include CMDOrc # XXX work in progress
-  include CMDNagios # XXX work in progress
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
