@@ -10,9 +10,9 @@ module CMDNagios
 
     case cmd
     when 'disable'
-      schedule_downtime(machine_def)
+      nagios_schedule_downtime(machine_def)
     when 'enable'
-      cancel_downtime(machine_def)
+      nagios_cancel_downtime(machine_def)
     else
       logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
       exit 1
@@ -21,7 +21,7 @@ module CMDNagios
 
   private
 
-  def schedule_downtime(machine_def)
+  def nagios_schedule_downtime(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
       hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
@@ -45,7 +45,7 @@ module CMDNagios
     end
   end
 
-  def cancel_downtime(machine_def)
+  def nagios_cancel_downtime(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
       hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)

@@ -1,6 +1,7 @@
 require 'stackbuilder/support/zamls'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_ls'
+require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_orc'
 require 'stackbuilder/support/cmd_nagios'
 
@@ -14,6 +15,7 @@ class CMD
   end
   include CMDAudit
   include CMDLs
+  include CMDClean
   include CMDOrc # XXX work in progress
   include CMDNagios # XXX work in progress
 
@@ -152,12 +154,6 @@ class CMD
       logger(Logger::FATAL) { "invalid sub command \"#{cmd}\"" }
       exit 1
     end
-  end
-
-  # XXX do this properly
-  def clean(_argv)
-    machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:clean")
   end
 
   # XXX do this properly
