@@ -140,48 +140,6 @@ namespace :sbx do
     end
   end
 
-  # FIXME: Stolen from hostcleanup application, this does not belong here
-  def status_code(status)
-    return 'OK' if status
-    'ERROR'
-  end
-
-  # FIXME: Stolen from hostcleanup application, this does not belong here
-  def output_result(responses)
-    responses.each do |resp|
-      if resp.results[:statuscode] == 0
-        printf(" %-48s: %s - %s, output: %s\n", resp.results[:sender], \
-               resp.action, \
-               status_code(resp.results[:data][:statuscode]), \
-               resp.results[:data][:status])
-      else
-        printf(" %-48s: %s - ERROR %s\n", resp.results[:sender], resp.action, resp.results[:statusmsg])
-      end
-    end
-  end
-
-  # FIXME: Stolen from hostcleanup application, this does not belong here
-  def hostcleanup(fqdn, action)
-    mco_client('hostcleanup') do |hostcleanup_mc|
-      hostcleanup_mc.progress = false
-      hostcleanup_mc.reset_filter
-      case action
-      when 'puppet'
-        hostcleanup_mc.class_filter('role::puppetserver')
-        hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
-      when 'mongodb'
-        hostcleanup_mc.class_filter('role::mcollective_registrationdb')
-        hostcleanup_mc.fact_filter 'logicalenv', '/(oy|pg|lon|st)/'
-      when 'nagios'
-        hostcleanup_mc.class_filter('nagios')
-        hostcleanup_mc.fact_filter 'domain', '/(oy|pg|lon)/'
-      when 'metrics'
-        hostcleanup_mc.class_filter('metrics')
-      end
-      output_result hostcleanup_mc.send(action, :fqdn => fqdn)
-    end
-  end
-
   cmd = CMD.new
   require 'set'
   machine_names = Set.new
@@ -487,13 +445,7 @@ namespace :sbx do
 
       desc 'clean away all traces of these machines'
       sbtask :clean_traces do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          hosts << child_machine_def.mgmt_fqdn if child_machine_def.respond_to?(:mgmt_fqdn)
-        end
-        %w(nagios mongodb puppet).each do |action|
-          hosts.each { |fqdn| hostcleanup(fqdn, action) }
-        end
+        cmd.do_clean_traces(machine_def)
       end
 
       desc "frees up ip and vip allocation of these machines"
