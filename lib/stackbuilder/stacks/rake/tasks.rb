@@ -7,6 +7,7 @@ require 'yaml'
 require 'rubygems'
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/inventory'
+require 'stackbuilder/support/cmd'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_puppet'
 require 'stackbuilder/support/nagios'
@@ -181,6 +182,7 @@ namespace :sbx do
     end
   end
 
+  cmd = CMD.new
   require 'set'
   machine_names = Set.new
   rake_task_names = Set.new
@@ -476,36 +478,12 @@ namespace :sbx do
 
           fail("some nodes have failed their puppet runs") unless success
         end
-
-        desc "Remove signed certs from puppetserver"
-        sbtask :clean do
-          puppet_certs_to_clean = []
-          machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to?(:mgmt_fqdn)
-              if child_machine_def.needs_signing?
-                puppet_certs_to_clean << child_machine_def.mgmt_fqdn
-              else
-                logger(Logger::INFO) { "removal of cert not needed for #{child_machine_def.mgmt_fqdn}" }
-              end
-            end
-          end
-
-          include Support::MCollectivePuppet
-          ca_clean(puppet_certs_to_clean) do
-            on :success do |machine|
-              logger(Logger::INFO) { "successfully removed cert for #{machine}" }
-            end
-            on :failed do |machine|
-              logger(Logger::WARN) { "failed to remove cert for #{machine}" }
-            end
-          end
-        end
       end
 
       desc 'unallocate machines'
-      # Note that the ordering here is important - must have killed VMs before
-      # removing their puppet cert, otherwise we have a race condition
-      task :clean => ['schedule_downtime', 'clean_nodes', 'puppet:clean']
+      sbtask :clean do
+        cmd.do_clean(machine_def)
+      end
 
       desc 'clean away all traces of these machines'
       sbtask :clean_traces do
@@ -520,47 +498,6 @@ namespace :sbx do
 
       desc "frees up ip and vip allocation of these machines"
       task :free_ip_allocation => %w(free_ips free_vips)
-
-      sbtask :clean_nodes do
-        computecontroller = Compute::Controller.new
-        computecontroller.clean(machine_def.to_specs) do
-          on :success do |vm, msg|
-            logger(Logger::INFO) { "successfully cleaned #{vm}: #{msg}" }
-          end
-          on :failure do |vm, msg|
-            logger(Logger::ERROR) { "failed to clean #{vm}: #{msg}" }
-          end
-          on :unaccounted do |vm|
-            logger(Logger::WARN) { "VM was unaccounted for: #{vm}" }
-          end
-        end
-      end
-
-      sbtask :schedule_downtime do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:mgmt_fqdn)
-            hosts << child_machine_def
-          end
-        end
-
-        nagios_helper = Support::Nagios::Service.new
-        downtime_secs = 1800 # 1800 = 30 mins
-        nagios_helper.schedule_downtime(hosts, downtime_secs) do
-          on :success do |response_hash|
-            logger(Logger::INFO) do
-              "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
-              "result: #{response_hash[:result]}"
-            end
-          end
-          on :failed do |response_hash|
-            logger(Logger::INFO) do
-              "failed to schedule #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
-              "result: #{response_hash[:result]}"
-            end
-          end
-        end
-      end
 
       sbtask :cancel_downtime do
         hosts = []
