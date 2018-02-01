@@ -29,8 +29,7 @@ module CMDOrc
     # false positive
     # rubocop:disable Style/GuardClause
     if !valid
-      logger(Logger::ERROR) { "machine_def \"#{machine_def.name}\" cannot be orc-resolved" }
-      exit 1
+      logger(Logger::INFO) { "machine_def \"#{machine_def.name}\" cannot be orc-resolved" }
     end
     # rubocop:enable Style/GuardClause
   end
