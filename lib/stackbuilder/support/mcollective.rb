@@ -1,4 +1,5 @@
 require 'stackbuilder/support/forking'
+require 'stackbuilder/support/logger'
 require 'mcollective'
 require 'mcollective/pluginmanager'
 
@@ -28,7 +29,7 @@ module Support
       def new_client(name)
         client = @rpc.rpcclient(name, :options => @mco_options)
         apply_fabric_filter client, @options[:fabric] if @options.key?(:fabric)
-        client
+        LoggingMcoRpcClientProxy.new(name, client)
       end
 
       def apply_fabric_filter(mco, fabric)
@@ -62,6 +63,20 @@ module Support
 
     class MCollectiveRPC
       include ::MCollective::RPC
+    end
+
+    class LoggingMcoRpcClientProxy < BasicObject
+      def initialize(rpcName, rpcClient)
+        @rpcName = rpcName
+        @rpcClient = rpcClient
+      end
+
+      private
+
+      def method_missing(method, *args, &block)
+        ::Kernel::logger(::Logger::DEBUG) { "making mco rpc call #{@rpcName} #{method}" }
+        @rpcClient.send(method, *args, &block)
+      end
     end
 
     private
