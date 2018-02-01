@@ -24,7 +24,7 @@ module CMDPuppet
     end
   end
 
-  #sign outstanding Puppet certificate signing requests for these machines
+  # sign outstanding Puppet certificate signing requests for these machines
   def puppet_poll_sign(machine_def)
     puppet_certs_to_sign = []
     machine_def.accept do |child_machine_def|
@@ -70,9 +70,7 @@ module CMDPuppet
       logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
 
-    unless run_result.all_passed?
-      fail("Puppet runs have timed out or failed, see above for details")
-    end
+    fail("Puppet runs have timed out or failed, see above for details") unless run_result.all_passed?
   end
 
   # run Puppet on these machines
