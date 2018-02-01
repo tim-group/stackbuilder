@@ -37,7 +37,6 @@ module CMDPuppet
       end
     end
 
-    include Support::MCollectivePuppet
     ca_sign(puppet_certs_to_sign) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully signed cert for #{machine}" }
