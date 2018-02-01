@@ -1,5 +1,6 @@
 require 'stackbuilder/support/zamls'
 require 'stackbuilder/support/nagios'
+require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_nagios'
@@ -19,6 +20,8 @@ class CMD
     @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
+    @subscription = Subscription.new
+    @subscription.start(["provision.*", "puppet_status"])
   end
 
   include CMDAudit
