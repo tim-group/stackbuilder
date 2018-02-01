@@ -1,7 +1,11 @@
 module CMDProvision
-  def launch(_argv)
-    machine_def = check_and_get_stack
-    do_launch($factory.services, machine_def)
+  def do_provision_machine(services, machine_def)
+    do_launch(services, machine_def)
+    puppet_sign(machine_def)
+    puppet_poll_sign(machine_def)
+    puppet_wait(machine_def)
+    do_orc_resolve(machine_def)
+    nagios_cancel_downtime(machine_def)
   end
 
   def do_launch(services, machine_def)

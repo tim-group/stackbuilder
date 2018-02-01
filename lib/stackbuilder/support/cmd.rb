@@ -27,7 +27,7 @@ class CMD
   include CMDPuppet
   include CMDClean
   include CMDProvision
-  include CMDOrc # XXX work in progress
+  include CMDOrc
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
@@ -141,10 +141,10 @@ class CMD
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:test")
   end
 
-  # XXX do this properly
   def reprovision(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:reprovision")
+    do_clean(machine_def)
+    do_provision_machine($factory.services, machine_def)
   end
 
   def dependencies(_argv)
