@@ -3,6 +3,7 @@ require 'stackbuilder/support/nagios'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_nagios'
+require 'stackbuilder/support/cmd_puppet'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
 require 'stackbuilder/support/cmd_orc'
@@ -23,6 +24,7 @@ class CMD
   include CMDAudit
   include CMDLs
   include CMDNagios
+  include CMDPuppet
   include CMDClean
   include CMDProvision
   include CMDOrc # XXX work in progress
