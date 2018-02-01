@@ -4,20 +4,27 @@ require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_clean'
+require 'stackbuilder/support/cmd_provision'
 require 'stackbuilder/support/cmd_orc'
+require 'stackbuilder/stacks/core/actions'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
 # long and complicated commands go to their own modules in their own files.
 class CMD
   attr_reader :cmds # this list is just a safety check
+
   def initialize
     @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @core_actions = Object.new
+    @core_actions.extend(Stacks::Core::Actions)
   end
+
   include CMDAudit
   include CMDLs
   include CMDNagios
   include CMDClean
+  include CMDProvision
   include CMDOrc # XXX work in progress
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
