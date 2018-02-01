@@ -67,15 +67,15 @@ module Support
 
     class LoggingMcoRpcClientProxy < BasicObject
       def initialize(rpcName, rpcClient)
-        @rpcName = rpcName
-        @rpcClient = rpcClient
+        @rpc_name = rpcName
+        @rpc_client = rpcClient
       end
 
       private
 
       def method_missing(method, *args, &block)
-        ::Kernel::logger(::Logger::DEBUG) { "making mco rpc call #{@rpcName} #{method}" }
-        @rpcClient.send(method, *args, &block)
+        ::Kernel.logger(::Logger::DEBUG) { "making mco rpc call #{@rpc_name} #{method}" }
+        @rpc_client.send(method, *args, &block)
       end
     end
 
