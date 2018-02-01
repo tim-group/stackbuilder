@@ -6,7 +6,6 @@ require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_orc'
 
-
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
 # long and complicated commands go to their own modules in their own files.
