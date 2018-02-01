@@ -55,7 +55,7 @@ module CMDNagios
     nagios_helper.cancel_downtime(hosts) do
       on :success do |response_hash|
         logger(Logger::INFO) do
-          "enabled nagios for #{response_hash[:machine]} " \
+          "successfully cancelled downtime for #{response_hash[:machine]} " \
           "result: #{response_hash[:result]}"
         end
       end
