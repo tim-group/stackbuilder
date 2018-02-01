@@ -1,5 +1,6 @@
 require 'stackbuilder/support/zamls'
 require 'stackbuilder/support/nagios'
+require 'stackbuilder/stacks/core/actions'
 require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_ls'
@@ -8,7 +9,6 @@ require 'stackbuilder/support/cmd_puppet'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
 require 'stackbuilder/support/cmd_orc'
-require 'stackbuilder/stacks/core/actions'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
