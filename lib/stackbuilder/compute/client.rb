@@ -47,7 +47,7 @@ class Compute::Client
       mco.hvinfo.map do |hv|
         fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
-        domains = audit_domains ? {} : get_libvirt_domains(mco, hv)
+        domains = audit_domains ? get_libvirt_domains(mco, hv) : {}
 
         [hv[:sender], hv[:data].merge(:domains => domains)]
       end
