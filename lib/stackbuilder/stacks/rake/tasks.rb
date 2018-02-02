@@ -11,14 +11,12 @@ require 'stackbuilder/support/cmd'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_puppet'
 require 'stackbuilder/support/nagios'
-require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/zamls'
 
 require 'set'
 require 'rspec'
 require 'stackbuilder/compute/controller'
 require 'stackbuilder/stacks/factory'
-require 'stackbuilder/stacks/core/actions'
 require 'thread'
 
 # XXX refactor this somehow, causes warnings in new rubys. hide the warnings for now
@@ -98,9 +96,6 @@ def sbtask(name, &block)
     puts "\n\e[1m\e[32m:#{task} passed in #{t}s\e[0m\n"
   end
 end
-
-@subscription = Subscription.new
-@subscription.start(["provision.*", "puppet_status"])
 
 namespace :sbx do
   desc 'Print a report of KVM host CPU/Storage/Memory allocation'
@@ -182,40 +177,11 @@ namespace :sbx do
         end
       end
 
-      # make orc resolve available on stacks (containers) that have app servers, and individual app servers
-      namespace :orc do
-        if machine_def.is_a? Stacks::Services::AppServer
-          desc "orc resolve #{machine_def.virtual_service.application}"
-          sbtask :resolve do
-            factory = Orc::Factory.new(
-              :application => machine_def.virtual_service.application,
-              :environment => machine_def.environment.name
-            )
-            factory.cmdb_git.update
-            factory.engine.resolve
-          end
-        else
-          applications = Set.new
-          machine_def.accept do |child_machine_def|
-            next unless child_machine_def.is_a? Stacks::Services::AppServer
-            applications << child_machine_def.virtual_service.application
-          end
-          desc "orc resolve #{applications.to_a.join(', ')}"
-          sbtask :resolve do
-            applications.to_a.each do |application|
-              factory = Orc::Factory.new(
-                :application => application,
-                :environment => machine_def.environment.name
-              )
-              factory.cmdb_git.update
-              factory.engine.resolve
-            end
-          end
-        end
-      end
-
       task :prepare_dependencies => ['allocate_vips', 'allocate_ips', 'puppet:prepare_dependencies']
-      task :provision_machine => ['launch', 'puppet:sign', 'puppet:poll_sign', 'puppet:wait', 'orc:resolve', 'cancel_downtime']
+
+      task :provision_machine do
+        cmd.do_provision_machine(@factory.services, machine_def)
+      end
 
       desc "perform all steps required to create and configure the machine(s)"
       task :provision => %w(prepare_dependencies provision_machine nagios:refresh)
@@ -225,12 +191,12 @@ namespace :sbx do
 
       desc "allocate these machines to hosts (but don't actually launch them - this is a dry run)"
       sbtask :allocate do
-        get_action("allocate").call(@factory.services, machine_def)
+        cmd.do_allocate(@factory.services, machine_def)
       end
 
       desc "launch these machines"
       sbtask :launch do
-        get_action("launch").call(@factory.services, machine_def)
+        cmd.do_launch(@factory.services, machine_def)
       end
 
       desc "resolve the IP numbers of these machines"
@@ -253,7 +219,7 @@ namespace :sbx do
 
       desc "allocate IPs for these machines"
       sbtask :allocate_ips do
-        get_action("allocate_ips").call(@factory.services, machine_def)
+        cmd.do_allocate_ips(@factory.services, machine_def)
       end
 
       # FIXME : Take this terrible, un-testable code out of rake
@@ -323,25 +289,6 @@ namespace :sbx do
       end
 
       namespace :puppet do
-        desc "sign outstanding Puppet certificate signing requests for these machines"
-        sbtask :sign do
-          puppet_certs_to_sign = []
-          machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to?(:mgmt_fqdn)
-              if child_machine_def.needs_signing?
-                puppet_certs_to_sign << child_machine_def.mgmt_fqdn
-              else
-                logger(Logger::INFO) { "signing not needed for #{child_machine_def.mgmt_fqdn}" }
-              end
-            end
-          end
-          start_time = Time.now
-          result = @subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
-          result.all.each do |vm, status|
-            logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
-          end
-        end
-
         desc "run puppet on all of a stack's dependencies"
         sbtask :prepare_dependencies do
           all_dependencies = Set.new
@@ -366,76 +313,6 @@ namespace :sbx do
             system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
           end
         end
-
-        desc "sign outstanding Puppet certificate signing requests for these machines"
-        sbtask :poll_sign do
-          puppet_certs_to_sign = []
-          machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to?(:mgmt_fqdn)
-              if child_machine_def.needs_poll_signing?
-                puppet_certs_to_sign << child_machine_def.mgmt_fqdn
-              else
-                logger(Logger::INFO) { "poll signing not needed for #{child_machine_def.mgmt_fqdn}" }
-              end
-            end
-          end
-
-          include Support::MCollectivePuppet
-          ca_sign(puppet_certs_to_sign) do
-            on :success do |machine|
-              logger(Logger::INFO) { "successfully signed cert for #{machine}" }
-            end
-            on :failed do |machine|
-              logger(Logger::WARN) { "failed to signed cert for #{machine}" }
-            end
-            on :unaccounted do |machine|
-              logger(Logger::WARN) { "cert not signed for #{machine} (unaccounted for)" }
-            end
-            on :already_signed do |machine|
-              logger(Logger::WARN) { "cert for #{machine} already signed, skipping" }
-            end
-          end
-        end
-
-        desc "wait for puppet to complete its run on these machines"
-        sbtask :wait do
-          start_time = Time.now
-          hosts = []
-          machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to?(:mgmt_fqdn)
-              hosts << child_machine_def.mgmt_fqdn
-            end
-          end
-
-          run_result = @subscription.wait_for_hosts("puppet_status", hosts, 5400)
-
-          run_result.all.each do |vm, status|
-            logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
-          end
-
-          unless run_result.all_passed?
-            fail("Puppet runs have timed out or failed, see above for details")
-          end
-        end
-
-        desc "run Puppet on these machines"
-        sbtask :run do
-          hosts = []
-          machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to?(:mgmt_fqdn)
-              hosts << child_machine_def.mgmt_fqdn
-            end
-          end
-
-          success = mco_client("puppetd") do |mco|
-            engine = PuppetRoll::Engine.new({ :concurrency => 5 }, [], hosts, PuppetRoll::Client.new(hosts, mco))
-            engine.execute
-            pp engine.get_report
-            engine.successful?
-          end
-
-          fail("some nodes have failed their puppet runs") unless success
-        end
       end
 
       desc 'unallocate machines'
@@ -450,31 +327,6 @@ namespace :sbx do
 
       desc "frees up ip and vip allocation of these machines"
       task :free_ip_allocation => %w(free_ips free_vips)
-
-      sbtask :cancel_downtime do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:mgmt_fqdn)
-            hosts << child_machine_def
-          end
-        end
-
-        nagios_helper = Support::Nagios::Service.new
-        nagios_helper.cancel_downtime(hosts) do
-          on :success do |response_hash|
-            logger(Logger::INFO) do
-              "successfully cancelled downtime for #{response_hash[:machine]} " \
-              "result: #{response_hash[:result]}"
-            end
-          end
-          on :failed do |response_hash|
-            logger(Logger::INFO) do
-              "failed to cancel downtime for #{response_hash[:machine]} " \
-              "result: #{response_hash[:result]}"
-            end
-          end
-        end
-      end
 
       namespace :nagios do
         sbtask :refresh do
