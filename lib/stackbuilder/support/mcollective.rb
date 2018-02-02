@@ -74,7 +74,7 @@ module Support
       private
 
       def method_missing(method, *args, &block)
-        ::Kernel.logger(::Logger::DEBUG) { "making mco rpc call #{@rpc_name} #{method}" }
+        ::Kernel.logger(::Logger::DEBUG) { "making mco rpc call #{@rpc_name} #{method} #{args}" }
         @rpc_client.send(method, *args, &block)
       end
     end
