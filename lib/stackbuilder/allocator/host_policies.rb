@@ -33,17 +33,25 @@ module StackBuilder::Allocator::HostPolicies
   def self.do_not_overallocate_ram_policy
     helper = StackBuilder::Allocator::PolicyHelpers
     Proc.new do |host, machine|
-      result = { :passed => true }
-      host_ram_stats = helper.ram_stats_of(host)
-      overhead = helper.overhead_per_vm
-      if host_ram_stats[:available_ram] < (machine[:ram].to_i + overhead)
-        result = {
+      machine_ram = machine[:ram].to_i
+
+      if (machine_ram < 1024) {
+        logger(Logger::FATAL) { "machine must require some ram: #{machine_ram} KiB" }
+        exit 1
+      }
+
+      required_ram = machine_ram + helper.overhead_per_vm
+      available_ram = helper.ram_stats_of(host)[:available_ram]
+
+      if available_ram >= required_ram
+        { :passed => true }
+      else
+        {
           :passed => false,
-          :reason => "Insufficient memory (required including overhead): #{machine[:ram].to_i + overhead} KiB. " \
-                     "Available (includes reserve): #{host_ram_stats[:available_ram].to_i} KiB"
+          :reason => "Insufficient memory (required including overhead): #{required_ram} KiB. " \
+                     "Available (includes reserve): #{available_ram} KiB"
         }
       end
-      result
     end
   end
 
