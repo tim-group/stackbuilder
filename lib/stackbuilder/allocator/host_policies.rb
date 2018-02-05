@@ -41,7 +41,7 @@ module StackBuilder::Allocator::HostPolicies
       end
 
       required_ram = machine_ram + helper.overhead_per_vm
-      available_ram = helper.ram_stats_of(host)[:available_ram]
+      available_ram = helper.ram_stats_of(host)[:available_ram].to_i
 
       if available_ram >= required_ram
         { :passed => true }
