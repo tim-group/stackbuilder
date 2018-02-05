@@ -101,7 +101,7 @@ class Subscription
           return_results << parsed_message
         end
       rescue Timeout::Error => e
-        puts "Timed out waiting for message #{e} .. retrying"
+        logger(Logger::DEBUG) { "Timed out waiting for message #{e} .. retrying" }
       end
     end
     WaitResponse.new(hosts, return_results)
