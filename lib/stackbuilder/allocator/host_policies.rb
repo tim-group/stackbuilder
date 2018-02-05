@@ -35,7 +35,7 @@ module StackBuilder::Allocator::HostPolicies
     Proc.new do |host, machine|
       machine_ram = machine[:ram].to_i
 
-      if (machine_ram < 1024)
+      if machine_ram < 1024
         logger(Logger::FATAL) { "machine must require some ram: #{machine_ram} KiB" }
         exit 1
       end
