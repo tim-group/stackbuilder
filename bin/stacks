@@ -29,6 +29,7 @@ Options:
     -h, --help                display this help and exit
     -p, --path=VALUE          path to the stackbuilder-config repository. "/etc/stacks" is the default. See also STACKBUILDER_CONFIG_PATH
     -v, --verbose             increase logging verbosity. Can be specified multiple times (e.g. -vvv)
+    -q, --quiet               reduce logging verbosity. Can be specified multiple times (e.g. -qqq)
 
   Options that may affect commands. Depending on "command", some of these may be mandatory, optional, or ignored.
 
@@ -97,7 +98,7 @@ end
 $options = {
   :environment => 'dev',
   :path        => ENV['STACKBUILDER_CONFIG_PATH'] || '.',
-  :verbose     => 1
+  :verbose     => 2
 }
 # change the default path on puppetservers puppet.conf node_terminus does not take parameters
 require 'socket'
@@ -112,6 +113,7 @@ GetoptLong.new(
   ['--stack',       '-s', GetoptLong::REQUIRED_ARGUMENT],
   ['--terse',       '-t', GetoptLong::NO_ARGUMENT],
   ['--verbose',     '-v', GetoptLong::NO_ARGUMENT],
+  ['--quiet',       '-q', GetoptLong::NO_ARGUMENT],
   ['--create-persistent-storage', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
@@ -120,9 +122,11 @@ GetoptLong.new(
     help
     exit 0
   when '--verbose'
-    $options[opt_sym] += 1
+    $options[:verbose] += 1
+  when '--quiet'
+    $options[:quiet] -= 1
   when '--terse'
-    $options[opt_sym] = true
+    $options[:terse] = true
   else
     $options[opt_sym] = arg
   end
