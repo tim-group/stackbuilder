@@ -1,7 +1,6 @@
 module Stacks
   module Services
-    require 'stackbuilder/stacks/services/traits/can_be_natted'
-    require 'stackbuilder/stacks/services/traits/rabbitmq_dependent'
+    require 'stackbuilder/stacks/services/traits/namespace'
     require 'stackbuilder/stacks/services/app_server'
     require 'stackbuilder/stacks/services/app_service'
     require 'stackbuilder/stacks/services/bind_server'

@@ -1,7 +1,10 @@
 require 'stackbuilder/support/owner_fact'
 require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/services/traits/namespace'
 
 class Stacks::MachineDef
+  include Stacks::Services::Traits::LogstashReceiverDependent
+
   attr_reader :domain
   attr_reader :environment
   attr_reader :fabric
@@ -241,15 +244,9 @@ class Stacks::MachineDef
 
   def to_enc
     enc = {}
-    if @virtual_service && @virtual_service.respond_to?(:logstash_receiver_hosts_for_filebeat)
-      logstash_receiver_hosts = @virtual_service.logstash_receiver_hosts_for_filebeat(@site)
 
-      if !logstash_receiver_hosts.nil? && !logstash_receiver_hosts.empty?
-        enc['profiles::filebeat'] = {
-          'logstash_receiver_hosts' => logstash_receiver_hosts
-        }
-      end
-    end
+    enc.merge!(filebeat_profile_enc)
+
     if @monitoring_in_enc
       enc['monitoring'] = {
         'checks'     => @monitoring,
