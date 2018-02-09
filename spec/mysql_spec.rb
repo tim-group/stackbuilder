@@ -1220,6 +1220,8 @@ describe_stack 'should allow snapshot backups' do
           machine.snapshot_retention = '6 days'
           machine.snapshot_hour = '*'
           machine.snapshot_minute = '*/30'
+          machine.snapshot_frequency_secs = 1800
+          machine.snapshot_retention_secs = 1800 * 7
         end
       end
     end
@@ -1246,6 +1248,8 @@ describe_stack 'should allow snapshot backups' do
     expect(enc['db_snapshot']['keep_snapshots_until']).to eql '6 days'
     expect(enc['db_snapshot']['cron_hour']).to eql '*'
     expect(enc['db_snapshot']['cron_minute']).to eql '*/30'
+    expect(enc['db_snapshot']['snapshot_frequency_secs']).to eql 1800
+    expect(enc['db_snapshot']['snapshot_retention_secs']).to eql 12_600
 
     spec = host.to_spec
     expect(spec[:storage][:"/mnt/data"][:prepare][:options][:create_guest_lvm]).to be true
