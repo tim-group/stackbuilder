@@ -1217,9 +1217,6 @@ describe_stack 'should allow snapshot backups' do
           next unless machine.role_of?(:backup)
           machine.snapshot_pv_size('60G')
           machine.snapshot_size = '256M'
-          machine.snapshot_retention = '6 days'
-          machine.snapshot_hour = '*'
-          machine.snapshot_minute = '*/30'
           machine.snapshot_frequency_secs = 1800
           machine.snapshot_retention_secs = 1800 * 7
         end
@@ -1245,9 +1242,6 @@ describe_stack 'should allow snapshot backups' do
     enc = host.to_enc
     expect(enc.key? 'db_snapshot').to be true
     expect(enc['db_snapshot']['snapshot_size']).to eql '256M'
-    expect(enc['db_snapshot']['keep_snapshots_until']).to eql '6 days'
-    expect(enc['db_snapshot']['cron_hour']).to eql '*'
-    expect(enc['db_snapshot']['cron_minute']).to eql '*/30'
     expect(enc['db_snapshot']['snapshot_frequency_secs']).to eql 1800
     expect(enc['db_snapshot']['snapshot_retention_secs']).to eql 12_600
 

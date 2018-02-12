@@ -9,7 +9,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   attr_accessor :use_gtids
   attr_accessor :monitoring_checks
   attr_accessor :grant_user_rights_by_default
-  attr_accessor :snapshot_retention, :snapshot_size, :snapshot_hour, :snapshot_minute, :snapshot_pv_size
+  attr_accessor :snapshot_size, :snapshot_pv_size
   attr_accessor :snapshot_frequency_secs, :snapshot_retention_secs
 
   def initialize(virtual_service, base_hostname, environment, site, role)
@@ -26,10 +26,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     @grant_user_rights_by_default = false
 
     @snapshot_pv_size = '20G'
-    @snapshot_retention = '7 days'
     @snapshot_size = '512M'
-    @snapshot_hour = '0'
-    @snapshot_minute = '0'
     @snapshot_frequency_secs = 86400
     @snapshot_retention_secs = 86400 * 7
 
@@ -196,11 +193,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   def snapshot_enc
     {
       'db_snapshot' => {
-        'cron_hour'               => @snapshot_hour,
-        'cron_minute'             => @snapshot_minute,
         'lv_to_snapshot'          => '_mnt_data',
         'snapshot_size'           => @snapshot_size,
-        'keep_snapshots_until'    => @snapshot_retention,
         'snapshot_frequency_secs' => @snapshot_frequency_secs,
         'snapshot_retention_secs' => @snapshot_retention_secs
       }
