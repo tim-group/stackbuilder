@@ -1,8 +1,6 @@
 module Stacks::Services::Traits::LogstashReceiverDependent
   def logstash_receiver_hosts
-    if !@virtual_service.is_a? Stacks::Dependencies
-      return []
-    end
+    return [] if !@virtual_service.is_a? Stacks::Dependencies
 
     @virtual_service.virtual_services_that_i_depend_on.select do |service|
       service.is_a?(Stacks::Services::LogstashReceiverCluster)
@@ -16,9 +14,9 @@ module Stacks::Services::Traits::LogstashReceiverDependent
 
     if !hosts.nil? && !hosts.empty?
       {
-          'profiles::filebeat' => {
-              'logstash_receiver_hosts' => hosts
-          }
+        'profiles::filebeat' => {
+          'logstash_receiver_hosts' => hosts
+        }
       }
     else
       {}
