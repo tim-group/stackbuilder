@@ -32,10 +32,6 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
     true
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def to_spec
     spec = super
     spec[:template] = "senode_#{options[:lsbdistcodename]}"

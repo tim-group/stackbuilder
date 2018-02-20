@@ -9,10 +9,6 @@ class Stacks::Services::ProxyServer < Stacks::MachineDef
     @disable_enc = false
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def disable_enc
     @disable_enc = true
   end

@@ -27,10 +27,6 @@ class Stacks::Services::Selenium::Hub < Stacks::MachineDef
     template(options[:lsbdistcodename].nil? ? :precise : options[:lsbdistcodename])
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def validate_storage
     true
   end

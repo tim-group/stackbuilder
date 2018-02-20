@@ -13,10 +13,6 @@ class Stacks::Services::BindServer < Stacks::MachineDef
     @role == :slave
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def to_enc
     dependant_zones = @virtual_service.bind_master_servers_and_zones_that_i_depend_on(location)
 

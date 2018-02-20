@@ -16,10 +16,6 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     @enc_hacks = []
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def allow_host(source_host_or_network)
     @allowed_hosts << source_host_or_network
     @allowed_hosts.uniq!

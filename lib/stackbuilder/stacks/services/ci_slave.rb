@@ -16,10 +16,6 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
     nil
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def to_enc
     enc = super()
     enc.merge!('role::cinode' => {

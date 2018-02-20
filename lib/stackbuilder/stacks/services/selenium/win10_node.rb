@@ -29,10 +29,6 @@ class Stacks::Services::Selenium::Win10Node < Stacks::MachineDef
     }
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def to_spec
     spec = super
     spec[:template] = "senode_win10"

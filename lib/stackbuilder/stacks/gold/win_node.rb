@@ -11,10 +11,6 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
     @win_version = nil
   end
 
-  def bind_to(environment)
-    super(environment)
-  end
-
   def to_spec
     modify_storage('/'.to_sym => {
                      :prepare => {
