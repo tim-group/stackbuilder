@@ -135,6 +135,9 @@ class CMD
   # XXX do this properly
   def provision(_argv)
     machine_def = check_and_get_stack
+    if $options[:'skip-prepare-dependencies']
+      ENV['SKIP_PREPARE_DEPENDENCIES'] = 'true'
+    end
     system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:provision")
   end
 

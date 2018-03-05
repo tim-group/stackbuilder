@@ -177,7 +177,15 @@ namespace :sbx do
         end
       end
 
-      task :prepare_dependencies => ['allocate_vips', 'allocate_ips', 'puppet:prepare_dependencies']
+      task :prepare_dependencies => if ENV.fetch('SKIP_PREPARE_DEPENDENCIES', 'false') == 'true'
+                                      ['notify_prepare_dependencies_disabled']
+                                    else
+                                      ['allocate_vips', 'allocate_ips', 'puppet:prepare_dependencies']
+                                    end
+
+      task :notify_prepare_dependencies_disabled do
+        logger(Logger::WARN) { 'skipping prepare_dependencies as --skip-prepare-dependencies flag is set' }
+      end
 
       task :provision_machine do
         cmd.do_provision_machine(@factory.services, machine_def)

@@ -61,6 +61,8 @@ Options:
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,
                               skip stacks of type "machine".
     provision [-e] -s         allocates and spins up a stack
+      [--skip-prepare-dependencies] when provisioning, set this to avoid tasks that usually only need to be run prior
+                              to the first time that a machine is provisioned, e.g. run puppet on dependencies. 
     reprovision [-e] -s       "clean", and then "provision" a stack
     terminus                  create a yaml puppet terminus
 
@@ -114,7 +116,8 @@ GetoptLong.new(
   ['--terse',       '-t', GetoptLong::NO_ARGUMENT],
   ['--verbose',     '-v', GetoptLong::NO_ARGUMENT],
   ['--quiet',       '-q', GetoptLong::NO_ARGUMENT],
-  ['--create-persistent-storage', GetoptLong::NO_ARGUMENT]
+  ['--create-persistent-storage', GetoptLong::NO_ARGUMENT],
+  ['--skip-prepare-dependencies', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
