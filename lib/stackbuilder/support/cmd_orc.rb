@@ -1,5 +1,5 @@
 $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup'
-require 'orc/util/option_parser' # XXX decouple orc from stackbuiler somehow
+require 'orc/util/factory' # XXX decouple orc from stackbuiler somehow
 $LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup')
 
 module CMDOrc
