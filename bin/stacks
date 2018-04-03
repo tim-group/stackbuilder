@@ -144,7 +144,8 @@ logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", optio
 if $options[:'checkout-config']
   require 'tmpdir'
   $options[:path] = Dir.mktmpdir
-  at_exit { FileUtils.remove_entry($options[:path]) }
+  parent = Process.pid
+  at_exit { if Process.pid == parent then FileUtils.remove_entry($options[:path]) end }
 
   if !system("git clone '#{$options[:'checkout-config']}' '#{$options[:path]}'")
     logger(Logger::FATAL) do
