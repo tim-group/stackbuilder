@@ -147,7 +147,7 @@ if $options[:'checkout-config']
   parent = Process.pid
   at_exit { FileUtils.remove_entry($options[:path]) if Process.pid == parent }
 
-  if !system("git clone '#{$options[:'checkout-config']}' '#{$options[:path]}'")
+  if !system("git clone --quiet --depth 1 '#{$options[:'checkout-config']}' '#{$options[:path]}'")
     logger(Logger::FATAL) do
       "Unable to clone '#{$options[:'checkout-config']}'"
     end
