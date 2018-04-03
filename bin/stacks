@@ -26,10 +26,13 @@ Usage: stacks [OPTIONS] command
 Options:
   General options:
 
-    -h, --help                display this help and exit
-    -p, --path=VALUE          path to the stackbuilder-config repository. "/etc/stacks" is the default. See also STACKBUILDER_CONFIG_PATH
-    -v, --verbose             increase logging verbosity. Can be specified multiple times (e.g. -vvv)
-    -q, --quiet               reduce logging verbosity. Can be specified multiple times (e.g. -qqq)
+    -h, --help                      display this help and exit
+    -p, --path=VALUE                path to the stackbuilder-config repository. "/etc/stacks" is the default. See also STACKBUILDER_CONFIG_PATH
+    -v, --verbose                   increase logging verbosity. Can be specified multiple times (e.g. -vvv)
+    -q, --quiet                     reduce logging verbosity. Can be specified multiple times (e.g. -qqq)
+    -c, --checkout-config=VALUE     make a new temporary clone of stackbuilder-config for this command (ignores the --path option)
+                                    The clone is made from the VALUE git remote (defaults to 'git@git:stackbuilder-config')
+                                    The clone is deleted after the command completes
 
   Options that may affect commands. Depending on "command", some of these may be mandatory, optional, or ignored.
 
@@ -107,13 +110,14 @@ $options[:path] = '/etc/stacks' if Socket.gethostname =~ /puppetserver/
 # options with arguments go straight into $options
 # unrecognized options are ignored
 GetoptLong.new(
-  ['--environment', '-e', GetoptLong::REQUIRED_ARGUMENT],
-  ['--help',        '-h', GetoptLong::NO_ARGUMENT],
-  ['--path',        '-p', GetoptLong::REQUIRED_ARGUMENT],
-  ['--stack',       '-s', GetoptLong::REQUIRED_ARGUMENT],
-  ['--terse',       '-t', GetoptLong::NO_ARGUMENT],
-  ['--verbose',     '-v', GetoptLong::NO_ARGUMENT],
-  ['--quiet',       '-q', GetoptLong::NO_ARGUMENT],
+  ['--environment',     '-e', GetoptLong::REQUIRED_ARGUMENT],
+  ['--help',            '-h', GetoptLong::NO_ARGUMENT],
+  ['--path',            '-p', GetoptLong::REQUIRED_ARGUMENT],
+  ['--stack',           '-s', GetoptLong::REQUIRED_ARGUMENT],
+  ['--terse',           '-t', GetoptLong::NO_ARGUMENT],
+  ['--verbose',         '-v', GetoptLong::NO_ARGUMENT],
+  ['--quiet',           '-q', GetoptLong::NO_ARGUMENT],
+  ['--checkout-config', '-c', GetoptLong::OPTIONAL_ARGUMENT],
   ['--create-persistent-storage', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
@@ -127,6 +131,8 @@ GetoptLong.new(
     $options[:quiet] -= 1
   when '--terse'
     $options[:terse] = true
+  when '--checkout-config'
+    $options[:'checkout-config'] = (arg == '') ? 'git@git:stackbuilder-config.git' : arg
   else
     $options[opt_sym] = arg
   end
@@ -134,6 +140,19 @@ end
 cmd = ARGV.shift
 argv = ARGV
 logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", options: \"#{$options}\", argv: #{argv}" }
+
+if $options[:'checkout-config']
+  require 'tmpdir'
+  $options[:path] = Dir.mktmpdir()
+  at_exit { FileUtils.remove_entry($options[:path]) }
+
+  if !system("git clone '#{$options[:'checkout-config']}' '#{$options[:path]}'")
+    logger(Logger::FATAL) do
+      "Unable to clone '#{$options[:'checkout-config']}'"
+    end
+    exit 1
+  end
+end
 
 if File.directory?($options[:path])
   if !system("cd \"#{$options[:path]}\" && " \
