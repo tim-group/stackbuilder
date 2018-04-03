@@ -145,7 +145,7 @@ if $options[:'checkout-config']
   require 'tmpdir'
   $options[:path] = Dir.mktmpdir
   parent = Process.pid
-  at_exit { if Process.pid == parent then FileUtils.remove_entry($options[:path]) end }
+  at_exit { FileUtils.remove_entry($options[:path]) if Process.pid == parent }
 
   if !system("git clone '#{$options[:'checkout-config']}' '#{$options[:path]}'")
     logger(Logger::FATAL) do
