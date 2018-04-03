@@ -143,7 +143,7 @@ logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", optio
 
 if $options[:'checkout-config']
   require 'tmpdir'
-  $options[:path] = Dir.mktmpdir()
+  $options[:path] = Dir.mktmpdir
   at_exit { FileUtils.remove_entry($options[:path]) }
 
   if !system("git clone '#{$options[:'checkout-config']}' '#{$options[:path]}'")
