@@ -132,7 +132,7 @@ GetoptLong.new(
   when '--terse'
     $options[:terse] = true
   when '--checkout-config'
-    $options[:'checkout-config'] = (arg == '') ? 'git@git:stackbuilder-config.git' : arg
+    $options[:'checkout-config'] = (arg == '') ? 'http://git/stackbuilder-config.git' : arg
   else
     $options[opt_sym] = arg
   end
