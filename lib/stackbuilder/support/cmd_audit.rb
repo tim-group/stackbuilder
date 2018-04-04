@@ -59,7 +59,7 @@ module CMDAudit
   end
 
   def kvm_hosts_tabulate(hosts, site)
-    require collimator
+    require 'collimator'
 
     headers = [:fqdn, :vms, :vcpus, :memory, :storage_os, :storage_data, :status, :tags]
     header_width = hosts.sort.inject({}) do |header_widths, (_fqdn, values)|
