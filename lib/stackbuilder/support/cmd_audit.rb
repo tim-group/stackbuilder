@@ -58,13 +58,9 @@ module CMDAudit
     total_width + 1
   end
 
-  def self.included(receiver)
-    require 'collimator'
-    include Collimator
-    receiver.send :include, Collimator
-  end
-
   def kvm_hosts_tabulate(hosts, site)
+    require collimator
+
     headers = [:fqdn, :vms, :vcpus, :memory, :storage_os, :storage_data, :status, :tags]
     header_width = hosts.sort.inject({}) do |header_widths, (_fqdn, values)|
       row = headers.inject([]) do |row_values, header|
@@ -82,7 +78,7 @@ module CMDAudit
         row_values << value
         row_values
       end
-      Table.row(row)
+      Collimator::Table.row(row)
       header_widths
     end
     # FIXME: This is not sane
@@ -96,14 +92,14 @@ module CMDAudit
     ]
     # storage_data not present in env=dev
     total_list.push(@total_str.call(@total[:hosts_used], @total[:hosts_avail])) if @total[:hosts_avail] > 0
-    Table.row(total_list)
+    Collimator::Table.row(total_list)
 
-    Table.header("KVM host machines audit for site: #{site}")
+    Collimator::Table.header("KVM host machines audit for site: #{site}")
     headers.each do |header|
       width = header_width[header] rescue header.to_s.size
-      Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
+      Collimator::Table.column(header.to_s, :width => width, :padding => 1, :justification => :left)
     end
-    Table.tabulate
+    Collimator::Table.tabulate
   end
 
   def details_for(hosts)
