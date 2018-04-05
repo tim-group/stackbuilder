@@ -1,6 +1,3 @@
-$LOAD_PATH << '/usr/local/lib/site_ruby/timgroup'
-require 'orc/util/option_parser' # XXX decouple orc from stackbuiler somehow
-$LOAD_PATH.delete('/usr/local/lib/site_ruby/timgroup')
 require 'rake'
 require 'pp'
 require 'yaml'

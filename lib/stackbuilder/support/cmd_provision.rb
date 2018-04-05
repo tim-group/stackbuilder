@@ -4,7 +4,7 @@ module CMDProvision
     puppet_sign(machine_def)
     puppet_poll_sign(machine_def)
     puppet_wait(machine_def)
-    do_orc_resolve(machine_def)
+    do_deploy_applications(machine_def)
     nagios_cancel_downtime(machine_def)
   end
 

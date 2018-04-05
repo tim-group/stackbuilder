@@ -8,7 +8,7 @@ require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_puppet'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
-require 'stackbuilder/support/cmd_orc'
+require 'stackbuilder/support/cmd_deploy'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
@@ -30,7 +30,7 @@ class CMD
   include CMDPuppet
   include CMDClean
   include CMDProvision
-  include CMDOrc
+  include CMDDeploy
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in

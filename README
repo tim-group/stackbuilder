@@ -6,4 +6,3 @@ entry paths into this codebase:
 DEPENDENCIES:
  - gems: rake, rspec, collimator, facter, json, web-test-framework
  - ruby-bundle
- - orc
