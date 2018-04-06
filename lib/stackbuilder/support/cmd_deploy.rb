@@ -31,37 +31,21 @@ module CMDDeploy
     }
     logger(Logger::INFO) { "Installing application on #{fqdn} : #{spec}" }
 
-    status = application_status(fqdn, spec)
+    status = get_application_status(fqdn, spec)
 
     fail "Application is already present" if status[:present]
 
     spec[:group] = status[:group]
     cmdb = query_cmdb_for(spec)
 
-    logger(Logger::INFO) { "Deploying app version #{cmdb[:target_version]} on #{fqdn} : #{spec}" }
-    mco_client("deployapp", :nodes => [fqdn]) do |mco|
-      mco.update_to_version(:spec => spec, :version => cmdb[:target_version]).map do |response|
-        fail response[:statusmsg] unless response[:statuscode] == 0
-        log_deployapp_response(response)
-        fail response[:data] unless response[:data][:successful]
-      end
-    end
+    deploy_app_version(fqdn, spec, cmdb[:target_version])
 
     wait_for_healthy(fqdn, spec)
 
-    if cmdb[:target_participation]
-      logger(Logger::INFO) { "Enabling participation app on #{fqdn} : #{spec}" }
-      mco_client("deployapp", :nodes => [fqdn]) do |mco|
-        mco.enable_participation(:spec => spec).map do |response|
-          fail response[:statusmsg] unless response[:statuscode] == 0
-          log_deployapp_response(response)
-          fail response[:data] unless response[:data][:successful]
-        end
-      end
-    end
+    enable_participation(fqdn, spec) if cmdb[:target_participation]
   end
 
-  def application_status(fqdn, spec)
+  def get_application_status(fqdn, spec)
     statuses = mco_client("deployapp", :nodes => [fqdn]) do |mco|
       mco.status(:spec => spec).map do |response|
         fail response[:statusmsg] unless response[:statuscode] == 0
@@ -72,6 +56,28 @@ module CMDDeploy
     end.flatten
     fail "could not determine application status: #{statuses}" unless statuses.length == 1
     statuses[0]
+  end
+
+  def deploy_app_version(fqdn, spec, version)
+    logger(Logger::INFO) { "Deploying app version #{version} on #{fqdn} : #{spec}" }
+    mco_client("deployapp", :nodes => [fqdn]) do |mco|
+      mco.update_to_version(:spec => spec, :version => version).map do |response|
+        fail response[:statusmsg] unless response[:statuscode] == 0
+        log_deployapp_response(response)
+        fail response[:data] unless response[:data][:successful]
+      end
+    end
+  end
+
+  def enable_participation(fqdn, spec)
+    logger(Logger::INFO) { "Enabling participation app on #{fqdn} : #{spec}" }
+    mco_client("deployapp", :nodes => [fqdn]) do |mco|
+      mco.enable_participation(:spec => spec).map do |response|
+        fail response[:statusmsg] unless response[:statuscode] == 0
+        log_deployapp_response(response)
+        fail response[:data] unless response[:data][:successful]
+      end
+    end
   end
 
   def log_deployapp_response(response)
@@ -90,13 +96,13 @@ module CMDDeploy
     logger(Logger::INFO) { "Waiting for Healthy app on #{fqdn} : #{spec}" }
     timeout = 25 * 60
     start_time = Time.now
-    while application_status(fqdn, spec)[:health] != 'healthy' && Time.now - start_time < timeout
+    while get_application_status(fqdn, spec)[:health] != 'healthy' && Time.now - start_time < timeout
       sleep 5
     end
   end
 
   def query_cmdb_for(spec)
-    cmdb_repo_url = 'http://git/cmdb' #TODO: parameterise?
+    cmdb_repo_url = 'http://git/cmdb' # TODO: parameterise?
 
     require 'tmpdir'
     cmdb_dir = Dir.mktmpdir
@@ -106,7 +112,7 @@ module CMDDeploy
     end
 
     require 'yaml'
-    cmdb = YAML::load(File.open("#{cmdb_dir}/#{spec[:environment]}/#{spec[:application]}.yaml")).map do |el|
+    cmdb = YAML.load(File.open("#{cmdb_dir}/#{spec[:environment]}/#{spec[:application]}.yaml")).map do |el|
       Hash[el.map { |(k, v)| [k.to_sym, v] }]
     end
 
@@ -116,6 +122,6 @@ module CMDDeploy
     fail "No CMDB data for #{spec}" unless result
     result
   ensure
-      FileUtils.remove_entry(cmdb_dir)
+    FileUtils.remove_entry(cmdb_dir)
   end
 end
