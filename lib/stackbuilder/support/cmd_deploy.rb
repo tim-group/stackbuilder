@@ -93,7 +93,7 @@ module CMDDeploy
   end
 
   def wait_for_healthy(fqdn, spec)
-    logger(Logger::INFO) { "Waiting for Healthy app on #{fqdn} : #{spec}" }
+    logger(Logger::INFO) { "Waiting for healthy app on #{fqdn} : #{spec}" }
     timeout = 25 * 60
     start_time = Time.now
     while get_application_status(fqdn, spec)[:health] != 'healthy' && Time.now - start_time < timeout
