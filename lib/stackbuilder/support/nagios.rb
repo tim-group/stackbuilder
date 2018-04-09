@@ -35,7 +35,7 @@ module Support
         mco_client("nagsrv", :fabric => machine.fabric) do |mco|
           mco.class_filter('nagios')
           mco.schedule_host_downtime(:host => fqdn, :duration => duration).map do |response|
-            "#{response[:sender]} = #{response[:statuscode] == 0 ? "OK" : "Failed"}: #{response[:statusmsg]}"
+            "#{response[:sender]} = #{response[:statuscode] == 0 ? 'OK' : 'Failed'}: #{response[:statusmsg]}"
           end
         end.join(',')
       end
@@ -46,7 +46,7 @@ module Support
         mco_client("nagsrv", :fabric => machine.fabric) do |mco|
           mco.class_filter('nagios')
           mco.del_host_downtime(:host => fqdn).map do |response|
-            "#{response[:sender]} = #{response[:statuscode] == 0 ? "OK" : "Failed"}: #{response[:statusmsg]}"
+            "#{response[:sender]} = #{response[:statuscode] == 0 ? 'OK' : 'Failed'}: #{response[:statusmsg]}"
           end.join(',')
         end
       end

@@ -335,9 +335,9 @@ namespace :sbx do
 
           sites = hosts.map(&:fabric).uniq
           nagios_servers = {
-              'oy' => ['oy-nagios-001.mgmt.oy.net.local'],
-              'pg' => ['pg-nagios-001.mgmt.pg.net.local'],
-              'lon' => ['lon-nagios-001.mgmt.lon.net.local']
+            'oy' => ['oy-nagios-001.mgmt.oy.net.local'],
+            'pg' => ['pg-nagios-001.mgmt.pg.net.local'],
+            'lon' => ['lon-nagios-001.mgmt.lon.net.local']
           }
           nagios_server_fqdns = sites.map { |s| nagios_servers[s] }.reject(&:nil?).flatten
 
