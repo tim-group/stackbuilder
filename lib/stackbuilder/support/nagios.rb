@@ -1,14 +1,12 @@
-require 'net/http'
-require 'json'
-require 'resolv'
-require 'stackbuilder/support/callback'
 require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/support/callback'
+require 'stackbuilder/support/mcollective'
 
 module Support
   module Nagios
     class Service
       def initialize(options = {})
-        @service = options[:service] || Nagios::Service::Http.new(options)
+        @service = options[:service] || Nagios::Service::MCollective.new()
       end
 
       def schedule_downtime(machines, duration = 600, &block)
@@ -26,88 +24,31 @@ module Support
           callback.invoke :success, :machine => machine.hostname, :result => response
         end
       end
-
-      def nagios_server_fqdns_for(site)
-        @service.get_nagios_servers_for_site(site)
-      end
     end
 
-    class Service::Http
-      def initialize(options)
-        ## FIXME: This does not belong here, but we dont know where it should go
-        default_nagios_servers = {
-          'oy' => ['oy-nagios-001.mgmt.oy.net.local'],
-          'pg' => ['pg-nagios-001.mgmt.pg.net.local'],
-          'lon' => ['lon-nagios-001.mgmt.lon.net.local']
-        }
-        default_api_port = 5152
-        @nagios_servers = options[:nagios_servers] || default_nagios_servers
-        @nagios_api_port = options[:nagios_api_port] || default_api_port
-      end
+    class Service::MCollective
+      include Support::MCollective
 
-      def http_request(url, body, initheader)
-        uri = URI.parse(URI.encode(url))
-        request = Net::HTTP::Post.new(uri.path, initheader)
-        request.body = body
-        http = Net::HTTP.new(resolv_host_for_uri(uri), uri.port)
-        http.use_ssl = true if uri.scheme == 'https'
-        response = http.start { |h| h.request(request) }
-        response
-      end
-
-      def resolv_host_for_uri(uri)
-        begin
-          Resolv.getaddress uri.host
-        rescue StandardError => e
-          raise e
-        end
-        uri.host
-      end
-
-      def process_response(response)
-        result = nil
-        begin
-          if response.code != '200'
-            result = "Failed: HTTP response code was #{response.code}"
-          else
-            json = JSON.parse(response.body)
-            if json['success']
-              result = "OK: #{json['content']}"
-            else
-              result = "Failed: #{json['content']}"
-            end
+      def schedule_downtime(machine, duration)
+        fqdn = machine.mgmt_fqdn
+        logger(Logger::INFO) { "Scheduling downtime for #{fqdn}" }
+        mco_client("nagsrv", :fabric => machine.fabric) do |mco|
+          mco.class_filter('nagios')
+          mco.schedule_host_downtime(:host => fqdn, :duration => duration).map do |response|
+            "#{response[:sender]} = #{response[:statuscode] == 0 ? "OK" : "Failed"}: #{response[:statusmsg]}"
           end
-          rescue StandardError => e
-            result = "Failed: #{e} #{e.backtrace}"
-        end
-        result
-      end
-
-      def get_nagios_servers_for_site(site)
-        return @nagios_servers[site] rescue nil
-      end
-
-      def modify_downtime(action, machine, duration = nil)
-        body = { "host" => machine.mgmt_fqdn }
-        body["duration"] = duration unless duration.nil?
-        header = { 'Content-Type' => 'application/json' }
-        nagios_servers = get_nagios_servers_for_site(machine.fabric)
-        return "skipping #{machine.hostname} - No nagios server found for #{machine.fabric}" if nagios_servers.nil? || nagios_servers.empty?
-        ret = []
-        nagios_servers.each do |nagios_server|
-          url = "http://#{nagios_server}:#{@nagios_api_port}/#{action}_downtime"
-          response = http_request(url, body.to_json, header)
-          ret << "#{nagios_server} = #{process_response(response)}"
-        end
-        ret.join(',')
-      end
-
-      def schedule_downtime(machine, duration = 600)
-        modify_downtime('schedule', machine, duration)
+        end.join(',')
       end
 
       def cancel_downtime(machine)
-        modify_downtime('cancel', machine)
+        fqdn = machine.mgmt_fqdn
+        logger(Logger::INFO) { "Cancelling downtime for #{fqdn}" }
+        mco_client("nagsrv", :fabric => machine.fabric) do |mco|
+          mco.class_filter('nagios')
+          mco.del_host_downtime(:host => fqdn).map do |response|
+            "#{response[:sender]} = #{response[:statuscode] == 0 ? "OK" : "Failed"}: #{response[:statusmsg]}"
+          end.join(',')
+        end
       end
     end
   end

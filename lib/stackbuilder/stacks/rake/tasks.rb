@@ -7,7 +7,6 @@ require 'stackbuilder/stacks/inventory'
 require 'stackbuilder/support/cmd'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_puppet'
-require 'stackbuilder/support/nagios'
 require 'stackbuilder/support/zamls'
 
 require 'set'
@@ -335,8 +334,12 @@ namespace :sbx do
           end
 
           sites = hosts.map(&:fabric).uniq
-          nagios_helper = Support::Nagios::Service.new
-          nagios_server_fqdns = sites.map { |s| nagios_helper.nagios_server_fqdns_for(s) }.reject(&:nil?).flatten
+          nagios_servers = {
+              'oy' => ['oy-nagios-001.mgmt.oy.net.local'],
+              'pg' => ['pg-nagios-001.mgmt.pg.net.local'],
+              'lon' => ['lon-nagios-001.mgmt.lon.net.local']
+          }
+          nagios_server_fqdns = sites.map { |s| nagios_servers[s] }.reject(&:nil?).flatten
 
           if nagios_server_fqdns.empty?
             logger(Logger::WARN) { "skipping #{machine_def.identity} - No nagios servers found in #{sites}" }
