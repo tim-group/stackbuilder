@@ -6,7 +6,7 @@ module Support
   module Nagios
     class Service
       def initialize(options = {})
-        @service = options[:service] || Nagios::Service::MCollective.new()
+        @service = options[:service] || Nagios::Service::MCollective.new
       end
 
       def schedule_downtime(machines, duration = 600, &block)
