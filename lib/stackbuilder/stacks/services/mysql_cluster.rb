@@ -268,9 +268,9 @@ module Stacks::Services::MysqlCluster
         "#{dependent_service.environment.name}/#{dependent_service.application}/mysql_password"
     }
     unless read_only_cluster.empty?
-      config_params["db.#{@database_name}.read_only_cluster"] = read_only_cluster.join(",")
-      # FIXME: Make this work based on modulo index
-      config_params["db.#{@database_name}.read_only_cluster"] = read_only_cluster.reverse.join(",") if dependent_instance.index == 2 and dependent_service.use_ha_mysql_ordering
+      roc = read_only_cluster
+      roc = read_only_cluster.sort.rotate((dependent_instance.index - 1) % read_only_cluster.length) if dependent_service.use_ha_mysql_ordering
+      config_params["db.#{@database_name}.read_only_cluster"] = roc.join(",")
     end
 
     config_params
