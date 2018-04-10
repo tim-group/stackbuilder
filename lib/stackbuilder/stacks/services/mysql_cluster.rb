@@ -141,22 +141,22 @@ module Stacks::Services::MysqlCluster
     rights
   end
 
-  def validate_dependant_requirement(dependent, requirement)
+  def validate_dependant_requirement(dependent_service, requirement)
     fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
          "supported_requirements is empty or unset." if @supported_requirements.empty? && !requirement.nil?
-    fail "'#{dependent.name}' must declare its requirement on '#{name}' as it declares supported requirements "\
+    fail "'#{dependent_service.name}' must declare its requirement on '#{name}' as it declares supported requirements "\
          "in environment '#{environment.name}'. Supported requirements: "\
          "[#{@supported_requirements.keys.sort.join(',')}]." if !@supported_requirements.empty? && requirement.nil?
   end
 
-  def config_params(dependent, fabric, dependent_instance)
-    requirement = requirement_of(dependent)
-    validate_dependant_requirement(dependent, requirement)
+  def config_params(dependent_service, fabric, dependent_instance)
+    requirement = requirement_of(dependent_service)
+    validate_dependant_requirement(dependent_service, requirement)
 
     ### FIXME: rpearce 26/04/2016
     ### This can be removed when all apps specify a requirement
     if @supported_requirements.empty? && requirement.nil?
-      config_given_no_requirement(dependent, fabric, dependent_instance)
+      config_given_no_requirement(dependent_service, fabric, dependent_instance)
     ### This can be moved to validate_dependant_requirement when all apps specify a requirement
     elsif !@supported_requirements.include?(requirement)
       fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
@@ -166,7 +166,7 @@ module Stacks::Services::MysqlCluster
       servers = @supported_requirements[requirement].inject([]) do |s, fqdn|
         s << children.find { |server| server.prod_fqdn == fqdn }
       end
-      config_to_fulfil_requirement(dependent, servers, requirement, dependent_instance)
+      config_to_fulfil_requirement(dependent_service, servers, requirement, dependent_instance)
     end
   end
 
@@ -234,18 +234,18 @@ module Stacks::Services::MysqlCluster
     service.database_username[0..15]
   end
 
-  def config_given_no_requirement(dependent, fabric, dependent_instance)
+  def config_given_no_requirement(dependent_service, fabric, dependent_instance)
     masters = master_servers
-    masters.reject! { |master| master.site != dependent.environment.sites.first } if @master_only_in_same_site
-    config_properties(dependent, [masters.map(&:prod_fqdn).sort.first], read_only_cluster_servers(fabric), dependent_instance)
+    masters.reject! { |master| master.site != dependent_service.environment.sites.first } if @master_only_in_same_site
+    config_properties(dependent_service, [masters.map(&:prod_fqdn).sort.first], read_only_cluster_servers(fabric), dependent_instance)
   end
 
-  def requirement_of(dependant)
-    dependent_on_this_cluster = dependant.depends_on.find { |dependency| dependency[0] == name }
+  def requirement_of(dependent_service)
+    dependent_on_this_cluster = dependent_service.depends_on.find { |dependency| dependency[0] == name }
     dependent_on_this_cluster[2]
   end
 
-  def config_to_fulfil_requirement(dependent, hosts, requirement, dependent_instance)
+  def config_to_fulfil_requirement(dependent_service, hosts, requirement, dependent_instance)
     master = []
     read_only_slaves = []
     if (requirement == :master_with_slaves)
@@ -254,22 +254,23 @@ module Stacks::Services::MysqlCluster
     else
       master = read_only_slaves = hosts.map(&:prod_fqdn)
     end
-    config_properties(dependent, master, read_only_slaves, dependent_instance)
+    config_properties(dependent_service, master, read_only_slaves, dependent_instance)
   end
 
-  def config_properties(dependent, master, read_only_cluster, dependent_instance)
+  def config_properties(dependent_service, master, read_only_cluster, dependent_instance)
     config_params = {
       "db.#{@database_name}.hostname"           => master.join(','),
       "db.#{@database_name}.database"           => database_name,
       "db.#{@database_name}.driver"             => 'com.mysql.jdbc.Driver',
       "db.#{@database_name}.port"               => '3306',
-      "db.#{@database_name}.username"           => mysql_username(dependent),
+      "db.#{@database_name}.username"           => mysql_username(dependent_service),
       "db.#{@database_name}.password_hiera_key" =>
-        "#{dependent.environment.name}/#{dependent.application}/mysql_password"
+        "#{dependent_service.environment.name}/#{dependent_service.application}/mysql_password"
     }
     unless read_only_cluster.empty?
       config_params["db.#{@database_name}.read_only_cluster"] = read_only_cluster.join(",")
-      config_params["db.#{@database_name}.read_only_cluster"] = read_only_cluster.reverse.join(",") if dependent_instance.index == 2 and dependent.use_ha_mysql_ordering
+      # FIXME: Make this work based on modulo index
+      config_params["db.#{@database_name}.read_only_cluster"] = read_only_cluster.reverse.join(",") if dependent_instance.index == 2 and dependent_service.use_ha_mysql_ordering
     end
 
     config_params
