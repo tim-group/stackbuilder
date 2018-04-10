@@ -149,12 +149,7 @@ class Stacks::MachineSet
   def dependency_config(fabric, dependent_instance)
     config = {}
     virtual_services_that_i_depend_on.each do |dependency|
-      # FIXME: Maintain backwards compatibility until all config_params methods take dependant_instance
-      if dependency.method(:config_params).arity == 2
-        config.merge! dependency.config_params(self, fabric)
-      else
-        config.merge! dependency.config_params(self, fabric, dependent_instance)
-      end
+      config.merge! dependency.config_params(self, fabric, dependent_instance)
     end
     config
   end

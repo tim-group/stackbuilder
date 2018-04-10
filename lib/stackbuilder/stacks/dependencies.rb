@@ -10,7 +10,7 @@ module Stacks::Dependencies
     object.configure
   end
 
-  def config_params(_dependant, _fabric)
+  def config_params(_dependant, _fabric, _dependent_instance)
     {} # parameters for config.properties of apps depending on this service
   end
 

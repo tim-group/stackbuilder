@@ -7,7 +7,7 @@ module Stacks::Services::EventStoreCluster
     @eventstore_name = ''
   end
 
-  def config_params(_dependent, fabric)
+  def config_params(_dependent, fabric, _dependent_instance)
     config_params = {
       "eventstore.#{@eventstore_name}.cluster"           => all_servers(fabric).join(','),
       "eventstore.#{@eventstore_name}.username"           => 'admin',

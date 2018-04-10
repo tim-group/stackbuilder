@@ -75,7 +75,7 @@ module Stacks::Services::RabbitMqLoggingCluster
     end.flatten.sort
   end
 
-  def config_params(dependent, fabric)
+  def config_params(dependent, fabric, _dependent_instance)
     config_params = {
       "logging.rabbit.clusternodes" => @definitions.values.select { |server| server.fabric == fabric }.inject([]) do |prod_fqdns, server|
         prod_fqdns << server.prod_fqdn

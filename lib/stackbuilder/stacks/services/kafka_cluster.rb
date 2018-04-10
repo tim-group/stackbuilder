@@ -7,7 +7,7 @@ module Stacks::Services::KafkaCluster
     @kafka_name = ''
   end
 
-  def config_params(_dependent, fabric)
+  def config_params(_dependent, fabric, _dependent_instance)
     config_params = {
       "kafka.#{@kafka_name}.cluster" => all_servers(fabric).join(',')
     }

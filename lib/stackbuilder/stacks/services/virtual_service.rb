@@ -80,7 +80,7 @@ module Stacks::Services::VirtualService
     @persistent_ports << port
   end
 
-  def config_params(_dependant, _fabric)
+  def config_params(_dependant, _fabric, _dependent_instance)
     {}
   end
 

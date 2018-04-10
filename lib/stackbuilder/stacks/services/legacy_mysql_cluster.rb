@@ -42,7 +42,7 @@ module Stacks::Services::LegacyMysqlCluster
     rights
   end
 
-  def config_params(dependant, _fabric)
+  def config_params(dependant, _fabric, _dependent_instance)
     # This is where we can provide config params to App servers (only) to put into their config.properties
     {
       "db.#{@database_name}.hostname"           => mysqldb_server.prod_fqdn,

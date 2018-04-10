@@ -56,7 +56,7 @@ module Stacks::Services::AppService
     create_rabbitmq_config(@application)
   end
 
-  def config_params(_dependant, fabric)
+  def config_params(_dependant, fabric, _dependent_instance)
     { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
   end
 

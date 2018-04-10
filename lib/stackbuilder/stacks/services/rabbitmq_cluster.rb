@@ -53,7 +53,7 @@ module Stacks::Services::RabbitMQCluster
     end
   end
 
-  def config_params(dependent, _fabric)
+  def config_params(dependent, _fabric, _dependent_instance)
     acceptable_supported_requirements = [:accept_any_requirement_default_all_servers]
     fail "Stack '#{name}' invalid supported requirements: #{supported_requirements} "\
           "in environment '#{environment.name}'. Acceptable supported requirements: "\
