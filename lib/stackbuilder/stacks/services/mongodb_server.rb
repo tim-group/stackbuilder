@@ -48,7 +48,7 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
       enc['role::mongodb_server'].merge!('dependant_instances' => dependant_instances.sort,
                                          'dependant_users'     => dependant_users,
-                                         'dependencies'        => @virtual_service.dependency_config(fabric))
+                                         'dependencies'        => @virtual_service.dependency_config(fabric, self))
     end
     enc
   end

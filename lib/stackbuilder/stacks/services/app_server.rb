@@ -22,11 +22,11 @@ class Stacks::Services::AppServer < Stacks::MachineDef
   end
 
   def dependency_config_sftp_servers_only(fabric)
-    @virtual_service.dependency_config(fabric).reject { |key, _value| key != 'sftp_servers' }
+    @virtual_service.dependency_config(fabric, self).reject { |key, _value| key != 'sftp_servers' }
   end
 
   def dependency_config_excluding_sftp_servers(fabric)
-    @virtual_service.dependency_config(fabric).reject! { |key, _value| key == 'sftp_servers' }
+    @virtual_service.dependency_config(fabric, self).reject! { |key, _value| key == 'sftp_servers' }
   end
 
   def normalize_storage

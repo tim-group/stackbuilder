@@ -36,7 +36,7 @@ class Stacks::Services::LegacyMysqlDBServer < Stacks::MachineDef
                })
     dependant_instances = @virtual_service.dependant_instance_fqdns(location)
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      enc['role::databaseserver'].merge!('dependencies' => @virtual_service.dependency_config(fabric),
+      enc['role::databaseserver'].merge!('dependencies' => @virtual_service.dependency_config(fabric, self),
                                          'dependant_instances' => dependant_instances)
       enc.merge!(@virtual_service.dependant_instance_mysql_rights)
     end

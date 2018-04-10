@@ -146,8 +146,7 @@ class Stacks::MachineSet
     @depends_on << [dependant, env, requirement] unless @depends_on.include? [dependant, env, requirement]
   end
 
-  # FIXME: Remove the defaulting for nil when all stacks support this new method
-  def dependency_config(fabric, dependent_instance=nil)
+  def dependency_config(fabric, dependent_instance)
     config = {}
     virtual_services_that_i_depend_on.each do |dependency|
       # FIXME: Maintain backwards compatibility until all config_params methods take dependant_instance
