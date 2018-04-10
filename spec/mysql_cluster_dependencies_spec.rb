@@ -38,20 +38,9 @@ describe_stack 'stack-with-dependencies' do
       app_service 'myapp' do
         self.groups = ['blue']
         self.application = 'rw-app'
+        self.use_ha_mysql_ordering = true
         depend_on 'exampledb', environment.name, :master_with_slaves
         depend_on 'examplelegacydb', environment.name, :read_only
-
-        each_machine do |machine|
-          machine.enc_hack do |enc|
-            cluster = enc["role::http_app"]["dependencies"]["db.exampledb.read_only_cluster"]
-            slaves = cluster.split(",")
-
-            if machine.mgmt_fqdn.include?("002")
-              enc["role::http_app"]["dependencies"]["db.exampledb.read_only_cluster"] = slaves.reverse.join(",")
-            end
-            enc
-          end
-        end
       end
     end
 

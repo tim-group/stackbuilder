@@ -10,6 +10,7 @@ module Stacks::Services::AppService
   attr_accessor :jvm_args
   attr_accessor :sso_port
   attr_accessor :tomcat_session_replication
+  attr_accessor :use_ha_mysql_ordering
 
   alias_method :database_username, :application
   alias_method :database_username=, :application=
@@ -28,6 +29,7 @@ module Stacks::Services::AppService
     @one_instance_in_lb = false
     @sso_port = nil
     @tomcat_session_replication = false
+    @use_ha_mysql_ordering = false
   end
 
   def enable_ehcache

@@ -50,7 +50,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'group'                             => group,
       'cluster'                           => availability_group,
       'environment'                       => environment.name,
-      'dependencies'                      => @virtual_service.dependency_config(fabric),
+      'dependencies'                      => @virtual_service.dependency_config(fabric, self),
       'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location),
       'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
       'port'                              => '8000'

@@ -235,7 +235,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   def dependant_instances_enc(dependant_instances)
     {
       'role::mysql_server' =>  {
-        'dependencies' => @virtual_service.dependency_config(fabric),
+        'dependencies' => @virtual_service.dependency_config(fabric, self),
         'dependant_instances' => dependant_instances.sort
       }
     }

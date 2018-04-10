@@ -146,10 +146,16 @@ class Stacks::MachineSet
     @depends_on << [dependant, env, requirement] unless @depends_on.include? [dependant, env, requirement]
   end
 
-  def dependency_config(fabric)
+  # FIXME: Remove the defaulting for nil when all stacks support this new method
+  def dependency_config(fabric, dependent_instance=nil)
     config = {}
     virtual_services_that_i_depend_on.each do |dependency|
-      config.merge! dependency.config_params(self, fabric)
+      # FIXME: Maintain backwards compatibility until all config_params methods take dependant_instance
+      if dependency.method(:config_params).arity == 2
+        config.merge! dependency.config_params(self, fabric)
+      else
+        config.merge! dependency.config_params(self, fabric, dependent_instance)
+      end
     end
     config
   end
