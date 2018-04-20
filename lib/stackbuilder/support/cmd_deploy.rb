@@ -99,6 +99,7 @@ module CMDDeploy
     while get_application_status(fqdn, spec)[:health] != 'healthy' && Time.now - start_time < timeout
       sleep 5
     end
+    fail "App did not go healthy in time" unless get_application_status(fqdn, spec)[:health] == 'healthy'
   end
 
   def query_cmdb_for(spec)
