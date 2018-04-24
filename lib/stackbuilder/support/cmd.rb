@@ -6,6 +6,7 @@ require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_puppet'
+require 'stackbuilder/support/cmd_dns'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
 require 'stackbuilder/support/cmd_deploy'
@@ -28,6 +29,7 @@ class CMD
   include CMDLs
   include CMDNagios
   include CMDPuppet
+  include CMDDns
   include CMDClean
   include CMDProvision
   include CMDDeploy

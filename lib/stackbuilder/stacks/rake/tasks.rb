@@ -218,21 +218,19 @@ namespace :sbx do
         cmd.do_allocate_ips(@factory.services, machine_def)
       end
 
-      # FIXME : Take this terrible, un-testable code out of rake
+      desc "free IPs for these machines"
+      sbtask :free_ips do
+        cmd.do_free_ips(@factory.services, machine_def)
+      end
+
       desc "allocate VIPs for these virtual services"
       sbtask :allocate_vips do
-        vips = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:to_vip_spec)
-            vips << child_machine_def.to_vip_spec(:primary_site)
-            vips << child_machine_def.to_vip_spec(:secondary_site) if child_machine_def.enable_secondary_site
-          end
-        end
-        if vips.empty?
-          logger(Logger::INFO) { 'no vips to allocate' }
-        else
-          @factory.services.dns.allocate(vips)
-        end
+        cmd.do_allocate_vips(machine_def)
+      end
+
+      desc "free VIPs for these virtual services"
+      sbtask :free_vips do
+        cmd.do_free_vips(machine_def)
       end
 
       desc "allocate cnames"
@@ -241,25 +239,6 @@ namespace :sbx do
         require 'pp'
         pp all_specs
         @factory.services.dns.do_cnames('add', all_specs)
-      end
-
-      # FIXME : Take this terrible, un-testable code out of rake
-      desc "free IPs for these virtual services"
-      sbtask :free_vips do
-        vips = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:to_vip_spec)
-            vips << child_machine_def.to_vip_spec(:primary_site)
-            vips << child_machine_def.to_vip_spec(:secondary_site) if child_machine_def.enable_secondary_site
-          end
-        end
-        @factory.services.dns.free(vips)
-      end
-
-      desc "free IPs"
-      sbtask :free_ips do
-        all_specs = machine_def.flatten.map(&:to_spec)
-        @factory.services.dns.free(all_specs)
       end
 
       desc "perform an MCollective ping against these machines"
