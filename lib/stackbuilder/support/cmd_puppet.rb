@@ -69,7 +69,7 @@ module CMDPuppet
       logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
 
-    fail("Puppet runs have timed out or failed, see above for details") unless run_result.all_passed?
+    run_result
   end
 
   # run Puppet on these machines
