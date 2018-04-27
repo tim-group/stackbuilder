@@ -179,15 +179,15 @@ if $options[:'create-persistent-storage']
   logger(Logger::WARN) { '--create-persistent-storage is set so any persistent storage will be created, existing storage will not be reused' }
 end
 
-logger(Logger::DEBUG) { 'initializing $factory' }
-$factory = Stacks::Factory.new
-if ($environment = $factory.inventory.find_environment($options[:environment])).nil?
+logger(Logger::DEBUG) { 'initializing stacks factory' }
+factory = Stacks::Factory.new
+if ($environment = factory.inventory.find_environment($options[:environment])).nil?
   logger(Logger::FATAL) { "environment \"#{$options[:environment]}\" not found" }
   exit 1
 end
 logger(Logger::DEBUG) { "environment \"#{$environment.name}\" has #{$environment.definitions.count} definitions" }
 
-commands = CMD.new
+commands = CMD.new(factory)
 if commands.cmds.include? cmd
   logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
   success = commands.method(cmd).call(argv)

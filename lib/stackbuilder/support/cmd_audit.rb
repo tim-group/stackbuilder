@@ -9,7 +9,7 @@ module CMDAudit
     @total_str = lambda { |a, b| sprintf("%d/%d %2.0f%%", a, b, 100.0 * a / b) }
     @total_str_with_units = lambda { |a, b| sprintf("%d/%d #{@units} %2.0f%%", a, b, 100.0 * a / b) }
 
-    hosts_raw = $factory.host_repository.find_compute_nodes(site).hosts
+    hosts_raw = @factory.host_repository.find_compute_nodes(site).hosts
     hosts_stats = hosts_raw.inject({}) do |data, host|
       data[host.fqdn] = stats_for(host)
       data

@@ -12,12 +12,12 @@ module CMDDns
     if vips.empty?
       logger(Logger::INFO) { 'no vips to allocate' }
     else
-      $factory.services.dns.allocate(vips)
+      @factory.services.dns.allocate(vips)
     end
   end
 
   def do_free_vips(machine_def)
-    $factory.services.dns.free(find_vips(machine_def))
+    @factory.services.dns.free(find_vips(machine_def))
   end
 
   private

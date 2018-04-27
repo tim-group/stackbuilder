@@ -17,7 +17,8 @@ require 'stackbuilder/support/cmd_deploy'
 class CMD
   attr_reader :cmds # this list is just a safety check
 
-  def initialize
+  def initialize(factory)
+    @factory = factory
     @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
@@ -38,7 +39,7 @@ class CMD
   # use yaml, as that's what puppet reads in
   def compile(_argv)
     output = {}
-    $factory.inventory.environments.sort.each do |_envname, env|
+    @factory.inventory.environments.sort.each do |_envname, env|
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
         box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
         output[box_id] = {}
@@ -79,7 +80,7 @@ class CMD
 
   def terminus(_argv)
     output = {}
-    $factory.inventory.environments.sort.each do |_envname, env|
+    @factory.inventory.environments.sort.each do |_envname, env|
       env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
         box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
         output[box_id] = stack.to_enc
@@ -149,7 +150,7 @@ class CMD
   def reprovision(_argv)
     machine_def = check_and_get_stack
     do_clean(machine_def)
-    do_provision_machine($factory.services, machine_def)
+    do_provision_machine(@factory.services, machine_def)
   end
 
   def dependencies(_argv)
