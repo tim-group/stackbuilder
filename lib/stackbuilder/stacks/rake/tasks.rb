@@ -192,24 +192,6 @@ namespace :sbx do
         cmd.do_launch(@factory.services, machine_def)
       end
 
-      desc "resolve the IP numbers of these machines"
-      sbtask :resolve do
-        computecontroller = Compute::Controller.new
-        pp computecontroller.resolve(machine_def.to_specs)
-      end
-
-      desc "disable notify for these machines"
-      sbtask :disable_notify do
-        computecontroller = Compute::Controller.new
-        computecontroller.disable_notify(machine_def.to_specs)
-      end
-
-      desc "enable notify for these machines"
-      sbtask :enable_notify do
-        computecontroller = Compute::Controller.new
-        computecontroller.enable_notify(machine_def.to_specs)
-      end
-
       desc "allocate IPs for these machines"
       sbtask :allocate_ips do
         cmd.do_allocate_ips(@factory.services, machine_def)

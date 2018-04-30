@@ -2,7 +2,6 @@ require 'stackbuilder/support/callback'
 require 'stackbuilder/support/monkeypatches' # Add flatten_hashes method to Array
 require 'stackbuilder/compute/namespace'
 require 'stackbuilder/compute/client'
-require 'stackbuilder/compute/nagservclient'
 require 'socket'
 require 'set'
 
@@ -55,19 +54,6 @@ end
 class Compute::Controller
   def initialize(args = {})
     @compute_node_client = args[:compute_node_client] || Compute::Client.new
-    @nagsrv_client = Compute::NagsrvClient.new
-  end
-
-  def enable_notify(specs)
-    specs.each do |spec|
-      pp @nagsrv_client.toggle_notify('enable-notify', spec[:qualified_hostnames][:mgmt])
-    end
-  end
-
-  def disable_notify(specs)
-    specs.each do |spec|
-      pp @nagsrv_client.toggle_notify('disable-notify', spec[:qualified_hostnames][:mgmt])
-    end
   end
 
   def launch_raw(allocation, &block)
@@ -126,13 +112,6 @@ class Compute::Controller
     end
 
     allocation
-  end
-
-  def resolve(specs)
-    Hash[specs.map do |spec|
-      qualified_hostname = spec[:qualified_hostnames][:mgmt]
-      [qualified_hostname, @dns_client.gethostbyname(qualified_hostname)]
-    end]
   end
 
   def dispatch_results(all_specs, grouped_results, callback)
