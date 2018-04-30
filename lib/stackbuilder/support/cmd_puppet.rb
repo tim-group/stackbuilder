@@ -72,25 +72,6 @@ module CMDPuppet
     run_result
   end
 
-  # run Puppet on these machines
-  def puppet_run(machine_def)
-    hosts = []
-    machine_def.accept do |child_machine_def|
-      if child_machine_def.respond_to?(:mgmt_fqdn)
-        hosts << child_machine_def.mgmt_fqdn
-      end
-    end
-
-    success = mco_client("puppetd") do |mco|
-      engine = PuppetRoll::Engine.new({ :concurrency => 5 }, [], hosts, PuppetRoll::Client.new(hosts, mco))
-      engine.execute
-      pp engine.get_report
-      engine.successful?
-    end
-
-    fail("some nodes have failed their puppet runs") unless success
-  end
-
   # Remove signed certs from puppetserver
   def puppet_clean(machine_def)
     puppet_certs_to_clean = []
