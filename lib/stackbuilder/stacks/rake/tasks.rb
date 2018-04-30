@@ -57,9 +57,6 @@ RSpec::Core::Runner.disable_autorun!
 #         clean needs to show what it actually cleaned, currently dumps results
 #         need to account for which host each machine was cleaned from
 #
-# mping:
-#         tidy, test and
-#
 # puppetclean:
 #       warn if cert clean did not occur
 #       show positive clean action clearly in log
@@ -70,7 +67,7 @@ RSpec::Core::Runner.disable_autorun!
 #       show positive sign action clearly in log
 #
 # need workflow tasks to tie builds together.
-#   ie provision dependson [launch, mping, puppet, test]
+#   ie provision dependson [launch, puppet, test]
 #      clean     dependson [destroy_vms, clean_certs]
 #
 
@@ -239,28 +236,6 @@ namespace :sbx do
         require 'pp'
         pp all_specs
         @factory.services.dns.do_cnames('add', all_specs)
-      end
-
-      desc "perform an MCollective ping against these machines"
-      sbtask :mping do
-        hosts = []
-        machine_def.accept do |child_machine_def|
-          if child_machine_def.respond_to?(:mgmt_fqdn)
-            hosts << child_machine_def.mgmt_fqdn
-          end
-        end
-        found = false
-        50.times do
-          found = mco_client("rpcutil") do |mco|
-            hosts.to_set.subset?(mco.discover.to_set)
-          end
-
-          sleep 1
-          break if found
-        end
-
-        fail("nodes #{hosts.join(' ')} not checked in to mcollective") unless found
-        logger(Logger::INFO) { "all nodes found in mcollective #{hosts.size}" }
       end
 
       namespace :puppet do
