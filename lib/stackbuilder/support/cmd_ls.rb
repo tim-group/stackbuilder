@@ -1,6 +1,6 @@
 module CMDLs
   def ls(_argv)
-    machine_def = $options[:stack] ? check_and_get_stack : @environment
+    machine_def = @stack ? check_and_get_stack : @environment
     traverse('', nil, machine_def)
   end
 

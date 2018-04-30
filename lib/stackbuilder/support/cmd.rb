@@ -17,9 +17,10 @@ require 'stackbuilder/support/cmd_deploy'
 class CMD
   attr_reader :cmds # this list is just a safety check
 
-  def initialize(factory, environment)
+  def initialize(factory, environment, stack = nil)
     @factory = factory
     @environment = environment
+    @stack = stack
     @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
@@ -96,7 +97,7 @@ class CMD
     if machine_def.respond_to?(:to_enc)
       puts ZAMLS.to_zamls(machine_def.to_enc)
     else
-      logger(Logger::FATAL) { "\"#{$options[:stack]}\" is not a machine fqdn" }
+      logger(Logger::FATAL) { "\"#{@stack}\" is not a machine fqdn" }
       exit 1
     end
   end
@@ -107,7 +108,7 @@ class CMD
     if machine_def.respond_to?(:to_spec)
       puts ZAMLS.to_zamls(machine_def.to_spec)
     else
-      logger(Logger::FATAL) { "\"#{$options[:stack]}\" is not a machine fqdn" }
+      logger(Logger::FATAL) { "\"#{@stack}\" is not a machine fqdn" }
       exit 1
     end
   end
@@ -174,21 +175,21 @@ class CMD
 
   def ensure_is_machine(machine_def)
     if !machine_def.is_a?(Stacks::MachineDef)
-      logger(Logger::FATAL) { "\"#{$options[:stack]}\" is not a machine fqdn" }
+      logger(Logger::FATAL) { "\"#{@stack}\" is not a machine fqdn" }
       exit 1
     end
     machine_def
   end
 
   def check_and_get_stack
-    if $options[:stack].nil?
+    if @stack.nil?
       logger(Logger::FATAL) { 'option "stack" not set' }
       exit 1
     end
 
-    machine_def = @environment.find_stack($options[:stack])
+    machine_def = @environment.find_stack(@stack)
     if machine_def.nil? then
-      logger(Logger::FATAL) { "stack \"#{$options[:stack]}\" not found" }
+      logger(Logger::FATAL) { "stack \"#{@stack}\" not found" }
       exit 1
     end
 
@@ -215,25 +216,5 @@ class CMD
     else
       object.dup
     end
-  end
-end
-
-# XXX ?
-module Opt
-  def self.stack
-    logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{@environment.options[:primary_site]}\"" }
-
-    if $options[:stack].nil?
-      logger(Logger::FATAL) { 'option "stack" not set' }
-      exit 1
-    end
-
-    machine_def = @environment.find_stack($options[:stack])
-    if machine_def.nil? then
-      logger(Logger::FATAL) { "stack \"#{$options[:stack]}\" not found" }
-      exit 1
-    end
-
-    machine_def
   end
 end

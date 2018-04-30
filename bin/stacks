@@ -188,7 +188,7 @@ if (environment).nil?
 end
 logger(Logger::DEBUG) { "environment \"#{environment.name}\" has #{environment.definitions.count} definitions" }
 
-commands = CMD.new(factory, environment)
+commands = CMD.new(factory, environment, $options[:stack])
 if commands.cmds.include? cmd
   logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
   success = commands.method(cmd).call(argv)
