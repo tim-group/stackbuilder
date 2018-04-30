@@ -180,7 +180,7 @@ if $options[:'create-persistent-storage']
 end
 
 logger(Logger::DEBUG) { 'initializing stacks factory' }
-factory = Stacks::Factory.new
+factory = Stacks::Factory.new($options[:path])
 environment = factory.inventory.find_environment($options[:environment])
 if (environment).nil?
   logger(Logger::FATAL) { "environment \"#{$options[:environment]}\" not found" }

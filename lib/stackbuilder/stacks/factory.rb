@@ -16,8 +16,12 @@ require 'stackbuilder/stacks/core/services'
 require 'stackbuilder/stacks/namespace'
 
 class Stacks::Factory
+  def initialize(path = nil)
+    @path = path.nil? ? '.' : path
+  end
+
   def inventory
-    @inventory ||= Stacks::Inventory.new(defined?($options[:path]) ? $options[:path] : '.')
+    @inventory ||= Stacks::Inventory.new(@path)
   end
 
   def policies
