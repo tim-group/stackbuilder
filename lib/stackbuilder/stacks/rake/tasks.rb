@@ -266,27 +266,7 @@ namespace :sbx do
       namespace :puppet do
         desc "run puppet on all of a stack's dependencies"
         sbtask :prepare_dependencies do
-          all_dependencies = Set.new
-          machine_def.accept do |m|
-            all_dependencies += m.dependencies.flatten if m.is_a? Stacks::MachineDef
-          end
-
-          dependency_fqdns = []
-          all_dependencies.map do |dependency|
-            dependency.accept do |m|
-              dependency_fqdns << m.mgmt_fqdn if m.is_a? Stacks::MachineDef
-            end
-          end
-
-          dependency_fqdns = dependency_fqdns.sort.uniq
-
-          require 'tempfile'
-          Tempfile.open("mco_prepdeps") do |f|
-            f.puts dependency_fqdns.join("\n")
-            f.flush
-
-            system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
-          end
+          cmd.do_puppet_run_on_dependencies(machine_def)
         end
       end
 
