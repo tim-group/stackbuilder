@@ -68,7 +68,7 @@ module CMDNagios
     end
   end
 
-  def host_for(machine_def)
+  def hosts_for(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
       hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
