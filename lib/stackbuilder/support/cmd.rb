@@ -124,13 +124,13 @@ class CMD
 
     case cmd
     when 'allocate_ips'
-      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:allocate_ips")
+      do_allocate_ips(@factory.services, machine_def)
     when 'free_ips'
-      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:free_ips")
+      do_free_ips(@factory.services, machine_def)
     when 'allocate_vips'
-      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:allocate_vips")
+      do_allocate_vips(machine_def)
     when 'free_vips'
-      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:free_vips")
+      do_free_vips(machine_def)
     else
       logger(Logger::FATAL) { "invalid sub command \"#{cmd}\"" }
       exit 1
@@ -138,15 +138,22 @@ class CMD
   end
 
   # XXX do this properly
-  def provision(_argv)
-    machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:provision")
-  end
-
-  # XXX do this properly
   def test(_argv)
     machine_def = check_and_get_stack
     system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:test")
+  end
+
+  def provision(_argv)
+    machine_def = check_and_get_stack
+
+    # prepare dependencies
+    do_allocate_vips(machine_def)
+    do_allocate_ips(@factory.services, machine_def)
+    do_puppet_run_on_dependencies(machine_def)
+
+    do_provision_machine(@factory.services, machine_def)
+
+    do_nagios_register_new(machine_def)
   end
 
   def reprovision(_argv)
