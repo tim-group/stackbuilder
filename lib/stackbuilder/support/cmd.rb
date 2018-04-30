@@ -21,7 +21,7 @@ class CMD
     @factory = factory
     @environment = environment
     @stack = stack
-    @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
+    @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test showvnc)
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
     @subscription = Subscription.new
@@ -176,6 +176,38 @@ class CMD
     service_dependencies = machine_def.virtual_service.virtual_services_that_depend_on_me
     dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
     puts ZAMLS.to_zamls(dependencies)
+  end
+
+  def showvnc(_argv)
+    machine_def = check_and_get_stack
+
+    hosts = []
+    machine_def.accept do |child|
+      hosts << child.name if child.is_a? Stacks::MachineDef
+    end
+    mco_client("libvirt") do |mco|
+      mco.fact_filter "domain=/(st|ci)/"
+      results = {}
+      hosts.each do |host|
+        mco.domainxml(:domain => host) do |result|
+          xml = result[:body][:data][:xml]
+          sender = result[:senderid]
+          unless xml.nil?
+            matches = /type='vnc' port='(\-?\d+)'/.match(xml)
+            fail "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
+            fail "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
+                  if matches.captures.empty?
+            results[host] = {
+                :host => sender,
+                :port => matches.captures.first
+            }
+          end
+        end
+      end
+      results.each do |vm, location|
+        puts "#{vm}  -> #{location[:host]}:#{location[:port]}"
+      end
+    end
   end
 
   private
