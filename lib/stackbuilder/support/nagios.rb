@@ -26,10 +26,10 @@ module Support
       end
 
       def register_new_machines(machines)
-        sites = hosts.map(&:fabric).uniq
+        sites = machines.map(&:fabric).uniq
         logger(Logger::INFO) { "running puppet on nagios servers (in #{sites}) so they will discover this node and include in monitoring" }
 
-        fqdn_filter = "fqdn=/mgmt.(#{ sites.join('|') }).net.local/"
+        fqdn_filter = "fqdn=/mgmt.(#{sites.join('|')}).net.local/"
         system('mco', 'puppetng', 'run', '--concurrency', '5', '--with-fact', fqdn_filter, '--with-class', 'nagios')
       end
     end
