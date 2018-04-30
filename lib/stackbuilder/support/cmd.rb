@@ -198,8 +198,8 @@ class CMD
             fail "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
                   if matches.captures.empty?
             results[host] = {
-                :host => sender,
-                :port => matches.captures.first
+              :host => sender,
+              :port => matches.captures.first
             }
           end
         end
