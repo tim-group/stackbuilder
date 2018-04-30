@@ -1,6 +1,6 @@
 module CMDLs
   def ls(_argv)
-    machine_def = $options[:stack] ? check_and_get_stack : $environment
+    machine_def = $options[:stack] ? check_and_get_stack : @environment
     traverse('', nil, machine_def)
   end
 
@@ -12,7 +12,7 @@ module CMDLs
       attr_reader :children
 
       def initialize
-        @children = $environment.environments.map { |x| x[1] }
+        @children = @environment.environments.map { |x| x[1] }
       end
 
       def name

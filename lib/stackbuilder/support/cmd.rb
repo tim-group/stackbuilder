@@ -17,8 +17,9 @@ require 'stackbuilder/support/cmd_deploy'
 class CMD
   attr_reader :cmds # this list is just a safety check
 
-  def initialize(factory)
+  def initialize(factory, environment)
     @factory = factory
+    @environment = environment
     @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test)
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
@@ -122,13 +123,13 @@ class CMD
 
     case cmd
     when 'allocate_ips'
-      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:allocate_ips")
+      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:allocate_ips")
     when 'free_ips'
-      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:free_ips")
+      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:free_ips")
     when 'allocate_vips'
-      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:allocate_vips")
+      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:allocate_vips")
     when 'free_vips'
-      system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:free_vips")
+      system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:free_vips")
     else
       logger(Logger::FATAL) { "invalid sub command \"#{cmd}\"" }
       exit 1
@@ -138,13 +139,13 @@ class CMD
   # XXX do this properly
   def provision(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:provision")
+    system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:provision")
   end
 
   # XXX do this properly
   def test(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{$environment.name} rake sbx:#{machine_def.identity}:test")
+    system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:test")
   end
 
   def reprovision(_argv)
@@ -185,7 +186,7 @@ class CMD
       exit 1
     end
 
-    machine_def = $environment.find_stack($options[:stack])
+    machine_def = @environment.find_stack($options[:stack])
     if machine_def.nil? then
       logger(Logger::FATAL) { "stack \"#{$options[:stack]}\" not found" }
       exit 1
@@ -220,14 +221,14 @@ end
 # XXX ?
 module Opt
   def self.stack
-    logger(Logger::DEBUG) { ":primary_site for \"#{$environment.name}\" is \"#{$environment.options[:primary_site]}\"" }
+    logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{@environment.options[:primary_site]}\"" }
 
     if $options[:stack].nil?
       logger(Logger::FATAL) { 'option "stack" not set' }
       exit 1
     end
 
-    machine_def = $environment.find_stack($options[:stack])
+    machine_def = @environment.find_stack($options[:stack])
     if machine_def.nil? then
       logger(Logger::FATAL) { "stack \"#{$options[:stack]}\" not found" }
       exit 1

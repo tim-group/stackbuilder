@@ -131,7 +131,7 @@ namespace :sbx do
     end
   end
 
-  cmd = CMD.new(@factory)
+  cmd = CMD.new(@factory, @environment)
   require 'set'
   machine_names = Set.new
   rake_task_names = Set.new

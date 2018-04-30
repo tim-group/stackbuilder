@@ -1,7 +1,7 @@
 module CMDAudit
   def audit(_argv)
-    site = $environment.options[:primary_site]
-    logger(Logger::DEBUG) { ":primary_site for \"#{$environment.name}\" is \"#{site}\"" }
+    site = @environment.options[:primary_site]
+    logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
 
     # FIXME: This is not sane
     @units = 'GiB' # used in totals

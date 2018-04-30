@@ -181,13 +181,14 @@ end
 
 logger(Logger::DEBUG) { 'initializing stacks factory' }
 factory = Stacks::Factory.new
-if ($environment = factory.inventory.find_environment($options[:environment])).nil?
+environment = factory.inventory.find_environment($options[:environment])
+if (environment).nil?
   logger(Logger::FATAL) { "environment \"#{$options[:environment]}\" not found" }
   exit 1
 end
-logger(Logger::DEBUG) { "environment \"#{$environment.name}\" has #{$environment.definitions.count} definitions" }
+logger(Logger::DEBUG) { "environment \"#{environment.name}\" has #{environment.definitions.count} definitions" }
 
-commands = CMD.new(factory)
+commands = CMD.new(factory, environment)
 if commands.cmds.include? cmd
   logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
   success = commands.method(cmd).call(argv)
