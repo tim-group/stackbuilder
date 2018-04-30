@@ -19,13 +19,16 @@ module CMDNagios
     end
   end
 
+  def do_nagios_register_new(machine_def)
+    hosts = hosts_for(machine_def)
+    nagios_helper = Support::Nagios::Service.new
+    nagios_helper.register_new_machines(hosts)
+  end
+
   private
 
   def nagios_schedule_downtime(machine_def)
-    hosts = []
-    machine_def.accept do |child_machine_def|
-      hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
-    end
+    hosts = hosts_for(machine_def)
 
     nagios_helper = Support::Nagios::Service.new
     downtime_secs = 1800 # 1800 = 30 mins
@@ -46,10 +49,7 @@ module CMDNagios
   end
 
   def nagios_cancel_downtime(machine_def)
-    hosts = []
-    machine_def.accept do |child_machine_def|
-      hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
-    end
+    hosts = hosts_for(machine_def)
 
     nagios_helper = Support::Nagios::Service.new
     nagios_helper.cancel_downtime(hosts) do
@@ -66,5 +66,13 @@ module CMDNagios
         end
       end
     end
+  end
+
+  def host_for(machine_def)
+    hosts = []
+    machine_def.accept do |child_machine_def|
+      hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
+    end
+    hosts
   end
 end

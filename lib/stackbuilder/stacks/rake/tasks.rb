@@ -305,34 +305,7 @@ namespace :sbx do
 
       namespace :nagios do
         sbtask :refresh do
-          hosts = []
-          machine_def.accept do |child_machine_def|
-            if child_machine_def.respond_to?(:mgmt_fqdn)
-              hosts << child_machine_def
-            end
-          end
-
-          sites = hosts.map(&:fabric).uniq
-          nagios_servers = {
-            'oy' => ['oy-nagios-001.mgmt.oy.net.local'],
-            'pg' => ['pg-nagios-001.mgmt.pg.net.local'],
-            'lon' => ['lon-nagios-001.mgmt.lon.net.local']
-          }
-          nagios_server_fqdns = sites.map { |s| nagios_servers[s] }.reject(&:nil?).flatten
-
-          if nagios_server_fqdns.empty?
-            logger(Logger::WARN) { "skipping #{machine_def.identity} - No nagios servers found in #{sites}" }
-          else
-            logger(Logger::INFO) { "running puppet on nagios servers (#{nagios_server_fqdns}) so they will discover this node and include in monitoring" }
-
-            require 'tempfile'
-            Tempfile.open('mco_puppet_on_nagios') do |f|
-              f.puts nagios_server_fqdns.join("\n")
-              f.flush
-
-              system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
-            end
-          end
+          cmd.do_nagios_register_new(machine_def)
         end
       end
 
