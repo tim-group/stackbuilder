@@ -1,3 +1,7 @@
+require 'stackbuilder/support/mcollective'
+
+include ::Support::MCollective
+
 shared_examples_for "nrpe" do |machine|
   commands = mco_client("nrpe", :nodes => [machine.mgmt_fqdn]) do |mco|
     results = []

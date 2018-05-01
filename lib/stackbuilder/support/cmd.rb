@@ -137,10 +137,34 @@ class CMD
     end
   end
 
-  # XXX do this properly
   def test(_argv)
     machine_def = check_and_get_stack
-    system("cd #{$options[:path]} && env=#{@environment.name} rake sbx:#{machine_def.identity}:test")
+
+    require 'rspec'
+    RSpec::Core::Runner.disable_autorun!
+
+    specs_home = File.dirname(__FILE__) + "/../stacks/stacktests"
+
+    machine_def.accept do |child_machine_def|
+      specpath = "#{specs_home}/#{child_machine_def.clazz}/*.rb"
+      RSpec.describe "#{child_machine_def.clazz}.#{child_machine_def.name}" do
+        Dir[specpath].each do |file|
+          require file
+          test = File.basename(file, '.rb')
+          it_behaves_like test, child_machine_def
+        end
+      end
+    end
+
+    result = RSpec::Core::Runner.run([], $stderr, $stdout)
+    if (result != 0)
+      logger(Logger::ERROR) do
+        "The 'test' task failed, indicating the stack is not functioning correctly. " \
+              "See the above test output for details."
+      end
+      exit 1
+    end
+    result
   end
 
   def provision(_argv)

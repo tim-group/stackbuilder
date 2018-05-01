@@ -3,6 +3,9 @@ require 'logger'
 require 'net/https'
 require 'net/http'
 require 'uri'
+require 'stackbuilder/support/mcollective'
+
+include ::Support::MCollective
 
 shared_examples_for 'vip' do |virtualservice|
   virtualservice.ports do |port|
