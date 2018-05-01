@@ -247,7 +247,7 @@ namespace :sbx do
       end
 
       sbtask :showvnc do
-        system("stacks -e #{environment.name} -p . -s #{machine_def.identity} showvnc")
+        system("stacks -e #{machine_def.environment.name} -p . -s #{machine_def.identity} showvnc")
       end
 
       desc "carry out all appropriate tests on these machines"
