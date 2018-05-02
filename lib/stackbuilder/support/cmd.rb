@@ -21,7 +21,7 @@ class CMD
     @factory = factory
     @environment = environment
     @stack = stack
-    @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all provision reprovision terminus test showvnc)
+    @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all launch provision reprovision terminus test showvnc)
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
     @subscription = Subscription.new
@@ -165,6 +165,11 @@ class CMD
       exit 1
     end
     result
+  end
+
+  def launch(_argv)
+    machine_def = check_and_get_stack
+    do_launch(@factory.services, machine_def)
   end
 
   def provision(_argv)
