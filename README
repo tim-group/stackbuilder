@@ -1,7 +1,6 @@
 entry paths into this codebase:
 - bin/stacks_indirector
 - lib/puppet/indirector/node/stacks.rb
-- stackbuilder-config via rake
 
 DEPENDENCIES:
  - gems: rake, rspec, collimator, facter, json, web-test-framework
