@@ -41,8 +41,9 @@ class CMD
   # use yaml, as that's what puppet reads in
   def compile(_argv)
     targets = []
+
     if @stack.nil?
-      @factory.inventory.environments.sort do |_envname, env|
+      @factory.inventory.environments.sort.each do |_envname, env|
         targets += env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
       end
     else
