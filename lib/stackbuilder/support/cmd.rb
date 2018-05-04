@@ -62,7 +62,7 @@ class CMD
 
   def diff(_argv)
     diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
-    sbc_path = ENV['STACKBUILDER_CONFIG_PATH'] || '.'
+    sbc_path = @factory.path
 
     require 'tempfile'
     before_file = Tempfile.new('before')
