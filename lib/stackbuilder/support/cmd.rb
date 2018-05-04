@@ -40,15 +40,23 @@ class CMD
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
   def compile(_argv)
-    output = {}
-    @factory.inventory.environments.sort.each do |_envname, env|
-      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
-        output[box_id] = {}
-        output[box_id]["enc"] = stack.to_enc
-        output[box_id]["spec"] = stack.to_spec
+    targets = []
+    if @stack.nil?
+      @factory.inventory.environments.sort do |_envname, env|
+        targets = targets + env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
       end
+    else
+      targets = check_and_get_stack.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
     end
+
+    output = {}
+    targets.each do |stack|
+      box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
+      output[box_id] = {}
+      output[box_id]["enc"] = stack.to_enc
+      output[box_id]["spec"] = stack.to_spec
+    end
+
     puts ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
   end
 
