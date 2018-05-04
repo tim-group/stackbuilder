@@ -52,8 +52,8 @@ Options:
     compile                   create a yaml file describing the entire infrastructure
     dependencies [-e] -s      list the machines that this machine depends on
     dependents [-e] -s        list the machines that depend on this machine
-    diff                      show compile diff between last commit and latest commit.
-    diff -sb                  show compile diff between latest stackbuilder and local stackbuilder.
+    diff                      show compile diff between last stackbuilder config commit and latest commit.
+    sbdiff                    show compile diff between latest stackbuilder and local stackbuilder.
     dns [-e] -s               perform DNS related tasks
       allocate_ips            allocate all ip addresses for the specified stack (machine(s))
       free_ips                free all ip addresses for the specified stack (machine(s))
@@ -89,7 +89,7 @@ Files:
 Examples:
   stacks compile > /tmp/enc_test
   stacks diff > /tmp/diff
-  stacks diff -sb > /tmp/sb_diff
+  stacks sbdiff > /tmp/sb_diff
   stacks -e test ls -s refapp
   stacks -e test enc -s test-refapp-002.mgmt.st.net.local
 
