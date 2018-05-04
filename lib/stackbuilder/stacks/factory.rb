@@ -16,7 +16,7 @@ require 'stackbuilder/stacks/core/services'
 require 'stackbuilder/stacks/namespace'
 
 class Stacks::Factory
-   attr_reader :path
+  attr_reader :path
 
   def initialize(path = nil)
     @path = path.nil? ? '.' : path

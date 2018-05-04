@@ -43,7 +43,7 @@ class CMD
     targets = []
     if @stack.nil?
       @factory.inventory.environments.sort do |_envname, env|
-        targets = targets + env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
+        targets += env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
       end
     else
       targets = check_and_get_stack.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
