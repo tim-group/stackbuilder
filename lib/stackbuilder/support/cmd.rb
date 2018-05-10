@@ -3,6 +3,7 @@ require 'stackbuilder/support/nagios'
 require 'stackbuilder/stacks/core/actions'
 require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/cmd_audit'
+require 'stackbuilder/support/cmd_vmaudit'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_puppet'
@@ -21,7 +22,7 @@ class CMD
     @factory = factory
     @environment = environment
     @stack = stack
-    @cmds = %w(audit compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all launch provision reprovision terminus test showvnc)
+    @cmds = %w(audit audit_vms compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all launch provision reprovision terminus test showvnc)
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
     @subscription = Subscription.new
@@ -29,6 +30,7 @@ class CMD
   end
 
   include CMDAudit
+  include CMDVmaudit
   include CMDLs
   include CMDNagios
   include CMDPuppet

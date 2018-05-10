@@ -26,15 +26,29 @@ class Compute::Client
     target_hash
   end
 
-  def get_libvirt_domains(mco, hv)
-    domains = Hash[]
+  def get_libvirt_domains(hv)
     domain_name = hv[:sender].gsub(/^[^.]*\.mgmt\./, "")
-    (hv[:data][:active_domains] + hv[:data][:inactive_domains]).each do |d|
-      mco.domaininfo(:domain => d).map do |di|
-        domains[d + "." + domain_name] = di[:data] if di[:statusmsg] == "OK"
+
+    host_volumes = (mco_client("lvm", :nodes => [hv[:sender]]) do |lvm|
+      lvm.lvs.map do |lvs|
+        lvs[:data][:lvs] if lvs[:statusmsg] == "OK"
       end
+    end).flatten
+
+    mco_client("libvirt", :nodes => [hv[:sender]]) do |mco|
+      (hv[:data][:active_domains] + hv[:data][:inactive_domains]).map do |d|
+        result = {}
+
+        vm_info = mco.domaininfo(:domain => d).map do |di|
+          di[:data] if di[:statusmsg] == "OK"
+        end
+        result.merge!(vm_info[0]) unless vm_info.empty?
+        result.merge!({ :logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(d) } })
+
+        vm_fqdn = d + "." + domain_name
+        { vm_fqdn => result }
+      end.reduce({}, :merge)
     end
-    domains
   end
 
   # audit_domains is not enabled by default, as it takes significant time to complete
@@ -47,7 +61,7 @@ class Compute::Client
       mco.hvinfo.map do |hv|
         fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
-        domains = audit_domains ? get_libvirt_domains(mco, hv) : {}
+        domains = audit_domains ? get_libvirt_domains(hv) : {}
 
         [hv[:sender], hv[:data].merge(:domains => domains)]
       end
