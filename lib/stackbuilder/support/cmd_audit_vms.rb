@@ -73,13 +73,13 @@ module CMDAuditVms
   end
 
   def render(vms_stats)
-    printf("%-60s %-11s %7s %5s %9s %9s\n", "fqdn", "host", "ram", "cpus", "os disk", "data disk")
+    printf("%-60s %-11s%8s%6s%10s%10s\n", "fqdn", "host", "ram", "cpus", "os disk", "data disk")
     vms_stats.sort_by { |a| sort_key(a) }.each do |stats|
       printf("%-60s %-11s", stats[:fqdn], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn][/[^.]+/])
-      print_formatted_pair(7, stats[:specified_ram], stats[:actual_ram])
-      print_formatted_pair(5, stats[:specified_cpus], stats[:actual_cpus])
-      print_formatted_pair(9, stats[:specified_os_disk], stats[:actual_os_disk])
-      print_formatted_pair(9, stats[:specified_data_disk], stats[:actual_data_disk])
+      print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
+      print_formatted_pair(6, stats[:specified_cpus], stats[:actual_cpus])
+      print_formatted_pair(10, stats[:specified_os_disk], stats[:actual_os_disk])
+      print_formatted_pair(10, stats[:specified_data_disk], stats[:actual_data_disk])
       printf("\n")
     end
     printf("All figures are reported as specified/actual\n")
