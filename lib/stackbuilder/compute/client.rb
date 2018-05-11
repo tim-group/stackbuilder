@@ -44,7 +44,7 @@ class Compute::Client
           di[:data] if di[:statuscode] == 0
         end
 
-        #retry once
+        # retry once
         if vm_info.empty?
           vm_info = mco.domaininfo(:domain => d).map do |di|
             fail "domainfo request #{hv[:sender]} #{d} failed: #{di[:statusmsg]}" if di[:statuscode] != 0
