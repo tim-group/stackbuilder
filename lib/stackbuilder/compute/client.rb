@@ -31,7 +31,8 @@ class Compute::Client
 
     host_volumes = (mco_client("lvm", :nodes => [hv[:sender]]) do |lvm|
       lvm.lvs.map do |lvs|
-        lvs[:data][:lvs] if lvs[:statusmsg] == "OK"
+        fail "failed to get logical volume info for #{hv[:sender]}: #{lvm[:statusmsg]}" if lvs[:statuscode] != 0
+        lvs[:data][:lvs]
       end
     end).flatten
 
@@ -40,9 +41,19 @@ class Compute::Client
         result = {}
 
         vm_info = mco.domaininfo(:domain => d).map do |di|
-          di[:data] if di[:statusmsg] == "OK"
+          di[:data] if di[:statuscode] == 0
         end
-        result.merge!(vm_info[0]) unless vm_info.empty?
+
+        #retry once
+        if vm_info.empty?
+          vm_info = mco.domaininfo(:domain => d).map do |di|
+            fail "domainfo request #{hv[:sender]} #{d} failed: #{di[:statusmsg]}" if di[:statuscode] != 0
+            di[:data]
+          end
+        end
+        fail "Got no response for domainfo request #{hv[:sender]} #{d}" if vm_info.empty?
+
+        result.merge!(vm_info[0])
         result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(d) })
 
         vm_fqdn = d + "." + domain_name
