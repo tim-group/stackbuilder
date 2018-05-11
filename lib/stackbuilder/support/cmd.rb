@@ -3,7 +3,7 @@ require 'stackbuilder/support/nagios'
 require 'stackbuilder/stacks/core/actions'
 require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/cmd_audit'
-require 'stackbuilder/support/cmd_vmaudit'
+require 'stackbuilder/support/cmd_audit_vms'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_puppet'
@@ -30,7 +30,7 @@ class CMD
   end
 
   include CMDAudit
-  include CMDVmaudit
+  include CMDAauditVms
   include CMDLs
   include CMDNagios
   include CMDPuppet

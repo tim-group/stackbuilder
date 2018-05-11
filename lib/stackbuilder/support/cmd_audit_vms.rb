@@ -1,4 +1,4 @@
-module CMDVmaudit
+module CMDAuditVms
   def audit_vms(_argv)
     site = @environment.options[:primary_site]
     logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
