@@ -79,7 +79,7 @@ module CMDAuditVms
 
   def print_formatted_pair(specified, actual)
     colour = specified == actual ? "[0;32m" : "[0;31m"
-    printf("%s%10s%s", colour, "#{specified}/#{actual}", "[0m")
+    printf("%s%10s%s", colour, "#{specified.nil? ? "X" : specified}/#{actual.nil? ? "X" : actual}", "[0m")
   end
 
   def sort_key(vm_stats)
