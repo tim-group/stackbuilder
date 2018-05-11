@@ -10,7 +10,7 @@ module CMDAuditVms
     get_specified_vms(site).each do |machine_def|
       fqdn = "#{machine_def.hostname}.#{machine_def.domain}"
       vms[fqdn] = {} if vms[fqdn].nil?
-      vms[fqdn].merge!({ :spec => machine_def.to_spec })
+      vms[fqdn].merge!(:spec => machine_def.to_spec)
     end
 
     vms_stats = vms.map { |fqdn, vm| stats_for(fqdn, vm) }
@@ -56,11 +56,11 @@ module CMDAuditVms
         s[:size]
       end
     end
-    size_strings.inject(0) { |tot, size_string| tot + size_string.chomp('G').to_i }
+    size_strings.inject(0) { |a, e| a + e.chomp('G').to_i }
   end
 
   def total_logical_volume_size(lvs, vg_name)
-    bytes = lvs.select { |lv| lv[:vg_name] == vg_name }.inject(0) { |sum, lv| sum + lv[:lv_size] }
+    bytes = lvs.select { |lv| lv[:vg_name] == vg_name }.inject(0) { |a, e| a + e[:lv_size] }
     bytes_to_gb(bytes)
   end
 
@@ -87,14 +87,14 @@ module CMDAuditVms
 
   def print_formatted_pair(width, specified, actual)
     colour = specified == actual ? "[0;32m" : "[0;31m"
-    printf("%s%#{width}s%s", colour, "#{specified.nil? ? "X" : specified}/#{actual.nil? ? "X" : actual}", "[0m")
+    printf("%s%#{width}s%s", colour, "#{specified.nil? ? 'X' : specified}/#{actual.nil? ? 'X' : actual}", "[0m")
   end
 
   def sort_key(vm_stats)
     [
-        vm_stats[:actual_ram].nil? ? -vm_stats[:specified_ram] : -vm_stats[:actual_ram],
-        vm_stats[:actual_data_disk].nil? ? -vm_stats[:specified_data_disk] : -vm_stats[:actual_data_disk],
-        vm_stats[:actual_os_disk].nil? ? -vm_stats[:specified_os_disk] : -vm_stats[:actual_os_disk]
+      vm_stats[:actual_ram].nil? ? -vm_stats[:specified_ram] : -vm_stats[:actual_ram],
+      vm_stats[:actual_data_disk].nil? ? -vm_stats[:specified_data_disk] : -vm_stats[:actual_data_disk],
+      vm_stats[:actual_os_disk].nil? ? -vm_stats[:specified_os_disk] : -vm_stats[:actual_os_disk]
     ]
   end
 end

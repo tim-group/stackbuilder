@@ -22,7 +22,28 @@ class CMD
     @factory = factory
     @environment = environment
     @stack = stack
-    @cmds = %w(audit audit_vms compile dependencies dependents diff dns sbdiff ls lsenv enc spec clean clean_all launch provision reprovision terminus test showvnc)
+    @cmds = %w(
+      audit
+      audit_vms
+      compile
+      dependencies
+      dependents
+      diff
+      dns
+      sbdiff
+      ls
+      lsenv
+      enc
+      spec
+      clean
+      clean_all
+      launch
+      provision
+      reprovision
+      terminus
+      test
+      showvnc
+    )
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
     @subscription = Subscription.new

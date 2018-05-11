@@ -43,7 +43,7 @@ class Compute::Client
           di[:data] if di[:statusmsg] == "OK"
         end
         result.merge!(vm_info[0]) unless vm_info.empty?
-        result.merge!({ :logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(d) } })
+        result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(d) })
 
         vm_fqdn = d + "." + domain_name
         { vm_fqdn => result }
