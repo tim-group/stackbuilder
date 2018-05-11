@@ -21,6 +21,6 @@ describe Support::Forking do
       async_fork_and_return.value do
         provisio # syntax error
       end.value
-    end.to raise_error NoMethodError
+    end.to raise_error
   end
 end
