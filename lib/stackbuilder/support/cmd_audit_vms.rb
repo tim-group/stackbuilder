@@ -38,6 +38,7 @@ module CMDAuditVms
     end
 
     if vm[:actual]
+      result[:host_fqdn] = vm[:actual][:host_fqdn]
       result[:actual_ram] = kb_to_gb(vm[:actual][:max_memory])
       result[:actual_os_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk1')
       result[:actual_data_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk2')
@@ -72,20 +73,21 @@ module CMDAuditVms
   end
 
   def render(vms_stats)
-    printf("%-60s %10s %10s %10s %10s\n", "fqdn (spec/actual)", "ram", "cpus", "os disk", "data disk")
+    printf("%-60s %-11s %7s %5s %9s %9s\n", "fqdn", "host", "ram", "cpus", "os disk", "data disk")
     vms_stats.sort_by { |a| sort_key(a) }.each do |stats|
-      printf("%-60s", stats[:fqdn])
-      print_formatted_pair(stats[:specified_ram], stats[:actual_ram])
-      print_formatted_pair(stats[:specified_cpus], stats[:actual_cpus])
-      print_formatted_pair(stats[:specified_os_disk], stats[:actual_os_disk])
-      print_formatted_pair(stats[:specified_data_disk], stats[:actual_data_disk])
+      printf("%-60s %-11s", stats[:fqdn], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn][/[^.]+/])
+      print_formatted_pair(7, stats[:specified_ram], stats[:actual_ram])
+      print_formatted_pair(5, stats[:specified_cpus], stats[:actual_cpus])
+      print_formatted_pair(9, stats[:specified_os_disk], stats[:actual_os_disk])
+      print_formatted_pair(9, stats[:specified_data_disk], stats[:actual_data_disk])
       printf("\n")
     end
+    printf("All figures are reported as specified/actual\n")
   end
 
-  def print_formatted_pair(specified, actual)
+  def print_formatted_pair(width, specified, actual)
     colour = specified == actual ? "[0;32m" : "[0;31m"
-    printf("%s%10s%s", colour, "#{specified.nil? ? "X" : specified}/#{actual.nil? ? "X" : actual}", "[0m")
+    printf("%s%#{width}s%s", colour, "#{specified.nil? ? "X" : specified}/#{actual.nil? ? "X" : actual}", "[0m")
   end
 
   def sort_key(vm_stats)
