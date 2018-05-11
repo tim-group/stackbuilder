@@ -19,7 +19,7 @@ module Support::Forking
         exception = nil
         result = block.call
       rescue StandardError => e
-        exception = e.message
+        exception = "#{e.message}\n#{e.backtrace}"
       end
       Marshal.dump({ :result => result, :exception => exception }, write)
     end
