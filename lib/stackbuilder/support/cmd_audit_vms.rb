@@ -13,8 +13,8 @@ module CMDAuditVms
       vms[fqdn].merge!(:spec => machine_def.to_spec)
     end
 
-    vms_stats = vms.map { |fqdn, vm| stats_for(fqdn, vm) }
-    render(vms_stats)
+    vms_stats = vms.map { |fqdn, vm| vm_stats_for(fqdn, vm) }
+    render_vm_stats(vms_stats)
   end
 
   private
@@ -27,11 +27,11 @@ module CMDAuditVms
     specified_vms
   end
 
-  def stats_for(vm_fqdn, vm)
+  def vm_stats_for(vm_fqdn, vm)
     result = { :fqdn => vm_fqdn }
 
     if vm[:spec]
-      result[:specified_ram] = kb_to_gb(vm[:spec][:ram])
+      result[:specified_ram] = convert_kb_to_gb(vm[:spec][:ram])
       result[:specified_os_disk] = total_spec_storage_size(vm[:spec][:storage], 'os')
       result[:specified_data_disk] = total_spec_storage_size(vm[:spec][:storage], 'data')
       result[:specified_cpus] = vm[:spec][:vcpus].nil? ? 2 : vm[:spec][:vcpus].to_i
@@ -39,7 +39,7 @@ module CMDAuditVms
 
     if vm[:actual]
       result[:host_fqdn] = vm[:actual][:host_fqdn]
-      result[:actual_ram] = kb_to_gb(vm[:actual][:max_memory])
+      result[:actual_ram] = convert_kb_to_gb(vm[:actual][:max_memory])
       result[:actual_os_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk1')
       result[:actual_data_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk2')
       result[:actual_cpus] = vm[:actual][:vcpus]
@@ -61,20 +61,20 @@ module CMDAuditVms
 
   def total_logical_volume_size(lvs, vg_name)
     bytes = lvs.select { |lv| lv[:vg_name] == vg_name }.inject(0) { |a, e| a + e[:lv_size] }
-    bytes_to_gb(bytes)
+    convert_bytes_to_gb(bytes)
   end
 
-  def kb_to_gb(value)
+  def convert_kb_to_gb(value)
     value.to_i / (1024 * 1024)
   end
 
-  def bytes_to_gb(value)
+  def convert_bytes_to_gb(value)
     value.to_i / (1024 * 1024 * 1024)
   end
 
-  def render(vms_stats)
+  def render_vm_stats(vms_stats)
     printf("%-60s %-11s%8s%6s%10s%10s\n", "fqdn", "host", "ram", "cpus", "os disk", "data disk")
-    vms_stats.sort_by { |a| sort_key(a) }.each do |stats|
+    vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
       printf("%-60s %-11s", stats[:fqdn], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn][/[^.]+/])
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
       print_formatted_pair(6, stats[:specified_cpus], stats[:actual_cpus])
@@ -90,7 +90,7 @@ module CMDAuditVms
     printf("%s%#{width}s%s", colour, "#{specified.nil? ? 'X' : specified}/#{actual.nil? ? 'X' : actual}", "[0m")
   end
 
-  def sort_key(vm_stats)
+  def vm_sort_key(vm_stats)
     [
       vm_stats[:actual_ram].nil? ? -vm_stats[:specified_ram] : -vm_stats[:actual_ram],
       vm_stats[:actual_data_disk].nil? ? -vm_stats[:specified_data_disk] : -vm_stats[:actual_data_disk],
