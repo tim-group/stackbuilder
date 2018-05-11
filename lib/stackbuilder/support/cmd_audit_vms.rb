@@ -48,7 +48,13 @@ module CMDAuditVms
   end
 
   def total_spec_storage_size(storage, type)
-    size_strings = storage.values.select { |s| s[:type] == type }.map { |s| s[:size] }
+    size_strings = storage.values.select { |s| s[:type] == type }.map do |s|
+      if s[:prepare] && s[:prepare][:options] && s[:prepare][:options][:guest_lvm_pv_size]
+        s[:prepare][:options][:guest_lvm_pv_size]
+      else
+        s[:size]
+      end
+    end
     size_strings.inject(0) { |tot, size_string| tot + size_string.chomp('G').to_i }
   end
 
