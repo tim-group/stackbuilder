@@ -30,7 +30,7 @@ class CMD
   end
 
   include CMDAudit
-  include CMDAauditVms
+  include CMDAuditVms
   include CMDLs
   include CMDNagios
   include CMDPuppet
