@@ -5,63 +5,6 @@ require 'stackbuilder/support/mcollective'
 class Compute::Client
   include Support::MCollective
 
-  def get_inventory(hosts)
-    response = mco_client('rpcutil', :nodes => hosts) do |mco|
-      result = mco.inventory
-      result.map do |resp|
-        [resp[:sender], {
-          :facts   => resp[:data][:facts],
-          :classes => resp[:data][:classes],
-          :agents  => resp[:data][:agents]
-        }]
-      end
-    end
-    response
-  end
-
-  def merge_attributes_by_fqdn(source_hash, target_hash)
-    source_hash.each do |fqdn, attr|
-      target_hash[fqdn] = attr.merge(target_hash[fqdn])
-    end
-    target_hash
-  end
-
-  def get_libvirt_domains(hv)
-    host_fqdn = hv[:sender]
-    host_volumes = (mco_client("lvm", :nodes => [host_fqdn]) do |mco|
-      mco.lvs.map do |lvs|
-        fail "failed to get logical volume info for #{host_fqdn}: #{lvs[:statusmsg]}" if lvs[:statuscode] != 0
-        lvs[:data][:lvs]
-      end
-    end).flatten
-
-    vm_names = hv[:data][:active_domains] + hv[:data][:inactive_domains]
-    mco_client("libvirt", :timeout => 1, :nodes => [host_fqdn]) do |mco|
-      vm_names.map do |vm_name|
-        result = {}
-        result.merge!(get_vm_info(mco, vm_name))
-        result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(vm_name) })
-
-        vm_fqdn = vm_name + "." + host_fqdn.gsub(/^[^.]*\.mgmt\./, "")
-        { vm_fqdn => result }
-      end.reduce({}, :merge)
-    end
-  end
-
-  def get_vm_info(mco, vm_name, attempts = 3)
-    vm_info = mco.domaininfo(:domain => vm_name).map do |di|
-      fail "domainfo request #{vm_name} failed: #{di[:statusmsg]}" if di[:statuscode] != 0 && attempts == 1
-      di[:statuscode] == 0 ? di[:data] : nil
-    end
-
-    if vm_info.empty? || vm_info[0].nil?
-      return get_vm_info(mco, vm_name, attempts - 1) if attempts > 1
-      fail "Got no response for domainfo request #{vm_name}"
-    end
-
-    vm_info[0]
-  end
-
   # audit_domains is not enabled by default, as it takes significant time to complete
   def audit_hosts(fabric, audit_domains = false)
     fail "Unable to audit hosts when Fabric is nil" if fabric.nil?
@@ -105,6 +48,32 @@ class Compute::Client
     response_hash.each { |fqdn, attr| response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
   end
 
+  def launch(host, specs)
+    invoke :launch, specs, :timeout => 10_000, :nodes => [host]
+  end
+
+  def allocate_ips(host, specs)
+    invoke :allocate_ips, specs, :timeout => 15 * 60, :nodes => [host]
+  end
+
+  def free_ips(host, specs)
+    invoke :free_ips, specs, :timeout => 15 * 60, :nodes => [host]
+  end
+
+  def clean(fabric, specs)
+    invoke :clean, specs, :timeout => 15 * 60, :fabric => fabric
+  end
+
+  def add_cnames(host, spec)
+    invoke :add_cnames, spec, :timeout => 15 * 60, :nodes => [host]
+  end
+
+  def remove_cnames(host, spec)
+    invoke :remove_cnames, spec, :timeout => 15 * 60, :nodes => [host]
+  end
+
+  private
+
   def discover_compute_nodes(fabric)
     mco_client("computenode", :fabric => fabric) do |mco|
       mco.discover.sort
@@ -129,27 +98,59 @@ class Compute::Client
     end
   end
 
-  def launch(host, specs)
-    invoke :launch, specs, :timeout => 10_000, :nodes => [host]
+  def merge_attributes_by_fqdn(source_hash, target_hash)
+    source_hash.each do |fqdn, attr|
+      target_hash[fqdn] = attr.merge(target_hash[fqdn])
+    end
+    target_hash
   end
 
-  def allocate_ips(host, specs)
-    invoke :allocate_ips, specs, :timeout => 15 * 60, :nodes => [host]
+  def get_inventory(hosts)
+    mco_client('rpcutil', :nodes => hosts) do |mco|
+      result = mco.inventory
+      result.map do |resp|
+        [resp[:sender], {
+            :facts   => resp[:data][:facts],
+            :classes => resp[:data][:classes],
+            :agents  => resp[:data][:agents]
+        }]
+      end
+    end
   end
 
-  def free_ips(host, specs)
-    invoke :free_ips, specs, :timeout => 15 * 60, :nodes => [host]
+  def get_libvirt_domains(hv)
+    host_fqdn = hv[:sender]
+    host_volumes = (mco_client("lvm", :nodes => [host_fqdn]) do |mco|
+      mco.lvs.map do |lvs|
+        fail "failed to get logical volume info for #{host_fqdn}: #{lvs[:statusmsg]}" if lvs[:statuscode] != 0
+        lvs[:data][:lvs]
+      end
+    end).flatten
+
+    vm_names = hv[:data][:active_domains] + hv[:data][:inactive_domains]
+    mco_client("libvirt", :timeout => 1, :nodes => [host_fqdn]) do |mco|
+      vm_names.map do |vm_name|
+        result = {}
+        result.merge!(get_vm_info(mco, vm_name))
+        result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(vm_name) })
+
+        vm_fqdn = vm_name + "." + host_fqdn.gsub(/^[^.]*\.mgmt\./, "")
+        { vm_fqdn => result }
+      end.reduce({}, :merge)
+    end
   end
 
-  def clean(fabric, specs)
-    invoke :clean, specs, :timeout => 15 * 60, :fabric => fabric
-  end
+  def get_vm_info(mco, vm_name, attempts = 3)
+    vm_info = mco.domaininfo(:domain => vm_name).map do |di|
+      fail "domainfo request #{vm_name} failed: #{di[:statusmsg]}" if di[:statuscode] != 0 && attempts == 1
+      di[:statuscode] == 0 ? di[:data] : nil
+    end
 
-  def add_cnames(host, spec)
-    invoke :add_cnames, spec, :timeout => 15 * 60, :nodes => [host]
-  end
+    if vm_info.empty? || vm_info[0].nil?
+      return get_vm_info(mco, vm_name, attempts - 1) if attempts > 1
+      fail "Got no response for domainfo request #{vm_name}"
+    end
 
-  def remove_cnames(host, spec)
-    invoke :remove_cnames, spec, :timeout => 15 * 60, :nodes => [host]
+    vm_info[0]
   end
 end
