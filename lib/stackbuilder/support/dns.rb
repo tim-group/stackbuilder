@@ -1,10 +1,17 @@
-module CMDDns
-  def do_allocate_ips(services, machine_def)
-    @core_actions.get_action("allocate_ips").call(services, machine_def)
+require 'stackbuilder/support/namespace'
+
+class Support::Dns
+  def initialize(factory, core_actions)
+    @factory = factory
+    @core_actions = core_actions
   end
 
-  def do_free_ips(services, machine_def)
-    @core_actions.get_action("free_ips").call(services, machine_def)
+  def do_allocate_ips(machine_def)
+    @core_actions.get_action("allocate_ips").call(@factory.services, machine_def)
+  end
+
+  def do_free_ips(machine_def)
+    @core_actions.get_action("free_ips").call(@factory.services, machine_def)
   end
 
   def do_allocate_vips(machine_def)

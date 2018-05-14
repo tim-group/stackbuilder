@@ -7,7 +7,7 @@ require 'stackbuilder/support/cmd_audit_vms'
 require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_puppet'
-require 'stackbuilder/support/cmd_dns'
+require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
 require 'stackbuilder/support/cmd_deploy'
@@ -48,6 +48,8 @@ class CMD
     @core_actions.extend(Stacks::Core::Actions)
     @subscription = Subscription.new
     @subscription.start(["provision.*", "puppet_status"])
+
+    @dns = Support::Dns.new(@factory, @core_actions)
   end
 
   include CMDAudit
@@ -55,7 +57,6 @@ class CMD
   include CMDLs
   include CMDNagios
   include CMDPuppet
-  include CMDDns
   include CMDClean
   include CMDProvision
   include CMDDeploy
@@ -156,13 +157,13 @@ class CMD
 
     case cmd
     when 'allocate_ips'
-      do_allocate_ips(@factory.services, machine_def)
+      @dns.do_allocate_ips(machine_def)
     when 'free_ips'
-      do_free_ips(@factory.services, machine_def)
+      @dns.do_free_ips(machine_def)
     when 'allocate_vips'
-      do_allocate_vips(machine_def)
+      @dns.do_allocate_vips(machine_def)
     when 'free_vips'
-      do_free_vips(machine_def)
+      @dns.do_free_vips(machine_def)
     else
       logger(Logger::FATAL) { "invalid sub command \"#{cmd}\"" }
       exit 1
@@ -208,8 +209,8 @@ class CMD
     machine_def = check_and_get_stack
 
     # prepare dependencies
-    do_allocate_vips(machine_def)
-    do_allocate_ips(@factory.services, machine_def)
+    @dns.do_allocate_vips(machine_def)
+    @dns.do_allocate_ips(machine_def)
     do_puppet_run_on_dependencies(machine_def)
 
     do_provision_machine(@factory.services, machine_def)
