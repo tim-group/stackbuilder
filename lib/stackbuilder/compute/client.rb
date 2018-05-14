@@ -110,9 +110,9 @@ class Compute::Client
       result = mco.inventory
       result.map do |resp|
         [resp[:sender], {
-            :facts   => resp[:data][:facts],
-            :classes => resp[:data][:classes],
-            :agents  => resp[:data][:agents]
+          :facts   => resp[:data][:facts],
+          :classes => resp[:data][:classes],
+          :agents  => resp[:data][:agents]
         }]
       end
     end
