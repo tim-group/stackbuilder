@@ -38,6 +38,7 @@ class Stacks::MachineDef
     @location = environment.translate_site_symbol(site)
     @availability_group = nil
     @ram = "2097152"
+    @vcpus = 1
     @storage = {
       '/'.to_sym =>  {
         :type        => 'os',

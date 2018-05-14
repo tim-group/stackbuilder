@@ -34,7 +34,7 @@ module CMDAuditVms
       result[:specified_ram] = convert_kb_to_gb(vm[:spec][:ram])
       result[:specified_os_disk] = total_spec_storage_size(vm[:spec][:storage], 'os')
       result[:specified_data_disk] = total_spec_storage_size(vm[:spec][:storage], 'data')
-      result[:specified_cpus] = vm[:spec][:vcpus].nil? ? 2 : vm[:spec][:vcpus].to_i
+      result[:specified_cpus] = vm[:spec][:vcpus].to_i
     end
 
     if vm[:actual]
