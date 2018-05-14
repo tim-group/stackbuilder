@@ -27,39 +27,39 @@ class Compute::Client
   end
 
   def get_libvirt_domains(hv)
-    domain_name = hv[:sender].gsub(/^[^.]*\.mgmt\./, "")
-
-    host_volumes = (mco_client("lvm", :nodes => [hv[:sender]]) do |lvm|
-      lvm.lvs.map do |lvs|
-        fail "failed to get logical volume info for #{hv[:sender]}: #{lvm[:statusmsg]}" if lvs[:statuscode] != 0
+    host_fqdn = hv[:sender]
+    host_volumes = (mco_client("lvm", :nodes => [host_fqdn]) do |mco|
+      mco.lvs.map do |lvs|
+        fail "failed to get logical volume info for #{host_fqdn}: #{lvs[:statusmsg]}" if lvs[:statuscode] != 0
         lvs[:data][:lvs]
       end
     end).flatten
 
-    mco_client("libvirt", :nodes => [hv[:sender]]) do |mco|
-      (hv[:data][:active_domains] + hv[:data][:inactive_domains]).map do |d|
+    vm_names = hv[:data][:active_domains] + hv[:data][:inactive_domains]
+    mco_client("libvirt", :timeout => 1, :nodes => [host_fqdn]) do |mco|
+      vm_names.map do |vm_name|
         result = {}
+        result.merge!(get_vm_info(mco, vm_name))
+        result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(vm_name) })
 
-        vm_info = mco.domaininfo(:domain => d).map do |di|
-          di[:data] if di[:statuscode] == 0
-        end
-
-        # retry once
-        if vm_info.empty?
-          vm_info = mco.domaininfo(:domain => d).map do |di|
-            fail "domainfo request #{hv[:sender]} #{d} failed: #{di[:statusmsg]}" if di[:statuscode] != 0
-            di[:data]
-          end
-        end
-        fail "Got no response for domainfo request #{hv[:sender]} #{d}" if vm_info.empty?
-
-        result.merge!(vm_info[0])
-        result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(d) })
-
-        vm_fqdn = d + "." + domain_name
+        vm_fqdn = vm_name + "." + host_fqdn.gsub(/^[^.]*\.mgmt\./, "")
         { vm_fqdn => result }
       end.reduce({}, :merge)
     end
+  end
+
+  def get_vm_info(mco, vm_name, attempts = 3)
+    vm_info = mco.domaininfo(:domain => vm_name).map do |di|
+      fail "domainfo request #{vm_name} failed: #{di[:statusmsg]}" if di[:statuscode] != 0 && attempts == 1
+      di[:statuscode] == 0 ? di[:data] : nil
+    end
+
+    if vm_info.empty? || vm_info[0].nil?
+      return get_vm_info(mco, vm_name, attempts - 1) if attempts > 1
+      fail "Got no response for domainfo request #{vm_name}"
+    end
+
+    vm_info[0]
   end
 
   # audit_domains is not enabled by default, as it takes significant time to complete
