@@ -5,7 +5,6 @@ require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_audit_vms'
 require 'stackbuilder/support/cmd_ls'
-require 'stackbuilder/support/cmd_nagios'
 require 'stackbuilder/support/cmd_puppet'
 require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cmd_clean'
@@ -50,12 +49,12 @@ class CMD
     @subscription.start(["provision.*", "puppet_status"])
 
     @dns = Support::Dns.new(@factory, @core_actions)
+    @nagios = Support::Nagios.new
   end
 
   include CMDAudit
   include CMDAuditVms
   include CMDLs
-  include CMDNagios
   include CMDPuppet
   include CMDClean
   include CMDProvision
@@ -170,6 +169,26 @@ class CMD
     end
   end
 
+  def nagios(argv)
+    cmd = argv.shift
+    if cmd.nil? then
+      logger(Logger::FATAL) { 'nagios needs a subcommand' }
+      exit 1
+    end
+
+    machine_def = check_and_get_stack
+
+    case cmd
+    when 'disable'
+      @nagios.nagios_schedule_downtime(machine_def)
+    when 'enable'
+      @nagios.nagios_cancel_downtime(machine_def)
+    else
+      logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
+      exit 1
+    end
+  end
+
   def test(_argv)
     machine_def = check_and_get_stack
 
@@ -200,6 +219,19 @@ class CMD
     result
   end
 
+  def clean(_argv)
+    machine_def = check_and_get_stack
+    @nagios.nagios_schedule_downtime(machine_def)
+    do_clean(machine_def)
+  end
+
+  def clean_all(_argv)
+    machine_def = check_and_get_stack
+    @nagios.nagios_schedule_downtime(machine_def)
+    do_clean(machine_def)
+    do_clean_traces(machine_def)
+  end
+
   def launch(_argv)
     machine_def = check_and_get_stack
     do_launch(@factory.services, machine_def)
@@ -214,14 +246,16 @@ class CMD
     do_puppet_run_on_dependencies(machine_def)
 
     do_provision_machine(@factory.services, machine_def)
-
-    do_nagios_register_new(machine_def)
+    @nagios.nagios_cancel_downtime(machine_def)
+    @nagios.do_nagios_register_new(machine_def)
   end
 
   def reprovision(_argv)
     machine_def = check_and_get_stack
+    @nagios.nagios_schedule_downtime(machine_def)
     do_clean(machine_def)
     do_provision_machine(@factory.services, machine_def)
+    @nagios.nagios_cancel_downtime(machine_def)
   end
 
   def dependencies(_argv)

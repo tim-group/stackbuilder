@@ -1,25 +1,9 @@
 module CMDClean
-  def clean(_argv)
-    machine_def = check_and_get_stack
-    do_clean(machine_def)
-  end
-
   def do_clean(machine_def)
     # Note that the ordering here is important - must have killed VMs before
     # removing their puppet cert, otherwise we have a race condition
-    nagios_schedule_downtime(machine_def)
     clean_nodes(machine_def)
     puppet_clean(machine_def)
-  end
-
-  def clean_all(_argv)
-    machine_def = check_and_get_stack
-    do_clean_all(machine_def)
-  end
-
-  def do_clean_all(machine_def)
-    do_clean(machine_def)
-    do_clean_traces(machine_def)
   end
 
   def do_clean_traces(machine_def)

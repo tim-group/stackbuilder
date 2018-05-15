@@ -4,7 +4,7 @@ def new_environment(name, options)
   Stacks::Environment.new(name, options, nil, {}, {}, Stacks::CalculatedDependenciesCache.new)
 end
 
-describe Support::Nagios::Service do
+describe Support::NagiosService do
   class MockService
     def schedule_downtime(_machine, _duration)
       'OK'
@@ -17,7 +17,7 @@ describe Support::Nagios::Service do
 
   before do
     @mock_service = MockService.new
-    @test = Support::Nagios::Service.new(:service => @mock_service)
+    @test = Support::NagiosService.new(:service => @mock_service)
     env = new_environment('env', :primary_site => 'oy')
     @test_machine1 = Stacks::MachineDef.new(self, 'test1', env, 'oy')
     @test_machine2 = Stacks::MachineDef.new(self, 'test2', env, 'oy')

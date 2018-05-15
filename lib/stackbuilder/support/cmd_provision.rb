@@ -13,7 +13,6 @@ module CMDProvision
     end
 
     do_deploy_applications(machine_def)
-    nagios_cancel_downtime(machine_def)
   end
 
   def do_launch(services, machine_def)
