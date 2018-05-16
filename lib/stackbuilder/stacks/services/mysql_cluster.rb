@@ -269,7 +269,13 @@ module Stacks::Services::MysqlCluster
     }
     unless read_only_cluster.empty?
       roc = read_only_cluster
-      roc = read_only_cluster.sort.rotate((dependent_instance.index - 1) % read_only_cluster.length) if dependent_service.use_ha_mysql_ordering
+      if dependent_service.use_ha_mysql_ordering
+        if !dependent_service.ha_mysql_ordering_exclude.include?(@name)
+          roc = read_only_cluster.sort.rotate((dependent_instance.index - 1) % read_only_cluster.length)
+        else
+          roc = read_only_cluster.sort
+        end
+      end
       config_params["db.#{@database_name}.read_only_cluster"] = roc.join(",")
     end
 
