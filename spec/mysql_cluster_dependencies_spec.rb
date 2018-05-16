@@ -195,19 +195,16 @@ describe_stack 'stack-with-dependencies1' do
 
   host('e-myharoapp-001.mgmt.earth.net.local') do |host|
     deps = host.to_enc['role::http_app']['dependencies']
-    pp deps['db.exampledb.read_only_cluster']
     expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-003.earth.net.local,e-exampledb-004.earth.net.local,e-exampledb-005.earth.net.local")
   end
 
   host('e-myharoapp-002.mgmt.earth.net.local') do |host|
     deps = host.to_enc['role::http_app']['dependencies']
-    pp deps['db.exampledb.read_only_cluster']
     expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-004.earth.net.local,e-exampledb-005.earth.net.local,e-exampledb-003.earth.net.local")
   end
 
   host('e-myharoapp-003.mgmt.earth.net.local') do |host|
     deps = host.to_enc['role::http_app']['dependencies']
-    pp deps['db.exampledb.read_only_cluster']
     expect(deps['db.exampledb.read_only_cluster']).to eql("e-exampledb-005.earth.net.local,e-exampledb-003.earth.net.local,e-exampledb-004.earth.net.local")
   end
 
