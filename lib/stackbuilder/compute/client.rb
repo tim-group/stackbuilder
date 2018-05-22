@@ -72,6 +72,10 @@ class Compute::Client
     invoke :remove_cnames, spec, :timeout => 15 * 60, :nodes => [host]
   end
 
+  def check_vm_definitions(host, specs)
+    invoke :check_definition, specs, :timeout => 15 * 60, :nodes => [host]
+  end
+
   private
 
   def discover_compute_nodes(fabric)

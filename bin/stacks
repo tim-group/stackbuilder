@@ -66,6 +66,7 @@ Options:
                               skip stacks of type "machine".
     provision [-e] -s         allocates and spins up a stack
     reprovision [-e] -s       "clean", and then "provision" a stack
+    check_definition [-e] -s  verify that the VMs of a provisioned stack match their corresponding VM definitions
     terminus                  create a yaml puppet terminus
 
   For further information about commands, read lib/stackbuilder/support/cmd*.rb

@@ -42,6 +42,7 @@ class CMD
       terminus
       test
       showvnc
+      check_definition
     )
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
@@ -235,6 +236,38 @@ class CMD
   def launch(_argv)
     machine_def = check_and_get_stack
     do_launch(@factory.services, machine_def)
+  end
+
+  def check_definition(_argv)
+    machine_def = check_and_get_stack
+    specs = machine_def.flatten.map(&:to_spec)
+    fabric_grouped_specs = specs.group_by { |spec| spec[:fabric] }
+    fabric_grouped_specs.map do |fabric, fabric_specs|
+      hosts = @factory.host_repository.find_compute_nodes(fabric).hosts
+
+      host_fqdn_by_machine_name = Hash[hosts.map do |host|
+        host.allocated_machines.map do |machine|
+          [machine[:hostname], host.fqdn]
+        end
+      end.flatten(1)]
+
+      host_grouped_specs = fabric_specs.group_by { |spec| host_fqdn_by_machine_name[spec[:hostname]] }
+      host_grouped_specs.each do |host_fqdn, host_specs|
+        if host_fqdn.nil?
+          host_specs.each { |spec| puts "[0;31m#{spec[:hostname]} ==> failed (not provisioned)[0m" }
+        else
+          results = @factory.compute_node_client.check_vm_definitions(host_fqdn, host_specs)
+          results.each do |host_result|
+            sender = host_result[0]
+            host_result[1].each do |vm_name, vm_result|
+              colour = vm_result[0] == 'success' ? "[0;32m" : "[0;31m"
+              puts "#{colour}#{vm_name} ==> #{vm_result[0]} (on host #{sender})[0m"
+              puts "  #{vm_result[1].gsub("\n", "  \n")}" unless vm_result[0] == 'success'
+            end
+          end
+        end
+      end
+    end
   end
 
   def provision(_argv)
