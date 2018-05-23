@@ -13,15 +13,15 @@ module CMDAuditVms
       @factory.compute_node_client.check_vm_definitions(host_fqdn, specs).each do |host_result|
         host_result[1].each do |vm_name, vm_result|
           vm_fqdn = vm_fqdn_by_vm_name[vm_name]
-          result = (vm_result[0] == 'success')
-          vms[vm_fqdn].merge!(:matches_definition => result)
+          inconsistency_count = (vm_result[0] == 'success') ? 0 : vm_result[1].lines.count - 1
+          vms[vm_fqdn].merge!(:inconsistency_count => inconsistency_count)
         end
       end
     end
 
     get_specified_vms(site).each do |machine_def|
       fqdn = "#{machine_def.hostname}.#{machine_def.domain}"
-      vms[fqdn] = { :matches_definition => false } if vms[fqdn].nil?
+      vms[fqdn] = {} if vms[fqdn].nil?
       vms[fqdn].merge!(:spec => machine_def.to_spec)
     end
 
@@ -40,7 +40,7 @@ module CMDAuditVms
   end
 
   def vm_stats_for(vm_fqdn, vm)
-    result = { :fqdn => vm_fqdn, :matches_definition => vm[:matches_definition]}
+    result = { :fqdn => vm_fqdn, :inconsistency_count => vm[:inconsistency_count]}
 
     if vm[:spec]
       result[:specified_ram] = convert_kb_to_gb(vm[:spec][:ram])
@@ -85,14 +85,14 @@ module CMDAuditVms
   end
 
   def render_vm_stats(vms_stats)
-    printf("%-60s %-11s%8s%6s%10s%10s%11s\n", "fqdn", "host", "ram", "cpus", "os disk", "data disk", "consistent")
+    printf("%-60s %-11s%8s%6s%10s%10s%9s\n", "fqdn", "host", "ram", "cpus", "os_disk", "data_disk", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
       printf("%-60s %-11s", stats[:fqdn], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn][/[^.]+/])
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
       print_formatted_pair(6, stats[:specified_cpus], stats[:actual_cpus])
       print_formatted_pair(10, stats[:specified_os_disk], stats[:actual_os_disk])
       print_formatted_pair(10, stats[:specified_data_disk], stats[:actual_data_disk])
-      print_result(11, stats[:matches_definition] ? "Yes" : "No", stats[:matches_definition])
+      print_result(9, stats[:inconsistency_count].nil? ? 'X' : stats[:inconsistency_count], stats[:inconsistency_count] == 0)
       printf("\n")
     end
     printf("All figures are reported as specified/actual\n")
