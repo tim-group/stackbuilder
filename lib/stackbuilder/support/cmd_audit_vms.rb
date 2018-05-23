@@ -7,6 +7,18 @@ module CMDAuditVms
 
     @factory.host_repository.find_vms(site).each { |vm| vms[vm[:fqdn]] = { :actual => vm } }
 
+    vms.values.group_by { |data| data[:actual][:host_fqdn] }.each do |host_fqdn, host_vms|
+      vm_fqdn_by_vm_name = host_vms.map { |data| [data[:actual][:fqdn].partition('.').first, data[:actual][:fqdn]] }.to_h
+      specs = vm_fqdn_by_vm_name.keys.map { |vm_name| @factory.inventory.find_by_hostname(vm_name).to_spec }
+      @factory.compute_node_client.check_vm_definitions(host_fqdn, specs).each do |host_result|
+        host_result[1].each do |vm_name, vm_result|
+          vm_fqdn = vm_fqdn_by_vm_name[vm_name]
+          result = (vm_result[0] == 'success')
+          vms[vm_fqdn].merge!(:matches_definition => result)
+        end
+      end
+    end
+
     get_specified_vms(site).each do |machine_def|
       fqdn = "#{machine_def.hostname}.#{machine_def.domain}"
       vms[fqdn] = {} if vms[fqdn].nil?
@@ -28,7 +40,7 @@ module CMDAuditVms
   end
 
   def vm_stats_for(vm_fqdn, vm)
-    result = { :fqdn => vm_fqdn }
+    result = { :fqdn => vm_fqdn, :matches_definition => (!!vm[:matches_definition]) }
 
     if vm[:spec]
       result[:specified_ram] = convert_kb_to_gb(vm[:spec][:ram])
@@ -73,21 +85,26 @@ module CMDAuditVms
   end
 
   def render_vm_stats(vms_stats)
-    printf("%-60s %-11s%8s%6s%10s%10s\n", "fqdn", "host", "ram", "cpus", "os disk", "data disk")
+    printf("%-60s %-11s%8s%6s%10s%10s%11s\n", "fqdn", "host", "ram", "cpus", "os disk", "data disk", "consistent")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
       printf("%-60s %-11s", stats[:fqdn], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn][/[^.]+/])
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
       print_formatted_pair(6, stats[:specified_cpus], stats[:actual_cpus])
       print_formatted_pair(10, stats[:specified_os_disk], stats[:actual_os_disk])
       print_formatted_pair(10, stats[:specified_data_disk], stats[:actual_data_disk])
+      print_result(11, stats[:matches_definition] ? "Yes" : "No", stats[:matches_definition])
       printf("\n")
     end
     printf("All figures are reported as specified/actual\n")
   end
 
   def print_formatted_pair(width, specified, actual)
-    colour = specified == actual ? "[0;32m" : "[0;31m"
-    printf("%s%#{width}s%s", colour, "#{specified.nil? ? 'X' : specified}/#{actual.nil? ? 'X' : actual}", "[0m")
+    print_result(width, "#{specified.nil? ? 'X' : specified}/#{actual.nil? ? 'X' : actual}", specified == actual)
+  end
+
+  def print_result(width, value, is_good)
+    colour = is_good ? "[0;32m" : "[0;31m"
+    printf("#{colour}%#{width}s[0m", value)
   end
 
   def vm_sort_key(vm_stats)
