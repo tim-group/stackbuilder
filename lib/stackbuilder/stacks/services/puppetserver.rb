@@ -13,7 +13,7 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
                      :persistent => true
                    })
     @vcpus = '9'
-    @ram = '10740000'
+    @ram = (10 * 1024 * 1024).to_s
     @networks = [:mgmt]
   end
 
