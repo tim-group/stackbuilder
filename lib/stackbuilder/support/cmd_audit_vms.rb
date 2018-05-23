@@ -21,7 +21,7 @@ module CMDAuditVms
 
     get_specified_vms(site).each do |machine_def|
       fqdn = "#{machine_def.hostname}.#{machine_def.domain}"
-      vms[fqdn] = {} if vms[fqdn].nil?
+      vms[fqdn] = { :matches_definition => false } if vms[fqdn].nil?
       vms[fqdn].merge!(:spec => machine_def.to_spec)
     end
 
@@ -40,7 +40,7 @@ module CMDAuditVms
   end
 
   def vm_stats_for(vm_fqdn, vm)
-    result = { :fqdn => vm_fqdn, :matches_definition => (!!vm[:matches_definition]) }
+    result = { :fqdn => vm_fqdn, :matches_definition => vm[:matches_definition]}
 
     if vm[:spec]
       result[:specified_ram] = convert_kb_to_gb(vm[:spec][:ram])
