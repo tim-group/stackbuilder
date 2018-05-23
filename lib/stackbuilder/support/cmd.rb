@@ -243,7 +243,7 @@ class CMD
     specs = machine_def.flatten.map(&:to_spec)
     fabric_grouped_specs = specs.group_by { |spec| spec[:fabric] }
     fabric_grouped_specs.map do |fabric, fabric_specs|
-      hosts = @factory.host_repository.find_compute_nodes(fabric).hosts
+      hosts = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts
 
       host_fqdn_by_machine_name = Hash[hosts.map do |host|
         host.allocated_machines.map do |machine|

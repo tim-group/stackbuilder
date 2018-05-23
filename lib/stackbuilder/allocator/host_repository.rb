@@ -13,8 +13,8 @@ class StackBuilder::Allocator::HostRepository
     @policies = args[:policies]
   end
 
-  def find_compute_nodes(fabric, audit_domains = false)
-    result = @compute_node_client.audit_hosts(fabric, audit_domains)
+  def find_compute_nodes(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
+    result = @compute_node_client.audit_hosts(fabric, audit_domains, audit_storage, audit_inventory)
     hosts = []
     result.each do |fqdn, attr|
       vms = []

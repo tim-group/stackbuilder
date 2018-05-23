@@ -6,7 +6,7 @@ class Compute::Client
   include Support::MCollective
 
   # audit_domains is not enabled by default, as it takes significant time to complete
-  def audit_hosts(fabric, audit_domains = false)
+  def audit_hosts(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
     fail "Unable to audit hosts when Fabric is nil" if fabric.nil?
     hosts = discover_compute_nodes(fabric)
     fail "unable to find any compute nodes in fabric #{fabric}" if hosts.empty?
@@ -25,27 +25,33 @@ class Compute::Client
 
     response_hash = Hash[libvirt_response]
 
-    inventory_response = get_inventory(hosts)
-    fail "inventory - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-      "(#{inventory_response.map { |x| x[0] }.join(', ')})" unless hosts.size == inventory_response.size
+    if audit_inventory
+      inventory_response = get_inventory(hosts)
+      fail "inventory - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+        "(#{inventory_response.map { |x| x[0] }.join(', ')})" unless hosts.size == inventory_response.size
 
-    response_hash = merge_attributes_by_fqdn(response_hash, Hash[inventory_response])
-
-    storage_response = mco_client("computenodestorage", :nodes => hosts) do |mco|
-      result = mco.details
-      result.map do |resp|
-        fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
-          unless resp[:statuscode] == 0
-
-        [resp[:sender], { :storage => resp[:data] }]
-      end
+      response_hash = merge_attributes_by_fqdn(response_hash, Hash[inventory_response])
     end
-    storage_response_hash = Hash[storage_response]
 
-    fail "storage - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-      "(#{storage_response.map { |x| x[0] }.join(', ')})" unless hosts.size == storage_response.size
+    if audit_storage
+      storage_response = mco_client("computenodestorage", :nodes => hosts) do |mco|
+        result = mco.details
+        result.map do |resp|
+          fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
+            unless resp[:statuscode] == 0
 
-    response_hash.each { |fqdn, attr| response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
+          [resp[:sender], { :storage => resp[:data] }]
+        end
+      end
+      storage_response_hash = Hash[storage_response]
+
+      fail "storage - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
+        "(#{storage_response.map { |x| x[0] }.join(', ')})" unless hosts.size == storage_response.size
+
+      response_hash.each { |fqdn, attr| response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
+    end
+
+    response_hash
   end
 
   def launch(host, specs)
