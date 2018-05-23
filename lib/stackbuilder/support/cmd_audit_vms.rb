@@ -40,7 +40,7 @@ module CMDAuditVms
   end
 
   def vm_stats_for(vm_fqdn, vm)
-    result = { :fqdn => vm_fqdn, :inconsistency_count => vm[:inconsistency_count]}
+    result = { :fqdn => vm_fqdn, :inconsistency_count => vm[:inconsistency_count] }
 
     if vm[:spec]
       result[:specified_ram] = convert_kb_to_gb(vm[:spec][:ram])
