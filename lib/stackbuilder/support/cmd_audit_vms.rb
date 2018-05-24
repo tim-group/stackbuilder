@@ -9,7 +9,7 @@ module CMDAuditVms
 
     vms.values.group_by { |data| data[:actual][:host_fqdn] }.each do |host_fqdn, host_vms|
       vm_fqdn_by_vm_name = host_vms.map { |data| [data[:vm_name], data[:actual][:fqdn]] }.to_h
-      specs = vm_fqdn_by_vm_name.keys.map { |vm_name| @factory.inventory.find_by_hostname(vm_name).to_spec }
+      specs = vm_fqdn_by_vm_name.keys.map { |vm_name| @factory.inventory.find_by_hostname(vm_name) }.reject(&:nil?).map(&:to_spec)
       @factory.compute_node_client.check_vm_definitions(host_fqdn, specs).each do |host_result|
         host_result[1].each do |vm_name, vm_result|
           vm_fqdn = vm_fqdn_by_vm_name[vm_name]
