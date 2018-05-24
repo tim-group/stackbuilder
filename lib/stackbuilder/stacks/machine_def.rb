@@ -12,11 +12,11 @@ class Stacks::MachineDef
   attr_reader :base_hostname
   attr_reader :virtual_service
   attr_reader :location
+  attr_reader :ram
   attr_accessor :index
   attr_accessor :availability_group
   attr_accessor :fabric
   attr_accessor :networks
-  attr_accessor :ram
   attr_accessor :storage
   attr_accessor :vcpus
   attr_accessor :allocation_tags
@@ -162,6 +162,11 @@ class Stacks::MachineDef
         @storage[mount_point.to_sym] = recurse_merge(@storage[mount_point.to_sym], values)
       end
     end
+  end
+
+  def ram=(value)
+    str = value.to_s
+    @ram = str.end_with?('G') ? (str.chomp('G').to_i * 1024 * 1024).to_s : str
   end
 
   def add_network(net)

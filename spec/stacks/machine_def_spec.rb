@@ -162,4 +162,16 @@ describe Stacks::MachineDef do
     expect(machinedef.to_enc['monitoring']).to have_key('maintainer')
     expect(machinedef.to_enc['monitoring']['maintainer']).to eql('datalibre')
   end
+
+  it 'should allow ram to be specified in GiB' do
+    env = new_environment('env', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.bind_to(env)
+
+    machinedef.ram = "13423"
+    expect(machinedef.ram).to eql('13423')
+
+    machinedef.ram = '10G'
+    expect(machinedef.ram).to eql('10485760')
+  end
 end
