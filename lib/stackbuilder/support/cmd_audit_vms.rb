@@ -5,10 +5,10 @@ module CMDAuditVms
 
     vms = {}
 
-    @factory.host_repository.find_vms(site).each { |vm| vms[vm[:fqdn]] = { :actual => vm } }
+    @factory.host_repository.find_vms(site).each { |vm| vms[vm[:fqdn]] = { :vm_name => vm[:fqdn].partition('.').first, :actual => vm } }
 
     vms.values.group_by { |data| data[:actual][:host_fqdn] }.each do |host_fqdn, host_vms|
-      vm_fqdn_by_vm_name = host_vms.map { |data| [data[:actual][:fqdn].partition('.').first, data[:actual][:fqdn]] }.to_h
+      vm_fqdn_by_vm_name = host_vms.map { |data| [data[:vm_name], data[:actual][:fqdn]] }.to_h
       specs = vm_fqdn_by_vm_name.keys.map { |vm_name| @factory.inventory.find_by_hostname(vm_name).to_spec }
       @factory.compute_node_client.check_vm_definitions(host_fqdn, specs).each do |host_result|
         host_result[1].each do |vm_name, vm_result|
@@ -22,7 +22,7 @@ module CMDAuditVms
     get_specified_vms(site).each do |machine_def|
       fqdn = "#{machine_def.hostname}.#{machine_def.domain}"
       vms[fqdn] = {} if vms[fqdn].nil?
-      vms[fqdn].merge!(:spec => machine_def.to_spec)
+      vms[fqdn].merge!(:vm_name => machine_def.hostname, :spec => machine_def.to_spec)
     end
 
     vms_stats = vms.map { |fqdn, vm| vm_stats_for(fqdn, vm) }
@@ -40,7 +40,7 @@ module CMDAuditVms
   end
 
   def vm_stats_for(vm_fqdn, vm)
-    result = { :fqdn => vm_fqdn, :inconsistency_count => vm[:inconsistency_count] }
+    result = { :fqdn => vm_fqdn, :vm_name => vm[:vm_name], :inconsistency_count => vm[:inconsistency_count] }
 
     if vm[:spec]
       result[:specified_ram] = convert_kb_to_gb(vm[:spec][:ram])
@@ -85,9 +85,10 @@ module CMDAuditVms
   end
 
   def render_vm_stats(vms_stats)
-    printf("%-60s %-11s%8s%6s%10s%10s%9s\n", "fqdn", "host", "ram", "cpus", "os_disk", "data_disk", "diff_cnt")
+    host_col_width = vms_stats.map { |x| x[:vm_name] }.map(&:length).max
+    printf("%-#{host_col_width}s %-11s%8s%6s%10s%10s%9s\n", "vm", "host", "ram", "cpus", "os_disk", "data_disk", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
-      printf("%-60s %-11s", stats[:fqdn], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn][/[^.]+/])
+      printf("%-#{host_col_width}s %-11s", stats[:vm_name], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn].partition('.').first)
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
       print_formatted_pair(6, stats[:specified_cpus], stats[:actual_cpus])
       print_formatted_pair(10, stats[:specified_os_disk], stats[:actual_os_disk])
