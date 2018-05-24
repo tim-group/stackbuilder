@@ -27,10 +27,9 @@ class Compute::Client
 
     if audit_inventory
       inventory_response = get_inventory(hosts)
-      fail "inventory - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-        "(#{inventory_response.map { |x| x[0] }.join(', ')})" unless hosts.size == inventory_response.size
-
-      response_hash = merge_attributes_by_fqdn(response_hash, Hash[inventory_response])
+      fail "inventory - not all hosts responded -- missing responses from " \
+        "(#{(hosts - inventory_response.keys.map { |x| x[0] }).join(', ')})" unless hosts.size == inventory_response.size
+      response_hash = merge_attributes_by_fqdn(response_hash, inventory_response)
     end
 
     if audit_storage
@@ -125,11 +124,12 @@ class Compute::Client
           :agents  => resp[:data][:agents]
         }]
       end
-    end
+    end.to_h
   end
 
   def get_libvirt_domains(hv)
     host_fqdn = hv[:sender]
+    host_domain = host_fqdn.partition('.')[2]
     vm_names = hv[:data][:active_domains] + hv[:data][:inactive_domains]
 
     host_volumes = (mco_client("lvm", :nodes => [host_fqdn]) do |mco|
@@ -140,16 +140,19 @@ class Compute::Client
     end).flatten
     fail "Got no response from mcollective lvs.lvm request to #{host_fqdn}" if !vm_names.empty? && host_volumes.empty?
 
-    mco_client("libvirt", :timeout => 1, :nodes => [host_fqdn]) do |mco|
+    result = mco_client("libvirt", :timeout => 1, :nodes => [host_fqdn]) do |mco|
       vm_names.map do |vm_name|
         result = {}
         result.merge!(get_vm_info(mco, vm_name))
         result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(vm_name) })
 
-        vm_fqdn = vm_name + "." + host_fqdn.gsub(/^[^.]*\.mgmt\./, "")
+        vm_fqdn = "#{vm_name}.#{host_domain}"
         { vm_fqdn => result }
       end.reduce({}, :merge)
     end
+
+    inventory = get_inventory(vm_names.map {|name| "#{name}.#{host_domain}"})
+    merge_attributes_by_fqdn(inventory, result)
   end
 
   def get_vm_info(mco, vm_name, attempts = 3)

@@ -20,7 +20,7 @@ module CMDAuditVms
     end
 
     get_specified_vms(site).each do |machine_def|
-      fqdn = "#{machine_def.hostname}.#{machine_def.domain}"
+      fqdn = machine_def.mgmt_fqdn
       vms[fqdn] = {} if vms[fqdn].nil?
       vms[fqdn].merge!(:vm_name => machine_def.hostname, :spec => machine_def.to_spec)
     end
@@ -51,6 +51,10 @@ module CMDAuditVms
 
     if vm[:actual]
       result[:host_fqdn] = vm[:actual][:host_fqdn]
+      result[:days_since_provisioned] = convert_epoch_time_to_days_ago(vm[:actual].fetch(:facts, {})['provision_secs_since_epoch'])
+      uptime_days = vm[:actual].fetch(:facts, {})['uptime_days']
+      result[:days_since_restarted] = uptime_days.nil? ? nil : "#{uptime_days}d"
+      result[:os] = vm[:actual].fetch(:facts, {})['lsbdistcodename']
       result[:actual_ram] = convert_kb_to_gb(vm[:actual][:max_memory])
       result[:actual_os_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk1')
       result[:actual_data_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk2')
@@ -84,16 +88,30 @@ module CMDAuditVms
     value.to_i / (1024 * 1024 * 1024)
   end
 
+  def convert_epoch_time_to_days_ago(epoch_time)
+    return nil if epoch_time.nil?
+    begin
+      days_ago = (Time.now.to_i - epoch_time.to_i) / (60 * 60 * 24)
+      "#{days_ago}d"
+    rescue StandardError => e
+      nil
+    end
+  end
+
   def render_vm_stats(vms_stats)
     host_col_width = vms_stats.map { |x| x[:vm_name] }.map(&:length).max
-    printf("%-#{host_col_width}s %-11s%8s%6s%10s%10s%9s\n", "vm", "host", "ram", "cpus", "os_disk", "data_disk", "diff_cnt")
+    printf("%-#{host_col_width}s %-11s%8s%6s%10s%10s%7s%7s%8s%9s\n",
+           "vm", "host", "ram", "cpus", "os_disk", "data_disk", "age", "uptime", "os", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
       printf("%-#{host_col_width}s %-11s", stats[:vm_name], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn].partition('.').first)
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
       print_formatted_pair(6, stats[:specified_cpus], stats[:actual_cpus])
       print_formatted_pair(10, stats[:specified_os_disk], stats[:actual_os_disk])
       print_formatted_pair(10, stats[:specified_data_disk], stats[:actual_data_disk])
-      print_result(9, stats[:inconsistency_count].nil? ? 'X' : stats[:inconsistency_count], stats[:inconsistency_count] == 0)
+      print_result(7, stats[:days_since_provisioned], happy_days(stats[:days_since_provisioned]))
+      print_result(7, stats[:days_since_restarted], happy_days(stats[:days_since_restarted]))
+      print_result(8, stats[:os], stats[:os] == 'trusty')
+      print_result(9, stats[:inconsistency_count], stats[:inconsistency_count] == 0)
       printf("\n")
     end
     printf("All figures are reported as specified/actual\n")
@@ -105,7 +123,11 @@ module CMDAuditVms
 
   def print_result(width, value, is_good)
     colour = is_good ? "[0;32m" : "[0;31m"
-    printf("#{colour}%#{width}s[0m", value)
+    printf("#{colour}%#{width}s[0m", value.nil? ? 'X' : value)
+  end
+
+  def happy_days(daystring)
+    !daystring.nil? && daystring.to_i <= 365
   end
 
   def vm_sort_key(vm_stats)
