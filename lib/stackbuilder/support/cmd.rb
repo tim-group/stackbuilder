@@ -304,7 +304,7 @@ class CMD
 
     machine = machines.first
     hosts = @factory.host_repository.find_compute_nodes(machine.fabric, false, false, false)
-    host = hosts.hosts.reject { |host| !host.allocated_machines.map { |m| m[:hostname] }.include?(machine.hostname) }.first
+    host = hosts.hosts.find { |h| h.allocated_machines.map { |m| m[:hostname] }.include?(machine.hostname) }
 
     if host.nil?
       logger(Logger::FATAL) { "#{machine.hostname} is not provisioned" }
