@@ -16,6 +16,14 @@ class StackBuilder::Allocator::Hosts
     end
   end
 
+  def without(hosts)
+    return self if hosts.empty?
+
+    excluded_host_fqdns = hosts.map(&:fqdn)
+    reduced_hosts = @hosts.reject { |h| excluded_host_fqdns.include?(h.fqdn) }
+    StackBuilder::Allocator::Hosts.new(:hosts => reduced_hosts, :preference_functions => @hosts.first.preference_functions)
+  end
+
   public
 
   def do_allocation(specs)
