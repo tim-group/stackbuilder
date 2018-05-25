@@ -309,11 +309,11 @@ class CMD
   end
 
   def clear_host(argv)
-    fail "You must specify a host to clear" unless _argv.size == 1
+    fail "You must specify a host to clear" unless argv.size == 1
 
     hostname = argv[0]
     fabric = hostname.partition('-').first
-    host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.find { |h| h.fqdn.start_with?(hostname) }
+    host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.find { |h| h.hostname == hostname }
 
     fail "unable to find #{hostname}" if host.nil?
 

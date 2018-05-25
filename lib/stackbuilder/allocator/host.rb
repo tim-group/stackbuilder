@@ -27,6 +27,10 @@ class StackBuilder::Allocator::Host
     @vm_rack_allocation = {}
   end
 
+  def hostname
+    @fqdn.partition('.').first
+  end
+
   def availability_groups_in_rack
     @hosts.availability_group_rack_distribution[@facts['rack']]
   end
