@@ -38,10 +38,10 @@ module Stacks
       calculated_dependencies_cache.reset(environments[name])
     end
 
-    def find_by_hostname(hostname)
+    def find_by_hostname(fabric, hostname)
       node = nil
       accept do |machine_def|
-        if machine_def.respond_to?(:hostname) && machine_def.hostname == hostname
+        if machine_def.respond_to?(:hostname) && machine_def.hostname == hostname && machine_def.fabric == fabric
           node = machine_def
         end
       end

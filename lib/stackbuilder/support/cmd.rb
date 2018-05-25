@@ -10,6 +10,7 @@ require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
 require 'stackbuilder/support/cmd_deploy'
+require 'stackbuilder/support/live_migration'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
@@ -43,6 +44,8 @@ class CMD
       test
       showvnc
       check_definition
+      move
+      clear_host
     )
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
@@ -289,6 +292,32 @@ class CMD
     do_clean(machine_def)
     do_provision_machine(@factory.services, machine_def)
     @nagios.nagios_cancel_downtime(machine_def)
+  end
+
+  def move(_argv)
+    machines = check_and_get_stack.flatten
+
+    fail "more than one machine not supported" unless machines.size == 1
+    machine = machines.first
+
+    hosts = @factory.host_repository.find_compute_nodes(machine.fabric, false, false, false)
+    host = hosts.hosts.reject { |host| !host.allocated_machines.map { |m| m[:hostname] }.include?(machine.hostname) }.first
+
+    fail "#{machine.hostname} is not provisioned" if host.nil?
+
+    Support::LiveMigrator.new(@factory, @core_actions, host).move(machine)
+  end
+
+  def clear_host(_argv)
+    fail "You must specify a host to clear" unless _argv.size == 1
+
+    hostname = _argv[0]
+    fabric = hostname.partition('-').first
+    host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.select { |host| host.fqdn.start_with?(hostname) }.first
+
+    fail "unable to find #{hostname}" if host.nil?
+
+    Support::LiveMigrator.new(@factory, @core_actions, host).move_all
   end
 
   def dependencies(_argv)

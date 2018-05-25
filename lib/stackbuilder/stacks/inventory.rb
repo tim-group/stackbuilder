@@ -22,8 +22,8 @@ class Stacks::Inventory
     @stacks.find(fqdn)
   end
 
-  def find_by_hostname(hostname)
-    @stacks.find_by_hostname(hostname)
+  def find_by_hostname(fabric, hostname)
+    @stacks.find_by_hostname(fabric, hostname)
   end
 
   def find_environment(name)
