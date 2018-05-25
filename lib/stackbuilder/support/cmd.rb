@@ -297,25 +297,37 @@ class CMD
   def move(_argv)
     machines = check_and_get_stack.flatten
 
-    fail "more than one machine not supported" unless machines.size == 1
-    machine = machines.first
+    if machines.size != 1
+      logger(Logger::FATAL) { "moving more than one machine not supported" }
+      exit 1
+    end
 
+    machine = machines.first
     hosts = @factory.host_repository.find_compute_nodes(machine.fabric, false, false, false)
     host = hosts.hosts.reject { |host| !host.allocated_machines.map { |m| m[:hostname] }.include?(machine.hostname) }.first
 
-    fail "#{machine.hostname} is not provisioned" if host.nil?
+    if host.nil?
+      logger(Logger::FATAL) { "#{machine.hostname} is not provisioned" }
+      exit 1
+    end
 
     Support::LiveMigrator.new(@factory, @core_actions, host).move(machine)
   end
 
   def clear_host(argv)
-    fail "You must specify a host to clear" unless argv.size == 1
+    if argv.size != 1
+      logger(Logger::FATAL) { "You must specify a host to clear" }
+      exit 1
+    end
 
     hostname = argv[0]
     fabric = hostname.partition('-').first
     host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.find { |h| h.hostname == hostname }
 
-    fail "unable to find #{hostname}" if host.nil?
+    if host.nil?
+      logger(Logger::FATAL) { "unable to find #{hostname}" }
+      exit 1
+    end
 
     Support::LiveMigrator.new(@factory, @core_actions, host).move_all
   end
