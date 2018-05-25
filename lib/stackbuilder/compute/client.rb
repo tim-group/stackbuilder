@@ -151,7 +151,7 @@ class Compute::Client
       end.reduce({}, :merge)
     end
 
-    inventory = get_inventory(vm_names.map {|name| "#{name}.#{host_domain}"})
+    inventory = get_inventory(vm_names.map { |name| "#{name}.#{host_domain}" })
     merge_attributes_by_fqdn(inventory, result)
   end
 

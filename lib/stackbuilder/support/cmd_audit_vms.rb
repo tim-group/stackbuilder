@@ -93,7 +93,7 @@ module CMDAuditVms
     begin
       days_ago = (Time.now.to_i - epoch_time.to_i) / (60 * 60 * 24)
       "#{days_ago}d"
-    rescue StandardError => e
+    rescue StandardError
       nil
     end
   end

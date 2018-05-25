@@ -308,12 +308,12 @@ class CMD
     Support::LiveMigrator.new(@factory, @core_actions, host).move(machine)
   end
 
-  def clear_host(_argv)
+  def clear_host(argv)
     fail "You must specify a host to clear" unless _argv.size == 1
 
-    hostname = _argv[0]
+    hostname = argv[0]
     fabric = hostname.partition('-').first
-    host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.select { |host| host.fqdn.start_with?(hostname) }.first
+    host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.find { |h| h.fqdn.start_with?(hostname) }
 
     fail "unable to find #{hostname}" if host.nil?
 

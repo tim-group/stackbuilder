@@ -11,7 +11,7 @@ class Support::LiveMigrator
     move_machines([machine])
   end
 
-  def move_all()
+  def move_all
     move_machines(@source_host.allocated_machines.map { |m| @factory.inventory.find_by_hostname(m[:fabric], m[:hostname]) })
   end
 
@@ -46,5 +46,4 @@ class Support::LiveMigrator
     logger(Logger::FATAL) { msg }
     exit 1
   end
-
 end
