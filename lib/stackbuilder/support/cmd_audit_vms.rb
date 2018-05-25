@@ -101,6 +101,7 @@ module CMDAuditVms
 
   def render_vm_stats(vms_stats)
     host_col_width = vms_stats.map { |x| x[:vm_name] }.map(&:length).max
+    printf("N.B. Figure pairs are reported as specified/actual\n")
     printf("%-#{host_col_width}s%12s%8s%6s%10s%10s%16s%7s%7s%9s\n",
            "vm", "host", "ram", "cpus", "os_disk", "data_disk", "os", "age", "uptime", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
@@ -116,7 +117,6 @@ module CMDAuditVms
       print_result(9, stats[:inconsistency_count], stats[:inconsistency_count] == 0)
       printf("\n")
     end
-    printf("All figures are reported as specified/actual\n")
   end
 
   def print_formatted_pair(width, specified, actual)
