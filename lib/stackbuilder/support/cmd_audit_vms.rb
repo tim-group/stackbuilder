@@ -22,7 +22,7 @@ module CMDAuditVms
     get_specified_vms(site).each do |machine_def|
       fqdn = machine_def.mgmt_fqdn
       vms[fqdn] = {} if vms[fqdn].nil?
-      vms[fqdn].merge!(:vm_name => machine_def.hostname, :spec => machine_def.to_spec)
+      vms[fqdn].merge!(:vm_name => machine_def.hostname, :spec => machine_def.to_spec, :spec_os => machine_def.lsbdistcodename)
     end
 
     vms_stats = vms.map { |fqdn, vm| vm_stats_for(fqdn, vm) }
@@ -47,6 +47,7 @@ module CMDAuditVms
       result[:specified_os_disk] = total_spec_storage_size(vm[:spec][:storage], 'os')
       result[:specified_data_disk] = total_spec_storage_size(vm[:spec][:storage], 'data')
       result[:specified_cpus] = vm[:spec][:vcpus].to_i
+      result[:specified_os] = vm[:spec_os]
     end
 
     if vm[:actual]
@@ -54,7 +55,7 @@ module CMDAuditVms
       result[:days_since_provisioned] = convert_epoch_time_to_days_ago(vm[:actual].fetch(:facts, {})['provision_secs_since_epoch'])
       uptime_days = vm[:actual].fetch(:facts, {})['uptime_days']
       result[:days_since_restarted] = uptime_days.nil? ? nil : "#{uptime_days}d"
-      result[:os] = vm[:actual].fetch(:facts, {})['lsbdistcodename']
+      result[:actual_os] = vm[:actual].fetch(:facts, {})['lsbdistcodename']
       result[:actual_ram] = convert_kb_to_gb(vm[:actual][:max_memory])
       result[:actual_os_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk1')
       result[:actual_data_disk] = total_logical_volume_size(vm[:actual][:logical_volumes], 'disk2')
@@ -100,17 +101,18 @@ module CMDAuditVms
 
   def render_vm_stats(vms_stats)
     host_col_width = vms_stats.map { |x| x[:vm_name] }.map(&:length).max
-    printf("%-#{host_col_width}s %-11s%8s%6s%10s%10s%7s%7s%8s%9s\n",
-           "vm", "host", "ram", "cpus", "os_disk", "data_disk", "age", "uptime", "os", "diff_cnt")
+    printf("%-#{host_col_width}s%12s%8s%6s%10s%10s%16s%7s%7s%9s\n",
+           "vm", "host", "ram", "cpus", "os_disk", "data_disk", "os", "age", "uptime", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
-      printf("%-#{host_col_width}s %-11s", stats[:vm_name], stats[:host_fqdn].nil? ? "X" : stats[:host_fqdn].partition('.').first)
+      printf("%-#{host_col_width}s", stats[:vm_name])
+      print_result(12, domain_name_from_fqdn(stats[:host_fqdn]), !stats[:host_fqdn].nil?)
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
       print_formatted_pair(6, stats[:specified_cpus], stats[:actual_cpus])
       print_formatted_pair(10, stats[:specified_os_disk], stats[:actual_os_disk])
       print_formatted_pair(10, stats[:specified_data_disk], stats[:actual_data_disk])
+      print_formatted_pair(16, stats[:specified_os], stats[:actual_os])
       print_result(7, stats[:days_since_provisioned], happy_days(stats[:days_since_provisioned]))
       print_result(7, stats[:days_since_restarted], happy_days(stats[:days_since_restarted]))
-      print_result(8, stats[:os], stats[:os] == 'trusty')
       print_result(9, stats[:inconsistency_count], stats[:inconsistency_count] == 0)
       printf("\n")
     end
@@ -128,6 +130,10 @@ module CMDAuditVms
 
   def happy_days(daystring)
     !daystring.nil? && daystring.to_i <= 365
+  end
+
+  def domain_name_from_fqdn(fqdn)
+    fqdn.nil? ? nil : fqdn.partition('.').first
   end
 
   def vm_sort_key(vm_stats)

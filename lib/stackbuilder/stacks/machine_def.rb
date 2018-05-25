@@ -13,6 +13,7 @@ class Stacks::MachineDef
   attr_reader :virtual_service
   attr_reader :location
   attr_reader :ram
+  attr_reader :lsbdistcodename
   attr_accessor :index
   attr_accessor :availability_group
   attr_accessor :fabric
