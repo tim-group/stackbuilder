@@ -123,7 +123,7 @@ GetoptLong.new(
   ['--quiet',           '-q', GetoptLong::NO_ARGUMENT],
   ['--checkout-config', '-c', GetoptLong::OPTIONAL_ARGUMENT],
   ['--create-persistent-storage', GetoptLong::NO_ARGUMENT],
-  ['--best-effort', GetoptLong::NO_ARGUMENT],
+  ['--best-effort', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -184,9 +184,7 @@ if $options[:'create-persistent-storage']
   logger(Logger::WARN) { '--create-persistent-storage is set so any persistent storage will be created, existing storage will not be reused' }
 end
 
-if $options[:'best-effort']
-  ENV['BEST_EFFORT'] = 'true'
-end
+ENV['BEST_EFFORT'] = 'true' if $options[:'best-effort']
 
 logger(Logger::DEBUG) { 'initializing stacks factory' }
 factory = Stacks::Factory.new($options[:path])

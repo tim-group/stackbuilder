@@ -7,7 +7,6 @@ def new_environment(name, options)
 end
 
 describe Support::LiveMigrator do
-
   before do
     @stacks_factory = double("stacks_factory")
     policies = Stacks::Factory.new.policies
@@ -32,11 +31,11 @@ describe Support::LiveMigrator do
 
     allow(@stacks_factory).to receive_message_chain(:compute_node_client, :check_vm_definitions).and_return([['host', { 'env-test1' => ['success'] }]])
 
-    allow(@stacks_factory).to receive_message_chain(:services, :allocator, :allocate).and_return({
+    allow(@stacks_factory).to receive_message_chain(:services, :allocator, :allocate).and_return(
       :already_allocated  => {},
       :newly_allocated    => {},
-      :failed_to_allocate => {'env-test1' => 'not enough cpus'}
-    })
+      :failed_to_allocate => { 'env-test1' => 'not enough cpus' }
+    )
 
     lambda { @live_migrator.move(@test_machine1) }.should raise_error SystemExit
   end
@@ -47,11 +46,11 @@ describe Support::LiveMigrator do
 
     allow(@stacks_factory).to receive_message_chain(:compute_node_client, :check_vm_definitions).and_return([['host', { 'env-test1' => ['success'] }]])
 
-    allow(@stacks_factory).to receive_message_chain(:services, :allocator, :allocate).and_return({
+    allow(@stacks_factory).to receive_message_chain(:services, :allocator, :allocate).and_return(
       :already_allocated  => {},
-      :newly_allocated    => {'destination_host' => [{:hostname => 'env-test1'}]},
+      :newly_allocated    => { 'destination_host' => [{ :hostname => 'env-test1' }] },
       :failed_to_allocate => {}
-    })
+    )
 
     lambda { @live_migrator.move(@test_machine1) }.should_not raise_error SystemExit
   end

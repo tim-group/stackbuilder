@@ -141,10 +141,10 @@ describe Stacks::MachineDef do
     machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
     machinedef.template(:precise)
     machinedef.modify_storage(
-        '/mnt/data' => {
-            :persistent => true,
-            :type => 'data',
-            :size => '1G' })
+      '/mnt/data' => {
+        :persistent => true,
+        :type => 'data',
+        :size => '1G' })
     machinedef.bind_to(env)
     expect(machinedef.to_spec(true)[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found]).to eql('create_new')
 
