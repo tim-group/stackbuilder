@@ -26,7 +26,7 @@ class StackBuilder::Allocator::Hosts
 
   public
 
-  def do_allocation(specs)
+  def do_allocation(specs, best_effort = false)
     allocated_machines = Hash[hosts.map do |host|
       host.allocated_machines.map do |machine|
         [machine, host.fqdn]
@@ -37,10 +37,14 @@ class StackBuilder::Allocator::Hosts
       !specs.include?(machine)
     end
 
-    {
-      :already_allocated => already_allocated,
-      :newly_allocated => allocate(specs)
-    }
+    result_map = allocate(specs)
+    result_map[:already_allocated] = already_allocated
+
+    return result_map if best_effort || result_map[:failed_to_allocate].empty?
+
+    result_map[:failed_to_allocate].each do |machine, reason|
+      fail "Unable to allocate #{machine[:hostname]} due to policy violation:\n  #{reason}"
+    end
   end
 
   def availability_group_rack_distribution
@@ -84,15 +88,13 @@ class StackBuilder::Allocator::Hosts
       !allocation_check_result[:allocatable]
     end
 
-    if candidate_hosts.empty?
-      fail "Unable to allocate #{machine[:hostname]} due to policy violation:\n  #{allocation_denials.join("\n  ")}"
-    end
+    return ['failure', allocation_denials] if candidate_hosts.empty?
 
     candidate_hosts = candidate_hosts.sort_by { |host| host.preference(machine) }
     logger(Logger::DEBUG) { "KVM preference list:" }
     logger(Logger::DEBUG) { "[prefer_not_g9, prefer_no_data, fewest_machines, diverse_vm_rack_distribution, fqdn]" }
     candidate_hosts.each { |p| logger(Logger::DEBUG) { "  #{p.preference(machine)}" } }
-    candidate_hosts[0]
+    ['success', candidate_hosts[0]]
   end
 
   private
@@ -113,18 +115,25 @@ class StackBuilder::Allocator::Hosts
   def allocate(machines)
     unallocated_machines = unallocated_machines(machines)
 
-    allocated_machines = Hash[unallocated_machines.map do |machine|
-      host = find_suitable_host_for(machine)
-      host.provisionally_allocate(machine)
-      [machine, host.fqdn]
-    end]
+    successful_allocations = {}
+    failed_allocations = {}
 
-    return_map = {}
-    allocated_machines.each do |machine, host|
-      return_map[host] = [] unless return_map[host]
-      return_map[host] << machine
+    unallocated_machines.each do |machine|
+      result = find_suitable_host_for(machine)
+
+      if result[0] == 'failure'
+        failed_allocations[machine] = result[1].join("\n  ")
+      else
+        host = result[1]
+        host.provisionally_allocate(machine)
+        successful_allocations[host.fqdn] = [] unless successful_allocations[host.fqdn]
+        successful_allocations[host.fqdn] << machine
+      end
     end
 
-    return_map
+    {
+      :newly_allocated => successful_allocations,
+      :failed_to_allocate => failed_allocations
+    }
   end
 end
