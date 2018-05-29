@@ -41,6 +41,7 @@ Options:
     -t, --terse                     shorten the output
     --create-persistent-storage     allocate new persistent storage, instead of finding existing storage
                                     (WARNING: normally only wanted when provisioning a stack for the first time)
+    --best-effort                   where applicable, do as much as is possible in the face of errors, rather than bailing immediately
 
   For further information about options, read bin/stacks.
 
@@ -120,7 +121,8 @@ GetoptLong.new(
   ['--verbose',         '-v', GetoptLong::NO_ARGUMENT],
   ['--quiet',           '-q', GetoptLong::NO_ARGUMENT],
   ['--checkout-config', '-c', GetoptLong::OPTIONAL_ARGUMENT],
-  ['--create-persistent-storage', GetoptLong::NO_ARGUMENT]
+  ['--create-persistent-storage', GetoptLong::NO_ARGUMENT],
+  ['--best-effort', GetoptLong::NO_ARGUMENT],
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -179,6 +181,10 @@ end
 if $options[:'create-persistent-storage']
   ENV['CREATE_PERSISTENT_STORAGE'] = 'true'
   logger(Logger::WARN) { '--create-persistent-storage is set so any persistent storage will be created, existing storage will not be reused' }
+end
+
+if $options[:'best-effort']
+  ENV['BEST_EFFORT'] = 'true'
 end
 
 logger(Logger::DEBUG) { 'initializing stacks factory' }

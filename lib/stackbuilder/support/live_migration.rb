@@ -11,7 +11,10 @@ class Support::LiveMigrator
   end
 
   def move_all
-    move_machines(@source_host.allocated_machines.map { |m| @factory.inventory.find_by_hostname(m[:fabric], m[:hostname]) })
+    move_machines(
+      @source_host.allocated_machines.map { |m| @factory.inventory.find_by_hostname(m[:fabric], m[:hostname]) },
+      ENV['BEST_EFFORT'] == 'true'
+    )
   end
 
   private
