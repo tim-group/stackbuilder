@@ -202,7 +202,7 @@ class Stacks::MachineDef
     @dont_start = true
   end
 
-  def to_spec
+  def to_spec(create_persistent_storage = @environment.options[:create_persistent_storage])
     validate_storage
     @destroyable = true if environment.every_machine_destroyable?
 
@@ -219,7 +219,7 @@ class Stacks::MachineDef
     spec[:disallow_destroy] = true unless @destroyable
     spec[:ram] = ram unless ram.nil?
     spec[:vcpus] = vcpus unless vcpus.nil?
-    spec[:storage] = @environment.options[:create_persistent_storage] ? turn_on_persistent_storage_creation(storage) : storage
+    spec[:storage] = create_persistent_storage ? turn_on_persistent_storage_creation(storage) : storage
     spec[:dont_start] = true if @dont_start
     spec[:cnames] = Hash[@added_cnames.map { |n, cnames| [n, Hash[cnames.map { |c| [c, qualified_hostname(n)] }]] }]
     spec[:allocation_tags] = @allocation_tags
