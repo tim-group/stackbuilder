@@ -311,7 +311,7 @@ class CMD
       exit 1
     end
 
-    Support::LiveMigrator.new(@factory, @core_actions, host).move(machine)
+    Support::LiveMigrator.new(@factory, host).move(machine)
   end
 
   def clear_host(argv)
@@ -329,7 +329,7 @@ class CMD
       exit 1
     end
 
-    Support::LiveMigrator.new(@factory, @core_actions, host).move_all
+    Support::LiveMigrator.new(@factory, host).move_all
   end
 
   def dependencies(_argv)

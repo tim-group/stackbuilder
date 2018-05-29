@@ -1,9 +1,8 @@
 require 'stackbuilder/support/namespace'
 
 class Support::LiveMigrator
-  def initialize(factory, core_actions, source_host)
+  def initialize(factory, source_host)
     @factory = factory
-    @core_actions = core_actions
     @source_host = source_host
   end
 
