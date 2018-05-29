@@ -49,27 +49,26 @@ Options:
 
     audit [-e]                show the state of the KVM host machines in the primary site of the specified env
     audit_vms [-e]            show the state of the VMs in the primary site of the specified env
+    check_definition [-e] -s  verify that the VMs of a provisioned stack match their corresponding VM definitions
     clean [-e] -s             shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
     clean_all [-e] -s         shuts down and removes a stack, puppet, nagios and mongo
+    clear_host HOST           clear the specified HOST machine of all VMs (supports --best-effort)
     compile                   create a yaml file describing the entire infrastructure
     dependencies [-e] -s      list the machines that this machine depends on
     dependents [-e] -s        list the machines that depend on this machine
     diff                      show compile diff between last stackbuilder config commit and latest commit.
-    sbdiff                    show compile diff between latest stackbuilder and local stackbuilder.
     dns [-e] -s               perform DNS related tasks
       allocate_ips            allocate all ip addresses for the specified stack (machine(s))
       free_ips                free all ip addresses for the specified stack (machine(s))
       allocate_vips           allocate all vip addresses for a stack (service(s))
       free_vips               free all vip addresses for a stack (service(s))
     enc [-e] -s               print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
-    spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
-    ls [-est]                 show the entire environment. Show just one stack if -s is specified. If -t is specified,
-                              skip stacks of type "machine".
+    ls [-est]                 show the entire environment. Show just one stack if -s is specified. Using -t skips stacks of type "machine".
+    move [-e] -s              move a given stack from its current host to another
     provision [-e] -s         allocates and spins up a stack
     reprovision [-e] -s       "clean", and then "provision" a stack
-    check_definition [-e] -s  verify that the VMs of a provisioned stack match their corresponding VM definitions
-    move [-e] -s              move a given stack from its current host to another
-    clear_host HOST           clear the specified HOST machine of all VMs (supports --best-effort)
+    sbdiff                    show compile diff between latest stackbuilder and local stackbuilder.
+    spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
     terminus                  create a yaml puppet terminus
 
   For further information about commands, read lib/stackbuilder/support/cmd*.rb
