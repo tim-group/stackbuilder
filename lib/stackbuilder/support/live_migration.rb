@@ -28,17 +28,15 @@ class Support::LiveMigrator
     check_results = @factory.compute_node_client.check_vm_definitions(@source_host.fqdn, machines.map(&:to_spec))
 
     bail "Did not receive check result from host" unless check_results.size == 1
-    successful_vm_names = check_results.first[1].reject { |_, vm_result| vm_result[0] != 'success' }.keys
+    successful_vm_names = check_results.first[1].select { |_, vm_result| vm_result[0] == 'success' }.keys
 
     failed_vm_names = machines.map(&:hostname) - successful_vm_names
-    unless failed_vm_names.empty?
-      level = best_effort ? Logger::WARN : Logger::FATAL
-      logger(level) { "Some VMs have out-of-date definitions and need re-provisioning: #{failed_vm_names.join(', ')}" }
-      exit 1 unless best_effort && !successful_vm_names.empty?
+    failed_vm_names.each do |vm_name|
+      logger(best_effort ? Logger::WARN : Logger::FATAL) { "#{vm_name} has an out-of-date definition and must be re-provisioned." }
     end
+    exit 1 unless failed_vm_names.empty? || (best_effort && !successful_vm_names.empty?)
 
-    logger(Logger::INFO) { "Will reallocate these VMs: #{successful_vm_names.join(', ')}" }
-
+    logger(Logger::INFO) { "These VMs are safe to migrate: #{successful_vm_names.join(', ')}" }
     machines.select { |machine| successful_vm_names.include?(machine.hostname) }
   end
 
