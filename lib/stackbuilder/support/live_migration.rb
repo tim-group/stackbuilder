@@ -17,6 +17,14 @@ class Support::LiveMigrator
   private
 
   def move_machines(machines, best_effort = false)
+    safe_machines = vms_that_are_safe_to_move(machines, best_effort)
+    moveable_machines = vms_that_can_be_reallocated(safe_machines, best_effort)
+
+    logger(Logger::INFO) { "Will perform live VM migration of these VMs: #{moveable_machines.map(&:hostname).join(', ')}" }
+    moveable_machines.each { |machine| perform_live_migration(machine) }
+  end
+
+  def vms_that_are_safe_to_move(machines, best_effort)
     check_results = @factory.compute_node_client.check_vm_definitions(@source_host.fqdn, machines.map(&:to_spec))
 
     bail "Did not receive check result from host" unless check_results.size == 1
@@ -31,9 +39,11 @@ class Support::LiveMigrator
 
     logger(Logger::INFO) { "Will reallocate these VMs: #{successful_vm_names.join(', ')}" }
 
-    safe_machines = machines.select { |machine| successful_vm_names.include?(machine.hostname) }
+    machines.select { |machine| successful_vm_names.include?(machine.hostname) }
+  end
 
-    preliminary_allocation = allocate_elsewhere(safe_machines.map(&:to_spec), true)
+  def vms_that_can_be_reallocated(machines, best_effort)
+    preliminary_allocation = allocate_elsewhere(machines.map(&:to_spec), true)
     preliminary_allocation[:newly_allocated].each do |host, allocated_specs|
       allocated_specs.each do |spec|
         logger(Logger::DEBUG) { "#{spec[:qualified_hostnames][:mgmt]} can be moved from #{@source_host.fqdn} to #{host}" }
@@ -46,20 +56,8 @@ class Support::LiveMigrator
     end
     exit 1 unless preliminary_allocation[:failed_to_allocate].empty? || (best_effort && !preliminary_allocation[:newly_allocated].empty?)
 
-    machine_specs_that_fit = preliminary_allocation[:newly_allocated].values.flatten
-    logger(Logger::INFO) { "Will perform live VM migration of these VMs: #{machine_specs_that_fit.map { |s| s[:hostname] }.join(', ')}" }
-    machine_specs_that_fit.each { |spec| perform_live_migration(spec) }
-  end
-
-  def perform_live_migration(spec)
-    logger(Logger::INFO) { "Performing live VM migration of #{spec[:hostname]}" }
-
-    allocation_results = allocate_elsewhere([spec], false)
-    dest_host_fqdn = allocation_results[:newly_allocated].keys.first
-
-    logger(Logger::INFO) { "#{spec[:qualified_hostnames][:mgmt]} will be moved from #{@source_host.fqdn} to #{dest_host_fqdn}" }
-
-    # invoke live migration
+    allocated_vm_names = preliminary_allocation[:newly_allocated].values.flatten.map { |spec| spec[:hostname] }
+    machines.select { |machine| allocated_vm_names.include?(machine.hostname) }
   end
 
   def allocate_elsewhere(specs, best_effort)
@@ -71,6 +69,18 @@ class Support::LiveMigrator
     bail "VMs are already allocated elsewhere!?" unless allocation_results[:already_allocated].empty?
 
     allocation_results
+  end
+
+  def perform_live_migration(machine)
+    logger(Logger::INFO) { "Performing live VM migration of #{machine.hostname}" }
+
+    spec = machine.to_spec
+    allocation_results = allocate_elsewhere([spec], false)
+    dest_host_fqdn = allocation_results[:newly_allocated].keys.first
+
+    logger(Logger::INFO) { "#{spec[:qualified_hostnames][:mgmt]} will be moved from #{@source_host.fqdn} to #{dest_host_fqdn}" }
+
+    # invoke live migration
   end
 
   def bail(msg)
