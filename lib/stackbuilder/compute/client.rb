@@ -20,8 +20,8 @@ class Compute::Client
         [hv[:sender], hv[:data].merge(:domains => domains)]
       end
     end
-    fail "libvirt - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-      "(#{libvirt_response.map { |x| x[0] }.join(', ')})" unless hosts.size == libvirt_response.size
+    fail "libvirt - not all compute nodes (#{hosts.join(', ')}) responded -- missing responses from " \
+      "(#{(hosts - libvirt_response.map { |x| x[0] }).join(', ')})" unless hosts.size == libvirt_response.size
 
     response_hash = Hash[libvirt_response]
 
@@ -44,8 +44,8 @@ class Compute::Client
       end
       storage_response_hash = Hash[storage_response]
 
-      fail "storage - not all compute nodes (#{hosts.join(', ')}) responded -- got responses from " \
-        "(#{storage_response.map { |x| x[0] }.join(', ')})" unless hosts.size == storage_response.size
+      fail "storage - not all compute nodes (#{hosts.join(', ')}) responded -- missing responses from " \
+        "(#{(hosts - storage_response.map { |x| x[0] }).join(', ')})" unless hosts.size == storage_response.size
 
       response_hash.each { |fqdn, attr| response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
     end
