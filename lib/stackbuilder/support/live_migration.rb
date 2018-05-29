@@ -26,24 +26,25 @@ class Support::LiveMigrator
     unless failed_vm_names.empty?
       level = best_effort ? Logger::WARN : Logger::FATAL
       logger(level) { "Some VMs have out-of-date definitions and need re-provisioning: #{failed_vm_names.join(', ')}" }
-      exit 1 unless best_effort
+      exit 1 unless best_effort && !successful_vm_names.empty?
     end
 
     logger(Logger::INFO) { "Will reallocate these VMs: #{successful_vm_names.join(', ')}" }
 
     safe_machines = machines.select { |machine| successful_vm_names.include?(machine.hostname) }
 
-    preliminary_allocation = allocate_elsewhere(safe_machines.map(&:to_spec), best_effort)
-    preliminary_allocation[:failed_to_allocate].each do |spec, reason|
-      logger(Logger::WARN) { "#{spec[:qualified_hostnames][:mgmt]} can't be moved from #{@source_host.fqdn} due to lack of capacity" }
-      logger(Logger::DEBUG) { reason }
-    end
-
+    preliminary_allocation = allocate_elsewhere(safe_machines.map(&:to_spec), true)
     preliminary_allocation[:newly_allocated].each do |host, allocated_specs|
       allocated_specs.each do |spec|
         logger(Logger::DEBUG) { "#{spec[:qualified_hostnames][:mgmt]} can be moved from #{@source_host.fqdn} to #{host}" }
       end
     end
+    preliminary_allocation[:failed_to_allocate].each do |spec, reason|
+      level = best_effort ? Logger::WARN : Logger::FATAL
+      logger(level) { "#{spec[:qualified_hostnames][:mgmt]} can't be moved from #{@source_host.fqdn} due to lack of capacity" }
+      logger(best_effort ? Logger::DEBUG : Logger::ERROR) { reason }
+    end
+    exit 1 unless preliminary_allocation[:failed_to_allocate].empty? || (best_effort && !preliminary_allocation[:newly_allocated].empty?)
 
     machine_specs_that_fit = preliminary_allocation[:newly_allocated].values.flatten
     logger(Logger::INFO) { "Will perform live VM migration of these VMs: #{machine_specs_that_fit.map { |s| s[:hostname] }.join(', ')}" }
