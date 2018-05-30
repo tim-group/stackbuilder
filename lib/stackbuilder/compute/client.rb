@@ -69,12 +69,12 @@ class Compute::Client
     invoke :clean, specs, :timeout => 15 * 60, :fabric => fabric
   end
 
-  def add_cnames(host, spec)
-    invoke :add_cnames, spec, :timeout => 15 * 60, :nodes => [host]
+  def add_cnames(host, specs)
+    invoke :add_cnames, specs, :timeout => 15 * 60, :nodes => [host]
   end
 
-  def remove_cnames(host, spec)
-    invoke :remove_cnames, spec, :timeout => 15 * 60, :nodes => [host]
+  def remove_cnames(host, specs)
+    invoke :remove_cnames, specs, :timeout => 15 * 60, :nodes => [host]
   end
 
   def check_vm_definitions(host, specs)
