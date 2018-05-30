@@ -79,9 +79,13 @@ class Support::LiveMigrator
     allocation_results = allocate_elsewhere([spec], false)
     dest_host_fqdn = allocation_results[:newly_allocated].keys.first
 
-    logger(Logger::INFO) { "#{spec[:qualified_hostnames][:mgmt]} will be moved from #{@source_host.fqdn} to #{dest_host_fqdn}" }
+    logger(Logger::INFO) { "#{machine.mgmt_fqdn} will be moved from #{@source_host.fqdn} to #{dest_host_fqdn}" }
 
-    # invoke live migration
+    @factory.compute_controller.enable_live_migration(@source_host.fqdn, dest_host_fqdn)
+
+    # do live migration here
+
+    @factory.compute_controller.disable_live_migration(@source_host.fqdn, dest_host_fqdn)
   end
 
   def bail(msg)

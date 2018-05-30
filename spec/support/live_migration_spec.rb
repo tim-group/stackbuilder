@@ -11,7 +11,7 @@ describe Support::LiveMigrator do
     @stacks_factory = double("stacks_factory")
     policies = Stacks::Factory.new.policies
     storage = { :used => '1.0' }
-    @source_host = StackBuilder::Allocator::Host.new("h1", :policies => policies, :storage => storage)
+    @source_host = StackBuilder::Allocator::Host.new("source_host", :policies => policies, :storage => storage)
     @live_migrator = Support::LiveMigrator.new(@stacks_factory, @source_host)
     @test_env = new_environment('env', :primary_site => 'oy')
   end
@@ -52,6 +52,12 @@ describe Support::LiveMigrator do
       :failed_to_allocate => {}
     )
 
+    compute_controller = spy("compute_controller")
+    allow(@stacks_factory).to receive(:compute_controller).and_return(compute_controller)
+
     lambda { @live_migrator.move(@test_machine1) }.should_not raise_error SystemExit
+
+    expect(compute_controller).to have_received(:enable_live_migration).with("source_host", "destination_host")
+    expect(compute_controller).to have_received(:disable_live_migration).with("source_host", "destination_host")
   end
 end

@@ -81,6 +81,14 @@ class Compute::Client
     invoke :check_definition, specs, :timeout => 15 * 60, :nodes => [host]
   end
 
+  def enable_live_migration(source_host_fqdn, dest_host_fqdn)
+    manage_live_migration(source_host_fqdn, dest_host_fqdn, true)
+  end
+
+  def disable_live_migration(source_host_fqdn, dest_host_fqdn)
+    manage_live_migration(source_host_fqdn, dest_host_fqdn, false)
+  end
+
   private
 
   def discover_compute_nodes(fabric)
@@ -104,6 +112,63 @@ class Compute::Client
 
         [node.results[:sender], node.results[:data]]
       end
+    end
+  end
+
+  def manage_live_migration(source_host_fqdn, dest_host_fqdn, enable)
+    logger(Logger::INFO) { "#{enable ? 'En' : 'Dis'}abling live migration capability from #{source_host_fqdn} to #{dest_host_fqdn}" }
+
+    action = enable ? "enable_live_migration" : "disable_live_migration"
+    responses = []
+    responses += mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+      mco.send(action, :other_host => dest_host_fqdn, :direction => 'outbound')
+    end
+    responses += mco_client("computenode", :nodes => [dest_host_fqdn]) do |mco|
+      mco.send(action, :other_host => source_host_fqdn, :direction => 'inbound')
+    end
+    responses.each do |response|
+      success = response[:statuscode] == 0
+      level = success ? Logger::DEBUG : Logger::ERROR
+      logger(level) { "#{response[:sender]} = #{success ? 'OK' : 'Failed'}: #{response[:statusmsg]}" }
+    end
+    fail "Failed to enable live migration on hosts." if responses.select { |r| r[:statuscode] == 0 }.size < 2
+
+    run_puppet_on([source_host_fqdn, dest_host_fqdn])
+  end
+
+  def run_puppet_on(hosts)
+    logger(Logger::INFO) { "Triggering puppet runs on #{hosts.join(', ')}." }
+
+    results = mco_client("puppetng", :nodes => hosts) do |mco|
+      run_id = "live_migration_#{Time.now.to_i}"
+      responses = mco.run(:runid => run_id)
+      return responses if responses.select { |r| r[:statuscode] == 0 }.size < hosts.size
+
+      loop do
+        responses = mco.check_run(:runid => run_id)
+        finished_hosts = responses.select { |r| r[:statuscode] == 0 && r[:data][:state] != 'waiting' && r[:data][:state] != 'running' }
+                                  .map { |r| r[:sender] }
+        break if finished_hosts.size == hosts.size
+        logger(Logger::DEBUG) { "Waiting for puppet runs to complete on #{(hosts - finished_hosts).join(', ')}." }
+        sleep 5
+      end
+
+      responses
+    end
+
+    logger(Logger::INFO) { "RESULT #{results}" }
+
+    hosts_with_results = results.reject { |r| r[:data][:state].nil? }.map { |r| r[:sender] }
+    failed_to_trigger_on = hosts - hosts_with_results
+    unless failed_to_trigger_on.empty?
+      logger(Logger::FATAL) { "Failed to trigger puppet on #{failed_to_trigger_on.join(', ')}" }
+      fail "puppet runs could not be triggered"
+    end
+
+    failed_runs = results.reject {|r| r[:data][:state] == 'success'}
+    unless failed_runs.empty?
+      failed_runs.each { |run| logger(Logger::FATAL) { "Puppet run failed on #{run[:sender]}:\n  #{run[:data][:errors].join("\n  ")}" } }
+      fail "puppet runs failed"
     end
   end
 
