@@ -78,14 +78,16 @@ class Support::LiveMigrator
     spec = machine.to_spec(true)
     allocation_results = allocate_elsewhere([spec], false)
     dest_host_fqdn = allocation_results[:newly_allocated].keys.first
+    source_host_fqdn = @source_host.fqdn
 
-    logger(Logger::INFO) { "#{machine.mgmt_fqdn} will be moved from #{@source_host.fqdn} to #{dest_host_fqdn}" }
+    logger(Logger::INFO) { "#{machine.mgmt_fqdn} will be moved from #{source_host_fqdn} to #{dest_host_fqdn}" }
 
-    @factory.compute_node_client.enable_live_migration(@source_host.fqdn, dest_host_fqdn)
-
-    # do live migration here
-
-    @factory.compute_node_client.disable_live_migration(@source_host.fqdn, dest_host_fqdn)
+    @factory.compute_node_client.enable_live_migration(source_host_fqdn, dest_host_fqdn)
+    @factory.compute_node_client.create_storage(dest_host_fqdn, [spec])
+    @factory.compute_node_client.live_migrate_vm(source_host_fqdn, dest_host_fqdn, machine.hostname)
+    # check migrated vm
+    # destroy old vm
+    @factory.compute_node_client.disable_live_migration(source_host_fqdn, dest_host_fqdn)
   end
 
   def bail(msg)

@@ -81,12 +81,20 @@ class Compute::Client
     invoke :check_definition, specs, :timeout => 15 * 60, :nodes => [host]
   end
 
+  def create_storage(host, specs)
+    invoke :create_storage, specs, :timeout => 15 * 60, :nodes => [host]
+  end
+
   def enable_live_migration(source_host_fqdn, dest_host_fqdn)
     manage_live_migration(source_host_fqdn, dest_host_fqdn, true)
   end
 
   def disable_live_migration(source_host_fqdn, dest_host_fqdn)
     manage_live_migration(source_host_fqdn, dest_host_fqdn, false)
+  end
+
+  def live_migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
+    migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
   end
 
   private
@@ -135,6 +143,14 @@ class Compute::Client
 
     tags = enable ? ["live_migration_setup"] : ["purge_unmanaged_firewall_rules"]
     run_puppet_on([source_host_fqdn, dest_host_fqdn], tags)
+  end
+
+  def migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
+    responses = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+      mco.live_migrate_vm(:other_host => dest_host_fqdn, :vm_name => vm_name)
+    end
+    fail "no response from live migration mco call" unless responses.size == 1
+    fail "failed to perform live migration" unless responses.first[:statuscode] == 0
   end
 
   def run_puppet_on(hosts, tags = [])

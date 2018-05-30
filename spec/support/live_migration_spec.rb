@@ -58,6 +58,8 @@ describe Support::LiveMigrator do
     lambda { @live_migrator.move(@test_machine1) }.should_not raise_error SystemExit
 
     expect(compute_node_client).to have_received(:enable_live_migration).with("source_host", "destination_host")
+    expect(compute_node_client).to have_received(:create_storage).with("destination_host", [@test_machine1.to_spec])
+    expect(compute_node_client).to have_received(:live_migrate_vm).with("source_host", "destination_host", @test_machine1.hostname)
     expect(compute_node_client).to have_received(:disable_live_migration).with("source_host", "destination_host")
   end
 end
