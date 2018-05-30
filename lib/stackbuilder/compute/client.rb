@@ -133,15 +133,16 @@ class Compute::Client
     end
     fail "Failed to enable live migration on hosts." if responses.count { |r| r[:statuscode] == 0 } < 2
 
-    run_puppet_on([source_host_fqdn, dest_host_fqdn])
+    tags = enable ? ["live_migration_setup"] : ["purge_unmanaged_firewall_rules"]
+    run_puppet_on([source_host_fqdn, dest_host_fqdn], tags)
   end
 
-  def run_puppet_on(hosts)
+  def run_puppet_on(hosts, tags = [])
     logger(Logger::INFO) { "Triggering puppet runs on #{hosts.join(', ')}." }
 
     results = mco_client("puppetng", :nodes => hosts) do |mco|
       run_id = "live_migration_#{Time.now.to_i}"
-      responses = mco.run(:runid => run_id)
+      responses = mco.run(:runid => run_id, :tags => tags.empty? ? nil : tags.join(','))
       return responses if responses.count { |r| r[:statuscode] == 0 } < hosts.size
 
       loop do
