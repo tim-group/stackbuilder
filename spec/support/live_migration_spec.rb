@@ -44,7 +44,10 @@ describe Support::LiveMigrator do
     @test_machine1 = Stacks::MachineDef.new(self, 'test1', @test_env, 'oy')
     @test_machine1.bind_to(@test_env)
 
-    allow(@stacks_factory).to receive_message_chain(:compute_node_client, :check_vm_definitions).and_return([['host', { 'env-test1' => ['success'] }]])
+    compute_node_client = spy("compute_node_client")
+    allow(@stacks_factory).to receive(:compute_node_client).and_return(compute_node_client)
+
+    allow(compute_node_client).to receive(:check_vm_definitions).and_return([['host', { 'env-test1' => ['success'] }]])
 
     allow(@stacks_factory).to receive_message_chain(:services, :allocator, :allocate).and_return(
       :already_allocated  => {},
@@ -52,12 +55,9 @@ describe Support::LiveMigrator do
       :failed_to_allocate => {}
     )
 
-    compute_controller = spy("compute_controller")
-    allow(@stacks_factory).to receive(:compute_controller).and_return(compute_controller)
-
     lambda { @live_migrator.move(@test_machine1) }.should_not raise_error SystemExit
 
-    expect(compute_controller).to have_received(:enable_live_migration).with("source_host", "destination_host")
-    expect(compute_controller).to have_received(:disable_live_migration).with("source_host", "destination_host")
+    expect(compute_node_client).to have_received(:enable_live_migration).with("source_host", "destination_host")
+    expect(compute_node_client).to have_received(:disable_live_migration).with("source_host", "destination_host")
   end
 end

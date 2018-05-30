@@ -205,14 +205,6 @@ class Compute::Controller
     allocate_and_send(:remove_cnames, all_specs, &block)
   end
 
-  def enable_live_migration(source_host_fqdn, dest_host_fqdn)
-    @compute_node_client.enable_live_migration(source_host_fqdn, dest_host_fqdn)
-  end
-
-  def disable_live_migration(source_host_fqdn, dest_host_fqdn)
-    @compute_node_client.disable_live_migration(source_host_fqdn, dest_host_fqdn)
-  end
-
   private
 
   def clean_destroyable_vms(destroyable_specs)

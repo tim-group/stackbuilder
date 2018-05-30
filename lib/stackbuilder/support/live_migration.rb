@@ -81,11 +81,11 @@ class Support::LiveMigrator
 
     logger(Logger::INFO) { "#{machine.mgmt_fqdn} will be moved from #{@source_host.fqdn} to #{dest_host_fqdn}" }
 
-    @factory.compute_controller.enable_live_migration(@source_host.fqdn, dest_host_fqdn)
+    @factory.compute_node_client.enable_live_migration(@source_host.fqdn, dest_host_fqdn)
 
     # do live migration here
 
-    @factory.compute_controller.disable_live_migration(@source_host.fqdn, dest_host_fqdn)
+    @factory.compute_node_client.disable_live_migration(@source_host.fqdn, dest_host_fqdn)
   end
 
   def bail(msg)
