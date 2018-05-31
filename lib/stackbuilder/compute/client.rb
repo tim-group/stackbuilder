@@ -152,6 +152,16 @@ class Compute::Client
     end
     fail "no response from live migration mco call" unless responses.size == 1
     fail "failed to perform live migration" unless responses.first[:statuscode] == 0
+    fail "failed to perform live migration" unless responses.first[:status] == 0
+
+    # mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+    #   loop do
+    #     check_responses = mco.check_live_vm_migration(:vm_name => vm_name)
+    #     break if check_responses.size == 1 && check_responses.first[:statuscode] == 0
+    #     logger(Logger::DEBUG) { "Waiting for live migration to complete on #{source_host_fqdn}." }
+    #     sleep 5
+    #   end
+    # end
   end
 
   def run_puppet_on(hosts, tags = [])
@@ -174,8 +184,6 @@ class Compute::Client
 
       responses
     end
-
-    logger(Logger::INFO) { "RESULT #{results}" }
 
     hosts_with_results = results.reject { |r| r[:data][:state].nil? }.map { |r| r[:sender] }
     failed_to_trigger_on = hosts - hosts_with_results
