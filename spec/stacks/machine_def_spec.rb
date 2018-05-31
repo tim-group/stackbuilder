@@ -136,21 +136,6 @@ describe Stacks::MachineDef do
     expect(machinedef.to_spec[:storage]['/'.to_sym][:persistence_options]).to be(nil)
   end
 
-  it 'should turn on persistent storage allocation when requested' do
-    env = new_environment('noenv', :primary_site => 'st', :create_persistent_storage => false)
-    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
-    machinedef.template(:precise)
-    machinedef.modify_storage(
-      '/mnt/data' => {
-        :persistent => true,
-        :type => 'data',
-        :size => '1G' })
-    machinedef.bind_to(env)
-    expect(machinedef.to_spec(true)[:storage]['/mnt/data'.to_sym][:persistence_options][:on_storage_not_found]).to eql('create_new')
-
-    expect(machinedef.to_spec(true)[:storage]['/'.to_sym][:persistence_options]).to be(nil)
-  end
-
   it 'should allow monitoring to be configured' do
     env = new_environment('noenv', :primary_site => 'st')
     machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')

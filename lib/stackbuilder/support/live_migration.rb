@@ -46,7 +46,7 @@ class Support::LiveMigrator
   end
 
   def vms_that_can_be_reallocated(machines, best_effort)
-    preliminary_allocation = allocate_elsewhere(machines.map { |m| m.to_spec(true) }, true)
+    preliminary_allocation = allocate_elsewhere(machines.map { |m| creatable_spec_for(m) }, true)
     preliminary_allocation[:newly_allocated].each do |host, allocated_specs|
       allocated_specs.each do |spec|
         logger(Logger::DEBUG) { "#{spec[:qualified_hostnames][:mgmt]} can be moved from #{@source_host.fqdn} to #{host}" }
@@ -77,7 +77,7 @@ class Support::LiveMigrator
   def perform_live_migration(machine)
     logger(Logger::INFO) { "Performing live VM migration of #{machine.hostname}" }
 
-    spec = machine.to_spec(true)
+    spec = creatable_spec_for(machine)
     allocation_results = allocate_elsewhere([spec], false)
     dest_host_fqdn = allocation_results[:newly_allocated].keys.first
     source_host_fqdn = @source_host.fqdn
@@ -90,6 +90,12 @@ class Support::LiveMigrator
     #TODO check migrated vm -- will nagios test be enough for this?
     #TODO destroy old vm -- can probably do a clean, but need to modify the spec to pretend storage is not persistent
     @factory.compute_node_client.disable_live_migration(source_host_fqdn, dest_host_fqdn)
+  end
+
+  def creatable_spec_for(machine_def)
+    spec = machine_def.to_spec
+    spec[:storage] = machine_def.turn_on_persistent_storage_creation(spec[:storage])
+    spec
   end
 
   def bail(msg)
