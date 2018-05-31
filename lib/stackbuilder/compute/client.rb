@@ -141,7 +141,8 @@ class Compute::Client
     end
     fail "Failed to enable live migration on hosts." if responses.count { |r| r[:statuscode] == 0 } < 2
 
-    tags = enable ? ["live_migration_setup"] : ["purge_unmanaged_firewall_rules"]
+    tags = ["live_migration_setup"]
+    tags << "purge_unmanaged_firewall_rules" unless enable
     run_puppet_on([source_host_fqdn, dest_host_fqdn], tags)
   end
 
