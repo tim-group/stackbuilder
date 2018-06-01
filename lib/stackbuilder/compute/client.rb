@@ -147,21 +147,25 @@ class Compute::Client
   end
 
   def migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
-    responses = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+    launch_responses = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
       mco.live_migrate_vm(:other_host => dest_host_fqdn, :vm_name => vm_name)
     end
-    fail "no response from live migration mco call" unless responses.size == 1
-    fail "failed to perform live migration" unless responses.first[:statuscode] == 0
-    fail "failed to perform live migration" unless responses.first[:status] == 0
+    fail "no response from live migration mco call" unless launch_responses.size == 1
+    fail "failed to perform live migration" unless launch_responses.first[:statuscode] == 0
+    fail "failed to perform live migration" unless launch_responses.first[:data][:state] == 'running'
 
-    # mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
-    #   loop do
-    #     check_responses = mco.check_live_vm_migration(:vm_name => vm_name)
-    #     break if check_responses.size == 1 && check_responses.first[:statuscode] == 0
-    #     logger(Logger::DEBUG) { "Waiting for live migration to complete on #{source_host_fqdn}." }
-    #     sleep 5
-    #   end
-    # end
+    completion_response = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+      chk_resps = []
+      loop do
+        chk_resps = mco.check_live_vm_migration(:vm_name => vm_name)
+        break if chk_resps.size == 1 && chk_resps.first[:statuscode] == 0 && chk_resps.first[:data][:state] != 'running'
+        logger(Logger::DEBUG) { "Waiting for live migration to complete on #{source_host_fqdn}." }
+        sleep 5
+      end
+      chk_resps.first
+    end
+
+    fail "Failed to complete live migration" unless completion_response[:data][:state] == 'successful'
   end
 
   def run_puppet_on(hosts, tags = [])
