@@ -39,7 +39,7 @@ class Support::LiveMigrator
     end
     exit 1 unless failed_vm_names.empty? || (best_effort && !successful_vm_names.empty?)
 
-    #TODO: need to thoroughly check that actual provisioned storage matches the spec too
+    # TODO: need to thoroughly check that actual provisioned storage matches the spec too
 
     logger(Logger::INFO) { "These VMs are safe to migrate: #{successful_vm_names.join(', ')}" }
     machines.select { |machine| successful_vm_names.include?(machine.hostname) }
@@ -85,10 +85,15 @@ class Support::LiveMigrator
     logger(Logger::INFO) { "#{machine.mgmt_fqdn} will be moved from #{source_host_fqdn} to #{dest_host_fqdn}" }
 
     @factory.compute_node_client.enable_live_migration(source_host_fqdn, dest_host_fqdn)
+
+    logger(Logger::INFO) { "Creating storage on #{dest_host_fqdn}" }
     @factory.compute_node_client.create_storage(dest_host_fqdn, [spec])
+
+    logger(Logger::INFO) { "Initiating migration on #{source_host_fqdn}" }
     @factory.compute_node_client.live_migrate_vm(source_host_fqdn, dest_host_fqdn, machine.hostname)
-    #TODO check migrated vm -- will nagios test be enough for this?
-    #TODO destroy old vm -- can probably do a clean, but need to modify the spec to pretend storage is not persistent
+    # TODO: check migrated vm -- will nagios test be enough for this?
+    # TODO: destroy old vm -- can probably do a clean, but need to modify the spec to pretend storage is not persistent
+
     @factory.compute_node_client.disable_live_migration(source_host_fqdn, dest_host_fqdn)
   end
 
