@@ -645,3 +645,32 @@ describe_stack 'vhosts should adopt default cert from proxy_service' do
     expect(vhost_enc['cert']).to eql 'super_cert'
   end
 end
+describe_stack 'vhost_for_lb_healthcheck_override_hack works with a hash of site to vhost' do
+  given do
+    stack "loadbalancer" do
+      loadbalancer_service do
+        self.instances = { 'st' => 1, 'bs' => 1 }
+      end
+    end
+    stack "proxyserver" do
+      proxy_service "proxy" do
+        @vhost_for_lb_healthcheck_override_hack = { 'st' => 'st.example.com', 'bs' => 'bs.example.com' }
+        self.instances = { 'st' => 1, 'bs' => 1 }
+      end
+    end
+
+    env "st", :primary_site => "st", :secondary_site => "bs" do
+      instantiate_stack "proxyserver"
+      instantiate_stack 'loadbalancer'
+    end
+  end
+
+  host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
+    vserver_enc = loadbalancer.to_enc['role::loadbalancer']["virtual_servers"]['st-proxy-vip.st.net.local']
+    expect(vserver_enc['vhost_for_healthcheck']).to eql 'st.example.com'
+  end
+  host("st-lb-001.mgmt.bs.net.local") do |loadbalancer|
+    vserver_enc = loadbalancer.to_enc['role::loadbalancer']["virtual_servers"]['st-proxy-vip.bs.net.local']
+    expect(vserver_enc['vhost_for_healthcheck']).to eql 'bs.example.com'
+  end
+end

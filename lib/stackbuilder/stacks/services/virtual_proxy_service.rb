@@ -94,7 +94,13 @@ module Stacks::Services::VirtualProxyService
   private
 
   def vhost_for_healthcheck(fabric)
-    return @vhost_for_lb_healthcheck_override_hack unless @vhost_for_lb_healthcheck_override_hack.nil?
+    unless @vhost_for_lb_healthcheck_override_hack.nil?
+      if @vhost_for_lb_healthcheck_override_hack.is_a?(Hash)
+        return @vhost_for_lb_healthcheck_override_hack[fabric]
+      else
+        return @vhost_for_lb_healthcheck_override_hack
+      end
+    end
     vhsts = @proxy_vhosts.select(&:use_for_lb_healthcheck?)
     case vhsts.length
     when 0
