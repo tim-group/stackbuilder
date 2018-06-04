@@ -97,6 +97,10 @@ class Compute::Client
     migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
   end
 
+  def clean_post_migration(source_host_fqdn, spec)
+    archive_vm(source_host_fqdn, spec)
+  end
+
   private
 
   def discover_compute_nodes(fabric)
@@ -151,8 +155,9 @@ class Compute::Client
       mco.live_migrate_vm(:other_host => dest_host_fqdn, :vm_name => vm_name)
     end
     fail "no response from live migration mco call" unless launch_responses.size == 1
-    fail "failed to perform live migration" unless launch_responses.first[:statuscode] == 0
-    fail "failed to perform live migration" unless launch_responses.first[:data][:state] == 'running'
+    response = launch_responses.first
+    fail "failed to perform live migration #{response[:statusmsg]}" unless response[:statuscode] == 0
+    fail "failed to perform live migration" unless response[:data][:state] == 'running'
 
     completion_response = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
       chk_resps = []
@@ -166,6 +171,17 @@ class Compute::Client
     end
 
     fail "Failed to complete live migration" unless completion_response[:data][:state] == 'successful'
+  end
+
+  def archive_vm(source_host_fqdn, spec)
+    responses = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+      mco.clean(:specs => [spec])
+    end
+    fail "no response from clean mco call" unless responses.size == 1
+    response = responses.first
+    fail "failed to clean vm #{response[:statusmsg]}" unless response[:statuscode] == 0
+
+    #TODO: archive persistent storage
   end
 
   def run_puppet_on(hosts, tags = [])

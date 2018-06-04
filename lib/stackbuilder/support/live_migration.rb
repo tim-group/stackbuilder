@@ -92,8 +92,10 @@ class Support::LiveMigrator
 
       logger(Logger::INFO) { "Initiating migration on #{source_host_fqdn}" }
       @factory.compute_node_client.live_migrate_vm(source_host_fqdn, dest_host_fqdn, machine.hostname)
-      # TODO: check migrated vm -- will nagios test be enough for this?
-      # TODO: destroy old vm -- can probably do a clean, but need to modify the spec to pretend storage is not persistent
+
+      # TODO: check migrated vm -- check virsh to see it is running (and disabled on other host?), and check ssh is open
+
+      @factory.compute_node_client.clean_post_migration(source_host_fqdn, spec)
     ensure
       @factory.compute_node_client.disable_live_migration(source_host_fqdn, dest_host_fqdn)
     end
