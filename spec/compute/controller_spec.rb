@@ -7,7 +7,7 @@ describe Compute::Controller do
   end
 
   it 'no hosts found' do
-    allow(@compute_node_client).to receive(:audit_hosts).and_return({})
+    allow(@compute_node_client).to receive(:audit_fabric).and_return({})
 
     specs = [
       { :hostname => "vm1" },
@@ -20,7 +20,7 @@ describe Compute::Controller do
   end
 
   it 'allocates to the local fabric' do
-    allow(@compute_node_client).to receive(:audit_hosts).and_return([])
+    allow(@compute_node_client).to receive(:audit_fabric).and_return([])
 
     specs = [{
       :hostname => "vm1",
@@ -36,10 +36,10 @@ describe Compute::Controller do
   end
 
   it 'allocates to a remote fabric' do
-    allow(@compute_node_client).to receive(:audit_hosts).with("st").
+    allow(@compute_node_client).to receive(:audit_fabric).with("st").
       and_return("st-kvm-001.mgmt.st.net.local" => { :active_hosts => [] })
 
-    allow(@compute_node_client).to receive(:audit_hosts).with("bs").
+    allow(@compute_node_client).to receive(:audit_fabric).with("bs").
       and_return("bs-kvm-001.mgmt.bs.net.local" => { :active_hosts => [] })
 
     specs = [{
@@ -60,7 +60,7 @@ describe Compute::Controller do
   end
 
   it 'doesnt allocate the same machine twice' do
-    allow(@compute_node_client).to receive(:audit_hosts).with("st").
+    allow(@compute_node_client).to receive(:audit_fabric).with("st").
       and_return("st-kvm-001.mgmt.st.net.local" => { :active_domains => [] },
                  "st-kvm-002.mgmt.st.net.local" => { :active_domains => ["vm0"] },
                  "st-kvm-003.mgmt.st.net.local" => { :active_domains => [] })
@@ -81,12 +81,12 @@ describe Compute::Controller do
   end
 
   it 'allocates by slicing specs' do
-    allow(@compute_node_client).to receive(:audit_hosts).with("st").
+    allow(@compute_node_client).to receive(:audit_fabric).with("st").
       and_return("st-kvm-001.mgmt.st.net.local" => { :active_domains => [] },
                  "st-kvm-002.mgmt.st.net.local" => { :active_domains => [] },
                  "st-kvm-003.mgmt.st.net.local" => { :active_domains => [] })
 
-    allow(@compute_node_client).to receive(:audit_hosts).with("bs").
+    allow(@compute_node_client).to receive(:audit_fabric).with("bs").
       and_return("bs-kvm-001.mgmt.bs.net.local" => { :active_domains => [] },
                  "bs-kvm-002.mgmt.bs.net.local" => { :active_domains => [] })
 
@@ -111,7 +111,7 @@ describe Compute::Controller do
   end
 
   it 'launches the vms on the allocated hosts' do
-    allow(@compute_node_client).to receive(:audit_hosts).and_return("myhost" => {})
+    allow(@compute_node_client).to receive(:audit_fabric).and_return("myhost" => {})
 
     specs = [{
       :hostname => "vm1",
@@ -127,7 +127,7 @@ describe Compute::Controller do
   end
 
   it 'machines that are already allocated should show up as that' do
-    allow(@compute_node_client).to receive(:audit_hosts).and_return("myhost" => { :active_domains => ["vm2"] })
+    allow(@compute_node_client).to receive(:audit_fabric).and_return("myhost" => { :active_domains => ["vm2"] })
 
     specs = [
       {
@@ -160,7 +160,7 @@ describe Compute::Controller do
   end
 
   it 'calls back when a launch is allocated' do
-    allow(@compute_node_client).to receive(:audit_hosts).and_return("myhost" => {})
+    allow(@compute_node_client).to receive(:audit_fabric).and_return("myhost" => {})
 
     specs = [{
       :hostname => "vm1",
@@ -235,7 +235,7 @@ describe Compute::Controller do
   end
 
   it 'calls back if any launch command failed' do
-    allow(@compute_node_client).to receive(:audit_hosts).and_return("myhost" => {})
+    allow(@compute_node_client).to receive(:audit_fabric).and_return("myhost" => {})
 
     specs = [{
       :hostname => "vm1",
@@ -257,7 +257,7 @@ describe Compute::Controller do
   end
 
   it 'unaccounted for vms raise an error when launching' do
-    allow(@compute_node_client).to receive(:audit_hosts).and_return("myhost" => {})
+    allow(@compute_node_client).to receive(:audit_fabric).and_return("myhost" => {})
 
     specs = [{
       :hostname => "vm1",

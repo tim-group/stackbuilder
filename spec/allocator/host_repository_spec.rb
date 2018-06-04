@@ -33,7 +33,7 @@ describe StackBuilder::Allocator::HostRepository do
     end
 
     preference_functions = []
-    allow(compute_node_client).to receive(:audit_hosts).and_return(result)
+    allow(compute_node_client).to receive(:audit_fabric).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
       :machine_repo => self,
@@ -65,7 +65,7 @@ describe StackBuilder::Allocator::HostRepository do
     end
 
     preference_functions = []
-    allow(compute_node_client).to receive(:audit_hosts).and_return(result)
+    allow(compute_node_client).to receive(:audit_fabric).and_return(result)
 
     host_repo = StackBuilder::Allocator::HostRepository.new(
       :machine_repo => self,

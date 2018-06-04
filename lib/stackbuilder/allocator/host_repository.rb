@@ -14,7 +14,7 @@ class StackBuilder::Allocator::HostRepository
   end
 
   def find_compute_nodes(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
-    result = @compute_node_client.audit_hosts(fabric, audit_domains, audit_storage, audit_inventory)
+    result = @compute_node_client.audit_fabric(fabric, audit_domains, audit_storage, audit_inventory)
     hosts = []
     result.each do |fqdn, attr|
       vms = []
@@ -45,7 +45,7 @@ class StackBuilder::Allocator::HostRepository
 
   def find_vms(fabric)
     result = []
-    @compute_node_client.audit_hosts(fabric, true).each do |host_fqdn, host_data|
+    @compute_node_client.audit_fabric(fabric, true).each do |host_fqdn, host_data|
       host_data[:domains].each do |vm_fqdn, vm_data|
         vm_data[:fqdn] = vm_fqdn
         vm_data[:host_fqdn] = host_fqdn

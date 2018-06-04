@@ -6,7 +6,7 @@ class Compute::Client
   include Support::MCollective
 
   # audit_domains is not enabled by default, as it takes significant time to complete
-  def audit_hosts(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
+  def audit_fabric(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
     fail "Unable to audit hosts when Fabric is nil" if fabric.nil?
     hosts = discover_compute_nodes(fabric)
     fail "unable to find any compute nodes in fabric #{fabric}" if hosts.empty?

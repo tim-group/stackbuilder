@@ -105,7 +105,7 @@ class Compute::Controller
         localhost = Socket.gethostbyname(Socket.gethostname).first
         allocation[localhost] = fspecs
       else
-        audit = @compute_node_client.audit_hosts(fabric)
+        audit = @compute_node_client.audit_fabric(fabric)
         new_allocation = Compute::Allocation.new(audit).allocate(fspecs)
         allocation = allocation.merge(new_allocation)
       end
