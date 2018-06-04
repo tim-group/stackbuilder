@@ -56,7 +56,7 @@ describe Support::LiveMigrator do
       :failed_to_allocate => {}
     )
 
-    allow(compute_node_client).to receive(:audit_hosts).with(["source_host", "destination_host"], false, false, false).and_return(
+    allow(compute_node_client).to receive(:audit_hosts).with(%w(source_host destination_host), false, false, false).and_return(
       'source_host' => { :inactive_domains => [@test_machine1.hostname] },
       'destination_host' => { :active_domains => [@test_machine1.hostname] }
     )

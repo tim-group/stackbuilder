@@ -184,7 +184,7 @@ class Compute::Client
     response = responses.first
     fail "failed to clean vm #{response[:statusmsg]}" unless response[:statuscode] == 0
 
-    #TODO: archive persistent storage
+    # TODO: archive persistent storage
   end
 
   def run_puppet_on(hosts, tags = [])

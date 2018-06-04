@@ -15,7 +15,7 @@ module Support
 
     def get_inventory(fqdns, ignore_missing = true)
       responses = mco_client("rpcutil", :nodes => fqdns) { |mco| mco.inventory }
-      failed_to_respond = fqdns - responses.map {|r| r[:sender]}
+      failed_to_respond = fqdns - responses.map { |r| r[:sender] }
       failed_to_respond.each { |fqdn| logger(ignore_missing ? Logger::WARN : Logger::ERROR) { "No inventory response from #{fqdn}" } }
       fail "Some machines did not respond to mco inventory" unless ignore_missing || failed_to_respond.empty?
 
@@ -24,9 +24,9 @@ module Support
 
       responses.map do |resp|
         [resp[:sender], {
-            :facts   => resp[:data][:facts],
-            :classes => resp[:data][:classes],
-            :agents  => resp[:data][:agents]
+          :facts   => resp[:data][:facts],
+          :classes => resp[:data][:classes],
+          :agents  => resp[:data][:agents]
         }]
       end.to_h
     end
