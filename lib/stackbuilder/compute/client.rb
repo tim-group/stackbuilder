@@ -5,13 +5,16 @@ require 'stackbuilder/support/mcollective'
 class Compute::Client
   include Support::MCollective
 
-  # audit_domains is not enabled by default, as it takes significant time to complete
   def audit_fabric(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
     fail "Unable to audit hosts when Fabric is nil" if fabric.nil?
     hosts = discover_compute_nodes(fabric)
     fail "unable to find any compute nodes in fabric #{fabric}" if hosts.empty?
+    audit_hosts(hosts, audit_domains, audit_storage, audit_inventory)
+  end
 
-    libvirt_response = mco_client("libvirt", :nodes => hosts) do |mco|
+  # audit_domains is not enabled by default, as it takes significant time to complete
+  def audit_hosts(host_fqdns, audit_domains = false, audit_storage = true, audit_inventory = true)
+    libvirt_response = mco_client("libvirt", :nodes => host_fqdns) do |mco|
       mco.hvinfo.map do |hv|
         fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
 
@@ -20,20 +23,20 @@ class Compute::Client
         [hv[:sender], hv[:data].merge(:domains => domains)]
       end
     end
-    fail "libvirt - not all compute nodes (#{hosts.join(', ')}) responded -- missing responses from " \
-      "(#{(hosts - libvirt_response.map { |x| x[0] }).join(', ')})" unless hosts.size == libvirt_response.size
+    fail "libvirt - not all compute nodes (#{host_fqdns.join(', ')}) responded -- missing responses from " \
+      "(#{(host_fqdns - libvirt_response.map { |x| x[0] }).join(', ')})" unless host_fqdns.size == libvirt_response.size
 
     response_hash = Hash[libvirt_response]
 
     if audit_inventory
-      inventory_response = get_inventory(hosts)
+      inventory_response = get_inventory(host_fqdns)
       fail "inventory - not all hosts responded -- missing responses from " \
-        "(#{(hosts - inventory_response.keys.map { |x| x[0] }).join(', ')})" unless hosts.size == inventory_response.size
+        "(#{(host_fqdns - inventory_response.keys.map { |x| x[0] }).join(', ')})" unless host_fqdns.size == inventory_response.size
       response_hash = merge_attributes_by_fqdn(response_hash, inventory_response)
     end
 
     if audit_storage
-      storage_response = mco_client("computenodestorage", :nodes => hosts) do |mco|
+      storage_response = mco_client("computenodestorage", :nodes => host_fqdns) do |mco|
         result = mco.details
         result.map do |resp|
           fail "all compute nodes must respond with a status code of 0 #{resp.pretty_inspect}" \
@@ -44,8 +47,8 @@ class Compute::Client
       end
       storage_response_hash = Hash[storage_response]
 
-      fail "storage - not all compute nodes (#{hosts.join(', ')}) responded -- missing responses from " \
-        "(#{(hosts - storage_response.map { |x| x[0] }).join(', ')})" unless hosts.size == storage_response.size
+      fail "storage - not all compute nodes (#{host_fqdns.join(', ')}) responded -- missing responses from " \
+        "(#{(host_fqdns - storage_response.map { |x| x[0] }).join(', ')})" unless host_fqdns.size == storage_response.size
 
       response_hash.each { |fqdn, attr| response_hash[fqdn] = attr.merge(storage_response_hash[fqdn]) }
     end

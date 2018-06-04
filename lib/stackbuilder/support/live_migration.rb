@@ -75,14 +75,15 @@ class Support::LiveMigrator
   end
 
   def perform_live_migration(machine)
-    logger(Logger::INFO) { "Performing live VM migration of #{machine.hostname}" }
+    vm_name = machine.hostname
+    logger(Logger::INFO) { "Performing live VM migration of #{vm_name}" }
 
     spec = creatable_spec_for(machine)
     allocation_results = allocate_elsewhere([spec], false)
     dest_host_fqdn = allocation_results[:newly_allocated].keys.first
     source_host_fqdn = @source_host.fqdn
 
-    logger(Logger::INFO) { "#{machine.mgmt_fqdn} will be moved from #{source_host_fqdn} to #{dest_host_fqdn}" }
+    logger(Logger::INFO) { "#{vm_name} will be moved from #{source_host_fqdn} to #{dest_host_fqdn}" }
 
     begin
       @factory.compute_node_client.enable_live_migration(source_host_fqdn, dest_host_fqdn)
@@ -91,9 +92,12 @@ class Support::LiveMigrator
       @factory.compute_node_client.create_storage(dest_host_fqdn, [spec])
 
       logger(Logger::INFO) { "Initiating migration on #{source_host_fqdn}" }
-      @factory.compute_node_client.live_migrate_vm(source_host_fqdn, dest_host_fqdn, machine.hostname)
+      @factory.compute_node_client.live_migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
 
-      # TODO: check migrated vm -- check virsh to see it is running (and disabled on other host?), and check ssh is open
+      host_results = @factory.compute_node_client.audit_hosts([source_host_fqdn, dest_host_fqdn], false, false, false)
+      fail "#{vm_name} not active on destination host" unless host_results[dest_host_fqdn][:active_domains].include? vm_name
+      fail "#{vm_name} not inactive on source host" unless host_results[source_host_fqdn][:inactive_domains].include? vm_name
+      # TODO: mco service status service=ssh the machine.mgmt_fqdn
 
       @factory.compute_node_client.clean_post_migration(source_host_fqdn, spec)
     ensure
