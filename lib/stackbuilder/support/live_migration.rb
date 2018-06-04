@@ -1,9 +1,11 @@
 require 'stackbuilder/support/namespace'
+require 'stackbuilder/support/mcollective_rpcutil'
 
 class Support::LiveMigrator
-  def initialize(factory, source_host)
+  def initialize(factory, source_host, rpcutil = Support::MCollectiveRpcutil.new)
     @factory = factory
     @source_host = source_host
+    @rpcutil = rpcutil
   end
 
   def move(machine)
@@ -97,7 +99,7 @@ class Support::LiveMigrator
       host_results = @factory.compute_node_client.audit_hosts([source_host_fqdn, dest_host_fqdn], false, false, false)
       fail "#{vm_name} not active on destination host" unless host_results[dest_host_fqdn][:active_domains].include? vm_name
       fail "#{vm_name} not inactive on source host" unless host_results[source_host_fqdn][:inactive_domains].include? vm_name
-      # TODO: mco service status service=ssh the machine.mgmt_fqdn
+      fail "#{vm_name} did not respond to mco ping" if @rpcutil.ping(machine.mgmt_fqdn).nil?
 
       @factory.compute_node_client.clean_post_migration(source_host_fqdn, spec)
     ensure

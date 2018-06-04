@@ -9,10 +9,11 @@ end
 describe Support::LiveMigrator do
   before do
     @stacks_factory = double("stacks_factory")
+    @rpcutil = double("rpcutil")
     policies = Stacks::Factory.new.policies
     storage = { :used => '1.0' }
     @source_host = StackBuilder::Allocator::Host.new("source_host", :policies => policies, :storage => storage)
-    @live_migrator = Support::LiveMigrator.new(@stacks_factory, @source_host)
+    @live_migrator = Support::LiveMigrator.new(@stacks_factory, @source_host, @rpcutil)
     @test_env = new_environment('env', :primary_site => 'oy')
   end
 
@@ -54,6 +55,12 @@ describe Support::LiveMigrator do
       :newly_allocated    => { 'destination_host' => [{ :hostname => 'env-test1' }] },
       :failed_to_allocate => {}
     )
+
+    allow(compute_node_client).to receive(:audit_hosts).with(["source_host", "destination_host"], false, false, false).and_return(
+      'source_host' => { :inactive_domains => [@test_machine1.hostname] },
+      'destination_host' => { :active_domains => [@test_machine1.hostname] }
+    )
+    allow(@rpcutil).to receive(:ping).with(@test_machine1.hostname).and_return(1528119341)
 
     lambda { @live_migrator.move(@test_machine1) }.should_not raise_error SystemExit
 

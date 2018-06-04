@@ -230,16 +230,8 @@ class Compute::Client
   end
 
   def get_inventory(hosts)
-    mco_client('rpcutil', :nodes => hosts) do |mco|
-      result = mco.inventory
-      result.map do |resp|
-        [resp[:sender], {
-          :facts   => resp[:data][:facts],
-          :classes => resp[:data][:classes],
-          :agents  => resp[:data][:agents]
-        }]
-      end
-    end.to_h
+    require 'stackbuilder/support/mcollective_rpcutil'
+    Support::MCollectiveRpcutil.new.get_inventory(hosts)
   end
 
   def get_libvirt_domains(hv)
