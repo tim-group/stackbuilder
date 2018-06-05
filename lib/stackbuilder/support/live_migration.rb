@@ -41,8 +41,6 @@ class Support::LiveMigrator
     end
     exit 1 unless failed_vm_names.empty? || (best_effort && !successful_vm_names.empty?)
 
-    # TODO: need to thoroughly check that actual provisioned storage matches the spec too
-
     logger(Logger::INFO) { "These VMs are safe to migrate: #{successful_vm_names.join(', ')}" }
     machines.select { |machine| successful_vm_names.include?(machine.hostname) }
   end
