@@ -177,14 +177,17 @@ class Compute::Client
   end
 
   def archive_vm(source_host_fqdn, spec)
-    responses = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
-      mco.clean(:specs => [spec])
-    end
-    fail "no response from clean mco call" unless responses.size == 1
-    response = responses.first
-    fail "failed to clean vm #{response[:statusmsg]}" unless response[:statuscode] == 0
+    mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+      responses = mco.clean(:specs => [spec])
+      fail "no response from clean mco call" unless responses.size == 1
+      response = responses.first
+      fail "failed to clean vm #{response[:statusmsg]}" unless response[:statuscode] == 0
 
-    # TODO: archive persistent storage
+      responses = mco.archive_persistent_storage(:specs => [spec])
+      fail "no response from archive_persistent_storage mco call" unless responses.size == 1
+      response = responses.first
+      fail "failed to archive persistent storage for vm #{response[:statusmsg]}" unless response[:statuscode] == 0
+    end
   end
 
   def run_puppet_on(hosts, tags = [])
