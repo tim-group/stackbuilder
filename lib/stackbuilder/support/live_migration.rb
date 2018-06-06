@@ -99,7 +99,9 @@ class Support::LiveMigrator
       fail "#{vm_name} not inactive on source host" unless host_results[source_host_fqdn][:inactive_domains].include? vm_name
       fail "#{vm_name} did not respond to mco ping" if @rpcutil.ping(machine.mgmt_fqdn).nil?
 
+      logger(Logger::INFO) { "Live migration successful, cleaning up old instance on #{source_host_fqdn}" }
       @factory.compute_node_client.clean_post_migration(source_host_fqdn, spec)
+      logger(Logger::INFO) { "Cleanup completed" }
     ensure
       @factory.compute_node_client.disable_live_migration(source_host_fqdn, dest_host_fqdn)
     end

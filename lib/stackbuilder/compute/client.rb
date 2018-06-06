@@ -178,11 +178,13 @@ class Compute::Client
 
   def archive_vm(source_host_fqdn, spec)
     mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
+      logger(Logger::INFO) { "Cleaning VM definition and transient storage" }
       responses = mco.clean(:specs => [spec])
       fail "no response from clean mco call" unless responses.size == 1
       response = responses.first
       fail "failed to clean vm #{response[:statusmsg]}" unless response[:statuscode] == 0
 
+      logger(Logger::INFO) { "Archiving persistent storage" }
       responses = mco.archive_persistent_storage(:specs => [spec])
       fail "no response from archive_persistent_storage mco call" unless responses.size == 1
       response = responses.first
