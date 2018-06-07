@@ -166,6 +166,7 @@ if File.directory?($options[:path])
     logger(Logger::FATAL) do
       "stackbuilder-config path \"#{$options[:path]}\" is not a valid git repository.\n" \
       "Please specify a valid git repository using -p <stackbuilder-config-path>\n" \
+      "Alternatively, use -c to automatically check-out stackbuilder-config\n" \
       "See --help for more information."
     end
     exit 1
@@ -174,6 +175,7 @@ else
   logger(Logger::FATAL) do
     "stackbuilder-config path \"#{$options[:path]}\" is not valid directory.\n" \
     "Please specify a valid git repository using -p <stackbuilder-config-path>\n" \
+    "Alternatively, use -c to automatically check-out stackbuilder-config\n" \
     "See --help for more information."
   end
   exit 1
