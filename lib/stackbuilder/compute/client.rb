@@ -150,7 +150,7 @@ class Compute::Client
 
     tags = ["live_migration_setup"]
     tags << "purge_unmanaged_firewall_rules" unless enable
-    run_puppet_on([source_host_fqdn, dest_host_fqdn], tags)
+    run_puppet_on([dest_host_fqdn], tags)
   end
 
   def migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
