@@ -164,10 +164,15 @@ class Compute::Client
 
     completion_response = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
       chk_resps = []
+      percentage = nil
       loop do
         chk_resps = mco.check_live_vm_migration(:vm_name => vm_name)
         break if chk_resps.size == 1 && chk_resps.first[:statuscode] == 0 && chk_resps.first[:data][:state] != 'running'
         logger(Logger::DEBUG) { "Waiting for live migration to complete on #{source_host_fqdn}." }
+        if chk_resps.first[:data][:progress_percentage] != percentage
+          percentage = chk_resps.first[:data][:progress_percentage]
+          logger(Logger::INFO) { "  #{percentage}% complete" }
+        end
         sleep 5
       end
       chk_resps.first
