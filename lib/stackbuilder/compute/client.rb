@@ -178,6 +178,7 @@ class Compute::Client
       chk_resps.first
     end
 
+    logger(Logger::FATAL) { "Live migration failed, see /var/log/live_migration/#{vm_name}-current on #{source_host_fqdn} for more info" }
     fail "Failed to complete live migration" unless completion_response[:data][:state] == 'successful'
   end
 
