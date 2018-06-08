@@ -123,7 +123,8 @@ GetoptLong.new(
   ['--quiet',           '-q', GetoptLong::NO_ARGUMENT],
   ['--checkout-config', '-c', GetoptLong::OPTIONAL_ARGUMENT],
   ['--create-persistent-storage', GetoptLong::NO_ARGUMENT],
-  ['--best-effort', GetoptLong::NO_ARGUMENT]
+  ['--best-effort', GetoptLong::NO_ARGUMENT],
+  ['--no-tmux', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -136,6 +137,8 @@ GetoptLong.new(
     $options[:quiet] -= 1
   when '--terse'
     $options[:terse] = true
+  when '--no-tmux'
+    $options[:no_tmux] = true
   when '--checkout-config'
     $options[:'checkout-config'] = (arg == '') ? 'http://git/stackbuilder-config.git' : arg
   else
@@ -198,23 +201,33 @@ end
 logger(Logger::DEBUG) { "environment \"#{environment.name}\" has #{environment.definitions.count} definitions" }
 
 commands = CMD.new(factory, environment, $options[:stack])
-if commands.cmds.include? cmd
-  logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
-  success = commands.method(cmd).call(argv)
-  # FIXME: These are all the command that simply call system and return true/false.
-  if %w(clean clean_all provision test reprovision).include? cmd
-    unless success
-      logger(Logger::FATAL) { "#{cmd} failed, check the output above" }
-      exit 1
-    end
-  end
-else
+unless commands.cmds.include? cmd
   if cmd.nil?
     logger(Logger::FATAL) { "no command specified.\nSee --help for more information." }
   else
     logger(Logger::FATAL) { "invalid command \"#{cmd}\".\nSee --help for more information." }
   end
   exit 1
+end
+
+unless ENV.has_key?('TMUX') || commands.read_cmds.include?(cmd)
+  if $options[:no_tmux]
+    logger(Logger::WARN) {"You are encouraged to run this stacks operation inside a tmux session"}
+  else
+    logger(Logger::FATAL) {"You must run this stacks operation inside a tmux session (or use --no-tmux to override)"}
+    exit 1
+  end
+end
+
+logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
+success = commands.method(cmd).call(argv)
+
+# FIXME: These are all the command that simply call system and return true/false.
+if %w(clean clean_all provision test reprovision).include? cmd
+  unless success
+    logger(Logger::FATAL) { "#{cmd} failed, check the output above" }
+    exit 1
+  end
 end
 
 exit 0

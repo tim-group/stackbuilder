@@ -17,36 +17,16 @@ require 'stackbuilder/support/live_migration'
 # long and complicated commands go to their own modules in their own files.
 class CMD
   attr_reader :cmds # this list is just a safety check
+  attr_reader :read_cmds # this list is just a safety check
+  attr_reader :write_cmds # this list is just a safety check
 
   def initialize(factory, environment, stack = nil)
     @factory = factory
     @environment = environment
     @stack = stack
-    @cmds = %w(
-      audit
-      audit_vms
-      compile
-      dependencies
-      dependents
-      diff
-      dns
-      sbdiff
-      ls
-      lsenv
-      enc
-      spec
-      clean
-      clean_all
-      launch
-      provision
-      reprovision
-      terminus
-      test
-      showvnc
-      check_definition
-      move
-      clear_host
-    )
+    @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
+    @write_cmds = %w(dns clean clean_all launch provision reprovision move clear_host)
+    @cmds = @read_cmds + @write_cmds
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
     @subscription = Subscription.new
