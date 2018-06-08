@@ -178,10 +178,10 @@ class Compute::Client
       chk_resps.first
     end
 
-    if completion_response[:data][:state] != 'successful'
-      logger(Logger::FATAL) { "Live migration failed, see /var/log/live_migration/#{vm_name}-current on #{source_host_fqdn} for more info" }
-      fail "Failed to complete live migration"
-    end
+    return if completion_response[:data][:state] == 'successful'
+
+    logger(Logger::FATAL) { "Live migration failed, see /var/log/live_migration/#{vm_name}-current on #{source_host_fqdn} for more info" }
+    fail "Failed to complete live migration"
   end
 
   def archive_vm(source_host_fqdn, spec)
