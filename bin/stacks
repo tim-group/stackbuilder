@@ -210,11 +210,11 @@ unless commands.cmds.include? cmd
   exit 1
 end
 
-unless ENV.has_key?('TMUX') || commands.read_cmds.include?(cmd)
+unless ENV.key?('TMUX') || commands.read_cmds.include?(cmd)
   if $options[:no_tmux]
-    logger(Logger::WARN) {"You are encouraged to run this stacks operation inside a tmux session"}
+    logger(Logger::WARN) { "You are encouraged to run this stacks operation inside a tmux session" }
   else
-    logger(Logger::FATAL) {"You must run this stacks operation inside a tmux session (or use --no-tmux to override)"}
+    logger(Logger::FATAL) { "You must run this stacks operation inside a tmux session (or use --no-tmux to override)" }
     exit 1
   end
 end
