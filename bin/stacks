@@ -210,7 +210,9 @@ unless commands.cmds.include? cmd
   exit 1
 end
 
-unless ENV.key?('TMUX') || commands.read_cmds.include?(cmd)
+in_tmux = ENV.key?('TMUX')
+in_ssh = ENV.key?('SSH_CLIENT') || ENV.key?('SSH_TTY')
+if commands.write_cmds.include?(cmd) && in_ssh && !in_tmux
   if $options[:no_tmux]
     logger(Logger::WARN) { "You are encouraged to run this stacks operation inside a tmux session" }
   else
