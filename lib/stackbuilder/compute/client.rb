@@ -164,17 +164,19 @@ class Compute::Client
 
     completion_response = mco_client("computenode", :nodes => [source_host_fqdn]) do |mco|
       chk_resps = []
-      percentage = nil
       loop do
         chk_resps = mco.check_live_vm_migration(:vm_name => vm_name)
         break if chk_resps.size == 1 && chk_resps.first[:statuscode] == 0 && chk_resps.first[:data][:state] != 'running'
-        logger(Logger::DEBUG) { "Waiting for live migration to complete on #{source_host_fqdn}." }
-        if chk_resps.first[:data][:progress_percentage] != percentage
-          percentage = chk_resps.first[:data][:progress_percentage]
-          logger(Logger::INFO) { "  #{percentage}% complete" }
+        percentage = chk_resps.first[:data][:progress_percentage]
+        message =  "  #{percentage.nil? ? 0 : percentage}% complete"
+        dji = chk_resps.first[:data][:domjobinfo]
+        unless dji.nil? || dji.empty?
+          message += " (#{format_dji(dji, 'memory')} RAM; #{format_dji(dji, 'file')} disk)"
         end
+        STDERR.printf("%s\r", message.ljust(60))
         sleep 5
       end
+      STDERR.printf("%s\n", "live migration finished".ljust(60))
       chk_resps.first
     end
 
@@ -182,6 +184,35 @@ class Compute::Client
 
     logger(Logger::FATAL) { "Live migration failed, see /var/log/live_migration/#{vm_name}-current on #{source_host_fqdn} for more info" }
     fail "Failed to complete live migration"
+  end
+
+  def format_dji(domjobinfo, item_name)
+    processed = domjobinfo[(item_name + "_processed").to_sym]
+    total = domjobinfo[(item_name + "_total").to_sym]
+    return "?" if processed.nil? || total.nil?
+
+    processed_val_and_unit = processed.split(" ", 2)
+    total_val_and_unit = total.split(" ", 2)
+    return "?" if processed_val_and_unit.size == 1 || total_val_and_unit.size == 1
+
+    processed_val = processed_val_and_unit[0].to_f
+    total_val = total_val_and_unit[0].to_f
+    return "?" if total_val == 0.0
+
+    if processed_val_and_unit[1] != total_val_and_unit[1]
+      processed_val = convert_val(processed_val, processed_val_and_unit[1].to_sym, total_val_and_unit[1].to_sym)
+    end
+
+    percentage = processed_val / total_val * 100.0
+    sprintf("%.0f%% of %.0f%s", percentage, total_val, total_val_and_unit[1])
+  end
+
+  def convert_val(val, from_unit, to_unit)
+    units = [:B, :KiB, :MiB, :GiB, :TiB]
+    i1 = units.find_index(from_unit)
+    i2 = units.find_index(to_unit)
+    return 0.0 if i2.nil? || i1.nil?
+    val * 1024.0 ** (i1 - i2)
   end
 
   def archive_vm(source_host_fqdn, spec)
