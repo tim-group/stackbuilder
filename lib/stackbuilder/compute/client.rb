@@ -212,7 +212,7 @@ class Compute::Client
     i1 = units.find_index(from_unit)
     i2 = units.find_index(to_unit)
     return 0.0 if i2.nil? || i1.nil?
-    val * 1024.0 ** (i1 - i2)
+    val * 1024.0**(i1 - i2)
   end
 
   def archive_vm(source_host_fqdn, spec)
