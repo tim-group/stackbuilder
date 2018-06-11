@@ -1,4 +1,4 @@
-require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/support/namespace'
 require 'stackbuilder/support/mcollective'
 
 module Support
