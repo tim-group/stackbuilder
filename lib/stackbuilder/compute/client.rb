@@ -232,38 +232,8 @@ class Compute::Client
   end
 
   def run_puppet_on(hosts, tags = [])
-    logger(Logger::INFO) { "Triggering puppet runs on #{hosts.join(', ')}." }
-
-    results = mco_client("puppetng", :nodes => hosts) do |mco|
-      run_id = "live_migration_#{Time.now.to_i}"
-      responses = mco.run(:runid => run_id, :tags => tags.empty? ? nil : tags.join(','))
-      return responses if responses.count { |r| r[:statuscode] == 0 } < hosts.size
-
-      loop do
-        responses = mco.check_run(:runid => run_id)
-        finished_hosts = responses.
-                         select { |r| r[:statuscode] == 0 && r[:data][:state] != 'waiting' && r[:data][:state] != 'running' }.
-                         map { |r| r[:sender] }
-        break if finished_hosts.size == hosts.size
-        logger(Logger::DEBUG) { "Waiting for puppet runs to complete on #{(hosts - finished_hosts).join(', ')}." }
-        sleep 5
-      end
-
-      responses
-    end
-
-    hosts_with_results = results.reject { |r| r[:data][:state].nil? }.map { |r| r[:sender] }
-    failed_to_trigger_on = hosts - hosts_with_results
-    unless failed_to_trigger_on.empty?
-      logger(Logger::FATAL) { "Failed to trigger puppet on #{failed_to_trigger_on.join(', ')}" }
-      fail "puppet runs could not be triggered"
-    end
-
-    failed_runs = results.reject { |r| r[:data][:state] == 'success' }
-    return if failed_runs.empty?
-
-    failed_runs.each { |run| logger(Logger::FATAL) { "Puppet run failed on #{run[:sender]}:\n  #{run[:data][:errors].join("\n  ")}" } }
-    fail "puppet runs failed"
+    require 'stackbuilder/support/mcollective_puppetng'
+    Support::MCollectivePuppetng.new.run_puppet(hosts, tags)
   end
 
   def merge_attributes_by_fqdn(source_hash, target_hash)
