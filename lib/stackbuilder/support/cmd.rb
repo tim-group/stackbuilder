@@ -300,7 +300,7 @@ class CMD
       exit 1
     end
 
-    hostname = argv[0]
+    hostname = argv[0].partition('.').first
     fabric = hostname.partition('-').first
     host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.find { |h| h.hostname == hostname }
 
