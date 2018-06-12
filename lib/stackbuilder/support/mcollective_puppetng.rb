@@ -16,8 +16,8 @@ module Support
         loop do
           responses = mco.check_run(:runid => run_id)
           finished_hosts = responses.
-              select { |r| r[:statuscode] == 0 && r[:data][:state] != 'waiting' && r[:data][:state] != 'running' }.
-              map { |r| r[:sender] }
+                           select { |r| r[:statuscode] == 0 && r[:data][:state] != 'waiting' && r[:data][:state] != 'running' }.
+                           map { |r| r[:sender] }
           break if finished_hosts.size == host_fqdns.size
           logger(Logger::DEBUG) { "Waiting for puppet runs to complete on #{(host_fqdns - finished_hosts).join(', ')}." }
           sleep 5
