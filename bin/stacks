@@ -48,7 +48,7 @@ Options:
   The list of commands follows. Optional and mandatory options are outlined.
 
     audit [-e]                show the state of the KVM host machines in the primary site of the specified env
-    audit_vms [-e]            show the state of the VMs in the primary site of the specified env
+    audit_vms [-e] [HOST]     show the state of the VMs in the primary site of the specified env (or specified host)
     check_definition [-e] -s  verify that the VMs of a provisioned stack match their corresponding VM definitions
     clean [-e] -s             shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
     clean_all [-e] -s         shuts down and removes a stack, puppet, nagios and mongo

@@ -1,11 +1,31 @@
 module CMDAuditVms
-  def audit_vms(_argv)
-    site = @environment.options[:primary_site]
-    logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
+  def audit_vms(argv)
+    if argv.size == 0
+      site = @environment.options[:primary_site]
+      logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
 
+      raw_actual = @factory.host_repository.find_fabric_vms(site)
+      raw_specified = get_specified_vms(site)
+    else
+      host_fqdn = argv[0]
+      unless host_fqdn.include?('.')
+        logger(Logger::FATAL) { "You must specify a host fqdn" }
+        exit 1
+      end
+
+      raw_actual = @factory.host_repository.find_host_vms(host_fqdn)
+      raw_specified = raw_actual.map { |vm| @factory.inventory.find(vm[:fqdn]) }
+    end
+
+    compile_vm_audit(raw_actual, raw_specified)
+  end
+
+  private
+
+  def compile_vm_audit(raw_actual, raw_specified)
     vms = {}
 
-    @factory.host_repository.find_vms(site).each { |vm| vms[vm[:fqdn]] = { :vm_name => vm[:fqdn].partition('.').first, :actual => vm } }
+    raw_actual.each { |vm| vms[vm[:fqdn]] = { :vm_name => vm[:fqdn].partition('.').first, :actual => vm } }
 
     vms.values.group_by { |data| data[:actual][:host_fqdn] }.each do |host_fqdn, host_vms|
       vm_fqdn_by_vm_name = host_vms.map { |data| [data[:vm_name], data[:actual][:fqdn]] }.to_h
@@ -19,7 +39,7 @@ module CMDAuditVms
       end
     end
 
-    get_specified_vms(site).each do |machine_def|
+    raw_specified.each do |machine_def|
       fqdn = machine_def.mgmt_fqdn
       vms[fqdn] = {} if vms[fqdn].nil?
       vms[fqdn].merge!(:vm_name => machine_def.hostname, :spec => machine_def.to_spec, :spec_os => machine_def.lsbdistcodename)
@@ -28,8 +48,6 @@ module CMDAuditVms
     vms_stats = vms.map { |fqdn, vm| vm_stats_for(fqdn, vm) }
     render_vm_stats(vms_stats)
   end
-
-  private
 
   def get_specified_vms(site)
     specified_vms = []

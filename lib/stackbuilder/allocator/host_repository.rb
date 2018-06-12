@@ -43,12 +43,24 @@ class StackBuilder::Allocator::HostRepository
     StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
   end
 
-  def find_vms(fabric)
+  def find_fabric_vms(fabric)
     result = []
     @compute_node_client.audit_fabric(fabric, true).each do |host_fqdn, host_data|
       host_data[:domains].each do |vm_fqdn, vm_data|
         vm_data[:fqdn] = vm_fqdn
         vm_data[:host_fqdn] = host_fqdn
+        result.push(vm_data)
+      end
+    end
+    result
+  end
+
+  def find_host_vms(host_fqdn)
+    result = []
+    @compute_node_client.audit_hosts([host_fqdn], true).each do |h_fqdn, host_data|
+      host_data[:domains].each do |vm_fqdn, vm_data|
+        vm_data[:fqdn] = vm_fqdn
+        vm_data[:host_fqdn] = h_fqdn
         result.push(vm_data)
       end
     end
