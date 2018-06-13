@@ -12,7 +12,8 @@ module CMDProvision
       fail("Puppet runs have timed out or failed")
     end
 
-    do_deploy_applications(machine_def)
+    require 'stackbuilder/support/app_deployer'
+    Support::AppDeployer.new.deploy_applications(machine_def)
   end
 
   def do_launch(services, machine_def)

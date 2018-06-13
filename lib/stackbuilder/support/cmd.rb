@@ -9,7 +9,6 @@ require 'stackbuilder/support/cmd_puppet'
 require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
-require 'stackbuilder/support/cmd_deploy'
 require 'stackbuilder/support/live_migration'
 
 # all public methods in this class are valid stacks commands.
@@ -42,7 +41,6 @@ class CMD
   include CMDPuppet
   include CMDClean
   include CMDProvision
-  include CMDDeploy
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
