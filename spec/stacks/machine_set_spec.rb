@@ -9,6 +9,10 @@ describe 'Stacks::MachineSet' do
           self.instances = 1
           @enable_secondary_site = true
         end
+        app_service 'dumbapp' do
+          self.instances = 1
+          @enable_secondary_site = false
+        end
       end
 
       env 'env', :primary_site => 'mars', :secondary_site => 'jupiter' do
@@ -18,6 +22,13 @@ describe 'Stacks::MachineSet' do
     it_stack 'should contain 1 server in each site' do |stack|
       expect(stack).to have_host('env-fundsapp-001.mgmt.mars.net.local')
       expect(stack).to have_host('env-fundsapp-001.mgmt.jupiter.net.local')
+      expect(stack).to have_host('env-dumbapp-001.mgmt.mars.net.local')
+      expect(stack).not_to have_host('env-dumbapp-001.mgmt.jupiter.net.local')
+    end
+    it_stack 'should put secondary site server in a different cluster' do |stack|
+      expect(stack.find("env-fundsapp-001.mgmt.mars.net.local").to_enc['role::http_app']['cluster']).to eql('env-fundsapp-mars')
+      expect(stack.find("env-fundsapp-001.mgmt.jupiter.net.local").to_enc['role::http_app']['cluster']).to eql('env-fundsapp-jupiter')
+      expect(stack.find("env-dumbapp-001.mgmt.mars.net.local").to_enc['role::http_app']['cluster']).to eql('env-dumbapp')
     end
   end
   describe_stack 'provides an allowed host mechanism that can be used by app_services' do

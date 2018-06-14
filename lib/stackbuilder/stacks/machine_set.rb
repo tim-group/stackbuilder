@@ -216,7 +216,7 @@ class Stacks::MachineSet
     server = @type.new(self, vm_name, environment, site, role)
     server.group = groups[(index - 1) % groups.size] if server.respond_to?(:group)
     if server.respond_to?(:availability_group)
-      server.availability_group = availability_group(environment)
+      server.availability_group = availability_group(environment) + (@enable_secondary_site ? "-#{site}" : '')
     end
     server.index = index
     @definitions[random_name] = server
