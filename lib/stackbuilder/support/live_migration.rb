@@ -88,10 +88,10 @@ class Support::LiveMigrator
     begin
       @factory.compute_node_client.enable_live_migration(source_host_fqdn, dest_host_fqdn)
 
-      logger(Logger::INFO) { "Creating storage on #{dest_host_fqdn}" }
+      logger(Logger::INFO) { "Creating storage for #{vm_name} on #{dest_host_fqdn}" }
       @factory.compute_node_client.create_storage(dest_host_fqdn, [spec])
 
-      logger(Logger::INFO) { "Initiating migration on #{source_host_fqdn}" }
+      logger(Logger::INFO) { "Initiating migration of #{vm_name} on #{source_host_fqdn}" }
       @factory.compute_node_client.live_migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
 
       host_results = @factory.compute_node_client.audit_hosts([source_host_fqdn, dest_host_fqdn], false, false, false)
@@ -99,7 +99,7 @@ class Support::LiveMigrator
       fail "#{vm_name} not inactive on source host" unless host_results[source_host_fqdn][:inactive_domains].include? vm_name
       fail "#{vm_name} did not respond to mco ping" if @rpcutil.ping(machine.mgmt_fqdn).nil?
 
-      logger(Logger::INFO) { "Live migration successful, cleaning up old instance on #{source_host_fqdn}" }
+      logger(Logger::INFO) { "Live migration of #{vm_name} successful, cleaning up old instance on #{source_host_fqdn}" }
       @factory.compute_node_client.clean_post_migration(source_host_fqdn, spec)
       logger(Logger::INFO) { "Cleanup completed" }
     ensure
