@@ -5,12 +5,14 @@ module Support
   class MCollectiveRpcutil
     include Support::MCollective
 
-    def ping(fqdn)
-      responses = mco_client("rpcutil", :nodes => [fqdn]) { |mco| mco.ping }
-      fail "no response from mco ping" unless responses.size == 1
-      response = responses.first
-      fail "failed to mco ping #{vm_fqdn}: #{response[:statusmsg]}" unless response[:statuscode] == 0
-      response[:data][:pong]
+    def ping(fqdn, attempts = 3)
+      rsps = mco_client("rpcutil", :timeout => 30, :nodes => [fqdn]) { |mco| mco.ping }
+
+      return ping(fqdn, attempts - 1) if attempts > 1 && (rsps.size != 1 || rsps[0][:statuscode] != 0 || rsps[0][:data][:pong].nil?)
+
+      fail "no response to mco ping from #{fqdn}" unless rsps.size == 1
+      fail "failed to mco ping #{fqdn}: #{rsps[0][:statusmsg]}" unless rsps[0][:statuscode] == 0
+      rsps[0][:data][:pong]
     end
 
     def get_inventory(fqdns, ignore_missing = true)
