@@ -143,7 +143,8 @@ module CMDAuditVms
 
   def print_result(width, value, is_good)
     colour = is_good ? "[0;32m" : "[0;31m"
-    printf("#{colour}%#{width}s[0m", value.nil? ? 'X' : value)
+    format = $stdout.isatty ? "#{colour}%#{width}s[0m" : "%#{width}s"
+    printf(format, value.nil? ? 'X' : value)
   end
 
   def happy_days(daystring)
