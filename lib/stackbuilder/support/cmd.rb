@@ -201,11 +201,13 @@ class CMD
   def clean(_argv)
     machine_def = check_and_get_stack
     do_clean(machine_def)
+    0
   end
 
   def clean_all(_argv)
     machine_def = check_and_get_stack
     do_clean(machine_def, true)
+    0
   end
 
   def launch(_argv)
