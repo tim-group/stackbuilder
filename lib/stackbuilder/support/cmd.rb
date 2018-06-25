@@ -5,7 +5,7 @@ require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_audit_vms'
 require 'stackbuilder/support/cmd_ls'
-require 'stackbuilder/support/cmd_puppet'
+require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cmd_clean'
 require 'stackbuilder/support/cmd_provision'
@@ -13,7 +13,6 @@ require 'stackbuilder/support/live_migration'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
-# long and complicated commands go to their own modules in their own files.
 class CMD
   attr_reader :cmds # this list is just a safety check
   attr_reader :read_cmds # this list is just a safety check
@@ -33,12 +32,12 @@ class CMD
 
     @dns = Support::Dns.new(@factory, @core_actions)
     @nagios = Support::Nagios.new
+    @puppet = Support::Puppet.new
   end
 
   include CMDAudit
   include CMDAuditVms
   include CMDLs
-  include CMDPuppet
   include CMDClean
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
@@ -258,7 +257,7 @@ class CMD
     # prepare dependencies
     @dns.do_allocate_vips(machine_def)
     @dns.do_allocate_ips(machine_def)
-    do_puppet_run_on_dependencies(machine_def)
+    @puppet.do_puppet_run_on_dependencies(machine_def)
 
     do_provision_machine(@factory.services, machine_def)
     @nagios.do_nagios_register_new(machine_def)
@@ -406,16 +405,16 @@ class CMD
   def do_clean(machine_def, all = false)
     @nagios.nagios_schedule_downtime(machine_def)
     clean_nodes(machine_def)
-    puppet_clean(machine_def)
+    @puppet.puppet_clean(machine_def)
     clean_traces(machine_def) if all
   end
 
   def do_provision_machine(services, machine_def)
     @core_actions.get_action("launch").call(services, machine_def)
-    puppet_sign(machine_def)
-    puppet_poll_sign(machine_def)
+    @puppet.puppet_sign(machine_def)
+    @puppet.puppet_poll_sign(machine_def)
 
-    puppet_results = puppet_wait(machine_def)
+    puppet_results = @puppet.puppet_wait(machine_def)
 
     unless puppet_results.all_passed?
       logger(Logger::INFO) { "Attempting to stop mcollective on hosts whose puppet runs failed" }
