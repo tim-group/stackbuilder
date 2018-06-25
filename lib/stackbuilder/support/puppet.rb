@@ -31,7 +31,7 @@ class Support::Puppet
   end
 
   # sign outstanding Puppet certificate signing requests for these machines
-  def puppet_sign(machine_def)
+  def puppet_sign(machine_def, subscription)
     puppet_certs_to_sign = []
     machine_def.accept do |child_machine_def|
       if child_machine_def.respond_to?(:mgmt_fqdn)
@@ -43,7 +43,7 @@ class Support::Puppet
       end
     end
     start_time = Time.now
-    result = @subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
+    result = subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
     result.all.each do |vm, status|
       logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
@@ -79,7 +79,7 @@ class Support::Puppet
   end
 
   # wait for puppet to complete its run on these machines
-  def puppet_wait(machine_def)
+  def puppet_wait(machine_def, subscription)
     start_time = Time.now
     hosts = []
     machine_def.accept do |child_machine_def|
@@ -88,7 +88,7 @@ class Support::Puppet
       end
     end
 
-    run_result = @subscription.wait_for_hosts("puppet_status", hosts, 5400)
+    run_result = subscription.wait_for_hosts("puppet_status", hosts, 5400)
 
     run_result.all.each do |vm, status|
       logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }

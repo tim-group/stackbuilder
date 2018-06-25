@@ -410,10 +410,10 @@ class CMD
 
   def do_provision_machine(services, machine_def)
     @core_actions.get_action("launch").call(services, machine_def)
-    @puppet.puppet_sign(machine_def)
+    @puppet.puppet_sign(machine_def, @subscription)
     @puppet.puppet_poll_sign(machine_def)
 
-    puppet_results = @puppet.puppet_wait(machine_def)
+    puppet_results = @puppet.puppet_wait(machine_def, @subscription)
 
     unless puppet_results.all_passed?
       logger(Logger::INFO) { "Attempting to stop mcollective on hosts whose puppet runs failed" }
