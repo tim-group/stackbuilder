@@ -8,7 +8,6 @@ require 'stackbuilder/support/cmd_ls'
 require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cmd_clean'
-require 'stackbuilder/support/cmd_provision'
 require 'stackbuilder/support/live_migration'
 
 # all public methods in this class are valid stacks commands.
