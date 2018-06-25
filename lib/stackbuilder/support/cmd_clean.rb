@@ -1,12 +1,6 @@
 module CMDClean
-  def do_clean(machine_def)
-    # Note that the ordering here is important - must have killed VMs before
-    # removing their puppet cert, otherwise we have a race condition
-    clean_nodes(machine_def)
-    puppet_clean(machine_def)
-  end
 
-  def do_clean_traces(machine_def)
+  def clean_traces(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
       hosts << child_machine_def.mgmt_fqdn if child_machine_def.respond_to?(:mgmt_fqdn)
@@ -15,8 +9,6 @@ module CMDClean
       hosts.each { |fqdn| hostcleanup(fqdn, action) }
     end
   end
-
-  private
 
   def clean_nodes(machine_def)
     computecontroller = Compute::Controller.new
@@ -32,6 +24,8 @@ module CMDClean
       end
     end
   end
+
+  private
 
   # FIXME: Stolen from hostcleanup application, this does not belong here
   def status_code(status)

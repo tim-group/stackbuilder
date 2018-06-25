@@ -40,7 +40,6 @@ class CMD
   include CMDLs
   include CMDPuppet
   include CMDClean
-  include CMDProvision
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
@@ -203,20 +202,22 @@ class CMD
 
   def clean(_argv)
     machine_def = check_and_get_stack
-    @nagios.nagios_schedule_downtime(machine_def)
     do_clean(machine_def)
   end
 
   def clean_all(_argv)
     machine_def = check_and_get_stack
-    @nagios.nagios_schedule_downtime(machine_def)
-    do_clean(machine_def)
-    do_clean_traces(machine_def)
+    do_clean(machine_def, true)
   end
 
   def launch(_argv)
     machine_def = check_and_get_stack
-    do_launch(@factory.services, machine_def)
+    @core_actions.get_action("launch").call(@factory.services, machine_def)
+  end
+
+  def allocate(_argv)
+    machine_def = check_and_get_stack
+    @core_actions.get_action("allocate").call(@factory.services, machine_def)
   end
 
   def check_definition(_argv)
@@ -260,16 +261,13 @@ class CMD
     do_puppet_run_on_dependencies(machine_def)
 
     do_provision_machine(@factory.services, machine_def)
-    @nagios.nagios_cancel_downtime(machine_def)
     @nagios.do_nagios_register_new(machine_def)
   end
 
   def reprovision(_argv)
     machine_def = check_and_get_stack
-    @nagios.nagios_schedule_downtime(machine_def)
     do_clean(machine_def)
     do_provision_machine(@factory.services, machine_def)
-    @nagios.nagios_cancel_downtime(machine_def)
   end
 
   def move(_argv)
@@ -403,5 +401,32 @@ class CMD
     else
       object.dup
     end
+  end
+
+  def do_clean(machine_def, all = false)
+    @nagios.nagios_schedule_downtime(machine_def)
+    clean_nodes(machine_def)
+    puppet_clean(machine_def)
+    clean_traces(machine_def) if all
+  end
+
+  def do_provision_machine(services, machine_def)
+    @core_actions.get_action("launch").call(services, machine_def)
+    puppet_sign(machine_def)
+    puppet_poll_sign(machine_def)
+
+    puppet_results = puppet_wait(machine_def)
+
+    unless puppet_results.all_passed?
+      logger(Logger::INFO) { "Attempting to stop mcollective on hosts whose puppet runs failed" }
+      mco_client("service", :timeout => 5, :nodes => puppet_results.failed + puppet_results.unaccounted_for) do |mco|
+        mco.stop(:service => "mcollective")
+      end
+      fail("Puppet runs have timed out or failed")
+    end
+
+    require 'stackbuilder/support/app_deployer'
+    Support::AppDeployer.new.deploy_applications(machine_def)
+    @nagios.nagios_cancel_downtime(machine_def)
   end
 end
