@@ -1,8 +1,7 @@
 require 'stackbuilder/stacks/factory'
 
 # XXX probably the wrong way to do this
-class Support::MCollectivePuppetTest
-  include Support::MCollectivePuppet
+class Support::MCollectivePuppetTest < Support::MCollectivePuppet
   def initialize(callouts, mco)
     @callouts = callouts
     @mco = mco

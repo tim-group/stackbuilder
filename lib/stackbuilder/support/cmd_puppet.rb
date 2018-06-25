@@ -1,6 +1,8 @@
 require 'stackbuilder/support/mcollective_puppet'
 
 module CMDPuppet
+  @mcollective_puppet = Support::MCollectivePuppet.new
+
   def do_puppet_run_on_dependencies(machine_def)
     all_dependencies = Set.new
     machine_def.accept do |m|
@@ -26,8 +28,6 @@ module CMDPuppet
   end
 
   private
-
-  include Support::MCollectivePuppet
 
   # sign outstanding Puppet certificate signing requests for these machines
   def puppet_sign(machine_def)
@@ -61,7 +61,7 @@ module CMDPuppet
       end
     end
 
-    ca_sign(puppet_certs_to_sign) do
+    @mcollective_puppet.ca_sign(puppet_certs_to_sign) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully signed cert for #{machine}" }
       end
@@ -109,7 +109,7 @@ module CMDPuppet
       end
     end
 
-    ca_clean(puppet_certs_to_clean) do
+    @mcollective_puppet.ca_clean(puppet_certs_to_clean) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully removed cert for #{machine}" }
       end

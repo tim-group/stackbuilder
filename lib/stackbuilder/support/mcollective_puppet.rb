@@ -2,13 +2,7 @@ require 'stackbuilder/support/namespace'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/callback'
 
-class Hash
-  def hash_select(&block)
-    Hash[select(&block)]
-  end
-end
-
-module Support::MCollectivePuppet
+class Support::MCollectivePuppet
   include Support::MCollective
 
   def ca_sign(machines_fqdns, &block)
@@ -74,12 +68,12 @@ module Support::MCollectivePuppet
     callback = Support::Callback.new(&block)
 
     fates = Hash[machine_fqdns.map { |fqdn| [fqdn, "unaccounted for"] }]
-    while !(undecided = fates.hash_select { |_, v| v != "passed" && v != "failed" }).empty? &&
+    while !(undecided = hash_select(fates) { |_, v| v != "passed" && v != "failed" }).empty? &&
           !timed_out(start_time, timeout)
       old_fates = fates.clone
       undecided_statuses = puppetd_status(undecided.keys)
       fates.merge!(undecided_statuses)
-      stopped_statuses = undecided_statuses.hash_select { |_, v| v == "stopped" }
+      stopped_statuses = hash_select(undecided_statuses) { |_, v| v == "stopped" }
       stopped_results = puppetd_last_run_summary_processed(stopped_statuses.keys)
       stopped_results.sort.each do |machine_fqdn, result|
         if result == "passed"
@@ -97,13 +91,15 @@ module Support::MCollectivePuppet
       end
     end
 
-    undecided = fates.hash_select { |_, v| v != "passed" && v != "failed" }
+    undecided = hash_select(fates) { |_, v| v != "passed" && v != "failed" }
     undecided.sort.each do |machine_fqdn, result|
       callback.invoke(:timed_out, [machine_fqdn, result])
     end
 
     callback.finish
   end
+
+  private
 
   def puppetd_status(fqdns)
     puppetd_query(:status, fqdns) do |data|
@@ -168,5 +164,9 @@ module Support::MCollectivePuppet
   # factor out the clock so it's mockable in tests
   def now
     Time.now
+  end
+
+  def hash_select(hash, &block)
+    Hash[hash.select(&block)]
   end
 end
