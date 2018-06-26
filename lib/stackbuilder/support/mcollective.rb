@@ -87,6 +87,8 @@ module Support::MCollective
 
   # block can be nil
   def mco_client(name, options = {}, &block)
+    # N.B. we always fork mco clients because the mco rpc relies on global shared state, so we need to sandbox
+    # (learned this following a conversation with david)
     async_mco_client(name, options, &block).value
   end
 
