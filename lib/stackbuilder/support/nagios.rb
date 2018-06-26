@@ -63,7 +63,7 @@ end
 
 class Support::NagiosService
   def initialize(options = {})
-    @service = options[:service] || NagiosMCollective.new
+    @service = options[:service] || Support::NagiosMCollective.new
   end
 
   def schedule_downtime(machines, duration = 600, &block)
