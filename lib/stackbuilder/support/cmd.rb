@@ -7,8 +7,9 @@ require 'stackbuilder/support/audit_vms'
 require 'stackbuilder/support/env_listing'
 require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/dns'
-require 'stackbuilder/support/cmd_clean'
+require 'stackbuilder/support/cleaner'
 require 'stackbuilder/support/live_migration'
+require 'stackbuilder/support/app_deployer'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
@@ -33,8 +34,6 @@ class CMD
     @nagios = Support::Nagios.new
     @puppet = Support::Puppet.new
   end
-
-  include CMDClean
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
@@ -427,10 +426,11 @@ class CMD
   end
 
   def do_clean(machine_def, all = false)
+    cleaner = Support::Cleaner.new(@factory.compute_controller)
     @nagios.nagios_schedule_downtime(machine_def)
-    clean_nodes(machine_def)
+    cleaner.clean_nodes(machine_def)
     @puppet.puppet_clean(machine_def)
-    clean_traces(machine_def) if all
+    cleaner.clean_traces(machine_def) if all
   end
 
   def do_provision_machine(services, machine_def)
@@ -448,7 +448,6 @@ class CMD
       fail("Puppet runs have timed out or failed")
     end
 
-    require 'stackbuilder/support/app_deployer'
     Support::AppDeployer.new.deploy_applications(machine_def)
     @nagios.nagios_cancel_downtime(machine_def)
   end
