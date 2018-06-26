@@ -1,6 +1,6 @@
 require 'stackbuilder/support/namespace'
 require 'stackbuilder/support/callback'
-require 'stackbuilder/support/mcollective'
+require 'stackbuilder/support/mcollective_nagsrv'
 
 class Support::Nagios
   def do_nagios_register_new(machine_def)
@@ -63,7 +63,7 @@ end
 
 class Support::NagiosService
   def initialize(options = {})
-    @service = options[:service] || Support::NagiosMCollective.new
+    @service = options[:service] || Support::MCollectiveNagsrv.new
   end
 
   def schedule_downtime(machines, duration = 600, &block)
@@ -88,31 +88,5 @@ class Support::NagiosService
 
     fqdn_filter = "fqdn=/mgmt\\.(#{sites.join('|')})\\.net\\.local/"
     system('mco', 'puppetng', 'run', '--concurrency', '5', '--with-fact', fqdn_filter, '--with-class', 'nagios')
-  end
-end
-
-class Support::NagiosMCollective
-  include Support::MCollective
-
-  def schedule_downtime(machine, duration)
-    fqdn = machine.mgmt_fqdn
-    logger(Logger::INFO) { "Scheduling downtime for #{fqdn}" }
-    mco_client("nagsrv", :fabric => machine.fabric) do |mco|
-      mco.class_filter('nagios')
-      mco.schedule_host_downtime(:host => fqdn, :duration => duration).map do |response|
-        "#{response[:sender]} = #{response[:statuscode] == 0 ? 'OK' : 'Failed'}: #{response[:statusmsg]}"
-      end
-    end.join(',')
-  end
-
-  def cancel_downtime(machine)
-    fqdn = machine.mgmt_fqdn
-    logger(Logger::INFO) { "Cancelling downtime for #{fqdn}" }
-    mco_client("nagsrv", :fabric => machine.fabric) do |mco|
-      mco.class_filter('nagios')
-      mco.del_host_downtime(:host => fqdn).map do |response|
-        "#{response[:sender]} = #{response[:statuscode] == 0 ? 'OK' : 'Failed'}: #{response[:statusmsg]}"
-      end.join(',')
-    end
   end
 end
