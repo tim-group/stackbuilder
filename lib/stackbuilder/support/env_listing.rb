@@ -1,6 +1,8 @@
-module CMDLs
-  def do_ls(machine_def, envs_only = false)
-    root = machine_def.instance_of?(Array) ? FakeLsRoot.new(machine_def) : machine_def
+require 'stackbuilder/support/namespace'
+
+class Support::EnvListing
+  def ls(target, envs_only = false)
+    root = target.instance_of?(Array) ? FakeLsRoot.new(target) : target
     traverse('', nil, root, envs_only)
   end
 

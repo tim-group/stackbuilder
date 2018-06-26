@@ -4,7 +4,7 @@ require 'stackbuilder/stacks/core/actions'
 require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/cmd_audit'
 require 'stackbuilder/support/cmd_audit_vms'
-require 'stackbuilder/support/cmd_ls'
+require 'stackbuilder/support/env_listing'
 require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cmd_clean'
@@ -36,7 +36,6 @@ class CMD
 
   include CMDAudit
   include CMDAuditVms
-  include CMDLs
   include CMDClean
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
@@ -199,11 +198,11 @@ class CMD
   end
 
   def ls(_argv)
-    do_ls(@stack ? check_and_get_stack : @environment)
+    Support::EnvListing.new().ls(@stack ? check_and_get_stack : @environment)
   end
 
   def lsenv(_argv)
-    do_ls(@environment.environments.values, true)
+    Support::EnvListing.new().ls(@environment.environments.values, true)
   end
 
   def clean(_argv)
