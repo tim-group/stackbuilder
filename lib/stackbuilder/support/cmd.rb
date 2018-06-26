@@ -2,7 +2,7 @@ require 'stackbuilder/support/zamls'
 require 'stackbuilder/support/nagios'
 require 'stackbuilder/stacks/core/actions'
 require 'stackbuilder/support/subscription'
-require 'stackbuilder/support/cmd_audit'
+require 'stackbuilder/support/audit_site'
 require 'stackbuilder/support/cmd_audit_vms'
 require 'stackbuilder/support/env_listing'
 require 'stackbuilder/support/puppet'
@@ -34,7 +34,6 @@ class CMD
     @puppet = Support::Puppet.new
   end
 
-  include CMDAudit
   include CMDAuditVms
   include CMDClean
 
@@ -203,6 +202,12 @@ class CMD
 
   def lsenv(_argv)
     Support::EnvListing.new.ls(@environment.environments.values, true)
+  end
+
+  def audit(_argv)
+    site = @environment.options[:primary_site]
+    logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
+    Support::AuditSite.new(@factory.host_repository).audit(site)
   end
 
   def clean(_argv)

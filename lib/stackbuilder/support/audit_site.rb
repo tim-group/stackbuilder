@@ -1,15 +1,18 @@
-module CMDAudit
-  def audit(_argv)
-    site = @environment.options[:primary_site]
-    logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
+require 'stackbuilder/support/namespace'
 
+class Support::AuditSite
+  def initialize(host_repository)
+    @host_repository = host_repository
+  end
+
+  def audit(site)
     # FIXME: This is not sane
     @units = 'GiB' # used in totals
     @total = Hash.new(0)
     @total_str = lambda { |a, b| sprintf("%d/%d %2.0f%%", a, b, 100.0 * a / b) }
     @total_str_with_units = lambda { |a, b| sprintf("%d/%d #{@units} %2.0f%%", a, b, 100.0 * a / b) }
 
-    hosts_raw = @factory.host_repository.find_compute_nodes(site).hosts
+    hosts_raw = @host_repository.find_compute_nodes(site).hosts
     hosts_stats = hosts_raw.inject({}) do |data, host|
       data[host.fqdn] = stats_for(host)
       data
