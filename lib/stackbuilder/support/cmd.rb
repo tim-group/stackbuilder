@@ -198,6 +198,14 @@ class CMD
     result
   end
 
+  def ls(_argv)
+    do_ls(@stack ? check_and_get_stack : @environment)
+  end
+
+  def lsenv(_argv)
+    do_ls(@environment.environments.values, true)
+  end
+
   def clean(_argv)
     machine_def = check_and_get_stack
     do_clean(machine_def)

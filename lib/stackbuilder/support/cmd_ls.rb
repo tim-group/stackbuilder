@@ -1,36 +1,28 @@
 module CMDLs
-  def ls(_argv)
-    machine_def = @stack ? check_and_get_stack : @environment
-    traverse('', nil, machine_def)
-  end
-
-  def lsenv(_argv)
-    @lsenv = true
-    # XXX anonymous class to construct a fake root. this should be in Factory or some other place.
-    # rubocop:disable Lint/NestedMethodDefinition
-    root = Class.new do
-      attr_reader :children
-
-      def initialize
-        @children = @environment.environments.map { |x| x[1] }
-      end
-
-      def name
-        'root'
-      end
-
-      def clazz
-        'root'
-      end
-    end.new
-    # rubocop:enable Lint/NestedMethodDefinition
-
-    traverse('', nil, root)
+  def do_ls(machine_def, envs_only = false)
+    root = machine_def.instance_of?(Array) ? FakeLsRoot.new(machine_def) : machine_def
+    traverse('', nil, root, envs_only)
   end
 
   private
 
-  def traverse(indent, is_last, machine_def)
+  class FakeLsRoot
+    attr_reader :children
+    attr_reader :name
+    attr_reader :clazz
+
+    def initialize(children)
+      @children = children
+      @name = 'root'
+      @clazz = 'root'
+    end
+
+    def type_of?
+      @clazz
+    end
+  end
+
+  def traverse(indent, is_last, machine_def, envs_only)
     case machine_def.type_of?
     when :environment
       name = machine_def.identity
@@ -60,11 +52,11 @@ module CMDLs
 
     children = machine_def.children
     children.select! { |m| m.clazz != 'machine' } if $options[:terse]
-    children.select! { |m| m.respond_to?(:domain_suffix) } if @lsenv
+    children.select! { |m| m.respond_to?(:domain_suffix) } if envs_only
 
     last = children.count - 1
     children.each_with_index do |child, index|
-      traverse(indent, index == last, child)
+      traverse(indent, index == last, child, envs_only)
     end
   end
 end
