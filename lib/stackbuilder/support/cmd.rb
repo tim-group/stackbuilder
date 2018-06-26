@@ -3,7 +3,7 @@ require 'stackbuilder/support/nagios'
 require 'stackbuilder/stacks/core/actions'
 require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/audit_site'
-require 'stackbuilder/support/cmd_audit_vms'
+require 'stackbuilder/support/audit_vms'
 require 'stackbuilder/support/env_listing'
 require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/dns'
@@ -34,7 +34,6 @@ class CMD
     @puppet = Support::Puppet.new
   end
 
-  include CMDAuditVms
   include CMDClean
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
@@ -208,6 +207,18 @@ class CMD
     site = @environment.options[:primary_site]
     logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
     Support::AuditSite.new(@factory.host_repository).audit(site)
+  end
+
+  def audit_vms(argv)
+    auditor = Support::AuditVms.new(@factory)
+    if argv.size == 0
+      site = @environment.options[:primary_site]
+      logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
+      auditor.audit_site_vms(site)
+    else
+      host_fqdn = argv[0]
+      auditor.audit_host_vms(host_fqdn)
+    end
   end
 
   def clean(_argv)

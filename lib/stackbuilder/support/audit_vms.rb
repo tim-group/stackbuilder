@@ -1,22 +1,24 @@
-module CMDAuditVms
-  def audit_vms(argv)
-    if argv.size == 0
-      site = @environment.options[:primary_site]
-      logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
+require 'stackbuilder/support/namespace'
 
-      raw_actual = @factory.host_repository.find_fabric_vms(site)
-      raw_specified = get_specified_vms(site)
-    else
-      host_fqdn = argv[0]
-      unless host_fqdn.include?('.')
-        logger(Logger::FATAL) { "You must specify a host fqdn" }
-        exit 1
-      end
+class Support::AuditVms
+  def initialize(factory)
+    @factory = factory
+  end
 
-      raw_actual = @factory.host_repository.find_host_vms(host_fqdn)
-      raw_specified = raw_actual.map { |vm| @factory.inventory.find(vm[:fqdn]) }
+  def audit_site_vms(site)
+    raw_actual = @factory.host_repository.find_fabric_vms(site)
+    raw_specified = get_specified_vms(site)
+    compile_vm_audit(raw_actual, raw_specified)
+  end
+
+  def audit_host_vms(host_fqdn)
+    unless host_fqdn.include?('.')
+      logger(Logger::FATAL) { "You must specify a host fqdn" }
+      exit 1
     end
 
+    raw_actual = @factory.host_repository.find_host_vms(host_fqdn)
+    raw_specified = raw_actual.map { |vm| @factory.inventory.find(vm[:fqdn]) }.reject(&:nil?)
     compile_vm_audit(raw_actual, raw_specified)
   end
 
