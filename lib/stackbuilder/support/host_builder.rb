@@ -1,5 +1,7 @@
 require 'stackbuilder/support/namespace'
 require 'stackbuilder/support/mcollective_pxe'
+require 'stackbuilder/support/mcollective_hpilo'
+require 'stackbuilder/support/mcollective_hostcleanup'
 
 class Support::HostBuilder
   def initialize(factory, nagios)
