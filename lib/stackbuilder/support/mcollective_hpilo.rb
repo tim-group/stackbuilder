@@ -29,7 +29,7 @@ class Support::MCollectiveHpilo
 
   def get_mac_address(host_fqdn, fabric)
     result = do_hpilo_call(fabric, "get_host_data", :host_fqdn => to_ilo_host_fqdn(host_fqdn))
-    result[:mac_address]
+    result[:output][:mac_address]
   end
 
   private
