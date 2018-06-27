@@ -60,10 +60,11 @@ class Support::HostBuilder
   end
 
   def verify_build(host_fqdn)
-    # sanity check
-    #   - check puppet last run report
-
     hostname = host_fqdn.partition('.').first
+    fabric = host_fqdn.partition('-').first
+
+    # check puppet last run report
+
     host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find { |h| h.hostname == hostname }
     bail "unable to find #{host_fqdn}" if host.nil?
     bail "host came up, but with allocation already enabled #{host_fqdn}" unless host.facts['allocation_disabled']
