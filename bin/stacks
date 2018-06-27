@@ -50,6 +50,7 @@ Options:
     allocate [-e] -s          perform noop dry-run allocation of a stack
     audit [-e]                show the state of the KVM host machines in the primary site of the specified env
     audit_vms [-e] [HOST]     show the state of the VMs in the primary site of the specified env (or specified host)
+    build_new_host HOST       install a clean operating system on a new KVM host (host must be switched off)
     check_definition [-e] -s  verify that the VMs of a provisioned stack match their corresponding VM definitions
     clean [-e] -s             shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
     clean_all [-e] -s         shuts down and removes a stack, puppet, nagios and mongo
@@ -68,7 +69,7 @@ Options:
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. Using -t skips stacks of type "machine".
     move [-e] -s              move a given stack from its current host to another
     provision [-e] -s         allocates and spins up a stack
-    rebuild_host HOST         install a clean operating system on a KVM host (host must be empty)
+    rebuild_host HOST         re-install a clean operating system on a KVM host (host must be empty)
     reprovision [-e] -s       "clean", and then "provision" a stack
     sbdiff                    show compile diff between latest stackbuilder and local stackbuilder.
     spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
