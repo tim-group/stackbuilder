@@ -14,16 +14,12 @@ class Support::MCollectiveHpilo
 
   def power_off_host(host_fqdn, fabric)
     do_hpilo_call(fabric, "power_off", :host_fqdn => host_fqdn)
-    while get_host_power_status(host_fqdn, fabric) == 'ON'
-      sleep 2
-    end
+    sleep 2 while get_host_power_status(host_fqdn, fabric) == 'ON'
   end
 
   def power_on_host(host_fqdn, fabric)
     do_hpilo_call(fabric, "power_on", :host_fqdn => host_fqdn)
-    while get_host_power_status(host_fqdn, fabric) == 'OFF'
-      sleep 2
-    end
+    sleep 2 while get_host_power_status(host_fqdn, fabric) == 'OFF'
   end
 
   def get_host_power_status(host_fqdn, fabric)
