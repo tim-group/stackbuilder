@@ -6,6 +6,7 @@ class Support::HostBuilder
     @factory = factory
     @nagios = nagios
     @pxe = Support::MCollectivePxe.new
+    @hpilo = Support::MCollectiveHpilo.new
     @hostcleanup = Support::MCollectiveHostcleanup.new
   end
 
@@ -21,8 +22,7 @@ class Support::HostBuilder
     logger(Logger::INFO) { "Will rebuild #{host_fqdn}" }
     @nagios.schedule_host_downtime(host_fqdn, fabric)
     @hostcleanup.hostcleanup(host_fqdn, "mongodb")
-
-    # power off
+    @hpilo.power_off_host(host_fqdn, fabric)
 
     build(host_fqdn)
 
@@ -40,23 +40,33 @@ class Support::HostBuilder
   def build(host_fqdn)
     fabric = host_fqdn.partition('-').first
 
-    # check host exists and is powered off
+    bail "#{host_fqdn} is not off" unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
 
-    # retrieve mac address
-    mac_address = '3c-d9-2b-f9-48-8c'
-
+    mac_address = @hpilo.get_mac_address(host_fqdn, fabric)
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
       logger(Logger::INFO) { "About to install o/s on #{host_fqdn}" }
-      # instigate rebuild
+      @hpilo.update_ilo_firmware(host_fqdn, fabric)
+      @hpilo.set_one_time_network_boot(host_fqdn, fabric)
+      @hpilo.power_on_host(host_fqdn, fabric)
     ensure
       @pxe.cleanup_after_reimage(mac_address, fabric)
     end
 
     # clean/wait/sign puppet cert
+
+    verify_build(host_fqdn)
+    # enable allocation
+  end
+
+  def verify_build(host_fqdn)
     # sanity check
     #   - check puppet last run report
-    #   - check computenode
+
+    hostname = host_fqdn.partition('.').first
+    host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find { |h| h.hostname == hostname }
+    bail "unable to find #{host_fqdn}" if host.nil?
+    bail "host came up, but with allocation already enabled #{host_fqdn}" unless host.facts['allocation_disabled']
   end
 
   def bail(msg)
