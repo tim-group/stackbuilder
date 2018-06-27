@@ -17,7 +17,7 @@ class Support::MCollectivePxe
   def do_pxe_call(host_mac_address, fabric, action)
     rsps = mco_client("pxe", :timeout => 10, :fabric => fabric) { |mco| mco.send(action, :mac_address => host_mac_address) }
 
-    fail "no respose to mco pxe call for fabric #{fabric}" unless rsps.size == 1
+    fail "no response to mco pxe call for fabric #{fabric}" unless rsps.size == 1
     fail "failed during mco pxe call for fabric #{fabric}: #{rsps[0][:statusmsg]}" unless rsps[0][:statuscode] == 0
     fail "mco pxe #{action} call failed for fabric #{fabric}: #{rsps[0][:data][:status]}" unless rsps[0][:data][:status] == 0
 
