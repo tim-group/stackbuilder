@@ -23,7 +23,7 @@ class CMD
     @environment = environment
     @stack = stack
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
-    @write_cmds = %w(dns clean clean_all launch provision reprovision move clear_host)
+    @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host)
     @cmds = @read_cmds + @write_cmds
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
