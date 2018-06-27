@@ -195,11 +195,11 @@ class CMD
   end
 
   def ls(_argv)
-    Support::EnvListing.new.ls(@stack ? check_and_get_stack : @environment)
+    Support::EnvListing.new($options[:terse]).ls(@stack ? check_and_get_stack : @environment)
   end
 
   def lsenv(_argv)
-    Support::EnvListing.new.ls(@environment.environments.values, true)
+    Support::EnvListing.new($options[:terse]).ls(@environment.environments.values, true)
   end
 
   def audit(_argv)

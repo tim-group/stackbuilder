@@ -1,6 +1,10 @@
 require 'stackbuilder/support/namespace'
 
 class Support::EnvListing
+  def initialize(terse = false)
+    @terse = terse
+  end
+
   def ls(target, envs_only = false)
     root = target.instance_of?(Array) ? FakeLsRoot.new(target) : target
     traverse('', nil, root, envs_only)
@@ -53,7 +57,7 @@ class Support::EnvListing
     return unless machine_def.respond_to?(:children)
 
     children = machine_def.children
-    children.select! { |m| m.clazz != 'machine' } if $options[:terse]
+    children.select! { |m| m.clazz != 'machine' } if @terse
     children.select! { |m| m.respond_to?(:domain_suffix) } if envs_only
 
     last = children.count - 1
