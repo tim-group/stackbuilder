@@ -8,12 +8,13 @@ class Support::HostBuilder
   def rebuild(host_fqdn)
     hostname = host_fqdn.partition('.').first
     fabric = hostname.partition('-').first
-    host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.find { |h| h.hostname == hostname }
+    host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find { |h| h.hostname == hostname }
 
     bail "unable to find #{host_fqdn}" if host.nil?
     bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map { |m| m[:hostname] }.join(', ')}" unless host.machines.empty?
+    bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
 
-    # set allocation disabled
+
     # schedule downtime
     # remove from mco mongodb registry
     # power off
