@@ -69,7 +69,7 @@ class Support::NagiosService
   def schedule_downtime(machines, duration = 600, &block)
     callback = Support::Callback.new(&block)
     machines.each do |machine|
-      response = @service.schedule_downtime(machine, duration)
+      response = @service.schedule_downtime(machine.mgmt_fqdn, machine.fabric, duration)
       callback.invoke :success, :machine => machine.hostname, :result => response
     end
   end
@@ -77,7 +77,7 @@ class Support::NagiosService
   def cancel_downtime(machines, &block)
     callback = Support::Callback.new(&block)
     machines.each do |machine|
-      response = @service.cancel_downtime(machine)
+      response = @service.cancel_downtime(machine.mgmt_fqdn, machine.fabric)
       callback.invoke :success, :machine => machine.hostname, :result => response
     end
   end
