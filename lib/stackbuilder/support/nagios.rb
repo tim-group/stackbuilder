@@ -6,7 +6,12 @@ class Support::Nagios
   def do_nagios_register_new(machine_def)
     machines = machines_from(machine_def)
     nagios_helper = Support::NagiosService.new
-    nagios_helper.register_new_machines(machines)
+    nagios_helper.register_new_machines(machines.map(&:fabric).uniq)
+  end
+
+  def register_new_machine_in(fabric)
+    nagios_helper = Support::NagiosService.new
+    nagios_helper.register_new_machines([fabric])
   end
 
   def nagios_schedule_downtime(machine_def)
@@ -103,11 +108,10 @@ class Support::NagiosService
     @service.cancel_downtime(host_fqdn, fabric)
   end
 
-  def register_new_machines(machines)
-    sites = machines.map(&:fabric).uniq
-    logger(Logger::INFO) { "running puppet on nagios servers (in #{sites}) so they will discover this node and include in monitoring" }
+  def register_new_machines(fabrics)
+    logger(Logger::INFO) { "running puppet on nagios servers (in #{fabrics}) so they will discover this node and include in monitoring" }
 
-    fqdn_filter = "fqdn=/mgmt\\.(#{sites.join('|')})\\.net\\.local/"
+    fqdn_filter = "fqdn=/mgmt\\.(#{fabrics.join('|')})\\.net\\.local/"
     system('mco', 'puppetng', 'run', '--concurrency', '5', '--with-fact', fqdn_filter, '--with-class', 'nagios')
   end
 end

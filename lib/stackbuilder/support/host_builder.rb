@@ -28,7 +28,9 @@ class Support::HostBuilder
   end
 
   def build_new(host_fqdn)
+    fabric = host_fqdn.partition('-').first
     build(host_fqdn)
+    @nagios.register_new_machine_in(fabric)
   end
 
   private
@@ -51,7 +53,6 @@ class Support::HostBuilder
 
     # clean/wait/sign puppet cert
     # sanity check
-    # enable allocation
   end
 
   def bail(msg)
