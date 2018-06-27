@@ -1,9 +1,11 @@
 require 'stackbuilder/support/namespace'
+require 'stackbuilder/support/mcollective_pxe'
 
 class Support::HostBuilder
   def initialize(factory, nagios)
     @factory = factory
     @nagios = nagios
+    @pxe = Support::MCollectivePxe.new
   end
 
   def rebuild(host_fqdn)
@@ -32,11 +34,20 @@ class Support::HostBuilder
   private
 
   def build(host_fqdn)
-    # check host exists and is powered off
-    # retrieve mac address and setup PXE
+    fabric = host_fqdn.partition('-').first
 
-    logger(Logger::INFO) { "About to install o/s on #{host_fqdn}" }
-    # instigate rebuild
+    # check host exists and is powered off
+
+    # retrieve mac address
+    mac_address = '3c-d9-2b-f9-48-8c'
+
+    @pxe.prepare_for_reimage(mac_address, fabric)
+    begin
+      logger(Logger::INFO) { "About to install o/s on #{host_fqdn}" }
+      # instigate rebuild
+    ensure
+      @pxe.cleanup_after_reimage(mac_address, fabric)
+    end
 
     # clean/wait/sign puppet cert
     # sanity check
