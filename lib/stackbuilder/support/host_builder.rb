@@ -23,8 +23,8 @@ class Support::HostBuilder
 
     logger(Logger::INFO) { "Will rebuild #{host_fqdn}" }
     @nagios.schedule_host_downtime(host_fqdn, fabric)
-    @hostcleanup.hostcleanup(host_fqdn, "mongodb")
     @hpilo.power_off_host(host_fqdn, fabric)
+    @hostcleanup.hostcleanup(host_fqdn, "mongodb")
 
     build(host_fqdn)
 
