@@ -6,6 +6,7 @@ class Support::HostBuilder
     @factory = factory
     @nagios = nagios
     @pxe = Support::MCollectivePxe.new
+    @hostcleanup = Support::MCollectiveHostcleanup.new
   end
 
   def rebuild(host_fqdn)
@@ -17,11 +18,12 @@ class Support::HostBuilder
     bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map { |m| m[:hostname] }.join(', ')}" unless host.machines.empty?
     bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
 
+    logger(Logger::INFO) { "Will rebuild #{host_fqdn}" }
     @nagios.schedule_host_downtime(host_fqdn, fabric)
-    # remove from mco mongodb registry
+    @hostcleanup.hostcleanup(host_fqdn, "mongodb")
+
     # power off
 
-    logger(Logger::INFO) { "Will rebuild #{host.fqdn}" }
     build(host_fqdn)
 
     @nagios.cancel_host_downtime(host_fqdn, fabric)
@@ -53,6 +55,8 @@ class Support::HostBuilder
 
     # clean/wait/sign puppet cert
     # sanity check
+    #   - check puppet last run report
+    #   - check computenode
   end
 
   def bail(msg)
