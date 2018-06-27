@@ -68,6 +68,7 @@ Options:
     ls [-est]                 show the entire environment. Show just one stack if -s is specified. Using -t skips stacks of type "machine".
     move [-e] -s              move a given stack from its current host to another
     provision [-e] -s         allocates and spins up a stack
+    rebuild_host HOST         install a clean operating system on a KVM host (host must be empty)
     reprovision [-e] -s       "clean", and then "provision" a stack
     sbdiff                    show compile diff between latest stackbuilder and local stackbuilder.
     spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging

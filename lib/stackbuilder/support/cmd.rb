@@ -9,6 +9,7 @@ require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/dns'
 require 'stackbuilder/support/cleaner'
 require 'stackbuilder/support/live_migration'
+require 'stackbuilder/support/host_builder'
 require 'stackbuilder/support/app_deployer'
 
 # all public methods in this class are valid stacks commands.
@@ -23,7 +24,7 @@ class CMD
     @environment = environment
     @stack = stack
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
-    @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host)
+    @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host rebuild_host)
     @cmds = @read_cmds + @write_cmds
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
@@ -328,6 +329,15 @@ class CMD
     end
 
     Support::LiveMigrator.new(@factory, host).move_all
+  end
+
+  def rebuild_host(argv)
+    if argv.size != 1
+      logger(Logger::FATAL) { "You must specify a host to rebuild" }
+      exit 1
+    end
+
+    Support::HostBuilder.new(@factory).rebuild(argv[0])
   end
 
   def dependencies(_argv)
