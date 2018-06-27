@@ -51,11 +51,12 @@ class Support::HostBuilder
       @hpilo.update_ilo_firmware(host_fqdn, fabric)
       @hpilo.set_one_time_network_boot(host_fqdn, fabric)
       @hpilo.power_on_host(host_fqdn, fabric)
+
+      # clean/wait/sign puppet cert
+      sleep 360
     ensure
       @pxe.cleanup_after_reimage(mac_address, fabric)
     end
-
-    # clean/wait/sign puppet cert
 
     verify_build(host_fqdn)
     # enable allocation
