@@ -50,6 +50,19 @@ class Support::Nagios
     end
   end
 
+  def schedule_host_downtime(host_fqdn, fabric)
+    downtime_secs = 1800 # 1800 = 30 mins
+    nagios_helper = Support::NagiosService.new
+    result = nagios_helper.schedule_host_downtime(host_fqdn, fabric, downtime_secs)
+    logger(Logger::INFO) { "scheduled #{downtime_secs}s downtime for #{host_fqdn}: #{result}" }
+  end
+
+  def cancel_host_downtime(host_fqdn, fabric)
+    nagios_helper = Support::NagiosService.new
+    result = nagios_helper.cancel_host_downtime(host_fqdn, fabric)
+    logger(Logger::INFO) { "cancelled downtime for #{host_fqdn}: #{result}" }
+  end
+
   private
 
   def machines_from(machine_def)
@@ -80,6 +93,14 @@ class Support::NagiosService
       response = @service.cancel_downtime(machine.mgmt_fqdn, machine.fabric)
       callback.invoke :success, :machine => machine.hostname, :result => response
     end
+  end
+
+  def schedule_host_downtime(host_fqdn, fabric, duration = 600)
+    @service.schedule_downtime(host_fqdn, fabric, duration)
+  end
+
+  def cancel_host_downtime(host_fqdn, fabric)
+    @service.cancel_downtime(host_fqdn, fabric)
   end
 
   def register_new_machines(machines)

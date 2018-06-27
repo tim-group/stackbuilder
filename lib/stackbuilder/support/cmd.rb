@@ -337,7 +337,7 @@ class CMD
       exit 1
     end
 
-    Support::HostBuilder.new(@factory).rebuild(argv[0])
+    Support::HostBuilder.new(@factory, @nagios).rebuild(argv[0])
   end
 
   def dependencies(_argv)

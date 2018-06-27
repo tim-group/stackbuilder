@@ -1,8 +1,9 @@
 require 'stackbuilder/support/namespace'
 
 class Support::HostBuilder
-  def initialize(factory)
+  def initialize(factory, nagios)
     @factory = factory
+    @nagios = nagios
   end
 
   def rebuild(host_fqdn)
@@ -14,17 +15,14 @@ class Support::HostBuilder
     bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map { |m| m[:hostname] }.join(', ')}" unless host.machines.empty?
     bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
 
-
-    # schedule downtime
+    @nagios.schedule_host_downtime(host_fqdn, fabric)
     # remove from mco mongodb registry
     # power off
 
     logger(Logger::INFO) { "Will rebuild #{host.fqdn}" }
     build(host_fqdn)
 
-    # unschedule downtime
-
-    bail("not implemented")
+    @nagios.cancel_host_downtime(host_fqdn, fabric)
   end
 
   def build_new(host_fqdn)
