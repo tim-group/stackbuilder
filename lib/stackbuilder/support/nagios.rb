@@ -4,17 +4,17 @@ require 'stackbuilder/support/mcollective_nagsrv'
 
 class Support::Nagios
   def do_nagios_register_new(machine_def)
-    hosts = hosts_for(machine_def)
+    machines = machines_from(machine_def)
     nagios_helper = Support::NagiosService.new
-    nagios_helper.register_new_machines(hosts)
+    nagios_helper.register_new_machines(machines)
   end
 
   def nagios_schedule_downtime(machine_def)
-    hosts = hosts_for(machine_def)
+    machines = machines_from(machine_def)
 
     nagios_helper = Support::NagiosService.new
     downtime_secs = 1800 # 1800 = 30 mins
-    nagios_helper.schedule_downtime(hosts, downtime_secs) do
+    nagios_helper.schedule_downtime(machines, downtime_secs) do
       on :success do |response_hash|
         logger(Logger::INFO) do
           "successfully scheduled #{downtime_secs} seconds downtime for #{response_hash[:machine]} " \
@@ -31,10 +31,10 @@ class Support::Nagios
   end
 
   def nagios_cancel_downtime(machine_def)
-    hosts = hosts_for(machine_def)
+    machines = machines_from(machine_def)
 
     nagios_helper = Support::NagiosService.new
-    nagios_helper.cancel_downtime(hosts) do
+    nagios_helper.cancel_downtime(machines) do
       on :success do |response_hash|
         logger(Logger::INFO) do
           "successfully cancelled downtime for #{response_hash[:machine]} " \
@@ -52,7 +52,7 @@ class Support::Nagios
 
   private
 
-  def hosts_for(machine_def)
+  def machines_from(machine_def)
     hosts = []
     machine_def.accept do |child_machine_def|
       hosts << child_machine_def if child_machine_def.respond_to?(:mgmt_fqdn)
