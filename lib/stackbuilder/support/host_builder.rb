@@ -45,6 +45,7 @@ class Support::HostBuilder
 
     bail "#{host_fqdn} is not off" unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
 
+    puppet_result = nil
     mac_address = @hpilo.get_mac_address(host_fqdn, fabric)
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
@@ -56,7 +57,9 @@ class Support::HostBuilder
       @hpilo.set_one_time_network_boot(host_fqdn, fabric)
       @hpilo.power_on_host(host_fqdn, fabric)
 
-      sleep 180 # give the host a chance to boot up and install the vanilla o/s
+      sleep 780 # give the host 13 mins to boot up and install the vanilla o/s
+      logger(Logger::INFO) { "o/s should be installed... signing puppet certificate for #{host_fqdn}" }
+
       signed_successfully = @puppet.poll_sign([host_fqdn], 600)
       puppet_result = @puppet.wait_for_run_completion([host_fqdn]) if signed_successfully
     ensure
