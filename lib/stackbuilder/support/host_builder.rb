@@ -65,7 +65,7 @@ class Support::HostBuilder
       @pxe.cleanup_after_reimage(mac_address, fabric)
     end
 
-    # puppet is triggered twice, the first run fails but sets up networking. The second run should pass.
+    # puppet is triggered twice: the first run fails but sets up networking; the second run should pass.
     @puppet.wait_for_run_completion([host_fqdn])
     puppet_result = @puppet.wait_for_run_completion([host_fqdn])
 
