@@ -65,7 +65,7 @@ class Support::HostBuilder
       logger(Logger::INFO) { "o/s should be installed... beginning polling to sign puppet certificate" }
 
       signed_successfully = @puppet.poll_sign([host_fqdn], 600)
-      bail ("unable to sign puppet cert") unless signed_successfully
+      bail "unable to sign puppet cert" unless signed_successfully
     ensure
       @pxe.cleanup_after_reimage(mac_address, fabric)
     end
