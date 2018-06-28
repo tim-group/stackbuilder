@@ -44,7 +44,7 @@ class Support::MCollectiveHpilo
     fail "no response to mco hpilo call for fabric #{fabric}" unless rsps.size == 1
     fail "failed during mco hpilo call for fabric #{fabric}: #{rsps[0][:statusmsg]}" unless rsps[0][:statuscode] == 0
 
-    logger(Logger::INFO) { "Successfully carried out mco hpilo #{action} operation on #{rsps[0][:sender]}" }
+    logger(Logger::DEBUG) { "Successfully carried out mco hpilo #{action} operation on #{rsps[0][:sender]}" }
     rsps[0][:data]
   end
 end

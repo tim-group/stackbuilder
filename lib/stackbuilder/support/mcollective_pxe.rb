@@ -21,7 +21,7 @@ class Support::MCollectivePxe
     fail "failed during mco pxe call for fabric #{fabric}: #{rsps[0][:statusmsg]}" unless rsps[0][:statuscode] == 0
     fail "mco pxe #{action} call failed for fabric #{fabric}: #{rsps[0][:data][:status]}" unless rsps[0][:data][:status] == 0
 
-    logger(Logger::INFO) { "Successfully carried out mco pxe #{action} operation on #{rsps[0][:sender]}" }
+    logger(Logger::DEBUG) { "Successfully carried out mco pxe #{action} operation on #{rsps[0][:sender]}" }
     rsps[0][:data]
   end
 end
