@@ -11,8 +11,11 @@ class Support::MCollectiveRpcutil
     if failed
       return ping(fqdn, attempts - 1) if attempts > 1
 
-      logger(Logger::DEBUG) { "no response to mco ping from #{fqdn}" } unless rsps.size == 1
-      logger(Logger::WARN) { "failed to mco ping #{fqdn}: #{rsps[0][:statusmsg]}" } unless rsps[0][:statuscode] == 0
+      if rsps.size == 0
+        logger(Logger::DEBUG) { "no response to mco ping from #{fqdn}" }
+      else
+        logger(Logger::WARN) { "failed to mco ping #{fqdn}: #{rsps[0][:statusmsg]}" } unless rsps[0][:statuscode] == 0
+      end
       return nil
     end
 
