@@ -86,7 +86,8 @@ class Support::HostBuilder
     logger(Logger::INFO) { "Host is up, performing checks" }
     verify_build(host_fqdn)
 
-    # TODO: enable allocation
+    logger(Logger::INFO) { "Host checks successful, enabling allocation" }
+    @factory.compute_node_client.enable_allocation(host_fqdn)
   end
 
   def wait_for_reboot(host_fqdn, timeout)

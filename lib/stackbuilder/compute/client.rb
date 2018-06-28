@@ -104,12 +104,24 @@ class Compute::Client
     archive_vm(source_host_fqdn, spec)
   end
 
+  def enable_allocation(host_fqdn)
+    resps = mco_client("computenode", :nodes => [host_fqdn]) { |mco| mco.enable_allocation }
+    fail "no response to mco computenode.enable_allocation request" unless resps.size == 1
+    fail "mco computenode.enable_allocation request railed: #{resps[0][:statusmsg]}" unless resps[0][:statuscode] == 0
+    resps[0]
+  end
+
+  def disable_allocation(host_fqdn, reason)
+    resps = mco_client("computenode", :nodes => [host_fqdn]) { |mco| mco.disable_allocation(:reason => reason) }
+    fail "no response to mco computenode.disable_allocation request" unless resps.size == 1
+    fail "mco computenode.disable_allocation request railed: #{resps[0][:statusmsg]}" unless resps[0][:statuscode] == 0
+    resps[0]
+  end
+
   private
 
   def discover_compute_nodes(fabric)
-    mco_client("computenode", :fabric => fabric) do |mco|
-      mco.discover.sort
-    end
+    mco_client("computenode", :fabric => fabric) { |mco| mco.discover.sort }
   end
 
   def invoke(selector, specs, client_options)
