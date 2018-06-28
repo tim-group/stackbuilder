@@ -2,8 +2,9 @@ require 'stackbuilder/support/namespace'
 require 'stackbuilder/support/mcollective_puppet'
 
 class Support::Puppet
-  def initialize
+  def initialize(subscription)
     @mcollective_puppet = Support::MCollectivePuppet.new
+    @subscription = subscription
   end
 
   def do_puppet_run_on_dependencies(machine_def)
@@ -30,12 +31,12 @@ class Support::Puppet
     end
   end
 
-  # sign outstanding Puppet certificate signing requests for these machines
-  def puppet_sign(machine_def, subscription)
+  # wait for automatic otp signing of outstanding Puppet certificates for these machines
+  def puppet_wait_for_autosign(machine_def)
     fqdns_to_sign = get_machine_fqdns(machine_def, "signing")
 
     start_time = Time.now
-    result = subscription.wait_for_hosts("provision.*", fqdns_to_sign, 600)
+    result = @subscription.wait_for_hosts("provision.*", fqdns_to_sign, 600)
     result.all.each do |vm, status|
       logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
@@ -43,9 +44,11 @@ class Support::Puppet
 
   # sign outstanding Puppet certificate signing requests for these machines
   def puppet_poll_sign(machine_def)
-    fqdns_to_sign = get_machine_fqdns(machine_def, "poll signing")
+    poll_sign(get_machine_fqdns(machine_def, "poll signing"))
+  end
 
-    @mcollective_puppet.ca_sign(fqdns_to_sign) do
+  def poll_sign(host_fqdns, timeout = 450)
+    @mcollective_puppet.ca_sign(host_fqdns, timeout) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully signed cert for #{machine}" }
       end
@@ -62,11 +65,15 @@ class Support::Puppet
   end
 
   # wait for puppet to complete its run on these machines
-  def puppet_wait(machine_def, subscription)
-    start_time = Time.now
+  def puppet_wait_for_run_completion(machine_def)
     host_fqdns = get_machine_fqdns(machine_def)
+    wait_for_run_completion(host_fqdns)
+  end
 
-    run_result = subscription.wait_for_hosts("puppet_status", host_fqdns, 5400)
+  def wait_for_run_completion(host_fqdns, timeout = 5400)
+    start_time = Time.now
+
+    run_result = @subscription.wait_for_hosts("puppet_status", host_fqdns, timeout)
 
     run_result.all.each do |vm, status|
       logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
@@ -77,8 +84,10 @@ class Support::Puppet
 
   # Remove signed certs from puppetserver
   def puppet_clean(machine_def)
-    fqdns_to_clean = get_machine_fqdns(machine_def, "removal of cert")
+    clean(get_machine_fqdns(machine_def, "removal of cert"))
+  end
 
+  def clean(fqdns_to_clean)
     @mcollective_puppet.ca_clean(fqdns_to_clean) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully removed cert for #{machine}" }

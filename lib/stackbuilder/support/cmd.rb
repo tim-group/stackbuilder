@@ -28,12 +28,12 @@ class CMD
     @cmds = @read_cmds + @write_cmds
     @core_actions = Object.new
     @core_actions.extend(Stacks::Core::Actions)
-    @subscription = Subscription.new
-    @subscription.start(["provision.*", "puppet_status"])
-
     @dns = Support::Dns.new(@factory, @core_actions)
     @nagios = Support::Nagios.new
-    @puppet = Support::Puppet.new
+
+    subscription = Subscription.new
+    subscription.start(["provision.*", "puppet_status"])
+    @puppet = Support::Puppet.new(@subscription)
   end
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
@@ -337,7 +337,7 @@ class CMD
       exit 1
     end
 
-    Support::HostBuilder.new(@factory, @nagios).rebuild(argv[0])
+    Support::HostBuilder.new(@factory, @nagios, @puppet).rebuild(argv[0])
   end
 
   def build_new_host(argv)
@@ -346,7 +346,7 @@ class CMD
       exit 1
     end
 
-    Support::HostBuilder.new(@factory, @nagios).build_new(argv[0])
+    Support::HostBuilder.new(@factory, @nagios, @puppet).build_new(argv[0])
   end
 
   def dependencies(_argv)
@@ -454,10 +454,10 @@ class CMD
 
   def do_provision_machine(services, machine_def)
     @core_actions.get_action("launch").call(services, machine_def)
-    @puppet.puppet_sign(machine_def, @subscription)
+    @puppet.puppet_wait_for_autosign(machine_def)
     @puppet.puppet_poll_sign(machine_def)
 
-    puppet_results = @puppet.puppet_wait(machine_def, @subscription)
+    puppet_results = @puppet.puppet_wait_for_run_completion(machine_def)
 
     unless puppet_results.all_passed?
       logger(Logger::INFO) { "Attempting to stop mcollective on hosts whose puppet runs failed" }

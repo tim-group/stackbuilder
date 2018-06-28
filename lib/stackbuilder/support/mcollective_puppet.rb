@@ -5,8 +5,7 @@ require 'stackbuilder/support/callback'
 class Support::MCollectivePuppet
   include Support::MCollective
 
-  def ca_sign(machines_fqdns, &block)
-    timeout = 450
+  def ca_sign(machines_fqdns, timeout, &block)
     callback = Support::Callback.new(&block)
     needs_signing = machines_fqdns.clone.to_set
 
