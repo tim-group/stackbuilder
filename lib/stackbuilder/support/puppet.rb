@@ -40,6 +40,7 @@ class Support::Puppet
     result.all.each do |vm, status|
       logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
+    result
   end
 
   # sign outstanding Puppet certificate signing requests for these machines
