@@ -45,7 +45,6 @@ class Support::HostBuilder
 
     bail "#{host_fqdn} is not off" unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
 
-    puppet_result = nil
     mac_address = @hpilo.get_mac_address(host_fqdn, fabric)
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
@@ -61,20 +60,23 @@ class Support::HostBuilder
       logger(Logger::INFO) { "o/s should be installed... signing puppet certificate for #{host_fqdn}" }
 
       signed_successfully = @puppet.poll_sign([host_fqdn], 600)
-      puppet_result = @puppet.wait_for_run_completion([host_fqdn]) if signed_successfully
+      bail ("unable to sign puppet cert") unless signed_successfully
     ensure
       @pxe.cleanup_after_reimage(mac_address, fabric)
     end
 
+    # puppet is triggered twice, the first run fails but sets up networking. The second run should pass.
+    @puppet.wait_for_run_completion([host_fqdn])
+    puppet_result = @puppet.wait_for_run_completion([host_fqdn])
+
     verify_build(host_fqdn, puppet_result)
-    # enable allocation
+    # TODO: enable allocation
   end
 
   def verify_build(host_fqdn, puppet_result)
     hostname = host_fqdn.partition('.').first
     fabric = host_fqdn.partition('-').first
 
-    bail "puppet could not be run" if puppet_result.nil?
     bail "puppet run did not complete" unless puppet_result.unaccounted_for.empty?
     bail "puppet run failed" unless puppet_result.failed.empty?
     bail "puppet did not succeed" if puppet_result.passed.empty?
