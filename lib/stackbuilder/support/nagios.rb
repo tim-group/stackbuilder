@@ -55,8 +55,7 @@ class Support::Nagios
     end
   end
 
-  def schedule_host_downtime(host_fqdn, fabric)
-    downtime_secs = 1800 # 1800 = 30 mins
+  def schedule_host_downtime(host_fqdn, fabric, downtime_secs = 1800)
     nagios_helper = Support::NagiosService.new
     result = nagios_helper.schedule_host_downtime(host_fqdn, fabric, downtime_secs)
     logger(Logger::INFO) { "scheduled #{downtime_secs}s downtime for #{host_fqdn}: #{result}" }

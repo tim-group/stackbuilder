@@ -25,7 +25,7 @@ class Support::HostBuilder
     bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
 
     logger(Logger::INFO) { "Will rebuild #{host_fqdn}, scheduling downtime and powering off host" }
-    @nagios.schedule_host_downtime(host_fqdn, fabric)
+    @nagios.schedule_host_downtime(host_fqdn, fabric, 60 * 40)
     @hpilo.power_off_host(host_fqdn, fabric)
     @hostcleanup.hostcleanup(host_fqdn, "mongodb")
 
