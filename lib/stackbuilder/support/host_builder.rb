@@ -22,19 +22,22 @@ class Support::HostBuilder
     bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map { |m| m[:hostname] }.join(', ')}" unless host.machines.empty?
     bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
 
-    logger(Logger::INFO) { "Will rebuild #{host_fqdn}" }
+    logger(Logger::INFO) { "Will rebuild #{host_fqdn}, scheduling downtime and powering off host" }
     @nagios.schedule_host_downtime(host_fqdn, fabric)
     @hpilo.power_off_host(host_fqdn, fabric)
     @hostcleanup.hostcleanup(host_fqdn, "mongodb")
 
     build(host_fqdn)
 
+    logger(Logger::INFO) { "Rebuild complete, cancelling downtime" }
     @nagios.cancel_host_downtime(host_fqdn, fabric)
   end
 
   def build_new(host_fqdn)
     fabric = host_fqdn.partition('-').first
     build(host_fqdn)
+
+    logger(Logger::INFO) { "Build complete, registering new machine with nagios" }
     @nagios.register_new_machine_in(fabric)
   end
 
@@ -45,19 +48,19 @@ class Support::HostBuilder
 
     bail "#{host_fqdn} is not off" unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
 
+    logger(Logger::INFO) { "Preparing to install new o/s on #{host_fqdn}" }
     mac_address = @hpilo.get_mac_address(host_fqdn, fabric)
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
-      logger(Logger::INFO) { "About to install o/s on #{host_fqdn}" }
       @hpilo.update_ilo_firmware(host_fqdn, fabric)
-
       @puppet.clean([host_fqdn])
-
       @hpilo.set_one_time_network_boot(host_fqdn, fabric)
+
+      logger(Logger::INFO) { "Powering on #{host_fqdn} for PXE network boot" }
       @hpilo.power_on_host(host_fqdn, fabric)
 
       sleep 780 # give the host 13 mins to boot up and install the vanilla o/s
-      logger(Logger::INFO) { "o/s should be installed... signing puppet certificate for #{host_fqdn}" }
+      logger(Logger::INFO) { "o/s should be installed... beginning polling to sign puppet certificate" }
 
       signed_successfully = @puppet.poll_sign([host_fqdn], 600)
       bail ("unable to sign puppet cert") unless signed_successfully
@@ -66,7 +69,9 @@ class Support::HostBuilder
     end
 
     # puppet is triggered twice: the first run fails but sets up networking; the second run should pass.
+    logger(Logger::INFO) { "Waiting for first puppet run to complete" }
     @puppet.wait_for_run_completion([host_fqdn])
+    logger(Logger::INFO) { "Waiting for second puppet run to complete" }
     puppet_result = @puppet.wait_for_run_completion([host_fqdn])
 
     verify_build(host_fqdn, puppet_result)
