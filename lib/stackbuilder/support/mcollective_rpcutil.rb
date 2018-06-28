@@ -6,11 +6,16 @@ class Support::MCollectiveRpcutil
 
   def ping(fqdn, attempts = 3)
     rsps = mco_client("rpcutil", :timeout => 30, :nodes => [fqdn]) { |mco| mco.ping }
+    failed = (rsps.size != 1 || rsps[0][:statuscode] != 0 || rsps[0][:data][:pong].nil?)
 
-    return ping(fqdn, attempts - 1) if attempts > 1 && (rsps.size != 1 || rsps[0][:statuscode] != 0 || rsps[0][:data][:pong].nil?)
+    if failed
+      return ping(fqdn, attempts - 1) if attempts > 1
 
-    fail "no response to mco ping from #{fqdn}" unless rsps.size == 1
-    fail "failed to mco ping #{fqdn}: #{rsps[0][:statusmsg]}" unless rsps[0][:statuscode] == 0
+      logger(Logger::DEBUG) { "no response to mco ping from #{fqdn}" } unless rsps.size == 1
+      logger(Logger::WARN) { "failed to mco ping #{fqdn}: #{rsps[0][:statusmsg]}" } unless rsps[0][:statuscode] == 0
+      return nil
+    end
+
     rsps[0][:data][:pong]
   end
 

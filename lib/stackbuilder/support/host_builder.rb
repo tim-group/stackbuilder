@@ -1,6 +1,7 @@
 require 'stackbuilder/support/namespace'
 require 'stackbuilder/support/mcollective_pxe'
 require 'stackbuilder/support/mcollective_hpilo'
+require 'stackbuilder/support/mcollective_rpcutil'
 require 'stackbuilder/support/mcollective_hostcleanup'
 
 class Support::HostBuilder
@@ -10,6 +11,7 @@ class Support::HostBuilder
     @puppet = puppet
     @pxe = Support::MCollectivePxe.new
     @hpilo = Support::MCollectiveHpilo.new
+    @rpcutil = Support::MCollectiveRpcutil.new
     @hostcleanup = Support::MCollectiveHostcleanup.new
   end
 
@@ -74,18 +76,35 @@ class Support::HostBuilder
     logger(Logger::INFO) { "Waiting for second puppet run to complete" }
     puppet_result = @puppet.wait_for_run_completion([host_fqdn])
 
-    verify_build(host_fqdn, puppet_result)
-    # TODO: enable allocation
-  end
-
-  def verify_build(host_fqdn, puppet_result)
-    hostname = host_fqdn.partition('.').first
-    fabric = host_fqdn.partition('-').first
-
     bail "puppet run did not complete" unless puppet_result.unaccounted_for.empty?
     bail "puppet run failed" unless puppet_result.failed.empty?
     bail "puppet did not succeed" if puppet_result.passed.empty?
 
+    logger(Logger::INFO) { "Puppet runs complete, waiting for final reboot" }
+    wait_for_reboot(host_fqdn, 360)
+
+    logger(Logger::INFO) { "Host is up, performing checks" }
+    verify_build(host_fqdn)
+
+    # TODO: enable allocation
+  end
+
+  def wait_for_reboot(host_fqdn, timeout)
+    start_time = Time.now
+    until @rpcutil.ping(host_fqdn, 1).nil?
+      bail "Timed out waiting for host to go down" if Time.now - start_time > timeout
+      sleep 10
+    end
+
+    while @rpcutil.ping(host_fqdn, 1).nil?
+      bail "Timed out waiting for host to come up" if Time.now - start_time > timeout
+      sleep 10
+    end
+  end
+
+  def verify_build(host_fqdn)
+    hostname = host_fqdn.partition('.').first
+    fabric = host_fqdn.partition('-').first
     host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find { |h| h.hostname == hostname }
     bail "unable to find #{host_fqdn}" if host.nil?
     bail "host came up, but with allocation already enabled #{host_fqdn}" unless host.facts['allocation_disabled']
