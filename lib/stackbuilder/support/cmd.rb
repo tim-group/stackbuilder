@@ -460,10 +460,10 @@ class CMD
     puppet_results = @puppet.puppet_wait_for_run_completion(machine_def)
 
     unless puppet_results.all_passed?
+      logger(Logger::ERROR) { "One or more puppet runs have failed" }
       logger(Logger::INFO) { "Attempting to stop mcollective on hosts whose puppet runs failed" }
-      mco_client("service", :timeout => 5, :nodes => puppet_results.failed + puppet_results.unaccounted_for) do |mco|
-        mco.stop(:service => "mcollective")
-      end
+      require 'stackbuilder/support/mcollective_service'
+      Support::MCollectiveService.new.stop_service("mcollective", puppet_results.failed + puppet_results.unaccounted_for)
       fail("Puppet runs have timed out or failed")
     end
 
