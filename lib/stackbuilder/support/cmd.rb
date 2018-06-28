@@ -454,8 +454,8 @@ class CMD
 
   def do_provision_machine(services, machine_def)
     @core_actions.get_action("launch").call(services, machine_def)
-    @puppet.puppet_wait_for_autosign(machine_def)
-    @puppet.puppet_poll_sign(machine_def)
+    sign_results = @puppet.puppet_wait_for_autosign(machine_def)
+    fail("unable to sign puppet cert") unless sign_results.all_passed?
 
     puppet_results = @puppet.puppet_wait_for_run_completion(machine_def)
 
