@@ -33,7 +33,7 @@ class CMD
 
     subscription = Subscription.new
     subscription.start(["provision.*", "puppet_status"])
-    @puppet = Support::Puppet.new(@subscription)
+    @puppet = Support::Puppet.new(subscription)
   end
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
