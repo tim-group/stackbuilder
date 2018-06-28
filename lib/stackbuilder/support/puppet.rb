@@ -32,18 +32,10 @@ class Support::Puppet
 
   # sign outstanding Puppet certificate signing requests for these machines
   def puppet_sign(machine_def, subscription)
-    puppet_certs_to_sign = []
-    machine_def.accept do |child_machine_def|
-      if child_machine_def.respond_to?(:mgmt_fqdn)
-        if child_machine_def.needs_signing?
-          puppet_certs_to_sign << child_machine_def.mgmt_fqdn
-        else
-          logger(Logger::INFO) { "signing not needed for #{child_machine_def.mgmt_fqdn}" }
-        end
-      end
-    end
+    fqdns_to_sign = get_machine_fqdns(machine_def, "signing")
+
     start_time = Time.now
-    result = subscription.wait_for_hosts("provision.*", puppet_certs_to_sign, 600)
+    result = subscription.wait_for_hosts("provision.*", fqdns_to_sign, 600)
     result.all.each do |vm, status|
       logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
@@ -51,18 +43,9 @@ class Support::Puppet
 
   # sign outstanding Puppet certificate signing requests for these machines
   def puppet_poll_sign(machine_def)
-    puppet_certs_to_sign = []
-    machine_def.accept do |child_machine_def|
-      if child_machine_def.respond_to?(:mgmt_fqdn)
-        if child_machine_def.needs_poll_signing?
-          puppet_certs_to_sign << child_machine_def.mgmt_fqdn
-        else
-          logger(Logger::INFO) { "poll signing not needed for #{child_machine_def.mgmt_fqdn}" }
-        end
-      end
-    end
+    fqdns_to_sign = get_machine_fqdns(machine_def, "poll signing")
 
-    @mcollective_puppet.ca_sign(puppet_certs_to_sign) do
+    @mcollective_puppet.ca_sign(fqdns_to_sign) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully signed cert for #{machine}" }
       end
@@ -81,14 +64,9 @@ class Support::Puppet
   # wait for puppet to complete its run on these machines
   def puppet_wait(machine_def, subscription)
     start_time = Time.now
-    hosts = []
-    machine_def.accept do |child_machine_def|
-      if child_machine_def.respond_to?(:mgmt_fqdn)
-        hosts << child_machine_def.mgmt_fqdn
-      end
-    end
+    host_fqdns = get_machine_fqdns(machine_def)
 
-    run_result = subscription.wait_for_hosts("puppet_status", hosts, 5400)
+    run_result = subscription.wait_for_hosts("puppet_status", host_fqdns, 5400)
 
     run_result.all.each do |vm, status|
       logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
@@ -99,18 +77,9 @@ class Support::Puppet
 
   # Remove signed certs from puppetserver
   def puppet_clean(machine_def)
-    puppet_certs_to_clean = []
-    machine_def.accept do |child_machine_def|
-      if child_machine_def.respond_to?(:mgmt_fqdn)
-        if child_machine_def.needs_signing?
-          puppet_certs_to_clean << child_machine_def.mgmt_fqdn
-        else
-          logger(Logger::INFO) { "removal of cert not needed for #{child_machine_def.mgmt_fqdn}" }
-        end
-      end
-    end
+    fqdns_to_clean = get_machine_fqdns(machine_def, "removal of cert")
 
-    @mcollective_puppet.ca_clean(puppet_certs_to_clean) do
+    @mcollective_puppet.ca_clean(fqdns_to_clean) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully removed cert for #{machine}" }
       end
@@ -118,5 +87,21 @@ class Support::Puppet
         logger(Logger::WARN) { "failed to remove cert for #{machine}" }
       end
     end
+  end
+
+  private
+
+  def get_machine_fqdns(machine_def, filter_needs_signing = nil)
+    host_fqdns = []
+    machine_def.accept do |child_machine_def|
+      if child_machine_def.respond_to?(:mgmt_fqdn)
+        if child_machine_def.needs_signing? || filter_needs_signing.nil?
+          host_fqdns << child_machine_def.mgmt_fqdn
+        else
+          logger(Logger::INFO) { "#{filter_needs_signing} not needed for #{child_machine_def.mgmt_fqdn}" }
+        end
+      end
+    end
+    host_fqdns
   end
 end
