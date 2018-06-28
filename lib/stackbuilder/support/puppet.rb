@@ -48,9 +48,11 @@ class Support::Puppet
   end
 
   def poll_sign(host_fqdns, timeout = 450)
+    success = false
     @mcollective_puppet.ca_sign(host_fqdns, timeout) do
       on :success do |machine|
         logger(Logger::INFO) { "successfully signed cert for #{machine}" }
+        success = true
       end
       on :failed do |machine|
         logger(Logger::WARN) { "failed to signed cert for #{machine}" }
@@ -60,8 +62,10 @@ class Support::Puppet
       end
       on :already_signed do |machine|
         logger(Logger::WARN) { "cert for #{machine} already signed, skipping" }
+        success = true
       end
     end
+    success
   end
 
   # wait for puppet to complete its run on these machines

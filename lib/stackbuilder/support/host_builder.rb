@@ -57,8 +57,8 @@ class Support::HostBuilder
       @hpilo.power_on_host(host_fqdn, fabric)
 
       sleep 180 # give the host a chance to boot up and install the vanilla o/s
-      @puppet.poll_sign([host_fqdn], 600)
-      puppet_result = @puppet.wait_for_run_completion([host_fqdn])
+      signed_successfully = @puppet.poll_sign([host_fqdn], 600)
+      puppet_result = @puppet.wait_for_run_completion([host_fqdn]) if (signed_successfully)
     ensure
       @pxe.cleanup_after_reimage(mac_address, fabric)
     end
