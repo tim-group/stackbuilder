@@ -41,8 +41,8 @@ describe StackBuilder::Allocator::HostRepository do
       :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_compute_nodes("t")
-    expect(hosts.hosts.size).to eql(n)
-    hosts.hosts.each do |host|
+    expect(hosts.size).to eql(n)
+    hosts.each do |host|
       expect(host.preference_functions).to eql(preference_functions)
       expect(host.machines).to eql(env.flatten.map(&:to_specs).flatten)
     end
@@ -73,8 +73,8 @@ describe StackBuilder::Allocator::HostRepository do
       :compute_node_client => compute_node_client)
 
     hosts = host_repo.find_compute_nodes("t")
-    expect(hosts.hosts.size).to eql(n)
-    hosts.hosts.each do |host|
+    expect(hosts.size).to eql(n)
+    hosts.each do |host|
       expect(host.preference_functions).to eql(preference_functions)
       expect(host.machines).to eql(machine_specs)
     end

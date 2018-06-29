@@ -248,7 +248,7 @@ class CMD
     specs = machine_def.flatten.map(&:to_spec)
     fabric_grouped_specs = specs.group_by { |spec| spec[:fabric] }
     fabric_grouped_specs.map do |fabric, fabric_specs|
-      hosts = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts
+      hosts = @factory.host_repository.find_compute_nodes(fabric, false, false, false)
 
       host_fqdn_by_machine_name = Hash[hosts.map do |host|
         host.allocated_machines.map do |machine|
@@ -303,7 +303,7 @@ class CMD
 
     machine = machines.first
     hosts = @factory.host_repository.find_compute_nodes(machine.fabric, false, false, false)
-    host = hosts.hosts.find { |h| h.allocated_machines.map { |m| m[:hostname] }.include?(machine.hostname) }
+    host = hosts.find { |h| h.allocated_machines.map { |m| m[:hostname] }.include?(machine.hostname) }
 
     if host.nil?
       logger(Logger::FATAL) { "#{machine.hostname} is not provisioned" }

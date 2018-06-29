@@ -3,7 +3,7 @@ describe 'launch' do
   class HostRepository
     attr_accessor :machine_repo
 
-    def find_compute_nodes
+    def get_fabric_allocator
       result = audit
       result.each.each do |vm|
         machine_repo.find(vm)
@@ -58,7 +58,7 @@ describe 'launch' do
   end
 
   action 'launch' do |services, machine_def|
-    hosts = services.host_repo.find_compute_nodes
+    hosts = services.host_repo.get_fabric_allocator
     hosts.allocate(machine_def.flatten)
     services.compute_controller.launch(nil)
   end

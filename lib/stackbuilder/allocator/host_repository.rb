@@ -22,7 +22,11 @@ class StackBuilder::Allocator::HostRepository
 
   def find_compute_nodes(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
     audit = @compute_node_client.audit_fabric(fabric, audit_domains, audit_storage, audit_inventory)
-    hosts = to_stacks_hosts(audit, fabric)
+    to_stacks_hosts(audit, fabric)
+  end
+
+  def get_fabric_allocator(fabric)
+    hosts = find_compute_nodes(fabric)
     StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
   end
 
