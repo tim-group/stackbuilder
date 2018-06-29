@@ -31,8 +31,8 @@ describe StackBuilder::Allocator::EphemeralAllocator do
     f2_hosts = StackBuilder::Allocator::Hosts.new(:hosts => [h2], :preference_functions => [])
 
     host_repository = double
-    allow(host_repository).to receive(:get_fabric_allocator).with("f1").and_return(hosts)
-    allow(host_repository).to receive(:get_fabric_allocator).with("f2").and_return(f2_hosts)
+    allow(host_repository).to receive(:fabric_allocator).with("f1").and_return(hosts)
+    allow(host_repository).to receive(:fabric_allocator).with("f2").and_return(f2_hosts)
 
     allocator = StackBuilder::Allocator::EphemeralAllocator.new(:host_repository => host_repository)
 

@@ -25,7 +25,7 @@ class StackBuilder::Allocator::HostRepository
     to_stacks_hosts(audit, fabric)
   end
 
-  def get_fabric_allocator(fabric)
+  def fabric_allocator(fabric)
     hosts = find_compute_nodes(fabric)
     StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
   end

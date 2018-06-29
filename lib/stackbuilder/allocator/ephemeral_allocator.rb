@@ -8,7 +8,7 @@ class StackBuilder::Allocator::EphemeralAllocator
   def allocate(specs, excluded_hosts = [], best_effort = false)
     grouped_specs = specs.group_by { |spec| spec[:fabric] }
     grouped_specs.map do |fabric, fabric_specs|
-      fabric_allocator = @host_repository.get_fabric_allocator(fabric).without(excluded_hosts)
+      fabric_allocator = @host_repository.fabric_allocator(fabric).without(excluded_hosts)
       fabric_allocator.do_allocation(fabric_specs, best_effort)
     end.reduce do |result1, result2|
       return {
