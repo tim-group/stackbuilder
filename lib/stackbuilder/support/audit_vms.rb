@@ -97,6 +97,7 @@ class Support::AuditVms
   end
 
   def total_logical_volume_size(lvs, vg_name)
+    return nil if lvs.nil?
     bytes = lvs.select { |lv| lv[:vg_name] == vg_name }.inject(0) { |a, e| a + e[:lv_size] }
     convert_bytes_to_gb(bytes)
   end
