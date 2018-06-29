@@ -457,7 +457,7 @@ class CMD
 
     # sometimes the one-time password auto-sign fails, and we do not know why
     unless sign_results.all_passed?
-      failed_fqdns = sign_results.all.select { |_, res| res != "success"}.keys
+      failed_fqdns = sign_results.all.select { |_, res| res != "success" }.keys
       logger(Logger::WARN) { "puppet auto-sign failed for: #{failed_fqdns.join(', ')}" }
       logger(Logger::INFO) { "falling back to poll sign for these hosts" }
       poll_sign_success = @puppet.poll_sign(failed_fqdns, 30)
