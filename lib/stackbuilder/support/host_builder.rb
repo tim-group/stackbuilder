@@ -24,14 +24,14 @@ class Support::HostBuilder
     bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map { |m| m[:hostname] }.join(', ')}" unless host.machines.empty?
     bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
 
-    logger(Logger::INFO) { "Will rebuild #{host_fqdn}, scheduling downtime and powering off host" }
+    logger(Logger::INFO) { "will rebuild #{host_fqdn}, scheduling downtime and powering off host" }
     @nagios.schedule_host_downtime(host_fqdn, fabric, 60 * 40)
     @hpilo.power_off_host(host_fqdn, fabric)
     @hostcleanup.hostcleanup(host_fqdn, "mongodb")
 
     build(host_fqdn)
 
-    logger(Logger::INFO) { "Rebuild complete, cancelling downtime" }
+    logger(Logger::INFO) { "rebuild complete, cancelling downtime" }
     @nagios.cancel_host_downtime(host_fqdn, fabric)
   end
 
@@ -39,7 +39,7 @@ class Support::HostBuilder
     fabric = host_fqdn.partition('-').first
     build(host_fqdn)
 
-    logger(Logger::INFO) { "Build complete, registering new machine with nagios" }
+    logger(Logger::INFO) { "build complete, registering new machine with nagios" }
     @nagios.register_new_machine_in(fabric)
   end
 
@@ -50,7 +50,7 @@ class Support::HostBuilder
 
     bail "#{host_fqdn} is not off" unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
 
-    logger(Logger::INFO) { "Preparing to install new o/s on #{host_fqdn}" }
+    logger(Logger::INFO) { "preparing to install new o/s on #{host_fqdn}" }
     mac_address = @hpilo.get_mac_address(host_fqdn, fabric)
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
@@ -58,7 +58,7 @@ class Support::HostBuilder
       @puppet.clean([host_fqdn])
       @hpilo.set_one_time_network_boot(host_fqdn, fabric)
 
-      logger(Logger::INFO) { "Powering on #{host_fqdn} for PXE network boot" }
+      logger(Logger::INFO) { "powering on #{host_fqdn} for PXE network boot" }
       @hpilo.power_on_host(host_fqdn, fabric)
 
       sleep 780 # give the host 13 mins to boot up and install the vanilla o/s
@@ -71,34 +71,34 @@ class Support::HostBuilder
     end
 
     # puppet is triggered twice: the first run fails but sets up networking; the second run should pass.
-    logger(Logger::INFO) { "Waiting for first puppet run to complete" }
+    logger(Logger::INFO) { "waiting for first puppet run to complete" }
     @puppet.wait_for_run_completion([host_fqdn])
-    logger(Logger::INFO) { "Waiting for second puppet run to complete" }
+    logger(Logger::INFO) { "waiting for second puppet run to complete" }
     puppet_result = @puppet.wait_for_run_completion([host_fqdn])
 
     bail "puppet run did not complete" unless puppet_result.unaccounted_for.empty?
     bail "puppet run failed" unless puppet_result.failed.empty?
     bail "puppet did not succeed" if puppet_result.passed.empty?
 
-    logger(Logger::INFO) { "Puppet runs complete, waiting for final reboot" }
+    logger(Logger::INFO) { "puppet runs complete, waiting for final reboot" }
     wait_for_reboot(host_fqdn, 360)
 
-    logger(Logger::INFO) { "Host is up, performing checks" }
+    logger(Logger::INFO) { "host is up, performing checks" }
     verify_build(host_fqdn)
 
-    logger(Logger::INFO) { "Host checks successful, enabling allocation" }
+    logger(Logger::INFO) { "host checks successful, enabling allocation" }
     @factory.compute_node_client.enable_allocation(host_fqdn)
   end
 
   def wait_for_reboot(host_fqdn, timeout)
     start_time = Time.now
     until @rpcutil.ping(host_fqdn, 1).nil?
-      bail "Timed out waiting for host to go down" if Time.now - start_time > timeout
+      bail "timed out waiting for host to go down" if Time.now - start_time > timeout
       sleep 10
     end
 
     while @rpcutil.ping(host_fqdn, 1).nil?
-      bail "Timed out waiting for host to come up" if Time.now - start_time > timeout
+      bail "timed out waiting for host to come up" if Time.now - start_time > timeout
       sleep 10
     end
   end
