@@ -5,7 +5,7 @@ class Support::MCollectiveNagsrv
   include Support::MCollective
 
   def schedule_downtime(fqdn, fabric, duration)
-    logger(Logger::INFO) { "Scheduling downtime for #{fqdn}" }
+    logger(Logger::DEBUG) { "Scheduling downtime for #{fqdn}" }
     mco_client("nagsrv", :fabric => fabric) do |mco|
       mco.class_filter('nagios')
       mco.schedule_host_downtime(:host => fqdn, :duration => duration).map do |response|
@@ -15,7 +15,7 @@ class Support::MCollectiveNagsrv
   end
 
   def cancel_downtime(fqdn, fabric)
-    logger(Logger::INFO) { "Cancelling downtime for #{fqdn}" }
+    logger(Logger::DEBUG) { "Cancelling downtime for #{fqdn}" }
     mco_client("nagsrv", :fabric => fabric) do |mco|
       mco.class_filter('nagios')
       mco.del_host_downtime(:host => fqdn).map do |response|
