@@ -76,13 +76,13 @@ class Support::Puppet
     wait_for_run_completion(host_fqdns)
   end
 
-  def wait_for_run_completion(host_fqdns, timeout = 5400)
+  def wait_for_run_completion(host_fqdns, timeout = 5400, expect_failure = false)
     start_time = Time.now
 
     run_result = @subscription.wait_for_hosts("puppet_status", host_fqdns, timeout)
 
     run_result.all.each do |vm, status|
-      level = (status == "success") ? Logger::INFO : Logger::ERROR
+      level = (status == "success" || expect_failure) ? Logger::INFO : Logger::ERROR
       logger(level) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
 

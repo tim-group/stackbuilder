@@ -91,9 +91,9 @@ class Support::HostBuilder
 
     # puppet is triggered twice: the first run fails but sets up networking; the second run should pass.
     logger(Logger::INFO) { "waiting for first puppet run to complete" }
-    @puppet.wait_for_run_completion([host_fqdn])
+    @puppet.wait_for_run_completion([host_fqdn], 600, true)
     logger(Logger::INFO) { "waiting for second puppet run to complete" }
-    puppet_result = @puppet.wait_for_run_completion([host_fqdn])
+    puppet_result = @puppet.wait_for_run_completion([host_fqdn], 300, false)
 
     bail "puppet run did not complete" unless puppet_result.unaccounted_for.empty?
     bail "puppet run failed" unless puppet_result.failed.empty?
