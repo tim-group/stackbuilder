@@ -16,14 +16,9 @@ class Support::HostBuilder
   end
 
   def rebuild(host_fqdn)
-    hostname = host_fqdn.partition('.').first
-    fabric = hostname.partition('-').first
-    host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find { |h| h.hostname == hostname }
+    ensure_safe_to_nuke(host_fqdn)
 
-    bail "unable to find #{host_fqdn}" if host.nil?
-    bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map { |m| m[:hostname] }.join(', ')}" unless host.machines.empty?
-    bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
-
+    fabric = host_fqdn.partition('-').first
     logger(Logger::INFO) { "will rebuild #{host_fqdn}, scheduling downtime and powering off host" }
     @nagios.schedule_host_downtime(host_fqdn, fabric, 60 * 40)
     @hpilo.power_off_host(host_fqdn, fabric)
@@ -44,6 +39,27 @@ class Support::HostBuilder
   end
 
   private
+
+  def ensure_safe_to_nuke(host_fqdn)
+    host = get_and_check_host(host_fqdn)
+
+    unless host.facts['allocation_disabled']
+      logger(Logger::INFO) { 'disabling allocation' }
+      @factory.compute_node_client.disable_allocation(host_fqdn, "rebuilding kvm host")
+      host = get_and_check_host(host_fqdn)
+    end
+
+    bail "cannot rebuild #{host_fqdn}, it has allocation enabled" unless host.facts['allocation_disabled']
+  end
+
+  def get_and_check_host(host_fqdn)
+    hostname = host_fqdn.partition('.').first
+    fabric = host_fqdn.partition('-').first
+    host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find {|h| h.hostname == hostname}
+    bail "unable to find #{host_fqdn}" if host.nil?
+    bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map {|m| m[:hostname]}.join(', ')}" unless host.machines.empty?
+    host
+  end
 
   def build(host_fqdn)
     fabric = host_fqdn.partition('-').first
