@@ -38,7 +38,8 @@ class Support::Puppet
     start_time = Time.now
     result = @subscription.wait_for_hosts("provision.*", fqdns_to_sign, 600)
     result.all.each do |vm, status|
-      logger(Logger::INFO) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
+      level = (status == "success") ? Logger::INFO : Logger::ERROR
+      logger(level) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
     result
   end
@@ -81,7 +82,8 @@ class Support::Puppet
     run_result = @subscription.wait_for_hosts("puppet_status", host_fqdns, timeout)
 
     run_result.all.each do |vm, status|
-      logger(Logger::INFO) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
+      level = (status == "success") ? Logger::INFO : Logger::ERROR
+      logger(level) { "puppet run: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
     end
 
     run_result
