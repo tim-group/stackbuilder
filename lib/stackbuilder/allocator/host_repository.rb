@@ -13,33 +13,16 @@ class StackBuilder::Allocator::HostRepository
     @policies = args[:policies]
   end
 
+  def find_compute_node(host_fqdn, audit_domains = false, audit_storage = true, audit_inventory = true)
+    audit = @compute_node_client.audit_hosts([host_fqdn], audit_domains, audit_storage, audit_inventory)
+    fabric = host_fqdn.partition('-').first
+    hosts = to_stacks_hosts(audit, fabric)
+    hosts[0]
+  end
+
   def find_compute_nodes(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
-    result = @compute_node_client.audit_fabric(fabric, audit_domains, audit_storage, audit_inventory)
-    hosts = []
-    result.each do |fqdn, attr|
-      vms = []
-      all_domains = attr[:active_domains].concat(attr[:inactive_domains])
-      all_domains.each do |vm_hostname|
-        vm_object = machine_repo.find_by_hostname(fabric, vm_hostname)
-        if vm_object.nil?
-          vms << { :hostname => vm_hostname, :in_model => false }
-        else
-          vms << vm_object.to_spec
-        end
-      end
-
-      host = StackBuilder::Allocator::Host.new(fqdn,
-                                               :preference_functions => preference_functions,
-                                               :policies             => policies,
-                                               :ram                  => attr[:memory],
-                                               :storage              => attr[:storage],
-                                               :facts                => attr[:facts])
-
-      host.allocated_machines = vms
-      host.domains = attr[:domains]
-      hosts << host
-    end
-
+    audit = @compute_node_client.audit_fabric(fabric, audit_domains, audit_storage, audit_inventory)
+    hosts = to_stacks_hosts(audit, fabric)
     StackBuilder::Allocator::Hosts.new(:hosts => hosts, :preference_functions => preference_functions)
   end
 
@@ -65,5 +48,35 @@ class StackBuilder::Allocator::HostRepository
       end
     end
     result
+  end
+
+  private
+
+  def to_stacks_hosts(audit, fabric)
+    hosts = []
+    audit.each do |fqdn, attr|
+      vms = []
+      all_domains = attr[:active_domains].concat(attr[:inactive_domains])
+      all_domains.each do |vm_hostname|
+        vm_object = machine_repo.find_by_hostname(fabric, vm_hostname)
+        if vm_object.nil?
+          vms << {:hostname => vm_hostname, :in_model => false}
+        else
+          vms << vm_object.to_spec
+        end
+      end
+
+      host = StackBuilder::Allocator::Host.new(fqdn,
+                                               :preference_functions => preference_functions,
+                                               :policies => policies,
+                                               :ram => attr[:memory],
+                                               :storage => attr[:storage],
+                                               :facts => attr[:facts])
+
+      host.allocated_machines = vms
+      host.domains = attr[:domains]
+      hosts << host
+    end
+    hosts
   end
 end

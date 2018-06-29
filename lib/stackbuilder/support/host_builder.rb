@@ -53,11 +53,14 @@ class Support::HostBuilder
   end
 
   def get_and_check_host(host_fqdn)
-    hostname = host_fqdn.partition('.').first
-    fabric = host_fqdn.partition('-').first
-    host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find {|h| h.hostname == hostname}
-    bail "unable to find #{host_fqdn}" if host.nil?
+    host = get_host(host_fqdn)
     bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map {|m| m[:hostname]}.join(', ')}" unless host.machines.empty?
+    host
+  end
+
+  def get_host(host_fqdn)
+    host = @factory.host_repository.find_compute_node(host_fqdn, false, false, true)
+    bail "unable to find #{host_fqdn}" if host.nil?
     host
   end
 
@@ -120,10 +123,7 @@ class Support::HostBuilder
   end
 
   def verify_build(host_fqdn)
-    hostname = host_fqdn.partition('.').first
-    fabric = host_fqdn.partition('-').first
-    host = @factory.host_repository.find_compute_nodes(fabric, false, false, true).hosts.find { |h| h.hostname == hostname }
-    bail "unable to find #{host_fqdn}" if host.nil?
+    host = get_host(host_fqdn)
     bail "host came up, but with allocation already enabled #{host_fqdn}" unless host.facts['allocation_disabled']
   end
 

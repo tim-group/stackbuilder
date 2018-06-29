@@ -319,12 +319,11 @@ class CMD
       exit 1
     end
 
-    hostname = argv[0].partition('.').first
-    fabric = hostname.partition('-').first
-    host = @factory.host_repository.find_compute_nodes(fabric, false, false, false).hosts.find { |h| h.hostname == hostname }
+    host_fqdn = argv[0]
+    host = @factory.host_repository.find_compute_node(host_fqdn, false, false, false)
 
     if host.nil?
-      logger(Logger::FATAL) { "unable to find #{hostname}" }
+      logger(Logger::FATAL) { "unable to find #{host_fqdn}" }
       exit 1
     end
 
