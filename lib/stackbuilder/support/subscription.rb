@@ -18,11 +18,11 @@ class Subscription
     end
 
     def passed
-      @responses.reject { |response| response["status"] == "failed" }.map { |response| response["host"] }
+      @responses.reject { |response| response["status"].nil? || response["status"] == "failed" }.map { |response| response["host"] }
     end
 
     def failed
-      @responses.select { |response| response["status"] == "failed" }.map { |response| response["host"] }
+      @responses.select { |response| response["status"].nil? || response["status"] == "failed" }.map { |response| response["host"] }
     end
 
     def unaccounted_for
