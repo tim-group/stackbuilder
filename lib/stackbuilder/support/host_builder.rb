@@ -54,7 +54,7 @@ class Support::HostBuilder
 
   def get_and_check_host(host_fqdn)
     host = get_host(host_fqdn)
-    bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map {|m| m[:hostname]}.join(', ')}" unless host.machines.empty?
+    bail "cannot rebuild #{host_fqdn}, it has VMs: #{host.machines.map { |m| m[:hostname] }.join(', ')}" unless host.machines.empty?
     host
   end
 
