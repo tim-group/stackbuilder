@@ -454,7 +454,15 @@ class CMD
   def do_provision_machine(services, machine_def)
     @core_actions.get_action("launch").call(services, machine_def)
     sign_results = @puppet.puppet_wait_for_autosign(machine_def)
-    fail("unable to sign puppet cert") unless sign_results.all_passed?
+
+    # sometimes the one-time password auto-sign fails, and we do not know why
+    unless sign_results.all_passed?
+      failed_fqdns = sign_results.all.select { |_, res| res != "success"}.keys
+      logger(Logger::WARN) { "puppet auto-sign failed for: #{failed_fqdns.join(', ')}" }
+      logger(Logger::INFO) { "falling back to poll sign for these hosts" }
+      poll_sign_success = @puppet.poll_sign(failed_fqdns, 30)
+      fail "poll sign also failed" unless poll_sign_success
+    end
 
     puppet_results = @puppet.puppet_wait_for_run_completion(machine_def)
 
