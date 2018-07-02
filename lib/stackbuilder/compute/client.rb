@@ -1,9 +1,16 @@
 require 'stackbuilder/compute/namespace'
 require 'mcollective'
 require 'stackbuilder/support/mcollective'
+require 'stackbuilder/support/mcollective_libvirt'
+require 'stackbuilder/support/mcollective_rpcutil'
 
 class Compute::Client
   include Support::MCollective
+
+  def initialize()
+    @mco_libvirt = Support::MCollectiveLibvirt.new
+    @mco_rpcutil = Support::MCollectiveRpcutil.new
+  end
 
   def audit_fabric(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
     fail "Unable to audit hosts when Fabric is nil" if fabric.nil?
@@ -14,25 +21,18 @@ class Compute::Client
 
   # audit_domains is not enabled by default, as it takes significant time to complete
   def audit_hosts(host_fqdns, audit_domains = false, audit_storage = true, audit_inventory = true)
-    libvirt_response = mco_client("libvirt", :nodes => host_fqdns) do |mco|
-      mco.hvinfo.map do |hv|
-        fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
-        [hv[:sender], hv[:data]]
-      end
-    end
-    fail "libvirt - not all compute nodes (#{host_fqdns.join(', ')}) responded -- missing responses from " \
-      "(#{(host_fqdns - libvirt_response.map { |x| x[0] }).join(', ')})" unless host_fqdns.size == libvirt_response.size
+    libvirt_response = @mco_libvirt.hvinfo(host_fqdns)
 
     response_hash = Hash[libvirt_response]
     if audit_domains
       response_hash.each do |host_fqdn, hv|
         vm_names = hv[:active_domains] + hv[:inactive_domains]
-        response_hash[host_fqdn][:domains] = get_libvirt_domains(host_fqdn, vm_names)
+        response_hash[host_fqdn][:domains] = audit_domains(host_fqdn, vm_names)
       end
     end
 
     if audit_inventory
-      inventory_response = get_inventory(host_fqdns)
+      inventory_response = @mco_rpcutil.get_inventory(host_fqdns)
       fail "inventory - not all hosts responded -- missing responses from " \
         "(#{(host_fqdns - inventory_response.keys.map { |x| x[0] }).join(', ')})" unless host_fqdns.size == inventory_response.size
       response_hash = merge_attributes_by_fqdn(response_hash, inventory_response)
@@ -258,15 +258,12 @@ class Compute::Client
     target_hash
   end
 
-  def get_inventory(hosts)
-    require 'stackbuilder/support/mcollective_rpcutil'
-    Support::MCollectiveRpcutil.new.get_inventory(hosts)
-  end
-
-  def get_libvirt_domains(host_fqdn, vm_names)
+  def audit_domains(host_fqdn, vm_names)
     return {} if vm_names.empty?
 
     host_domain = host_fqdn.partition('.')[2]
+    vm_name_by_vm_fqdn = Hash[vm_names.map { |name| ["#{name}.#{host_domain}", name] }]
+    inventory = @mco_rpcutil.get_inventory(vm_name_by_vm_fqdn.keys)
 
     host_volumes = (mco_client("lvm", :nodes => [host_fqdn]) do |mco|
       mco.lvs.map do |lvs|
@@ -274,34 +271,15 @@ class Compute::Client
         lvs[:data][:lvs]
       end
     end).flatten
-    fail "Got no response from mcollective lvs.lvm request to #{host_fqdn}" if !vm_names.empty? && host_volumes.empty?
+    fail "Got no response from mcollective lvs.lvm request to #{host_fqdn}" if host_volumes.empty?
 
-    result = mco_client("libvirt", :timeout => 1, :nodes => [host_fqdn]) do |mco|
-      vm_names.map do |vm_name|
-        result = {}
-        result.merge!(get_vm_info(mco, vm_name))
-        result.merge!(:logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(vm_name) })
+    domain_info = @mco_libvirt.domaininfo(host_fqdn, vm_names)
 
-        vm_fqdn = "#{vm_name}.#{host_domain}"
-        { vm_fqdn => result }
-      end.reduce({}, :merge)
-    end
-
-    inventory = get_inventory(vm_names.map { |name| "#{name}.#{host_domain}" })
-    merge_attributes_by_fqdn(inventory, result)
-  end
-
-  def get_vm_info(mco, vm_name, attempts = 3)
-    vm_info = mco.domaininfo(:domain => vm_name).map do |di|
-      fail "domainfo request #{vm_name} failed: #{di[:statusmsg]}" if di[:statuscode] != 0 && attempts == 1
-      di[:statuscode] == 0 ? di[:data] : nil
-    end
-
-    if vm_info.empty? || vm_info[0].nil?
-      return get_vm_info(mco, vm_name, attempts - 1) if attempts > 1
-      fail "Got no response for domainfo request #{vm_name}"
-    end
-
-    vm_info[0]
+    Hash[vm_name_by_vm_fqdn.map do |vm_fqdn, vm_name|
+      data = { :logical_volumes => host_volumes.select { |lv| lv[:lv_name].start_with?(vm_name) } }
+      data.merge!(domain_info[vm_name])
+      data.merge!(inventory[vm_fqdn]) if inventory[vm_fqdn]
+      [vm_fqdn, data]
+    end]
   end
 end
