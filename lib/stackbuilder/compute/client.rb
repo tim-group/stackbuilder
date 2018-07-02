@@ -3,6 +3,7 @@ require 'mcollective'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_libvirt'
 require 'stackbuilder/support/mcollective_rpcutil'
+require 'stackbuilder/support/mcollective_puppetng'
 
 class Compute::Client
   include Support::MCollective
@@ -10,6 +11,7 @@ class Compute::Client
   def initialize()
     @mco_libvirt = Support::MCollectiveLibvirt.new
     @mco_rpcutil = Support::MCollectiveRpcutil.new
+    @mco_puppetng = Support::MCollectivePuppetng.new
   end
 
   def audit_fabric(fabric, audit_domains = false, audit_storage = true, audit_inventory = true)
@@ -165,7 +167,7 @@ class Compute::Client
 
     tags = ["live_migration_setup"]
     tags << "purge_unmanaged_firewall_rules" unless enable
-    run_puppet_on([dest_host_fqdn], tags)
+    @mco_puppetng.run_puppet([dest_host_fqdn], tags)
   end
 
   def migrate_vm(source_host_fqdn, dest_host_fqdn, vm_name)
@@ -244,11 +246,6 @@ class Compute::Client
       response = responses.first
       fail "failed to archive persistent storage for vm #{response[:statusmsg]}" unless response[:statuscode] == 0
     end
-  end
-
-  def run_puppet_on(hosts, tags = [])
-    require 'stackbuilder/support/mcollective_puppetng'
-    Support::MCollectivePuppetng.new.run_puppet(hosts, tags)
   end
 
   def merge_attributes_by_fqdn(source_hash, target_hash)
