@@ -6,6 +6,7 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
     stack 'a_stack' do
       elasticsearch_data 'elasticsearch-data' do
         depend_on 'elasticsearch-master'
+        allow_host 'some-random-app.oy.net.local'
         each_machine do |machine|
           machine.add_node_attribute('test', 'blah') if machine.hostname == 'oy-elasticsearch-data-002'
         end
@@ -21,6 +22,11 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
         depend_on 'elasticsearch-data'
       end
       loadbalancer_service
+      app_service 'myapp' do
+        self.groups = ['blue']
+        self.application = 'rw-app'
+        depend_on 'elasticsearch-data', environment.name
+      end
     end
 
     env 'o', :primary_site => 'oy' do
@@ -34,6 +40,8 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
     enc = host.to_enc
     expect(enc['role::elasticsearch_data']).not_to be_nil
     role_enc = enc['role::elasticsearch_data']
+    expect(role_enc['allowed_hosts']).to include('oy-myapp-001.oy.net.local')
+    expect(role_enc['allowed_hosts']).to include('some-random-app.oy.net.local')
     expect(role_enc['elasticsearch_master_hosts']).to \
       eql([
         'oy-elasticsearch-master-001.oy.net.local',
@@ -121,5 +129,10 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
     expect(enc['virtual_servers']['oy-elasticsearch-data-vip.oy.net.local']['healthchecks']).to be_eql([
       { "healthcheck" => "TCP_CHECK", "connect_timeout" => "5" }
     ])
+  end
+
+  host('oy-myapp-001.mgmt.oy.net.local') do |host|
+    deps = host.to_enc['role::http_app']['dependencies']
+    expect(deps['elasticsearch-data.url']).to eql('http://oy-elasticsearch-data-vip.oy.net.local:9200')
   end
 end

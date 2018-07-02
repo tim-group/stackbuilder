@@ -35,6 +35,10 @@ module Stacks::Services::ElasticsearchDataCluster
     end.flatten.sort
   end
 
+  def config_params(_dependant, fabric, _dependent_instance)
+    { "#{name}.url" => "http://#{vip_fqdn(:prod, fabric)}:9200" }
+  end
+
   def logstash_receiver_hosts
     virtual_services_that_depend_on_me.select do |service|
       service.is_a?(Stacks::Services::LogstashReceiverCluster)

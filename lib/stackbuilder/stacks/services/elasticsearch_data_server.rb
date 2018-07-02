@@ -21,6 +21,9 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
   def to_enc
     enc = super()
 
+    allowed_hosts = @virtual_service.dependant_instance_fqdns(location, [:prod], false)
+    allowed_hosts += @virtual_service.allowed_hosts
+
     enc.merge!('role::elasticsearch_data' => {
                  'elasticsearch_master_hosts'     => @elasticsearch_cluster.elasticsearch_master_hosts,
                  'other_elasticsearch_data_hosts' => @elasticsearch_cluster.other_elasticsearch_data_hosts(mgmt_fqdn),
@@ -31,7 +34,7 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
                  'prod_vip_fqdn'                  => @elasticsearch_cluster.vip_fqdn(:prod, fabric),
                  'minimum_master_nodes'           => @elasticsearch_cluster.elasticsearch_minimum_master_nodes,
                  'node_attrs'                     => @node_attrs,
-                 'allowed_hosts'                  => @virtual_service.allowed_hosts
+                 'allowed_hosts'                  => allowed_hosts.uniq.sort
                },
                'server::default_new_mgmt_net_local' => nil)
     enc
