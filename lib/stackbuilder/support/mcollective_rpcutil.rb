@@ -23,6 +23,8 @@ class Support::MCollectiveRpcutil
   end
 
   def get_inventory(fqdns, ignore_missing = true)
+    return {} if fqdns.empty?
+
     responses = mco_client("rpcutil", :timeout => 30, :nodes => fqdns) { |mco| mco.inventory }
     failed_to_respond = fqdns - responses.map { |r| r[:sender] }
     failed_to_respond.each { |fqdn| logger(ignore_missing ? Logger::WARN : Logger::ERROR) { "No inventory response from #{fqdn}" } }

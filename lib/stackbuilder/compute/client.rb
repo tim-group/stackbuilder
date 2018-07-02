@@ -17,16 +17,19 @@ class Compute::Client
     libvirt_response = mco_client("libvirt", :nodes => host_fqdns) do |mco|
       mco.hvinfo.map do |hv|
         fail "all compute nodes must respond with a status code of 0 #{hv.pretty_inspect}" unless hv[:statuscode] == 0
-
-        domains = audit_domains ? get_libvirt_domains(hv) : {}
-
-        [hv[:sender], hv[:data].merge(:domains => domains)]
+        [hv[:sender], hv[:data]]
       end
     end
     fail "libvirt - not all compute nodes (#{host_fqdns.join(', ')}) responded -- missing responses from " \
       "(#{(host_fqdns - libvirt_response.map { |x| x[0] }).join(', ')})" unless host_fqdns.size == libvirt_response.size
 
     response_hash = Hash[libvirt_response]
+    if audit_domains
+      response_hash.each do |host_fqdn, hv|
+        vm_names = hv[:active_domains] + hv[:inactive_domains]
+        response_hash[host_fqdn][:domains] = get_libvirt_domains(host_fqdn, vm_names)
+      end
+    end
 
     if audit_inventory
       inventory_response = get_inventory(host_fqdns)
@@ -260,10 +263,10 @@ class Compute::Client
     Support::MCollectiveRpcutil.new.get_inventory(hosts)
   end
 
-  def get_libvirt_domains(hv)
-    host_fqdn = hv[:sender]
+  def get_libvirt_domains(host_fqdn, vm_names)
+    return {} if vm_names.empty?
+
     host_domain = host_fqdn.partition('.')[2]
-    vm_names = hv[:data][:active_domains] + hv[:data][:inactive_domains]
 
     host_volumes = (mco_client("lvm", :nodes => [host_fqdn]) do |mco|
       mco.lvs.map do |lvs|
