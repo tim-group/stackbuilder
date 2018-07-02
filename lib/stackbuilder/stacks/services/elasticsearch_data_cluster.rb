@@ -36,7 +36,7 @@ module Stacks::Services::ElasticsearchDataCluster
   end
 
   def config_params(_dependant, fabric, _dependent_instance)
-    { "#{name}.url" => "http://#{vip_fqdn(:prod, fabric)}:9200" }
+    { "#{name}.url" => "http://#{vip_fqdn(:prod, environment.primary_site)}:9200" }
   end
 
   def logstash_receiver_hosts
