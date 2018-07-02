@@ -1,4 +1,3 @@
-require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_nrpe'
 
 shared_examples_for "nrpe" do |machine|
