@@ -3,6 +3,7 @@ require 'mcollective'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/mcollective_libvirt'
 require 'stackbuilder/support/mcollective_rpcutil'
+require 'stackbuilder/support/mcollective_lvm'
 require 'stackbuilder/support/mcollective_puppetng'
 
 class Compute::Client
@@ -11,6 +12,7 @@ class Compute::Client
   def initialize()
     @mco_libvirt = Support::MCollectiveLibvirt.new
     @mco_rpcutil = Support::MCollectiveRpcutil.new
+    @mco_lvm = Support::MCollectiveLvm.new
     @mco_puppetng = Support::MCollectivePuppetng.new
   end
 
@@ -260,16 +262,9 @@ class Compute::Client
 
     host_domain = host_fqdn.partition('.')[2]
     vm_name_by_vm_fqdn = Hash[vm_names.map { |name| ["#{name}.#{host_domain}", name] }]
+
     inventory = @mco_rpcutil.get_inventory(vm_name_by_vm_fqdn.keys)
-
-    host_volumes = (mco_client("lvm", :nodes => [host_fqdn]) do |mco|
-      mco.lvs.map do |lvs|
-        fail "failed to get logical volume info for #{host_fqdn}: #{lvs[:statusmsg]}" if lvs[:statuscode] != 0
-        lvs[:data][:lvs]
-      end
-    end).flatten
-    fail "Got no response from mcollective lvs.lvm request to #{host_fqdn}" if host_volumes.empty?
-
+    host_volumes = @mco_lvm.logical_volumes(host_fqdn)
     domain_info = @mco_libvirt.domaininfo(host_fqdn, vm_names)
 
     Hash[vm_name_by_vm_fqdn.map do |vm_fqdn, vm_name|
