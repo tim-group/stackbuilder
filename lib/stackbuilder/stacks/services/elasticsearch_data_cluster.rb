@@ -35,7 +35,7 @@ module Stacks::Services::ElasticsearchDataCluster
     end.flatten.sort
   end
 
-  def config_params(_dependant, fabric, _dependent_instance)
+  def config_params(_dependant, _fabric, _dependent_instance)
     { "#{name}.url" => "http://#{vip_fqdn(:prod, environment.primary_site)}:9200" }
   end
 
