@@ -9,7 +9,7 @@ require 'stackbuilder/support/mcollective_puppetng'
 class Compute::Client
   include Support::MCollective
 
-  def initialize()
+  def initialize
     @mco_libvirt = Support::MCollectiveLibvirt.new
     @mco_rpcutil = Support::MCollectiveRpcutil.new
     @mco_lvm = Support::MCollectiveLvm.new
