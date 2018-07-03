@@ -39,7 +39,7 @@ class Support::MCollectiveHpilo
   end
 
   def do_hpilo_call(fabric, action, args_hash)
-    rsps = mco_client("hpilo", :timeout => 10, :fabric => fabric) { |mco| mco.send(action, args_hash) }
+    rsps = mco_client("hpilo", :timeout => 300, :fabric => fabric) { |mco| mco.send(action, args_hash) }
 
     fail "no response to mco hpilo call for fabric #{fabric}" unless rsps.size == 1
     fail "failed during mco hpilo call for fabric #{fabric}: #{rsps[0][:statusmsg]}" unless rsps[0][:statuscode] == 0
