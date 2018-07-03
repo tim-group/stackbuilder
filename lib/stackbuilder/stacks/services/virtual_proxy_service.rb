@@ -7,6 +7,7 @@ module Stacks::Services::VirtualProxyService
   attr_reader :is_use_deployapp_enabled
   attr_reader :use_deployapp
   attr_accessor :override_vhost_location
+  attr_reader :is_proxy_without_participation_enabled
 
   def self.extended(object)
     object.configure
@@ -20,6 +21,7 @@ module Stacks::Services::VirtualProxyService
     @vhost_for_lb_healthcheck_override_hack = nil
     @use_deployapp = true
     @is_use_deployapp_enabled = false
+    @is_proxy_without_participation_enabled = false
   end
 
   def vhost(service, fqdn = nil, service_env_name = nil, service_location = :primary_site, &config_block)
@@ -55,7 +57,7 @@ module Stacks::Services::VirtualProxyService
       [group, grealserver_fqdns]
     end]
 
-    type = @is_use_deployapp_enabled && @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
+    type = @is_proxy_without_participation_enabled ? 'proxy_without_participation': @is_use_deployapp_enabled && @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
 
     enc = {
       'env' => environment.name,
@@ -89,6 +91,10 @@ module Stacks::Services::VirtualProxyService
 
   def disable_using_deployapp
     @use_deployapp = false
+  end
+
+  def enable_proxy_without_participation
+    @is_proxy_without_participation_enabled = true
   end
 
   private
