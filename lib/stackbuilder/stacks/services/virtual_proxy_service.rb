@@ -57,7 +57,13 @@ module Stacks::Services::VirtualProxyService
       [group, grealserver_fqdns]
     end]
 
-    type = @is_proxy_without_participation_enabled ? 'proxy_without_participation': @is_use_deployapp_enabled && @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
+    type = if @is_proxy_without_participation_enabled
+             'proxy_without_participation'
+           elsif @is_use_deployapp_enabled && @use_deployapp
+             'proxy_with_deployapp'
+           else
+             'proxy'
+           end
 
     enc = {
       'env' => environment.name,

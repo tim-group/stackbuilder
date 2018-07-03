@@ -711,4 +711,3 @@ describe_stack 'proxy_without_participation type is set when enabled' do
     expect(vserver_enc['type']).to eql 'proxy_without_participation'
   end
 end
-
