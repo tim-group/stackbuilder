@@ -16,9 +16,9 @@ class Support::HostBuilder
   end
 
   def rebuild(host_fqdn)
-    ensure_safe_to_nuke(host_fqdn)
-
     fabric = host_fqdn.partition('-').first
+    ensure_safe_to_nuke(host_fqdn) unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
+
     logger(Logger::INFO) { "will rebuild #{host_fqdn}, scheduling downtime and powering off host" }
     @nagios.schedule_host_downtime(host_fqdn, fabric, 60 * 40)
     @hpilo.power_off_host(host_fqdn, fabric)
