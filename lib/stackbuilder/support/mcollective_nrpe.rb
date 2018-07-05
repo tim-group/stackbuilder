@@ -4,7 +4,7 @@ require 'stackbuilder/support/mcollective'
 class Support::MCollectiveNrpe
   include Support::MCollective
 
-  def run_all_commands(fqdn, attempts = 3)
+  def run_all_commands(fqdn, attempts = 30)
     rsps = mco_client("nrpe", :timeout => 30, :nodes => [fqdn]) { |mco| mco.runallcommands }
     failed = (rsps.size != 1 || rsps[0][:statuscode] != 0 || rsps[0][:data][:commands].nil?)
 
