@@ -80,7 +80,7 @@ class Support::HostBuilder
       logger(Logger::INFO) { "powering on #{host_fqdn} for PXE network boot" }
       @hpilo.power_on_host(host_fqdn, fabric)
 
-      sleep 780 # give the host 13 mins to boot up and install the vanilla o/s
+      sleep 720 # give the host 12 mins to boot up and install the vanilla o/s
       logger(Logger::INFO) { "o/s should be installed... beginning polling to sign puppet certificate" }
 
       signed_successfully = @puppet.poll_sign([host_fqdn], 600)
