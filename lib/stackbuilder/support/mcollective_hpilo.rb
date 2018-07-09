@@ -5,30 +5,30 @@ class Support::MCollectiveHpilo
   include Support::MCollective
 
   def update_ilo_firmware(host_fqdn, fabric)
-    do_hpilo_call(fabric, "update_rib_firmware", { :host_fqdn => to_ilo_host_fqdn(host_fqdn), :version => "latest" })
+    do_hpilo_call(fabric, "update_rib_firmware", :host_fqdn => to_ilo_host_fqdn(host_fqdn), :version => "latest")
   end
 
   def set_one_time_network_boot(host_fqdn, fabric)
-    do_hpilo_call(fabric, "set_one_time_boot", { :host_fqdn => to_ilo_host_fqdn(host_fqdn), :device => "network" })
+    do_hpilo_call(fabric, "set_one_time_boot", :host_fqdn => to_ilo_host_fqdn(host_fqdn), :device => "network")
   end
 
   def power_off_host(host_fqdn, fabric)
-    do_hpilo_call(fabric, "power_off", { :host_fqdn => to_ilo_host_fqdn(host_fqdn) })
+    do_hpilo_call(fabric, "power_off", :host_fqdn => to_ilo_host_fqdn(host_fqdn))
     sleep 2 while get_host_power_status(host_fqdn, fabric) == 'ON'
   end
 
   def power_on_host(host_fqdn, fabric)
-    do_hpilo_call(fabric, "power_on", { :host_fqdn => to_ilo_host_fqdn(host_fqdn) })
+    do_hpilo_call(fabric, "power_on", :host_fqdn => to_ilo_host_fqdn(host_fqdn))
     sleep 2 while get_host_power_status(host_fqdn, fabric) == 'OFF'
   end
 
   def get_host_power_status(host_fqdn, fabric)
-    result = do_hpilo_call(fabric, "power_status", { :host_fqdn => to_ilo_host_fqdn(host_fqdn) })
+    result = do_hpilo_call(fabric, "power_status", :host_fqdn => to_ilo_host_fqdn(host_fqdn))
     result[:power]
   end
 
   def get_mac_address(host_fqdn, fabric)
-    result = do_hpilo_call(fabric, "get_host_data", { :host_fqdn => to_ilo_host_fqdn(host_fqdn) })
+    result = do_hpilo_call(fabric, "get_host_data", :host_fqdn => to_ilo_host_fqdn(host_fqdn))
     result[:output][:mac_address]
   end
 
