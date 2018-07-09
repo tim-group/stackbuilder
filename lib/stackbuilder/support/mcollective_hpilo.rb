@@ -43,15 +43,19 @@ class Support::MCollectiveHpilo
 
     unless rsps.size == 1 && rsps[0][:statuscode] == 0
       if attempts > 1
-        logger(Logger::WARN) { "hpilo #{action} operation failed with #{rsps[0]}, retrying..." }
+        logger(Logger::WARN) { "hpilo #{action} operation failed with #{status_of(rsps[0])}, retrying..." }
         return do_hpilo_call(fabric, action, args_hash, attempts - 1)
       end
-      logger(Logger::FATAL) { "hpilo #{action} operation failed with #{rsps[0]}" }
+      logger(Logger::FATAL) { "hpilo #{action} operation failed with #{status_of(rsps[0])}" }
       fail "no response to mco hpilo call for fabric #{fabric}" unless rsps.size == 1
       fail "failed during mco hpilo call for fabric #{fabric}: #{rsps[0][:statusmsg]}" unless rsps[0][:statuscode] == 0
     end
 
     logger(Logger::DEBUG) { "Successfully carried out mco hpilo #{action} operation on #{rsps[0][:sender]}" }
     rsps[0][:data]
+  end
+
+  def status_of(resp)
+    resp.nil? ? 'no response' : resp[:statusmsg]
   end
 end
