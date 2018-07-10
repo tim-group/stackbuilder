@@ -100,7 +100,7 @@ class Support::HostBuilder
     bail "puppet did not succeed" if puppet_result.passed.empty?
 
     logger(Logger::INFO) { "puppet runs complete, waiting for final reboot" }
-    wait_for_reboot(host_fqdn, 360)
+    wait_for_reboot(host_fqdn, 420)
 
     logger(Logger::INFO) { "host is up, performing checks" }
     verify_build(host_fqdn)
