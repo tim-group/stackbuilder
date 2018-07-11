@@ -19,10 +19,10 @@ class CMD
   attr_reader :read_cmds # this list is just a safety check
   attr_reader :write_cmds # this list is just a safety check
 
-  def initialize(factory, environment, stack = nil)
+  def initialize(factory, environment, stack_name = nil)
     @factory = factory
     @environment = environment
-    @stack = stack
+    @stack_name = stack_name
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
     @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host rebuild_host build_new_host)
     @cmds = @read_cmds + @write_cmds
@@ -41,7 +41,7 @@ class CMD
   def compile(_argv)
     targets = []
 
-    if @stack.nil?
+    if @stack_name.nil?
       @factory.inventory.environments.sort.each do |_envname, env|
         targets += env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
       end
@@ -105,7 +105,7 @@ class CMD
     if machine_def.respond_to?(:to_enc)
       puts ZAMLS.to_zamls(machine_def.to_enc)
     else
-      logger(Logger::FATAL) { "\"#{@stack}\" is not a machine fqdn" }
+      logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn" }
       exit 1
     end
   end
@@ -116,7 +116,7 @@ class CMD
     if machine_def.respond_to?(:to_spec)
       puts ZAMLS.to_zamls(machine_def.to_spec)
     else
-      logger(Logger::FATAL) { "\"#{@stack}\" is not a machine fqdn" }
+      logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn" }
       exit 1
     end
   end
@@ -196,7 +196,7 @@ class CMD
   end
 
   def ls(_argv)
-    Support::EnvListing.new($options[:terse]).ls(@stack ? check_and_get_stack : @environment)
+    Support::EnvListing.new($options[:terse]).ls(@stack_name ? check_and_get_stack : @environment)
   end
 
   def lsenv(_argv)
@@ -400,25 +400,31 @@ class CMD
 
   def ensure_is_machine(machine_def)
     if !machine_def.is_a?(Stacks::MachineDef)
-      logger(Logger::FATAL) { "\"#{@stack}\" is not a machine fqdn" }
+      logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn" }
       exit 1
     end
     machine_def
   end
 
   def check_and_get_stack
-    if @stack.nil?
+    if @stack_name.nil?
       logger(Logger::FATAL) { 'option "stack" not set' }
       exit 1
     end
 
-    machine_def = @environment.find_stack(@stack)
-    if machine_def.nil? then
-      logger(Logger::FATAL) { "stack \"#{@stack}\" not found" }
+    stacks = @environment.find_stacks(@stack_name)
+    if stacks.empty?
+      logger(Logger::FATAL) { "stack \"#{@stack_name}\" not found" }
       exit 1
     end
 
-    machine_def
+    if stacks.size > 1
+      names = stacks.map { |s| s.respond_to?(:mgmt_fqdn) ? s.mgmt_fqdn : s.name }
+      logger(Logger::FATAL) { "Multiple stacks match specified stack name (#{names.join(', ') })." }
+      exit 1
+    end
+
+    stacks.first
   end
 
   def deep_dup_to_avoid_yaml_aliases(output)

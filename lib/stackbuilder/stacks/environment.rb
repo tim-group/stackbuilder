@@ -229,16 +229,14 @@ class Stacks::Environment
     found
   end
 
-  def find_stack(name)
-    node = nil
+  def find_stacks(name)
+    nodes = []
     accept do |machine_def|
-      if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == name) ||
-         machine_def.name == name
-        node = machine_def
-        break
+      if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == name) || machine_def.name == name
+        nodes.push(machine_def)
       end
     end
-    node
+    nodes
   end
 
   def calculated_dependencies
