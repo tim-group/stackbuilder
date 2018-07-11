@@ -420,7 +420,7 @@ class CMD
 
     if stacks.size > 1
       names = stacks.map { |s| s.respond_to?(:mgmt_fqdn) ? s.mgmt_fqdn : s.name }
-      logger(Logger::FATAL) { "Multiple stacks match specified stack name (#{names.join(', ') })." }
+      logger(Logger::FATAL) { "Multiple stacks match specified stack name (#{names.join(', ')})." }
       exit 1
     end
 
