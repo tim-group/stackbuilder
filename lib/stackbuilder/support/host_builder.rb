@@ -27,7 +27,7 @@ class Support::HostBuilder
     build(host_fqdn)
 
     logger(Logger::INFO) { "rebuild complete, cancelling downtime" }
-    @nagios.cancel_host_downtime(host_fqdn, fabric)
+    @nagios.schedule_host_uptime(host_fqdn, fabric)
   end
 
   def build_new(host_fqdn)

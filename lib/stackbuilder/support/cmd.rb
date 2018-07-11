@@ -475,6 +475,6 @@ class CMD
     end
 
     Support::AppDeployer.new.deploy_applications(machine_def)
-    @nagios.nagios_cancel_downtime(machine_def)
+    @nagios.nagios_schedule_uptime(machine_def)
   end
 end

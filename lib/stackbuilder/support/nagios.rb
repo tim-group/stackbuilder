@@ -35,6 +35,40 @@ class Support::Nagios
     end
   end
 
+  def nagios_schedule_uptime(machine_def)
+    machines = machines_from(machine_def)
+
+    nagios_helper = Support::NagiosService.new
+    nagios_helper.force_checks(machines) do
+      on :success do |response_hash|
+        logger(Logger::INFO) do
+          "successfully forced checks for #{response_hash[:machine]} " \
+        "result: #{response_hash[:result]}"
+        end
+      end
+      on :failed do |response_hash|
+        logger(Logger::INFO) do
+          "failed to force checks for #{response_hash[:machine]} " \
+        "result: #{response_hash[:result]}"
+        end
+      end
+    end
+    nagios_helper.schedule_downtime(machines, 60) do
+      on :success do |response_hash|
+        logger(Logger::INFO) do
+          "successfully reduced scheduled downtime for #{response_hash[:machine]} " \
+        "result: #{response_hash[:result]}"
+        end
+      end
+      on :failed do |response_hash|
+        logger(Logger::INFO) do
+          "failed to reduce scheduled downtime for #{response_hash[:machine]} " \
+        "result: #{response_hash[:result]}"
+        end
+      end
+    end
+  end
+
   def nagios_cancel_downtime(machine_def)
     machines = machines_from(machine_def)
 
@@ -59,6 +93,13 @@ class Support::Nagios
     nagios_helper = Support::NagiosService.new
     result = nagios_helper.schedule_host_downtime(host_fqdn, fabric, downtime_secs)
     logger(Logger::INFO) { "scheduled #{downtime_secs}s downtime for #{host_fqdn}: #{result}" }
+  end
+
+  def schedule_host_uptime(host_fqdn, fabric, delay = 60)
+    nagios_helper = Support::NagiosService.new
+    nagios_helper.force_host_checks(host_fqdn, fabric)
+    result = nagios_helper.schedule_host_downtime(host_fqdn, fabric, delay)
+    logger(Logger::INFO) { "reduced scheduled downtime for #{host_fqdn} to #{delay}s: #{result}" }
   end
 
   def cancel_host_downtime(host_fqdn, fabric)
@@ -99,12 +140,24 @@ class Support::NagiosService
     end
   end
 
+  def force_checks(machines, &block)
+    callback = Support::Callback.new(&block)
+    machines.each do |machine|
+      response = @service.force_checks(machine.mgmt_fqdn, machine.fabric)
+      callback.invoke :success, :machine => machine.hostname, :result => response
+    end
+  end
+
   def schedule_host_downtime(host_fqdn, fabric, duration = 600)
     @service.schedule_downtime(host_fqdn, fabric, duration)
   end
 
   def cancel_host_downtime(host_fqdn, fabric)
     @service.cancel_downtime(host_fqdn, fabric)
+  end
+
+  def force_host_checks(host_fqdn, fabric)
+    @service.force_checks(host_fqdn, fabric)
   end
 
   def register_new_machines(fabrics)
