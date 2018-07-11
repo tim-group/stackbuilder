@@ -283,14 +283,14 @@ class CMD
     @dns.do_allocate_ips(machine_def)
     @puppet.do_puppet_run_on_dependencies(machine_def)
 
-    do_provision_machine(@factory.services, machine_def)
+    do_provision(@factory.services, machine_def)
     @nagios.do_nagios_register_new(machine_def)
   end
 
   def reprovision(_argv)
     machine_def = check_and_get_stack
     do_clean(machine_def)
-    do_provision_machine(@factory.services, machine_def)
+    do_provision(@factory.services, machine_def)
   end
 
   def move(_argv)
@@ -451,7 +451,7 @@ class CMD
     cleaner.clean_traces(machine_def) if all
   end
 
-  def do_provision_machine(services, machine_def)
+  def do_provision(services, machine_def)
     @core_actions.get_action("launch").call(services, machine_def)
     sign_results = @puppet.puppet_wait_for_autosign(machine_def)
 
