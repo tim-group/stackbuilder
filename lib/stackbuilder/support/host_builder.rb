@@ -83,7 +83,7 @@ class Support::HostBuilder
       sleep 720 # give the host 12 mins to boot up and install the vanilla o/s
       logger(Logger::INFO) { "o/s should be installed... beginning polling to sign puppet certificate" }
 
-      signed_successfully = @puppet.poll_sign([host_fqdn], 600)
+      signed_successfully = @puppet.poll_sign([host_fqdn], 720)
       bail "unable to sign puppet cert" unless signed_successfully
     ensure
       @pxe.cleanup_after_reimage(mac_address, fabric)
