@@ -73,7 +73,6 @@ class Support::HostBuilder
     mac_address = @hpilo.get_mac_address(host_fqdn, fabric)
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
-      @hpilo.update_ilo_firmware(host_fqdn, fabric)
       @puppet.clean([host_fqdn])
       @hpilo.set_one_time_network_boot(host_fqdn, fabric)
 
