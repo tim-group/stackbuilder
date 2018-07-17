@@ -78,7 +78,7 @@ class Support::LiveMigrator
     vm_name = machine.hostname
     logger(Logger::INFO) { "Performing live VM migration of #{vm_name}" }
 
-    spec = creatable_spec_for(machine)
+    spec = creatable_destroyable_spec_for(machine)
     allocation_results = allocate_elsewhere([spec], false)
     dest_host_fqdn = allocation_results[:newly_allocated].keys.first
     source_host_fqdn = @source_host.fqdn
@@ -107,9 +107,10 @@ class Support::LiveMigrator
     end
   end
 
-  def creatable_spec_for(machine_def)
+  def creatable_destroyable_spec_for(machine_def)
     spec = machine_def.to_spec
     spec[:storage] = machine_def.turn_on_persistent_storage_creation(spec[:storage])
+    spec[:disallow_destroy] = false
     spec
   end
 
