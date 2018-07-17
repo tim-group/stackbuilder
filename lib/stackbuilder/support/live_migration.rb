@@ -46,7 +46,7 @@ class Support::LiveMigrator
   end
 
   def vms_that_can_be_reallocated(machines, best_effort)
-    preliminary_allocation = allocate_elsewhere(machines.map { |m| creatable_spec_for(m) }, true)
+    preliminary_allocation = allocate_elsewhere(machines.map { |m| creatable_destroyable_spec_for(m) }, true)
     preliminary_allocation[:newly_allocated].each do |host, allocated_specs|
       allocated_specs.each do |spec|
         logger(Logger::DEBUG) { "#{spec[:qualified_hostnames][:mgmt]} can be moved from #{@source_host.fqdn} to #{host}" }
