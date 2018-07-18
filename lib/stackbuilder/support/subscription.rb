@@ -7,6 +7,7 @@ class Subscription
   def initialize(options = {})
     @queues = {}
     @pop_timeout = options[:pop_timeout] || 30
+    @minimum_wait = options[:minimum_wait] || 1
   end
 
   class WaitResponse
@@ -97,7 +98,7 @@ class Subscription
           message = @queues[topic].pop
         end
         parsed_message = JSON.parse(message.body)
-        if hosts.include?(parsed_message["host"])
+        if Time.now - start_time > @minimum_wait && hosts.include?(parsed_message["host"])
           return_results << parsed_message
         end
       rescue Timeout::Error => e

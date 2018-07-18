@@ -16,7 +16,7 @@ describe Subscription do
   # FIXME: rpearce 28/04/2016 this continues to flicker, go away.
   xit 'waits for all hosts to check-in' do
     topic = random_topic
-    subscription = Subscription.new(:pop_timeout => 1)
+    subscription = Subscription.new(:pop_timeout => 1, :minimum_wait => 0)
     subscription.start([topic])
 
     threads = []
@@ -31,7 +31,7 @@ describe Subscription do
 
   it 'returns anyway after the timeout with some results missing' do
     topic = random_topic
-    subscription = Subscription.new(:pop_timeout => 1)
+    subscription = Subscription.new(:pop_timeout => 1, :minimum_wait => 0)
     subscription.start([topic])
 
     threads = []
@@ -48,7 +48,7 @@ describe Subscription do
     topic = random_topic
     topic2 = random_topic
 
-    subscription2 = Subscription.new(:pop_timeout => 1)
+    subscription2 = Subscription.new(:pop_timeout => 1, :minimum_wait => 0)
     subscription2.start([topic, topic2]) # XXX flicker
 
     threads = []
@@ -64,8 +64,7 @@ describe Subscription do
   xit 'correctly shows: successful, failed and unknowns' do
     topic = random_topic
 
-    # 08.05.2015 mmazurek: 0.05 might be to slow, bump if causing specs to fail, remove comment if fine after a while
-    subscription = Subscription.new(:pop_timeout => 0.05)
+    subscription = Subscription.new(:pop_timeout => 0.05, :minimum_wait => 0)
     subscription.start([topic]) # XXX flicker
 
     threads = []
