@@ -593,7 +593,6 @@ describe_stack 'fails if a proxy_service has more than one vhost thats configure
     end.to raise_error "More than one vhost of service 'proxy' in environment 'st' are configured to be used for load balancer " \
                        "healthchecks: st-proxy-vip.st.net.local,st-proxy-vip.st.net.local"
   end
-
   describe_stack 'proxy servers have an option to specify logging to syslog' do
     given do
       stack "exampleproxy" do
@@ -620,7 +619,6 @@ describe_stack 'fails if a proxy_service has more than one vhost thats configure
     end
   end
 end
-
 describe_stack 'vhosts should adopt default cert from proxy_service' do
   given do
     stack "proxyserver" do
@@ -647,7 +645,6 @@ describe_stack 'vhosts should adopt default cert from proxy_service' do
     expect(vhost_enc['cert']).to eql 'super_cert'
   end
 end
-
 describe_stack 'vhost_for_lb_healthcheck_override_hack works with a hash of site to vhost' do
   given do
     stack "loadbalancer" do
@@ -675,39 +672,5 @@ describe_stack 'vhost_for_lb_healthcheck_override_hack works with a hash of site
   host("st-lb-001.mgmt.bs.net.local") do |loadbalancer|
     vserver_enc = loadbalancer.to_enc['role::loadbalancer']["virtual_servers"]['st-proxy-vip.bs.net.local']
     expect(vserver_enc['vhost_for_healthcheck']).to eql 'bs.example.com'
-  end
-end
-
-describe_stack 'proxy_without_participation type is set when enabled' do
-  given do
-    stack "loadbalancer" do
-      loadbalancer_service
-    end
-
-    stack "proxyserver" do
-      proxy_service "proxy" do
-        enable_proxy_without_participation
-        vhost('app') do
-          use_for_lb_healthcheck
-        end
-      end
-    end
-
-    stack 'appserver' do
-      app_service 'app' do
-        self.application = 'app'
-      end
-    end
-
-    env "st", :primary_site => "st", :secondary_site => "bs" do
-      instantiate_stack "loadbalancer"
-      instantiate_stack "proxyserver"
-      instantiate_stack 'appserver'
-    end
-  end
-
-  host("st-lb-001.mgmt.st.net.local") do |loadbalancer|
-    vserver_enc = loadbalancer.to_enc['role::loadbalancer']["virtual_servers"]['st-proxy-vip.st.net.local']
-    expect(vserver_enc['type']).to eql 'proxy_without_participation'
   end
 end
