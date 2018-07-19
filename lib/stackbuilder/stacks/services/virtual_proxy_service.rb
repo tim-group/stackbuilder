@@ -4,8 +4,6 @@ require 'stackbuilder/stacks/services/proxy_vhost'
 module Stacks::Services::VirtualProxyService
   attr_reader :cert
   attr_reader :proxy_vhosts
-  attr_reader :is_use_deployapp_enabled
-  attr_reader :use_deployapp
   attr_accessor :override_vhost_location
 
   def self.extended(object)
@@ -18,8 +16,6 @@ module Stacks::Services::VirtualProxyService
     @cert                    = 'wildcard_timgroup_com_2017'
     @override_vhost_location = {}
     @vhost_for_lb_healthcheck_override_hack = nil
-    @use_deployapp = true
-    @is_use_deployapp_enabled = false
   end
 
   def vhost(service, fqdn = nil, service_env_name = nil, service_location = :primary_site, &config_block)
@@ -55,12 +51,8 @@ module Stacks::Services::VirtualProxyService
       [group, grealserver_fqdns]
     end]
 
-    type = @is_use_deployapp_enabled && @use_deployapp ? 'proxy_with_deployapp' : 'proxy'
-
     enc = {
-      'env' => environment.name,
-      'app' => 'apache2',
-      'type' => type,
+      'type' => 'proxy',
       'ports' => @ports,
       'realservers' => realservers
     }
@@ -81,14 +73,6 @@ module Stacks::Services::VirtualProxyService
     fail("vhost_for_lb_healthcheck_override_hack is already set to #{@vhost_for_lb_healthcheck_override_hack} " \
          "for service '#{name}' in environment '#{environment.name}'") unless @vhost_for_lb_healthcheck_override_hack.nil?
     @vhost_for_lb_healthcheck_override_hack = vhost_name
-  end
-
-  def enable_use_deployapp
-    @is_use_deployapp_enabled = true
-  end
-
-  def disable_using_deployapp
-    @use_deployapp = false
   end
 
   private
