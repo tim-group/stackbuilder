@@ -15,6 +15,7 @@ module Support::Forking
     read, write = IO.pipe
     pid = fork do
       begin
+        read.close
         result = nil
         exception = nil
         result = block.call
@@ -22,14 +23,18 @@ module Support::Forking
         exception = "#{e.message}\n  #{e.backtrace.join("\n  ")}"
       end
       Marshal.dump({ :result => result, :exception => exception }, write)
+      exit 0
     end
+
     write.close
 
     Future.new do
       serialized_result = read.read
-      Process.waitpid(pid)
+      _, status = Process.waitpid2(pid)
+      fail "non-zero return from child process #{status.inspect}" unless status.success?
+
       result = Marshal.load(serialized_result)
-      fail result[:exception] unless result[:exception].nil?
+      fail "child process raised exception: #{result[:exception]}" unless result[:exception].nil?
       result[:result]
     end
   end
