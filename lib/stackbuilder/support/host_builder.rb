@@ -17,11 +17,11 @@ class Support::HostBuilder
 
   def rebuild(host_fqdn)
     fabric = host_fqdn.partition('-').first
-    ensure_safe_to_nuke(host_fqdn) unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
+    ensure_safe_to_nuke(host_fqdn) unless @hpilo.get_host_power_status(host_fqdn) == "OFF"
 
     logger(Logger::INFO) { "will rebuild #{host_fqdn}, scheduling downtime and powering off host" }
     @nagios.schedule_host_downtime(host_fqdn, fabric, 60 * 40)
-    @hpilo.power_off_host(host_fqdn, fabric)
+    @hpilo.power_off_host(host_fqdn)
     @hostcleanup.hostcleanup(host_fqdn, "mongodb")
 
     build(host_fqdn)
@@ -67,17 +67,17 @@ class Support::HostBuilder
   def build(host_fqdn)
     fabric = host_fqdn.partition('-').first
 
-    bail "#{host_fqdn} is not off" unless @hpilo.get_host_power_status(host_fqdn, fabric) == "OFF"
+    bail "#{host_fqdn} is not off" unless @hpilo.get_host_power_status(host_fqdn) == "OFF"
 
     logger(Logger::INFO) { "preparing to install new o/s on #{host_fqdn}" }
-    mac_address = @hpilo.get_mac_address(host_fqdn, fabric)
+    mac_address = @hpilo.get_mac_address(host_fqdn)
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
       @puppet.clean([host_fqdn])
-      @hpilo.set_one_time_network_boot(host_fqdn, fabric)
+      @hpilo.set_one_time_network_boot(host_fqdn)
 
       logger(Logger::INFO) { "powering on #{host_fqdn} for PXE network boot" }
-      @hpilo.power_on_host(host_fqdn, fabric)
+      @hpilo.power_on_host(host_fqdn)
 
       sleep 720 # give the host 12 mins to boot up and install the vanilla o/s
       logger(Logger::INFO) { "o/s should be installed... beginning polling to sign puppet certificate" }
