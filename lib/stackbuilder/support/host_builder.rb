@@ -74,7 +74,7 @@ class Support::HostBuilder
     @pxe.prepare_for_reimage(mac_address, fabric)
     begin
       @puppet.clean([host_fqdn])
-      @hpilo.set_one_time_network_boot(host_fqdn)
+      @hpilo.enable_one_time_network_boot(host_fqdn)
 
       logger(Logger::INFO) { "powering on #{host_fqdn} for PXE network boot" }
       @hpilo.power_on_host(host_fqdn)

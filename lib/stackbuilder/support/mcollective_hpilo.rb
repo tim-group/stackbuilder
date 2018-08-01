@@ -8,7 +8,7 @@ class Support::MCollectiveHpilo
     do_hpilo_call(host_fqdn, "update_rib_firmware", :version => "latest")
   end
 
-  def set_one_time_network_boot(host_fqdn)
+  def enable_one_time_network_boot(host_fqdn)
     do_hpilo_call(host_fqdn, "set_one_time_boot", :device => "network")
   end
 
