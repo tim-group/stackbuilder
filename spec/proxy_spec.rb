@@ -716,4 +716,3 @@ describe_stack 'can specify path on proxypass rule' do
     expect(proxy_pass_rules['/HIP/blah3']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000/foo'
   end
 end
-
