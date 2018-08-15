@@ -674,3 +674,46 @@ describe_stack 'vhost_for_lb_healthcheck_override_hack works with a hash of site
     expect(vserver_enc['vhost_for_healthcheck']).to eql 'bs.example.com'
   end
 end
+
+describe_stack 'can specify path on proxypass rule' do
+  given do
+    stack 'funds_proxy' do
+      proxy_service 'fundsproxy' do
+        @cert = 'wildcard_youdevise_com'
+        vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
+          @cert = 'wildcard_timgroup_com'
+          add_pass_rule "/HIP/blah3", :service => "blondinapp", :path => "/foo"
+        end
+        nat_config.dnat_enabled = true
+      end
+    end
+    stack 'funds' do
+      app_service 'blondinapp' do
+        self.groups = ['blue']
+        self.application = 'Blondin'
+      end
+
+      app_service 'fundsuserapp' do
+        self.groups = ['blue']
+        self.application = 'tfunds'
+        self.ports = [8443]
+      end
+    end
+    env 'shared', :primary_site => 'oy' do
+      instantiate_stack 'funds_proxy'
+      instantiate_stack 'funds'
+
+      env 'mirror' do
+        instantiate_stack 'funds'
+      end
+      env 'latest' do
+        instantiate_stack 'funds'
+      end
+    end
+  end
+  host('shared-fundsproxy-001.mgmt.oy.net.local') do |host|
+    proxy_pass_rules = host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']
+    expect(proxy_pass_rules['/HIP/blah3']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000/foo'
+  end
+end
+
