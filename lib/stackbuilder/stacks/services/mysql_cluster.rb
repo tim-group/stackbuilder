@@ -126,10 +126,6 @@ module Stacks::Services::MysqlCluster
     rights
   end
 
-  def truncated_fqdn_as_mysql_host(dependant)
-    dependant.prod_fqdn[0..59]
-  end
-
   def dependant_instance_mysql_rights
     rights = {
       'mysql_hacks::application_rights_wrapper' => { 'rights' => {} }
@@ -138,7 +134,7 @@ module Stacks::Services::MysqlCluster
       service.children.each do |dependant|
         rights['mysql_hacks::application_rights_wrapper']['rights'].
           merge!(
-            "#{mysql_username(service)}@#{truncated_fqdn_as_mysql_host(dependant)}/#{database_name}" =>
+            "#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
             { 'password_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_password" })
       end
     end
