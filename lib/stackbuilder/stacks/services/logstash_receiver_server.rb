@@ -28,4 +28,9 @@ class Stacks::Services::LogstashReceiverServer < Stacks::MachineDef
                'server::default_new_mgmt_net_local' => nil)
     enc
   end
+
+  def is_dependency_that_requires_preparation?
+    false
+  end
+
 end

@@ -16,7 +16,11 @@ class Support::Puppet
     dependency_fqdns = []
     all_dependencies.map do |dependency|
       dependency.accept do |m|
-        dependency_fqdns << m.mgmt_fqdn if m.is_a? Stacks::MachineDef
+        if m.is_a? Stacks::MachineDef
+          if m.is_dependency_that_requires_preparation?
+            dependency_fqdns << m.mgmt_fqdn
+          end
+        end
       end
     end
 

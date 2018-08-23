@@ -295,4 +295,8 @@ class Stacks::MachineDef
   def dependencies
     virtual_service.virtual_services_that_i_depend_on
   end
+
+  def is_dependency_that_requires_preparation?
+    true
+  end
 end
