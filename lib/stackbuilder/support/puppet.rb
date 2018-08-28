@@ -17,9 +17,7 @@ class Support::Puppet
     all_dependencies.map do |dependency|
       dependency.accept do |m|
         if m.is_a? Stacks::MachineDef
-          if m.is_dependency_that_requires_preparation?
-            dependency_fqdns << m.mgmt_fqdn
-          end
+          dependency_fqdns << m.mgmt_fqdn if m.should_prepare_dependency?
         end
       end
     end

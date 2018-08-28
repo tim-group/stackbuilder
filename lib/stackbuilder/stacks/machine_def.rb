@@ -296,7 +296,7 @@ class Stacks::MachineDef
     virtual_service.virtual_services_that_i_depend_on
   end
 
-  def is_dependency_that_requires_preparation?
+  def should_prepare_dependency?
     true
   end
 end

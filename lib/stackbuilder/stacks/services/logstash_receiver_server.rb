@@ -29,7 +29,7 @@ class Stacks::Services::LogstashReceiverServer < Stacks::MachineDef
     enc
   end
 
-  def is_dependency_that_requires_preparation?
+  def should_prepare_dependency?
     false
   end
 end
