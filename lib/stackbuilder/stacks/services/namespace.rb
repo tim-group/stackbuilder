@@ -19,8 +19,6 @@ module Stacks
     require 'stackbuilder/stacks/services/kafka_server'
     require 'stackbuilder/stacks/services/kibana_cluster'
     require 'stackbuilder/stacks/services/kibana_server'
-    require 'stackbuilder/stacks/services/legacy_mysql_cluster'
-    require 'stackbuilder/stacks/services/legacy_mysqldb_server'
     require 'stackbuilder/stacks/services/loadbalancer'
     require 'stackbuilder/stacks/services/loadbalancer_cluster'
     require 'stackbuilder/stacks/services/logstash_indexer_cluster'

@@ -77,10 +77,6 @@ class Stacks::CustomServices
     machineset_with(name, [Stacks::Services::MysqlCluster], Stacks::Services::MysqlServer, &block)
   end
 
-  def legacy_mysql_cluster(name = 'mysqldb', &block)
-    machineset_with(name, [Stacks::Services::LegacyMysqlCluster], Stacks::Services::LegacyMysqlDBServer, &block)
-  end
-
   def puppetserver_cluster(name, &block)
     machineset_with(name, [Stacks::Services::PuppetserverCluster], Stacks::Services::Puppetserver, &block)
   end

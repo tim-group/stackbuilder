@@ -34,9 +34,12 @@ describe_stack 'stack-with-dependencies' do
       end
     end
     stack 'example_db' do
-      legacy_mysql_cluster 'exampledb' do
+      mysql_cluster 'exampledb' do
         self.instances = 1
         self.database_name = 'example'
+        self.role_in_name = false
+        self.backup_instances = 0
+        self.slave_instances = 0
       end
     end
 
@@ -83,7 +86,7 @@ describe_stack 'stack-with-dependencies' do
     expect(host.to_enc['role::http_app']['dependencies']).to eql({})
   end
   host('e1-exampledb-001.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::databaseserver']['dependant_instances']).to eql([
+    expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql([
       'e1-exampleapp2-001.space.net.local',
       'e1-exampleapp2-002.space.net.local'
     ])
