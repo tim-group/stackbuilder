@@ -42,38 +42,39 @@ Options:
     --create-persistent-storage     allocate new persistent storage, instead of finding existing storage
                                     (WARNING: normally only wanted when provisioning a stack for the first time)
     --best-effort                   where applicable, do as much as is possible in the face of errors, rather than bailing immediately
+    --diffs-only                    for audit_vms command - only output VMs where there are differences
 
   For further information about options, read bin/stacks.
 
   The list of commands follows. Optional and mandatory options are outlined.
 
-    allocate [-e] -s          perform noop dry-run allocation of a stack
-    audit [-e]                show the state of the KVM host machines in the primary site of the specified env
-    audit_vms [-e] [HOST]     show the state of the VMs in the primary site of the specified env (or specified host)
-    build_new_host HOST       install a clean operating system on a new KVM host (host must be switched off)
-    check_definition [-e] -s  verify that the VMs of a provisioned stack match their corresponding VM definitions
-    clean [-e] -s             shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
-    clean_all [-e] -s         shuts down and removes a stack, puppet, nagios and mongo
-    clear_host HOST           clear the specified HOST machine of all VMs (supports --best-effort)
-    compile                   create a yaml file describing the entire infrastructure
-    dependencies [-e] -s      list the machines that this machine depends on
-    dependents [-e] -s        list the machines that depend on this machine
-    diff                      show compile diff between last stackbuilder config commit and latest commit.
-    dns [-e] -s               perform DNS related tasks
-      allocate_ips            allocate all ip addresses for the specified stack (machine(s))
-      free_ips                free all ip addresses for the specified stack (machine(s))
-      allocate_vips           allocate all vip addresses for a stack (service(s))
-      free_vips               free all vip addresses for a stack (service(s))
-    enc [-e] -s               print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
-    launch [-e] -s            allocate and create a stack, but do not spin it up (you probably want to use provision)
-    ls [-est]                 show the entire environment. Show just one stack if -s is specified. Using -t skips stacks of type "machine".
-    move [-e] -s              move a given stack from its current host to another
-    provision [-e] -s         allocates and spins up a stack
-    rebuild_host HOST         re-install a clean operating system on a KVM host (host must be empty)
-    reprovision [-e] -s       "clean", and then "provision" a stack
-    sbdiff                    show compile diff between latest stackbuilder and local stackbuilder.
-    spec [-e] -s              print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
-    terminus                  create a yaml puppet terminus
+    allocate [-e] -s                      perform noop dry-run allocation of a stack
+    audit [-e]                            show the state of the KVM host machines in the primary site of the specified env
+    audit_vms [-e] [HOST] [--diffs-only]  show the state of the VMs in the primary site of the specified env (or specified host)
+    build_new_host HOST                   install a clean operating system on a new KVM host (host must be switched off)
+    check_definition [-e] -s              verify that the VMs of a provisioned stack match their corresponding VM definitions
+    clean [-e] -s                         shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
+    clean_all [-e] -s                     shuts down and removes a stack, puppet, nagios and mongo
+    clear_host HOST                       clear the specified HOST machine of all VMs (supports --best-effort)
+    compile                               create a yaml file describing the entire infrastructure
+    dependencies [-e] -s                  list the machines that this machine depends on
+    dependents [-e] -s                    list the machines that depend on this machine
+    diff                                  show compile diff between last stackbuilder config commit and latest commit.
+    dns [-e] -s                           perform DNS related tasks
+      allocate_ips                        allocate all ip addresses for the specified stack (machine(s))
+      free_ips                            free all ip addresses for the specified stack (machine(s))
+      allocate_vips                       allocate all vip addresses for a stack (service(s))
+      free_vips                           free all vip addresses for a stack (service(s))
+    enc [-e] -s                           print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
+    launch [-e] -s                        allocate and create a stack, but do not spin it up (you probably want to use provision)
+    ls [-est]                             show the entire environment. Show just one stack if -s is specified. Using -t skips stacks of type "machine".
+    move [-e] -s                          move a given stack from its current host to another
+    provision [-e] -s                     allocates and spins up a stack
+    rebuild_host HOST                     re-install a clean operating system on a KVM host (host must be empty)
+    reprovision [-e] -s                   "clean", and then "provision" a stack
+    sbdiff                                show compile diff between latest stackbuilder and local stackbuilder.
+    spec [-e] -s                          print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
+    terminus                              create a yaml puppet terminus
 
   For further information about commands, read lib/stackbuilder/support/cmd*.rb
 
@@ -128,6 +129,7 @@ GetoptLong.new(
   ['--checkout-config', '-c', GetoptLong::OPTIONAL_ARGUMENT],
   ['--create-persistent-storage', GetoptLong::NO_ARGUMENT],
   ['--best-effort', GetoptLong::NO_ARGUMENT],
+  ['--diffs-only', GetoptLong::NO_ARGUMENT],
   ['--no-tmux', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
@@ -145,6 +147,8 @@ GetoptLong.new(
     $options[:no_tmux] = true
   when '--checkout-config'
     $options[:'checkout-config'] = (arg == '') ? 'http://git/stackbuilder-config.git' : arg
+  when '--diffs-only'
+    $options[:'diffs-only'] = true
   else
     $options[opt_sym] = arg
   end

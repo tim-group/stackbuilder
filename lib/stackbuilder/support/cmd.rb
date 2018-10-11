@@ -214,10 +214,10 @@ class CMD
     if argv.size == 0
       site = @environment.options[:primary_site]
       logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
-      auditor.audit_site_vms(site)
+      auditor.audit_site_vms(site, $options[:'diffs-only'])
     else
       host_fqdn = argv[0]
-      auditor.audit_host_vms(host_fqdn)
+      auditor.audit_host_vms(host_fqdn, $options[:'diffs-only'])
     end
   end
 

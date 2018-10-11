@@ -5,13 +5,13 @@ class Support::AuditVms
     @factory = factory
   end
 
-  def audit_site_vms(site)
+  def audit_site_vms(site, diffs_only)
     raw_actual = @factory.host_repository.find_fabric_vms(site)
     raw_specified = get_specified_vms(site)
-    compile_vm_audit(raw_actual, raw_specified)
+    compile_vm_audit(raw_actual, raw_specified, diffs_only)
   end
 
-  def audit_host_vms(host_fqdn)
+  def audit_host_vms(host_fqdn, diffs_only)
     unless host_fqdn.include?('.')
       logger(Logger::FATAL) { "You must specify a host fqdn" }
       exit 1
@@ -19,12 +19,12 @@ class Support::AuditVms
 
     raw_actual = @factory.host_repository.find_host_vms(host_fqdn)
     raw_specified = raw_actual.map { |vm| @factory.inventory.find(vm[:fqdn]) }.reject(&:nil?)
-    compile_vm_audit(raw_actual, raw_specified)
+    compile_vm_audit(raw_actual, raw_specified, diffs_only)
   end
 
   private
 
-  def compile_vm_audit(raw_actual, raw_specified)
+  def compile_vm_audit(raw_actual, raw_specified, diffs_only)
     vms = {}
 
     raw_actual.each { |vm| vms[vm[:fqdn]] = { :vm_name => vm[:fqdn].partition('.').first, :actual => vm } }
@@ -48,7 +48,7 @@ class Support::AuditVms
     end
 
     vms_stats = vms.map { |fqdn, vm| vm_stats_for(fqdn, vm) }
-    render_vm_stats(vms_stats)
+    render_vm_stats(vms_stats, diffs_only)
   end
 
   def get_specified_vms(site)
@@ -120,12 +120,13 @@ class Support::AuditVms
     end
   end
 
-  def render_vm_stats(vms_stats)
+  def render_vm_stats(vms_stats, diffs_only)
     host_col_width = vms_stats.map { |x| x[:vm_name] }.map(&:length).max
     printf("N.B. Figure pairs are reported as specified/actual\n")
     printf("%-#{host_col_width}s%12s%8s%6s%10s%10s%16s%7s%7s%9s\n",
            "vm", "host", "ram", "cpus", "os_disk", "data_disk", "os", "age", "uptime", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
+      next unless !diffs_only || stats[:inconsistency_count] != 0
       printf("%-#{host_col_width}s", stats[:vm_name])
       print_result(12, domain_name_from_fqdn(stats[:host_fqdn]), !stats[:host_fqdn].nil?)
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
