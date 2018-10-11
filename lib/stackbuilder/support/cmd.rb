@@ -11,6 +11,7 @@ require 'stackbuilder/support/cleaner'
 require 'stackbuilder/support/live_migration'
 require 'stackbuilder/support/host_builder'
 require 'stackbuilder/support/app_deployer'
+require 'stackbuilder/support/mcollective'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
@@ -371,6 +372,8 @@ class CMD
     machine_def.accept do |child|
       hosts << child.name if child.is_a? Stacks::MachineDef
     end
+
+    self.class.include Support::MCollective
     mco_client("libvirt") do |mco|
       mco.fact_filter "domain=/(st|ci)/"
       results = {}
