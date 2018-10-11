@@ -126,7 +126,7 @@ class Support::AuditVms
     printf("%-#{host_col_width}s%12s%8s%6s%10s%10s%16s%7s%7s%9s\n",
            "vm", "host", "ram", "cpus", "os_disk", "data_disk", "os", "age", "uptime", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
-      next unless !diffs_only || stats[:inconsistency_count] != 0
+      next unless !diffs_only || any_difference?(stats)
       printf("%-#{host_col_width}s", stats[:vm_name])
       print_result(12, domain_name_from_fqdn(stats[:host_fqdn]), !stats[:host_fqdn].nil?)
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
@@ -149,6 +149,11 @@ class Support::AuditVms
     colour = is_good ? "[0;32m" : "[0;31m"
     format = $stdout.isatty ? "#{colour}%#{width}s[0m" : "%#{width}s"
     printf(format, value.nil? ? 'X' : value)
+  end
+
+  def any_difference?(stats)
+    stats[:specified_os] != stats[:actual_os] ||
+      stats[:inconsistency_count] != 0
   end
 
   def happy_days(daystring)
