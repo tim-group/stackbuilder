@@ -126,7 +126,7 @@ class Support::AuditVms
     printf("%-#{host_col_width}s%12s%8s%6s%10s%10s%16s%7s%7s%9s\n",
            "vm", "host", "ram", "cpus", "os_disk", "data_disk", "os", "age", "uptime", "diff_cnt")
     vms_stats.sort_by { |a| vm_sort_key(a) }.each do |stats|
-      next if diffs_only && stats[:inconsistency_count] == 0
+      next if diffs_only && !any_difference?(stats)
       printf("%-#{host_col_width}s", stats[:vm_name])
       print_result(12, domain_name_from_fqdn(stats[:host_fqdn]), !stats[:host_fqdn].nil?)
       print_formatted_pair(8, stats[:specified_ram], stats[:actual_ram])
