@@ -25,8 +25,7 @@ class Stacks::Services::LogstashIndexerServer < Stacks::MachineDef
                  'rabbitmq_central_password_key'      => rabbitmq_config.password_hiera_key,
                  'rabbitmq_central_exchange'          => @logstash_cluster.exchange,
                  'rabbitmq_central_hosts'             => @logstash_cluster.rabbitmq_logging_hosts
-               },
-               'server::default_new_mgmt_net_local' => nil)
+               })
     enc
   end
 end

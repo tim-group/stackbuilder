@@ -24,8 +24,7 @@ class Stacks::Services::LogstashReceiverServer < Stacks::MachineDef
                  'rabbitmq_logging_password_key'      => rabbitmq_config.password_hiera_key,
                  'rabbitmq_logging_exchange'          => @logstash_cluster.exchange,
                  'rabbitmq_logging_hosts'             => @logstash_cluster.rabbitmq_logging_hosts
-               },
-               'server::default_new_mgmt_net_local' => nil)
+               })
     enc
   end
 

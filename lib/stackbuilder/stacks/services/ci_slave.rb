@@ -21,6 +21,9 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
     enc.merge!('role::cinode' => {
                  'node_labels'   => @node_labels.join(' '),
                  'allow_matrix_host' => @allow_matrix_host
+               },
+               'server::default_new_mgmt_net_local' => {
+                 'minimal' => true
                })
     enc
   end

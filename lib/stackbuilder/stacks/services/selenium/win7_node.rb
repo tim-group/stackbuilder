@@ -29,6 +29,11 @@ class Stacks::Services::Selenium::Win7Node < Stacks::MachineDef
     }
   end
 
+  def to_enc
+    super
+    {}
+  end
+
   def to_spec
     spec = super
     spec[:template] = "senode_win7"

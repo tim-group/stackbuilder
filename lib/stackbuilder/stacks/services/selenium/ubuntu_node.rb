@@ -28,6 +28,11 @@ class Stacks::Services::Selenium::UbuntuNode < Stacks::MachineDef
     template(options[:lsbdistcodename].nil? ? :precise : options[:lsbdistcodename])
   end
 
+  def to_enc
+    super
+    {}
+  end
+
   def validate_storage
     true
   end

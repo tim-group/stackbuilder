@@ -11,6 +11,11 @@ class Stacks::Gold::WinNode < Stacks::MachineDef
     @win_version = nil
   end
 
+  def to_enc
+    super
+    {}
+  end
+
   def to_spec
     modify_storage('/'.to_sym => {
                      :prepare => {

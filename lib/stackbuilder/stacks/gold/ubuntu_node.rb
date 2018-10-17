@@ -20,6 +20,11 @@ class Stacks::Gold::UbuntuNode < Stacks::MachineDef
                    })
   end
 
+  def to_enc
+    super
+    {}
+  end
+
   def to_spec
     spec = super
     spec[:template] = "ubuntu-#{@ubuntu_version}"

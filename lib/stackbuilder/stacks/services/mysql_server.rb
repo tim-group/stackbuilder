@@ -274,8 +274,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'charset'                  => @virtual_service.charset,
                  'version'                  => dist_version,
                  'monitoring_checks'        => @monitoring_checks
-               },
-               'server::default_new_mgmt_net_local' => nil)
+               })
 
     dependant_instances = @virtual_service.dependant_instance_fqdns(location, [:prod], false)
     dependant_instances.concat(@virtual_service.children.map(&:prod_fqdn))

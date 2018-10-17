@@ -174,4 +174,10 @@ describe Stacks::MachineDef do
     machinedef.ram = '10G'
     expect(machinedef.ram).to eql('10485760')
   end
+
+  it 'should populate the ENC with default class' do
+    env = new_environment('env', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    expect(machinedef.to_enc).to have_key('server::default_new_mgmt_net_local')
+  end
 end

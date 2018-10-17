@@ -25,7 +25,6 @@ class Stacks::Services::RabbitMqLoggingServer < Stacks::MachineDef
                  'dependant_instances' => dependant_instances.sort,
                  'dependant_users'     => @rabbitmq_logging_cluster.dependant_users,
                  'shovel_destinations' => @rabbitmq_logging_cluster.shovel_destinations
-               },
-               'server::default_new_mgmt_net_local' => nil)
+               })
   end
 end

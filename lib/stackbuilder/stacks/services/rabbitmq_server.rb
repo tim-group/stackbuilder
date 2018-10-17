@@ -11,8 +11,7 @@ class Stacks::Services::RabbitMQServer < Stacks::MachineDef
     enc.merge!('role::rabbitmq_server' => {
                  'cluster_nodes' =>  @rabbitmq_cluster.cluster_nodes(location),
                  'vip_fqdn' => @rabbitmq_cluster.vip_fqdn(:prod, fabric)
-               },
-               'server::default_new_mgmt_net_local' => nil)
+               })
 
     dependant_instances = @rabbitmq_cluster.dependant_instance_fqdns(location)
     dependant_instances.concat(@rabbitmq_cluster.children.map(&:prod_fqdn)).sort
