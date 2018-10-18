@@ -256,7 +256,7 @@ class Stacks::MachineDef
 
     if @spectre_patches
       enc['server'] = {
-          'spectre_patches' => @spectre_patches,
+        'spectre_patches' => @spectre_patches
       }
     end
 
