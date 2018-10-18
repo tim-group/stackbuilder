@@ -175,9 +175,17 @@ describe Stacks::MachineDef do
     expect(machinedef.ram).to eql('10485760')
   end
 
-  it 'should populate the ENC with default class' do
+  it 'should populate the ENC with default server class' do
     env = new_environment('env', :primary_site => 'st')
     machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
     expect(machinedef.to_enc).to have_key('server')
+  end
+
+  it 'should populate the ENC with default server class and spectre patches enabled' do
+    env = new_environment('env', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.spectre_patches = true
+    expect(machinedef.to_enc).to have_key('server')
+    expect(machinedef.to_enc['server']['spectre_patches']).to eql(true)
   end
 end

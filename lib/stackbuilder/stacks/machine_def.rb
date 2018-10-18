@@ -29,6 +29,7 @@ class Stacks::MachineDef
   attr_accessor :monitoring_in_enc
   attr_accessor :monitoring_options
   attr_accessor :maintainer
+  attr_accessor :spectre_patches
 
   def initialize(virtual_service, base_hostname, environment, site, role = nil)
     @virtual_service = virtual_service
@@ -62,6 +63,7 @@ class Stacks::MachineDef
     @monitoring_options = @virtual_service.monitoring_options if @virtual_service.respond_to?(:monitoring_options)
     @monitoring_in_enc = false # temporary feature flag
     @monitoring_in_enc = @virtual_service.monitoring_in_enc if @virtual_service.respond_to?(:monitoring_in_enc)
+    @spectre_patches = nil
 
     @destroyable = true
     @dont_start = false
@@ -251,6 +253,13 @@ class Stacks::MachineDef
 
   def to_enc
     enc = { 'server' => nil }
+
+    if @spectre_patches
+      enc['server'] = {
+          'spectre_patches' => @spectre_patches,
+      }
+    end
+
     enc.merge!(filebeat_profile_enc)
 
     if @monitoring_in_enc
