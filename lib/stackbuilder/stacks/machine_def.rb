@@ -250,7 +250,7 @@ class Stacks::MachineDef
   end
 
   def to_enc
-    enc = { 'server::default_new_mgmt_net_local' => nil }
+    enc = { 'server' => nil }
     enc.merge!(filebeat_profile_enc)
 
     if @monitoring_in_enc

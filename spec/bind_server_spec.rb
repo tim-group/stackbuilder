@@ -55,7 +55,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   # OY Master - Slaves from PG Master
   host('oy-ns-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
       'mgmt.oy.net.local',
       'oy.net.local',
@@ -81,7 +81,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   # OY Slave - Slaves from OY Master, PG Master
   host('oy-ns-002.mgmt.oy.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
     expect(enc['role::bind_server']['slave_zones']).to eql(
       'oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'],
@@ -105,7 +105,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   # PG Master - Slaves from OY Master
   host('pg-ns-001.mgmt.pg.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
       'mgmt.pg.net.local',
       'pg.net.local',
@@ -132,7 +132,7 @@ describe_stack 'nameservers with bi-directional slave_from dependencies' do
   # PG Slave - Slaves from PG Master, OY Master
   host('pg-ns-002.mgmt.pg.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
     expect(enc['role::bind_server']['slave_zones']).to eql('oy-ns-001.mgmt.oy.net.local' => [
       'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'
@@ -190,7 +190,7 @@ describe_stack 'nameservers with single slave_from dependency' do
   # OY Master
   host('oy-ns-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
       'mgmt.oy.net.local',
       'oy.net.local',
@@ -218,7 +218,7 @@ describe_stack 'nameservers with single slave_from dependency' do
   # OY Slave - Slaves from OY Master
   host('oy-ns-002.mgmt.oy.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
     expect(enc['role::bind_server']['slave_zones']).
       to eql('oy-ns-001.mgmt.oy.net.local' => ['mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'])
@@ -239,7 +239,7 @@ describe_stack 'nameservers with single slave_from dependency' do
   # PG Master - Slaves from OY Master
   host('pg-ns-001.mgmt.pg.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to eql([
       'mgmt.pg.net.local',
       'pg.net.local',
@@ -265,7 +265,7 @@ describe_stack 'nameservers with single slave_from dependency' do
   # PG Slave - Slaves from PG Master, OY Master
   host('pg-ns-002.mgmt.pg.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::bind_server']['master_zones']).to be_nil
     expect(enc['role::bind_server']['slave_zones']).to eql('oy-ns-001.mgmt.oy.net.local' => [
       'mgmt.oy.net.local', 'oy.net.local', 'front.oy.net.local'

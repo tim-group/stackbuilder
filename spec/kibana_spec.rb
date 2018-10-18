@@ -20,7 +20,7 @@ describe_stack 'kibana server enc is correct' do
 
   host('oy-kibana-001.mgmt.oy.net.local') do |host|
     enc = host.to_enc
-    expect(enc['server::default_new_mgmt_net_local']).to be_nil
+    expect(enc['server']).to be_nil
     expect(enc['role::kibana']).not_to be_nil
     expect(enc['role::kibana']['elasticsearch_cluster_address']).to eql('oy-elasticsearch-data-vip.oy.net.local')
     expect(enc['role::kibana']['loadbalancer_hosts']).to eql([

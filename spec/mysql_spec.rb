@@ -138,7 +138,7 @@ describe_stack 'should provide correct enc data' do
     expect(enc_rights['mydb']['environment']).to eql('testing')
     expect(enc_rights['mydb']['database_name']).to eql('mydb')
 
-    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
+    expect(host.to_enc).to include('server')
     expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-002.space.net.local' => {
         'password_hiera_key' => 'testing/mydb/replication/mysql_password'
@@ -159,9 +159,9 @@ describe_stack 'should provide correct enc data' do
     expect(enc_rights['mydb']['environment']).to eql('testing')
     expect(enc_rights['mydb']['database_name']).to eql('mydb')
 
-    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
+    expect(host.to_enc).to include('server')
     expect(host.to_enc).to include('mysql_hacks::replication_rights_wrapper')
-    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
+    expect(host.to_enc).to include('server')
 
     expect(host.to_enc['mysql_hacks::replication_rights_wrapper']['rights']).to eql(
       'replicant@testing-mydb-001.space.net.local' => {
@@ -187,7 +187,7 @@ describe_stack 'should provide correct enc data' do
         'password_hiera_key' => 'testing/mydb/replication/mysql_password'
       }
     )
-    expect(host.to_enc).to include('server::default_new_mgmt_net_local')
+    expect(host.to_enc).to include('server')
     expect(host.to_enc).to include('mysql_hacks::replication_rights_wrapper')
     expect(host.to_enc).not_to include('mysql_hacks::application_rights_wrapper')
   end

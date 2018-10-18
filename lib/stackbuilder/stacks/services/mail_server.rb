@@ -25,7 +25,7 @@ class Stacks::Services::MailServer < Stacks::MachineDef
                  'participation_dependant_instances' =>
                    @virtual_service.dependant_load_balancer_fqdns(location, @virtual_service.vip_networks)
                },
-               'server::default_new_mgmt_net_local' => {
+               'server' => {
                  'postfix' => false
                })
     enc

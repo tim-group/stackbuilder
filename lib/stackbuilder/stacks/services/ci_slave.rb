@@ -22,7 +22,7 @@ class Stacks::Services::CiSlave < Stacks::MachineDef
                  'node_labels'   => @node_labels.join(' '),
                  'allow_matrix_host' => @allow_matrix_host
                },
-               'server::default_new_mgmt_net_local' => {
+               'server' => {
                  'minimal' => true
                })
     enc

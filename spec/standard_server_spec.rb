@@ -13,7 +13,7 @@ describe_stack 'standard' do
   end
 
   host("e1-mymachine-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['server::default_new_mgmt_net_local']).to eql({})
+    expect(host.to_enc['server']).to eql({})
   end
 end
 
@@ -31,6 +31,6 @@ describe_stack 'standard with offset' do
   end
 
   host("e1-mymachine-011.mgmt.space.net.local") do |host|
-    expect(host.to_enc['server::default_new_mgmt_net_local']).to eql({})
+    expect(host.to_enc['server']).to eql({})
   end
 end

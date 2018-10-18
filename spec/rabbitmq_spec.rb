@@ -21,7 +21,7 @@ describe_stack 'basic rabbitmq cluster' do
       'e1-rabbitmq-001.space.net.local')
     expect(host.to_enc['role::rabbitmq_server']['dependencies']).to be_empty
     expect(host.to_enc['role::rabbitmq_server']['users']).to be_nil
-    expect(host.to_enc.key?('server::default_new_mgmt_net_local')).to eql true
+    expect(host.to_enc.key?('server')).to eql true
   end
 end
 
