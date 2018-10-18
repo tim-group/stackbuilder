@@ -226,9 +226,7 @@ class Stacks::MachineDef
     spec[:cnames] = Hash[@added_cnames.map { |n, cnames| [n, Hash[cnames.map { |c| [c, qualified_hostname(n)] }]] }]
     spec[:allocation_tags] = @allocation_tags
 
-    if @spectre_patches
-      spec[:spectre_patches] = @spectre_patches
-    end
+    spec[:spectre_patches] = @spectre_patches if @spectre_patches
 
     spec
   end
