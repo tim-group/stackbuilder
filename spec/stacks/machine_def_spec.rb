@@ -188,4 +188,12 @@ describe Stacks::MachineDef do
     expect(machinedef.to_enc).to have_key('server')
     expect(machinedef.to_enc['server']['spectre_patches']).to eql(true)
   end
+
+  it 'should populate the specs with the spectre patches toggle' do
+    env = new_environment('env', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.bind_to(env)
+    machinedef.spectre_patches = true
+    expect(machinedef.to_spec[:spectre_patches]).to eql(true)
+  end
 end
