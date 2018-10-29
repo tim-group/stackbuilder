@@ -43,6 +43,8 @@ Options:
                                     (WARNING: normally only wanted when provisioning a stack for the first time)
     --best-effort                   where applicable, do as much as is possible in the face of errors, rather than bailing immediately
     --diffs-only                    for audit_vms command - only output VMs where there are differences
+    --force                         for move command - allows moving VM even when there are VM XML diffs, as long as
+                                    the only diffs are "safe" according to provisioning tools
 
   For further information about options, read bin/stacks.
 
@@ -68,7 +70,7 @@ Options:
     enc [-e] -s                           print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
     launch [-e] -s                        allocate and create a stack, but do not spin it up (you probably want to use provision)
     ls [-est]                             show the entire environment. Show just one stack if -s is specified. Using -t skips stacks of type "machine".
-    move [-e] -s                          move a given stack from its current host to another
+    move [-e] -s [--force]                move a given stack from its current host to another
     provision [-e] -s                     allocates and spins up a stack
     rebuild_host HOST                     re-install a clean operating system on a KVM host (host must be empty)
     reprovision [-e] -s                   "clean", and then "provision" a stack
@@ -130,6 +132,7 @@ GetoptLong.new(
   ['--create-persistent-storage', GetoptLong::NO_ARGUMENT],
   ['--best-effort', GetoptLong::NO_ARGUMENT],
   ['--diffs-only', GetoptLong::NO_ARGUMENT],
+  ['--force', GetoptLong::NO_ARGUMENT],
   ['--no-tmux', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
@@ -149,6 +152,8 @@ GetoptLong.new(
     $options[:'checkout-config'] = (arg == '') ? 'http://git/stackbuilder-config.git' : arg
   when '--diffs-only'
     $options[:'diffs-only'] = true
+  when '--force'
+    $options[:force] = true
   else
     $options[opt_sym] = arg
   end

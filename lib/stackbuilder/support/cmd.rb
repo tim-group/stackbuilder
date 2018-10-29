@@ -311,7 +311,7 @@ class CMD
       exit 1
     end
 
-    Support::LiveMigrator.new(@factory, host).move(machine)
+    Support::LiveMigrator.new(@factory, host).move(machine, $options[:force])
   end
 
   def clear_host(argv)

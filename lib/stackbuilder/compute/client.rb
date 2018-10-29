@@ -64,35 +64,35 @@ class Compute::Client
   end
 
   def launch(host, specs)
-    invoke :launch, specs, :timeout => 10_000, :nodes => [host]
+    invoke :launch, { :specs => specs }, :timeout => 10_000, :nodes => [host]
   end
 
   def allocate_ips(host, specs)
-    invoke :allocate_ips, specs, :timeout => 15 * 60, :nodes => [host]
+    invoke :allocate_ips, { :specs => specs }, :timeout => 15 * 60, :nodes => [host]
   end
 
   def free_ips(host, specs)
-    invoke :free_ips, specs, :timeout => 15 * 60, :nodes => [host]
+    invoke :free_ips, { :specs => specs }, :timeout => 15 * 60, :nodes => [host]
   end
 
   def clean(fabric, specs)
-    invoke :clean, specs, :timeout => 15 * 60, :fabric => fabric
+    invoke :clean, { :specs => specs }, :timeout => 15 * 60, :fabric => fabric
   end
 
   def add_cnames(host, specs)
-    invoke :add_cnames, specs, :timeout => 15 * 60, :nodes => [host]
+    invoke :add_cnames, { :specs => specs }, :timeout => 15 * 60, :nodes => [host]
   end
 
   def remove_cnames(host, specs)
-    invoke :remove_cnames, specs, :timeout => 15 * 60, :nodes => [host]
+    invoke :remove_cnames, { :specs => specs }, :timeout => 15 * 60, :nodes => [host]
   end
 
-  def check_vm_definitions(host, specs)
-    invoke :check_definition, specs, :timeout => 15 * 60, :nodes => [host]
+  def check_vm_definitions(host, specs, ignore_safe_vm_diffs)
+    invoke :check_definition, { :specs => specs, :ignore_safe_vm_diffs => ignore_safe_vm_diffs }, :timeout => 15 * 60, :nodes => [host]
   end
 
   def create_storage(host, specs)
-    invoke :create_storage, specs, :timeout => 15 * 60, :nodes => [host]
+    invoke :create_storage, { :specs => specs }, :timeout => 15 * 60, :nodes => [host]
   end
 
   def enable_live_migration(source_host_fqdn, dest_host_fqdn)
@@ -131,9 +131,9 @@ class Compute::Client
     mco_client("computenode", :fabric => fabric) { |mco| mco.discover.sort }
   end
 
-  def invoke(selector, specs, client_options)
+  def invoke(selector, options, client_options)
     mco_client("computenode", client_options) do |mco|
-      mco.send(selector, :specs => specs).map do |node|
+      mco.send(selector, options).map do |node|
         fail node[:statusmsg] if node[:statuscode] != 0
 
         # XXX mcollective's implemented_by, after reading the return JSON, arbitrarily converts hash keys from strings
