@@ -87,7 +87,7 @@ class Compute::Client
     invoke :remove_cnames, { :specs => specs }, :timeout => 15 * 60, :nodes => [host]
   end
 
-  def check_vm_definitions(host, specs, ignore_safe_vm_diffs)
+  def check_vm_definitions(host, specs, ignore_safe_vm_diffs = false)
     invoke :check_definition, { :specs => specs, :ignore_safe_vm_diffs => ignore_safe_vm_diffs }, :timeout => 15 * 60, :nodes => [host]
   end
 
