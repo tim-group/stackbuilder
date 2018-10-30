@@ -145,7 +145,7 @@ module Stacks::Services::VirtualBindService
           'arg_style'   => 'APPEND_HOST',
           'path'        => "/usr/bin/host -4 -W 3 -t A -s apt.#{zone}"
         }
-      when /crosssite/, /glue/
+      when /crosssite/, /glue/, /ilo/
         # do nothing
       else
         healthchecks << {
