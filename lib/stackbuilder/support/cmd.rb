@@ -328,7 +328,7 @@ class CMD
       exit 1
     end
 
-    Support::LiveMigrator.new(@factory, host).move_all
+    Support::LiveMigrator.new(@factory, host).move_all($options[:force])
   end
 
   def rebuild_host(argv)

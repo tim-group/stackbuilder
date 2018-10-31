@@ -12,11 +12,11 @@ class Support::LiveMigrator
     move_machines([machine], false, force)
   end
 
-  def move_all
-    # TODO: allow force?
+  def move_all(force = false)
     move_machines(
       @source_host.allocated_machines.map { |m| @factory.inventory.find_by_hostname(m[:fabric], m[:hostname]) },
-      ENV['BEST_EFFORT'] == 'true'
+      ENV['BEST_EFFORT'] == 'true',
+      force
     )
   end
 

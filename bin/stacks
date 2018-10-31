@@ -43,7 +43,7 @@ Options:
                                     (WARNING: normally only wanted when provisioning a stack for the first time)
     --best-effort                   where applicable, do as much as is possible in the face of errors, rather than bailing immediately
     --diffs-only                    for audit_vms command - only output VMs where there are differences
-    --force                         for move command - allows moving VM even when there are VM XML diffs, as long as
+    --force                         for move and clear_host commands - allows moving VM even when there are VM XML diffs, as long as
                                     the only diffs are "safe" according to provisioning tools
 
   For further information about options, read bin/stacks.
@@ -57,7 +57,7 @@ Options:
     check_definition [-e] -s              verify that the VMs of a provisioned stack match their corresponding VM definitions
     clean [-e] -s                         shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
     clean_all [-e] -s                     shuts down and removes a stack, puppet, nagios and mongo
-    clear_host HOST                       clear the specified HOST machine of all VMs (supports --best-effort)
+    clear_host HOST [--force]             clear the specified HOST machine of all VMs (supports --best-effort)
     compile                               create a yaml file describing the entire infrastructure
     dependencies [-e] -s                  list the machines that this machine depends on
     dependents [-e] -s                    list the machines that depend on this machine
