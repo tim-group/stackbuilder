@@ -15,7 +15,7 @@ class Support::MCollectivePxe
   private
 
   def do_pxe_call(host_mac_address, fabric, action)
-    site = fabric =~ /^(ci|st)$/ ? 'lon' : fabric
+    site = fabric == 'ci' ? 'lon' : fabric
     rsps = mco_client("pxe", :timeout => 10, :fabric => site) { |mco| mco.send(action, :mac_address => host_mac_address) }
 
     fail "no response to mco pxe call for fabric #{site}" unless rsps.size == 1
