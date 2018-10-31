@@ -112,7 +112,8 @@ end
 $options = {
   :environment => 'dev',
   :path        => ENV['STACKBUILDER_CONFIG_PATH'] || '.',
-  :verbose     => 2
+  :verbose     => 2,
+  :force       => false
 }
 # change the default path on puppetservers puppet.conf node_terminus does not take parameters
 require 'socket'
