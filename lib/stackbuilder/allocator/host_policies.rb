@@ -191,6 +191,22 @@ module StackBuilder::Allocator::HostPolicies
     end
   end
 
+  def self.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy
+    Proc.new do |host, machine|
+      vm_requested_tags = machine[:allocation_tags]
+      host_supplied_tags = host.facts['allocation_tags']
+
+      is_vm_spectre_patched = vm_requested_tags && vm_requested_tags.include?('spectre_patched')
+      is_host_spectre_patched = host_supplied_tags && host_supplied_tags.include?('spectre_patched')
+
+      if is_vm_spectre_patched != is_host_spectre_patched
+        { :passed => false, :reason => is_vm_spectre_patched ? "VM is spectre-patched but host is not" : "VM is not spectre-patched but host is" }
+      else
+        { :passed => true }
+      end
+    end
+  end
+
   # Policy
   # If tag(s) don't exist = explode
   # If tag(s) don't exist but no capacity = explode
