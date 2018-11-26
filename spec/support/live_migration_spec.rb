@@ -17,6 +17,12 @@ describe Support::LiveMigrator do
     @test_env = new_environment('env', :primary_site => 'oy')
   end
 
+  it 'should refuse to migrate if machine not in stacks model' do
+    @source_host.allocated_machines = [{ :hostname => "roguemachine", :in_model => false }]
+
+    lambda { @live_migrator.move_all }.should raise_error SystemExit
+  end
+
   it 'should refuse to migrate if machine does not have up-to-date definition' do
     @test_machine1 = Stacks::MachineDef.new(self, 'test1', @test_env, 'oy')
     @test_machine1.bind_to(@test_env)
