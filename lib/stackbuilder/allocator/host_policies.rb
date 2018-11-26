@@ -195,7 +195,7 @@ module StackBuilder::Allocator::HostPolicies
     Proc.new do |host, machine|
       host_supplied_tags = host.facts['allocation_tags']
 
-      is_vm_spectre_patched = machine[:spectre_patches]
+      is_vm_spectre_patched = !machine[:spectre_patches].nil? && machine[:spectre_patches]
       is_host_spectre_patched = !host_supplied_tags.nil? && host_supplied_tags.include?('spectre_patched')
 
       if is_vm_spectre_patched != is_host_spectre_patched

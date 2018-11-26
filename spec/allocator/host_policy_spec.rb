@@ -366,8 +366,16 @@ describe StackBuilder::Allocator::HostPolicies do
   end
 
   it 'only allocates to hosts with matching spectre patch status' do
-    unpatched_machine = {
-      :hostname => 'test-db-001',
+    unpatched_host_without_allocation_tags = StackBuilder::Allocator::Host.new("unpatched_host")
+    unpatched_host_with_spectre_unpatched_allocation_tags =
+      StackBuilder::Allocator::Host.new("unpatched_host", :facts => { 'allocation_tags' => %w(spectre_unpatched) })
+    patched_host = StackBuilder::Allocator::Host.new("patched_host", :facts => { 'allocation_tags' => %w(spectre_patched) })
+
+    unpatched_machine_without_spectre_patches_attribute = {
+      :hostname => 'test-db-001'
+    }
+    unpatched_machine_with_false_spectre_patches_attribute = {
+      :hostname        => 'test-db-001',
       :spectre_patches => false
     }
     patched_machine = {
@@ -375,21 +383,30 @@ describe StackBuilder::Allocator::HostPolicies do
       :spectre_patches => true
     }
 
-    unpatched_host = StackBuilder::Allocator::Host.new("unpatched_host")
-    patched_host = StackBuilder::Allocator::Host.new("patched_host", :facts => { 'allocation_tags' => %w(spectre_patched) })
+    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
+           call(unpatched_host_without_allocation_tags, unpatched_machine_without_spectre_patches_attribute)[:passed]).to eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
+           call(unpatched_host_without_allocation_tags, unpatched_machine_with_false_spectre_patches_attribute)[:passed]).to eql(true)
+    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
+           call(unpatched_host_without_allocation_tags, patched_machine)[:passed]).to eql(false)
 
     expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(unpatched_host, unpatched_machine)[:passed]).to eql(true)
+           call(unpatched_host_with_spectre_unpatched_allocation_tags, unpatched_machine_without_spectre_patches_attribute)[:passed]).to eql(true)
     expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(unpatched_host, patched_machine)[:passed]).to eql(false)
+           call(unpatched_host_with_spectre_unpatched_allocation_tags, unpatched_machine_with_false_spectre_patches_attribute)[:passed]).to eql(true)
     expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(patched_host, unpatched_machine)[:passed]).to eql(false)
+           call(unpatched_host_with_spectre_unpatched_allocation_tags, patched_machine)[:passed]).to eql(false)
+
+    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
+           call(patched_host, unpatched_machine_without_spectre_patches_attribute)[:passed]).to eql(false)
+    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
+           call(patched_host, unpatched_machine_with_false_spectre_patches_attribute)[:passed]).to eql(false)
     expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
            call(patched_host, patched_machine)[:passed]).to eql(true)
 
     expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(unpatched_host, patched_machine)[:reason]).to eql("VM is spectre-patched but host is not")
+           call(unpatched_host_with_spectre_unpatched_allocation_tags, patched_machine)[:reason]).to eql("VM is spectre-patched but host is not")
     expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(patched_host, unpatched_machine)[:reason]).to eql("VM is not spectre-patched but host is")
+           call(patched_host, unpatched_machine_without_spectre_patches_attribute)[:reason]).to eql("VM is not spectre-patched but host is")
   end
 end
