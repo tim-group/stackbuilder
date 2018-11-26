@@ -13,17 +13,9 @@ class Support::LiveMigrator
   end
 
   def move_all(force = false)
-    best_effort = ENV['BEST_EFFORT'] == 'true'
-
-    machines_not_in_model, machines_in_model = @source_host.allocated_machines.partition { |m| m.include?(:in_model) && m[:in_model] == false }
-    machines_not_in_model.map { |vm| vm[:hostname] }.each do |vm_name|
-      logger(best_effort ? Logger::WARN : Logger::FATAL) { "#{vm_name} is not in the stacks model so cannot be live migrated." }
-    end
-    exit 1 unless machines_not_in_model.empty? || best_effort
-
     move_machines(
-      machines_in_model.map { |m| @factory.inventory.find_by_hostname(m[:fabric], m[:hostname]) },
-      best_effort,
+      @source_host.allocated_machines.map { |m| @factory.inventory.find_by_hostname(m[:fabric], m[:hostname]) },
+      ENV['BEST_EFFORT'] == 'true',
       force
     )
   end

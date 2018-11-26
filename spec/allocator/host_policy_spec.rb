@@ -364,32 +364,4 @@ describe StackBuilder::Allocator::HostPolicies do
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h1, machine)[:passed]).to eql(true)
     expect(StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags.call(h2, machine)[:passed]).to eql(true)
   end
-
-  it 'only allocates to hosts with matching spectre patch status' do
-    unpatched_machine = {
-      :hostname => 'test-db-001',
-      :spectre_patches => false
-    }
-    patched_machine = {
-      :hostname        => 'test-db-001',
-      :spectre_patches => true
-    }
-
-    unpatched_host = StackBuilder::Allocator::Host.new("unpatched_host")
-    patched_host = StackBuilder::Allocator::Host.new("patched_host", :facts => { 'allocation_tags' => %w(spectre_patched) })
-
-    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(unpatched_host, unpatched_machine)[:passed]).to eql(true)
-    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(unpatched_host, patched_machine)[:passed]).to eql(false)
-    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(patched_host, unpatched_machine)[:passed]).to eql(false)
-    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(patched_host, patched_machine)[:passed]).to eql(true)
-
-    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(unpatched_host, patched_machine)[:reason]).to eql("VM is spectre-patched but host is not")
-    expect(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy.
-           call(patched_host, unpatched_machine)[:reason]).to eql("VM is not spectre-patched but host is")
-  end
 end
