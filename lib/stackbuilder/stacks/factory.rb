@@ -18,8 +18,9 @@ require 'stackbuilder/stacks/namespace'
 class Stacks::Factory
   attr_reader :path
 
-  def initialize(path = nil)
+  def initialize(path = nil, force = false)
     @path = path.nil? ? '.' : path
+    @force = force
   end
 
   def inventory
@@ -27,17 +28,24 @@ class Stacks::Factory
   end
 
   def policies
-    @policies ||= [
-      StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags,
-      StackBuilder::Allocator::HostPolicies.ensure_mount_points_have_specified_storage_types_policy,
-      StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy,
-      StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy,
-      StackBuilder::Allocator::HostPolicies.ha_group,
-      StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy,
-      StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy,
-      StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy,
-      StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy
-    ]
+    if defined? @policies
+      @policies
+    else
+      policies = [
+        StackBuilder::Allocator::HostPolicies.allocate_on_host_with_tags,
+        StackBuilder::Allocator::HostPolicies.ensure_mount_points_have_specified_storage_types_policy,
+        StackBuilder::Allocator::HostPolicies.ensure_defined_storage_types_policy,
+        StackBuilder::Allocator::HostPolicies.do_not_overallocate_disk_policy,
+        StackBuilder::Allocator::HostPolicies.ha_group,
+        StackBuilder::Allocator::HostPolicies.do_not_overallocate_ram_policy,
+        StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy,
+        StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy
+      ]
+      if !@force
+        policies.push(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy)
+      end
+      policies
+    end
   end
 
   def preference_functions
