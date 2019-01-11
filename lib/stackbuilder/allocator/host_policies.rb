@@ -67,7 +67,7 @@ module StackBuilder::Allocator::HostPolicies
         unique_missing_storage_types = Set.new(missing_storage_types).to_a
         {
           :passed => false,
-          :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')} " \
+          :reason => "Storage type not available (required: #{unique_missing_storage_types.join(',')}, " \
                       "available: #{host.storage.keys.sort.join(',')})"
         }
       else
