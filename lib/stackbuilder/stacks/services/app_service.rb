@@ -62,7 +62,7 @@ module Stacks::Services::AppService
     if respond_to? :vip_fqdn
       { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
     else
-      Hash.new
+      {}
     end
   end
 
