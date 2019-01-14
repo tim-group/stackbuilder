@@ -14,6 +14,7 @@ class Stacks::Environment
   attr_reader :sites
   attr_accessor :allocation_tags
   attr_reader :depends_on
+  attr_reader :primary_network
 
   include Stacks::MachineDefContainer
 
@@ -45,6 +46,8 @@ class Stacks::Environment
       @routes[site].concat(@parent.routes[site]) if @parent.routes.key?(site)
     end unless @parent.nil?
     @depends_on = []
+
+    @primary_network = options[:primary_network] || :prod
   end
 
   # Transitional site lookup array, allowing servers to translate sites (oy,pg) to legacy symbols
