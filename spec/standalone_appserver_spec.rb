@@ -148,5 +148,4 @@ describe_stack 'standalone servers can depend on each other' do
     # Cannot add dependencies for a standalone service since it is not a virtual service
     expect(host.to_enc['role::http_app']['dependencies']).to eql({})
   end
-
 end
