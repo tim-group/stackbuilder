@@ -25,7 +25,8 @@ else
 fi
 
 echo -n "Running stacks compile: "
-OUTPUT=`stacks compile > /tmp/stacks-pre-commit`
+USER=`whoami`
+OUTPUT=`stacks compile > /tmp/$USER-stacks-pre-commit`
 RC=$?
 if [ $RC -ne 0 ]; then
   echo "FAIL"
