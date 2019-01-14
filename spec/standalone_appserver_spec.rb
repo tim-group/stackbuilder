@@ -115,3 +115,38 @@ describe_stack 'standalone servers should not provide a configuration to load ba
     expect(load_balancer.to_enc['role::loadbalancer']['virtual_servers']).to eql({})
   end
 end
+
+describe_stack 'standalone servers can depend on each other' do
+  given do
+    stack 'standalone_app' do
+      standalone_app_service 'standaloneapp' do
+        self.application = 'standalone-app'
+        self.instances = 1
+        self.groups = ['blue']
+      end
+    end
+    stack 'dependant_app' do
+      standalone_app_service 'dependantapp' do
+        self.application = 'dependant-app'
+        self.instances = 1
+        self.groups = ['blue']
+        depend_on 'standaloneapp'
+      end
+    end
+
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'standalone_app'
+      instantiate_stack 'dependant_app'
+    end
+  end
+
+  host('e1-standaloneapp-001.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql(['e1-dependantapp-001.space.net.local'])
+  end
+
+  host('e1-dependantapp-001.mgmt.space.net.local') do |host|
+    # Cannot add dependencies for a standalone service since it is not a virtual service
+    expect(host.to_enc['role::http_app']['dependencies']).to eql({})
+  end
+
+end

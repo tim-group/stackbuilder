@@ -59,7 +59,11 @@ module Stacks::Services::AppService
   end
 
   def config_params(_dependant, fabric, _dependent_instance)
-    { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
+    if respond_to? :vip_fqdn
+      { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
+    else
+      Hash.new
+    end
   end
 
   def to_loadbalancer_config(location, fabric)
