@@ -352,7 +352,7 @@ class CMD
   def dependencies(_argv)
     machine_def = ensure_is_machine(check_and_get_stack)
 
-    service_dependencies = machine_def.virtual_service.virtual_services_that_i_depend_on
+    service_dependencies = machine_def.dependencies
     dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
     puts ZAMLS.to_zamls(dependencies)
   end
