@@ -39,7 +39,7 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
     enc
   end
 
-  def dependent_nodes
+  def dependency_nodes
     super + @elasticsearch_cluster.other_elasticsearch_data_hosts(mgmt_fqdn)
   end
 end

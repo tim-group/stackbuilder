@@ -155,6 +155,10 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     role_of?(:backup)
   end
 
+  def dependency_nodes
+    super + @virtual_service.children.select { |m| m.identity != self.identity }
+  end
+
   def merge_gtid_config
     gtid_config = {
       'mysqld' => {

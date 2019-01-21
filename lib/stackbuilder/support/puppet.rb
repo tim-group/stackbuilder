@@ -10,7 +10,7 @@ class Support::Puppet
   def do_puppet_run_on_dependencies(machine_def)
     all_dependencies = Set.new
     machine_def.accept do |m|
-      all_dependencies += m.dependent_nodes if m.is_a? Stacks::MachineDef
+      all_dependencies += m.dependency_nodes if m.is_a? Stacks::MachineDef
     end
 
     dependency_fqdns = []

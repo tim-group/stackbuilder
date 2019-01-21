@@ -79,6 +79,33 @@ describe_stack 'stack-with-dependencies' do
   end
 end
 
+describe_stack 'mysql-cluster' do
+  given do
+    stack 'example_db_cluster' do
+      mysql_cluster 'exampledb' do
+        self.role_in_name = false
+        self.database_name = 'exampledb'
+        self.master_instances = 1
+        self.slave_instances = 1
+        self.secondary_site_slave_instances = 1
+      end
+    end
+
+    env 'e', :primary_site => 'earth', :secondary_site => 'space' do
+      instantiate_stack 'example_db_cluster'
+    end
+  end
+
+  host('e-exampledb-001.mgmt.space.net.local') do |host|
+    expect(host.dependency_nodes.map(&:mgmt_fqdn).sort).to eql(
+      [
+        'e-exampledb-001.mgmt.earth.net.local',
+        'e-exampledb-002.mgmt.earth.net.local',
+        'e-exampledbbackup-001.mgmt.space.net.local'
+      ])
+  end
+end
+
 describe_stack 'stack-with-dependencies1' do
   given do
     stack 'example_db' do

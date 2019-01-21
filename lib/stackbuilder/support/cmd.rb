@@ -351,7 +351,7 @@ class CMD
 
   def dependencies(_argv)
     machine_def = ensure_is_machine(check_and_get_stack)
-    puts ZAMLS.to_zamls(machine_def.dependent_nodes.map(&:identity))
+    puts ZAMLS.to_zamls(machine_def.dependency_nodes.map(&:identity))
   end
 
   def dependents(_argv)

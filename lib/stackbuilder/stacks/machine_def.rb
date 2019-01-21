@@ -303,7 +303,7 @@ class Stacks::MachineDef
     "machine"
   end
 
-  def dependent_nodes
+  def dependency_nodes
     virtual_service.virtual_services_that_i_depend_on.map(&:children).flatten
   end
 
