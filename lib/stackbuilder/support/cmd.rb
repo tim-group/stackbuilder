@@ -280,12 +280,12 @@ class CMD
     machine_def = check_and_get_stack
 
     # prepare dependencies
-    # @dns.do_allocate_vips(machine_def)
-    # @dns.do_allocate_ips(machine_def)
+    @dns.do_allocate_vips(machine_def)
+    @dns.do_allocate_ips(machine_def)
     @puppet.do_puppet_run_on_dependencies(machine_def)
 
-    # do_provision(@factory.services, machine_def)
-    # @nagios.do_nagios_register_new(machine_def)
+    do_provision(@factory.services, machine_def)
+    @nagios.do_nagios_register_new(machine_def)
   end
 
   def reprovision(_argv)

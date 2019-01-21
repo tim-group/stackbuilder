@@ -25,13 +25,13 @@ class Support::Puppet
     dependency_fqdns = dependency_fqdns.sort.uniq
 
     pp dependency_fqdns
-    # require 'tempfile'
-    # Tempfile.open("mco_prepdeps") do |f|
-    #   f.puts dependency_fqdns.join("\n")
-    #   f.flush
-    #
-    #   system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
-    # end
+    require 'tempfile'
+    Tempfile.open("mco_prepdeps") do |f|
+      f.puts dependency_fqdns.join("\n")
+      f.flush
+
+      system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
+    end
   end
 
   # wait for automatic otp signing of outstanding Puppet certificates for these machines
