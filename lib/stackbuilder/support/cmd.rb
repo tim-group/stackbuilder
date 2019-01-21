@@ -280,12 +280,12 @@ class CMD
     machine_def = check_and_get_stack
 
     # prepare dependencies
-    @dns.do_allocate_vips(machine_def)
-    @dns.do_allocate_ips(machine_def)
+    # @dns.do_allocate_vips(machine_def)
+    # @dns.do_allocate_ips(machine_def)
     @puppet.do_puppet_run_on_dependencies(machine_def)
 
-    do_provision(@factory.services, machine_def)
-    @nagios.do_nagios_register_new(machine_def)
+    # do_provision(@factory.services, machine_def)
+    # @nagios.do_nagios_register_new(machine_def)
   end
 
   def reprovision(_argv)
@@ -351,10 +351,7 @@ class CMD
 
   def dependencies(_argv)
     machine_def = ensure_is_machine(check_and_get_stack)
-
-    service_dependencies = machine_def.dependencies
-    dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
-    puts ZAMLS.to_zamls(dependencies)
+    puts ZAMLS.to_zamls(machine_def.dependent_nodes.map(&:identity))
   end
 
   def dependents(_argv)

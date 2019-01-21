@@ -114,6 +114,8 @@ describe_stack 'elasticsearch data server and associated load balancer enc is co
     expect(role_enc['prod_vip_fqdn']).to eql('oy-elasticsearch-data-vip.oy.net.local')
     expect(role_enc['minimum_master_nodes']).to eql(2)
     expect(role_enc['node_attrs']).to eql('test' => 'blah')
+
+    expect(host.dependent_nodes.map(&:mgmt_fqdn)).to include('oy-elasticsearch-data-001.mgmt.oy.net.local')
   end
 
   host('oy-lb-001.mgmt.oy.net.local') do |host|

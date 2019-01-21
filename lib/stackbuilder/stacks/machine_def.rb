@@ -303,8 +303,8 @@ class Stacks::MachineDef
     "machine"
   end
 
-  def dependencies
-    virtual_service.virtual_services_that_i_depend_on
+  def dependent_nodes
+    virtual_service.virtual_services_that_i_depend_on.map(&:children).flatten
   end
 
   def should_prepare_dependency?

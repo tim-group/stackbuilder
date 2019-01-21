@@ -10,7 +10,7 @@ class Support::Puppet
   def do_puppet_run_on_dependencies(machine_def)
     all_dependencies = Set.new
     machine_def.accept do |m|
-      all_dependencies += m.dependencies.flatten if m.is_a? Stacks::MachineDef
+      all_dependencies += m.dependent_nodes if m.is_a? Stacks::MachineDef
     end
 
     dependency_fqdns = []
@@ -24,13 +24,14 @@ class Support::Puppet
 
     dependency_fqdns = dependency_fqdns.sort.uniq
 
-    require 'tempfile'
-    Tempfile.open("mco_prepdeps") do |f|
-      f.puts dependency_fqdns.join("\n")
-      f.flush
-
-      system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
-    end
+    pp dependency_fqdns
+    # require 'tempfile'
+    # Tempfile.open("mco_prepdeps") do |f|
+    #   f.puts dependency_fqdns.join("\n")
+    #   f.flush
+    #
+    #   system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
+    # end
   end
 
   # wait for automatic otp signing of outstanding Puppet certificates for these machines
