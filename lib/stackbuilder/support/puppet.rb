@@ -24,7 +24,6 @@ class Support::Puppet
 
     dependency_fqdns = dependency_fqdns.sort.uniq
 
-    pp dependency_fqdns
     require 'tempfile'
     Tempfile.open("mco_prepdeps") do |f|
       f.puts dependency_fqdns.join("\n")
