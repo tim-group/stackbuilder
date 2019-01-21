@@ -156,7 +156,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
   end
 
   def dependency_nodes
-    super + @virtual_service.children.select { |m| m.identity != self.identity }
+    super + @virtual_service.children.select { |m| m.identity != identity }
   end
 
   def merge_gtid_config
