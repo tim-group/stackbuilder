@@ -143,8 +143,8 @@ module StackBuilder::Allocator::HostPolicies
   end
 
   def self.do_not_overallocate_disk_policy
-    required_space_hash = {}
     Proc.new do |host, machine|
+      required_space_hash = {}
       machine[:storage].each do |_mount_point, values|
         required_space_hash[values[:type]] = 0
       end
