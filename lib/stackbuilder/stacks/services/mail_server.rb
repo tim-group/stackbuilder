@@ -28,6 +28,7 @@ class Stacks::Services::MailServer < Stacks::MachineDef
                'server' => {
                  'postfix' => false
                })
+    enc['server']['spectre_patches'] = @spectre_patches if @spectre_patches
     enc
   end
 end
