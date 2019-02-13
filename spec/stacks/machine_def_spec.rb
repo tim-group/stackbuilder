@@ -112,6 +112,14 @@ describe Stacks::MachineDef do
     expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to eql('/var/local/images/ubuntu-trusty.img')
   end
 
+  it 'should configure gold image and allocation tag when instructed to use bionic' do
+    env = new_environment('noenv', :primary_site => 'st')
+    machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')
+    machinedef.template(:bionic)
+    machinedef.bind_to(env)
+    expect(machinedef.to_spec[:storage][:/][:prepare][:options][:path]).to eql('/var/local/images/ubuntu-bionic.img')
+  end
+
   it 'should configure gold image and allocation tag when instructed to use ubuntu_precise' do
     env = new_environment('noenv', :primary_site => 'st')
     machinedef = Stacks::MachineDef.new(self, 'test', env, 'st')

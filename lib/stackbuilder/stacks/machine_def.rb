@@ -102,7 +102,7 @@ class Stacks::MachineDef
   end
 
   def template(lsbdistcodename)
-    fail "Unknown template #{lsbdistcodename}" unless [:trusty, :precise].include? lsbdistcodename
+    fail "Unknown template #{lsbdistcodename}" unless [:trusty, :precise, :bionic].include? lsbdistcodename
     @lsbdistcodename = lsbdistcodename.to_s
     case lsbdistcodename
     when :precise
