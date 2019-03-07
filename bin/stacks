@@ -43,6 +43,7 @@ Options:
                                     (WARNING: normally only wanted when provisioning a stack for the first time)
     --best-effort                   where applicable, do as much as is possible in the face of errors, rather than bailing immediately
     --diffs-only                    for audit_vms command - only output VMs where there are differences
+    --ignore-safe-diffs             for audit_vms command - ignore diffs that are "safe" according to provisioning tools
     --force                         - for move and clear_host commands: allows moving VM even when there are VM XML diffs, as long as
                                     the only diffs are "safe" according to provisioning tools
                                     - for allocate, launch, provision and reprovision commands: does not enforce policy that a
@@ -55,6 +56,7 @@ Options:
     allocate [-e] -s [--force]            perform noop dry-run allocation of a stack
     audit [-e]                            show the state of the KVM host machines in the primary site of the specified env
     audit_vms [-e] [HOST] [--diffs-only]  show the state of the VMs in the primary site of the specified env (or specified host)
+        [--ignore-safe-diffs]
     build_new_host HOST                   install a clean operating system on a new KVM host (host must be switched off)
     check_definition [-e] -s              verify that the VMs of a provisioned stack match their corresponding VM definitions
     clean [-e] -s                         shuts down and removes a stack, but retains configuration (puppet, nagios, mongo)
@@ -112,10 +114,11 @@ end
 
 # options with defaults. an arbitrary option can be set here, this is not an exclusive list.
 $options = {
-  :environment => 'dev',
-  :path        => ENV['STACKBUILDER_CONFIG_PATH'] || '.',
-  :verbose     => 2,
-  :force       => false
+  :environment         => 'dev',
+  :path                => ENV['STACKBUILDER_CONFIG_PATH'] || '.',
+  :verbose             => 2,
+  :force               => false,
+  :'ignore-safe-diffs' => false
 }
 # change the default path on puppetservers puppet.conf node_terminus does not take parameters
 require 'socket'
@@ -135,6 +138,7 @@ GetoptLong.new(
   ['--create-persistent-storage', GetoptLong::NO_ARGUMENT],
   ['--best-effort', GetoptLong::NO_ARGUMENT],
   ['--diffs-only', GetoptLong::NO_ARGUMENT],
+  ['--ignore-safe-diffs', GetoptLong::NO_ARGUMENT],
   ['--force', GetoptLong::NO_ARGUMENT],
   ['--no-tmux', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
@@ -155,6 +159,8 @@ GetoptLong.new(
     $options[:'checkout-config'] = (arg == '') ? 'http://git/stackbuilder-config.git' : arg
   when '--diffs-only'
     $options[:'diffs-only'] = true
+  when '--ignore-safe-diffs'
+    $options[:'ignore-safe-diffs'] = true
   when '--force'
     $options[:force] = true
   else

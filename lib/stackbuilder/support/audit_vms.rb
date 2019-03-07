@@ -5,13 +5,13 @@ class Support::AuditVms
     @factory = factory
   end
 
-  def audit_site_vms(site, diffs_only)
+  def audit_site_vms(site, diffs_only, ignore_safe_diffs = false)
     raw_actual = @factory.host_repository.find_fabric_vms(site)
     raw_specified = get_specified_vms(site)
-    compile_vm_audit(raw_actual, raw_specified, diffs_only)
+    compile_vm_audit(raw_actual, raw_specified, diffs_only, ignore_safe_diffs)
   end
 
-  def audit_host_vms(host_fqdn, diffs_only)
+  def audit_host_vms(host_fqdn, diffs_only, ignore_safe_diffs = false)
     unless host_fqdn.include?('.')
       logger(Logger::FATAL) { "You must specify a host fqdn" }
       exit 1
@@ -19,12 +19,12 @@ class Support::AuditVms
 
     raw_actual = @factory.host_repository.find_host_vms(host_fqdn)
     raw_specified = raw_actual.map { |vm| @factory.inventory.find(vm[:fqdn]) }.reject(&:nil?)
-    compile_vm_audit(raw_actual, raw_specified, diffs_only)
+    compile_vm_audit(raw_actual, raw_specified, diffs_only, ignore_safe_diffs)
   end
 
   private
 
-  def compile_vm_audit(raw_actual, raw_specified, diffs_only)
+  def compile_vm_audit(raw_actual, raw_specified, diffs_only, ignore_safe_diffs)
     vms = {}
 
     raw_actual.each { |vm| vms[vm[:fqdn]] = { :vm_name => vm[:fqdn].partition('.').first, :actual => vm } }
@@ -32,7 +32,7 @@ class Support::AuditVms
     vms.values.group_by { |data| data[:actual][:host_fqdn] }.each do |host_fqdn, host_vms|
       vm_fqdn_by_vm_name = host_vms.map { |data| [data[:vm_name], data[:actual][:fqdn]] }.to_h
       specs = vm_fqdn_by_vm_name.values.map { |vm_fqdn| @factory.inventory.find(vm_fqdn) }.reject(&:nil?).map(&:to_spec)
-      @factory.compute_node_client.check_vm_definitions(host_fqdn, specs).each do |host_result|
+      @factory.compute_node_client.check_vm_definitions(host_fqdn, specs, ignore_safe_diffs).each do |host_result|
         host_result[1].each do |vm_name, vm_result|
           vm_fqdn = vm_fqdn_by_vm_name[vm_name]
           inconsistency_count = (vm_result[0] == 'success') ? 0 : vm_result[1].lines.count - 1
