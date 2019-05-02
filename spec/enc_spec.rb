@@ -201,6 +201,7 @@ describe Stacks::DSL do
                                                    'vip_fqdn' => 'ci-appx-vip.st.net.local',
                                                    'environment' => 'ci',
                                                    'port'        => '8000',
+                                                   'use_docker' => false,
                                                    'dependencies' => {},
                                                    'application_dependant_instances' => [],
                                                    'participation_dependant_instances' => [])
@@ -223,6 +224,7 @@ describe Stacks::DSL do
                                                    'cluster' => 'ci-appx',
                                                    'environment' => 'ci',
                                                    'port'        => '8000',
+                                                   'use_docker' => false,
                                                    'dependencies' => {},
                                                    'application_dependant_instances' => [],
                                                    'participation_dependant_instances' => [])

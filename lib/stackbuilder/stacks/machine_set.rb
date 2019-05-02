@@ -16,6 +16,7 @@ class Stacks::MachineSet
   attr_accessor :monitoring
   attr_accessor :monitoring_options
   attr_accessor :monitoring_in_enc
+  attr_accessor :use_docker
   attr_reader :allowed_hosts
   attr_reader :default_networks
   attr_reader :depends_on
@@ -45,6 +46,7 @@ class Stacks::MachineSet
       'nagios_service_template' => 'non-prod-service'
     }
     @monitoring_in_enc = false # temporary feature flag
+    @use_docker = false
   end
 
   def secondary_site?

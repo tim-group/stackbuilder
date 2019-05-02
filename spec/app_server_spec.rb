@@ -177,3 +177,23 @@ describe_stack 'test_app_server_with_rabbit_logging_dependencies' do
     expect(enc['logging.rabbit.password_hiera_key']).to include('e1/rw-app/messaging_password')
   end
 end
+
+describe_stack 'test_app_server that uses docker' do
+  given do
+    stack "test_app_server" do
+      app_service 'myapp' do
+        self.groups = ['blue']
+        self.application = 'rw-app'
+        self.use_docker = true
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "test_app_server"
+    end
+  end
+
+  host("e1-myapp-001.mgmt.space.net.local") do |host|
+    expect(host.to_enc['role::http_app']['use_docker']).to eql(true)
+  end
+end
