@@ -92,9 +92,11 @@ describe_stack 'stack-with-dependencies' do
     ])
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
     expect(rights['example2@e1-exampleapp2-001.space.net.local/example']).to eql(
-      'password_hiera_key' => 'e1/example2/mysql_password')
+      'password_hiera_key' => 'e1/example2/mysql_password',
+      'passwords_hiera_key' => 'e1/example2/mysql_passwords')
     expect(rights['example2@e1-exampleapp2-002.space.net.local/example']).to eql(
-      'password_hiera_key' => 'e1/example2/mysql_password')
+      'password_hiera_key' => 'e1/example2/mysql_password',
+      'passwords_hiera_key' => 'e1/example2/mysql_passwords')
   end
 end
 

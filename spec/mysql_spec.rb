@@ -215,6 +215,8 @@ describe_stack 'should provide the correct application rights' do
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
     expect(rights['SuperLongLengthN@testing-applong-001.space.net.local/ref']['password_hiera_key']).to \
       eql('testing/SuperLongLengthName/mysql_password')
+    expect(rights['SuperLongLengthN@testing-applong-001.space.net.local/ref']['passwords_hiera_key']).to \
+      eql('testing/SuperLongLengthName/mysql_passwords')
   end
   host("testing-applong-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['role::http_app']['dependencies']
