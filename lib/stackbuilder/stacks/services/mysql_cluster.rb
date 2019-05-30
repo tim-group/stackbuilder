@@ -132,11 +132,14 @@ module Stacks::Services::MysqlCluster
     }
     virtual_services_that_depend_on_me.each do |service|
       service.children.each do |dependant|
+        right = {
+          'passwords_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_passwords",
+          'password_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_password"
+        }
+        right['allow_kubernetes'] = true if dependant.virtual_service.kubernetes
+
         rights['mysql_hacks::application_rights_wrapper']['rights'].
-          merge!(
-            "#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" =>
-            { 'passwords_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_passwords",
-              'password_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_password" })
+          merge!("#{mysql_username(service)}@#{dependant.prod_fqdn}/#{database_name}" => right)
       end
     end
     rights

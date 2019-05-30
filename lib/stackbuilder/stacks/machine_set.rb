@@ -17,6 +17,7 @@ class Stacks::MachineSet
   attr_accessor :monitoring_options
   attr_accessor :monitoring_in_enc
   attr_accessor :use_docker
+  attr_accessor :kubernetes
   attr_reader :allowed_hosts
   attr_reader :default_networks
   attr_reader :depends_on
