@@ -68,7 +68,7 @@ describe Support::LiveMigrator do
     )
     allow(@rpcutil).to receive(:ping).with(@test_machine1.hostname).and_return(1528119341)
 
-    lambda { @live_migrator.move(@test_machine1, false) }.should_not raise_error SystemExit
+    lambda { @live_migrator.move(@test_machine1) }.should_not raise_error SystemExit
 
     expected_spec = @test_machine1.to_spec
     expected_spec[:disallow_destroy] = false
@@ -77,33 +77,5 @@ describe Support::LiveMigrator do
     expect(compute_node_client).to have_received(:create_storage).with("destination_host", [expected_spec])
     expect(compute_node_client).to have_received(:live_migrate_vm).with("source_host", "destination_host", @test_machine1.hostname)
     expect(compute_node_client).to have_received(:disable_live_migration).with("source_host", "destination_host")
-  end
-
-  it 'should pass through force option when checking vm definitions' do
-    @test_machine1 = Stacks::MachineDef.new(self, 'test1', @test_env, 'oy')
-    @test_machine1.bind_to(@test_env)
-
-    compute_node_client = spy("compute_node_client")
-    allow(@stacks_factory).to receive(:compute_node_client).and_return(compute_node_client)
-
-    allow(compute_node_client).to receive(:check_vm_definitions).and_return([['host', { 'env-test1' => ['success'] }]])
-
-    allow(@stacks_factory).to receive_message_chain(:services, :allocator, :allocate).and_return(
-      :already_allocated  => {},
-      :newly_allocated    => { 'destination_host' => [{ :hostname => 'env-test1' }] },
-      :failed_to_allocate => {}
-    )
-
-    allow(compute_node_client).to receive(:audit_hosts).with(%w(source_host destination_host), false, false, false).and_return(
-      'source_host' => { :inactive_domains => [@test_machine1.hostname] },
-      'destination_host' => { :active_domains => [@test_machine1.hostname] }
-    )
-    allow(@rpcutil).to receive(:ping).with(@test_machine1.hostname).and_return(1528119341)
-
-    lambda { @live_migrator.move(@test_machine1, true) }.should_not raise_error SystemExit
-
-    expected_spec = @test_machine1.to_spec
-
-    expect(compute_node_client).to have_received(:check_vm_definitions).with('source_host', [expected_spec], true)
   end
 end

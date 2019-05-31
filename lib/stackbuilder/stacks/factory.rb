@@ -18,9 +18,9 @@ require 'stackbuilder/stacks/namespace'
 class Stacks::Factory
   attr_reader :path
 
-  def initialize(path = nil, force = false)
+  def initialize(path = nil, ignore_spectre_patching_host_policy = false)
     @path = path.nil? ? '.' : path
-    @force = force
+    @ignore_spectre_patching_host_policy = ignore_spectre_patching_host_policy
   end
 
   def inventory
@@ -41,7 +41,7 @@ class Stacks::Factory
         StackBuilder::Allocator::HostPolicies.allocation_temporarily_disabled_policy,
         StackBuilder::Allocator::HostPolicies.require_persistent_storage_to_exist_policy
       ]
-      if !@force
+      if !@ignore_spectre_patching_host_policy
         policies.push(StackBuilder::Allocator::HostPolicies.spectre_patch_status_of_vm_must_match_spectre_patch_status_of_host_policy)
       end
       policies

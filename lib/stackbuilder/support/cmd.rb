@@ -311,7 +311,7 @@ class CMD
       exit 1
     end
 
-    Support::LiveMigrator.new(@factory, host).move(machine, $options[:force])
+    Support::LiveMigrator.new(@factory, host).move(machine)
   end
 
   def clear_host(argv)
@@ -328,7 +328,7 @@ class CMD
       exit 1
     end
 
-    Support::LiveMigrator.new(@factory, host).move_all($options[:force])
+    Support::LiveMigrator.new(@factory, host).move_all
   end
 
   def rebuild_host(argv)

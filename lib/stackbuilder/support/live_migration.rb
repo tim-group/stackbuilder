@@ -8,11 +8,11 @@ class Support::LiveMigrator
     @rpcutil = rpcutil
   end
 
-  def move(machine, force = false)
-    move_machines([machine], false, force)
+  def move(machine)
+    move_machines([machine], false)
   end
 
-  def move_all(force = false)
+  def move_all
     best_effort = ENV['BEST_EFFORT'] == 'true'
 
     machines_not_in_model, machines_in_model = @source_host.allocated_machines.partition { |m| m.include?(:in_model) && m[:in_model] == false }
@@ -23,23 +23,22 @@ class Support::LiveMigrator
 
     move_machines(
       machines_in_model.map { |m| @factory.inventory.find_by_hostname(m[:fabric], m[:hostname]) },
-      best_effort,
-      force
+      best_effort
     )
   end
 
   private
 
-  def move_machines(machines, best_effort = false, force = false)
-    safe_machines = vms_that_are_safe_to_move(machines, best_effort, force)
+  def move_machines(machines, best_effort = false)
+    safe_machines = vms_that_are_safe_to_move(machines, best_effort)
     moveable_machines = vms_that_can_be_reallocated(safe_machines, best_effort)
 
     logger(Logger::INFO) { "Will perform live VM migration of these VMs: #{moveable_machines.map(&:hostname).join(', ')}" }
     moveable_machines.each { |machine| perform_live_migration(machine) }
   end
 
-  def vms_that_are_safe_to_move(machines, best_effort, force)
-    check_results = @factory.compute_node_client.check_vm_definitions(@source_host.fqdn, machines.map(&:to_spec), force)
+  def vms_that_are_safe_to_move(machines, best_effort)
+    check_results = @factory.compute_node_client.check_vm_definitions(@source_host.fqdn, machines.map(&:to_spec), true)
 
     bail "Did not receive check result from host" unless check_results.size == 1
     successful_vm_names = check_results.first[1].select { |_, vm_result| vm_result[0] == 'success' }.keys
