@@ -82,11 +82,11 @@ module Stacks::Dependencies
     container_defs.first.vip_fqdn(network, fabric)
   end
 
-  private
-
   def dependant_instances_of_type(type, location)
     dependant_instances(location).reject { |machine_def| machine_def.class != type }
   end
+
+  private
 
   def dependant_instances(location, reject_nodes_in_different_location = true)
     get_children_for_virtual_services(

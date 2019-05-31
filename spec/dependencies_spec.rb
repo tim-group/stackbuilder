@@ -33,6 +33,7 @@ describe_stack 'stack-with-dependencies' do
         self.kubernetes = true
         self.instances = 1
         depend_on 'exampledb'
+        depend_on 'exampleapp'
       end
     end
     stack 'example_db' do
@@ -82,10 +83,12 @@ describe_stack 'stack-with-dependencies' do
       'e1-exampleapp2-002.space.net.local',
       'e1-exampleproxy-001.space.net.local',
       'e1-exampleproxy-002.space.net.local',
+      'e1-kubeexampleapp-001.space.net.local',
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
     expect(host.to_enc['role::http_app']['dependencies']).to eql({})
+    expect(host.to_enc['role::http_app']['allow_kubernetes']).to eql(true)
   end
   host('e1-exampledb-001.mgmt.space.net.local') do |host|
     expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql([
