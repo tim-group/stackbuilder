@@ -54,10 +54,11 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network]),
       'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
       'port'                              => '8000',
-      'use_docker'                        => @virtual_service.use_docker,
+      'use_docker'                        => @virtual_service.use_docker
     }
 
-    enc['role::http_app']['allow_kubernetes'] = true if @virtual_service.dependant_instances_of_type(Stacks::Services::AppServer, location).any? { |s| s.virtual_service.kubernetes }
+    enc['role::http_app']['allow_kubernetes'] = true \
+      if @virtual_service.dependant_instances_of_type(Stacks::Services::AppServer, location).any? { |s| s.virtual_service.kubernetes }
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
     enc['role::http_app']['sso_port'] = @virtual_service.sso_port unless @virtual_service.sso_port.nil?
