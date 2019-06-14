@@ -26,9 +26,6 @@ describe_stack 'mongodb' do
   host("e1-mongodb-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mongodb_server']['database_name']).to eql("myapp")
   end
-  host("e1-mongodbbackup-001.mgmt.moon.net.local") do |host|
-    expect(host.to_enc['mongodb::backup']).to eql('ensure' => 'present')
-  end
 end
 
 describe_stack 'provides dependency information to masters(only) and dependants' do

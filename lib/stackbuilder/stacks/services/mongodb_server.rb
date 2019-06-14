@@ -36,7 +36,7 @@ class Stacks::Services::MongoDBServer < Stacks::MachineDef
     enc.merge!('role::mongodb_server' => {
                  'database_name' => @virtual_service.database_name
                })
-    enc['mongodb::backup'] = { 'ensure' => 'present' } if role_of?(:backup)
+
     dependant_instances = @virtual_service.children.map(&:prod_fqdn)
     dependant_instances.delete prod_fqdn
     dependant_users = {}
