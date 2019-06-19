@@ -26,8 +26,6 @@ module Stacks
     require 'stackbuilder/stacks/services/logstash_receiver_cluster'
     require 'stackbuilder/stacks/services/logstash_receiver_server'
     require 'stackbuilder/stacks/services/mail_server'
-    require 'stackbuilder/stacks/services/mongodb_cluster'
-    require 'stackbuilder/stacks/services/mongodb_server'
     require 'stackbuilder/stacks/services/mysql_cluster'
     require 'stackbuilder/stacks/services/mysql_server'
     require 'stackbuilder/stacks/services/nat_cluster'
