@@ -319,16 +319,16 @@ describe_stack 'should allow hacking in extra custom load balancing' do
       loadbalancer_service do
         test_virtual_service_definition = {
           'e1-test-vip.mgmt.pg.net.local' => {
-             'ports' => [ 6443 ],
-             'realservers' => {
-               'blue' => [
-                 'oy-kvm-001.mgmt.pg.net.local',
-                 'oy-kvm-005.mgmt.pg.net.local',
-                 'oy-kvm-010.mgmt.pg.net.local'
-               ]
-             },
-             'type' => 'http'
-           }
+            'ports' => [6443],
+            'realservers' => {
+              'blue' => [
+                'oy-kvm-001.mgmt.pg.net.local',
+                'oy-kvm-005.mgmt.pg.net.local',
+                'oy-kvm-010.mgmt.pg.net.local'
+              ]
+            },
+            'type' => 'http'
+          }
         }
         hack_in_virtual_service test_virtual_service_definition
       end

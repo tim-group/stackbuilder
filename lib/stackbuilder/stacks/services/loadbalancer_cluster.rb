@@ -1,7 +1,6 @@
 require 'stackbuilder/stacks/namespace'
 
 module Stacks::Services::LoadBalancerCluster
-
   attr_accessor :extra_virtual_services
 
   def self.extended(object)
