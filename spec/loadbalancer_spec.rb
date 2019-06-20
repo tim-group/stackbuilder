@@ -312,3 +312,35 @@ describe_stack 'should only load balance for services in the same site' do
     expect(virtual_servers.keys).to include('e1-rabbitmq-vip.pg.net.local')
   end
 end
+
+describe_stack 'should allow hacking in extra custom load balancing' do
+  given do
+    stack "lb" do
+      loadbalancer_service do
+        test_virtual_service_definition = {
+          'e1-test-vip.mgmt.pg.net.local' => {
+             'ports' => [ 6443 ],
+             'realservers' => {
+               'blue' => [
+                 'oy-kvm-001.mgmt.pg.net.local',
+                 'oy-kvm-005.mgmt.pg.net.local',
+                 'oy-kvm-010.mgmt.pg.net.local'
+               ]
+             },
+             'type' => 'http'
+           }
+        }
+        hack_in_virtual_service test_virtual_service_definition
+      end
+    end
+
+    env "e1", :primary_site => "pg", :secondary_site => 'oy' do
+      instantiate_stack("lb")
+    end
+  end
+  host("e1-lb-001.mgmt.pg.net.local") do |host|
+    virtual_servers = host.to_enc['role::loadbalancer']['virtual_servers']
+    expect(virtual_servers.keys.size).to eql(1)
+    expect(virtual_servers.keys).to include('e1-test-vip.mgmt.pg.net.local')
+  end
+end

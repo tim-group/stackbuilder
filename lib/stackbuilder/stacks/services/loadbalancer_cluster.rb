@@ -1,11 +1,15 @@
 require 'stackbuilder/stacks/namespace'
 
 module Stacks::Services::LoadBalancerCluster
+
+  attr_accessor :extra_virtual_services
+
   def self.extended(object)
     object.configure
   end
 
   def configure
+    @extra_virtual_services = {}
   end
 
   def establish_dependencies
@@ -20,7 +24,7 @@ module Stacks::Services::LoadBalancerCluster
   end
 
   def loadbalancer_config_hash(location, fabric)
-    config_hash = {}
+    config_hash = @extra_virtual_services.dup
     services = @environment.virtual_services.select do |node|
       node.respond_to?(:to_loadbalancer_config)
     end
@@ -41,6 +45,10 @@ module Stacks::Services::LoadBalancerCluster
 
   def clazz
     'loadbalancercluster'
+  end
+
+  def hack_in_virtual_service(service_hash)
+    @extra_virtual_services.merge! service_hash
   end
 
   private
