@@ -310,4 +310,127 @@ class Stacks::MachineDef
   def should_prepare_dependency?
     true
   end
+
+  def to_k8s(app_deployer)
+    app_name = @virtual_service.application.downcase
+
+    [{
+      'apiVersion' => 'apps/v1',
+      'kind' => 'Deployment',
+      'metadata' => {
+        'name' => app_name
+      },
+      'spec' => {
+        'selector' => {
+          'matchLabels' => {
+            'app' => app_name
+          }
+        },
+        'strategy' => {
+          'type' => 'RollingUpdate',
+          'rollingUpdate' => { # these settings allow one instance to be taken down and no extras to be created, this replicates orc
+            'maxUnavailable' => 1,
+            'maxSurge' => 0
+          }
+        },
+        'replicas' => @virtual_service.instances,
+        'template' => {
+          'metadata' => {
+            'labels' => {
+              'app' => app_name
+            }
+          },
+          'spec' => {
+            'containers' => [{
+              'image' => "repo.net.local:8080/#{app_name}:#{app_deployer.query_cmdb_for(:application => @virtual_service.application,
+                                                                                        :environment => @environment.name,
+                                                                                        :group => 'blue')[:target_version]}",
+              'name' => app_name,
+              'args' => [
+                'java',
+                '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                '-jar /app/app.jar',
+                'config.properties'
+              ],
+              'ports' => [{
+                'containerPort' => 8000,
+                'name' => app_name
+              }],
+              'volumeMounts' => [{
+                'name' => 'config-volume',
+                'mountPath' => '/app/config.properties',
+                'subPath' => 'config.properties'
+              }],
+              'readinessProbe' => {
+                'periodSeconds' => 2,
+                'httpGet' => {
+                  'path' => '/info/health',
+                  'port' => 8000
+                }
+              }
+            }],
+            'volumes' => [{
+              'name' => 'config-volume',
+              'configMap' => {
+                'name' => app_name + '-config'
+              }
+            }]
+          }
+        }
+      }
+    },
+     {
+       'apiVersion' => 'v1',
+       'kind' => 'Service',
+       'metadata' => {
+         'name' => app_name
+       },
+       'spec' => {
+         'type' => 'LoadBalancer',
+         'selector' => {
+           'app' => app_name
+         },
+         'ports' => [{
+           'name' => 'app',
+           'protocol' => 'TCP',
+           'port' => 8000,
+           'targetPort' => 8000
+         }]
+       }
+     },
+     {
+       'apiVersion' => 'extension/v1beta1',
+       'kind' => 'Ingress',
+       'metadata' => {
+         'name' => 'ingress-' + app_name,
+         'annotations' => {
+           'kubernetes.io/ingress.class' => 'nginx',
+           'nginx.ingress.kubernetes.io/ssl-redirect' => 'false'
+         }
+       },
+       'spec' => {
+         'rules' => [{
+           'http' => {
+             'paths' => [{
+               'path' => '/',
+               'backend' => {
+                 'serviceName' => app_name,
+                 'servicePort' => 8000
+               }
+             }]
+           }
+         }]
+       }
+     },
+     {
+       'apiVersion' => 'v1',
+       'kind' => 'ConfigMap',
+       'metadata' => {
+         'name' => app_name + '-config'
+       },
+       'data' => {
+         'config.properties' => 'stuff goes here'
+       }
+     }]
+  end
 end

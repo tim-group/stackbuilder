@@ -297,3 +297,174 @@ describe_stack 'should raise exception if @instances is not an Integer or Hash' 
     end
   end
 end
+
+describe_stack 'Kubernetes' do
+  class TestAppDeployer
+    def initialize(version)
+      @version = version
+    end
+
+    def query_cmdb_for(_spec)
+      { :target_version => @version }
+    end
+  end
+
+  app_deployer = TestAppDeployer.new('1.2.3')
+
+  describe_stack 'defines a Deployment' do
+    given do
+      stack "mystack" do
+        app_service "x" do
+          self.application = 'MyApplication'
+          self.kubernetes = true
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    host("e1-x-001.mgmt.space.net.local") do |host|
+      expected_deployment = {
+        'apiVersion' => 'apps/v1',
+        'kind' => 'Deployment',
+        'metadata' => {
+          'name' => 'myapplication'
+        },
+        'spec' => {
+          'selector' => {
+            'matchLabels' => {
+              'app' => 'myapplication'
+            }
+          },
+          'strategy' => {
+            'type' => 'RollingUpdate',
+            'rollingUpdate' => {
+              'maxUnavailable' => 1,
+              'maxSurge' => 0
+            }
+          },
+          'replicas' => 2,
+          'template' => {
+            'metadata' => {
+              'labels' => {
+                'app' => 'myapplication'
+              }
+            },
+            'spec' => {
+              'containers' => [{
+                'image' => 'repo.net.local:8080/myapplication:1.2.3',
+                'name' => 'myapplication',
+                'args' => [
+                  'java',
+                  '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                  '-jar /app/app.jar',
+                  'config.properties'
+                ],
+                'ports' => [{
+                  'containerPort' => 8000,
+                  'name' => 'myapplication'
+                }],
+                'volumeMounts' => [{
+                  'name' => 'config-volume',
+                  'mountPath' => '/app/config.properties',
+                  'subPath' => 'config.properties'
+                }],
+                'readinessProbe' => {
+                  'periodSeconds' => 2,
+                  'httpGet' => {
+                    'path' => '/info/health',
+                    'port' => 8000
+                  }
+                }
+              }],
+              'volumes' => [{
+                'name' => 'config-volume',
+                'configMap' => {
+                  'name' => 'myapplication-config'
+                }
+              }]
+            }
+          }
+        }
+      }
+      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Deployment' }).to eql(expected_deployment)
+
+      expected_service = {
+        'apiVersion' => 'v1',
+        'kind' => 'Service',
+        'metadata' => {
+          'name' => 'myapplication'
+        },
+        'spec' => {
+          'type' => 'LoadBalancer',
+          'selector' => {
+            'app' => 'myapplication'
+          },
+          'ports' => [{
+            'name' => 'app',
+            'protocol' => 'TCP',
+            'port' => 8000,
+            'targetPort' => 8000
+          }]
+        }
+      }
+      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Service' }).to eql(expected_service)
+
+      expected_ingress = {
+        'apiVersion' => 'extension/v1beta1',
+        'kind' => 'Ingress',
+        'metadata' => {
+          'name' => 'ingress-myapplication',
+          'annotations' => {
+            'kubernetes.io/ingress.class' => 'nginx',
+            'nginx.ingress.kubernetes.io/ssl-redirect' => 'false'
+          }
+        },
+        'spec' => {
+          'rules' => [{
+            'http' => {
+              'paths' => [{
+                'path' => '/',
+                'backend' => {
+                  'serviceName' => 'myapplication',
+                  'servicePort' => 8000
+                }
+              }]
+            }
+          }]
+        }
+      }
+      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Ingress' }).to eql(expected_ingress)
+
+      expected_config_map = {
+        'apiVersion' => 'v1',
+        'kind' => 'ConfigMap',
+        'metadata' => {
+          'name' => 'myapplication-config'
+        },
+        'data' => {
+          'config.properties' => 'stuff goes here'
+        }
+      }
+      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
+    end
+  end
+
+  describe_stack 'controls the number of replicas' do
+    given do
+      stack "mystack" do
+        app_service "x" do
+          self.application = 'MyApplication'
+          self.instances = 3000
+          self.kubernetes = true
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    host("e1-x-001.mgmt.space.net.local") do |host|
+      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
+    end
+  end
+end

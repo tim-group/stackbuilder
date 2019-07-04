@@ -29,6 +29,30 @@ class Support::AppDeployer
     logger(Logger::INFO) { "machine_def \"#{machine_def.name}\" has no application to start" } unless valid
   end
 
+  def query_cmdb_for(spec)
+    cmdb_repo_url = 'http://git/cmdb' # TODO: parameterise?
+
+    require 'tmpdir'
+    cmdb_dir = Dir.mktmpdir
+
+    unless system("git clone --quiet --depth 1 '#{cmdb_repo_url}' '#{cmdb_dir}'")
+      fail "Unable to clone '#{cmdb_repo_url}'"
+    end
+
+    require 'yaml'
+    cmdb = YAML.load(File.open("#{cmdb_dir}/#{spec[:environment]}/#{spec[:application]}.yaml")).map do |el|
+      Hash[el.map { |(k, v)| [k.to_sym, v] }]
+    end
+
+    logger(Logger::DEBUG) { "cmdb data: #{cmdb}" }
+    result = cmdb.detect { |group| group[:name] == spec[:group] }
+
+    fail "No CMDB data for #{spec}" unless result
+    result
+  ensure
+    FileUtils.remove_entry(cmdb_dir)
+  end
+
   private
 
   def install_and_start_application(environment, fqdn, app_name)
@@ -60,29 +84,5 @@ class Support::AppDeployer
       sleep 5
     end
     fail "App did not go healthy in time" unless @deployapp.get_application_status(fqdn, spec)[:health] == 'healthy'
-  end
-
-  def query_cmdb_for(spec)
-    cmdb_repo_url = 'http://git/cmdb' # TODO: parameterise?
-
-    require 'tmpdir'
-    cmdb_dir = Dir.mktmpdir
-
-    unless system("git clone --quiet --depth 1 '#{cmdb_repo_url}' '#{cmdb_dir}'")
-      fail "Unable to clone '#{cmdb_repo_url}'"
-    end
-
-    require 'yaml'
-    cmdb = YAML.load(File.open("#{cmdb_dir}/#{spec[:environment]}/#{spec[:application]}.yaml")).map do |el|
-      Hash[el.map { |(k, v)| [k.to_sym, v] }]
-    end
-
-    logger(Logger::DEBUG) { "cmdb data: #{cmdb}" }
-    result = cmdb.detect { |group| group[:name] == spec[:group] }
-
-    fail "No CMDB data for #{spec}" unless result
-    result
-  ensure
-    FileUtils.remove_entry(cmdb_dir)
   end
 end
