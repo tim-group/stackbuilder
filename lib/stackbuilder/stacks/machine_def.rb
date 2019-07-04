@@ -429,7 +429,17 @@ class Stacks::MachineDef
          'name' => app_name + '-config'
        },
        'data' => {
-         'config.properties' => 'port=8000'
+         'config.properties' => <<EOC
+port=8000
+log.directory=/var/log/#{@virtual_service.application}/#{@environment.name}-#{@virtual_service.application}-#{@group}
+log.tags=["env:#{@environment.name}", "app:#{@virtual_service.application}", "instance:#{@group}"]
+
+graphite.enabled=true
+graphite.host=#{@site}-mon-001.mgmt.#{@site}.net.local
+graphite.port=2013
+graphite.prefix=#{app_name}.k8s_#{@environment.name}_#{@site}
+graphite.period=10
+EOC
        }
      }]
   end

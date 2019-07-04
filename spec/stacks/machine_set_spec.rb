@@ -443,7 +443,17 @@ describe_stack 'Kubernetes' do
           'name' => 'myapplication-config'
         },
         'data' => {
-          'config.properties' => 'port=8000'
+          'config.properties' => <<EOL
+port=8000
+log.directory=/var/log/MyApplication/e1-MyApplication-blue
+log.tags=["env:e1", "app:MyApplication", "instance:blue"]
+
+graphite.enabled=true
+graphite.host=space-mon-001.mgmt.space.net.local
+graphite.port=2013
+graphite.prefix=myapplication.k8s_e1_space
+graphite.period=10
+EOL
         }
       }
       expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
@@ -465,6 +475,24 @@ describe_stack 'Kubernetes' do
     end
     host("e1-x-001.mgmt.space.net.local") do |host|
       expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
+    end
+  end
+
+  describe_stack 'labels metrics using the site' do
+    given do
+      stack "mystack" do
+        app_service "x" do
+          self.application = 'MyApplication'
+          self.instances = { 'earth' => 1 }
+          self.kubernetes = true
+        end
+      end
+      env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+        instantiate_stack "mystack"
+      end
+    end
+    host("e1-x-001.mgmt.earth.net.local") do |host|
+      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/earth-mon-001.mgmt.earth.net.local/)
     end
   end
 end
