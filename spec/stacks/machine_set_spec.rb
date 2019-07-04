@@ -410,32 +410,6 @@ describe_stack 'Kubernetes' do
       }
       expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Service' }).to eql(expected_service)
 
-      expected_ingress = {
-        'apiVersion' => 'extension/v1beta1',
-        'kind' => 'Ingress',
-        'metadata' => {
-          'name' => 'ingress-myapplication',
-          'annotations' => {
-            'kubernetes.io/ingress.class' => 'nginx',
-            'nginx.ingress.kubernetes.io/ssl-redirect' => 'false'
-          }
-        },
-        'spec' => {
-          'rules' => [{
-            'http' => {
-              'paths' => [{
-                'path' => '/',
-                'backend' => {
-                  'serviceName' => 'myapplication',
-                  'servicePort' => 8000
-                }
-              }]
-            }
-          }]
-        }
-      }
-      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Ingress' }).to eql(expected_ingress)
-
       expected_config_map = {
         'apiVersion' => 'v1',
         'kind' => 'ConfigMap',

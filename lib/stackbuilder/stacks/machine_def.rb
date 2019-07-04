@@ -399,30 +399,6 @@ class Stacks::MachineDef
        }
      },
      {
-       'apiVersion' => 'extension/v1beta1',
-       'kind' => 'Ingress',
-       'metadata' => {
-         'name' => 'ingress-' + app_name,
-         'annotations' => {
-           'kubernetes.io/ingress.class' => 'nginx',
-           'nginx.ingress.kubernetes.io/ssl-redirect' => 'false'
-         }
-       },
-       'spec' => {
-         'rules' => [{
-           'http' => {
-             'paths' => [{
-               'path' => '/',
-               'backend' => {
-                 'serviceName' => app_name,
-                 'servicePort' => 8000
-               }
-             }]
-           }
-         }]
-       }
-     },
-     {
        'apiVersion' => 'v1',
        'kind' => 'ConfigMap',
        'metadata' => {
