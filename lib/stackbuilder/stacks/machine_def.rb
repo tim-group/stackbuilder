@@ -429,7 +429,7 @@ class Stacks::MachineDef
          'name' => app_name + '-config'
        },
        'data' => {
-         'config.properties' => 'stuff goes here'
+         'config.properties' => 'port=8000'
        }
      }]
   end

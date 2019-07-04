@@ -443,7 +443,7 @@ describe_stack 'Kubernetes' do
           'name' => 'myapplication-config'
         },
         'data' => {
-          'config.properties' => 'stuff goes here'
+          'config.properties' => 'port=8000'
         }
       }
       expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
