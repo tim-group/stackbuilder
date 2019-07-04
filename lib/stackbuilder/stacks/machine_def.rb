@@ -344,7 +344,7 @@ class Stacks::MachineDef
             'containers' => [{
               'image' => "repo.net.local:8080/#{app_name}:#{app_deployer.query_cmdb_for(:application => @virtual_service.application,
                                                                                         :environment => @environment.name,
-                                                                                        :group => 'blue')[:target_version]}",
+                                                                                        :group => @group)[:target_version]}",
               'name' => app_name,
               'args' => [
                 'java',
