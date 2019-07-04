@@ -414,7 +414,7 @@ graphite.enabled=true
 graphite.host=#{@site}-mon-001.mgmt.#{@site}.net.local
 graphite.port=2013
 graphite.prefix=#{app_name}.k8s_#{@environment.name}_#{@site}
-graphite.period=10
+graphite.period=10#{"\n" + ERB.new(@virtual_service.appconfig).result(binding) unless @virtual_service.appconfig.nil?}
 EOC
        }
      }]

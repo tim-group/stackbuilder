@@ -12,6 +12,7 @@ module Stacks::Services::AppService
   attr_accessor :tomcat_session_replication
   attr_accessor :use_ha_mysql_ordering
   attr_accessor :ha_mysql_ordering_exclude
+  attr_accessor :appconfig
 
   alias_method :database_username, :application
   alias_method :database_username=, :application=

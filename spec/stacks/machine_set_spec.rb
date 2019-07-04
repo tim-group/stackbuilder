@@ -469,4 +469,24 @@ EOL
       expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/earth-mon-001.mgmt.earth.net.local/)
     end
   end
+
+  describe_stack 'generates config from app-defined template' do
+    given do
+      stack "mystack" do
+        app_service "x" do
+          self.application = 'MyApplication'
+          self.kubernetes = true
+          self.appconfig = <<EOL
+site=<%= @site %>
+EOL
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    host("e1-x-001.mgmt.space.net.local") do |host|
+      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
+    end
+  end
 end
