@@ -433,6 +433,7 @@ describe_stack 'Kubernetes' do
         'data' => {
           'config.properties' => <<EOL
 port=8000
+
 log.directory=/var/log/MyApplication/e1-MyApplication-blue
 log.tags=["env:e1", "app:MyApplication", "instance:blue"]
 

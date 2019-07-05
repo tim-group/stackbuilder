@@ -325,6 +325,7 @@ class Stacks::MachineDef
       'data' => {
         'config.properties' => <<EOC
 port=8000
+
 log.directory=/var/log/#{@virtual_service.application}/#{@environment.name}-#{@virtual_service.application}-#{@group}
 log.tags=["env:#{@environment.name}", "app:#{@virtual_service.application}", "instance:#{@group}"]
 
