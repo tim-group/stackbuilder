@@ -7,5 +7,7 @@ class Support::DnsResolver
 
   def lookup(host)
     @resolver.getaddress(host)
+  rescue
+    'NOT YET ASSIGNED'
   end
 end
