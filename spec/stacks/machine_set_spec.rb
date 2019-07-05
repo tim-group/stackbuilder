@@ -370,7 +370,8 @@ describe_stack 'Kubernetes' do
                 'args' => [
                   'java',
                   '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
-                  '-jar /app/app.jar',
+                  '-jar',
+                  '/app/app.jar',
                   'config.properties'
                 ],
                 'ports' => [{
