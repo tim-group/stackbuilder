@@ -312,9 +312,19 @@ class Stacks::MachineDef
   end
 
   def to_k8s(app_deployer, dns_resolver)
-    return unless @virtual_service.respond_to?(:application)
+    if !@virtual_service.respond_to?(:application) || @virtual_service.application.nil? || !@virtual_service.respond_to?(:vip_fqdn)
+      return
+    end
 
     app_name = @virtual_service.application.downcase
+
+    begin
+      app_version = app_deployer.query_cmdb_for(:application => @virtual_service.application,
+                                                :environment => @environment.name,
+                                                :group => @group)[:target_version]
+    rescue
+      app_version = "UNKNOWN"
+    end
 
     [{
       'apiVersion' => 'v1',
@@ -388,9 +398,7 @@ EOC
            },
            'spec' => {
              'containers' => [{
-               'image' => "repo.net.local:8080/#{app_name}:#{app_deployer.query_cmdb_for(:application => @virtual_service.application,
-                                                                                         :environment => @environment.name,
-                                                                                         :group => @group)[:target_version]}",
+               'image' => "repo.net.local:8080/#{app_name}:#{app_version}",
                'name' => app_name,
                'args' => [
                  'java',
