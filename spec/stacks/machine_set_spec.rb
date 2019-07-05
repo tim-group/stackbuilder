@@ -341,7 +341,8 @@ describe_stack 'Kubernetes' do
         'apiVersion' => 'apps/v1',
         'kind' => 'Deployment',
         'metadata' => {
-          'name' => 'myapplication'
+          'name' => 'myapplication',
+          'namespace' => 'e1'
         },
         'spec' => {
           'selector' => {
@@ -407,7 +408,8 @@ describe_stack 'Kubernetes' do
         'apiVersion' => 'v1',
         'kind' => 'Service',
         'metadata' => {
-          'name' => 'myapplication'
+          'name' => 'myapplication',
+          'namespace' => 'e1'
         },
         'spec' => {
           'type' => 'LoadBalancer',
@@ -429,7 +431,8 @@ describe_stack 'Kubernetes' do
         'apiVersion' => 'v1',
         'kind' => 'ConfigMap',
         'metadata' => {
-          'name' => 'myapplication-config'
+          'name' => 'myapplication-config',
+          'namespace' => 'e1'
         },
         'data' => {
           'config.properties' => <<EOL

@@ -320,7 +320,8 @@ class Stacks::MachineDef
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
       'metadata' => {
-        'name' => app_name + '-config'
+        'name' => app_name + '-config',
+        'namespace' => @environment.name
       },
       'data' => {
         'config.properties' => <<EOC
@@ -341,7 +342,8 @@ EOC
        'apiVersion' => 'v1',
        'kind' => 'Service',
        'metadata' => {
-         'name' => app_name
+         'name' => app_name,
+         'namespace' => @environment.name
        },
        'spec' => {
          'type' => 'LoadBalancer',
@@ -361,7 +363,8 @@ EOC
        'apiVersion' => 'apps/v1',
        'kind' => 'Deployment',
        'metadata' => {
-         'name' => app_name
+         'name' => app_name,
+         'namespace' => @environment.name
        },
        'spec' => {
          'selector' => {
