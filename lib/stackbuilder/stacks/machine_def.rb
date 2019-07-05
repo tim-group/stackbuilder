@@ -315,68 +315,23 @@ class Stacks::MachineDef
     app_name = @virtual_service.application.downcase
 
     [{
-      'apiVersion' => 'apps/v1',
-      'kind' => 'Deployment',
+      'apiVersion' => 'v1',
+      'kind' => 'ConfigMap',
       'metadata' => {
-        'name' => app_name
+        'name' => app_name + '-config'
       },
-      'spec' => {
-        'selector' => {
-          'matchLabels' => {
-            'app' => app_name
-          }
-        },
-        'strategy' => {
-          'type' => 'RollingUpdate',
-          'rollingUpdate' => { # these settings allow one instance to be taken down and no extras to be created, this replicates orc
-            'maxUnavailable' => 1,
-            'maxSurge' => 0
-          }
-        },
-        'replicas' => @virtual_service.instances,
-        'template' => {
-          'metadata' => {
-            'labels' => {
-              'app' => app_name
-            }
-          },
-          'spec' => {
-            'containers' => [{
-              'image' => "repo.net.local:8080/#{app_name}:#{app_deployer.query_cmdb_for(:application => @virtual_service.application,
-                                                                                        :environment => @environment.name,
-                                                                                        :group => @group)[:target_version]}",
-              'name' => app_name,
-              'args' => [
-                'java',
-                '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
-                '-jar /app/app.jar',
-                'config.properties'
-              ],
-              'ports' => [{
-                'containerPort' => 8000,
-                'name' => app_name
-              }],
-              'volumeMounts' => [{
-                'name' => 'config-volume',
-                'mountPath' => '/app/config.properties',
-                'subPath' => 'config.properties'
-              }],
-              'readinessProbe' => {
-                'periodSeconds' => 2,
-                'httpGet' => {
-                  'path' => '/info/health',
-                  'port' => 8000
-                }
-              }
-            }],
-            'volumes' => [{
-              'name' => 'config-volume',
-              'configMap' => {
-                'name' => app_name + '-config'
-              }
-            }]
-          }
-        }
+      'data' => {
+        'config.properties' => <<EOC
+port=8000
+log.directory=/var/log/#{@virtual_service.application}/#{@environment.name}-#{@virtual_service.application}-#{@group}
+log.tags=["env:#{@environment.name}", "app:#{@virtual_service.application}", "instance:#{@group}"]
+
+graphite.enabled=true
+graphite.host=#{@site}-mon-001.mgmt.#{@site}.net.local
+graphite.port=2013
+graphite.prefix=#{app_name}.k8s_#{@environment.name}_#{@site}
+graphite.period=10#{"\n" + ERB.new(@virtual_service.appconfig).result(binding) unless @virtual_service.appconfig.nil?}
+EOC
       }
     },
      {
@@ -400,23 +355,68 @@ class Stacks::MachineDef
        }
      },
      {
-       'apiVersion' => 'v1',
-       'kind' => 'ConfigMap',
+       'apiVersion' => 'apps/v1',
+       'kind' => 'Deployment',
        'metadata' => {
-         'name' => app_name + '-config'
+         'name' => app_name
        },
-       'data' => {
-         'config.properties' => <<EOC
-port=8000
-log.directory=/var/log/#{@virtual_service.application}/#{@environment.name}-#{@virtual_service.application}-#{@group}
-log.tags=["env:#{@environment.name}", "app:#{@virtual_service.application}", "instance:#{@group}"]
-
-graphite.enabled=true
-graphite.host=#{@site}-mon-001.mgmt.#{@site}.net.local
-graphite.port=2013
-graphite.prefix=#{app_name}.k8s_#{@environment.name}_#{@site}
-graphite.period=10#{"\n" + ERB.new(@virtual_service.appconfig).result(binding) unless @virtual_service.appconfig.nil?}
-EOC
+       'spec' => {
+         'selector' => {
+           'matchLabels' => {
+             'app' => app_name
+           }
+         },
+         'strategy' => {
+           'type' => 'RollingUpdate',
+           'rollingUpdate' => { # these settings allow one instance to be taken down and no extras to be created, this replicates orc
+             'maxUnavailable' => 1,
+             'maxSurge' => 0
+           }
+         },
+         'replicas' => @virtual_service.instances,
+         'template' => {
+           'metadata' => {
+             'labels' => {
+               'app' => app_name
+             }
+           },
+           'spec' => {
+             'containers' => [{
+               'image' => "repo.net.local:8080/#{app_name}:#{app_deployer.query_cmdb_for(:application => @virtual_service.application,
+                                                                                         :environment => @environment.name,
+                                                                                         :group => @group)[:target_version]}",
+               'name' => app_name,
+               'args' => [
+                 'java',
+                 '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                 '-jar /app/app.jar',
+                 'config.properties'
+               ],
+               'ports' => [{
+                 'containerPort' => 8000,
+                 'name' => app_name
+               }],
+               'volumeMounts' => [{
+                 'name' => 'config-volume',
+                 'mountPath' => '/app/config.properties',
+                 'subPath' => 'config.properties'
+               }],
+               'readinessProbe' => {
+                 'periodSeconds' => 2,
+                 'httpGet' => {
+                   'path' => '/info/health',
+                   'port' => 8000
+                 }
+               }
+             }],
+             'volumes' => [{
+               'name' => 'config-volume',
+               'configMap' => {
+                 'name' => app_name + '-config'
+               }
+             }]
+           }
+         }
        }
      }]
   end
