@@ -312,6 +312,8 @@ class Stacks::MachineDef
   end
 
   def to_k8s(app_deployer, dns_resolver)
+    return unless @virtual_service.respond_to?(:application)
+
     app_name = @virtual_service.application.downcase
 
     [{

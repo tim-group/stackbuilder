@@ -11,6 +11,7 @@ require 'stackbuilder/support/cleaner'
 require 'stackbuilder/support/live_migration'
 require 'stackbuilder/support/host_builder'
 require 'stackbuilder/support/app_deployer'
+require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
 
 # all public methods in this class are valid stacks commands.
@@ -56,6 +57,16 @@ class CMD
       output[box_id] = {}
       output[box_id]["enc"] = stack.to_enc
       output[box_id]["spec"] = stack.to_spec
+
+      k8s_defns = stack.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+
+      next if k8s_defns.nil?
+
+      k8s = k8s_defns.map do |k8s_defn|
+        ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(k8s_defn))
+      end.join("\n")
+
+      output[box_id]["k8s"] = k8s
     end
 
     puts ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
