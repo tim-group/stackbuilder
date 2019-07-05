@@ -354,7 +354,7 @@ EOC
            'port' => 8000,
            'targetPort' => 8000
          }],
-         'loadBalancerIp' => dns_resolver.lookup(@virtual_service.vip_fqdn('prod', @fabric)).to_s
+         'loadBalancerIP' => dns_resolver.lookup(@virtual_service.vip_fqdn('prod', @fabric)).to_s
        }
      },
      {

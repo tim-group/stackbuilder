@@ -419,7 +419,7 @@ describe_stack 'Kubernetes' do
             'port' => 8000,
             'targetPort' => 8000
           }],
-          'loadBalancerIp' => '3.1.4.1'
+          'loadBalancerIP' => '3.1.4.1'
         }
       }
       expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Service' }).to eql(expected_service)
