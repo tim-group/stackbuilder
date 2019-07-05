@@ -311,7 +311,7 @@ class Stacks::MachineDef
     true
   end
 
-  def to_k8s(app_deployer)
+  def to_k8s(app_deployer, dns_resolver)
     app_name = @virtual_service.application.downcase
 
     [{
@@ -395,7 +395,8 @@ class Stacks::MachineDef
            'protocol' => 'TCP',
            'port' => 8000,
            'targetPort' => 8000
-         }]
+         }],
+         'loadBalancerIp' => dns_resolver.lookup(@virtual_service.vip_fqdn('prod', @fabric)).to_s
        }
      },
      {

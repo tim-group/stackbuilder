@@ -1,5 +1,6 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
+require 'resolv'
 
 describe 'Stacks::MachineSet' do
   describe_stack 'allows creation of secondary servers' do
@@ -311,6 +312,18 @@ describe_stack 'Kubernetes' do
 
   app_deployer = TestAppDeployer.new('1.2.3')
 
+  class TestDnsResolver
+    def initialize(ip_address)
+      @ip_address = ip_address
+    end
+
+    def lookup(_fqdn)
+      Resolv::IPv4.create(@ip_address)
+    end
+  end
+
+  dns_resolver = TestDnsResolver.new('3.1.4.1')
+
   describe_stack 'defines a Deployment' do
     given do
       stack "mystack" do
@@ -387,7 +400,7 @@ describe_stack 'Kubernetes' do
           }
         }
       }
-      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Deployment' }).to eql(expected_deployment)
+      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Deployment' }).to eql(expected_deployment)
 
       expected_service = {
         'apiVersion' => 'v1',
@@ -405,10 +418,11 @@ describe_stack 'Kubernetes' do
             'protocol' => 'TCP',
             'port' => 8000,
             'targetPort' => 8000
-          }]
+          }],
+          'loadBalancerIp' => '3.1.4.1'
         }
       }
-      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Service' }).to eql(expected_service)
+      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Service' }).to eql(expected_service)
 
       expected_config_map = {
         'apiVersion' => 'v1',
@@ -430,7 +444,7 @@ graphite.period=10
 EOL
         }
       }
-      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
+      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
     end
   end
 
@@ -448,7 +462,7 @@ EOL
       end
     end
     host("e1-x-001.mgmt.space.net.local") do |host|
-      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
+      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
     end
   end
 
@@ -466,7 +480,8 @@ EOL
       end
     end
     host("e1-x-001.mgmt.earth.net.local") do |host|
-      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/earth-mon-001.mgmt.earth.net.local/)
+      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+        to match(/earth-mon-001.mgmt.earth.net.local/)
     end
   end
 
@@ -486,7 +501,7 @@ EOL
       end
     end
     host("e1-x-001.mgmt.space.net.local") do |host|
-      expect(host.to_k8s(app_deployer).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
+      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
     end
   end
 end
