@@ -337,6 +337,7 @@ describe_stack 'Kubernetes' do
       end
     end
     host("e1-x-001.mgmt.space.net.local") do |host|
+      k8s = host.to_k8s(app_deployer, dns_resolver)
       expected_deployment = {
         'apiVersion' => 'apps/v1',
         'kind' => 'Deployment',
@@ -402,7 +403,7 @@ describe_stack 'Kubernetes' do
           }
         }
       }
-      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Deployment' }).to eql(expected_deployment)
+      expect(k8s.find { |s| s['kind'] == 'Deployment' }).to eql(expected_deployment)
 
       expected_service = {
         'apiVersion' => 'v1',
@@ -425,7 +426,7 @@ describe_stack 'Kubernetes' do
           'loadBalancerIP' => '3.1.4.1'
         }
       }
-      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Service' }).to eql(expected_service)
+      expect(k8s.find { |s| s['kind'] == 'Service' }).to eql(expected_service)
 
       expected_config_map = {
         'apiVersion' => 'v1',
@@ -449,7 +450,12 @@ graphite.period=10
 EOL
         }
       }
-      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
+      expect(k8s.find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
+
+      ordering = {}
+      k8s.each_with_index { |s, index| ordering[s['kind']] = index }
+      expect(ordering['Service']).to be < ordering['Deployment']
+      expect(ordering['ConfigMap']).to be < ordering['Deployment']
     end
   end
 
