@@ -335,7 +335,7 @@ class String
       when (self =~ /\n/ and self !~ /\A\s/)
         # embedded newline, split line-wise in quoted string block form.
         if self[-1..-1] == "\n" then z.emit('|+') else z.emit('|-') end
-        z.nested { split("\n",-1).each { |line| z.nl; z.emit(line) } }
+        z.nested { chomp("\n").split("\n",-1).each { |line| z.nl; z.emit(line) } }
       else
         # ...though we still have to escape unsafe characters.
         escaped = gsub(/[\\"\x00-\x1F]/) do |c|
