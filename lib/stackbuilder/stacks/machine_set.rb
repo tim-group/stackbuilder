@@ -210,6 +210,10 @@ class Stacks::MachineSet
     SecureRandom.hex(20)
   end
 
+  def to_k8s(app_deployer, dns_resolver)
+    children.first.to_k8s(app_deployer, dns_resolver)
+  end
+
   private
 
   def instantiate_machine(index, environment, site, role = nil, custom_name = '')

@@ -4,12 +4,14 @@ require 'stackbuilder/stacks/namespace'
 
 class Stacks::CustomServices
   attr_reader :name
+  attr_reader :k8s_machinesets
 
   include Stacks::MachineDefContainer
 
   def initialize(name)
     @name = name
     @definitions = {}
+    @k8s_machinesets = {}
   end
 
   def type_of?
@@ -21,9 +23,14 @@ class Stacks::CustomServices
   end
 
   # FIXME: Remove when all things have moved to loadbalanced_app_service it is just confusing
-  def app_service(name, &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
-                    Stacks::Services::AppServer, &block)
+  def app_service(name, properties = {}, &block)
+    if properties[:kubernetes]
+      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
+                          Stacks::Services::AppServer, &block)
+    else
+      machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
+                      Stacks::Services::AppServer, &block)
+    end
   end
 
   def loadbalanced_app_service(name, &block)
@@ -160,6 +167,12 @@ class Stacks::CustomServices
     @definitions[key]
   end
 
+  alias_method :orig_bind_to, :bind_to
+  def bind_to(environment)
+    orig_bind_to(environment)
+    k8s_machinesets.values.each { |s| s.bind_to(environment) }
+  end
+
   private
 
   def machineset_with(name, extends, type, &block)
@@ -168,5 +181,13 @@ class Stacks::CustomServices
     extends.each { |e| machineset.extend(e) }
     machineset.type = type
     @definitions[name] = machineset
+  end
+
+  def k8s_machineset_with(name, extends, type, &block)
+    machineset = Stacks::MachineSet.new(name, &block)
+    machineset.extend(Stacks::Dependencies)
+    extends.each { |e| machineset.extend(e) }
+    machineset.type = type
+    @k8s_machinesets[name] = machineset
   end
 end

@@ -1,3 +1,5 @@
+require 'pry'
+
 module Stacks::TestFramework
   attr_reader :stacks
 
@@ -6,6 +8,18 @@ module Stacks::TestFramework
     stacks.extend Stacks::DSL
     stacks.instance_eval(&block)
     @subject = @stacks = stacks
+  end
+
+  def machineset(name, &block)
+    subject = @subject
+    it "#{name}" do
+      services = nil
+      subject.accept do |s|
+        services = s if s.is_a?(Stacks::CustomServices)
+      end
+      set = services.k8s_machinesets[name]
+      block.call(set)
+    end
   end
 
   def host(host, &block)

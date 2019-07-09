@@ -30,17 +30,16 @@ describe_stack 'Kubernetes' do
   describe_stack 'defines a Deployment' do
     given do
       stack "mystack" do
-        app_service "x" do
+        app_service "x", :kubernetes => true do
           self.application = 'MyApplication'
-          self.kubernetes = true
         end
       end
       env "e1", :primary_site => 'space' do
         instantiate_stack "mystack"
       end
     end
-    host("e1-x-001.mgmt.space.net.local") do |host|
-      k8s = host.to_k8s(app_deployer, dns_resolver)
+    machineset("x") do |set|
+      k8s = set.to_k8s(app_deployer, dns_resolver)
       expected_deployment = {
         'apiVersion' => 'apps/v1',
         'kind' => 'Deployment',
@@ -165,36 +164,34 @@ EOL
   describe_stack 'controls the number of replicas' do
     given do
       stack "mystack" do
-        app_service "x" do
+        app_service "x", :kubernetes => true do
           self.application = 'MyApplication'
           self.instances = 3000
-          self.kubernetes = true
         end
       end
       env "e1", :primary_site => 'space' do
         instantiate_stack "mystack"
       end
     end
-    host("e1-x-001.mgmt.space.net.local") do |host|
-      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
+    machineset("x") do |set|
+      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
     end
   end
 
   describe_stack 'labels metrics using the site' do
     given do
       stack "mystack" do
-        app_service "x" do
+        app_service "x", :kubernetes => true do
           self.application = 'MyApplication'
           self.instances = { 'earth' => 1 }
-          self.kubernetes = true
         end
       end
       env "e1", :primary_site => 'space', :secondary_site => 'earth' do
         instantiate_stack "mystack"
       end
     end
-    host("e1-x-001.mgmt.earth.net.local") do |host|
-      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+    machineset("x") do |set|
+      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
         to match(/earth-mon-001.mgmt.earth.net.local/)
     end
   end
@@ -202,9 +199,8 @@ EOL
   describe_stack 'generates config from app-defined template' do
     given do
       stack "mystack" do
-        app_service "x" do
+        app_service "x", :kubernetes => true do
           self.application = 'MyApplication'
-          self.kubernetes = true
           self.appconfig = <<EOL
 site=<%= @site %>
 EOL
@@ -214,8 +210,8 @@ EOL
         instantiate_stack "mystack"
       end
     end
-    host("e1-x-001.mgmt.space.net.local") do |host|
-      expect(host.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
+    machineset("x") do |set|
+      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
     end
   end
 end
