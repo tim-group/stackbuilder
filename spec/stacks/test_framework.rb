@@ -1,5 +1,3 @@
-require 'pry'
-
 module Stacks::TestFramework
   attr_reader :stacks
 
