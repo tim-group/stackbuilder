@@ -137,7 +137,7 @@ class Stacks::CustomServices
   end
 
   def gold(name, &block)
-    machineset = Stacks::MachineSet.new(name, &block)
+    machineset = Stacks::MachineSet.new(name, self, &block)
     machineset.extend Stacks::Gold
     @definitions[name] = machineset
   end
@@ -176,7 +176,7 @@ class Stacks::CustomServices
   private
 
   def machineset_with(name, extends, type, &block)
-    machineset = Stacks::MachineSet.new(name, &block)
+    machineset = Stacks::MachineSet.new(name, self, &block)
     machineset.extend(Stacks::Dependencies)
     extends.each { |e| machineset.extend(e) }
     machineset.type = type
@@ -184,7 +184,7 @@ class Stacks::CustomServices
   end
 
   def k8s_machineset_with(name, extends, type, &block)
-    machineset = Stacks::MachineSet.new(name, &block)
+    machineset = Stacks::MachineSet.new(name, self, &block)
     machineset.extend(Stacks::Dependencies)
     extends.each { |e| machineset.extend(e) }
     machineset.kubernetes = true

@@ -331,7 +331,11 @@ class Stacks::MachineDef
       'kind' => 'ConfigMap',
       'metadata' => {
         'name' => app_name + '-config',
-        'namespace' => @environment.name
+        'namespace' => @environment.name,
+        'labels' => {
+          'stack' => @virtual_service.stack.name,
+          'machineset' => @virtual_service.name
+        }
       },
       'data' => {
         'config.properties' => <<EOC
@@ -353,7 +357,11 @@ EOC
        'kind' => 'Service',
        'metadata' => {
          'name' => app_name,
-         'namespace' => @environment.name
+         'namespace' => @environment.name,
+         'labels' => {
+           'stack' => @virtual_service.stack.name,
+           'machineset' => @virtual_service.name
+         }
        },
        'spec' => {
          'type' => 'LoadBalancer',
@@ -374,7 +382,11 @@ EOC
        'kind' => 'Deployment',
        'metadata' => {
          'name' => app_name,
-         'namespace' => @environment.name
+         'namespace' => @environment.name,
+         'labels' => {
+           'stack' => @virtual_service.stack.name,
+           'machineset' => @virtual_service.name
+         }
        },
        'spec' => {
          'selector' => {

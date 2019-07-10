@@ -45,7 +45,11 @@ describe_stack 'Kubernetes' do
         'kind' => 'Deployment',
         'metadata' => {
           'name' => 'myapplication',
-          'namespace' => 'e1'
+          'namespace' => 'e1',
+          'labels' => {
+            'stack' => 'mystack',
+            'machineset' => 'x'
+          }
         },
         'spec' => {
           'selector' => {
@@ -112,7 +116,11 @@ describe_stack 'Kubernetes' do
         'kind' => 'Service',
         'metadata' => {
           'name' => 'myapplication',
-          'namespace' => 'e1'
+          'namespace' => 'e1',
+          'labels' => {
+            'stack' => 'mystack',
+            'machineset' => 'x'
+          }
         },
         'spec' => {
           'type' => 'LoadBalancer',
@@ -135,7 +143,11 @@ describe_stack 'Kubernetes' do
         'kind' => 'ConfigMap',
         'metadata' => {
           'name' => 'myapplication-config',
-          'namespace' => 'e1'
+          'namespace' => 'e1',
+          'labels' => {
+            'stack' => 'mystack',
+            'machineset' => 'x'
+          }
         },
         'data' => {
           'config.properties' => <<EOL

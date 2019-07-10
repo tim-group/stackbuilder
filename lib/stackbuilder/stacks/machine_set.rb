@@ -21,18 +21,20 @@ class Stacks::MachineSet
   attr_reader :allowed_hosts
   attr_reader :default_networks
   attr_reader :depends_on
+  attr_reader :stack
 
   attr_accessor :database_username
 
   include Stacks::MachineDefContainer
 
-  def initialize(name, &config_block)
+  def initialize(name, stack, &config_block)
     @bind_steps = []
     @config_block = config_block
     @definitions = {}
     @groups = ['blue']
     @instances = 2
     @name = name
+    @stack = stack
 
     @allowed_hosts = []
     @default_networks = [:mgmt, :prod]
