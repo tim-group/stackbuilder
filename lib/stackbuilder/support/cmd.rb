@@ -293,32 +293,15 @@ class CMD
       thing.k8s_machinesets.values.each do |set|
         provision_k8s(set)
       end
+
+      # after provisioning any k8s machinesets there may be vm machinesets still to do
+      provision_vm(thing)
     elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
       provision_k8s(thing)
     elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
       fail "Cannot provision kubernetes for a single host. Provision the stack or service (#{thing.virtual_service.name}) instead"
     else # provision a VM
-      # prepare dependencies
-      @dns.do_allocate_vips(thing)
-      @dns.do_allocate_ips(thing)
-      @puppet.do_puppet_run_on_dependencies(thing)
-
-      do_provision(@factory.services, thing)
-      @nagios.do_nagios_register_new(thing)
-    end
-  end
-
-  def provision_k8s(machineset)
-    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
-    k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
-    @dns.do_allocate_vips(machineset)
-    # @puppet.do_puppet_run_on_dependencies(thing)
-
-    stdout_str, error_str, status = Open3.capture3('kubectl apply -f -', stdin_data => k8s_defns_yaml)
-    if status.success?
-      logger(Logger::INFO) { stdout_str }
-    else
-      fail "Failed to apply k8s resource definitions - error: #{error_str}"
+      provision_vm(thing)
     end
   end
 
@@ -498,12 +481,65 @@ class CMD
     end
   end
 
-  def do_clean(machine_def, all = false)
+  def do_clean(thing, all = false)
+    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+      thing.k8s_machinesets.values.each do |set|
+        clean_k8s(set)
+      end
+
+      # after cleaning any k8s machinesets there may be vm machinesets still to do
+      clean_vm(thing, all)
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      clean_k8s(thing)
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
+      fail "Cannot clean a single host from kubernetes. Clean the stack or service (#{thing.virtual_service.name}) instead"
+    else
+      clean_vm(thing, all)
+    end
+  end
+
+  def clean_k8s(machineset)
+    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+
+    environment = machineset.environment.name
+    machineset_name = machineset.name
+    k8s_defns.each do |defn|
+      resource_kind = defn['kind'].downcase
+
+      stdout_str, error_str, status = Open3.capture3('kubectl', 'delete', resource_kind, '-l', "machineset=#{machineset_name}", '-n', environment)
+      if status.success?
+        logger(Logger::INFO) { stdout_str }
+      else
+        fail "Failed to apply k8s resource definitions - error: #{error_str}"
+      end
+    end
+  end
+
+  def clean_vm(thing, all)
     cleaner = Support::Cleaner.new(@factory.compute_controller)
-    @nagios.nagios_schedule_downtime(machine_def)
-    cleaner.clean_nodes(machine_def)
-    @puppet.puppet_clean(machine_def)
-    cleaner.clean_traces(machine_def) if all
+    @nagios.nagios_schedule_downtime(thing)
+    cleaner.clean_nodes(thing)
+    @puppet.puppet_clean(thing)
+    cleaner.clean_traces(thing) if all
+  end
+
+  def provision_vm(thing)
+    # prepare dependencies
+    @dns.do_allocate_vips(thing)
+    @dns.do_allocate_ips(thing)
+    @puppet.do_puppet_run_on_dependencies(thing)
+
+    do_provision(@factory.services, thing)
+    @nagios.do_nagios_register_new(thing)
+  end
+
+  def provision_k8s(machineset)
+    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+    k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
+    @dns.do_allocate_vips(machineset)
+    # @puppet.do_puppet_run_on_dependencies(thing)
+
+    apply_k8s_defns(k8s_defns_yaml)
   end
 
   def do_provision(services, machine_def)
@@ -537,5 +573,14 @@ class CMD
     k8s_defns.map do |k8s_defn|
       ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(k8s_defn))
     end.join("\n")
+  end
+
+  def apply_k8s_defns(k8s_defns_yaml)
+    stdout_str, error_str, status = Open3.capture3('kubectl apply -f -', :stdin_data => k8s_defns_yaml)
+    if status.success?
+      logger(Logger::INFO) { stdout_str }
+    else
+      fail "Failed to apply k8s resource definitions - error: #{error_str}"
+    end
   end
 end
