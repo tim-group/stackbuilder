@@ -13,6 +13,7 @@ require 'stackbuilder/support/host_builder'
 require 'stackbuilder/support/app_deployer'
 require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
+require 'open3'
 
 # all public methods in this class are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
@@ -62,11 +63,9 @@ class CMD
 
       next if k8s_defns.nil?
 
-      k8s = k8s_defns.map do |k8s_defn|
-        ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(k8s_defn))
-      end.join("\n")
+      k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
 
-      output[box_id]["k8s"] = k8s
+      output[box_id]["k8s"] = k8s_defns_yaml
     end
 
     puts ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
@@ -288,15 +287,39 @@ class CMD
   end
 
   def provision(_argv)
-    machine_def = check_and_get_stack
+    thing = check_and_get_stack
 
-    # prepare dependencies
-    @dns.do_allocate_vips(machine_def)
-    @dns.do_allocate_ips(machine_def)
-    @puppet.do_puppet_run_on_dependencies(machine_def)
+    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+      thing.k8s_machinesets.values.each do |set|
+        provision_k8s(set)
+      end
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      provision_k8s(thing)
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
+      fail "Cannot provision kubernetes for a single host. Provision the stack or service (#{thing.virtual_service.name}) instead"
+    else # provision a VM
+      # prepare dependencies
+      @dns.do_allocate_vips(thing)
+      @dns.do_allocate_ips(thing)
+      @puppet.do_puppet_run_on_dependencies(thing)
 
-    do_provision(@factory.services, machine_def)
-    @nagios.do_nagios_register_new(machine_def)
+      do_provision(@factory.services, thing)
+      @nagios.do_nagios_register_new(thing)
+    end
+  end
+
+  def provision_k8s(machineset)
+    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+    k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
+    @dns.do_allocate_vips(machineset)
+    # @puppet.do_puppet_run_on_dependencies(thing)
+
+    stdout_str, error_str, status = Open3.capture3('kubectl apply -f -', stdin_data => k8s_defns_yaml)
+    if status.success?
+      logger(Logger::INFO) { stdout_str }
+    else
+      fail "Failed to apply k8s resource definitions - error: #{error_str}"
+    end
   end
 
   def reprovision(_argv)
@@ -423,7 +446,22 @@ class CMD
       exit 1
     end
 
-    stacks = @environment.find_stacks(@stack_name)
+    stacks = []
+    @environment.accept do |thing|
+      if (thing.respond_to?(:mgmt_fqdn) && thing.mgmt_fqdn == @stack_name) || thing.name == @stack_name
+        stacks.push(thing)
+      end
+      if thing.is_a?(Stacks::CustomServices)
+        thing.k8s_machinesets.values.each do |set|
+          set.accept do |machine_def|
+            if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == @stack_name) || machine_def.name == @stack_name
+              stacks.push(machine_def)
+            end
+          end
+        end
+      end
+    end
+
     if stacks.empty?
       logger(Logger::FATAL) { "stack \"#{@stack_name}\" not found" }
       exit 1
@@ -493,5 +531,11 @@ class CMD
 
     Support::AppDeployer.new.deploy_applications(machine_def)
     @nagios.nagios_schedule_uptime(machine_def)
+  end
+
+  def generate_k8s_defns_yaml(k8s_defns)
+    k8s_defns.map do |k8s_defn|
+      ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(k8s_defn))
+    end.join("\n")
   end
 end

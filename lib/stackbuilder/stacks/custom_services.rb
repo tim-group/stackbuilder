@@ -187,6 +187,7 @@ class Stacks::CustomServices
     machineset = Stacks::MachineSet.new(name, &block)
     machineset.extend(Stacks::Dependencies)
     extends.each { |e| machineset.extend(e) }
+    machineset.kubernetes = true
     machineset.type = type
     @k8s_machinesets[name] = machineset
   end
