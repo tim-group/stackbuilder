@@ -528,20 +528,20 @@ class CMD
     cleaner.clean_traces(thing) if all
   end
 
-  def do_provision(thing)
+  def do_provision(services, thing)
     if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
       thing.k8s_machinesets.values.each do |set|
         apply_k8s(set, thing.name)
       end
 
       # after provisioning any k8s machinesets there may be vm machinesets still to do
-      provision_vm(@factory.services, thing)
+      provision_vm(services, thing)
     elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
       apply_k8s(thing, thing.stack.name)
     elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
       fail "Cannot provision kubernetes for a single host. Provision the stack or service (#{thing.virtual_service.name}) instead"
     else # provision a VM
-      provision_vm(@factory.services, thing)
+      provision_vm(services, thing)
     end
   end
 
