@@ -288,27 +288,31 @@ class CMD
 
   def provision(_argv)
     thing = check_and_get_stack
-
-    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
-      thing.k8s_machinesets.values.each do |set|
-        provision_k8s(set)
-      end
-
-      # after provisioning any k8s machinesets there may be vm machinesets still to do
-      provision_vm(thing)
-    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
-      provision_k8s(thing)
-    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
-      fail "Cannot provision kubernetes for a single host. Provision the stack or service (#{thing.virtual_service.name}) instead"
-    else # provision a VM
-      provision_vm(thing)
-    end
+    do_provision(@factory.services, thing)
   end
 
   def reprovision(_argv)
-    machine_def = check_and_get_stack
-    do_clean(machine_def)
-    do_provision(@factory.services, machine_def)
+    thing = check_and_get_stack
+
+    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+      thing.k8s_machinesets.values.each do |set|
+        apply_k8s(set, thing.name)
+      end
+
+      # after reprovisioning any k8s machinesets there may be vm machinesets still to do
+      reprovision_vm(@factory.services, thing)
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      apply_k8s(thing, thing.stack.name)
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
+      fail "Cannot reprovision kubernetes for a single host. Reprovision the stack or service (#{thing.virtual_service.name}) instead"
+    else # reprovision a VM
+      reprovision_vm(@factory.services, thing)
+    end
+  end
+
+  def reprovision_vm(services, thing)
+    clean_vm(thing)
+    provision_vm(services, thing, false)
   end
 
   def move(_argv)
@@ -510,12 +514,12 @@ class CMD
       if status.success?
         logger(Logger::INFO) { stdout_str }
       else
-        fail "Failed to apply k8s resource definitions - error: #{error_str}"
+        fail "Failed to delete k8s resource definitions - error: #{error_str}"
       end
     end
   end
 
-  def clean_vm(thing, all)
+  def clean_vm(thing, all = false)
     cleaner = Support::Cleaner.new(@factory.compute_controller)
     @nagios.nagios_schedule_downtime(thing)
     cleaner.clean_nodes(thing)
@@ -523,28 +527,42 @@ class CMD
     cleaner.clean_traces(thing) if all
   end
 
-  def provision_vm(thing)
-    # prepare dependencies
-    @dns.do_allocate_vips(thing)
-    @dns.do_allocate_ips(thing)
-    @puppet.do_puppet_run_on_dependencies(thing)
+  def do_provision(thing)
+    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+      thing.k8s_machinesets.values.each do |set|
+        apply_k8s(set, thing.name)
+      end
 
-    do_provision(@factory.services, thing)
-    @nagios.do_nagios_register_new(thing)
+      # after provisioning any k8s machinesets there may be vm machinesets still to do
+      provision_vm(@factory.services, thing)
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      apply_k8s(thing, thing.stack.name)
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
+      fail "Cannot provision kubernetes for a single host. Provision the stack or service (#{thing.virtual_service.name}) instead"
+    else # provision a VM
+      provision_vm(@factory.services, thing)
+    end
   end
 
-  def provision_k8s(machineset)
+  def apply_k8s(machineset, stack_name)
     k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
     k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
     @dns.do_allocate_vips(machineset)
     # @puppet.do_puppet_run_on_dependencies(thing)
 
-    apply_k8s_defns(k8s_defns_yaml)
+    apply_and_prune_k8s_defns(k8s_defns_yaml, stack_name, machineset.name)
   end
 
-  def do_provision(services, machine_def)
-    @core_actions.get_action("launch").call(services, machine_def)
-    sign_results = @puppet.puppet_wait_for_autosign(machine_def)
+  def provision_vm(services, thing, initial = true)
+    if initial
+      # prepare dependencies
+      @dns.do_allocate_vips(thing)
+      @dns.do_allocate_ips(thing)
+      @puppet.do_puppet_run_on_dependencies(thing)
+    end
+
+    @core_actions.get_action("launch").call(services, thing)
+    sign_results = @puppet.puppet_wait_for_autosign(thing)
 
     # sometimes the one-time password auto-sign fails, and we do not know why
     unless sign_results.all_passed?
@@ -555,7 +573,7 @@ class CMD
       fail "poll sign also failed" unless poll_sign_success
     end
 
-    puppet_results = @puppet.puppet_wait_for_run_completion(machine_def)
+    puppet_results = @puppet.puppet_wait_for_run_completion(thing)
 
     unless puppet_results.all_passed?
       logger(Logger::ERROR) { "One or more puppet runs have failed" }
@@ -565,8 +583,10 @@ class CMD
       fail("Puppet runs have timed out or failed")
     end
 
-    Support::AppDeployer.new.deploy_applications(machine_def)
-    @nagios.nagios_schedule_uptime(machine_def)
+    Support::AppDeployer.new.deploy_applications(thing)
+    @nagios.nagios_schedule_uptime(thing)
+
+    @nagios.do_nagios_register_new(thing) if initial
   end
 
   def generate_k8s_defns_yaml(k8s_defns)
@@ -575,8 +595,10 @@ class CMD
     end.join("\n")
   end
 
-  def apply_k8s_defns(k8s_defns_yaml)
-    stdout_str, error_str, status = Open3.capture3('kubectl apply -f -', :stdin_data => k8s_defns_yaml)
+  def apply_and_prune_k8s_defns(k8s_defns_yaml, stack_name, machine_set_name)
+    command = ['kubectl', 'apply', '--prune', '-l', "stack=#{stack_name},machineset=#{machine_set_name}", '-f', '-']
+    logger(Logger::DEBUG) { "running command: #{command.join(' ')}" }
+    stdout_str, error_str, status = Open3.capture3(*command, :stdin_data => k8s_defns_yaml)
     if status.success?
       logger(Logger::INFO) { stdout_str }
     else
