@@ -308,6 +308,7 @@ class CMD
     else # reprovision a VM
       reprovision_vm(@factory.services, thing)
     end
+    0
   end
 
   def reprovision_vm(services, thing)
