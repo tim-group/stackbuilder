@@ -496,7 +496,7 @@ class CMD
       clean_vm(thing, all)
     elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
       clean_k8s(thing)
-    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
       fail "Cannot clean a single host from kubernetes. Clean the stack or service (#{thing.virtual_service.name}) instead"
     else
       clean_vm(thing, all)
