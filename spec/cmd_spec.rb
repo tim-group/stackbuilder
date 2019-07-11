@@ -7,33 +7,16 @@ describe 'compile' do
     Stacks::Factory.new(Stacks::Inventory.from(&block))
   end
 
-  it 'prints spec and enc for a specific machine' do
-    factory = eval_stacks do
+  let(:factory) do
+    eval_stacks do
       stack "mystack" do
-        app_service "x" do
+        app_service "myappservice" do
           self.application = 'MyApplication'
-        end
-      end
-      env 'e1', :primary_site => 'space' do
-        instantiate_stack "mystack"
-      end
-    end
-
-    cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'e1-x-001.mgmt.space.net.local')
-
-    expect { cmd.compile nil }.to output(/\benc:/).to_stdout
-    expect { cmd.compile nil }.to output(/\bspec:/).to_stdout
-  end
-
-  it 'prints spec and enc for everything' do
-    factory = eval_stacks do
-      stack "mystack" do
-        app_service "x" do
-          self.application = 'MyApplication'
+          self.instances = 2
         end
       end
       stack "myotherstack" do
-        app_service "y" do
+        app_service "myotherappservice" do
           self.application = 'MyOtherApplication'
         end
       end
@@ -41,13 +24,51 @@ describe 'compile' do
         instantiate_stack "mystack"
       end
       env 'e2', :primary_site => 'space' do
-        instantiate_stack "mystack"
+        instantiate_stack "myotherstack"
       end
     end
+  end
 
+  it 'prints enc and spec for everything' do
     cmd = CMD.new(factory, nil, nil)
 
-    expect { cmd.compile nil }.to output(/\benc:/).to_stdout
-    expect { cmd.compile nil }.to output(/\bspec:/).to_stdout
+    expect { cmd.compile nil }.to output(/\be1-myappservice-001.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         \be2-myotherappservice-001.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         /mx).to_stdout
+  end
+
+  it 'prints enc and spec for a specific machineset' do
+    cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'myappservice')
+
+    expect { cmd.compile nil }.to output(/\be1-myappservice-001.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         \be1-myappservice-002.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         /mx).to_stdout
+
+    expect { cmd.compile nil }.not_to output(/\be2-myotherappservice-001.mgmt.space.net.local:.*
+                                             \benc:.*
+                                             \bspec:.*
+                                             /mx).to_stdout
+  end
+
+  it 'prints enc and spec for a specific machine' do
+    cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'e1-myappservice-001.mgmt.space.net.local')
+
+    expect { cmd.compile nil }.to output(/\be1-myappservice-001.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         /mx).to_stdout
+
+    expect { cmd.compile nil }.not_to output(/\be1-myappservice-002.mgmt.space.net.local:
+                                             |
+                                             \be2-myotherappservice-001.mgmt.space.net.local:
+                                             /mx).to_stdout
   end
 end
