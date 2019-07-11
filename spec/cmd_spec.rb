@@ -14,6 +14,10 @@ describe 'compile' do
           self.application = 'MyApplication'
           self.instances = 2
         end
+        app_service "myrelatedappservice" do
+          self.application = 'MyRelatedApplication'
+          self.instances = 1
+        end
       end
       stack "myotherstack" do
         app_service "myotherappservice" do
@@ -35,10 +39,36 @@ describe 'compile' do
     expect { cmd.compile nil }.to output(/\be1-myappservice-001.mgmt.space.net.local:.*
                                          \benc:.*
                                          \bspec:.*
+                                         \be1-myappservice-002.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         \be1-myrelatedappservice-001.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
                                          \be2-myotherappservice-001.mgmt.space.net.local:.*
                                          \benc:.*
                                          \bspec:.*
                                          /mx).to_stdout
+  end
+
+  it 'prints enc and spec for a stack' do
+    cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'mystack')
+
+    expect { cmd.compile nil }.to output(/\be1-myappservice-001.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         \be1-myappservice-002.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         \be1-myrelatedappservice-001.mgmt.space.net.local:.*
+                                         \benc:.*
+                                         \bspec:.*
+                                         /mx).to_stdout
+
+    expect { cmd.compile nil }.not_to output(/\be2-myotherappservice-001.mgmt.space.net.local:.*
+                                             \benc:.*
+                                             \bspec:.*
+                                             /mx).to_stdout
   end
 
   it 'prints enc and spec for a specific machineset' do
@@ -52,9 +82,9 @@ describe 'compile' do
                                          \bspec:.*
                                          /mx).to_stdout
 
-    expect { cmd.compile nil }.not_to output(/\be2-myotherappservice-001.mgmt.space.net.local:.*
-                                             \benc:.*
-                                             \bspec:.*
+    expect { cmd.compile nil }.not_to output(/\be2-myotherappservice-001.mgmt.space.net.local:
+                                             |
+                                             \be1-myrelatedappservice-001.mgmt.space.net.local:
                                              /mx).to_stdout
   end
 
@@ -67,6 +97,8 @@ describe 'compile' do
                                          /mx).to_stdout
 
     expect { cmd.compile nil }.not_to output(/\be1-myappservice-002.mgmt.space.net.local:
+                                             |
+                                             \be1-myrelatedappservice-001.mgmt.space.net.local:
                                              |
                                              \be2-myotherappservice-001.mgmt.space.net.local:
                                              /mx).to_stdout
