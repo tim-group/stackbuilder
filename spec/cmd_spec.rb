@@ -103,4 +103,10 @@ describe 'compile' do
                                              \be2-myotherappservice-001.mgmt.space.net.local:
                                              /mx).to_stdout
   end
+
+  it 'fails if the name is not found' do
+    cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'notfound')
+
+    expect { cmd.compile nil }.to raise_error('Entity not found')
+  end
 end

@@ -250,15 +250,13 @@ if commands.write_cmds.include?(cmd) && in_ssh && !in_tmux
 end
 
 logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
-success = commands.method(cmd).call(argv)
 
-# FIXME: These are all the command that simply call system and return true/false.
-if %w(clean clean_all provision test reprovision).include? cmd
-  unless success
-    logger(Logger::FATAL) { "#{cmd} failed, check the output above" }
-    exit 1
-  end
+begin
+  commands.method(cmd).call(argv)
+rescue
+  logger(Logger::FATAL) { "#{cmd} failed" }
+  exit 1
 end
 
-exit 0
 logger(Logger::DEBUG) { 'exiting gracefully' }
+exit 0

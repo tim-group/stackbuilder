@@ -117,7 +117,7 @@ class CMD
       puts ZAMLS.to_zamls(machine_def.to_enc)
     else
       logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn" }
-      exit 1
+      fail "Machine not found"
     end
   end
 
@@ -128,7 +128,7 @@ class CMD
       puts ZAMLS.to_zamls(machine_def.to_spec)
     else
       logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn" }
-      exit 1
+      fail "Machine not found"
     end
   end
 
@@ -136,7 +136,7 @@ class CMD
     cmd = argv.shift
     if cmd.nil? then
       logger(Logger::FATAL) { 'dns needs a subcommand' }
-      exit 1
+      fail 'Subcommand not provided'
     end
 
     machine_def = check_and_get_stack
@@ -152,7 +152,7 @@ class CMD
       @dns.do_free_vips(machine_def)
     else
       logger(Logger::FATAL) { "invalid sub command \"#{cmd}\"" }
-      exit 1
+      fail 'Unknown subcommand'
     end
   end
 
@@ -160,7 +160,7 @@ class CMD
     cmd = argv.shift
     if cmd.nil? then
       logger(Logger::FATAL) { 'nagios needs a subcommand' }
-      exit 1
+      fail 'Subcommand not provided'
     end
 
     machine_def = check_and_get_stack
@@ -172,7 +172,7 @@ class CMD
       @nagios.nagios_cancel_downtime(machine_def)
     else
       logger(Logger::FATAL) { "invalid command \"#{cmd}\"" }
-      exit 1
+      fail 'Unknown subcommand'
     end
   end
 
@@ -201,7 +201,7 @@ class CMD
         "The 'test' task failed, indicating the stack is not functioning correctly. " \
               "See the above test output for details."
       end
-      exit 1
+      fail "Error running tests"
     end
     result
   end
@@ -321,7 +321,7 @@ class CMD
 
     if machines.size != 1
       logger(Logger::FATAL) { "moving more than one machine not supported" }
-      exit 1
+      fail "Too many machines selected"
     end
 
     machine = machines.first
@@ -330,7 +330,7 @@ class CMD
 
     if host.nil?
       logger(Logger::FATAL) { "#{machine.hostname} is not provisioned" }
-      exit 1
+      fail "Machine not found"
     end
 
     Support::LiveMigrator.new(@factory, host).move(machine)
@@ -339,7 +339,7 @@ class CMD
   def clear_host(argv)
     if argv.size != 1
       logger(Logger::FATAL) { "You must specify a host to clear" }
-      exit 1
+      fail "Host not specified"
     end
 
     host_fqdn = argv[0]
@@ -347,7 +347,7 @@ class CMD
 
     if host.nil?
       logger(Logger::FATAL) { "unable to find #{host_fqdn}" }
-      exit 1
+      fail "Host not found"
     end
 
     Support::LiveMigrator.new(@factory, host).move_all
@@ -356,7 +356,7 @@ class CMD
   def rebuild_host(argv)
     if argv.size != 1
       logger(Logger::FATAL) { "You must specify a host to rebuild" }
-      exit 1
+      fail "No host specified"
     end
 
     Support::HostBuilder.new(@factory, @nagios, @puppet).rebuild(argv[0])
@@ -365,7 +365,7 @@ class CMD
   def build_new_host(argv)
     if argv.size != 1
       logger(Logger::FATAL) { "You must specify a host to rebuild" }
-      exit 1
+      fail "Host not specified"
     end
 
     Support::HostBuilder.new(@factory, @nagios, @puppet).build_new(argv[0])
@@ -423,7 +423,7 @@ class CMD
   def ensure_is_machine(machine_def)
     if !machine_def.is_a?(Stacks::MachineDef)
       logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn" }
-      exit 1
+      fail "Machine not found"
     end
     machine_def
   end
@@ -431,7 +431,7 @@ class CMD
   def check_and_get_stack
     if @stack_name.nil?
       logger(Logger::FATAL) { 'option "stack" not set' }
-      exit 1
+      fail "Internal error"
     end
 
     stacks = []
@@ -452,13 +452,13 @@ class CMD
 
     if stacks.empty?
       logger(Logger::FATAL) { "stack \"#{@stack_name}\" not found" }
-      exit 1
+      fail "Entity not found"
     end
 
     if stacks.size > 1
       names = stacks.map { |s| s.respond_to?(:mgmt_fqdn) ? s.mgmt_fqdn : s.name }
       logger(Logger::FATAL) { "Multiple stacks match specified stack name (#{names.join(', ')})." }
-      exit 1
+      fail "Too many entities found"
     end
 
     stacks.first
