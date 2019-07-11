@@ -219,7 +219,8 @@ end
 ENV['BEST_EFFORT'] = 'true' if $options[:'best-effort']
 
 logger(Logger::DEBUG) { 'initializing stacks factory' }
-factory = Stacks::Factory.new($options[:path], $options[:'ignore-spectre-patching-host-policy'])
+inventory = Stacks::Inventory.from_dir($options[:path].nil? ? '.' : $options[:path])
+factory = Stacks::Factory.new(inventory, $options[:'ignore-spectre-patching-host-policy'])
 environment = factory.inventory.find_environment($options[:environment])
 if (environment).nil?
   logger(Logger::FATAL) { "environment \"#{$options[:environment]}\" not found" }

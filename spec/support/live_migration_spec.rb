@@ -10,7 +10,7 @@ describe Support::LiveMigrator do
   before do
     @stacks_factory = double("stacks_factory")
     @rpcutil = double("rpcutil")
-    policies = Stacks::Factory.new.policies
+    policies = Stacks::Factory.new(Stacks::Inventory.from {}).policies
     storage = { :used => '1.0' }
     @source_host = StackBuilder::Allocator::Host.new("source_host", :policies => policies, :storage => storage)
     @live_migrator = Support::LiveMigrator.new(@stacks_factory, @source_host, @rpcutil)

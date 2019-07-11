@@ -11,7 +11,7 @@ describe Stacks::Inventory do
         File.open("#{dir}/ruby_file_with_errors.rb", 'w') do |file|
           file.write("burp!")
         end
-        Stacks::Inventory.new(dir)
+        Stacks::Inventory.from_dir(dir)
       end
     end.to raise_error
   end
@@ -19,7 +19,7 @@ describe Stacks::Inventory do
   it 'returns nil when asked to find an unknown node' do
     hostname = 'nosuch.mgmt.space.net.local'
 
-    inventory = Stacks::Inventory.new(@stacks_dir)
+    inventory = Stacks::Inventory.from_dir(@stacks_dir)
     result = inventory.find(hostname)
 
     expect(result).to eql(nil)
@@ -28,7 +28,7 @@ describe Stacks::Inventory do
   it 'finds known nodes' do
     hostname = 'te-stapp-001.mgmt.space.net.local'
 
-    inventory = Stacks::Inventory.new(@stacks_dir)
+    inventory = Stacks::Inventory.from_dir(@stacks_dir)
     result = inventory.find(hostname)
 
     expect(result.hostname).to eql("te-stapp-001")

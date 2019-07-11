@@ -15,7 +15,7 @@ class Puppet::Node::Stacks < Puppet::Indirector::Plain
   desc "generates the necessary wiring for all nodes in a stack."
 
   def initialize(
-    stacks_inventory = Stacks::Inventory.new('/etc/stacks'),
+    stacks_inventory = Stacks::Inventory.from_dir('/etc/stacks'),
     delegate = Puppet::Node::Plain.new,
     dump_enc = true,
     dump_enc_dir = '/var/log/stacks/enc',

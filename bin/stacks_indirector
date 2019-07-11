@@ -19,7 +19,7 @@ start_time = Time.now
 hostname = ARGV[0] || abort("usage: #{$PROGRAM_NAME} hostname")
 abort "suspicious hostname: \"#{hostname}\"" if hostname !~ /^[-_.a-zA-Z0-9]+$/
 node = {}
-machine = Stacks::Inventory.new('/etc/stacks').find(hostname)
+machine = Stacks::Inventory.from_dir('/etc/stacks').find(hostname)
 
 if machine
   classes = machine.to_enc

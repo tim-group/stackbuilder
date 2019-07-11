@@ -17,14 +17,11 @@ require 'stackbuilder/stacks/namespace'
 
 class Stacks::Factory
   attr_reader :path
+  attr_reader :inventory
 
-  def initialize(path = nil, ignore_spectre_patching_host_policy = false)
-    @path = path.nil? ? '.' : path
+  def initialize(inventory, ignore_spectre_patching_host_policy = false)
+    @inventory = inventory
     @ignore_spectre_patching_host_policy = ignore_spectre_patching_host_policy
-  end
-
-  def inventory
-    @inventory ||= Stacks::Inventory.new(@path)
   end
 
   def policies
