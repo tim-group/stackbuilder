@@ -3,7 +3,7 @@ source "https://rubygems.org" do
   gem 'collimator'
   gem 'mcollective-client', '2.8.1'
   gem 'nagios-support', :git => 'https://github.com/tim-group/ruby-nagios-support.git'
-  gem "orc", :git => "https://github.com/tim-group/orc.git", :branch => 'gemspec_test'
+  gem "orc", :git => "https://github.com/tim-group/orc.git"
   gem 'puppet', '3.8.5'
   gem 'rspec', '3.3.0'
   gem 'rubocop', '0.32.1'
