@@ -22,22 +22,22 @@ class CMD
   attr_reader :read_cmds # this list is just a safety check
   attr_reader :write_cmds # this list is just a safety check
 
-  def initialize(factory, environment, stack_name = nil)
+  # rubocop:disable Metrics/ParameterLists
+  def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, environment, stack_name = nil)
     @factory = factory
+    @core_actions = core_actions
+    @dns = dns
+    @nagios = nagios
+    @subscription = subscription
+    @puppet = puppet
+    @app_deployer = app_deployer
     @environment = environment
     @stack_name = stack_name
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
     @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host rebuild_host build_new_host)
     @cmds = @read_cmds + @write_cmds
-    @core_actions = Object.new
-    @core_actions.extend(Stacks::Core::Actions)
-    @dns = Support::Dns.new(@factory, @core_actions)
-    @nagios = Support::Nagios.new
-
-    subscription = Subscription.new
-    subscription.start(["provision.*", "puppet_status"])
-    @puppet = Support::Puppet.new(subscription)
   end
+  # rubocop:enable Metrics/ParameterLists
 
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
@@ -610,7 +610,7 @@ class CMD
       fail("Puppet runs have timed out or failed")
     end
 
-    Support::AppDeployer.new.deploy_applications(thing)
+    @app_deployer.deploy_applications(thing)
     @nagios.nagios_schedule_uptime(thing)
 
     @nagios.do_nagios_register_new(thing) if initial
