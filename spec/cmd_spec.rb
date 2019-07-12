@@ -225,18 +225,6 @@ describe 'compile' do
       expect(out.scan(/---/).size).to eq 1
     end
 
-    it 'prints k8s definitions for a specific machineset' do
-      out = capture_stdout do
-        cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'myk8sappservice')
-        cmd.compile nil
-      end
-
-      expect(out.scan(/---/).size).to eq 1
-      expect(out).to match(/\bspace-e1-myk8sappservice:.*
-                           \bkind:.*
-                           /mx)
-    end
-
     it 'prints k8s and VM definitions for a specific stack' do
       out = capture_stdout do
         cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'mystack')
@@ -249,6 +237,24 @@ describe 'compile' do
                            ^---\s*$.*\bspace-e1-myk8sappservice:.*
                            \bkind:.*
                            /mx)
+    end
+
+    it 'prints k8s definitions for a specific machineset' do
+      out = capture_stdout do
+        cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'myk8sappservice')
+        cmd.compile nil
+      end
+
+      expect(out.scan(/---/).size).to eq 1
+      expect(out).to match(/\bspace-e1-myk8sappservice:.*
+                           \bkind:.*
+                           /mx)
+    end
+
+    it 'raises an error for a specific machine in a k8s machineset' do
+      cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'e1-myk8sappservice-001.mgmt.space.net.local')
+
+      expect { cmd.compile nil }.to raise_error(/Cannot compile a single host for kubernetes/)
     end
   end
 end
