@@ -452,7 +452,7 @@ class CMD
       if thing.is_a?(Stacks::CustomServices)
         thing.k8s_machinesets.values.each do |set|
           set.accept do |machine_def|
-            if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == @stack_name) || machin1e_def.name == @stack_name
+            if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == @stack_name) || machine_def.name == @stack_name
               stacks.push(machine_def)
             end
           end
