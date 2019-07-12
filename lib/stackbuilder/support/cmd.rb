@@ -62,7 +62,7 @@ class CMD
       elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
         k8s_targets << thing
       elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
-        fail "Cannot clean a single host from kubernetes. Clean the stack or service (#{thing.virtual_service.name}) instead"
+        fail "Cannot compile a single host for kubernetes. Compile the stack or service (#{thing.virtual_service.name}) instead"
       else
         vm_targets = thing.flatten
       end
