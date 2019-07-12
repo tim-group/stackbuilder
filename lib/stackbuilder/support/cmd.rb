@@ -47,19 +47,35 @@ class CMD
 
     if @stack_name.nil?
       @factory.inventory.environments.sort.each do |_envname, env|
-        vm_targets += env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
-        k8s_targets += env.children.select { |c| c.is_a?(Stacks::CustomServices) }.map(&:k8s_machinesets).map(&:values).flatten
+        vm_targets += env.flatten
+        env.accept do |c|
+          if c.is_a?(Stacks::CustomServices)
+            k8s_targets += c.k8s_machinesets.values.flatten
+          end
+        end
       end
     else
-      vm_targets = check_and_get_stack.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
+      thing = check_and_get_stack
+      if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+        k8s_targets = thing.k8s_machinesets.values
+        vm_targets = thing.flatten
+      elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+        k8s_targets << thing
+      elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
+        fail "Cannot clean a single host from kubernetes. Clean the stack or service (#{thing.virtual_service.name}) instead"
+      else
+        vm_targets = thing.flatten
+      end
     end
 
-    puts [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].join("\n")
+    puts [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].compact.join("\n")
   end
 
-  def vms_compile_output(vm_targets)
+  def vms_compile_output(targets)
+    return nil if targets.empty?
+
     output = {}
-    vm_targets.each do |stack|
+    targets.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
       box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
       output[box_id] = {}
       output[box_id]["enc"] = stack.to_enc
@@ -69,11 +85,11 @@ class CMD
     ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
   end
 
-  def k8s_compile_output(k8s_targets)
-    return '' if k8s_targets.empty?
+  def k8s_compile_output(targets)
+    return nil if targets.empty?
 
     output = {}
-    k8s_targets.each do |machine_set|
+    targets.each do |machine_set|
       machine_set_id = "#{machine_set.children.first.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
       output[machine_set_id] = machine_set.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
     end

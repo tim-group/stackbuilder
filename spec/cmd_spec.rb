@@ -47,88 +47,90 @@ describe 'compile' do
     end
   end
 
-  it 'prints enc and spec for everything' do
-    out = capture_stdout do
-      cmd = CMD.new(factory, nil, nil)
-      cmd.compile nil
+  describe 'VMs' do
+    it 'prints enc and spec for everything' do
+      out = capture_stdout do
+        cmd = CMD.new(factory, nil, nil)
+        cmd.compile nil
+      end
+
+      expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          \be1-myappservice-002.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          \be1-myrelatedappservice-001.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          \be2-myotherappservice-001.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          /mx)
     end
 
-    expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         \be1-myappservice-002.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         \be1-myrelatedappservice-001.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         \be2-myotherappservice-001.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         /mx)
-  end
+    it 'prints enc and spec for a stack' do
+      out = capture_stdout do
+        cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'mystack')
+        cmd.compile nil
+      end
 
-  it 'prints enc and spec for a stack' do
-    out = capture_stdout do
-      cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'mystack')
-      cmd.compile nil
+      expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          \be1-myappservice-002.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          \be1-myrelatedappservice-001.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          /mx)
+
+      expect(out).not_to match(/\be2-myotherappservice-001.mgmt.space.net.local:.*
+                              \benc:.*
+                              \bspec:.*
+                              /mx)
     end
 
-    expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         \be1-myappservice-002.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         \be1-myrelatedappservice-001.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         /mx)
+    it 'prints enc and spec for a specific machineset' do
+      out = capture_stdout do
+        cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'myappservice')
+        cmd.compile nil
+      end
 
-    expect(out).not_to match(/\be2-myotherappservice-001.mgmt.space.net.local:.*
-                             \benc:.*
-                             \bspec:.*
-                             /mx)
-  end
+      expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          \be1-myappservice-002.mgmt.space.net.local:.*
+                          \benc:.*
+                          \bspec:.*
+                          /mx)
 
-  it 'prints enc and spec for a specific machineset' do
-    out = capture_stdout do
-      cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'myappservice')
-      cmd.compile nil
+      expect(out).not_to match(/\be2-myotherappservice-001.mgmt.space.net.local:
+                              |
+                              \be1-myrelatedappservice-001.mgmt.space.net.local:
+                              /mx)
     end
 
-    expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         \be1-myappservice-002.mgmt.space.net.local:.*
-                         \benc:.*
-                         \bspec:.*
-                         /mx)
+    it 'prints enc and spec for a specific machine' do
+      out = capture_stdout do
+        cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'e1-myappservice-001.mgmt.space.net.local')
 
-    expect(out).not_to match(/\be2-myotherappservice-001.mgmt.space.net.local:
-                             |
-                             \be1-myrelatedappservice-001.mgmt.space.net.local:
-                             /mx)
-  end
+        cmd.compile nil
+      end
 
-  it 'prints enc and spec for a specific machine' do
-    out = capture_stdout do
-      cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'e1-myappservice-001.mgmt.space.net.local')
+      expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
+                                          \benc:.*
+                                          \bspec:.*
+                                          /mx)
 
-      cmd.compile nil
+      expect(out).not_to match(/\be1-myappservice-002.mgmt.space.net.local:
+                                              |
+                                              \be1-myrelatedappservice-001.mgmt.space.net.local:
+                                              |
+                                              \be2-myotherappservice-001.mgmt.space.net.local:
+                                              /mx)
     end
-
-    expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
-                                         \benc:.*
-                                         \bspec:.*
-                                         /mx)
-
-    expect(out).not_to match(/\be1-myappservice-002.mgmt.space.net.local:
-                                             |
-                                             \be1-myrelatedappservice-001.mgmt.space.net.local:
-                                             |
-                                             \be2-myotherappservice-001.mgmt.space.net.local:
-                                             /mx)
   end
 
   it 'fails if the name is not found' do
@@ -161,8 +163,8 @@ describe 'compile' do
   end
 
   describe "k8s" do
-    it 'outputs kubernetes machinesets after VMs' do
-      factory = eval_stacks do
+    let(:factory) do
+      eval_stacks do
         stack "mystack" do
           app_service "myvmappservice" do
             self.application = 'MyApplication'
@@ -171,14 +173,22 @@ describe 'compile' do
             self.application = 'MyK8sApplication'
           end
         end
+        stack "myotherstack" do
+          app_service "myotherk8sappservice", :kubernetes => true do
+            self.application = 'MyOtherK8sApplication'
+          end
+        end
         env 'e1', :primary_site => 'space' do
           instantiate_stack "mystack"
 
           env 'childenv' do
+            instantiate_stack "myotherstack"
           end
         end
       end
+    end
 
+    it 'outputs kubernetes machinesets after VMs' do
       out = capture_stdout do
         cmd = CMD.new(factory, nil, nil)
         cmd.compile nil
@@ -188,6 +198,8 @@ describe 'compile' do
                             \benc:.*
                             \bspec:.*
                             ^---\s*$.*
+                            \bspace-childenv-myotherk8sappservice:.*
+                            \bkind:.*
                             \bspace-e1-myk8sappservice:.*
                             \bkind:.*
                             /mx)
@@ -211,6 +223,32 @@ describe 'compile' do
       end
 
       expect(out.scan(/---/).size).to eq 1
+    end
+
+    it 'prints k8s definitions for a specific machineset' do
+      out = capture_stdout do
+        cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'myk8sappservice')
+        cmd.compile nil
+      end
+
+      expect(out.scan(/---/).size).to eq 1
+      expect(out).to match(/\bspace-e1-myk8sappservice:.*
+                           \bkind:.*
+                           /mx)
+    end
+
+    it 'prints k8s and VM definitions for a specific stack' do
+      out = capture_stdout do
+        cmd = CMD.new(factory, factory.inventory.find_environment('e1'), 'mystack')
+        cmd.compile nil
+      end
+
+      expect(out).to match(/\be1-myvmappservice-001.mgmt.space.net.local:.*
+                           \benc:.*
+                           \bspec:.*
+                           ^---\s*$.*\bspace-e1-myk8sappservice:.*
+                           \bkind:.*
+                           /mx)
     end
   end
 end
