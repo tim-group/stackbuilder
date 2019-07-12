@@ -159,4 +159,58 @@ describe 'compile' do
 
     expect { cmd.compile nil }.to raise_error('Too many entities found')
   end
+
+  describe "k8s" do
+    it 'outputs kubernetes machinesets after VMs' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "myvmappservice" do
+            self.application = 'MyApplication'
+          end
+          app_service "myk8sappservice", :kubernetes => true do
+            self.application = 'MyK8sApplication'
+          end
+        end
+        env 'e1', :primary_site => 'space' do
+          instantiate_stack "mystack"
+
+          env 'childenv' do
+          end
+        end
+      end
+
+      out = capture_stdout do
+        cmd = CMD.new(factory, nil, nil)
+        cmd.compile nil
+      end
+
+      expect(out).to match(/\be1-myvmappservice-001.mgmt.space.net.local:.*
+                            \benc:.*
+                            \bspec:.*
+                            ^---\s*$.*
+                            \bspace-e1-myk8sappservice:.*
+                            \bkind:.*
+                            /mx)
+    end
+
+    it 'outputs no kubernetes section if there are no kubernetes systems found' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "myvmappservice" do
+            self.application = 'MyApplication'
+          end
+        end
+        env 'e1', :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+
+      out = capture_stdout do
+        cmd = CMD.new(factory, nil, nil)
+        cmd.compile nil
+      end
+
+      expect(out.scan(/---/).size).to eq 1
+    end
+  end
 end

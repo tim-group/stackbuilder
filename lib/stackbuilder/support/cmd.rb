@@ -42,33 +42,43 @@ class CMD
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
   def compile(_argv)
-    targets = []
+    vm_targets = []
+    k8s_targets = []
 
     if @stack_name.nil?
       @factory.inventory.environments.sort.each do |_envname, env|
-        targets += env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
+        vm_targets += env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
+        k8s_targets += env.children.select { |c| c.is_a?(Stacks::CustomServices) }.map(&:k8s_machinesets).map(&:values).flatten
       end
     else
-      targets = check_and_get_stack.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
+      vm_targets = check_and_get_stack.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }
     end
 
+    puts [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].join("\n")
+  end
+
+  def vms_compile_output(vm_targets)
     output = {}
-    targets.each do |stack|
+    vm_targets.each do |stack|
       box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
       output[box_id] = {}
       output[box_id]["enc"] = stack.to_enc
       output[box_id]["spec"] = stack.to_spec
-
-      k8s_defns = stack.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
-
-      next if k8s_defns.nil?
-
-      k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
-
-      output[box_id]["k8s"] = k8s_defns_yaml
     end
 
-    puts ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
+    ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
+  end
+
+  def k8s_compile_output(k8s_targets)
+    return '' if k8s_targets.empty?
+
+    output = {}
+    k8s_targets.each do |machine_set|
+      machine_set_id = "#{machine_set.children.first.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
+      output[machine_set_id] = machine_set.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+    end
+
+    ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
   end
 
   def diff(_argv)
@@ -442,7 +452,7 @@ class CMD
       if thing.is_a?(Stacks::CustomServices)
         thing.k8s_machinesets.values.each do |set|
           set.accept do |machine_def|
-            if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == @stack_name) || machine_def.name == @stack_name
+            if (machine_def.respond_to?(:mgmt_fqdn) && machine_def.mgmt_fqdn == @stack_name) || machin1e_def.name == @stack_name
               stacks.push(machine_def)
             end
           end

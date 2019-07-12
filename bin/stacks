@@ -253,7 +253,8 @@ logger(Logger::DEBUG) { "about to execute command \"#{cmd}\"" }
 
 begin
   commands.method(cmd).call(argv)
-rescue
+rescue => e
+  logger(Logger::DEBUG) { e }
   logger(Logger::FATAL) { "#{cmd} failed" }
   exit 1
 end
