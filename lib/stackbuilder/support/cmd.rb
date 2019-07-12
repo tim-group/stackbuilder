@@ -71,32 +71,6 @@ class CMD
     puts [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].compact.join("\n")
   end
 
-  def vms_compile_output(targets)
-    return nil if targets.empty?
-
-    output = {}
-    targets.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-      box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
-      output[box_id] = {}
-      output[box_id]["enc"] = stack.to_enc
-      output[box_id]["spec"] = stack.to_spec
-    end
-
-    ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
-  end
-
-  def k8s_compile_output(targets)
-    return nil if targets.empty?
-
-    output = {}
-    targets.each do |machine_set|
-      machine_set_id = "#{machine_set.children.first.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
-      output[machine_set_id] = machine_set.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
-    end
-
-    ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
-  end
-
   def diff(_argv)
     diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
     sbc_path = @factory.path
@@ -337,11 +311,6 @@ class CMD
     0
   end
 
-  def reprovision_vm(services, thing)
-    clean_vm(thing)
-    provision_vm(services, thing, false)
-  end
-
   def move(_argv)
     machines = check_and_get_stack.flatten
 
@@ -490,6 +459,32 @@ class CMD
     stacks.first
   end
 
+  def vms_compile_output(targets)
+    return nil if targets.empty?
+
+    output = {}
+    targets.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
+      box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
+      output[box_id] = {}
+      output[box_id]["enc"] = stack.to_enc
+      output[box_id]["spec"] = stack.to_spec
+    end
+
+    ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
+  end
+
+  def k8s_compile_output(targets)
+    return nil if targets.empty?
+
+    output = {}
+    targets.each do |machine_set|
+      machine_set_id = "#{machine_set.children.first.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
+      output[machine_set_id] = machine_set.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+    end
+
+    ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
+  end
+
   def deep_dup_to_avoid_yaml_aliases(output)
     ddup(output)
   end
@@ -569,6 +564,11 @@ class CMD
     else # provision a VM
       provision_vm(services, thing)
     end
+  end
+
+  def reprovision_vm(services, thing)
+    clean_vm(thing)
+    provision_vm(services, thing, false)
   end
 
   def apply_k8s(machineset, stack_name)
