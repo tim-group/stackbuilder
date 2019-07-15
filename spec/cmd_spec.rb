@@ -65,8 +65,8 @@ describe 'cmd' do
     end
   end
 
-  describe 'provision' do
-    describe 'VMs' do
+  describe 'provision command' do
+    describe 'for VMs' do
       it 'provisions a stack' do
         stack = have_attributes(:name => 'mystack')
         successful_response = Subscription::WaitResponse.new([], [])
@@ -135,8 +135,8 @@ describe 'cmd' do
     end
   end
 
-  describe 'clean' do
-    describe 'VMs' do
+  describe 'clean command' do
+    describe 'for VMs' do
       it 'cleans a stack' do
         stack = have_attributes(:name => 'mystack')
 
@@ -175,8 +175,8 @@ describe 'cmd' do
     end
   end
 
-  describe 'compile' do
-    describe 'VMs' do
+  describe 'compile command' do
+    describe 'for VMs' do
       it 'prints enc and spec for everything' do
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
@@ -291,7 +291,7 @@ describe 'cmd' do
       expect { cmd.compile nil }.to raise_error('Too many entities found')
     end
 
-    describe "k8s" do
+    describe "for k8s" do
       let(:factory) do
         eval_stacks do
           stack "mystack" do
