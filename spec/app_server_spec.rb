@@ -197,3 +197,56 @@ describe_stack 'test_app_server that uses docker' do
     expect(host.to_enc['role::http_app']['use_docker']).to eql(true)
   end
 end
+
+describe_stack 'test_app_server that uses docker' do
+  given do
+    stack "test_app_servers" do
+      app_service 'app1' do
+        depend_on 'app2'
+      end
+
+      app_service 'app2' do
+        self.application = 'app2'
+        self.kubernetes = true
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "test_app_servers"
+    end
+  end
+
+  it_stack 'should contain all the expected hosts' do |stack|
+    machine_sets = stack.environments['e1'].definitions['test_app_servers'].definitions
+    app2_machine_set = machine_sets['app2']
+    app2_app_server = app2_machine_set.definitions[app2_machine_set.definitions.keys.first]
+    expect(app2_app_server.virtual_service.dependant_instance_fqdns(app2_app_server.location, [app2_machine_set.environment.primary_network])).to eql([
+      "e1-app1-001.space.net.local",
+      "e1-app1-002.space.net.local"
+    ])
+  class TestAppDeployer
+    def initialize(version)
+      @version = version
+    end
+
+    def query_cmdb_for(_spec)
+      { :target_version => @version }
+    end
+  end
+
+  app_deployer = TestAppDeployer.new('1.2.3')
+
+  class TestDnsResolver
+    def initialize(ip_address)
+      @ip_address = ip_address
+    end
+
+    def lookup(_fqdn)
+      Resolv::IPv4.create(@ip_address)
+    end
+  end
+
+  dns_resolver = TestDnsResolver.new('3.1.4.1')
+    pp app2_app_server.to_k8s(app_deployer, dns_resolver)
+  end
+end

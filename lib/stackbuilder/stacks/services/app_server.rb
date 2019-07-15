@@ -95,6 +95,52 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     end
   end
 
+  def to_k8s(app_deployer, dns_resolver)
+    output = super
+    puts output.class
+
+    @virtual_service.virtual_services_that_depend_on_me.each do |dependant_virtual_service|
+      virtual_service_instance_fqdns = @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network]),
+      ip_blocks = []
+      virtual_service_instance_fqdns.each do |instance_fqdn|
+        ip_blocks << {
+          'ipBlock' => {
+            'cidr' => "#{dns_resolver.lookup(instance_fqdn)}/32"
+          }
+        }
+      end
+
+      output << {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => "allow-#{dependant_virtual_service.environment.name}-#{dependant_virtual_service.name}-to-#{@virtual_service.name}-8000",
+          'namespace' => @environment.name,
+          'spec' => {
+            'podSelector' => {
+              'matchLabels' => {
+                'machine_set' => @virtual_service.name,
+                'stack' => @virtual_service.stack.name
+              }
+            },
+            'policyTypes' => [
+              'Ingress'
+            ],
+            'ingress' => [{
+              'from' => ip_blocks,
+              'ports' => [{
+                'protocol' => 'TCP',
+                'port' => 8000
+              }]
+            }]
+          }
+        }
+      }
+    end
+
+    output
+  end
+
   private
 
   def enc_ehcache(enc)
