@@ -13,6 +13,8 @@ describe 'cmd' do
     @app_deployer = double('app_deployer')
     @dns_resolver = double('dns_resolver')
     @cleaner = double('cleaner')
+    @open3 = double('Open3')
+    stub_const("Open3", @open3)
   end
 
   def eval_stacks(&block)
@@ -56,8 +58,15 @@ describe 'cmd' do
           self.application = 'MyOtherApplication'
         end
       end
+      stack "myk8sstack" do
+        app_service "myk8sappservice", :kubernetes => true do
+          self.application = 'MyK8sApplication'
+          self.instances = 2
+        end
+      end
       env 'e1', :primary_site => 'space' do
         instantiate_stack "mystack"
+        instantiate_stack "myk8sstack"
       end
       env 'e2', :primary_site => 'space' do
         instantiate_stack "myotherstack"
@@ -66,6 +75,37 @@ describe 'cmd' do
   end
 
   describe 'provision command' do
+    describe 'for k8s' do
+      xit 'provisions a stack' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        machineset = have_attributes(:name => 'myk8sappservice')
+
+        cmd = cmd(factory, 'e1', 'myk8sstack')
+
+        expect(@dns).to receive(:do_allocate_vips).with(machineset)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(machineset)
+        return_status = double('return_status')
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myk8sappservice',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', return_status])
+        expect(return_status).to receive(:success?).and_return(true)
+
+        cmd.provision nil
+      end
+    end
+
     describe 'for VMs' do
       it 'provisions a stack' do
         stack = have_attributes(:name => 'mystack')
@@ -178,6 +218,9 @@ describe 'cmd' do
   describe 'compile command' do
     describe 'for VMs' do
       it 'prints enc and spec for everything' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
           cmd.compile nil

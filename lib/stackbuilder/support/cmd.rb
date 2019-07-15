@@ -566,10 +566,10 @@ class CMD
   end
 
   def apply_k8s(machineset, stack_name)
-    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+    k8s_defns = machineset.to_k8s(@app_deployer, @dns_resolver)
     k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
     @dns.do_allocate_vips(machineset)
-    # @puppet.do_puppet_run_on_dependencies(thing)
+    @puppet.do_puppet_run_on_dependencies(machineset)
 
     apply_and_prune_k8s_defns(k8s_defns_yaml, stack_name, machineset.name)
   end
