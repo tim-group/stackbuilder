@@ -10,6 +10,7 @@ describe 'cmd' do
     @subscription = double('subscription')
     @puppet = double('puppet')
     @app_deployer = double('app_deployer')
+    @cleaner = double('cleaner')
   end
 
   def eval_stacks(&block)
@@ -17,7 +18,7 @@ describe 'cmd' do
   end
 
   def cmd(factory, env_name, stack_selector)
-    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer,
+    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer, @cleaner,
             env_name.nil? ? nil : factory.inventory.find_environment(env_name),
             stack_selector)
   end
@@ -128,6 +129,46 @@ describe 'cmd' do
         expect(@nagios).to receive(:do_nagios_register_new).with(the_thing)
 
         cmd.provision nil
+      end
+    end
+  end
+
+  describe 'clean' do
+    describe 'VMs' do
+      it 'cleans a stack' do
+        stack = have_attributes(:name => 'mystack')
+
+        cmd = cmd(factory, 'e1', 'mystack')
+
+        expect(@nagios).to receive(:nagios_schedule_downtime).with(stack)
+        expect(@cleaner).to receive(:clean_nodes).with(stack)
+        expect(@puppet).to receive(:puppet_clean).with(stack)
+
+        cmd.clean nil
+      end
+
+      it 'cleans a specific machineset' do
+        machineset = have_attributes(:name => 'myappservice')
+
+        cmd = cmd(factory, 'e1', 'myappservice')
+
+        expect(@nagios).to receive(:nagios_schedule_downtime).with(machineset)
+        expect(@cleaner).to receive(:clean_nodes).with(machineset)
+        expect(@puppet).to receive(:puppet_clean).with(machineset)
+
+        cmd.clean nil
+      end
+
+      it 'cleans a specific VM' do
+        the_thing = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
+
+        cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
+
+        expect(@nagios).to receive(:nagios_schedule_downtime).with(the_thing)
+        expect(@cleaner).to receive(:clean_nodes).with(the_thing)
+        expect(@puppet).to receive(:puppet_clean).with(the_thing)
+
+        cmd.clean nil
       end
     end
   end

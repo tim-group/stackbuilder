@@ -7,7 +7,6 @@ require 'stackbuilder/support/audit_vms'
 require 'stackbuilder/support/env_listing'
 require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/dns'
-require 'stackbuilder/support/cleaner'
 require 'stackbuilder/support/live_migration'
 require 'stackbuilder/support/host_builder'
 require 'stackbuilder/support/app_deployer'
@@ -23,7 +22,7 @@ class CMD
   attr_reader :write_cmds # this list is just a safety check
 
   # rubocop:disable Metrics/ParameterLists
-  def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, environment, stack_name = nil)
+  def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, cleaner, environment, stack_name = nil)
     @factory = factory
     @core_actions = core_actions
     @dns = dns
@@ -31,6 +30,7 @@ class CMD
     @subscription = subscription
     @puppet = puppet
     @app_deployer = app_deployer
+    @cleaner = cleaner
     @environment = environment
     @stack_name = stack_name
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
@@ -542,11 +542,10 @@ class CMD
   end
 
   def clean_vm(thing, all = false)
-    cleaner = Support::Cleaner.new(@factory.compute_controller)
     @nagios.nagios_schedule_downtime(thing)
-    cleaner.clean_nodes(thing)
+    @cleaner.clean_nodes(thing)
     @puppet.puppet_clean(thing)
-    cleaner.clean_traces(thing) if all
+    @cleaner.clean_traces(thing) if all
   end
 
   def do_provision(services, thing)
