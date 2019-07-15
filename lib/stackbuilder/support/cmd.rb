@@ -1,15 +1,9 @@
 require 'stackbuilder/support/zamls'
-require 'stackbuilder/support/nagios'
-require 'stackbuilder/stacks/core/actions'
-require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/audit_site'
 require 'stackbuilder/support/audit_vms'
 require 'stackbuilder/support/env_listing'
-require 'stackbuilder/support/puppet'
-require 'stackbuilder/support/dns'
 require 'stackbuilder/support/live_migration'
 require 'stackbuilder/support/host_builder'
-require 'stackbuilder/support/app_deployer'
 require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
 require 'open3'
@@ -22,7 +16,7 @@ class CMD
   attr_reader :write_cmds # this list is just a safety check
 
   # rubocop:disable Metrics/ParameterLists
-  def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, cleaner, environment, stack_name = nil)
+  def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver, cleaner, environment, stack_name = nil)
     @factory = factory
     @core_actions = core_actions
     @dns = dns
@@ -30,6 +24,7 @@ class CMD
     @subscription = subscription
     @puppet = puppet
     @app_deployer = app_deployer
+    @dns_resolver = dns_resolver
     @cleaner = cleaner
     @environment = environment
     @stack_name = stack_name
@@ -479,7 +474,7 @@ class CMD
     output = {}
     targets.each do |machine_set|
       machine_set_id = "#{machine_set.children.first.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
-      output[machine_set_id] = machine_set.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+      output[machine_set_id] = machine_set.to_k8s(@app_deployer, @dns_resolver)
     end
 
     ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))

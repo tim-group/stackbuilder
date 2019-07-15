@@ -1,5 +1,6 @@
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/cmd'
+require 'stackbuilder/support/subscription'
 require 'stacks/test_framework'
 
 describe 'cmd' do
@@ -10,6 +11,7 @@ describe 'cmd' do
     @subscription = double('subscription')
     @puppet = double('puppet')
     @app_deployer = double('app_deployer')
+    @dns_resolver = double('dns_resolver')
     @cleaner = double('cleaner')
   end
 
@@ -18,7 +20,7 @@ describe 'cmd' do
   end
 
   def cmd(factory, env_name, stack_selector)
-    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer, @cleaner,
+    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer, @dns_resolver, @cleaner,
             env_name.nil? ? nil : factory.inventory.find_environment(env_name),
             stack_selector)
   end
@@ -160,13 +162,13 @@ describe 'cmd' do
       end
 
       it 'cleans a specific VM' do
-        the_thing = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
+        machine = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
 
         cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
 
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(the_thing)
-        expect(@cleaner).to receive(:clean_nodes).with(the_thing)
-        expect(@puppet).to receive(:puppet_clean).with(the_thing)
+        expect(@nagios).to receive(:nagios_schedule_downtime).with(machine)
+        expect(@cleaner).to receive(:clean_nodes).with(machine)
+        expect(@puppet).to receive(:puppet_clean).with(machine)
 
         cmd.clean nil
       end
@@ -316,6 +318,9 @@ describe 'cmd' do
       end
 
       it 'outputs kubernetes machinesets after VMs' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
           cmd.compile nil
@@ -353,6 +358,9 @@ describe 'cmd' do
       end
 
       it 'prints k8s and VM definitions for a specific stack' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'mystack')
           cmd.compile nil
@@ -367,6 +375,9 @@ describe 'cmd' do
       end
 
       it 'prints k8s definitions for a specific machineset' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'myk8sappservice')
           cmd.compile nil

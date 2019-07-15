@@ -11,6 +11,13 @@ require 'getoptlong'
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/logger'
 require 'stackbuilder/support/cmd'
+require 'stackbuilder/stacks/core/actions'
+require 'stackbuilder/support/dns'
+require 'stackbuilder/support/nagios'
+require 'stackbuilder/support/subscription'
+require 'stackbuilder/support/puppet'
+require 'stackbuilder/support/app_deployer'
+require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/cleaner'
 
 def help
@@ -238,8 +245,9 @@ subscription = Subscription.new
 subscription.start(["provision.*", "puppet_status"])
 puppet = Support::Puppet.new(subscription)
 app_deployer = Support::AppDeployer.new
+dns_resolver = Support::DnsResolver.new
 cleaner = Support::Cleaner.new(factory.compute_controller)
-commands = CMD.new(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, cleaner, environment, $options[:stack])
+commands = CMD.new(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver, cleaner, environment, $options[:stack])
 unless commands.cmds.include? cmd
   if cmd.nil?
     logger(Logger::FATAL) { "no command specified.\nSee --help for more information." }
