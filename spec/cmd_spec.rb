@@ -16,6 +16,7 @@ describe 'cmd' do
     @open3 = double('Open3')
     stub_const("Open3", @open3)
     @launch_action = double("launch_action")
+    @return_status = double('return_status')
   end
 
   def eval_stacks(&block)
@@ -64,6 +65,10 @@ describe 'cmd' do
           self.application = 'MyK8sApplication'
           self.instances = 2
         end
+        app_service "myrelatedk8sappservice", :kubernetes => true do
+          self.application = 'MyRelatedK8sApplication'
+          self.instances = 1
+        end
       end
       env 'e1', :primary_site => 'space' do
         instantiate_stack "mystack"
@@ -81,13 +86,17 @@ describe 'cmd' do
         allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
-        machineset = have_attributes(:name => 'myk8sappservice')
+        myk8sappservice_machineset = have_attributes(:name => 'myk8sappservice')
+        myrelatedk8sappservice_machineset = have_attributes(:name => 'myrelatedk8sappservice')
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
 
-        expect(@dns).to receive(:do_allocate_vips).with(machineset)
-        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(machineset)
-        return_status = double('return_status')
+        expect(@dns).to receive(:do_allocate_vips).with(myk8sappservice_machineset)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(myk8sappservice_machineset)
+
+        expect(@dns).to receive(:do_allocate_vips).with(myrelatedk8sappservice_machineset)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(myrelatedk8sappservice_machineset)
+
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
@@ -100,8 +109,23 @@ describe 'cmd' do
                                      \bkind:\s*Service.*
                                      \bkind:\s*Deployment.*
                                      /mx)).
-          and_return(['Some stdout output', 'Some stderr output', return_status])
-        expect(return_status).to receive(:success?).and_return(true)
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
+
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myrelatedk8sappservice',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
 
         cmd.provision nil
       end
@@ -163,7 +187,6 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
 
-        return_status = double('return_status')
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
@@ -176,8 +199,23 @@ describe 'cmd' do
                                      \bkind:\s*Service.*
                                      \bkind:\s*Deployment.*
                                      /mx)).
-          and_return(['Some stdout output', 'Some stderr output', return_status])
-        expect(return_status).to receive(:success?).and_return(true)
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
+
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myrelatedk8sappservice',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
 
         cmd.reprovision nil
       end
@@ -188,7 +226,6 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sappservice')
 
-        return_status = double('return_status')
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
@@ -201,8 +238,8 @@ describe 'cmd' do
                                      \bkind:\s*Service.*
                                      \bkind:\s*Deployment.*
                                      /mx)).
-          and_return(['Some stdout output', 'Some stderr output', return_status])
-        expect(return_status).to receive(:success?).and_return(true)
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
 
         cmd.reprovision nil
       end
