@@ -281,9 +281,14 @@ class CMD
         [x]
       end
     end
+
     k8s_targets.each do |t|
+      @dns.do_allocate_vips(t)
+      @puppet.do_puppet_run_on_dependencies(t)
+
       apply_k8s(t, t.stack.name)
     end
+
     vm_targets.each do |t|
       provision_vm(@factory.services, t)
     end
@@ -292,7 +297,13 @@ class CMD
   def reprovision(_argv)
     thing = check_and_get_stack
 
-    k8s_targets, vm_targets = split_k8s_from_vms(thing)
+    k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
+      if x.is_a?(Stacks::CustomServices)
+        x.children
+      else
+        [x]
+      end
+    end
 
     k8s_targets.each do |t|
       apply_k8s(t, t.stack.name)
@@ -569,8 +580,6 @@ class CMD
   def apply_k8s(machineset, stack_name)
     k8s_defns = machineset.to_k8s(@app_deployer, @dns_resolver)
     k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
-    @dns.do_allocate_vips(machineset)
-    @puppet.do_puppet_run_on_dependencies(machineset)
 
     apply_and_prune_k8s_defns(k8s_defns_yaml, stack_name, machineset.name)
   end

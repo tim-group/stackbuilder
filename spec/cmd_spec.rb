@@ -137,44 +137,18 @@ describe 'cmd' do
 
       it 'provisions a specific machineset' do
         machineset = have_attributes(:name => 'myappservice')
-        successful_response = Subscription::WaitResponse.new([], [])
+        makes_calls_to_provision(machineset)
 
         cmd = cmd(factory, 'e1', 'myappservice')
-
-        expect(@dns).to receive(:do_allocate_vips).with(machineset)
-        expect(@dns).to receive(:do_allocate_ips).with(machineset)
-        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(machineset)
-
-        launch_action = double("launch_action")
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
-        expect(launch_action).to receive(:call).with(factory.services, machineset)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(machineset).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(machineset).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(machineset)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(machineset)
-        expect(@nagios).to receive(:do_nagios_register_new).with(machineset)
 
         cmd.provision nil
       end
 
       it 'provisions a specific VM' do
         the_thing = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
-        successful_response = Subscription::WaitResponse.new([], [])
+        makes_calls_to_provision(the_thing)
 
         cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
-
-        expect(@dns).to receive(:do_allocate_vips).with(the_thing)
-        expect(@dns).to receive(:do_allocate_ips).with(the_thing)
-        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(the_thing)
-
-        launch_action = double("launch_action")
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
-        expect(launch_action).to receive(:call).with(factory.services, the_thing)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(the_thing).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(the_thing).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(the_thing)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(the_thing)
-        expect(@nagios).to receive(:do_nagios_register_new).with(the_thing)
 
         cmd.provision nil
       end
@@ -182,72 +156,77 @@ describe 'cmd' do
   end
 
   describe 'reprovision command' do
-    describe 'for VMs' do
+    describe 'for k8s' do
       it 'reprovisions a stack' do
-        stack = have_attributes(:name => 'mystack')
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        cmd = cmd(factory, 'e1', 'myk8sstack')
+
+        return_status = double('return_status')
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myk8sappservice',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', return_status])
+        expect(return_status).to receive(:success?).and_return(true)
+
+        cmd.reprovision nil
+      end
+    end
+
+    describe 'for VMs' do
+      def makes_calls_to_reprovision(thing_matcher)
         successful_response = Subscription::WaitResponse.new([], [])
 
-        cmd = cmd(factory, 'e1', 'mystack')
-
         # Cleans
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(stack)
-        expect(@cleaner).to receive(:clean_nodes).with(stack)
-        expect(@puppet).to receive(:puppet_clean).with(stack)
+        expect(@nagios).to receive(:nagios_schedule_downtime).with(thing_matcher)
+        expect(@cleaner).to receive(:clean_nodes).with(thing_matcher)
+        expect(@puppet).to receive(:puppet_clean).with(thing_matcher)
 
         # Provisions
-        launch_action = double("launch_action")
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
-        expect(launch_action).to receive(:call).with(factory.services, stack)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(stack).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(stack).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(stack)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(stack)
+        expect(@core_actions).to receive(:get_action).with("launch").and_return(@launch_action)
+        expect(@launch_action).to receive(:call).with(factory.services, thing_matcher)
+        expect(@puppet).to receive(:puppet_wait_for_autosign).with(thing_matcher).and_return(successful_response)
+        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(thing_matcher).and_return(successful_response)
+        expect(@app_deployer).to receive(:deploy_applications).with(thing_matcher)
+        expect(@nagios).to receive(:nagios_schedule_uptime).with(thing_matcher)
+      end
+
+      it 'reprovisions a stack' do
+        myappservice_machineset = have_attributes(:name => 'myappservice')
+        myrelatedappservice_machineset = have_attributes(:name => 'myrelatedappservice')
+
+        makes_calls_to_reprovision(myappservice_machineset)
+        makes_calls_to_reprovision(myrelatedappservice_machineset)
+
+        cmd = cmd(factory, 'e1', 'mystack')
 
         cmd.reprovision nil
       end
 
       it 'reprovisions a specific machineset' do
         machineset = have_attributes(:name => 'myappservice')
-        successful_response = Subscription::WaitResponse.new([], [])
+        makes_calls_to_reprovision(machineset)
 
         cmd = cmd(factory, 'e1', 'myappservice')
-
-        # Cleans
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(machineset)
-        expect(@cleaner).to receive(:clean_nodes).with(machineset)
-        expect(@puppet).to receive(:puppet_clean).with(machineset)
-
-        # Provisions
-        launch_action = double("launch_action")
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
-        expect(launch_action).to receive(:call).with(factory.services, machineset)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(machineset).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(machineset).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(machineset)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(machineset)
 
         cmd.reprovision nil
       end
 
       it 'reprovisions a specific VM' do
         the_thing = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
-        successful_response = Subscription::WaitResponse.new([], [])
+        makes_calls_to_reprovision(the_thing)
 
         cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
-
-        # Cleans
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(the_thing)
-        expect(@cleaner).to receive(:clean_nodes).with(the_thing)
-        expect(@puppet).to receive(:puppet_clean).with(the_thing)
-
-        # Provisions
-        launch_action = double("launch_action")
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
-        expect(launch_action).to receive(:call).with(factory.services, the_thing)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(the_thing).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(the_thing).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(the_thing)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(the_thing)
 
         cmd.reprovision nil
       end
