@@ -197,3 +197,156 @@ describe_stack 'test_app_server that uses docker' do
     expect(host.to_enc['role::http_app']['use_docker']).to eql(true)
   end
 end
+
+describe 'a kubernetes service should get correct ingress network policies for another service that depends on it' do
+  class TestAppDeployer
+    def initialize(version)
+      @version = version
+    end
+
+    def query_cmdb_for(_spec)
+      { :target_version => @version }
+    end
+  end
+
+  let(:app_deployer) { TestAppDeployer.new('1.2.3') }
+
+  class MyTestDnsResolver
+    def initialize(ip_address_map)
+      @ip_address_map = ip_address_map
+    end
+
+    def lookup(fqdn)
+      Resolv::IPv4.create(@ip_address_map[fqdn])
+    end
+  end
+
+  let(:dns_resolver) do
+    MyTestDnsResolver.new({
+      'e1-app1-001.space.net.local' => '3.1.4.1',
+      'e1-app1-002.space.net.local' => '3.1.4.2',
+      'e1-app2-vip.space.net.local' => '3.1.4.3'
+    })
+  end
+
+  def eval_stacks(&block)
+    Stacks::Factory.new(Stacks::Inventory.from(&block))
+  end
+
+  it 'should contain all the expected hosts' do
+    factory = eval_stacks do
+      stack "test_app_servers" do
+        app_service 'app1' do
+          depend_on 'app2'
+        end
+
+        app_service 'app2', :kubernetes => true do
+          self.application = 'app2'
+        end
+      end
+
+      env "e1", :primary_site => "space" do
+        instantiate_stack "test_app_servers"
+      end
+    end
+
+    machine_sets = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets
+    app2_machine_set = machine_sets['app2']
+    app2_app_server = app2_machine_set.definitions[app2_machine_set.definitions.keys.first]
+    expect(app2_machine_set.dependant_instance_fqdns(:primary_site, [app2_machine_set.environment.primary_network])).to eql([
+      "e1-app1-001.space.net.local",
+      "e1-app1-002.space.net.local"
+    ])
+
+    network_policies = app2_app_server.to_k8s(app_deployer, dns_resolver).select do |policy|
+      policy['kind'] == "NetworkPolicy"
+    end
+
+    expect(network_policies.size).to be(1)
+    expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
+    expect(network_policies.first['metadata']['namespace']).to eql('e1')
+    expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
+    expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+    expect(network_policies.first['metadata']['spec']['policyTypes']).to eql(['Ingress'])
+    expect(network_policies.first['metadata']['spec']['ingress'].size).to be(1)
+    expect(network_policies.first['metadata']['spec']['ingress'].first['from'].size).to be(2)
+    expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].size).to be(1)
+    expect(network_policies.first['metadata']['spec']['ingress'].first['from']).to include({'ipBlock' => {'cidr' => '3.1.4.1/32'}})
+    expect(network_policies.first['metadata']['spec']['ingress'].first['from']).to include({'ipBlock' => {'cidr' => '3.1.4.2/32'}})
+    expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
+    expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['port']).to be(8000)
+  end
+end
+
+describe 'a kubernetes service should get correct egress network policies for another service that it depends on' do
+  class TestAppDeployer
+    def initialize(version)
+      @version = version
+    end
+
+    def query_cmdb_for(_spec)
+      { :target_version => @version }
+    end
+  end
+
+  let(:app_deployer) { TestAppDeployer.new('1.2.3') }
+
+  class MyTestDnsResolver
+    def initialize(ip_address_map)
+      @ip_address_map = ip_address_map
+    end
+
+    def lookup(fqdn)
+      Resolv::IPv4.create(@ip_address_map[fqdn])
+    end
+  end
+
+  let(:dns_resolver) do
+    MyTestDnsResolver.new({
+      'e1-app2-vip.space.net.local' => '3.1.4.3',
+      'e1-app1-vip.space.net.local' => '3.1.4.4'
+    })
+  end
+
+  def eval_stacks(&block)
+    Stacks::Factory.new(Stacks::Inventory.from(&block))
+  end
+
+  it 'should contain all the expected hosts' do
+    factory = eval_stacks do
+      stack "test_app_servers" do
+        app_service 'app1' do
+        end
+
+        app_service 'app2', :kubernetes => true do
+          self.application = 'app2'
+          depend_on 'app1'
+        end
+      end
+
+      env "e1", :primary_site => "space" do
+        instantiate_stack "test_app_servers"
+      end
+    end
+
+    machine_sets = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets
+    app2_machine_set = machine_sets['app2']
+
+    network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
+      policy['kind'] == "NetworkPolicy"
+    end
+
+    expect(network_policies.size).to be(1)
+    expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
+    expect(network_policies.first['metadata']['namespace']).to eql('e1')
+    expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
+    expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+    expect(network_policies.first['metadata']['spec']['policyTypes']).to eql(['Egress'])
+    expect(network_policies.first['metadata']['spec']['egress'].size).to be(1)
+    expect(network_policies.first['metadata']['spec']['egress'].first['to'].size).to be(1)
+    expect(network_policies.first['metadata']['spec']['egress'].first['ports'].size).to be(1)
+    expect(network_policies.first['metadata']['spec']['egress'].first['to']).to include({'ipBlock' => {'cidr' => '3.1.4.4/32'}})
+    expect(network_policies.first['metadata']['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
+    expect(network_policies.first['metadata']['spec']['egress'].first['ports'].first['port']).to be(8000)
+  end
+end

@@ -19,14 +19,14 @@ class Stacks::CalculatedDependenciesCache
 
   def calculate_dependencies
     dependencies = []
-    @environment.virtual_services.each do |virtual_service|
-      next if !virtual_service.is_a?(Stacks::MachineDefContainer)
-      next if !virtual_service.respond_to?(:depends_on)
+    @environment.all_things.each do |thing|
+      next if !thing.is_a?(Stacks::MachineDefContainer)
+      next if !thing.respond_to?(:depends_on)
 
-      if virtual_service.respond_to?(:establish_dependencies)
-        dependencies.push [virtual_service, virtual_service.establish_dependencies]
+      if thing.respond_to?(:establish_dependencies)
+        dependencies.push [thing, thing.establish_dependencies]
       else
-        dependencies.push [virtual_service, virtual_service.depends_on]
+        dependencies.push [thing, thing.depends_on]
       end
     end
 

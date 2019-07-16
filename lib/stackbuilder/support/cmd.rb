@@ -1,9 +1,16 @@
 require 'stackbuilder/support/zamls'
+require 'stackbuilder/support/nagios'
+require 'stackbuilder/stacks/core/actions'
+require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/audit_site'
 require 'stackbuilder/support/audit_vms'
 require 'stackbuilder/support/env_listing'
+require 'stackbuilder/support/puppet'
+require 'stackbuilder/support/dns'
+require 'stackbuilder/support/cleaner'
 require 'stackbuilder/support/live_migration'
 require 'stackbuilder/support/host_builder'
+require 'stackbuilder/support/app_deployer'
 require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
 require 'open3'
@@ -16,7 +23,7 @@ class CMD
   attr_reader :write_cmds # this list is just a safety check
 
   # rubocop:disable Metrics/ParameterLists
-  def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver, cleaner, environment, stack_name = nil)
+  def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, environment, stack_name = nil)
     @factory = factory
     @core_actions = core_actions
     @dns = dns
@@ -24,8 +31,6 @@ class CMD
     @subscription = subscription
     @puppet = puppet
     @app_deployer = app_deployer
-    @dns_resolver = dns_resolver
-    @cleaner = cleaner
     @environment = environment
     @stack_name = stack_name
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
@@ -51,7 +56,16 @@ class CMD
       end
     else
       thing = check_and_get_stack
-      k8s_targets, vm_targets = split_k8s_from_vms(thing) { |x| x.flatten }
+      if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+        k8s_targets = thing.k8s_machinesets.values
+        vm_targets = thing.flatten
+      elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+        k8s_targets << thing
+      elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
+        fail "Cannot compile a single host for kubernetes. Compile the stack or service (#{thing.virtual_service.name}) instead"
+      else
+        vm_targets = thing.flatten
+      end
     end
 
     puts [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].compact.join("\n")
@@ -274,45 +288,26 @@ class CMD
 
   def provision(_argv)
     thing = check_and_get_stack
-    k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
-      if x.is_a?(Stacks::CustomServices)
-        x.children
-      else
-        [x]
-      end
-    end
-
-    k8s_targets.each do |t|
-      @dns.do_allocate_vips(t)
-      @puppet.do_puppet_run_on_dependencies(t)
-
-      apply_k8s(t, t.stack.name)
-    end
-
-    vm_targets.each do |t|
-      provision_vm(@factory.services, t)
-    end
+    do_provision(@factory.services, thing)
   end
 
   def reprovision(_argv)
     thing = check_and_get_stack
 
-    k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
-      if x.is_a?(Stacks::CustomServices)
-        x.children
-      else
-        [x]
+    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+      thing.k8s_machinesets.values.each do |set|
+        apply_k8s(set, thing.name)
       end
-    end
 
-    k8s_targets.each do |t|
-      apply_k8s(t, t.stack.name)
+      # after reprovisioning any k8s machinesets there may be vm machinesets still to do
+      reprovision_vm(@factory.services, thing)
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      apply_k8s(thing, thing.stack.name)
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
+      fail "Cannot reprovision kubernetes for a single host. Reprovision the stack or service (#{thing.virtual_service.name}) instead"
+    else # reprovision a VM
+      reprovision_vm(@factory.services, thing)
     end
-
-    vm_targets.each do |t|
-      reprovision_vm(@factory.services, t)
-    end
-
     0
   end
 
@@ -418,6 +413,22 @@ class CMD
     end
   end
 
+  def dependencies(_argv)
+    machine_def = ensure_is_machine(check_and_get_stack)
+
+    service_dependencies = machine_def.virtual_service.virtual_services_that_i_depend_on
+    dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
+    puts ZAMLS.to_zamls(dependencies)
+  end
+
+  def dependents(_argv)
+    machine_def = ensure_is_machine(check_and_get_stack)
+
+    service_dependencies = machine_def.virtual_service.virtual_services_that_depend_on_me
+    dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
+    puts ZAMLS.to_zamls(dependencies)
+  end
+
   private
 
   def ensure_is_machine(machine_def)
@@ -461,31 +472,7 @@ class CMD
       fail "Too many entities found"
     end
 
-    thing = stacks.first
-
-    if thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
-      logger(Logger::FATAL) { "Cannot operate on a single host for kubernetes. Use the stack or service (#{thing.virtual_service.name}) instead" }
-      fail "Invalid selection. Cannot use machinedef for kubernetes"
-    end
-
-    thing
-  end
-
-  def split_k8s_from_vms(thing, &vm_extraction)
-    vm_extraction ||= lambda { |x| [x] }
-    k8s_targets = []
-    vm_targets = []
-
-    if thing.is_a?(Stacks::CustomServices)
-      k8s_targets = thing.k8s_machinesets.values
-      vm_targets = vm_extraction.call(thing)
-    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
-      k8s_targets << thing
-    else
-      vm_targets = vm_extraction.call(thing)
-    end
-
-    [k8s_targets, vm_targets]
+    stacks.first
   end
 
   def vms_compile_output(targets)
@@ -508,7 +495,7 @@ class CMD
     output = {}
     targets.each do |machine_set|
       machine_set_id = "#{machine_set.children.first.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
-      output[machine_set_id] = machine_set.to_k8s(@app_deployer, @dns_resolver)
+      output[machine_set_id] = machine_set.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
     end
 
     ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
@@ -537,37 +524,31 @@ class CMD
   end
 
   def do_clean(thing, all = false)
-    k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
-      if x.is_a?(Stacks::CustomServices)
-        x.children
-      else
-        [x]
+    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+      thing.k8s_machinesets.values.each do |set|
+        clean_k8s(set)
       end
-    end
 
-    k8s_targets.each do |t|
-      clean_k8s(t)
-    end
-
-    vm_targets.each do |t|
-      clean_vm(t, all)
+      # after cleaning any k8s machinesets there may be vm machinesets still to do
+      clean_vm(thing, all)
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      clean_k8s(thing)
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
+      fail "Cannot clean a single host from kubernetes. Clean the stack or service (#{thing.virtual_service.name}) instead"
+    else
+      clean_vm(thing, all)
     end
   end
 
   def clean_k8s(machineset)
-    k8s_defns = machineset.to_k8s(@app_deployer, @dns_resolver)
+    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
 
     environment = machineset.environment.name
     machineset_name = machineset.name
     k8s_defns.each do |defn|
       resource_kind = defn['kind'].downcase
 
-      stdout_str, error_str, status = Open3.capture3('kubectl',
-                                                     'delete',
-                                                     resource_kind,
-                                                     '-l',
-                                                     "stack=#{machineset.stack.name},machineset=#{machineset_name}",
-                                                     '-n', environment)
+      stdout_str, error_str, status = Open3.capture3('kubectl', 'delete', resource_kind, '-l', "machineset=#{machineset_name}", '-n', environment)
       if status.success?
         logger(Logger::INFO) { stdout_str }
       else
@@ -577,10 +558,28 @@ class CMD
   end
 
   def clean_vm(thing, all = false)
+    cleaner = Support::Cleaner.new(@factory.compute_controller)
     @nagios.nagios_schedule_downtime(thing)
-    @cleaner.clean_nodes(thing)
+    cleaner.clean_nodes(thing)
     @puppet.puppet_clean(thing)
-    @cleaner.clean_traces(thing) if all
+    cleaner.clean_traces(thing) if all
+  end
+
+  def do_provision(services, thing)
+    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
+      thing.k8s_machinesets.values.each do |set|
+        apply_k8s(set, thing.name)
+      end
+
+      # after provisioning any k8s machinesets there may be vm machinesets still to do
+      provision_vm(services, thing)
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      apply_k8s(thing, thing.stack.name)
+    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
+      fail "Cannot provision kubernetes for a single host. Provision the stack or service (#{thing.virtual_service.name}) instead"
+    else # provision a VM
+      provision_vm(services, thing)
+    end
   end
 
   def reprovision_vm(services, thing)
@@ -589,8 +588,10 @@ class CMD
   end
 
   def apply_k8s(machineset, stack_name)
-    k8s_defns = machineset.to_k8s(@app_deployer, @dns_resolver)
+    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
     k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
+    @dns.do_allocate_vips(machineset)
+    # @puppet.do_puppet_run_on_dependencies(thing)
 
     apply_and_prune_k8s_defns(k8s_defns_yaml, stack_name, machineset.name)
   end

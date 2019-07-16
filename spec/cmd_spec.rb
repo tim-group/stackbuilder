@@ -1,6 +1,5 @@
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/cmd'
-require 'stackbuilder/support/subscription'
 require 'stacks/test_framework'
 
 describe 'cmd' do
@@ -11,12 +10,6 @@ describe 'cmd' do
     @subscription = double('subscription')
     @puppet = double('puppet')
     @app_deployer = double('app_deployer')
-    @dns_resolver = double('dns_resolver')
-    @cleaner = double('cleaner')
-    @open3 = double('Open3')
-    stub_const("Open3", @open3)
-    @launch_action = double("launch_action")
-    @return_status = double('return_status')
   end
 
   def eval_stacks(&block)
@@ -24,7 +17,7 @@ describe 'cmd' do
   end
 
   def cmd(factory, env_name, stack_selector)
-    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer, @dns_resolver, @cleaner,
+    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer,
             env_name.nil? ? nil : factory.inventory.find_environment(env_name),
             stack_selector)
   end
@@ -60,19 +53,8 @@ describe 'cmd' do
           self.application = 'MyOtherApplication'
         end
       end
-      stack "myk8sstack" do
-        app_service "myk8sappservice", :kubernetes => true do
-          self.application = 'MyK8sApplication'
-          self.instances = 2
-        end
-        app_service "myrelatedk8sappservice", :kubernetes => true do
-          self.application = 'MyRelatedK8sApplication'
-          self.instances = 1
-        end
-      end
       env 'e1', :primary_site => 'space' do
         instantiate_stack "mystack"
-        instantiate_stack "myk8sstack"
       end
       env 'e2', :primary_site => 'space' do
         instantiate_stack "myotherstack"
@@ -80,326 +62,79 @@ describe 'cmd' do
     end
   end
 
-  describe 'provision command' do
-    describe 'for k8s' do
+  describe 'provision' do
+    describe 'VMs' do
       it 'provisions a stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
-        myk8sappservice_machineset = have_attributes(:name => 'myk8sappservice')
-        myrelatedk8sappservice_machineset = have_attributes(:name => 'myrelatedk8sappservice')
-
-        cmd = cmd(factory, 'e1', 'myk8sstack')
-
-        expect(@dns).to receive(:do_allocate_vips).with(myk8sappservice_machineset)
-        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(myk8sappservice_machineset)
-
-        expect(@dns).to receive(:do_allocate_vips).with(myrelatedk8sappservice_machineset)
-        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(myrelatedk8sappservice_machineset)
-
-        expect(@open3).to receive(:capture3).
-          with('kubectl',
-               'apply',
-               '--prune',
-               '-l',
-               'stack=myk8sstack,machineset=myk8sappservice',
-               '-f',
-               '-',
-               :stdin_data => match(/^---\s*$.*
-                                     \bkind:\s*Service.*
-                                     \bkind:\s*Deployment.*
-                                     /mx)).
-          and_return(['Some stdout output', 'Some stderr output', @return_status])
-        expect(@return_status).to receive(:success?).and_return(true)
-
-        expect(@open3).to receive(:capture3).
-          with('kubectl',
-               'apply',
-               '--prune',
-               '-l',
-               'stack=myk8sstack,machineset=myrelatedk8sappservice',
-               '-f',
-               '-',
-               :stdin_data => match(/^---\s*$.*
-                                     \bkind:\s*Service.*
-                                     \bkind:\s*Deployment.*
-                                     /mx)).
-          and_return(['Some stdout output', 'Some stderr output', @return_status])
-        expect(@return_status).to receive(:success?).and_return(true)
-
-        cmd.provision nil
-      end
-    end
-
-    describe 'for VMs' do
-      def makes_calls_to_provision(machineset_matcher)
+        stack = have_attributes(:name => 'mystack')
         successful_response = Subscription::WaitResponse.new([], [])
 
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(@launch_action)
-        expect(@dns).to receive(:do_allocate_vips).with(machineset_matcher)
-        expect(@dns).to receive(:do_allocate_ips).with(machineset_matcher)
-        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(machineset_matcher)
-        expect(@launch_action).to receive(:call).with(factory.services, machineset_matcher)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(machineset_matcher).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(machineset_matcher).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(machineset_matcher)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(machineset_matcher)
-        expect(@nagios).to receive(:do_nagios_register_new).with(machineset_matcher)
-      end
-
-      it 'provisions a stack' do
-        myappservice_machineset = have_attributes(:name => 'myappservice')
-        myrelatedappservice_machineset = have_attributes(:name => 'myrelatedappservice')
-
-        makes_calls_to_provision(myappservice_machineset)
-        makes_calls_to_provision(myrelatedappservice_machineset)
-
         cmd = cmd(factory, 'e1', 'mystack')
+
+        expect(@dns).to receive(:do_allocate_vips).with(stack)
+        expect(@dns).to receive(:do_allocate_ips).with(stack)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(stack)
+
+        launch_action = double("launch_action")
+        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
+        expect(launch_action).to receive(:call).with(factory.services, stack)
+        expect(@puppet).to receive(:puppet_wait_for_autosign).with(stack).and_return(successful_response)
+        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(stack).and_return(successful_response)
+        expect(@app_deployer).to receive(:deploy_applications).with(stack)
+        expect(@nagios).to receive(:nagios_schedule_uptime).with(stack)
+        expect(@nagios).to receive(:do_nagios_register_new).with(stack)
 
         cmd.provision nil
       end
 
       it 'provisions a specific machineset' do
         machineset = have_attributes(:name => 'myappservice')
-        makes_calls_to_provision(machineset)
+        successful_response = Subscription::WaitResponse.new([], [])
 
         cmd = cmd(factory, 'e1', 'myappservice')
+
+        expect(@dns).to receive(:do_allocate_vips).with(machineset)
+        expect(@dns).to receive(:do_allocate_ips).with(machineset)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(machineset)
+
+        launch_action = double("launch_action")
+        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
+        expect(launch_action).to receive(:call).with(factory.services, machineset)
+        expect(@puppet).to receive(:puppet_wait_for_autosign).with(machineset).and_return(successful_response)
+        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(machineset).and_return(successful_response)
+        expect(@app_deployer).to receive(:deploy_applications).with(machineset)
+        expect(@nagios).to receive(:nagios_schedule_uptime).with(machineset)
+        expect(@nagios).to receive(:do_nagios_register_new).with(machineset)
 
         cmd.provision nil
       end
 
       it 'provisions a specific VM' do
         the_thing = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
-        makes_calls_to_provision(the_thing)
+        successful_response = Subscription::WaitResponse.new([], [])
 
         cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
+
+        expect(@dns).to receive(:do_allocate_vips).with(the_thing)
+        expect(@dns).to receive(:do_allocate_ips).with(the_thing)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(the_thing)
+
+        launch_action = double("launch_action")
+        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
+        expect(launch_action).to receive(:call).with(factory.services, the_thing)
+        expect(@puppet).to receive(:puppet_wait_for_autosign).with(the_thing).and_return(successful_response)
+        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(the_thing).and_return(successful_response)
+        expect(@app_deployer).to receive(:deploy_applications).with(the_thing)
+        expect(@nagios).to receive(:nagios_schedule_uptime).with(the_thing)
+        expect(@nagios).to receive(:do_nagios_register_new).with(the_thing)
 
         cmd.provision nil
       end
     end
   end
 
-  describe 'reprovision command' do
-    describe 'for k8s' do
-      it 'reprovisions a stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
-        cmd = cmd(factory, 'e1', 'myk8sstack')
-
-        expect(@open3).to receive(:capture3).
-          with('kubectl',
-               'apply',
-               '--prune',
-               '-l',
-               'stack=myk8sstack,machineset=myk8sappservice',
-               '-f',
-               '-',
-               :stdin_data => match(/^---\s*$.*
-                                     \bkind:\s*Service.*
-                                     \bkind:\s*Deployment.*
-                                     /mx)).
-          and_return(['Some stdout output', 'Some stderr output', @return_status])
-        expect(@return_status).to receive(:success?).and_return(true)
-
-        expect(@open3).to receive(:capture3).
-          with('kubectl',
-               'apply',
-               '--prune',
-               '-l',
-               'stack=myk8sstack,machineset=myrelatedk8sappservice',
-               '-f',
-               '-',
-               :stdin_data => match(/^---\s*$.*
-                                     \bkind:\s*Service.*
-                                     \bkind:\s*Deployment.*
-                                     /mx)).
-          and_return(['Some stdout output', 'Some stderr output', @return_status])
-        expect(@return_status).to receive(:success?).and_return(true)
-
-        cmd.reprovision nil
-      end
-
-      it 'reprovisions a machineset' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
-        cmd = cmd(factory, 'e1', 'myk8sappservice')
-
-        expect(@open3).to receive(:capture3).
-          with('kubectl',
-               'apply',
-               '--prune',
-               '-l',
-               'stack=myk8sstack,machineset=myk8sappservice',
-               '-f',
-               '-',
-               :stdin_data => match(/^---\s*$.*
-                                     \bkind:\s*Service.*
-                                     \bkind:\s*Deployment.*
-                                     /mx)).
-          and_return(['Some stdout output', 'Some stderr output', @return_status])
-        expect(@return_status).to receive(:success?).and_return(true)
-
-        cmd.reprovision nil
-      end
-    end
-
-    describe 'for VMs' do
-      def makes_calls_to_reprovision(thing_matcher)
-        successful_response = Subscription::WaitResponse.new([], [])
-
-        # Cleans
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(thing_matcher)
-        expect(@cleaner).to receive(:clean_nodes).with(thing_matcher)
-        expect(@puppet).to receive(:puppet_clean).with(thing_matcher)
-
-        # Provisions
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(@launch_action)
-        expect(@launch_action).to receive(:call).with(factory.services, thing_matcher)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(thing_matcher).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(thing_matcher).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(thing_matcher)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(thing_matcher)
-      end
-
-      it 'reprovisions a stack' do
-        myappservice_machineset = have_attributes(:name => 'myappservice')
-        myrelatedappservice_machineset = have_attributes(:name => 'myrelatedappservice')
-
-        makes_calls_to_reprovision(myappservice_machineset)
-        makes_calls_to_reprovision(myrelatedappservice_machineset)
-
-        cmd = cmd(factory, 'e1', 'mystack')
-
-        cmd.reprovision nil
-      end
-
-      it 'reprovisions a specific machineset' do
-        machineset = have_attributes(:name => 'myappservice')
-        makes_calls_to_reprovision(machineset)
-
-        cmd = cmd(factory, 'e1', 'myappservice')
-
-        cmd.reprovision nil
-      end
-
-      it 'reprovisions a specific VM' do
-        the_thing = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
-        makes_calls_to_reprovision(the_thing)
-
-        cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
-
-        cmd.reprovision nil
-      end
-    end
-  end
-
-  describe 'clean command' do
-    describe 'for k8s' do
-      it 'cleans a stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
-        cmd = cmd(factory, 'e1', 'myk8sstack')
-
-        %w(deployment configmap service).each do |kind|
-          expect(@open3).to receive(:capture3).
-            with('kubectl',
-                 'delete',
-                 kind,
-                 '-l',
-                 'stack=myk8sstack,machineset=myk8sappservice',
-                 '-n', 'e1').
-            and_return(['Some stdout output', 'Some stderr output', @return_status])
-          expect(@return_status).to receive(:success?).and_return(true)
-
-          expect(@open3).to receive(:capture3).
-            with('kubectl',
-                 'delete',
-                 kind,
-                 '-l',
-                 'stack=myk8sstack,machineset=myrelatedk8sappservice',
-                 '-n', 'e1').
-            and_return(['Some stdout output', 'Some stderr output', @return_status])
-          expect(@return_status).to receive(:success?).and_return(true)
-        end
-
-        cmd.clean nil
-      end
-
-      it 'reprovisions a machineset' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
-        cmd = cmd(factory, 'e1', 'myk8sappservice')
-
-        %w(deployment configmap service).each do |kind|
-          expect(@open3).to receive(:capture3).
-            with('kubectl',
-                 'delete',
-                 kind,
-                 '-l',
-                 'stack=myk8sstack,machineset=myk8sappservice',
-                 '-n', 'e1').
-            and_return(['Some stdout output', 'Some stderr output', @return_status])
-          expect(@return_status).to receive(:success?).and_return(true)
-        end
-
-        cmd.clean nil
-      end
-    end
-
-    describe 'for VMs' do
-      it 'cleans a stack' do
-        myappservice_machineset = have_attributes(:name => 'myappservice')
-        myrelatedappservice_machineset = have_attributes(:name => 'myrelatedappservice')
-
-        cmd = cmd(factory, 'e1', 'mystack')
-
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(myappservice_machineset)
-        expect(@cleaner).to receive(:clean_nodes).with(myappservice_machineset)
-        expect(@puppet).to receive(:puppet_clean).with(myappservice_machineset)
-
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(myrelatedappservice_machineset)
-        expect(@cleaner).to receive(:clean_nodes).with(myrelatedappservice_machineset)
-        expect(@puppet).to receive(:puppet_clean).with(myrelatedappservice_machineset)
-
-        cmd.clean nil
-      end
-
-      it 'cleans a specific machineset' do
-        machineset = have_attributes(:name => 'myappservice')
-
-        cmd = cmd(factory, 'e1', 'myappservice')
-
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(machineset)
-        expect(@cleaner).to receive(:clean_nodes).with(machineset)
-        expect(@puppet).to receive(:puppet_clean).with(machineset)
-
-        cmd.clean nil
-      end
-
-      it 'cleans a specific VM' do
-        machine = have_attributes(:mgmt_fqdn => 'e1-myappservice-001.mgmt.space.net.local')
-
-        cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
-
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(machine)
-        expect(@cleaner).to receive(:clean_nodes).with(machine)
-        expect(@puppet).to receive(:puppet_clean).with(machine)
-
-        cmd.clean nil
-      end
-    end
-  end
-
-  describe 'compile command' do
-    describe 'for VMs' do
+  describe 'compile' do
+    describe 'VMs' do
       it 'prints enc and spec for everything' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
           cmd.compile nil
@@ -513,7 +248,7 @@ describe 'cmd' do
       expect { cmd.compile nil }.to raise_error('Too many entities found')
     end
 
-    describe "for k8s" do
+    describe "k8s" do
       let(:factory) do
         eval_stacks do
           stack "mystack" do
@@ -540,9 +275,6 @@ describe 'cmd' do
       end
 
       it 'outputs kubernetes machinesets after VMs' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
           cmd.compile nil
@@ -580,9 +312,6 @@ describe 'cmd' do
       end
 
       it 'prints k8s and VM definitions for a specific stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'mystack')
           cmd.compile nil
@@ -597,9 +326,6 @@ describe 'cmd' do
       end
 
       it 'prints k8s definitions for a specific machineset' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
-        allow(@dns_resolver).to receive(:lookup).with(anything)
-
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'myk8sappservice')
           cmd.compile nil
@@ -610,15 +336,12 @@ describe 'cmd' do
                             \bkind:.*
                             /mx)
       end
+
+      it 'raises an error for a specific machine in a k8s machineset' do
+        cmd = cmd(factory, 'e1', 'e1-myk8sappservice-001.mgmt.space.net.local')
+
+        expect { cmd.compile nil }.to raise_error(/Cannot compile a single host for kubernetes/)
+      end
     end
-  end
-
-  it 'raises an error for a specific machine in a k8s machineset' do
-    cmd = cmd(factory, 'e1', 'e1-myk8sappservice-001.mgmt.space.net.local')
-
-    expect { cmd.compile nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
-    expect { cmd.provision nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
-    expect { cmd.reprovision nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
-    expect { cmd.clean nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
   end
 end
