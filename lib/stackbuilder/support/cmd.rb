@@ -537,7 +537,13 @@ class CMD
   end
 
   def do_clean(thing, all = false)
-    k8s_targets, vm_targets = split_k8s_from_vms(thing)
+    k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
+      if x.is_a?(Stacks::CustomServices)
+        x.children
+      else
+        [x]
+      end
+    end
 
     k8s_targets.each do |t|
       clean_k8s(t)
@@ -549,14 +555,19 @@ class CMD
   end
 
   def clean_k8s(machineset)
-    k8s_defns = machineset.to_k8s(Support::AppDeployer.new, Support::DnsResolver.new)
+    k8s_defns = machineset.to_k8s(@app_deployer, @dns_resolver)
 
     environment = machineset.environment.name
     machineset_name = machineset.name
     k8s_defns.each do |defn|
       resource_kind = defn['kind'].downcase
 
-      stdout_str, error_str, status = Open3.capture3('kubectl', 'delete', resource_kind, '-l', "machineset=#{machineset_name}", '-n', environment)
+      stdout_str, error_str, status = Open3.capture3('kubectl',
+                                                     'delete',
+                                                     resource_kind,
+                                                     '-l',
+                                                     "stack=#{machineset.stack.name},machineset=#{machineset_name}",
+                                                     '-n', environment)
       if status.success?
         logger(Logger::INFO) { stdout_str }
       else

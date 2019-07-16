@@ -296,15 +296,74 @@ describe 'cmd' do
   end
 
   describe 'clean command' do
+    describe 'for k8s' do
+      it 'cleans a stack' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        cmd = cmd(factory, 'e1', 'myk8sstack')
+
+        %w(deployment configmap service).each do |kind|
+          expect(@open3).to receive(:capture3).
+            with('kubectl',
+                 'delete',
+                 kind,
+                 '-l',
+                 'stack=myk8sstack,machineset=myk8sappservice',
+                 '-n', 'e1').
+            and_return(['Some stdout output', 'Some stderr output', @return_status])
+          expect(@return_status).to receive(:success?).and_return(true)
+
+          expect(@open3).to receive(:capture3).
+            with('kubectl',
+                 'delete',
+                 kind,
+                 '-l',
+                 'stack=myk8sstack,machineset=myrelatedk8sappservice',
+                 '-n', 'e1').
+            and_return(['Some stdout output', 'Some stderr output', @return_status])
+          expect(@return_status).to receive(:success?).and_return(true)
+        end
+
+        cmd.clean nil
+      end
+
+      it 'reprovisions a machineset' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        cmd = cmd(factory, 'e1', 'myk8sappservice')
+
+        %w(deployment configmap service).each do |kind|
+          expect(@open3).to receive(:capture3).
+            with('kubectl',
+                 'delete',
+                 kind,
+                 '-l',
+                 'stack=myk8sstack,machineset=myk8sappservice',
+                 '-n', 'e1').
+            and_return(['Some stdout output', 'Some stderr output', @return_status])
+          expect(@return_status).to receive(:success?).and_return(true)
+        end
+
+        cmd.clean nil
+      end
+    end
+
     describe 'for VMs' do
       it 'cleans a stack' do
-        stack = have_attributes(:name => 'mystack')
+        myappservice_machineset = have_attributes(:name => 'myappservice')
+        myrelatedappservice_machineset = have_attributes(:name => 'myrelatedappservice')
 
         cmd = cmd(factory, 'e1', 'mystack')
 
-        expect(@nagios).to receive(:nagios_schedule_downtime).with(stack)
-        expect(@cleaner).to receive(:clean_nodes).with(stack)
-        expect(@puppet).to receive(:puppet_clean).with(stack)
+        expect(@nagios).to receive(:nagios_schedule_downtime).with(myappservice_machineset)
+        expect(@cleaner).to receive(:clean_nodes).with(myappservice_machineset)
+        expect(@puppet).to receive(:puppet_clean).with(myappservice_machineset)
+
+        expect(@nagios).to receive(:nagios_schedule_downtime).with(myrelatedappservice_machineset)
+        expect(@cleaner).to receive(:clean_nodes).with(myrelatedappservice_machineset)
+        expect(@puppet).to receive(:puppet_clean).with(myrelatedappservice_machineset)
 
         cmd.clean nil
       end
