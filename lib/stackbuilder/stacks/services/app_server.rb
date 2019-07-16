@@ -98,7 +98,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
   def to_k8s(app_deployer, dns_resolver)
     output = super
 
-    @virtual_service.virtual_services_that_depend_on_me.each do |dependant_virtual_service|
+    @virtual_service.virtual_services_that_depend_on_me.each do |vs|
       virtual_service_instance_fqdns = @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network])
       ip_blocks = []
       virtual_service_instance_fqdns.each do |instance_fqdn|
@@ -113,7 +113,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
         'apiVersion' => 'networking.k8s.io/v1',
         'kind' => 'NetworkPolicy',
         'metadata' => {
-          'name' => "allow-#{dependant_virtual_service.environment.name}-#{dependant_virtual_service.name}-to-#{@virtual_service.name}-8000",
+          'name' => "allow-#{vs.environment.name}-#{vs.name}-in-to-#{@virtual_service.name}-8000",
           'namespace' => @environment.name,
           'spec' => {
             'podSelector' => {
@@ -127,6 +127,39 @@ class Stacks::Services::AppServer < Stacks::MachineDef
             ],
             'ingress' => [{
               'from' => ip_blocks,
+              'ports' => [{
+                'protocol' => 'TCP',
+                'port' => 8000
+              }]
+            }]
+          }
+        }
+      }
+    end
+
+    @virtual_service.virtual_services_that_i_depend_on.each do |vs|
+      output << {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => "allow-#{@virtual_service.name}-out-to-#{vs.environment.name}-#{vs.name}-8000",
+          'namespace' => @environment.name,
+          'spec' => {
+            'podSelector' => {
+              'matchLabels' => {
+                'machine_set' => @virtual_service.name,
+                'stack' => @virtual_service.stack.name
+              }
+            },
+            'policyTypes' => [
+              'Egress'
+            ],
+            'egress' => [{
+              'to' => {
+                'ipBlock' => {
+                  'cidr' => "#{dns_resolver.lookup(vs.vip_fqdn(:prod, @fabric))}/32"
+                }
+              },
               'ports' => [{
                 'protocol' => 'TCP',
                 'port' => 8000

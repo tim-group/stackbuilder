@@ -258,7 +258,7 @@ describe_stack 'a kubernetes service should get correct ingress network policies
   end
 
   expect(network_policies.size).to be(1)
-  expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-to-app2-8000')
+  expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
   expect(network_policies.first['metadata']['namespace']).to eql('e1')
   expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
   expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
@@ -270,5 +270,74 @@ describe_stack 'a kubernetes service should get correct ingress network policies
   expect(network_policies.first['metadata']['spec']['ingress'].first['from']).to include({'ipBlock' => {'cidr' => '3.1.4.2/32'}})
   expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
   expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['port']).to be(8000)
+  end
+end
+
+describe_stack 'a kubernetes service should get correct egress network policies for another service that it depends on' do
+  class TestAppDeployer
+    def initialize(version)
+      @version = version
+    end
+
+    def query_cmdb_for(_spec)
+      { :target_version => @version }
+    end
+  end
+
+  app_deployer = TestAppDeployer.new('1.2.3')
+
+  class TestDnsResolver
+    def initialize(ip_address_map)
+      @ip_address_map = ip_address_map
+    end
+
+    def lookup(fqdn)
+      Resolv::IPv4.create(@ip_address_map[fqdn])
+    end
+  end
+
+  dns_resolver = TestDnsResolver.new({
+    'e1-app2-vip.space.net.local' => '3.1.4.3',
+    'e1-app1-vip.space.net.local' => '3.1.4.4'
+  })
+
+  given do
+    stack "test_app_servers" do
+      app_service 'app1' do
+      end
+
+      app_service 'app2' do
+        self.application = 'app2'
+        self.kubernetes = true
+        depend_on 'app1'
+      end
+    end
+
+    env "e1", :primary_site => "space" do
+      instantiate_stack "test_app_servers"
+    end
+  end
+
+  it_stack 'should contain all the expected hosts' do |stack|
+    machine_sets = stack.environments['e1'].definitions['test_app_servers'].definitions
+    app2_machine_set = machine_sets['app2']
+    app2_app_server = app2_machine_set.definitions[app2_machine_set.definitions.keys.first]
+
+  network_policies = app2_app_server.to_k8s(app_deployer, dns_resolver).select do |policy|
+    policy['kind'] == "NetworkPolicy"
+  end
+
+  expect(network_policies.size).to be(1)
+  expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
+  expect(network_policies.first['metadata']['namespace']).to eql('e1')
+  expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
+  expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+  expect(network_policies.first['metadata']['spec']['policyTypes']).to eql(['Egress'])
+  expect(network_policies.first['metadata']['spec']['egress'].size).to be(1)
+  expect(network_policies.first['metadata']['spec']['egress'].first['to'].size).to be(1)
+  expect(network_policies.first['metadata']['spec']['egress'].first['ports'].size).to be(1)
+  expect(network_policies.first['metadata']['spec']['egress'].first['to']).to include({'ipBlock' => {'cidr' => '3.1.4.4/32'}})
+  expect(network_policies.first['metadata']['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
+  expect(network_policies.first['metadata']['spec']['egress'].first['ports'].first['port']).to be(8000)
   end
 end
