@@ -12,10 +12,10 @@ module Stacks::Services::LoadBalancerCluster
   end
 
   def establish_dependencies
-    services = @environment.virtual_services.select do |node|
-      node.respond_to?(:to_loadbalancer_config) &&
-      node.respond_to?(:load_balanced_service?) &&
-      node.load_balanced_service?
+    services = @environment.all_things.select do |thing|
+      thing.respond_to?(:to_loadbalancer_config) &&
+      thing.respond_to?(:load_balanced_service?) &&
+      thing.load_balanced_service?
     end
     services.map do |node|
       [node.name, environment.name]
@@ -24,8 +24,8 @@ module Stacks::Services::LoadBalancerCluster
 
   def loadbalancer_config_hash(location, fabric)
     config_hash = @extra_virtual_services.dup
-    services = @environment.virtual_services.select do |node|
-      node.respond_to?(:to_loadbalancer_config)
+    services = @environment.all_things.select do |thing|
+      thing.respond_to?(:to_loadbalancer_config)
     end
 
     lb_services = services.select do |node|

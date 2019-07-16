@@ -95,6 +95,90 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     end
   end
 
+  def to_k8s(app_deployer, dns_resolver)
+    output = super
+
+    @virtual_service.virtual_services_that_depend_on_me.each do |vs|
+      filters = []
+      if vs.kubernetes
+        filters << { 'podSelector' => { 'matchLabels' => { 'machine_set' => vs.name, 'stack' => vs.stack.name } } }
+      else
+        virtual_service_instance_fqdns = @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network])
+        virtual_service_instance_fqdns.each do |instance_fqdn|
+          filters << {
+            'ipBlock' => {
+              'cidr' => "#{dns_resolver.lookup(instance_fqdn)}/32"
+            }
+          }
+        end
+      end
+
+      output << {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => "allow-#{vs.environment.name}-#{vs.name}-in-to-#{@virtual_service.name}-8000",
+          'namespace' => @environment.name,
+          'spec' => {
+            'podSelector' => {
+              'matchLabels' => {
+                'machine_set' => @virtual_service.name,
+                'stack' => @virtual_service.stack.name
+              }
+            },
+            'policyTypes' => [
+              'Ingress'
+            ],
+            'ingress' => [{
+              'from' => filters,
+              'ports' => [{
+                'protocol' => 'TCP',
+                'port' => 8000
+              }]
+            }]
+          }
+        }
+      }
+    end
+
+    @virtual_service.virtual_services_that_i_depend_on.each do |vs|
+      filters = []
+      if vs.kubernetes
+        filters << { 'podSelector' => { 'matchLabels' => { 'machine_set' => vs.name, 'stack' => vs.stack.name } } }
+      else
+        filters << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(vs.vip_fqdn(:prod, @fabric))}/32" } }
+      end
+      output << {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => "allow-#{@virtual_service.name}-out-to-#{vs.environment.name}-#{vs.name}-8000",
+          'namespace' => @environment.name,
+          'spec' => {
+            'podSelector' => {
+              'matchLabels' => {
+                'machine_set' => @virtual_service.name,
+                'stack' => @virtual_service.stack.name
+              }
+            },
+            'policyTypes' => [
+              'Egress'
+            ],
+            'egress' => [{
+              'to' => filters,
+              'ports' => [{
+                'protocol' => 'TCP',
+                'port' => 8000
+              }]
+            }]
+          }
+        }
+      }
+    end
+
+    output
+  end
+
   private
 
   def enc_ehcache(enc)
