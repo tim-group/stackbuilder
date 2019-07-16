@@ -51,16 +51,7 @@ class CMD
       end
     else
       thing = check_and_get_stack
-      if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
-        k8s_targets = thing.k8s_machinesets.values
-        vm_targets = thing.flatten
-      elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
-        k8s_targets << thing
-      elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
-        fail "Cannot compile a single host for kubernetes. Compile the stack or service (#{thing.virtual_service.name}) instead"
-      else
-        vm_targets = thing.flatten
-      end
+      k8s_targets, vm_targets = split_k8s_from_vms(thing) { |x| x.flatten }
     end
 
     puts [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].compact.join("\n")
@@ -283,26 +274,34 @@ class CMD
 
   def provision(_argv)
     thing = check_and_get_stack
-    do_provision(@factory.services, thing)
+    k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
+      if x.is_a?(Stacks::CustomServices)
+        x.children
+      else
+        [x]
+      end
+    end
+    k8s_targets.each do |t|
+      apply_k8s(t, t.stack.name)
+    end
+    vm_targets.each do |t|
+      provision_vm(@factory.services, t)
+    end
   end
 
   def reprovision(_argv)
     thing = check_and_get_stack
 
-    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
-      thing.k8s_machinesets.values.each do |set|
-        apply_k8s(set, thing.name)
-      end
+    k8s_targets, vm_targets = split_k8s_from_vms(thing)
 
-      # after reprovisioning any k8s machinesets there may be vm machinesets still to do
-      reprovision_vm(@factory.services, thing)
-    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
-      apply_k8s(thing, thing.stack.name)
-    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
-      fail "Cannot reprovision kubernetes for a single host. Reprovision the stack or service (#{thing.virtual_service.name}) instead"
-    else # reprovision a VM
-      reprovision_vm(@factory.services, thing)
+    k8s_targets.each do |t|
+      apply_k8s(t, t.stack.name)
     end
+
+    vm_targets.each do |t|
+      reprovision_vm(@factory.services, t)
+    end
+
     0
   end
 
@@ -451,7 +450,31 @@ class CMD
       fail "Too many entities found"
     end
 
-    stacks.first
+    thing = stacks.first
+
+    if thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
+      logger(Logger::FATAL) { "Cannot operate on a single host for kubernetes. Use the stack or service (#{thing.virtual_service.name}) instead" }
+      fail "Invalid selection. Cannot use machinedef for kubernetes"
+    end
+
+    thing
+  end
+
+  def split_k8s_from_vms(thing, &vm_extraction)
+    vm_extraction ||= lambda { |x| [x] }
+    k8s_targets = []
+    vm_targets = []
+
+    if thing.is_a?(Stacks::CustomServices)
+      k8s_targets = thing.k8s_machinesets.values
+      vm_targets = vm_extraction.call(thing)
+    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
+      k8s_targets << thing
+    else
+      vm_targets = vm_extraction.call(thing)
+    end
+
+    [k8s_targets, vm_targets]
   end
 
   def vms_compile_output(targets)
@@ -503,19 +526,14 @@ class CMD
   end
 
   def do_clean(thing, all = false)
-    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
-      thing.k8s_machinesets.values.each do |set|
-        clean_k8s(set)
-      end
+    k8s_targets, vm_targets = split_k8s_from_vms(thing)
 
-      # after cleaning any k8s machinesets there may be vm machinesets still to do
-      clean_vm(thing, all)
-    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
-      clean_k8s(thing)
-    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
-      fail "Cannot clean a single host from kubernetes. Clean the stack or service (#{thing.virtual_service.name}) instead"
-    else
-      clean_vm(thing, all)
+    k8s_targets.each do |t|
+      clean_k8s(t)
+    end
+
+    vm_targets.each do |t|
+      clean_vm(t, all)
     end
   end
 
@@ -541,23 +559,6 @@ class CMD
     @cleaner.clean_nodes(thing)
     @puppet.puppet_clean(thing)
     @cleaner.clean_traces(thing) if all
-  end
-
-  def do_provision(services, thing)
-    if thing.is_a?(Stacks::CustomServices) && !thing.k8s_machinesets.empty?
-      thing.k8s_machinesets.values.each do |set|
-        apply_k8s(set, thing.name)
-      end
-
-      # after provisioning any k8s machinesets there may be vm machinesets still to do
-      provision_vm(services, thing)
-    elsif thing.is_a?(Stacks::MachineSet) && thing.kubernetes
-      apply_k8s(thing, thing.stack.name)
-    elsif thing.is_a?(Stacks::MachineDef) && thing.virtual_service.kubernetes
-      fail "Cannot provision kubernetes for a single host. Provision the stack or service (#{thing.virtual_service.name}) instead"
-    else # provision a VM
-      provision_vm(services, thing)
-    end
   end
 
   def reprovision_vm(services, thing)

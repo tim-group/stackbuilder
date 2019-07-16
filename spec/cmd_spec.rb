@@ -15,6 +15,7 @@ describe 'cmd' do
     @cleaner = double('cleaner')
     @open3 = double('Open3')
     stub_const("Open3", @open3)
+    @launch_action = double("launch_action")
   end
 
   def eval_stacks(&block)
@@ -76,7 +77,7 @@ describe 'cmd' do
 
   describe 'provision command' do
     describe 'for k8s' do
-      xit 'provisions a stack' do
+      it 'provisions a stack' do
         allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
@@ -107,24 +108,29 @@ describe 'cmd' do
     end
 
     describe 'for VMs' do
-      it 'provisions a stack' do
-        stack = have_attributes(:name => 'mystack')
+      def makes_calls_to_provision(machineset_matcher)
         successful_response = Subscription::WaitResponse.new([], [])
 
+        expect(@core_actions).to receive(:get_action).with("launch").and_return(@launch_action)
+        expect(@dns).to receive(:do_allocate_vips).with(machineset_matcher)
+        expect(@dns).to receive(:do_allocate_ips).with(machineset_matcher)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(machineset_matcher)
+        expect(@launch_action).to receive(:call).with(factory.services, machineset_matcher)
+        expect(@puppet).to receive(:puppet_wait_for_autosign).with(machineset_matcher).and_return(successful_response)
+        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(machineset_matcher).and_return(successful_response)
+        expect(@app_deployer).to receive(:deploy_applications).with(machineset_matcher)
+        expect(@nagios).to receive(:nagios_schedule_uptime).with(machineset_matcher)
+        expect(@nagios).to receive(:do_nagios_register_new).with(machineset_matcher)
+      end
+
+      it 'provisions a stack' do
+        myappservice_machineset = have_attributes(:name => 'myappservice')
+        myrelatedappservice_machineset = have_attributes(:name => 'myrelatedappservice')
+
+        makes_calls_to_provision(myappservice_machineset)
+        makes_calls_to_provision(myrelatedappservice_machineset)
+
         cmd = cmd(factory, 'e1', 'mystack')
-
-        expect(@dns).to receive(:do_allocate_vips).with(stack)
-        expect(@dns).to receive(:do_allocate_ips).with(stack)
-        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(stack)
-
-        launch_action = double("launch_action")
-        expect(@core_actions).to receive(:get_action).with("launch").and_return(launch_action)
-        expect(launch_action).to receive(:call).with(factory.services, stack)
-        expect(@puppet).to receive(:puppet_wait_for_autosign).with(stack).and_return(successful_response)
-        expect(@puppet).to receive(:puppet_wait_for_run_completion).with(stack).and_return(successful_response)
-        expect(@app_deployer).to receive(:deploy_applications).with(stack)
-        expect(@nagios).to receive(:nagios_schedule_uptime).with(stack)
-        expect(@nagios).to receive(:do_nagios_register_new).with(stack)
 
         cmd.provision nil
       end
@@ -508,7 +514,7 @@ describe 'cmd' do
       it 'raises an error for a specific machine in a k8s machineset' do
         cmd = cmd(factory, 'e1', 'e1-myk8sappservice-001.mgmt.space.net.local')
 
-        expect { cmd.compile nil }.to raise_error(/Cannot compile a single host for kubernetes/)
+        expect { cmd.compile nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
       end
     end
   end
