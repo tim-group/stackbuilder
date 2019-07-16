@@ -181,6 +181,31 @@ describe 'cmd' do
 
         cmd.reprovision nil
       end
+
+      it 'reprovisions a machineset' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        cmd = cmd(factory, 'e1', 'myk8sappservice')
+
+        return_status = double('return_status')
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myk8sappservice',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', return_status])
+        expect(return_status).to receive(:success?).and_return(true)
+
+        cmd.reprovision nil
+      end
     end
 
     describe 'for VMs' do
