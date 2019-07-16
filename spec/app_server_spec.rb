@@ -198,7 +198,35 @@ describe_stack 'test_app_server that uses docker' do
   end
 end
 
-describe_stack 'test_app_server that uses docker' do
+describe_stack 'a kubernetes service should get correct ingress network policies for another service that depends on it' do
+  class TestAppDeployer
+    def initialize(version)
+      @version = version
+    end
+
+    def query_cmdb_for(_spec)
+      { :target_version => @version }
+    end
+  end
+
+  app_deployer = TestAppDeployer.new('1.2.3')
+
+  class TestDnsResolver
+    def initialize(ip_address_map)
+      @ip_address_map = ip_address_map
+    end
+
+    def lookup(fqdn)
+      Resolv::IPv4.create(@ip_address_map[fqdn])
+    end
+  end
+
+  dns_resolver = TestDnsResolver.new({
+    'e1-app1-001.space.net.local' => '3.1.4.1',
+    'e1-app1-002.space.net.local' => '3.1.4.2',
+    'e1-app2-vip.space.net.local' => '3.1.4.3'
+  })
+
   given do
     stack "test_app_servers" do
       app_service 'app1' do
@@ -224,29 +252,23 @@ describe_stack 'test_app_server that uses docker' do
       "e1-app1-001.space.net.local",
       "e1-app1-002.space.net.local"
     ])
-  class TestAppDeployer
-    def initialize(version)
-      @version = version
-    end
 
-    def query_cmdb_for(_spec)
-      { :target_version => @version }
-    end
+  network_policies = app2_app_server.to_k8s(app_deployer, dns_resolver).select do |policy|
+    policy['kind'] == "NetworkPolicy"
   end
 
-  app_deployer = TestAppDeployer.new('1.2.3')
-
-  class TestDnsResolver
-    def initialize(ip_address)
-      @ip_address = ip_address
-    end
-
-    def lookup(_fqdn)
-      Resolv::IPv4.create(@ip_address)
-    end
-  end
-
-  dns_resolver = TestDnsResolver.new('3.1.4.1')
-    pp app2_app_server.to_k8s(app_deployer, dns_resolver)
+  expect(network_policies.size).to be(1)
+  expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-to-app2-8000')
+  expect(network_policies.first['metadata']['namespace']).to eql('e1')
+  expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
+  expect(network_policies.first['metadata']['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+  expect(network_policies.first['metadata']['spec']['policyTypes']).to eql(['Ingress'])
+  expect(network_policies.first['metadata']['spec']['ingress'].size).to be(1)
+  expect(network_policies.first['metadata']['spec']['ingress'].first['from'].size).to be(2)
+  expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].size).to be(1)
+  expect(network_policies.first['metadata']['spec']['ingress'].first['from']).to include({'ipBlock' => {'cidr' => '3.1.4.1/32'}})
+  expect(network_policies.first['metadata']['spec']['ingress'].first['from']).to include({'ipBlock' => {'cidr' => '3.1.4.2/32'}})
+  expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
+  expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['port']).to be(8000)
   end
 end

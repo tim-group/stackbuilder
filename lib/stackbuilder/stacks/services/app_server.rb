@@ -97,10 +97,9 @@ class Stacks::Services::AppServer < Stacks::MachineDef
 
   def to_k8s(app_deployer, dns_resolver)
     output = super
-    puts output.class
 
     @virtual_service.virtual_services_that_depend_on_me.each do |dependant_virtual_service|
-      virtual_service_instance_fqdns = @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network]),
+      virtual_service_instance_fqdns = @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network])
       ip_blocks = []
       virtual_service_instance_fqdns.each do |instance_fqdn|
         ip_blocks << {
