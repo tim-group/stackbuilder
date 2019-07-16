@@ -207,14 +207,21 @@ class Stacks::Environment
     environment_set
   end
 
-  def virtual_services
-    virtual_services = []
+  def all_things
+    things = []
     find_all_environments.each do |env|
-      env.accept do |virtual_service|
-        virtual_services.push virtual_service
+      env.accept do |thing|
+        things << thing
+#        if thing.is_a?(Stacks::CustomServices)
+#          thing.k8s_machinesets.values.each do |machineset|
+#            machineset.accept do |thing|
+#              things << thing
+#            end
+#          end
+#        end
       end
     end
-    virtual_services
+    things
   end
 
   def instantiate_stack(stack_name)
