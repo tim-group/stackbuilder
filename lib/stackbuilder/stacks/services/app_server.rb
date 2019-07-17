@@ -101,7 +101,19 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     @virtual_service.virtual_services_that_depend_on_me.each do |vs|
       filters = []
       if vs.kubernetes
-        filters << { 'podSelector' => { 'matchLabels' => { 'machine_set' => vs.name, 'stack' => vs.stack.name } } }
+        filters << {
+          'podSelector' => {
+            'matchLabels' => {
+              'machine_set' => vs.name,
+              'stack' => vs.stack.name
+            }
+          },
+          'namespaceSelector' => {
+            'matchLabels' => {
+              'name' => vs.environment.name
+            }
+          }
+        }
       else
         virtual_service_instance_fqdns = @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network])
         virtual_service_instance_fqdns.each do |instance_fqdn|
@@ -144,7 +156,19 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     @virtual_service.virtual_services_that_i_depend_on.each do |vs|
       filters = []
       if vs.kubernetes
-        filters << { 'podSelector' => { 'matchLabels' => { 'machine_set' => vs.name, 'stack' => vs.stack.name } } }
+        filters << {
+          'podSelector' => {
+            'matchLabels' => {
+              'machine_set' => vs.name,
+              'stack' => vs.stack.name
+            }
+          },
+          'namespaceSelector' => {
+            'matchLabels' => {
+              'name' => vs.environment.name
+            }
+          }
+        }
       else
         filters << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(vs.vip_fqdn(:prod, @fabric))}/32" } }
       end
