@@ -88,7 +88,7 @@ module Stacks::Services::AppService
     config
   end
 
-  def to_k8s(app_deployer, dns_resolver)
+  def to_k8s(app_deployer, dns_resolver, hiera_provider)
     output = super
     app_name = application.downcase
     fail('app_service to_k8s doesn\'t know how to deal with multiple groups yet') if @groups.size > 1
@@ -104,7 +104,7 @@ module Stacks::Services::AppService
       app_version = "UNKNOWN"
     end
 
-    output << generate_k8s_config_map(application, app_name, group, site)
+    output << generate_k8s_config_map(hiera_provider, application, app_name, group, site)
     output << generate_k8s_service(dns_resolver, app_name)
     output << generate_k8s_deployment(app_name, app_version)
     output += generate_k8s_network_policies(dns_resolver)
@@ -113,7 +113,7 @@ module Stacks::Services::AppService
 
   private
 
-  def generate_k8s_config_map(application, app_name, group, site)
+  def generate_k8s_config_map(hiera_provider, application, app_name, group, site)
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',

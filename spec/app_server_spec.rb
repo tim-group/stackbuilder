@@ -226,6 +226,16 @@ describe 'kubernetes' do
     end
   end
 
+  class TestHieraProvider
+    def initialize(data)
+      @data = data
+    end
+
+    def lookup(_machineset, key, default_value = nil)
+      @data.key?(key) ? @data[key] : default_value
+    end
+  end
+
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
   let(:dns_resolver) do
     MyTestDnsResolver.new('e1-x-vip.space.net.local' => '3.1.4.1',
@@ -235,6 +245,7 @@ describe 'kubernetes' do
                           'e1-app1-vip.space.net.local' => '3.1.4.4',
                           'e2-app2-vip.space.net.local' => '3.1.4.5')
   end
+  let(:hiera_provider) { TestHieraProvider.new('the_hiera_key' => 'the_hiera_value') }
 
   describe 'app spec' do
     it 'defines a Deployment' do
@@ -249,7 +260,7 @@ describe 'kubernetes' do
         end
       end
       machine_sets = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets
-      k8s = machine_sets['x'].to_k8s(app_deployer, dns_resolver)
+      k8s = machine_sets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
       expected_deployment = {
         'apiVersion' => 'apps/v1',
         'kind' => 'Deployment',
@@ -395,7 +406,7 @@ EOL
         end
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
+      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
     end
 
     it 'labels metrics using the site' do
@@ -411,7 +422,7 @@ EOL
         end
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
         to match(/space-mon-001.mgmt.space.net.local/)
     end
 
@@ -430,7 +441,7 @@ EOL
         end
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
+      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
     end
   end
 
@@ -459,7 +470,7 @@ EOL
         "e1-app1-002.space.net.local"
       ])
 
-      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
+      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
         policy['kind'] == "NetworkPolicy"
       end
 
@@ -498,7 +509,7 @@ EOL
       machine_sets = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets
       app2_machine_set = machine_sets['app2']
 
-      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
+      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
         policy['kind'] == "NetworkPolicy"
       end
 
@@ -521,7 +532,7 @@ EOL
         machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
         machine_set = machine_sets[service]
 
-        machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
+        machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
           policy['kind'] == "NetworkPolicy"
         end
       end
@@ -586,7 +597,7 @@ depends on the other' do
         machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
         machine_set = machine_sets[service]
 
-        machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
+        machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
           policy['kind'] == "NetworkPolicy"
         end
       end

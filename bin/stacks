@@ -18,6 +18,7 @@ require 'stackbuilder/support/subscription'
 require 'stackbuilder/support/puppet'
 require 'stackbuilder/support/app_deployer'
 require 'stackbuilder/support/dns_resolver'
+require 'stackbuilder/support/hiera_provider'
 require 'stackbuilder/support/cleaner'
 
 def help
@@ -246,8 +247,10 @@ subscription.start(["provision.*", "puppet_status"])
 puppet = Support::Puppet.new(subscription)
 app_deployer = Support::AppDeployer.new
 dns_resolver = Support::DnsResolver.new
+hiera_provider = Support::HieraProvider.new(:origin => 'git@git:puppet')
 cleaner = Support::Cleaner.new(factory.compute_controller)
-commands = CMD.new(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver, cleaner, environment, $options[:stack])
+commands = CMD.new(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver,
+                   hiera_provider, cleaner, environment, $options[:stack])
 unless commands.cmds.include? cmd
   if cmd.nil?
     logger(Logger::FATAL) { "no command specified.\nSee --help for more information." }

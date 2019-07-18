@@ -212,7 +212,7 @@ class Stacks::MachineSet
     SecureRandom.hex(20)
   end
 
-  def to_k8s(_app_deployer, _dns_resolver)
+  def to_k8s(_app_deployer, _dns_resolver, _hiera_provider)
     []
   end
 

@@ -12,6 +12,7 @@ describe 'cmd' do
     @puppet = double('puppet')
     @app_deployer = double('app_deployer')
     @dns_resolver = double('dns_resolver')
+    @hiera_provider = double('hiera_provider')
     @cleaner = double('cleaner')
     @open3 = double('Open3')
     stub_const("Open3", @open3)
@@ -24,7 +25,7 @@ describe 'cmd' do
   end
 
   def cmd(factory, env_name, stack_selector)
-    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer, @dns_resolver, @cleaner,
+    CMD.new(factory, @core_actions, @dns, @nagios, @subscription, @puppet, @app_deployer, @dns_resolver, @hiera_provider, @cleaner,
             env_name.nil? ? nil : factory.inventory.find_environment(env_name),
             stack_selector)
   end
