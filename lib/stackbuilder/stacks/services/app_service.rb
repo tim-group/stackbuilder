@@ -299,7 +299,7 @@ EOC
       }
     end
 
-    virtual_services_that_i_depend_on.each do |vs|
+    virtual_services_that_i_depend_on(false).each do |vs|
       filters = []
       if vs.kubernetes
         filters << {
