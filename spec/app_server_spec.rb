@@ -432,7 +432,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.application = 'MyApplication'
             self.appconfig = <<EOL
-  site=<%= @environment.sites.first %>
+  site=<%= @site %>
 EOL
           end
         end

@@ -14,24 +14,16 @@ class Support::HieraProvider
     @hieradata ||= fetch_hieradata
   end
 
-  def lookup(machineset, key, default_value = nil)
-    fail("Hiera lookup requires a machineset") if !machineset.is_a?(Stacks::MachineSet)
+  def lookup(scope, key, default_value = nil)
+    %w(domain hostname environment stackname).each do |s|
+      fail("Missing variable - Hiera lookup requires #{s} in scope") if !scope[s]
+    end
 
-    site = machineset.children.first.site
-    location = machineset.environment.translate_site_symbol(site)
-    fabric = machineset.environment.options[location]
-    domain = machineset.environment.domain(fabric)
-    environment = machineset.environment.name
-
-    # Machine def hostnames don't make sense for k8s so we pick up the config for the 001 instance only
-    hostname = machineset.children.first.hostname
-    stackname = machineset.stack.name
-
-    hieradata.fetch(domain, {}).fetch(hostname, {}).fetch(key, nil) ||
-      hieradata.fetch(domain, {}).fetch(environment, {}).fetch(key, nil) ||
-      hieradata.fetch("logicalenv_#{environment}", {}).fetch(key, nil) ||
-      hieradata.fetch("domain_#{domain}", {}).fetch(key, nil) ||
-      hieradata.fetch('stacks', {}).fetch(stackname, {}).fetch(key, nil) ||
+    hieradata.fetch(scope['domain'], {}).fetch(scope['hostname'], {}).fetch(key, nil) ||
+      hieradata.fetch(scope['domain'], {}).fetch(scope['environment'], {}).fetch(key, nil) ||
+      hieradata.fetch("logicalenv_#{scope['environment']}", {}).fetch(key, nil) ||
+      hieradata.fetch("domain_#{scope['domain']}", {}).fetch(key, nil) ||
+      hieradata.fetch('stacks', {}).fetch(scope['stackname'], {}).fetch(key, nil) ||
       hieradata.fetch('dbrights', {}).fetch(key, nil) ||
       hieradata.fetch('secrets', {}).fetch(key, nil) ||
       hieradata.fetch('common', {}).fetch(key, nil) ||

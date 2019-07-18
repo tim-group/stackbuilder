@@ -1,4 +1,5 @@
 require 'stackbuilder/stacks/namespace'
+require 'erb'
 
 module Stacks::Services::AppService
   include Stacks::Services::RabbitMqDependent
@@ -88,6 +89,23 @@ module Stacks::Services::AppService
     config
   end
 
+  class ConfigERB < ERB
+    def initialize(template, vars, hiera_provider)
+      super(template)
+      vars.each { |k, v| instance_variable_set("@#{k}", v) }
+      @vars = vars
+      @hiera_provider = hiera_provider
+    end
+
+    def hiera(key, default = nil)
+      @hiera_provider.lookup(@vars, key, default)
+    end
+
+    def render
+      result(binding)
+    end
+  end
+
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
     output = super
     app_name = application.downcase
@@ -104,7 +122,21 @@ module Stacks::Services::AppService
       app_version = "UNKNOWN"
     end
 
-    output << generate_k8s_config_map(hiera_provider, application, app_name, group, site)
+    location = environment.translate_site_symbol(site)
+    fabric = environment.options[location]
+    domain = "mgmt.#{environment.domain(fabric)}"
+
+    erb_vars = {
+      'domain' => domain,
+      'hostname' => children.first.hostname,
+      'application' => application,
+      'stackname' => @stack.name,
+      'environment' => @environment.name,
+      'group' => group,
+      'site' => site
+    }
+
+    output << generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site)
     output << generate_k8s_service(dns_resolver, app_name)
     output << generate_k8s_deployment(app_name, app_version)
     output += generate_k8s_network_policies(dns_resolver)
@@ -113,7 +145,7 @@ module Stacks::Services::AppService
 
   private
 
-  def generate_k8s_config_map(hiera_provider, application, app_name, group, site)
+  def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site)
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
@@ -136,7 +168,7 @@ graphite.enabled=true
 graphite.host=#{site}-mon-001.mgmt.#{site}.net.local
 graphite.port=2013
 graphite.prefix=#{app_name}.k8s_#{@environment.name}_#{site}
-graphite.period=10#{"\n\n" + ERB.new(@appconfig).result(binding) unless @appconfig.nil?}
+graphite.period=10#{"\n\n" + ConfigERB.new(appconfig, erb_vars, hiera_provider).render unless appconfig.nil?}
 EOC
       }
     }

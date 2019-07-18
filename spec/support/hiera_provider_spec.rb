@@ -57,35 +57,8 @@ describe Support::HieraProvider do
     fail "System call failed - error: #{stderr_str}" if !status.success?
   end
 
-  def eval_stacks(&block)
-    Stacks::Factory.new(Stacks::Inventory.from(&block))
-  end
-
-  let(:factory) do
-    eval_stacks do
-      stack "mystack" do
-        app_service "myappservice" do
-          self.application = 'MyApplication'
-          self.instances = 2
-        end
-        app_service "myk8sappservice", :kubernetes => true do
-          self.application = 'MyK8sApplication'
-          self.instances = 2
-        end
-      end
-      env 'e1', :primary_site => 'space' do
-        instantiate_stack "mystack"
-      end
-    end
-  end
-
-  it 'should raise exception if not passed a machineset' do
-    environment = factory.inventory.find_environment('e1')
-    expect { @hiera_provider.lookup(environment, 'anything') }.to raise_error(RuntimeError, /Hiera lookup requires a machineset/)
-    stack = environment.find_stacks('mystack').first
-    expect { @hiera_provider.lookup(stack, 'anything') }.to raise_error(RuntimeError, /Hiera lookup requires a machineset/)
-    machinedef = stack.children.first.children.first
-    expect { @hiera_provider.lookup(machinedef, 'anything') }.to raise_error(RuntimeError, /Hiera lookup requires a machineset/)
+  it "should raise exception if scope doesn't contain required variables" do
+    expect { @hiera_provider.lookup({}, 'anything') }.to raise_error(RuntimeError, /Missing variable/)
   end
 
   it "should raise exception if it can't clone the repo" do
@@ -95,9 +68,14 @@ describe Support::HieraProvider do
   it 'should raise exception if key not found and no default passed' do
     given_hieradata {}
 
-    machineset = factory.inventory.find_environment('e1').find_stacks('mystack').first.k8s_machinesets['myk8sappservice']
+    scope = {
+      'domain' => 'dummy',
+      'hostname' => 'dummy',
+      'environment' => 'dummy',
+      'stackname' => 'dummy'
+    }
 
-    expect { @hiera_provider.lookup(machineset, 'key/that/does/not/exist') }.to raise_error(RuntimeError, /Could not find data item/)
+    expect { @hiera_provider.lookup(scope, 'key/that/does/not/exist') }.to raise_error(RuntimeError, /Could not find data item/)
   end
 
   it 'can look up hiera values' do
@@ -110,9 +88,15 @@ second/key: 42
 EOF
       end
     end
-    machineset = factory.inventory.find_environment('e1').find_stacks('mystack').first.k8s_machinesets['myk8sappservice']
 
-    value = @hiera_provider.lookup(machineset, 'first/key')
+    scope = {
+      'domain' => 'dummy',
+      'hostname' => 'dummy',
+      'environment' => 'e1',
+      'stackname' => 'dummy'
+    }
+
+    value = @hiera_provider.lookup(scope, 'first/key')
 
     expect(value).to eq('the_value')
   end
@@ -132,9 +116,15 @@ the/answer: 42
 EOF
       end
     end
-    machineset = factory.inventory.find_environment('e1').find_stacks('mystack').first.k8s_machinesets['myk8sappservice']
 
-    value = @hiera_provider.lookup(machineset, 'the/answer')
+    scope = {
+      'domain' => 'dummy',
+      'hostname' => 'dummy',
+      'environment' => 'e1',
+      'stackname' => 'dummy'
+    }
+
+    value = @hiera_provider.lookup(scope, 'the/answer')
 
     expect(value).to eq(42)
   end
@@ -142,9 +132,14 @@ EOF
   it 'returns default value if key not found in data files' do
     given_hieradata {}
 
-    machineset = factory.inventory.find_environment('e1').find_stacks('mystack').first.k8s_machinesets['myk8sappservice']
+    scope = {
+      'domain' => 'dummy',
+      'hostname' => 'dummy',
+      'environment' => '1',
+      'stackname' => 'dummy'
+    }
 
-    value = @hiera_provider.lookup(machineset, 'the/answer', 42)
+    value = @hiera_provider.lookup(scope, 'the/answer', 42)
 
     expect(value).to eq(42)
   end
