@@ -9,6 +9,9 @@ source "https://rubygems.org" do
   gem 'rake', '10.1.0'
   gem 'rspec', '3.3.0'
   gem 'rubocop', '0.32.1'
-  gem 'syck'
   gem 'web-test-framework', :git => 'https://github.com/tim-group/ruby-web-test-framework.git'
+
+  group :not_ci do
+    gem 'syck'
+  end
 end
