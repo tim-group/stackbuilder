@@ -135,12 +135,44 @@ EOF
     scope = {
       'domain' => 'dummy',
       'hostname' => 'dummy',
-      'environment' => '1',
+      'environment' => 'dummy',
       'stackname' => 'dummy'
     }
 
     value = @hiera_provider.lookup(scope, 'the/answer', 42)
 
     expect(value).to eq(42)
+  end
+
+  it 'can handle boolean values' do
+    given_hieradata do
+      file 'domain_mgmt.oy.net.local.yaml' do
+        contents <<EOF
+---
+thats/the/t: true
+that/aint/the/t: false
+EOF
+      end
+      file 'common.yaml' do
+        contents <<EOF
+---
+thats/the/t: false
+that/aint/the/t: true
+EOF
+      end
+    end
+
+    scope = {
+      'domain' => 'mgmt.oy.net.local',
+      'hostname' => 'dummy',
+      'environment' => 'dummy',
+      'stackname' => 'dummy'
+    }
+
+    true_value = @hiera_provider.lookup(scope, 'thats/the/t')
+    false_value = @hiera_provider.lookup(scope, 'that/aint/the/t')
+
+    expect(true_value).to eq(true)
+    expect(false_value).to eq(false)
   end
 end

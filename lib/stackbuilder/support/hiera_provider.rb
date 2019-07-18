@@ -4,6 +4,17 @@ require 'yaml'
 require 'open3'
 
 class Support::HieraProvider
+  HIERARCHY = [
+    lambda { |hieradata, scope| hieradata.fetch(scope['domain'], {}).fetch(scope['hostname'], {}) },
+    lambda { |hieradata, scope| hieradata.fetch(scope['domain'], {}).fetch(scope['environment'], {}) },
+    lambda { |hieradata, scope| hieradata.fetch("logicalenv_#{scope['environment']}", {}) },
+    lambda { |hieradata, scope| hieradata.fetch("domain_#{scope['domain']}", {}) },
+    lambda { |hieradata, scope| hieradata.fetch('stacks', {}).fetch(scope['stackname'], {}) },
+    lambda { |hieradata, _scope| hieradata.fetch('dbrights', {}) },
+    lambda { |hieradata, _scope| hieradata.fetch('secrets', {}) },
+    lambda { |hieradata, _scope| hieradata.fetch('common', {}) }
+  ]
+
   def initialize(opts)
     fail('Origin option is required') if !opts[:origin]
     @local_path = opts[:local_path] || '/tmp/stacks-puppet-repo'
@@ -19,16 +30,13 @@ class Support::HieraProvider
       fail("Missing variable - Hiera lookup requires #{s} in scope") if !scope[s]
     end
 
-    hieradata.fetch(scope['domain'], {}).fetch(scope['hostname'], {}).fetch(key, nil) ||
-      hieradata.fetch(scope['domain'], {}).fetch(scope['environment'], {}).fetch(key, nil) ||
-      hieradata.fetch("logicalenv_#{scope['environment']}", {}).fetch(key, nil) ||
-      hieradata.fetch("domain_#{scope['domain']}", {}).fetch(key, nil) ||
-      hieradata.fetch('stacks', {}).fetch(scope['stackname'], {}).fetch(key, nil) ||
-      hieradata.fetch('dbrights', {}).fetch(key, nil) ||
-      hieradata.fetch('secrets', {}).fetch(key, nil) ||
-      hieradata.fetch('common', {}).fetch(key, nil) ||
-      default_value ||
-      fail("Could not find data item #{key} in any Hiera data file and no default supplied")
+    HIERARCHY.each do |x|
+      return x.call(hieradata, scope)[key] if x.call(hieradata, scope).key?(key)
+    end
+
+    return default_value if !default_value.nil?
+
+    fail("Could not find data item #{key} in any Hiera data file and no default supplied")
   end
 
   def fetch_hieradata
