@@ -10,7 +10,7 @@ if [ $HAVE_BUNDLER -eq 0 ]; then
 fi
 
 echo -n "Running rake spec: "
-if [ $HAVE_BUNDLE_RUBOCOP -eq 0 ]; then
+if [ $HAVE_BUNDLE_RAKE -eq 0 ]; then
   SPEC_OUTPUT=$(bundle exec rake spec 2>&1)
 elif which rake > /dev/null; then
   SPEC_OUTPUT=`rake spec 2>&1`
