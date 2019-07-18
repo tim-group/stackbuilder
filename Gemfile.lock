@@ -29,6 +29,7 @@ GEM
     ci_reporter_rspec (1.0.0)
       ci_reporter (~> 2.0)
       rspec (>= 2.14, < 4)
+    coderay (1.1.2)
     collimator (0.0.3)
       colored
     colored (1.2)
@@ -43,16 +44,20 @@ GEM
       json
       stomp
       systemu
+    method_source (0.9.2)
     parser (2.6.3.0)
       ast (~> 2.4.0)
     powerpack (0.1.2)
+    pry (0.12.2)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
     puppet (3.8.5)
       facter (> 1.6, < 3)
       hiera (~> 1.0)
       json_pure
     rainbow (2.2.2)
       rake
-    rake (12.3.2)
+    rake (10.1.0)
     rspec (3.3.0)
       rspec-core (~> 3.3.0)
       rspec-expectations (~> 3.3.0)
@@ -74,6 +79,7 @@ GEM
       ruby-progressbar (~> 1.4)
     ruby-progressbar (1.10.1)
     stomp (1.4.8)
+    syck (1.4.0)
     systemu (2.6.5)
 
 PLATFORMS
@@ -85,9 +91,12 @@ DEPENDENCIES
   mcollective-client (= 2.8.1)!
   nagios-support!
   orc!
+  pry (= 0.12.2)!
   puppet (= 3.8.5)!
+  rake (= 10.1.0)!
   rspec (= 3.3.0)!
   rubocop (= 0.32.1)!
+  syck!
   web-test-framework!
 
 BUNDLED WITH
