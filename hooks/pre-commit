@@ -1,21 +1,7 @@
 #!/bin/sh
 
-which bundle > /dev/null
-HAVE_BUNDLER=$?
-if [ $HAVE_BUNDLER -eq 0 ]; then
-  [ -d 'vendor/bundle' ]
-  WITH_BUNDLER=$?
-fi
-
 echo -n "Running rake spec: "
-if [ $WITH_BUNDLER -eq 0 ]; then
-  SPEC_OUTPUT=$(bundle exec rake spec 2>&1)
-elif which rake > /dev/null; then
-  SPEC_OUTPUT=`rake spec 2>&1`
-else
-  echo "[31mrake not found[0m" >&2
-  exit 1
-fi
+SPEC_OUTPUT=`rake spec 2>&1`
 if [ $? -ne 0 ]; then
 	echo "[31mFAIL[0m" >&2
 	echo "$SPEC_OUTPUT" >&2
@@ -24,30 +10,23 @@ else
 	echo "[32mOK[0m"
 fi
 
-# check only touched files
-tmpdir=$(mktemp -d pre-commit.XXXXXXXXXX)
-trap "rm -rf $tmpdir" EXIT
+if which rubocop > /dev/null; then
+	# check only touched files
+	tmpdir=$(mktemp -d pre-commit.XXXXXXXXXX)
+	trap "rm -rf $tmpdir" EXIT
 
-git diff --cached --name-only --diff-filter=ACM \
-  | git checkout-index --stdin --prefix=$tmpdir/
+	git diff --cached --name-only --diff-filter=ACM \
+	 | git checkout-index --stdin --prefix=$tmpdir/
 
-if [ $WITH_BUNDLER -eq 0 ]; then
-  bundle exec rubocop $tmpdir/ || exit 1
-elif which rubocop > /dev/null; then
 	rubocop $tmpdir/ || exit 1
 else
-  echo "[31mrubocop not found[0m" >&2
-  exit 1
+	echo "[31mrubocop not found[0m" >&2
+	exit 1
 fi
 
 echo -n "Running stacks compile: "
 USER=`whoami`
-if [ $WITH_BUNDLER -eq 0 ]; then 
-  OUTPUT=`/usr/bin/env WITH_BUNDLER=true ruby bin/stacks compile -c -- > /tmp/$USER-stacks-pre-commit`
-else
-  OUTPUT=`dev=true bin/stacks compile -c -- > /tmp/$USER-stacks-pre-commit`
-fi
-
+OUTPUT=`dev=true bin/stacks compile -c -- > /tmp/$USER-stacks-pre-commit`
 RC=$?
 if [ $RC -ne 0 ]; then
   echo "FAIL"
