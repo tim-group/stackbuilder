@@ -2,6 +2,10 @@
 
 if ENV['dev']
   $LOAD_PATH << 'lib/'
+elsif ENV['WITH_BUNDLER'] == 'true'
+  $LOAD_PATH << './lib'
+  require 'rubygems'
+  require 'bundler/setup'
 else
   $LOAD_PATH << '/usr/local/lib/site_ruby/timgroup/'
 end
