@@ -441,7 +441,9 @@ EOL
         end
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
+      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).
+                 find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+        to match(/site=space/)
     end
   end
 
