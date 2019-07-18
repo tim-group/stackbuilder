@@ -212,8 +212,8 @@ class Stacks::MachineSet
     SecureRandom.hex(20)
   end
 
-  def to_k8s(app_deployer, dns_resolver)
-    children.first.to_k8s(app_deployer, dns_resolver)
+  def to_k8s(_app_deployer, _dns_resolver)
+    []
   end
 
   private

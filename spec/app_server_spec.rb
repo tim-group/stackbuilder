@@ -1,5 +1,6 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
+require 'resolv'
 
 describe_stack 'test_app_server' do
   given do
@@ -198,7 +199,7 @@ describe_stack 'test_app_server that uses docker' do
   end
 end
 
-describe 'kubernetes dependencies' do
+describe 'kubernetes' do
   def eval_stacks(&block)
     Stacks::Factory.new(Stacks::Inventory.from(&block))
   end
@@ -226,15 +227,215 @@ describe 'kubernetes dependencies' do
   end
 
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
+  let(:dns_resolver) do
+    MyTestDnsResolver.new('e1-x-vip.space.net.local' => '3.1.4.1',
+                          'e1-app1-001.space.net.local' => '3.1.4.1',
+                          'e1-app1-002.space.net.local' => '3.1.4.2',
+                          'e1-app2-vip.space.net.local' => '3.1.4.3',
+                          'e1-app1-vip.space.net.local' => '3.1.4.4',
+                          'e2-app2-vip.space.net.local' => '3.1.4.5')
+  end
 
-  describe 'a kubernetes service should get correct ingress network policies for another service that depends on it' do
-    let(:dns_resolver) do
-      MyTestDnsResolver.new('e1-app1-001.space.net.local' => '3.1.4.1',
-                            'e1-app1-002.space.net.local' => '3.1.4.2',
-                            'e1-app2-vip.space.net.local' => '3.1.4.3')
+  describe 'app spec' do
+    it 'defines a Deployment' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+      machine_sets = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets
+      k8s = machine_sets['x'].to_k8s(app_deployer, dns_resolver)
+      expected_deployment = {
+        'apiVersion' => 'apps/v1',
+        'kind' => 'Deployment',
+        'metadata' => {
+          'name' => 'myapplication',
+          'namespace' => 'e1',
+          'labels' => {
+            'stack' => 'mystack',
+            'machineset' => 'x'
+          }
+        },
+        'spec' => {
+          'selector' => {
+            'matchLabels' => {
+              'app' => 'myapplication'
+            }
+          },
+          'strategy' => {
+            'type' => 'RollingUpdate',
+            'rollingUpdate' => {
+              'maxUnavailable' => 1,
+              'maxSurge' => 0
+            }
+          },
+          'replicas' => 2,
+          'template' => {
+            'metadata' => {
+              'labels' => {
+                'app' => 'myapplication'
+              }
+            },
+            'spec' => {
+              'containers' => [{
+                'image' => 'repo.net.local:8080/myapplication:1.2.3',
+                'name' => 'myapplication',
+                'args' => [
+                  'java',
+                  '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                  '-jar',
+                  '/app/app.jar',
+                  'config.properties'
+                ],
+                'ports' => [{
+                  'containerPort' => 8000,
+                  'name' => 'myapplication'
+                }],
+                'volumeMounts' => [{
+                  'name' => 'config-volume',
+                  'mountPath' => '/app/config.properties',
+                  'subPath' => 'config.properties'
+                }],
+                'readinessProbe' => {
+                  'periodSeconds' => 2,
+                  'httpGet' => {
+                    'path' => '/info/health',
+                    'port' => 8000
+                  }
+                }
+              }],
+              'volumes' => [{
+                'name' => 'config-volume',
+                'configMap' => {
+                  'name' => 'myapplication-config'
+                }
+              }]
+            }
+          }
+        }
+      }
+      expect(k8s.find { |s| s['kind'] == 'Deployment' }).to eql(expected_deployment)
+
+      expected_service = {
+        'apiVersion' => 'v1',
+        'kind' => 'Service',
+        'metadata' => {
+          'name' => 'myapplication',
+          'namespace' => 'e1',
+          'labels' => {
+            'stack' => 'mystack',
+            'machineset' => 'x'
+          }
+        },
+        'spec' => {
+          'type' => 'LoadBalancer',
+          'selector' => {
+            'app' => 'myapplication'
+          },
+          'ports' => [{
+            'name' => 'app',
+            'protocol' => 'TCP',
+            'port' => 8000,
+            'targetPort' => 8000
+          }],
+          'loadBalancerIP' => '3.1.4.1'
+        }
+      }
+      expect(k8s.find { |s| s['kind'] == 'Service' }).to eql(expected_service)
+
+      expected_config_map = {
+        'apiVersion' => 'v1',
+        'kind' => 'ConfigMap',
+        'metadata' => {
+          'name' => 'myapplication-config',
+          'namespace' => 'e1',
+          'labels' => {
+            'stack' => 'mystack',
+            'machineset' => 'x'
+          }
+        },
+        'data' => {
+          'config.properties' => <<EOL
+port=8000
+
+log.directory=/var/log/MyApplication/e1-MyApplication-blue
+log.tags=["env:e1", "app:MyApplication", "instance:blue"]
+
+graphite.enabled=true
+graphite.host=space-mon-001.mgmt.space.net.local
+graphite.port=2013
+graphite.prefix=myapplication.k8s_e1_space
+graphite.period=10
+EOL
+        }
+      }
+      expect(k8s.find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
+
+      ordering = {}
+      k8s.each_with_index { |s, index| ordering[s['kind']] = index }
+      expect(ordering['Service']).to be < ordering['Deployment']
+      expect(ordering['ConfigMap']).to be < ordering['Deployment']
     end
 
-    it 'should contain all the expected hosts' do
+    it 'controls the number of replicas' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+            self.instances = 3000
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
+    end
+
+    it 'labels metrics using the site' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+            self.instances = 1
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+        to match(/space-mon-001.mgmt.space.net.local/)
+    end
+
+    it 'generates config from app-defined template' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+            self.appconfig = <<EOL
+  site=<%= @environment.sites.first %>
+EOL
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      expect(set.to_k8s(app_deployer, dns_resolver).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).to match(/site=space/)
+    end
+  end
+
+  describe 'dependencies' do
+    it 'should create the correct ingress network policies for a service in kubernetes when another non kubernetes service depends on it' do
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1' do
@@ -253,13 +454,12 @@ describe 'kubernetes dependencies' do
 
       machine_sets = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets
       app2_machine_set = machine_sets['app2']
-      app2_app_server = app2_machine_set.definitions[app2_machine_set.definitions.keys.first]
       expect(app2_machine_set.dependant_instance_fqdns(:primary_site, [app2_machine_set.environment.primary_network])).to eql([
         "e1-app1-001.space.net.local",
         "e1-app1-002.space.net.local"
       ])
 
-      network_policies = app2_app_server.to_k8s(app_deployer, dns_resolver).select do |policy|
+      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
         policy['kind'] == "NetworkPolicy"
       end
 
@@ -277,15 +477,8 @@ describe 'kubernetes dependencies' do
       expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
       expect(network_policies.first['metadata']['spec']['ingress'].first['ports'].first['port']).to be(8000)
     end
-  end
 
-  describe 'a kubernetes service should get correct egress network policies for another service that it depends on' do
-    let(:dns_resolver) do
-      MyTestDnsResolver.new('e1-app2-vip.space.net.local' => '3.1.4.3',
-                            'e1-app1-vip.space.net.local' => '3.1.4.4')
-    end
-
-    it 'should contain all the expected hosts' do
+    it 'should create the correct egress network policies for a service in kubernetes when that service depends on another non kubernetes service' do
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1' do
@@ -322,24 +515,17 @@ describe 'kubernetes dependencies' do
       expect(network_policies.first['metadata']['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
       expect(network_policies.first['metadata']['spec']['egress'].first['ports'].first['port']).to be(8000)
     end
-  end
 
-  describe 'two services in kubernetes should get correct network policies when one service depends on the other' do
-    let(:dns_resolver) do
-      MyTestDnsResolver.new('e1-app2-vip.space.net.local' => '3.1.4.3',
-                            'e1-app1-vip.space.net.local' => '3.1.4.4')
-    end
+    it 'should create the correct network policies for two services in kubernetes in the same environment when one service depends on the other' do
+      def network_policies_for(factory, env, stack, service)
+        machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
+        machine_set = machine_sets[service]
 
-    def network_policies_for(factory, env, stack, service)
-      machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
-      machine_set = machine_sets[service]
-
-      machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
-        policy['kind'] == "NetworkPolicy"
+        machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
+          policy['kind'] == "NetworkPolicy"
+        end
       end
-    end
 
-    it 'should contain all the expected hosts' do
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1', :kubernetes => true do
@@ -392,24 +578,19 @@ describe 'kubernetes dependencies' do
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
       expect(egress.first['ports'].first['port']).to be(8000)
     end
-  end
 
-  describe 'two services in kubernetes iin different environments should get correct network policies when one service depends on the other' do
-    let(:dns_resolver) do
-      MyTestDnsResolver.new('e2-app2-vip.space.net.local' => '3.1.4.3',
-                            'e1-app1-vip.space.net.local' => '3.1.4.4')
-    end
+    it 'should create the correct network policies for two services in \
+kubernetes in different environments in the same site when one service \
+depends on the other' do
+      def network_policies_for(factory, env, stack, service)
+        machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
+        machine_set = machine_sets[service]
 
-    def network_policies_for(factory, env, stack, service)
-      machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
-      machine_set = machine_sets[service]
-
-      machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
-        policy['kind'] == "NetworkPolicy"
+        machine_set.to_k8s(app_deployer, dns_resolver).select do |policy|
+          policy['kind'] == "NetworkPolicy"
+        end
       end
-    end
 
-    it 'should contain all the expected hosts' do
       factory = eval_stacks do
         stack "test_app_server1" do
           app_service 'app1', :kubernetes => true do
