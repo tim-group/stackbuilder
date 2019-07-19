@@ -308,25 +308,25 @@ EOC
         'kind' => 'NetworkPolicy',
         'metadata' => {
           'name' => "allow-#{vs.environment.name}-#{vs.name}-in-to-#{@name}-8000",
-          'namespace' => @environment.name,
-          'spec' => {
-            'podSelector' => {
-              'matchLabels' => {
-                'machine_set' => @name,
-                'stack' => @stack.name
-              }
-            },
-            'policyTypes' => [
-              'Ingress'
-            ],
-            'ingress' => [{
-              'from' => filters,
-              'ports' => [{
-                'protocol' => 'TCP',
-                'port' => 8000
-              }]
+          'namespace' => @environment.name
+        },
+        'spec' => {
+          'podSelector' => {
+            'matchLabels' => {
+              'machine_set' => @name,
+              'stack' => @stack.name
+            }
+          },
+          'policyTypes' => [
+            'Ingress'
+          ],
+          'ingress' => [{
+            'from' => filters,
+            'ports' => [{
+              'protocol' => 'TCP',
+              'port' => 8000
             }]
-          }
+          }]
         }
       }
     end
@@ -355,25 +355,25 @@ EOC
         'kind' => 'NetworkPolicy',
         'metadata' => {
           'name' => "allow-#{@name}-out-to-#{vs.environment.name}-#{vs.name}-8000",
-          'namespace' => @environment.name,
-          'spec' => {
-            'podSelector' => {
-              'matchLabels' => {
-                'machine_set' => @name,
-                'stack' => @stack.name
-              }
-            },
-            'policyTypes' => [
-              'Egress'
-            ],
-            'egress' => [{
-              'to' => filters,
-              'ports' => [{
-                'protocol' => 'TCP',
-                'port' => 8000
-              }]
+          'namespace' => @environment.name
+        },
+        'spec' => {
+          'podSelector' => {
+            'matchLabels' => {
+              'machine_set' => @name,
+              'stack' => @stack.name
+            }
+          },
+          'policyTypes' => [
+            'Egress'
+          ],
+          'egress' => [{
+            'to' => filters,
+            'ports' => [{
+              'protocol' => 'TCP',
+              'port' => 8000
             }]
-          }
+          }]
         }
       }
     end
