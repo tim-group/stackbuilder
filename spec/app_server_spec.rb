@@ -463,6 +463,27 @@ EOL
       expect { set.to_k8s(failing_app_deployer, dns_resolver, hiera_provider) }.
         to raise_error(RuntimeError, /Version not found in cmdb/)
     end
+
+    it 'does not mess with lbs for k8s things' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+          end
+        end
+        stack 'loadbalancer_service' do
+          loadbalancer_service do
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+          instantiate_stack 'loadbalancer_service'
+        end
+      end
+      lb_first_machine_def = factory.inventory.find_environment("e1").
+                             definitions['loadbalancer_service'].children.first.children.first
+      expect(lb_first_machine_def.to_enc["role::loadbalancer"]["virtual_servers"].size).to eq(0)
+    end
   end
 
   describe 'dependencies' do

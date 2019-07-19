@@ -73,7 +73,7 @@ module Stacks::Services::AppService
       fail('disable_http_lb_hack and one_instance_in_lb cannot be specified at the same time')
     end
     config = {}
-    if respond_to?(:load_balanced_service?)
+    if respond_to?(:load_balanced_service?) && !(respond_to?(:kubernetes) && kubernetes)
       config = loadbalancer_config(location, fabric)
       unless @sso_port.nil? || config.empty?
         if @disable_http_lb_hack
