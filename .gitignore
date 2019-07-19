@@ -9,5 +9,4 @@
 stackbuilder.iml
 /.buildpath
 spec/reports/*.xml
-.bundle
 vendor/
