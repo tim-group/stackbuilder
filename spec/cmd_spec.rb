@@ -84,7 +84,7 @@ describe 'cmd' do
   describe 'provision command' do
     describe 'for k8s' do
       it 'provisions a stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         myk8sappservice_machineset = have_attributes(:name => 'myk8sappservice')
@@ -183,7 +183,7 @@ describe 'cmd' do
   describe 'reprovision command' do
     describe 'for k8s' do
       it 'reprovisions a stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
@@ -222,7 +222,7 @@ describe 'cmd' do
       end
 
       it 'reprovisions a machineset' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         cmd = cmd(factory, 'e1', 'myk8sappservice')
@@ -299,7 +299,7 @@ describe 'cmd' do
   describe 'clean command' do
     describe 'for k8s' do
       it 'cleans a stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
@@ -330,7 +330,7 @@ describe 'cmd' do
       end
 
       it 'reprovisions a machineset' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         cmd = cmd(factory, 'e1', 'myk8sappservice')
@@ -398,7 +398,7 @@ describe 'cmd' do
   describe 'compile command' do
     describe 'for VMs' do
       it 'prints enc and spec for everything' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         out = capture_stdout do
@@ -541,7 +541,7 @@ describe 'cmd' do
       end
 
       it 'outputs kubernetes machinesets after VMs' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         out = capture_stdout do
@@ -581,7 +581,7 @@ describe 'cmd' do
       end
 
       it 'prints k8s and VM definitions for a specific stack' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         out = capture_stdout do
@@ -598,7 +598,7 @@ describe 'cmd' do
       end
 
       it 'prints k8s definitions for a specific machineset' do
-        allow(@app_deployer).to receive(:query_cmdb_for).with(anything)
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         out = capture_stdout do

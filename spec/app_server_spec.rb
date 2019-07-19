@@ -210,6 +210,7 @@ describe 'kubernetes' do
     end
 
     def query_cmdb_for(_spec)
+      fail "Not found" if @version.nil?
       { :target_version => @version }
     end
   end
@@ -237,6 +238,7 @@ describe 'kubernetes' do
   end
 
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
+  let(:failing_app_deployer) { TestAppDeployer.new(nil) }
   let(:dns_resolver) do
     MyTestDnsResolver.new('e1-x-vip.space.net.local' => '3.1.4.1',
                           'e1-app1-001.space.net.local' => '3.1.4.1',
@@ -444,6 +446,22 @@ EOL
       expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).
                  find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
         to match(/site=space/)
+    end
+
+    it 'fails when the app version cannot be found' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      expect { set.to_k8s(failing_app_deployer, dns_resolver, hiera_provider) }.
+        to raise_error(RuntimeError, /Version not found in cmdb/)
     end
   end
 

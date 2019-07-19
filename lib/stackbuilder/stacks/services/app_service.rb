@@ -119,7 +119,7 @@ module Stacks::Services::AppService
                                                 :environment => @environment.name,
                                                 :group => group)[:target_version]
     rescue
-      app_version = "UNKNOWN"
+      raise("Version not found in cmdb for application: '#{application}', group: '#{group}' in environment: '#{environment.name}'")
     end
 
     location = environment.translate_site_symbol(site)
