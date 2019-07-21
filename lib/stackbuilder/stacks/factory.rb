@@ -19,7 +19,8 @@ class Stacks::Factory
   attr_reader :path
   attr_reader :inventory
 
-  def initialize(inventory, ignore_spectre_patching_host_policy = false)
+  def initialize(inventory, path = nil, ignore_spectre_patching_host_policy = false)
+    @path = path
     @inventory = inventory
     @ignore_spectre_patching_host_policy = ignore_spectre_patching_host_policy
   end
@@ -86,5 +87,9 @@ class Stacks::Factory
       :allocator          => allocator,
       :dns_service        => dns_service
     )
+  end
+
+  def refresh
+    @inventory = Stacks::Inventory.from_dir(@path)
   end
 end

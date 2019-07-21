@@ -39,36 +39,26 @@ class CMD
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
   def compile(_argv)
-    vm_targets = []
-    k8s_targets = []
-
-    if @stack_name.nil?
-      @factory.inventory.environments.sort.each do |_envname, env|
-        vm_targets += env.flatten
-        env.accept do |c|
-          if c.is_a?(Stacks::CustomServices)
-            k8s_targets += c.k8s_machinesets.values.flatten
-          end
-        end
-      end
-    else
-      thing = check_and_get_stack
-      k8s_targets, vm_targets = split_k8s_from_vms(thing) { |x| x.flatten }
-    end
-
-    puts [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].compact.join("\n")
+    puts generate_compile_output
   end
 
   def diff(_argv)
     diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
     sbc_path = @factory.path
+    logger(Logger::DEBUG) { "Using sbc_path: #{sbc_path}" }
 
     require 'tempfile'
     before_file = Tempfile.new('before')
     after_file = Tempfile.new('after')
 
-    system("cd #{sbc_path} && git checkout HEAD~1 && stacks compile > #{before_file.path}")
-    system("cd #{sbc_path} && git checkout master && stacks compile > #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    Dir.chdir(sbc_path) do
+      system("git checkout HEAD~1")
+      @factory.refresh
+      before_file.write(generate_compile_output)
+      system("git checkout master")
+      @factory.refresh
+      after_file.write(generate_compile_output)
+    end
     system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
     before_file.unlink
     after_file.unlink
@@ -421,6 +411,27 @@ class CMD
   end
 
   private
+
+  def generate_compile_output
+    vm_targets = []
+    k8s_targets = []
+
+    if @stack_name.nil?
+      @factory.inventory.environments.sort.each do |_envname, env|
+        vm_targets += env.flatten
+        env.accept do |c|
+          if c.is_a?(Stacks::CustomServices)
+            k8s_targets += c.k8s_machinesets.values.flatten
+          end
+        end
+      end
+    else
+      thing = check_and_get_stack
+      k8s_targets, vm_targets = split_k8s_from_vms(thing) { |x| x.flatten }
+    end
+
+    [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].compact.join("\n")
+  end
 
   def ensure_is_machine(machine_def)
     if !machine_def.is_a?(Stacks::MachineDef)
