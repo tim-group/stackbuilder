@@ -55,6 +55,7 @@ Options:
     --ignore-safe-diffs                    for audit_vms command - ignore diffs that are "safe" according to provisioning tools
     --ignore-spectre-patching-host-policy  for allocate, clear_host, launch, move, provision and reprovision commands: does not enforce
                                            policy that a spectre-patched VM can only be allocated to a spectre-patched host and vice versa
+    --stash                                for diff command - compare uncommitted changes against HEAD (uses git stash and git stash pop --index)
 
   For further information about options, read bin/stacks.
 
@@ -131,7 +132,8 @@ $options = {
   :path                                  => ENV['STACKBUILDER_CONFIG_PATH'] || '.',
   :verbose                               => 2,
   :'ignore-spectre-patching-host-policy' => false,
-  :'ignore-safe-diffs'                   => false
+  :'ignore-safe-diffs'                   => false,
+  :stash                                 => false
 }
 # change the default path on puppetservers puppet.conf node_terminus does not take parameters
 require 'socket'
@@ -153,7 +155,8 @@ GetoptLong.new(
   ['--diffs-only', GetoptLong::NO_ARGUMENT],
   ['--ignore-safe-diffs', GetoptLong::NO_ARGUMENT],
   ['--ignore-spectre-patching-host-policy', GetoptLong::NO_ARGUMENT],
-  ['--no-tmux', GetoptLong::NO_ARGUMENT]
+  ['--no-tmux', GetoptLong::NO_ARGUMENT],
+  ['--stash', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -176,6 +179,8 @@ GetoptLong.new(
     $options[:'ignore-safe-diffs'] = true
   when '--ignore-spectre-patching-host-policy'
     $options[:'ignore-spectre-patching-host-policy'] = true
+  when '--stash'
+    $options[:stash] = true
   else
     $options[opt_sym] = arg
   end
@@ -251,7 +256,7 @@ dns_resolver = Support::DnsResolver.new
 hiera_provider = Support::HieraProvider.new(:origin => 'git@git:puppet')
 cleaner = Support::Cleaner.new(factory.compute_controller)
 commands = CMD.new(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver,
-                   hiera_provider, cleaner, environment, $options[:stack])
+                   hiera_provider, cleaner, environment, $options[:stack], $options[:stash])
 unless commands.cmds.include? cmd
   if cmd.nil?
     logger(Logger::FATAL) { "no command specified.\nSee --help for more information." }

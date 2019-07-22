@@ -17,7 +17,7 @@ class CMD
 
   # rubocop:disable Metrics/ParameterLists
   def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver,
-                 hiera_provider, cleaner, environment, stack_name = nil)
+                 hiera_provider, cleaner, environment, stack_name = nil, stash = false)
     @factory = factory
     @core_actions = core_actions
     @dns = dns
@@ -30,6 +30,7 @@ class CMD
     @cleaner = cleaner
     @environment = environment
     @stack_name = stack_name
+    @stash = stash
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
     @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host rebuild_host build_new_host)
     @cmds = @read_cmds + @write_cmds
@@ -52,12 +53,22 @@ class CMD
     after_file = Tempfile.new('after')
 
     Dir.chdir(sbc_path) do
-      system("git checkout HEAD~1")
-      @factory.refresh
-      before_file.write(generate_compile_output)
-      system("git checkout master")
-      @factory.refresh
-      after_file.write(generate_compile_output)
+      system("git diff --quiet") # returns 0 if working tree clean, 1 if dirty
+      if $CHILD_STATUS.to_i == 0
+        system("git checkout HEAD~1")
+        @factory.refresh
+        before_file.write(generate_compile_output)
+        system("git checkout master")
+        @factory.refresh
+        after_file.write(generate_compile_output)
+      else
+        fail('Stackbuilder-config working tree not clean. Commit your changes or use --stash') unless @stash
+        before_file.write(generate_compile_output)
+        system("git stash")
+        @factory.refresh
+        after_file.write(generate_compile_output)
+        system("git stash pop --index")
+      end
     end
     system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
     before_file.unlink
