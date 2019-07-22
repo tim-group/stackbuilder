@@ -1,5 +1,4 @@
 require 'stackbuilder/stacks/factory'
-require 'resolv'
 require 'test_classes'
 
 describe 'machine_set' do

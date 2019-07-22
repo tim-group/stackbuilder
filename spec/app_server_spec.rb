@@ -1,6 +1,5 @@
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
-require 'resolv'
 require 'test_classes'
 
 describe_stack 'test_app_server' do

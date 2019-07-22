@@ -1,3 +1,5 @@
+require 'resolv'
+
 class TestAppDeployer
   def initialize(version)
     @version = version
@@ -17,7 +19,7 @@ class MyTestDnsResolver
   def lookup(fqdn)
     Resolv::IPv4.create(@ip_address_map[fqdn])
   rescue ArgumentError
-    raise Resolv::ResolvError "no address for #{fqdn}"
+    raise Resolv::ResolvError, "no address for #{fqdn}"
   end
 end
 
