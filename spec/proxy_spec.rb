@@ -718,3 +718,28 @@ describe_stack 'can specify path on proxypass rule' do
     expect(proxy_pass_rules['/HIP/blah3']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000/foo'
   end
 end
+
+describe_stack 'can proxy to apps running in k8s' do
+  given do
+    stack "exampleproxy" do
+      proxy_service 'exampleproxy' do
+        vhost('exampleapp')
+        nat_config.dnat_enabled = true
+      end
+      app_service 'exampleapp', :kubernetes => true do
+        self.application = 'example'
+      end
+    end
+    env "e1", :primary_site => "space" do
+      instantiate_stack "exampleproxy"
+    end
+  end
+
+  host('e1-exampleproxy-001.mgmt.space.net.local') do |host|
+    role_enc = host.to_enc['role::proxyserver']
+    expect(role_enc['vhosts'].size).to eql(1)
+    vhost1_enc = role_enc['vhosts']['e1-exampleproxy-vip.front.space.net.local']
+    expect(vhost1_enc['ensure']).to eql('present')
+    expect(vhost1_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
+  end
+end

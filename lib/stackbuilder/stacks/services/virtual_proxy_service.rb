@@ -36,6 +36,12 @@ module Stacks::Services::VirtualProxyService
       end
     end
 
+    @environment.find_environment(environment_name).definitions.values.select { |d| d.k8s_machinesets != {} }.each do |stack|
+      stack.k8s_machinesets.values.each do |ms|
+        return ms if service.eql?(ms.name)
+      end
+    end
+
     fail "Cannot find the service called #{service} in #{environment_name}"
   end
 
