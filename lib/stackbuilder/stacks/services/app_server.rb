@@ -51,7 +51,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'cluster'                           => availability_group,
       'environment'                       => environment.name,
       'dependencies'                      => @virtual_service.dependency_config(fabric, self),
-      'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network]),
+      'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network], true, true),
       'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
       'port'                              => '8000',
       'use_docker'                        => @virtual_service.use_docker

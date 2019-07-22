@@ -83,7 +83,6 @@ describe_stack 'stack-with-dependencies' do
       'e1-exampleapp2-002.space.net.local',
       'e1-exampleproxy-001.space.net.local',
       'e1-exampleproxy-002.space.net.local',
-      'e1-kubeexampleapp-001.space.net.local',
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])

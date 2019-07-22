@@ -34,8 +34,8 @@ module Stacks::Dependencies
     fqdn_list(instances, networks)
   end
 
-  def dependant_instance_fqdns(location, networks = [:prod], reject_nodes_in_different_location = true)
-    fqdn_list(dependant_instances(location, reject_nodes_in_different_location), networks).sort
+  def dependant_instance_fqdns(location, networks = [:prod], reject_nodes_in_different_location = true, reject_k8s_nodes = false)
+    fqdn_list(dependant_instances(location, reject_nodes_in_different_location, reject_k8s_nodes), networks).sort
   end
 
   def virtual_services_that_depend_on_me
@@ -51,9 +51,11 @@ module Stacks::Dependencies
 
   def get_children_for_virtual_services(virtual_services,
                                         location = :primary_site,
-                                        reject_nodes_in_different_location = true)
+                                        reject_nodes_in_different_location = true,
+                                        reject_k8s_nodes = false)
     children = []
     virtual_services.map do |service|
+      next if reject_k8s_nodes && service.kubernetes
       children.concat(service.children)
     end
 
@@ -90,11 +92,12 @@ module Stacks::Dependencies
 
   private
 
-  def dependant_instances(location, reject_nodes_in_different_location = true)
+  def dependant_instances(location, reject_nodes_in_different_location = true, reject_k8s_nodes = false)
     get_children_for_virtual_services(
       virtual_services_that_depend_on_me,
       location,
-      reject_nodes_in_different_location)
+      reject_nodes_in_different_location,
+      reject_k8s_nodes)
   end
 
   def find_virtual_service_that_i_depend_on(dependency_id)
