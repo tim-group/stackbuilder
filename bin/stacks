@@ -75,7 +75,7 @@ Options:
     compile                               create a yaml file describing the entire infrastructure
     dependencies [-e] -s                  list the machines that this machine depends on
     dependents [-e] -s                    list the machines that depend on this machine
-    diff                                  show compile diff between last stackbuilder config commit and latest commit.
+    diff [--stash]                        show compile diff between last stackbuilder config commit and latest commit.
     dns [-e] -s                           perform DNS related tasks
       allocate_ips                        allocate all ip addresses for the specified stack (machine(s))
       free_ips                            free all ip addresses for the specified stack (machine(s))
