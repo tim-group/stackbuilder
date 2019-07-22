@@ -58,7 +58,7 @@ class CMD
         system("git checkout HEAD~1")
         @factory.refresh
         before_file.write(generate_compile_output)
-        system("git checkout master")
+        system("git checkout -")
         @factory.refresh
         after_file.write(generate_compile_output)
       else
