@@ -332,6 +332,8 @@ EOC
     end
 
     virtual_services_that_i_depend_on(false).each do |vs|
+      fqdn_to_use = vs.respond_to?(:vip_fqdn) ? vs.vip_fqdn(:prod, children.first.fabric) : vs.children.first.prod_fqdn
+
       filters = []
       if vs.kubernetes
         filters << {
@@ -348,7 +350,7 @@ EOC
           }
         }
       else
-        filters << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(vs.vip_fqdn(:prod, children.first.fabric))}/32" } }
+        filters << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn_to_use)}/32" } }
       end
       network_policies << {
         'apiVersion' => 'networking.k8s.io/v1',
