@@ -12,14 +12,15 @@ module Stacks::Services::LoadBalancerCluster
   end
 
   def establish_dependencies
-    services = @environment.all_things.select do |thing|
-      thing.respond_to?(:to_loadbalancer_config) &&
-      thing.respond_to?(:load_balanced_service?) &&
-      thing.load_balanced_service?
+    services = []
+    @environment.accept do |thing|
+      if thing.respond_to?(:to_loadbalancer_config) &&
+         thing.respond_to?(:load_balanced_service?) &&
+         thing.load_balanced_service?
+        services << [thing.name, environment.name]
+      end
     end
-    services.map do |node|
-      [node.name, environment.name]
-    end
+    services
   end
 
   def loadbalancer_config_hash(location, fabric)
