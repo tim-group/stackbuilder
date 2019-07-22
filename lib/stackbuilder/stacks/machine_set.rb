@@ -19,6 +19,7 @@ class Stacks::MachineSet
   attr_accessor :use_docker
   attr_accessor :kubernetes
   attr_reader :allowed_hosts
+  attr_reader :allowed_outbound_connections
   attr_reader :default_networks
   attr_reader :depends_on
   attr_reader :stack
@@ -37,6 +38,7 @@ class Stacks::MachineSet
     @stack = stack
 
     @allowed_hosts = []
+    @allowed_outbound_connections = {}
     @default_networks = [:mgmt, :prod]
     @depends_on = []
     @enable_secondary_site = false
@@ -164,6 +166,14 @@ class Stacks::MachineSet
     @allowed_hosts.uniq!
   end
 
+  def allow_outbound_to(identifier, destination_ips_in_cidr_form, ports)
+    fail('Allowing outbound connections is only supported if kubernetes is enabled for this machine_set') unless @kubernetes
+    @allowed_outbound_connections[identifier] = {
+      :ips => destination_ips_in_cidr_form.is_a?(Array) ? destination_ips_in_cidr_form : [destination_ips_in_cidr_form],
+      :ports => ports.is_a?(Array) ? ports : [ports]
+    }
+  end
+
   def on_bind(&block)
     @bind_steps << block
   end
@@ -213,7 +223,44 @@ class Stacks::MachineSet
   end
 
   def to_k8s(_app_deployer, _dns_resolver, _hiera_provider)
-    []
+    policies = []
+    @allowed_outbound_connections.each_key do |outbound_connection|
+      filters = []
+      @allowed_outbound_connections[outbound_connection][:ips].each do |ip|
+        filters << { 'ipBlock' => { 'cidr' => ip } }
+      end
+      ports = []
+      @allowed_outbound_connections[outbound_connection][:ports].each do |port|
+        ports << {
+          'protocol' => 'TCP',
+          'port' => port
+        }
+      end
+      policies << {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => "allow-#{@name}-out-to-#{outbound_connection}-on-ports-#{ports.map { |port| port['port'] }.join('-')}",
+          'namespace' => @environment.name
+        },
+        'spec' => {
+          'podSelector' => {
+            'matchLabels' => {
+              'machine_set' => @name,
+              'stack' => @stack.name
+            }
+          },
+          'policyTypes' => [
+            'Egress'
+          ],
+          'egress' => [{
+            'to' => filters,
+            'ports' => ports
+          }]
+        }
+      }
+    end
+    policies
   end
 
   private
