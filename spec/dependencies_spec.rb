@@ -90,11 +90,6 @@ describe_stack 'stack-with-dependencies' do
     expect(host.to_enc['role::http_app']['allow_kubernetes']).to eql(true)
   end
   host('e1-exampledb-001.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql([
-      'e1-exampleapp2-001.space.net.local',
-      'e1-exampleapp2-002.space.net.local',
-      'e1-kubeexampleapp-001.space.net.local'
-    ])
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
     expect(rights['example2@e1-exampleapp2-001.space.net.local/example']).to eql(
       'password_hiera_key' => 'e1/example2/mysql_password',

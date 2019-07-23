@@ -236,15 +236,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     }
   end
 
-  def dependant_instances_enc(dependant_instances)
-    {
-      'role::mysql_server' =>  {
-        'dependencies' => @virtual_service.dependency_config(fabric, self),
-        'dependant_instances' => dependant_instances.sort
-      }
-    }
-  end
-
   def allowed_hosts_enc
     return {} if @virtual_service.allowed_hosts.empty?
     {
@@ -285,7 +276,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     dependant_instances.delete prod_fqdn
 
     if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      recurse_merge!(enc, dependant_instances_enc(dependant_instances))
       unless role_of?(:backup) || role_of?(:user_access)
         recurse_merge!(enc, @virtual_service.dependant_instance_mysql_rights)
       end

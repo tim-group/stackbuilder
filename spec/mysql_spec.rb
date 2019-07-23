@@ -62,11 +62,6 @@ describe_stack 'should provide 3 mysql servers by default, one is a master' do
 
   host("testing-frdb-001.mgmt.space.net.local") do |host|
     expect(host.role).to eql(:master)
-    # Ordering should be idempotent
-    expect(host.to_enc['role::mysql_server']['dependant_instances']).to eql([
-      'testing-frdb-002.space.net.local',
-      'testing-frdbbackup-001.earth.net.local'
-    ])
   end
   host("testing-frdb-002.mgmt.space.net.local") do |host|
     expect(host.role).to eql(:slave)
@@ -376,55 +371,6 @@ describe_stack 'should have mysql 5.6.25-1ubuntu14.04 as the default version of 
   end
   host("testing-my55-001.mgmt.space.net.local") do |host|
     expect(host.to_enc['role::mysql_server']['version']).to eql('5.5.43-0ubuntu14.04')
-  end
-end
-
-describe_stack 'should support dependencies' do
-  given do
-    stack 'fr' do
-      app_service 'frapp' do
-        self.application = 'futuresroll'
-        depend_on 'frdb'
-      end
-    end
-    stack 'fr_db' do
-      mysql_cluster 'frdb' do
-        self.role_in_name = false
-        self.database_name = "futuresroll"
-      end
-    end
-    stack 'hr' do
-      app_service 'hrapp' do
-        self.application = 'huturesroll'
-      end
-    end
-    stack 'hr_db' do
-      mysql_cluster 'hrdb' do
-        self.role_in_name = false
-        self.database_name = "huturesroll"
-      end
-    end
-
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
-      instantiate_stack "fr"
-      instantiate_stack "fr_db"
-      instantiate_stack "hr"
-      instantiate_stack "hr_db"
-    end
-  end
-  host("testing-frdb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['dependant_instances'].size).to eql(4)
-    expect(host.to_enc['role::mysql_server']['dependant_instances']).to \
-      include('testing-frapp-001.space.net.local', 'testing-frapp-002.space.net.local')
-    expect(host.to_enc['role::mysql_server']['dependant_instances']).to \
-      include('testing-frdb-002.space.net.local', 'testing-frdbbackup-001.earth.net.local')
-    expect(host.to_enc['role::mysql_server']['dependencies']).to eql({})
-  end
-  host("testing-hrdb-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['dependant_instances'].size).to eql(2)
-    expect(host.to_enc['role::mysql_server']['dependant_instances']).to \
-      include('testing-hrdb-002.space.net.local', 'testing-hrdbbackup-001.earth.net.local')
-    expect(host.to_enc['role::mysql_server']['dependencies']).to eql({})
   end
 end
 
