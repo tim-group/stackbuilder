@@ -63,10 +63,10 @@ class CMD
         after_file.write(generate_compile_output)
       else
         fail('Stackbuilder-config working tree not clean. Commit your changes or use --stash') unless @stash
-        before_file.write(generate_compile_output)
+        after_file.write(generate_compile_output)
         system("git stash")
         @factory.refresh
-        after_file.write(generate_compile_output)
+        before_file.write(generate_compile_output)
         system("git stash pop --index")
       end
     end
