@@ -262,7 +262,7 @@ EOC
               'readinessProbe' => {
                 'periodSeconds' => 2,
                 'httpGet' => {
-                  'path' => '/info/health',
+                  'path' => '/info/ready',
                   'port' => 8000
                 }
               }
