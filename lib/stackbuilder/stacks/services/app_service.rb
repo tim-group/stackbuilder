@@ -60,6 +60,10 @@ module Stacks::Services::AppService
     create_rabbitmq_config(@application)
   end
 
+  def endpoints(_dependent_service, fabric)
+    [{ :port => 8000, :fqdns => [vip_fqdn(:prod, fabric)] }]
+  end
+
   def config_params(_dependant, fabric, _dependent_instance)
     if respond_to? :vip_fqdn
       { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
@@ -108,6 +112,7 @@ module Stacks::Services::AppService
 
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
     output = super
+    fail("app_service requires application") if application.nil?
     app_name = application.downcase
     fail('app_service to_k8s doesn\'t know how to deal with multiple groups yet') if @groups.size > 1
     group = @groups.first
@@ -139,7 +144,7 @@ module Stacks::Services::AppService
     output << generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site)
     output << generate_k8s_service(dns_resolver, app_name)
     output << generate_k8s_deployment(app_name, app_version)
-    output += generate_k8s_network_policies(dns_resolver)
+    output += generate_k8s_network_policies(dns_resolver, fabric)
     output
   end
 
@@ -274,7 +279,7 @@ EOC
     }
   end
 
-  def generate_k8s_network_policies(dns_resolver)
+  def generate_k8s_network_policies(dns_resolver, fabric)
     network_policies = []
     virtual_services_that_depend_on_me.each do |vs|
       filters = []
@@ -332,31 +337,49 @@ EOC
     end
 
     virtual_services_that_i_depend_on(false).each do |vs|
-      fqdn_to_use = vs.respond_to?(:vip_fqdn) ? vs.vip_fqdn(:prod, children.first.fabric) : vs.children.first.prod_fqdn
+      fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
 
-      filters = []
+      egresses = []
       if vs.kubernetes
-        filters << {
-          'podSelector' => {
-            'matchLabels' => {
-              'machine_set' => vs.name,
-              'stack' => vs.stack.name
+        egresses << {
+          'to' => [{
+            'podSelector' => {
+              'matchLabels' => {
+                'machine_set' => vs.name,
+                'stack' => vs.stack.name
+              }
+            },
+            'namespaceSelector' => {
+              'matchLabels' => {
+                'name' => vs.environment.name
+              }
             }
-          },
-          'namespaceSelector' => {
-            'matchLabels' => {
-              'name' => vs.environment.name
-            }
-          }
+          }],
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => 8000
+          }]
         }
       else
-        filters << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn_to_use)}/32" } }
+        vs.endpoints(self, fabric).each do |e|
+          ip_blocks = []
+          e[:fqdns].each do |fqdn|
+            ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
+          end
+          egresses << {
+            'to' => ip_blocks,
+            'ports' => [{
+              'protocol' => 'TCP',
+              'port' => e[:port]
+            }]
+          }
+        end
       end
       network_policies << {
         'apiVersion' => 'networking.k8s.io/v1',
         'kind' => 'NetworkPolicy',
         'metadata' => {
-          'name' => "allow-#{@name}-out-to-#{vs.environment.name}-#{vs.name}-8000",
+          'name' => "allow-#{@name}-out-to-#{vs.environment.name}-#{vs.name}-#{vs.endpoints(self, fabric).map { |e| e[:port] }.join('-')}",
           'namespace' => @environment.name
         },
         'spec' => {
@@ -369,13 +392,7 @@ EOC
           'policyTypes' => [
             'Egress'
           ],
-          'egress' => [{
-            'to' => filters,
-            'ports' => [{
-              'protocol' => 'TCP',
-              'port' => 8000
-            }]
-          }]
+          'egress' => egresses
         }
       }
     end

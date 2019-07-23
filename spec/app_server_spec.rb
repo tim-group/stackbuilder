@@ -482,19 +482,19 @@ EOL
         policy['kind'] == "NetworkPolicy"
       end
 
-      expect(network_policies.size).to be(1)
+      expect(network_policies.size).to eq(1)
       expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
       expect(network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
       expect(network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
-      expect(network_policies.first['spec']['ingress'].size).to be(1)
-      expect(network_policies.first['spec']['ingress'].first['from'].size).to be(2)
-      expect(network_policies.first['spec']['ingress'].first['ports'].size).to be(1)
+      expect(network_policies.first['spec']['ingress'].size).to eq(1)
+      expect(network_policies.first['spec']['ingress'].first['from'].size).to eq(2)
+      expect(network_policies.first['spec']['ingress'].first['ports'].size).to eq(1)
       expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.1/32' })
       expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
       expect(network_policies.first['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(network_policies.first['spec']['ingress'].first['ports'].first['port']).to be(8000)
+      expect(network_policies.first['spec']['ingress'].first['ports'].first['port']).to eq(8000)
     end
 
     it 'should create the correct egress network policies for a service in kubernetes when that service depends on another non kubernetes service' do
@@ -521,18 +521,18 @@ EOL
         policy['kind'] == "NetworkPolicy"
       end
 
-      expect(network_policies.size).to be(1)
+      expect(network_policies.size).to eq(1)
       expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
       expect(network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
-      expect(network_policies.first['spec']['egress'].size).to be(1)
-      expect(network_policies.first['spec']['egress'].first['to'].size).to be(1)
-      expect(network_policies.first['spec']['egress'].first['ports'].size).to be(1)
+      expect(network_policies.first['spec']['egress'].size).to eq(1)
+      expect(network_policies.first['spec']['egress'].first['to'].size).to eq(1)
+      expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
       expect(network_policies.first['spec']['egress'].first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.4/32' })
       expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to be(8000)
+      expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(8000)
     end
 
     it 'should create the correct network policies for two services in kubernetes in the same environment when one service depends on the other' do
@@ -566,36 +566,36 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to be(1)
+      expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e1-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
-      expect(ingress.size).to be(1)
-      expect(ingress.first['from'].size).to be(1)
-      expect(ingress.first['ports'].size).to be(1)
+      expect(ingress.size).to eq(1)
+      expect(ingress.first['from'].size).to eq(1)
+      expect(ingress.first['ports'].size).to eq(1)
       expect(ingress.first['from'].first['podSelector']['matchLabels']['machine_set']).to eql('app2')
       expect(ingress.first['from'].first['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress.first['ports'].first['port']).to be(8000)
+      expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to be(1)
+      expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
-      expect(egress.size).to be(1)
-      expect(egress.first['to'].size).to be(1)
-      expect(egress.first['ports'].size).to be(1)
+      expect(egress.size).to eq(1)
+      expect(egress.first['to'].size).to eq(1)
+      expect(egress.first['ports'].size).to eq(1)
       expect(egress.first['to'].first['podSelector']['matchLabels']['machine_set']).to eql('app1')
       expect(egress.first['to'].first['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
-      expect(egress.first['ports'].first['port']).to be(8000)
+      expect(egress.first['ports'].first['port']).to eq(8000)
     end
 
     it 'should create the correct network policies for two services in \
@@ -635,36 +635,58 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to be(1)
+      expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e2-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_server1')
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
-      expect(ingress.size).to be(1)
-      expect(ingress.first['from'].size).to be(1)
-      expect(ingress.first['ports'].size).to be(1)
+      expect(ingress.size).to eq(1)
+      expect(ingress.first['from'].size).to eq(1)
+      expect(ingress.first['ports'].size).to eq(1)
       expect(ingress.first['from'].first['podSelector']['matchLabels']['machine_set']).to eql('app2')
       expect(ingress.first['from'].first['podSelector']['matchLabels']['stack']).to eql('test_app_server2')
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e2')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress.first['ports'].first['port']).to be(8000)
+      expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to be(1)
+      expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_server2')
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
-      expect(egress.size).to be(1)
-      expect(egress.first['to'].size).to be(1)
-      expect(egress.first['ports'].size).to be(1)
+      expect(egress.size).to eq(1)
+      expect(egress.first['to'].size).to eq(1)
+      expect(egress.first['ports'].size).to eq(1)
       expect(egress.first['to'].first['podSelector']['matchLabels']['machine_set']).to eql('app1')
       expect(egress.first['to'].first['podSelector']['matchLabels']['stack']).to eql('test_app_server1')
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
-      expect(egress.first['ports'].first['port']).to be(8000)
+      expect(egress.first['ports'].first['port']).to eq(8000)
+    end
+
+    it 'should fail when dependency does not provide endpoints' do
+      factory = eval_stacks do
+        stack "test_app_servers" do
+          app_service 'app1', :kubernetes => true do
+            self.application = 'app'
+            depend_on 'logstash-receiver'
+          end
+          logstash_receiver 'logstash-receiver' do
+          end
+        end
+        env "e1", :primary_site => "space" do
+          instantiate_stack "test_app_servers"
+        end
+      end
+
+      machine_sets = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets
+      machine_set = machine_sets['app1']
+      expect { machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider) }.to raise_error(
+        RuntimeError,
+        match(/not supported for k8s - endpoints method is not implemented/))
     end
   end
 end

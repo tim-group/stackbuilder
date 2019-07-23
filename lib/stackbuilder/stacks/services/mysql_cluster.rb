@@ -166,12 +166,21 @@ module Stacks::Services::MysqlCluster
       fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
         "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
     else
-      # Convert the fqdn array to an array of server objects ensuring the same order
-      servers = @supported_requirements[requirement].inject([]) do |s, fqdn|
-        s << children.find { |server| server.prod_fqdn == fqdn }
-      end
+      servers = servers_ordered(requirement)
       config_to_fulfil_requirement(dependent_service, servers, requirement, dependent_instance)
     end
+  end
+
+  def endpoints(dependent_service, fabric)
+    requirement = requirement_of(dependent_service)
+    fqdns = []
+    if @supported_requirements.empty? && requirement.nil?
+      master, read_only_slaves = hosts_given_no_requirement(dependent_service, fabric)
+      fqdns = master + read_only_slaves
+    else
+      fqdns = servers_ordered(requirement).map(&:prod_fqdn)
+    end
+    [{ :port => 3306, :fqdns => fqdns }]
   end
 
   def master_servers
@@ -239,9 +248,14 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_given_no_requirement(dependent_service, fabric, dependent_instance)
+    masters, read_only_slaves = hosts_given_no_requirement(dependent_service, fabric)
+    config_properties(dependent_service, masters, read_only_slaves, dependent_instance)
+  end
+
+  def hosts_given_no_requirement(dependent_service, fabric)
     masters = master_servers
     masters.reject! { |master| master.site != dependent_service.environment.sites.first } if @master_only_in_same_site
-    config_properties(dependent_service, [masters.map(&:prod_fqdn).sort.first], read_only_cluster_servers(fabric), dependent_instance)
+    [[masters.map(&:prod_fqdn).sort.first], read_only_cluster_servers(fabric)]
   end
 
   def requirement_of(dependent_service)
@@ -250,15 +264,20 @@ module Stacks::Services::MysqlCluster
   end
 
   def config_to_fulfil_requirement(dependent_service, hosts, requirement, dependent_instance)
-    master = []
-    read_only_slaves = []
+    hosts_for_writing, hosts_for_reading = hosts_to_fulfil_requirement(hosts, requirement)
+    config_properties(dependent_service, hosts_for_writing, hosts_for_reading, dependent_instance)
+  end
+
+  def hosts_to_fulfil_requirement(hosts, requirement)
+    hosts_for_writing = []
+    hosts_for_reading = []
     if (requirement == :master_with_slaves)
-      master = [hosts.select(&:master?).map(&:prod_fqdn).first]
-      read_only_slaves = hosts.reject(&:master?).map(&:prod_fqdn)
+      hosts_for_writing = [hosts.select(&:master?).map(&:prod_fqdn).first]
+      hosts_for_reading = hosts.reject(&:master?).map(&:prod_fqdn)
     else
-      master = read_only_slaves = hosts.map(&:prod_fqdn)
+      hosts_for_writing = hosts_for_reading = hosts.map(&:prod_fqdn)
     end
-    config_properties(dependent_service, master, read_only_slaves, dependent_instance)
+    [hosts_for_writing, hosts_for_reading]
   end
 
   def config_properties(dependent_service, master, read_only_cluster, dependent_instance)
@@ -284,5 +303,13 @@ module Stacks::Services::MysqlCluster
     end
 
     config_params
+  end
+
+  def servers_ordered(requirement)
+    fail "Supported requirements are enabled for this DB but one was not specified" if requirement.nil?
+    # Convert the fqdn array to an array of server objects ensuring the same order
+    @supported_requirements[requirement].inject([]) do |s, fqdn|
+      s << children.find { |server| server.prod_fqdn == fqdn }
+    end
   end
 end
