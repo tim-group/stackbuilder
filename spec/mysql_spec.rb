@@ -249,6 +249,8 @@ describe_stack 'should provide the correct application rights if the app server 
       eql('testing/SuperLongLengthName/mysql_password')
     expect(rights['SuperLongLengthN@space-testing-applong/ref']['passwords_hiera_key']).to \
       eql('testing/SuperLongLengthName/mysql_passwords')
+    expect(rights['SuperLongLengthN@space-testing-applong/ref']['allow_kubernetes']).to be(true)
+    expect(rights['SuperLongLengthN@space-testing-applong/ref']['kubernetes_clusters']).to eql(['space'])
   end
 end
 
