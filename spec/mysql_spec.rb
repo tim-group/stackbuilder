@@ -224,6 +224,34 @@ describe_stack 'should provide the correct application rights' do
   end
 end
 
+describe_stack 'should provide the correct application rights if the app server is in kubernetes' do
+  given do
+    stack "mysql" do
+      mysql_cluster "mydb" do
+        self.role_in_name = false
+        self.database_name = "ref"
+      end
+    end
+    stack "app_server" do
+      app_service "applong", :kubernetes => true do
+        self.application = "SuperLongLengthName"
+        depend_on 'mydb'
+      end
+    end
+    env "testing", :primary_site => "space", :secondary_site => "earth" do
+      instantiate_stack "mysql"
+      instantiate_stack "app_server"
+    end
+  end
+  host("testing-mydb-001.mgmt.space.net.local") do |host|
+    rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
+    expect(rights['SuperLongLengthN@space-testing-applong/ref']['password_hiera_key']).to \
+      eql('testing/SuperLongLengthName/mysql_password')
+    expect(rights['SuperLongLengthN@space-testing-applong/ref']['passwords_hiera_key']).to \
+      eql('testing/SuperLongLengthName/mysql_passwords')
+  end
+end
+
 describe_stack 'should allow storage options to be overwritten' do
   given do
     stack "mysql" do
