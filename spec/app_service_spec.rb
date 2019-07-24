@@ -20,7 +20,7 @@ describe 'kubernetes' do
   end
   let(:hiera_provider) { TestHieraProvider.new('the_hiera_key' => 'the_hiera_value') }
 
-  describe 'app spec' do
+  describe 'resource definitions' do
     it 'defines a Deployment' do
       factory = eval_stacks do
         stack "mystack" do
