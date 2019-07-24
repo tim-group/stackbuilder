@@ -491,4 +491,134 @@ depends on the other' do
         match(/not supported for k8s - endpoints method is not implemented/))
     end
   end
+
+  describe 'stacks' do
+    it 'should allow app services to be k8s or non-k8s by environment' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service 'app1', :kubernetes => { 'e1' => true, 'e2' => false } do
+            self.application = 'myapp'
+          end
+        end
+        env "e1", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+        env "e2", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+      end
+
+      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
+      expect(e1_mystack.definitions.size).to eq(0)
+      expect(e1_mystack.k8s_machinesets.size).to eq(1)
+      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
+      expect(e2_mystack.definitions.size).to eq(1)
+      expect(e2_mystack.k8s_machinesets.size).to eq(0)
+    end
+
+    it 'should allow app services to all be k8s' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service 'app1', :kubernetes => true do
+            self.application = 'myapp'
+          end
+        end
+        env "e1", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+        env "e2", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+      end
+
+      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
+      expect(e1_mystack.definitions.size).to eq(0)
+      expect(e1_mystack.k8s_machinesets.size).to eq(1)
+      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
+      expect(e2_mystack.definitions.size).to eq(0)
+      expect(e2_mystack.k8s_machinesets.size).to eq(1)
+    end
+
+    it 'should allow app services to not be k8s' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service 'app1', :kubernetes => false do
+            self.application = 'myapp'
+          end
+        end
+        env "e1", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+        env "e2", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+      end
+
+      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
+      expect(e1_mystack.definitions.size).to eq(1)
+      expect(e1_mystack.k8s_machinesets.size).to eq(0)
+      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
+      expect(e2_mystack.definitions.size).to eq(1)
+      expect(e2_mystack.k8s_machinesets.size).to eq(0)
+    end
+
+    it 'should default app services to not be k8s if no kubernetes property is defined' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service 'app1' do
+            self.application = 'myapp'
+          end
+          app_service 'app2' do
+            self.application = 'myapp'
+          end
+        end
+        env "e1", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+        env "e2", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+      end
+
+      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
+      expect(e1_mystack.definitions.size).to eq(2)
+      expect(e1_mystack.k8s_machinesets.size).to eq(0)
+      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
+      expect(e2_mystack.definitions.size).to eq(2)
+      expect(e2_mystack.k8s_machinesets.size).to eq(0)
+    end
+
+    it 'should raise error if any environments where stack is instantiated are not specified' do
+      expect do
+        eval_stacks do
+          stack "mystack" do
+            app_service 'app1', :kubernetes => { 'e1' => true } do
+              self.application = 'myapp'
+            end
+          end
+          env "e1", :primary_site => "space" do
+            instantiate_stack "mystack"
+          end
+          env "e2", :primary_site => "space" do
+            instantiate_stack "mystack"
+          end
+        end
+      end.to raise_error(RuntimeError, match(/all environments/))
+    end
+
+    it 'should raise error if kubernetes property for environment is not a boolean' do
+      expect do
+        eval_stacks do
+          stack "mystack" do
+            app_service 'app1', :kubernetes => { 'e1' => 'foo' } do
+              self.application = 'myapp'
+            end
+          end
+          env "e1", :primary_site => "space" do
+            instantiate_stack "mystack"
+          end
+        end
+      end.to raise_error(RuntimeError, match(/not a boolean/))
+    end
+  end
 end
