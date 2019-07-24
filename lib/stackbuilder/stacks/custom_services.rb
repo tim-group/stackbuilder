@@ -23,8 +23,7 @@ class Stacks::CustomServices
     "#{environment.name}_#{name.to_sym}"
   end
 
-  # FIXME: Remove when all things have moved to loadbalanced_app_service it is just confusing
-  def app_service(name, properties = {}, &block)
+  def service_in_kubernetes?(name, properties)
     fail("app_service '#{name}' does not specify kubernetes property for environment '#{@environment.name}'. \
 If any environments are specified then all environments where the stack is instantiated must \
 be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash) && !properties[:kubernetes].key?(@environment.name)
@@ -32,9 +31,13 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
     fail("app_service '#{name}' kubernetes property for environment '#{@environment.name}' is not a boolean.") if
       properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash) && ![true, false].include?(properties[:kubernetes][@environment.name])
 
-    if properties.is_a?(Hash) &&
-       ((properties[:kubernetes].is_a?(Hash) && properties[:kubernetes][@environment.name] == true) ||
-         (properties[:kubernetes] == true))
+    properties.is_a?(Hash) &&
+      ((properties[:kubernetes].is_a?(Hash) && properties[:kubernetes][@environment.name] == true) ||
+        (properties[:kubernetes] == true))
+  end
+
+  def app_service(name, properties = {}, &block)
+    if service_in_kubernetes?(name, properties)
       k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                           Stacks::Services::AppServer, &block)
     else
@@ -43,13 +46,12 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
     end
   end
 
-  def loadbalanced_app_service(name, &block)
-    machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
-                    Stacks::Services::AppServer, &block)
-  end
-
-  def standalone_app_service(name, &block)
-    machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
+  def standalone_app_service(name, properties = {}, &block)
+    if service_in_kubernetes?(name, properties)
+      k8s_machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
+    else
+      machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
+    end
   end
 
   def proxy_service(name, &block)

@@ -61,13 +61,13 @@ module Stacks::Services::AppService
   end
 
   def endpoints(_dependent_service, fabric)
-    [{ :port => 8000, :fqdns => [vip_fqdn(:prod, fabric)] }]
+    [{ :port => 8000, :fqdns => [prod_fqdn(fabric)] }]
   end
 
   def config_params(_dependant, fabric, _dependent_instance)
     if respond_to? :vip_fqdn
       fail("app_service requires application") if application.nil?
-      { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
+      { "#{application.downcase}.url" => "http://#{prod_fqdn(fabric)}:8000" }
     else
       {}
     end
@@ -149,6 +149,14 @@ module Stacks::Services::AppService
     output
   end
 
+  def prod_fqdn(fabric)
+    if respond_to? :vip_fqdn
+      vip_fqdn(:prod, fabric)
+    else
+      children.first.prod_fqdn
+    end
+  end
+
   private
 
   def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric)
@@ -212,7 +220,7 @@ EOC
           'port' => 8000,
           'targetPort' => 8000
         }],
-        'loadBalancerIP' => dns_resolver.lookup(vip_fqdn('prod', children.first.fabric)).to_s
+        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(children.first.fabric)).to_s
       }
     }
   end
