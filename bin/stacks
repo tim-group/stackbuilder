@@ -187,6 +187,9 @@ GetoptLong.new(
 end
 cmd = ARGV.shift
 argv = ARGV
+
+logger(Logger::DEBUG) { "Running on ruby #{RUBY_DESCRIPTION}" }
+logger(Logger::DEBUG) { "Loading libraries from #{$LOAD_PATH.join(',')}" }
 logger(Logger::DEBUG) { "finished processing options. command: \"#{cmd}\", options: \"#{$options}\", argv: #{argv}" }
 
 if $options[:'checkout-config']
