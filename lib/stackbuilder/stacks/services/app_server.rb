@@ -57,8 +57,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'use_docker'                        => @virtual_service.use_docker
     }
 
-    enc['role::http_app']['allow_kubernetes'] = true \
-      if @virtual_service.dependant_instances_of_type(Stacks::Services::AppServer, location).any? { |s| s.virtual_service.kubernetes }
+    enc_dependant_kubernetes_things enc
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
     enc['role::http_app']['sso_port'] = @virtual_service.sso_port unless @virtual_service.sso_port.nil?
@@ -96,6 +95,15 @@ class Stacks::Services::AppServer < Stacks::MachineDef
   end
 
   private
+
+  def enc_dependant_kubernetes_things(enc)
+    dependant_app_server_instances = @virtual_service.dependant_instances_of_type(Stacks::Services::AppServer, location)
+    return unless dependant_app_server_instances.any? { |s| s.virtual_service.kubernetes }
+    enc['role::http_app']['allow_kubernetes'] = true
+    enc['role::http_app']['kubernetes_clusters'] = dependant_app_server_instances.select do |s|
+      s.virtual_service.kubernetes
+    end.map { |vs| vs.environment.options[location] }.uniq
+  end
 
   def enc_ehcache(enc)
     return unless @virtual_service.ehcache
