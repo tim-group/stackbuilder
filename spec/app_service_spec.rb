@@ -14,7 +14,9 @@ describe 'kubernetes' do
                           'e1-app1-002.space.net.local' => '3.1.4.2',
                           'e1-app2-vip.space.net.local' => '3.1.4.3',
                           'e1-app1-vip.space.net.local' => '3.1.4.4',
-                          'e2-app2-vip.space.net.local' => '3.1.4.5')
+                          'e2-app2-vip.space.net.local' => '3.1.4.5',
+                          'e1-mydb-001.space.net.local' => '3.1.4.6',
+                          'e1-mydb-002.space.net.local' => '3.1.4.6')
   end
   let(:hiera_provider) { TestHieraProvider.new('the_hiera_key' => 'the_hiera_value') }
 
@@ -217,6 +219,41 @@ EOL
         to match(/site=space/)
     end
 
+    it 'has config for it\'s db dependencies' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+            depend_on 'mydb'
+          end
+        end
+        stack "my_db" do
+          mysql_cluster "mydb" do
+            self.role_in_name = false
+            self.database_name = 'exampledb'
+            self.master_instances = 1
+            self.slave_instances = 1
+            self.include_master_in_read_only_cluster = false
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+          instantiate_stack "my_db"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).
+                 find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+        to match(/db.exampledb.hostname=e1-mydb-001.space.net.local.*
+                  db.exampledb.database=exampledb.*
+                  db.exampledb.driver=com.mysql.jdbc.Driver.*
+                  db.exampledb.port=3306.*
+                  db.exampledb.username=MyApplication.*
+                  db.exampledb.password_hiera_key=e1\/MyApplication\/mysql_password.*
+                  db.exampledb.read_only_cluster=e1-mydb-002.space.net.local.*
+                 /mx)
+    end
+
     it 'fails when the app version cannot be found' do
       factory = eval_stacks do
         stack "mystack" do
@@ -303,6 +340,7 @@ EOL
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1' do
+            self.application = 'app1'
           end
 
           app_service 'app2', :kubernetes => true do

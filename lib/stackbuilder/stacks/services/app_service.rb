@@ -66,6 +66,7 @@ module Stacks::Services::AppService
 
   def config_params(_dependant, fabric, _dependent_instance)
     if respond_to? :vip_fqdn
+      fail("app_service requires application") if application.nil?
       { "#{application.downcase}.url" => "http://#{vip_fqdn(:prod, fabric)}:8000" }
     else
       {}
@@ -141,7 +142,7 @@ module Stacks::Services::AppService
       'site' => site
     }
 
-    output << generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site)
+    output << generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric)
     output << generate_k8s_service(dns_resolver, app_name)
     output << generate_k8s_deployment(app_name, app_version)
     output += generate_k8s_network_policies(dns_resolver, fabric)
@@ -150,7 +151,7 @@ module Stacks::Services::AppService
 
   private
 
-  def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site)
+  def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric)
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
@@ -173,10 +174,19 @@ graphite.enabled=true
 graphite.host=#{site}-mon-001.mgmt.#{site}.net.local
 graphite.port=2013
 graphite.prefix=#{app_name}.k8s_#{@environment.name}_#{site}
-graphite.period=10#{"\n\n" + ConfigERB.new(appconfig, erb_vars, hiera_provider).render unless appconfig.nil?}
+graphite.period=10#{generate_dependency_config(fabric)}#{"\n\n" + ConfigERB.new(appconfig, erb_vars, hiera_provider).render unless appconfig.nil?}
 EOC
       }
     }
+  end
+
+  def generate_dependency_config(fabric)
+    config_params = dependency_config(fabric, children.first)
+    return '' if config_params.empty?
+
+    "\n\n" + config_params.map do |k, v|
+      "#{k}=#{v}"
+    end.join("\n")
   end
 
   def generate_k8s_service(dns_resolver, app_name)

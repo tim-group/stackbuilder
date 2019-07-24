@@ -179,7 +179,7 @@ module Stacks::Services::MysqlCluster
       fail "Stack '#{name}' does not support requirement '#{requirement}' in environment '#{environment.name}'. " \
         "Supported requirements: [#{@supported_requirements.keys.sort.join(',')}]."
     else
-      servers = servers_ordered(requirement)
+      servers = servers_ordered(dependent_service, requirement)
       config_to_fulfil_requirement(dependent_service, servers, requirement, dependent_instance)
     end
   end
@@ -191,7 +191,7 @@ module Stacks::Services::MysqlCluster
       master, read_only_slaves = hosts_given_no_requirement(dependent_service, fabric)
       fqdns = master + read_only_slaves
     else
-      fqdns = servers_ordered(requirement).map(&:prod_fqdn)
+      fqdns = servers_ordered(dependent_service, requirement).map(&:prod_fqdn)
     end
     [{ :port => 3306, :fqdns => fqdns }]
   end
@@ -318,8 +318,8 @@ module Stacks::Services::MysqlCluster
     config_params
   end
 
-  def servers_ordered(requirement)
-    fail "Supported requirements are enabled for this DB but one was not specified" if requirement.nil?
+  def servers_ordered(dependent_service, requirement)
+    validate_dependant_requirement(dependent_service, requirement)
     # Convert the fqdn array to an array of server objects ensuring the same order
     @supported_requirements[requirement].inject([]) do |s, fqdn|
       s << children.find { |server| server.prod_fqdn == fqdn }

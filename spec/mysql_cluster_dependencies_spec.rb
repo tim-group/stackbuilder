@@ -402,6 +402,6 @@ describe 'k8s stack-with-dependencies' do
 
     machine_sets = factory.inventory.find_environment('e').definitions['db_supported_reqs'].k8s_machinesets
     expect { machine_sets['myapp'].to_k8s(app_deployer, dns_resolver, hiera_provider) }.
-      to raise_error(RuntimeError, match(/Supported requirements are enabled for this DB but one was not specified/))
+      to raise_error(RuntimeError, match(/must declare its requirement on/))
   end
 end
