@@ -1,4 +1,4 @@
-#!/opt/ruby-bundle/bin/ruby
+#!/usr/bin/env ruby
 
 if ENV['dev']
   $LOAD_PATH << 'lib/'
