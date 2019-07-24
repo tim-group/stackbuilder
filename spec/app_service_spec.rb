@@ -42,13 +42,18 @@ describe 'kubernetes' do
           'namespace' => 'e1',
           'labels' => {
             'stack' => 'mystack',
-            'machineset' => 'x'
+            'machineset' => 'x',
+            'app.kubernetes.io/name' => 'myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/component' => 'app_service',
+            'app.kubernetes.io/version' => '1.2.3',
+            'app.kubernetes.io/managed-by' => 'stacks'
           }
         },
         'spec' => {
           'selector' => {
             'matchLabels' => {
-              'app' => 'myapplication'
+              'app.kubernetes.io/name' => 'myapplication'
             }
           },
           'strategy' => {
@@ -62,7 +67,11 @@ describe 'kubernetes' do
           'template' => {
             'metadata' => {
               'labels' => {
-                'app' => 'myapplication'
+                'app.kubernetes.io/name' => 'myapplication',
+                'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+                'app.kubernetes.io/component' => 'app_service',
+                'app.kubernetes.io/version' => '1.2.3',
+                'app.kubernetes.io/managed-by' => 'stacks'
               }
             },
             'spec' => {
@@ -113,13 +122,18 @@ describe 'kubernetes' do
           'namespace' => 'e1',
           'labels' => {
             'stack' => 'mystack',
-            'machineset' => 'x'
+            'machineset' => 'x',
+            'app.kubernetes.io/name' => 'myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/component' => 'app_service',
+            'app.kubernetes.io/version' => '1.2.3',
+            'app.kubernetes.io/managed-by' => 'stacks'
           }
         },
         'spec' => {
           'type' => 'LoadBalancer',
           'selector' => {
-            'app' => 'myapplication'
+            'app.kubernetes.io/name' => 'myapplication',
           },
           'ports' => [{
             'name' => 'app',
@@ -140,7 +154,12 @@ describe 'kubernetes' do
           'namespace' => 'e1',
           'labels' => {
             'stack' => 'mystack',
-            'machineset' => 'x'
+            'machineset' => 'x',
+            'app.kubernetes.io/name' => 'myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/component' => 'app_service',
+            'app.kubernetes.io/version' => '1.2.3',
+            'app.kubernetes.io/managed-by' => 'stacks'
           }
         },
         'data' => {
@@ -293,6 +312,15 @@ EOL
   end
 
   describe 'dependencies' do
+    def network_policies_for(factory, env, stack, service)
+      machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
+      machine_set = machine_sets[service]
+
+      machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
+        policy['kind'] == "NetworkPolicy"
+      end
+    end
+
     it 'should create the correct ingress network policies for a service in kubernetes when another non kubernetes service depends on it' do
       factory = eval_stacks do
         stack "test_app_servers" do
@@ -324,8 +352,18 @@ EOL
       expect(network_policies.size).to eq(1)
       expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
-      expect(network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+      expect(network_policies.first['metadata']['labels']).to eql({
+        'stack' => 'test_app_servers',
+        'machineset' => 'app2',
+        'app.kubernetes.io/name' => 'app2',
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+        'app.kubernetes.io/component' => 'app_service',
+        'app.kubernetes.io/version' => '1.2.3',
+        'app.kubernetes.io/managed-by' => 'stacks'
+      })
+      expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+      })
       expect(network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(network_policies.first['spec']['ingress'].size).to eq(1)
       expect(network_policies.first['spec']['ingress'].first['from'].size).to eq(2)
@@ -364,8 +402,18 @@ EOL
       expect(network_policies.size).to eq(1)
       expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
-      expect(network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+      expect(network_policies.first['metadata']['labels']).to eql({
+        'stack' => 'test_app_servers',
+        'machineset' => 'app2',
+        'app.kubernetes.io/name' => 'app2',
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+        'app.kubernetes.io/component' => 'app_service',
+        'app.kubernetes.io/version' => '1.2.3',
+        'app.kubernetes.io/managed-by' => 'stacks'
+      })
+      expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+      })
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policies.first['spec']['egress'].size).to eq(1)
       expect(network_policies.first['spec']['egress'].first['to'].size).to eq(1)
@@ -376,15 +424,6 @@ EOL
     end
 
     it 'should create the correct network policies for two services in kubernetes in the same environment when one service depends on the other' do
-      def network_policies_for(factory, env, stack, service)
-        machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
-        machine_set = machine_sets[service]
-
-        machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
-          policy['kind'] == "NetworkPolicy"
-        end
-      end
-
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1', :kubernetes => true do
@@ -409,14 +448,25 @@ EOL
       expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e1-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app1')
-      expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+      expect(app1_network_policies.first['metadata']['labels']).to eql({
+        'stack' => 'test_app_servers',
+        'machineset' => 'app1',
+        'app.kubernetes.io/name' => 'app1',
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1',
+        'app.kubernetes.io/component' => 'app_service',
+        'app.kubernetes.io/version' => '1.2.3',
+        'app.kubernetes.io/managed-by' => 'stacks'
+      })
+      expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1',
+      })
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)
       expect(ingress.first['from'].size).to eq(1)
       expect(ingress.first['ports'].size).to eq(1)
-      expect(ingress.first['from'].first['podSelector']['matchLabels']['machine_set']).to eql('app2')
-      expect(ingress.first['from'].first['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+      expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+      })
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
       expect(ingress.first['ports'].first['port']).to eq(8000)
@@ -425,14 +475,25 @@ EOL
       expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
-      expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+      expect(app2_network_policies.first['metadata']['labels']).to eql({
+        'stack' => 'test_app_servers',
+        'machineset' => 'app2',
+        'app.kubernetes.io/name' => 'app2',
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+        'app.kubernetes.io/component' => 'app_service',
+        'app.kubernetes.io/version' => '1.2.3',
+        'app.kubernetes.io/managed-by' => 'stacks'
+      })
+      expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+      })
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
       expect(egress.first['to'].size).to eq(1)
       expect(egress.first['ports'].size).to eq(1)
-      expect(egress.first['to'].first['podSelector']['matchLabels']['machine_set']).to eql('app1')
-      expect(egress.first['to'].first['podSelector']['matchLabels']['stack']).to eql('test_app_servers')
+      expect(egress.first['to'].first['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1',
+      })
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
       expect(egress.first['ports'].first['port']).to eq(8000)
@@ -441,15 +502,6 @@ EOL
     it 'should create the correct network policies for two services in \
 kubernetes in different environments in the same site when one service \
 depends on the other' do
-      def network_policies_for(factory, env, stack, service)
-        machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
-        machine_set = machine_sets[service]
-
-        machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
-          policy['kind'] == "NetworkPolicy"
-        end
-      end
-
       factory = eval_stacks do
         stack "test_app_server1" do
           app_service 'app1', :kubernetes => true do
@@ -478,14 +530,16 @@ depends on the other' do
       expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e2-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app1')
-      expect(app1_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_server1')
+      expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_server1-app1',
+      })
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)
       expect(ingress.first['from'].size).to eq(1)
       expect(ingress.first['ports'].size).to eq(1)
-      expect(ingress.first['from'].first['podSelector']['matchLabels']['machine_set']).to eql('app2')
-      expect(ingress.first['from'].first['podSelector']['matchLabels']['stack']).to eql('test_app_server2')
+      expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e2-test_app_server2-app2',
+      })
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e2')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
       expect(ingress.first['ports'].first['port']).to eq(8000)
@@ -494,14 +548,16 @@ depends on the other' do
       expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
-      expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app2')
-      expect(app2_network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_app_server2')
+      expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e2-test_app_server2-app2',
+      })
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
       expect(egress.first['to'].size).to eq(1)
       expect(egress.first['ports'].size).to eq(1)
-      expect(egress.first['to'].first['podSelector']['matchLabels']['machine_set']).to eql('app1')
-      expect(egress.first['to'].first['podSelector']['matchLabels']['stack']).to eql('test_app_server1')
+      expect(egress.first['to'].first['podSelector']['matchLabels']).to eql({
+        'app.kubernetes.io/instance' => 'e1-test_app_server1-app1',
+      })
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
       expect(egress.first['ports'].first['port']).to eq(8000)

@@ -142,16 +142,28 @@ module Stacks::Services::AppService
       'site' => site
     }
 
-    output << generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric)
-    output << generate_k8s_service(dns_resolver, app_name)
-    output << generate_k8s_deployment(app_name, app_version)
-    output += generate_k8s_network_policies(dns_resolver, fabric)
+    standard_labels = {
+      'app.kubernetes.io/name' => app_name,
+      'app.kubernetes.io/instance' => instance_name_of(self),
+      'app.kubernetes.io/component' => 'app_service',
+      'app.kubernetes.io/version' => app_version,
+      'app.kubernetes.io/managed-by' => 'stacks'
+    }
+
+    output << generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric, standard_labels)
+    output << generate_k8s_service(dns_resolver, app_name, standard_labels)
+    output << generate_k8s_deployment(app_name, app_version, standard_labels)
+    output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
     output
   end
 
   private
 
-  def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric)
+  def instance_name_of(service)
+    "#{service.environment.name}-#{service.stack.name}-#{service.application.downcase}"
+  end
+
+  def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric, standard_labels)
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
@@ -161,7 +173,7 @@ module Stacks::Services::AppService
         'labels' => {
           'stack' => @stack.name,
           'machineset' => @name
-        }
+        }.merge(standard_labels)
       },
       'data' => {
         'config.properties' => <<EOC
@@ -189,7 +201,7 @@ EOC
     end.join("\n")
   end
 
-  def generate_k8s_service(dns_resolver, app_name)
+  def generate_k8s_service(dns_resolver, app_name, standard_labels)
     {
       'apiVersion' => 'v1',
       'kind' => 'Service',
@@ -199,12 +211,12 @@ EOC
         'labels' => {
           'stack' => @stack.name,
           'machineset' => @name
-        }
+        }.merge(standard_labels)
       },
       'spec' => {
         'type' => 'LoadBalancer',
         'selector' => {
-          'app' => app_name
+          'app.kubernetes.io/name' => app_name
         },
         'ports' => [{
           'name' => 'app',
@@ -217,7 +229,7 @@ EOC
     }
   end
 
-  def generate_k8s_deployment(app_name, app_version)
+  def generate_k8s_deployment(app_name, app_version, standard_labels)
     {
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
@@ -226,13 +238,13 @@ EOC
         'namespace' => @environment.name,
         'labels' => {
           'stack' => @stack.name,
-          'machineset' => @name
-        }
+          'machineset' => @name,
+        }.merge(standard_labels)
       },
       'spec' => {
         'selector' => {
           'matchLabels' => {
-            'app' => app_name
+            'app.kubernetes.io/name' => app_name
           }
         },
         'strategy' => {
@@ -245,9 +257,7 @@ EOC
         'replicas' => @instances,
         'template' => {
           'metadata' => {
-            'labels' => {
-              'app' => app_name
-            }
+            'labels' => standard_labels
           },
           'spec' => {
             'containers' => [{
@@ -289,7 +299,7 @@ EOC
     }
   end
 
-  def generate_k8s_network_policies(dns_resolver, fabric)
+  def generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
     network_policies = []
     virtual_services_that_depend_on_me.each do |vs|
       filters = []
@@ -297,8 +307,7 @@ EOC
         filters << {
           'podSelector' => {
             'matchLabels' => {
-              'machine_set' => vs.name,
-              'stack' => vs.stack.name
+              'app.kubernetes.io/instance' => instance_name_of(vs)
             }
           },
           'namespaceSelector' => {
@@ -323,13 +332,16 @@ EOC
         'kind' => 'NetworkPolicy',
         'metadata' => {
           'name' => "allow-#{vs.environment.name}-#{vs.name}-in-to-#{@name}-8000",
-          'namespace' => @environment.name
+          'namespace' => @environment.name,
+          'labels' => {
+            'stack' => @stack.name,
+            'machineset' => @name,
+          }.merge(standard_labels)
         },
         'spec' => {
           'podSelector' => {
             'matchLabels' => {
-              'machine_set' => @name,
-              'stack' => @stack.name
+              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
             }
           },
           'policyTypes' => [
@@ -355,8 +367,7 @@ EOC
           'to' => [{
             'podSelector' => {
               'matchLabels' => {
-                'machine_set' => vs.name,
-                'stack' => vs.stack.name
+                'app.kubernetes.io/instance' => instance_name_of(vs)
               }
             },
             'namespaceSelector' => {
@@ -390,13 +401,16 @@ EOC
         'kind' => 'NetworkPolicy',
         'metadata' => {
           'name' => "allow-#{@name}-out-to-#{vs.environment.name}-#{vs.name}-#{vs.endpoints(self, fabric).map { |e| e[:port] }.join('-')}",
-          'namespace' => @environment.name
+          'namespace' => @environment.name,
+          'labels' => {
+            'stack' => @stack.name,
+            'machineset' => @name,
+          }.merge(standard_labels)
         },
         'spec' => {
           'podSelector' => {
             'matchLabels' => {
-              'machine_set' => @name,
-              'stack' => @stack.name
+              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
             }
           },
           'policyTypes' => [
