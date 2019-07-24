@@ -614,6 +614,73 @@ describe 'cmd' do
     end
   end
 
+  describe 'dependencies and dependents commands' do
+    let(:factory) do
+      eval_stacks do
+        stack "mystack" do
+          app_service "myappservice" do
+            self.application = 'MyApplication'
+            self.instances = 2
+            depend_on 'myrelatedappservice'
+            depend_on 'myk8sappservice'
+          end
+          app_service "myrelatedappservice" do
+            self.application = 'MyRelatedApplication'
+            self.instances = 1
+          end
+        end
+        stack "myotherstack" do
+          app_service "myotherappservice" do
+            self.application = 'MyOtherApplication'
+          end
+        end
+        stack "myk8sstack" do
+          app_service "myk8sappservice", :kubernetes => true do
+            self.application = 'MyK8sApplication'
+            self.instances = 2
+          end
+          app_service "myrelatedk8sappservice", :kubernetes => true do
+            self.application = 'MyRelatedK8sApplication'
+            self.instances = 1
+          end
+        end
+        env 'e1', :primary_site => 'space' do
+          instantiate_stack "mystack"
+          instantiate_stack "myk8sstack"
+        end
+        env 'e2', :primary_site => 'space' do
+          instantiate_stack "myotherstack"
+        end
+      end
+    end
+
+    it 'prints dependencies' do
+      allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+      allow(@dns_resolver).to receive(:lookup).with(anything)
+
+      out = capture_stdout do
+        cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
+        cmd.dependencies nil
+      end
+
+      expect(out).to match(/e1-myrelatedappservice-001.mgmt.space.net.local/)
+      expect(out).to match(/space-e1-myk8sappservice/)
+    end
+
+    it 'prints dependents' do
+      allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+      allow(@dns_resolver).to receive(:lookup).with(anything)
+
+      out = capture_stdout do
+        cmd = cmd(factory, 'e1', 'e1-myrelatedappservice-001.mgmt.space.net.local')
+        cmd.dependents nil
+      end
+
+      expect(out).to match(/e1-myappservice-001.mgmt.space.net.local/)
+      expect(out).to match(/e1-myappservice-002.mgmt.space.net.local/)
+    end
+  end
+
   it 'raises an error for a specific machine in a k8s machineset' do
     cmd = cmd(factory, 'e1', 'e1-myk8sappservice-001.mgmt.space.net.local')
 
