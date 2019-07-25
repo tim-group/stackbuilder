@@ -202,7 +202,7 @@ class Stacks::MachineSet
     on_bind do |_machineset, environment|
       @environment = environment
       instance_eval(&@config_block) unless @config_block.nil?
-      instantiate_machines(environment)
+      instantiate_machines(environment) unless kubernetes
       bind_children(environment)
     end
   end
@@ -263,6 +263,10 @@ class Stacks::MachineSet
     policies
   end
 
+  def fabric
+    @environment.primary_site
+  end
+
   private
 
   def instantiate_machine(index, environment, site, role = nil, custom_name = '')
@@ -277,5 +281,9 @@ class Stacks::MachineSet
     server.index = index
     @definitions[random_name] = server
     server
+  end
+
+  def location
+    @environment.translate_site_symbol(fabric)
   end
 end

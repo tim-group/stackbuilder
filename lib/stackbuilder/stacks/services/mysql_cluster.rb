@@ -145,7 +145,7 @@ module Stacks::Services::MysqlCluster
         fabric = service.environment.options[location]
         right['kubernetes_clusters'] = [fabric]
 
-        service_id = "#{service.children.first.fabric}-#{service.environment.name}-#{service.name}"
+        service_id = "#{service.fabric}-#{service.environment.name}-#{service.name}"
         rights['mysql_hacks::application_rights_wrapper']['rights'].
           merge!("#{mysql_username(service)}@#{service_id}/#{database_name}" => right)
       else
@@ -306,7 +306,8 @@ module Stacks::Services::MysqlCluster
     unless read_only_cluster.empty?
       roc = read_only_cluster
       if dependent_service.use_ha_mysql_ordering
-        if !dependent_service.ha_mysql_ordering_exclude.include?(@name)
+        # FIXME: if dependent_instance is nil, it's likely something in kubernetes (probably an app) and it will NOT get 'HA ordering'
+        if !dependent_service.ha_mysql_ordering_exclude.include?(@name) && dependent_instance
           roc = read_only_cluster.sort.rotate((dependent_instance.index - 1) % read_only_cluster.length)
         else
           roc = read_only_cluster.sort

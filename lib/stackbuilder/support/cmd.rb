@@ -485,14 +485,7 @@ class CMD
       fail "Too many entities found"
     end
 
-    thing = stacks.first
-
-    if thing.is_a?(Stacks::MachineDef) && thing.virtual_service && thing.virtual_service.kubernetes
-      logger(Logger::FATAL) { "Cannot operate on a single host for kubernetes. Use the stack or service (#{thing.virtual_service.name}) instead" }
-      fail "Invalid selection. Cannot use machinedef for kubernetes"
-    end
-
-    thing
+    stacks.first
   end
 
   def split_k8s_from_vms(thing, &vm_extraction)
@@ -531,7 +524,7 @@ class CMD
 
     output = {}
     targets.each do |machine_set|
-      machine_set_id = "#{machine_set.children.first.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
+      machine_set_id = "#{machine_set.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
       output[machine_set_id] = machine_set.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
     end
 

@@ -38,8 +38,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
-                          Stacks::Services::AppServer, &block)
+      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService], &block)
     else
       machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                       Stacks::Services::AppServer, &block)
@@ -48,7 +47,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def standalone_app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
+      k8s_machineset_with(name, [Stacks::Services::AppService], &block)
     else
       machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
     end
@@ -195,12 +194,11 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
     @definitions[name] = machineset
   end
 
-  def k8s_machineset_with(name, extends, type, &block)
+  def k8s_machineset_with(name, extends, &block)
     machineset = Stacks::MachineSet.new(name, self, &block)
     machineset.extend(Stacks::Dependencies)
     extends.each { |e| machineset.extend(e) }
     machineset.kubernetes = true
-    machineset.type = type
     @k8s_machinesets[name] = machineset
   end
 end

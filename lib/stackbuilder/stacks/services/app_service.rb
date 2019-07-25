@@ -134,7 +134,7 @@ module Stacks::Services::AppService
 
     erb_vars = {
       'domain' => domain,
-      'hostname' => children.first.hostname,
+      'hostname' => kubernetes ? identity : children.first.hostname,
       'application' => application,
       'stackname' => @stack.name,
       'environment' => @environment.name,
@@ -201,7 +201,7 @@ EOC
   end
 
   def generate_dependency_config(fabric)
-    config_params = dependency_config(fabric, children.first)
+    config_params = dependency_config(fabric, nil)
     return '' if config_params.empty?
 
     "\n\n" + config_params.map do |k, v|
@@ -233,7 +233,7 @@ EOC
           'port' => 8000,
           'targetPort' => 8000
         }],
-        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(children.first.fabric)).to_s
+        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(fabric)).to_s
       }
     }
   end
@@ -329,7 +329,7 @@ EOC
           }
         }
       else
-        virtual_service_instance_fqdns = dependant_instance_fqdns(children.first.location, [@environment.primary_network])
+        virtual_service_instance_fqdns = dependant_instance_fqdns(location, [@environment.primary_network])
         virtual_service_instance_fqdns.each do |instance_fqdn|
           filters << {
             'ipBlock' => {

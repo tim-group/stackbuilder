@@ -97,12 +97,10 @@ class Stacks::Services::AppServer < Stacks::MachineDef
   private
 
   def enc_dependant_kubernetes_things(enc)
-    dependant_app_server_instances = @virtual_service.dependant_instances_of_type(Stacks::Services::AppServer, location)
-    return unless dependant_app_server_instances.any? { |s| s.virtual_service.kubernetes }
+    dependant_app_services = @virtual_service.dependant_services_of_type(Stacks::Services::AppService)
+    return unless dependant_app_services.any?(&:kubernetes)
     enc['role::http_app']['allow_kubernetes'] = true
-    enc['role::http_app']['kubernetes_clusters'] = dependant_app_server_instances.select do |s|
-      s.virtual_service.kubernetes
-    end.map { |vs| vs.environment.options[location] }.uniq
+    enc['role::http_app']['kubernetes_clusters'] = dependant_app_services.select(&:kubernetes).map { |vs| vs.environment.options[location] }.uniq
   end
 
   def enc_ehcache(enc)

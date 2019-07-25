@@ -613,13 +613,4 @@ describe 'cmd' do
       end
     end
   end
-
-  it 'raises an error for a specific machine in a k8s machineset' do
-    cmd = cmd(factory, 'e1', 'e1-myk8sappservice-001.mgmt.space.net.local')
-
-    expect { cmd.compile nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
-    expect { cmd.provision nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
-    expect { cmd.reprovision nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
-    expect { cmd.clean nil }.to raise_error('Invalid selection. Cannot use machinedef for kubernetes')
-  end
 end

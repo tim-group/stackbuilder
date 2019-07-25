@@ -90,6 +90,12 @@ module Stacks::Dependencies
     dependant_instances(location).reject { |machine_def| machine_def.class != type }
   end
 
+  def dependant_services_of_type(type)
+    virtual_services_that_depend_on_me.select do |machine_set|
+      machine_set.is_a? type
+    end
+  end
+
   private
 
   def dependant_instances(location, reject_nodes_in_different_location = true, reject_k8s_nodes = false)
