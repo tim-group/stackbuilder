@@ -375,15 +375,28 @@ class CMD
   end
 
   def dependencies(_argv)
-    machine_def = ensure_is_machine(check_and_get_stack)
-    puts ZAMLS.to_zamls(machine_def.dependency_nodes.map(&:identity))
+    machine_set = convert_to_machine_set(check_and_get_stack)
+
+    puts ZAMLS.to_zamls(machine_set.virtual_services_that_i_depend_on.map do |s|
+      if s.kubernetes
+        s
+      else
+        s.children
+      end
+    end.flatten.map(&:identity))
   end
 
   def dependents(_argv)
-    machine_def = ensure_is_machine(check_and_get_stack)
+    machine_set = convert_to_machine_set(check_and_get_stack)
 
-    service_dependencies = machine_def.virtual_service.virtual_services_that_depend_on_me
-    dependencies = service_dependencies.map { |machine_set| machine_set.children.map(&:identity) }.flatten
+    service_dependencies = machine_set.virtual_services_that_depend_on_me
+    dependencies = service_dependencies.map do |s|
+      if s.kubernetes
+        s
+      else
+        s.children
+      end
+    end.flatten.map(&:identity)
     puts ZAMLS.to_zamls(dependencies)
   end
 
@@ -444,12 +457,15 @@ class CMD
     [vms_compile_output(vm_targets), k8s_compile_output(k8s_targets)].compact.join("\n")
   end
 
-  def ensure_is_machine(machine_def)
-    if !machine_def.is_a?(Stacks::MachineDef)
-      logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn" }
+  def convert_to_machine_set(thing)
+    if thing.is_a?(Stacks::MachineDef)
+      thing.virtual_service
+    elsif thing.is_a?(Stacks::MachineSet)
+      thing
+    else
+      logger(Logger::FATAL) { "\"#{@stack_name}\" is not a machine fqdn or service name" }
       fail "Machine not found"
     end
-    machine_def
   end
 
   def check_and_get_stack

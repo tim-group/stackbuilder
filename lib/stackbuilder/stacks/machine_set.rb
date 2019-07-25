@@ -63,7 +63,7 @@ class Stacks::MachineSet
   end
 
   def identity
-    "#{environment.name}_#{name.to_sym}"
+    "#{environment.name}-#{@stack.name}-#{name}"
   end
 
   def instances_usage_with_role
