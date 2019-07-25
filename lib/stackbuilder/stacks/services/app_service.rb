@@ -224,7 +224,8 @@ EOC
       'spec' => {
         'type' => 'LoadBalancer',
         'selector' => {
-          'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
+          'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance'],
+          'participation' => 'enabled'
         },
         'ports' => [{
           'name' => 'app',
@@ -252,7 +253,8 @@ EOC
       'spec' => {
         'selector' => {
           'matchLabels' => {
-            'app.kubernetes.io/name' => app_name
+            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance'],
+            'participation' => 'enabled'
           }
         },
         'strategy' => {
@@ -265,7 +267,9 @@ EOC
         'replicas' => @instances,
         'template' => {
           'metadata' => {
-            'labels' => standard_labels
+            'labels' => {
+              'participation' => 'enabled'
+            }.merge(standard_labels)
           },
           'spec' => {
             'containers' => [{

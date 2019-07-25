@@ -53,7 +53,8 @@ describe 'kubernetes' do
         'spec' => {
           'selector' => {
             'matchLabels' => {
-              'app.kubernetes.io/name' => 'myapplication'
+              'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+              'participation' => 'enabled'
             }
           },
           'strategy' => {
@@ -67,6 +68,7 @@ describe 'kubernetes' do
           'template' => {
             'metadata' => {
               'labels' => {
+                'participation' => 'enabled',
                 'app.kubernetes.io/name' => 'myapplication',
                 'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
                 'app.kubernetes.io/component' => 'app_service',
@@ -133,7 +135,8 @@ describe 'kubernetes' do
         'spec' => {
           'type' => 'LoadBalancer',
           'selector' => {
-            'app.kubernetes.io/instance' => 'e1-mystack-myapplication'
+            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'participation' => 'enabled'
           },
           'ports' => [{
             'name' => 'app',
