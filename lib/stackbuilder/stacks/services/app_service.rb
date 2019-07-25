@@ -224,7 +224,7 @@ EOC
       'spec' => {
         'type' => 'LoadBalancer',
         'selector' => {
-          'app.kubernetes.io/name' => app_name
+          'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
         },
         'ports' => [{
           'name' => 'app',
@@ -246,7 +246,7 @@ EOC
         'namespace' => @environment.name,
         'labels' => {
           'stack' => @stack.name,
-          'machineset' => @name,
+          'machineset' => @name
         }.merge(standard_labels)
       },
       'spec' => {
@@ -343,7 +343,7 @@ EOC
           'namespace' => @environment.name,
           'labels' => {
             'stack' => @stack.name,
-            'machineset' => @name,
+            'machineset' => @name
           }.merge(standard_labels)
         },
         'spec' => {
@@ -412,7 +412,7 @@ EOC
           'namespace' => @environment.name,
           'labels' => {
             'stack' => @stack.name,
-            'machineset' => @name,
+            'machineset' => @name
           }.merge(standard_labels)
         },
         'spec' => {
