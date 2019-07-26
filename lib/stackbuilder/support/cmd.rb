@@ -389,15 +389,13 @@ class CMD
   def dependents(_argv)
     machine_set = convert_to_machine_set(check_and_get_stack)
 
-    service_dependencies = machine_set.virtual_services_that_depend_on_me
-    dependencies = service_dependencies.map do |s|
+    puts ZAMLS.to_zamls(machine_set.virtual_services_that_depend_on_me.map do |s|
       if s.kubernetes
         s
       else
         s.children
       end
-    end.flatten.map(&:identity)
-    puts ZAMLS.to_zamls(dependencies)
+    end.flatten.map(&:identity))
   end
 
   def showvnc(_argv)
