@@ -654,55 +654,57 @@ describe 'cmd' do
         end
       end
     end
+    
+    describe "dependencies" do
+      it 'prints dependencies of an individual machine' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+        allow(@dns_resolver).to receive(:lookup).with(anything)
 
-    it 'prints dependencies' do
-      allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
-      allow(@dns_resolver).to receive(:lookup).with(anything)
+        out = YAML.load(capture_stdout do
+          cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
+          cmd.dependencies nil
+        end)
 
-      out = capture_stdout do
-        cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
-        cmd.dependencies nil
+        expect(out).to contain_exactly('e1-myrelatedappservice-001.mgmt.space.net.local', 'e1-myk8sstack-myk8sappservice')
       end
 
-      expect(out).to match(/e1-myrelatedappservice-001.mgmt.space.net.local/)
-      expect(out).to match(/e1-myk8sstack-myk8sappservice/)
+      it 'prints dependencies of a k8s service' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        out = YAML.load(capture_stdout do
+          cmd = cmd(factory, 'e1', 'myrelatedk8sappservice')
+          cmd.dependencies nil
+        end)
+
+        expect(out).to contain_exactly('e2-myotherappservice-001.mgmt.space.net.local', 'e2-myotherappservice-002.mgmt.space.net.local')
+      end
     end
 
-    it 'prints k8s dependencies' do
-      allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
-      allow(@dns_resolver).to receive(:lookup).with(anything)
+    describe 'dependents' do
+      it 'prints dependents of an individual machine' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+        allow(@dns_resolver).to receive(:lookup).with(anything)
 
-      out = capture_stdout do
-        cmd = cmd(factory, 'e1', 'myrelatedk8sappservice')
-        cmd.dependencies nil
+        out = YAML.load(capture_stdout do
+          cmd = cmd(factory, 'e1', 'e1-myrelatedappservice-001.mgmt.space.net.local')
+          cmd.dependents nil
+        end)
+
+        expect(out).to contain_exactly('e1-myappservice-001.mgmt.space.net.local', 'e1-myappservice-002.mgmt.space.net.local')
       end
 
-      expect(out).to match(/e2-myotherappservice-001.mgmt.space.net.local/)
-    end
+      it 'prints k8s dependents' do
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+        allow(@dns_resolver).to receive(:lookup).with(anything)
 
-    it 'prints dependents' do
-      allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
-      allow(@dns_resolver).to receive(:lookup).with(anything)
+        out = YAML.load(capture_stdout do
+          cmd = cmd(factory, 'e2', 'e2-myotherappservice-001.mgmt.space.net.local')
+          cmd.dependents nil
+        end)
 
-      out = capture_stdout do
-        cmd = cmd(factory, 'e1', 'e1-myrelatedappservice-001.mgmt.space.net.local')
-        cmd.dependents nil
+        expect(out).to contain_exactly('e1-myk8sstack-myrelatedk8sappservice')
       end
-
-      expect(out).to match(/e1-myappservice-001.mgmt.space.net.local/)
-      expect(out).to match(/e1-myappservice-002.mgmt.space.net.local/)
-    end
-
-    it 'prints k8s dependents' do
-      allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
-      allow(@dns_resolver).to receive(:lookup).with(anything)
-
-      out = capture_stdout do
-        cmd = cmd(factory, 'e2', 'e2-myotherappservice-001.mgmt.space.net.local')
-        cmd.dependents nil
-      end
-
-      expect(out).to match(/e1-myk8sstack-myrelatedk8sappservice/)
     end
   end
 end
