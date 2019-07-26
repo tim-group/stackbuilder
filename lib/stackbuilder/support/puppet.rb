@@ -7,26 +7,20 @@ class Support::Puppet
     @subscription = subscription
   end
 
-  def do_puppet_run_on_dependencies(machine_def)
-    all_dependencies = Set.new
-    machine_def.accept do |m|
-      all_dependencies += m.dependency_nodes if m.is_a? Stacks::MachineDef
-    end
+  def do_puppet_run_on_dependencies(thing)
+    all_dependencies = if thing.is_a?(Stacks::MachineSet)
+                         service_dependencies(thing)
+                       elsif thing.is_a?(Stacks::MachineDef)
+                         service_dependencies(thing.virtual_service) + thing.dependencies_inside_service
+                       else
+                         fail "Not implemented for #{thing}"
+                       end
 
-    dependency_fqdns = []
-    all_dependencies.map do |dependency|
-      dependency.accept do |m|
-        if m.is_a? Stacks::MachineDef
-          dependency_fqdns << m.mgmt_fqdn if m.should_prepare_dependency?
-        end
-      end
-    end
-
-    dependency_fqdns = dependency_fqdns.sort.uniq
+    fqdns = all_dependencies.select(&:should_prepare_dependency?).map(&:mgmt_fqdn).uniq.sort
 
     require 'tempfile'
     Tempfile.open("mco_prepdeps") do |f|
-      f.puts dependency_fqdns.join("\n")
+      f.puts fqdns.join("\n")
       f.flush
 
       system('mco', 'puppetng', 'run', '--concurrency', '5', '--nodes', f.path)
@@ -121,5 +115,9 @@ class Support::Puppet
       end
     end
     host_fqdns
+  end
+
+  def service_dependencies(machine_set)
+    machine_set.virtual_services_that_i_depend_on.reject(&:kubernetes).flat_map(&:flatten).compact
   end
 end

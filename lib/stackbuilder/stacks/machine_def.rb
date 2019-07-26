@@ -303,17 +303,11 @@ class Stacks::MachineDef
     "machine"
   end
 
-  def dependency_nodes
-    virtual_service.virtual_services_that_i_depend_on.map do |s|
-      if s.kubernetes
-        s
-      else
-        s.children
-      end
-    end.flatten
-  end
-
   def should_prepare_dependency?
     true
+  end
+
+  def dependencies_inside_service
+    []
   end
 end

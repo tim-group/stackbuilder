@@ -98,7 +98,7 @@ describe_stack 'mysql-cluster' do
   end
 
   host('e-exampledb-001.mgmt.space.net.local') do |host|
-    expect(host.dependency_nodes.map(&:mgmt_fqdn).sort).to eql(
+    expect(host.dependencies_inside_service.map(&:mgmt_fqdn).sort).to eql(
       [
         'e-exampledb-001.mgmt.earth.net.local',
         'e-exampledb-002.mgmt.earth.net.local',

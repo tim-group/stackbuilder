@@ -26,7 +26,7 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
 
     enc.merge!('role::elasticsearch_data' => {
                  'elasticsearch_master_hosts'     => @elasticsearch_cluster.elasticsearch_master_hosts,
-                 'other_elasticsearch_data_hosts' => @elasticsearch_cluster.other_elasticsearch_data_hosts(mgmt_fqdn).map(&:prod_fqdn).flatten.sort,
+                 'other_elasticsearch_data_hosts' => dependencies_inside_service.map(&:prod_fqdn).flatten.sort,
                  'kibana_hosts'                   => @elasticsearch_cluster.kibana_hosts,
                  'loadbalancer_hosts'             => @elasticsearch_cluster.dependant_load_balancer_fqdns(location),
                  'logstash_indexer_hosts'         => @elasticsearch_cluster.logstash_indexer_hosts,
@@ -39,7 +39,9 @@ class Stacks::Services::ElasticsearchDataServer < Stacks::MachineDef
     enc
   end
 
-  def dependency_nodes
-    super + @elasticsearch_cluster.other_elasticsearch_data_hosts(mgmt_fqdn)
+  def dependencies_inside_service
+    @virtual_service.children.select do |child|
+      child.mgmt_fqdn != mgmt_fqdn
+    end
   end
 end

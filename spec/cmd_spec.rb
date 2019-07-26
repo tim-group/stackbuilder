@@ -654,7 +654,7 @@ describe 'cmd' do
         end
       end
     end
-    
+
     describe "dependencies" do
       it 'prints dependencies of an individual machine' do
         allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')

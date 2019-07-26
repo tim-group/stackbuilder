@@ -59,12 +59,6 @@ module Stacks::Services::ElasticsearchDataCluster
     (elasticsearch_master_hosts.length.to_f / 2).ceil
   end
 
-  def other_elasticsearch_data_hosts(this_servers_hostname)
-    children.select do |child|
-      child.mgmt_fqdn != this_servers_hostname
-    end
-  end
-
   def to_loadbalancer_config(location, fabric)
     config = {}
     config[vip_fqdn(:prod, fabric)] = {
