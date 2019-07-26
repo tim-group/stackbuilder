@@ -1,7 +1,6 @@
 require 'matchers/server_matcher'
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
-require 'pp'
 
 describe_stack 'kafka-stack-with-dependencies' do
   given do
@@ -34,7 +33,6 @@ describe_stack 'kafka-stack-with-dependencies' do
 
   host('e-examplestore-001.mgmt.space.net.local') do |host|
     deps = host.to_enc['role::kafka_server']
-    pp deps
     expect(deps['dependant_instances']).to eql(["e-myapp-001.space.net.local", "e-myapp-002.space.net.local"])
   end
 

@@ -47,4 +47,8 @@ class Stacks::Inventory
   def environments
     @stacks.environments
   end
+
+  def fqdn_list
+    @stacks.fqdn_list
+  end
 end

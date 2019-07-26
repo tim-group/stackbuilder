@@ -13,7 +13,7 @@ describe Stacks::Inventory do
         end
         Stacks::Inventory.from_dir(dir)
       end
-    end.to raise_error
+    end.to raise_error(/Unable to instance_eval/)
   end
 
   it 'returns nil when asked to find an unknown node' do

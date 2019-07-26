@@ -20,7 +20,7 @@ describe Support::LiveMigrator do
   it 'should refuse to migrate if machine not in stacks model' do
     @source_host.allocated_machines = [{ :hostname => "roguemachine", :in_model => false }]
 
-    lambda { @live_migrator.move_all }.should raise_error SystemExit
+    expect { @live_migrator.move_all }.to raise_error SystemExit
   end
 
   it 'should refuse to migrate if machine does not have up-to-date definition' do
@@ -29,7 +29,7 @@ describe Support::LiveMigrator do
 
     allow(@stacks_factory).to receive_message_chain(:compute_node_client, :check_vm_definitions).and_return([['host', { 'env-test1' => ['failure'] }]])
 
-    lambda { @live_migrator.move(@test_machine1) }.should raise_error SystemExit
+    expect { @live_migrator.move(@test_machine1) }.to raise_error SystemExit
   end
 
   it 'should refuse to migrate if machine cannot be allocated elsewhere' do
@@ -44,7 +44,7 @@ describe Support::LiveMigrator do
       :failed_to_allocate => { 'env-test1' => 'not enough cpus' }
     )
 
-    lambda { @live_migrator.move(@test_machine1) }.should raise_error SystemExit
+    expect { @live_migrator.move(@test_machine1) }.to raise_error SystemExit
   end
 
   it 'should succeed if the stars are aligned' do
@@ -66,9 +66,9 @@ describe Support::LiveMigrator do
       'source_host' => { :inactive_domains => [@test_machine1.hostname] },
       'destination_host' => { :active_domains => [@test_machine1.hostname] }
     )
-    allow(@rpcutil).to receive(:ping).with(@test_machine1.hostname).and_return(1528119341)
+    allow(@rpcutil).to receive(:ping).with(@test_machine1.mgmt_fqdn).and_return(1528119341)
 
-    lambda { @live_migrator.move(@test_machine1) }.should_not raise_error SystemExit
+    @live_migrator.move(@test_machine1)
 
     expected_spec = @test_machine1.to_spec
     expected_spec[:disallow_destroy] = false

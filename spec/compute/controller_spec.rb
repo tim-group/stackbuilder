@@ -368,7 +368,7 @@ describe Compute::Controller do
     allow(@compute_node_client).to receive(:clean).with("st", [specs[1]]).
       and_return([["st", { "vm2" => %w(success yay) }]])
 
-    expect { @compute_controller.clean(specs) }.to raise_error
+    expect { @compute_controller.clean(specs) }.to raise_error 'vm1 is not destroyable'
   end
 
   it 'will handle responses from old-fashioned agents' do
