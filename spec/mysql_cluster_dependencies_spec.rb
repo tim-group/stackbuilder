@@ -2,6 +2,7 @@ require 'matchers/server_matcher'
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 require 'test_classes'
+require 'spec_helper'
 
 describe_stack 'stack-with-dependencies' do
   given do
@@ -277,10 +278,6 @@ describe_stack 'stack-with-dependencies1' do
 end
 
 describe 'k8s stack-with-dependencies' do
-  def eval_stacks(&block)
-    Stacks::Factory.new(Stacks::Inventory.from(&block))
-  end
-
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
   let(:dns_resolver) do
     MyTestDnsResolver.new('e-myapp-vip.earth.net.local' => '3.1.4.1',

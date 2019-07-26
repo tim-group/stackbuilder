@@ -1,11 +1,8 @@
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/puppet'
+require 'spec_helper'
 
 describe Support::Puppet do
-  def eval_stacks(&block)
-    Stacks::Factory.new(Stacks::Inventory.from(&block))
-  end
-
   let(:factory) do
     eval_stacks do
       stack "app" do

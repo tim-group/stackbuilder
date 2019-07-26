@@ -2,6 +2,7 @@ require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/cmd'
 require 'stackbuilder/support/subscription'
 require 'stacks/test_framework'
+require 'spec_helper'
 
 describe 'cmd' do
   before :each do
@@ -18,10 +19,6 @@ describe 'cmd' do
     stub_const("Open3", @open3)
     @launch_action = double("launch_action")
     @return_status = double('return_status')
-  end
-
-  def eval_stacks(&block)
-    Stacks::Factory.new(Stacks::Inventory.from(&block))
   end
 
   def cmd(factory, env_name, stack_selector)

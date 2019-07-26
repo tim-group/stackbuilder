@@ -1,11 +1,8 @@
 require 'stackbuilder/stacks/factory'
 require 'test_classes'
+require 'spec_helper'
 
 describe 'machine_set' do
-  def eval_stacks(&block)
-    Stacks::Factory.new(Stacks::Inventory.from(&block))
-  end
-
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
   let(:dns_resolver) do
     MyTestDnsResolver.new(

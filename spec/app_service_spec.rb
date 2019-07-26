@@ -1,11 +1,8 @@
 require 'stackbuilder/stacks/factory'
 require 'test_classes'
+require 'spec_helper'
 
 describe 'kubernetes' do
-  def eval_stacks(&block)
-    Stacks::Factory.new(Stacks::Inventory.from(&block))
-  end
-
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
   let(:failing_app_deployer) { TestAppDeployer.new(nil) }
   let(:dns_resolver) do
