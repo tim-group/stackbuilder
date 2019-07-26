@@ -79,21 +79,8 @@ module Stacks::Dependencies
     end
   end
 
-  def vip_i_depend_on_for_clazz(clazz, location, network = :prod)
-    container_defs = virtual_services_that_i_depend_on
-    container_defs.reject! { |container| container.clazz != clazz }
-    fabric = environment.options[location]
-    container_defs.first.vip_fqdn(network, fabric)
-  end
-
   def dependant_instances_of_type(type, location)
     dependant_instances(location).reject { |machine_def| machine_def.class != type }
-  end
-
-  def dependant_services_of_type(type)
-    virtual_services_that_depend_on_me.select do |machine_set|
-      machine_set.is_a? type
-    end
   end
 
   private

@@ -97,7 +97,9 @@ class Stacks::Services::AppServer < Stacks::MachineDef
   private
 
   def enc_dependant_kubernetes_things(enc)
-    dependant_app_services = @virtual_service.dependant_services_of_type(Stacks::Services::AppService)
+    dependant_app_services = @virtual_service.virtual_services_that_depend_on_me.select do |machine_set|
+      machine_set.is_a? Stacks::Services::AppService
+    end
     return unless dependant_app_services.any?(&:kubernetes)
     enc['role::http_app']['allow_kubernetes'] = true
     enc['role::http_app']['kubernetes_clusters'] = dependant_app_services.select(&:kubernetes).map { |vs| vs.environment.options[location] }.uniq
