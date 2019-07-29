@@ -177,7 +177,6 @@ graphite.host=space-mon-001.mgmt.space.net.local
 graphite.port=2013
 graphite.prefix=myapplication.k8s_e1_space
 graphite.period=10
-
 EOL
         }
       }
@@ -272,7 +271,7 @@ EOL
                   db.exampledb.driver=com.mysql.jdbc.Driver.*
                   db.exampledb.port=3306.*
                   db.exampledb.username=MyApplication0.*
-                  db.exampledb.password_hiera_key=e1\/MyApplication\/mysql_password.*
+                  db.exampledb.password=\{SECRET:e1_MyApplication_mysql_passwords_0\}.*
                   db.exampledb.read_only_cluster=e1-mydb-002.space.net.local.*
                  /mx)
     end

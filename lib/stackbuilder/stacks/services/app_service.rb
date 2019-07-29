@@ -96,7 +96,7 @@ module Stacks::Services::AppService
 
   class ConfigERB < ERB
     def initialize(template, vars, hiera_provider)
-      super(template, nil, '<>-')
+      super(template, nil, '-')
       vars.each { |k, v| instance_variable_set("@#{k}", v) }
       @vars = vars
       @hiera_provider = hiera_provider
@@ -140,7 +140,7 @@ module Stacks::Services::AppService
       'environment' => @environment.name,
       'group' => group,
       'site' => site,
-      'dependencies' => dependency_config(fabric, nil),
+      'dependencies' => dependency_config(fabric, nil)
     }
     erb_vars['credentials_selector'] = hiera_provider.lookup(erb_vars, 'stacks/application_credentials_selector', nil)
 
@@ -152,7 +152,7 @@ module Stacks::Services::AppService
       'app.kubernetes.io/managed-by' => 'stacks'
     }
 
-    output << generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric, standard_labels)
+    output << generate_k8s_config_map(hiera_provider, erb_vars, app_name, standard_labels)
     output << generate_k8s_service(dns_resolver, app_name, standard_labels)
     output << generate_k8s_deployment(app_name, app_version, standard_labels)
     output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
@@ -173,7 +173,7 @@ module Stacks::Services::AppService
     "#{service.environment.name}-#{service.stack.name}-#{service.application.downcase}"
   end
 
-  def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric, standard_labels)
+  def generate_k8s_config_map(hiera_provider, erb_vars, app_name, standard_labels)
     template = <<EOC
 port=8000
 
@@ -185,15 +185,17 @@ graphite.host=<%= @site %>-mon-001.mgmt.<%= @site %>.net.local
 graphite.port=2013
 graphite.prefix=<%= @application.downcase %>.k8s_<%= @environment %>_<%= @site %>
 graphite.period=10
-<% if @dependencies.size > 1 %>
-<% @dependencies.map do |k, v| %>
-<% if k.start_with?('db.') && k.end_with?('.username') %>
-<%= k %>=<%= v[0,15] + @credentials_selector.to_s -%>
-<% else %>
-<%= k %>=<%= v -%>
-<% end %>
-<% end %>
-<% end %>#{appconfig}
+<%- if @dependencies.size > 1 -%>
+<%- @dependencies.map do |k, v| -%>
+<%- if k.start_with?('db.') && k.end_with?('.username') -%>
+<%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
+<%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
+<%= k.gsub(/_hiera_key$/, '') %>={SECRET:<%= v.gsub(/[^a-zA-Z0-9]/, '_') %>s_<%= @credentials_selector %>}
+<%- else -%>
+<%= k %>=<%= v %>
+<%- end -%>
+<%- end -%>
+<%- end -%>#{appconfig}
 EOC
 
     {
