@@ -191,6 +191,7 @@ graphite.period=10
 <%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
 <%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
 <%= k.gsub(/_hiera_key$/, '') %>={SECRET:<%= v.gsub(/[^a-zA-Z0-9]/, '_') %>s_<%= @credentials_selector %>}
+<%# TODO: support non-db _hiera_key. For example for a rabbitmq connection -%>
 <%- else -%>
 <%= k %>=<%= v %>
 <%- end -%>
