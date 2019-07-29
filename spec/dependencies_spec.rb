@@ -87,7 +87,7 @@ describe_stack 'stack-with-dependencies' do
       'e1-lb-002.space.net.local'
     ])
     expect(host.to_enc['role::http_app']['dependencies']).to eql({})
-    expect(host.to_enc['role::http_app']['allow_kubernetes']).to eql(true)
+    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(['space'])
   end
   host('e1-exampledb-001.mgmt.space.net.local') do |host|
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
@@ -100,8 +100,7 @@ describe_stack 'stack-with-dependencies' do
     expect(rights['kubeexample@space-e1-kubeexampleapp/example']).to eql(
       'password_hiera_key' => 'e1/kubeexample/mysql_password',
       'passwords_hiera_key' => 'e1/kubeexample/mysql_passwords',
-      'allow_kubernetes' => true,
-      'kubernetes_clusters' => ['space'])
+      'allow_kubernetes_clusters' => ['space'])
   end
 end
 
@@ -123,8 +122,7 @@ describe_stack 'k8s app with non-k8s app dependency' do
   end
 
   host('e1-nonk8sapp-001.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::http_app']['allow_kubernetes']).to eql(true)
-    expect(host.to_enc['role::http_app']['kubernetes_clusters']).to eql(['space'])
+    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(['space'])
   end
 end
 

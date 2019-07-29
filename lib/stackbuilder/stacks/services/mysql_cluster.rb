@@ -138,12 +138,10 @@ module Stacks::Services::MysqlCluster
       if service.kubernetes
         fail('k8s services don\'t know how to deal with multiple sites yet') if @enable_secondary_site || @instances.is_a?(Hash)
 
-        right['allow_kubernetes'] = true
-
         site = service.environment.sites.first
         location = service.environment.translate_site_symbol(site)
         fabric = service.environment.options[location]
-        right['kubernetes_clusters'] = [fabric]
+        right['allow_kubernetes_clusters'] = [fabric]
 
         service_id = "#{service.fabric}-#{service.environment.name}-#{service.name}"
         rights['mysql_hacks::application_rights_wrapper']['rights'].
