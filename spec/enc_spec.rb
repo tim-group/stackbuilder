@@ -150,7 +150,6 @@ describe Stacks::DSL do
                                                                  "monitor_critical" => 0
                                                                },
                                                                "st-oneapp-vip.st.net.local" => {
-                                                                 "healthcheck_timeout" => 10,
                                                                  "realservers" => {
                                                                    "green" => ["st-oneapp-002.st.net.local"],
                                                                    "blue" => ["st-oneapp-001.st.net.local"]
