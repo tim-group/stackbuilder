@@ -8,6 +8,4 @@ gem 'puppet', '3.7.5'
 gem 'pry'
 gem 'pry-byebug'
 gem 'rubocop', '0.32.1'
-if RUBY_VERSION.split('.').first.to_i > 1
-  gem 'syck'
-end
+gem 'syck' if RUBY_VERSION.split('.').first.to_i > 1
