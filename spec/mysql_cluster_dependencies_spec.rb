@@ -287,7 +287,9 @@ describe 'k8s stack-with-dependencies' do
                           'e-exampledb-004.earth.net.local' => '3.1.4.5',
                           'e-exampledb-005.earth.net.local' => '3.1.4.6')
   end
-  let(:hiera_provider) { TestHieraProvider.new('the_hiera_key' => 'the_hiera_value') }
+  let(:hiera_provider) do
+    TestHieraProvider.new('stacks/application_credentials_selector' => 0)
+  end
 
   it 'example_db_depended_on_in_different_ways' do
     factory = eval_stacks do

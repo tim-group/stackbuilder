@@ -15,7 +15,10 @@ describe 'kubernetes' do
                           'e1-mydb-001.space.net.local' => '3.1.4.6',
                           'e1-mydb-002.space.net.local' => '3.1.4.6')
   end
-  let(:hiera_provider) { TestHieraProvider.new('the_hiera_key' => 'the_hiera_value') }
+  let(:hiera_provider) do
+    TestHieraProvider.new(
+      'stacks/application_credentials_selector' => 0)
+  end
 
   describe 'resource definitions' do
     it 'defines a Deployment' do
@@ -174,6 +177,7 @@ graphite.host=space-mon-001.mgmt.space.net.local
 graphite.port=2013
 graphite.prefix=myapplication.k8s_e1_space
 graphite.period=10
+
 EOL
         }
       }
@@ -267,7 +271,7 @@ EOL
                   db.exampledb.database=exampledb.*
                   db.exampledb.driver=com.mysql.jdbc.Driver.*
                   db.exampledb.port=3306.*
-                  db.exampledb.username=MyApplication.*
+                  db.exampledb.username=MyApplication0.*
                   db.exampledb.password_hiera_key=e1\/MyApplication\/mysql_password.*
                   db.exampledb.read_only_cluster=e1-mydb-002.space.net.local.*
                  /mx)

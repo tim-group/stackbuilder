@@ -2,6 +2,7 @@ require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/cmd'
 require 'stackbuilder/support/subscription'
 require 'stacks/test_framework'
+require 'test_classes'
 require 'spec_helper'
 
 describe 'cmd' do
@@ -13,7 +14,7 @@ describe 'cmd' do
     @puppet = double('puppet')
     @app_deployer = double('app_deployer')
     @dns_resolver = double('dns_resolver')
-    @hiera_provider = double('hiera_provider')
+    @hiera_provider = TestHieraProvider.new({})
     @cleaner = double('cleaner')
     @open3 = double('Open3')
     stub_const("Open3", @open3)

@@ -140,8 +140,9 @@ module Stacks::Services::AppService
       'environment' => @environment.name,
       'group' => group,
       'site' => site,
-      'dependencies' => dependency_config(fabric, nil)
+      'dependencies' => dependency_config(fabric, nil),
     }
+    erb_vars['credentials_selector'] = hiera_provider.lookup(erb_vars, 'stacks/application_credentials_selector', nil)
 
     standard_labels = {
       'app.kubernetes.io/name' => app_name,
@@ -183,12 +184,15 @@ graphite.enabled=true
 graphite.host=<%= @site %>-mon-001.mgmt.<%= @site %>.net.local
 graphite.port=2013
 graphite.prefix=<%= @application.downcase %>.k8s_<%= @environment %>_<%= @site %>
-graphite.period=10<% if @dependencies.size > 1 -%>
-
-
+graphite.period=10
+<% if @dependencies.size > 1 %>
 <% @dependencies.map do |k, v| %>
-<%= k %>=<%= v %>
-<% end -%>
+<% if k.start_with?('db.') && k.end_with?('.username') %>
+<%= k %>=<%= v[0,15] + @credentials_selector.to_s -%>
+<% else %>
+<%= k %>=<%= v -%>
+<% end %>
+<% end %>
 <% end %>#{appconfig}
 EOC
 
