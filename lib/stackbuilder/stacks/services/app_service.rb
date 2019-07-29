@@ -96,7 +96,7 @@ module Stacks::Services::AppService
 
   class ConfigERB < ERB
     def initialize(template, vars, hiera_provider)
-      super(template)
+      super(template, nil, '<>-')
       vars.each { |k, v| instance_variable_set("@#{k}", v) }
       @vars = vars
       @hiera_provider = hiera_provider
@@ -139,7 +139,8 @@ module Stacks::Services::AppService
       'stackname' => @stack.name,
       'environment' => @environment.name,
       'group' => group,
-      'site' => site
+      'site' => site,
+      'dependencies' => dependency_config(fabric, nil)
     }
 
     standard_labels = {
@@ -172,6 +173,25 @@ module Stacks::Services::AppService
   end
 
   def generate_k8s_config_map(hiera_provider, erb_vars, application, app_name, group, site, fabric, standard_labels)
+    template = <<EOC
+port=8000
+
+log.directory=/var/log/<%= @application %>/<%= @environment %>-<%= @application %>-<%= @group %>
+log.tags=["env:<%= @environment %>", "app:<%= @application %>", "instance:<%= @group %>"]
+
+graphite.enabled=true
+graphite.host=<%= @site %>-mon-001.mgmt.<%= @site %>.net.local
+graphite.port=2013
+graphite.prefix=<%= @application.downcase %>.k8s_<%= @environment %>_<%= @site %>
+graphite.period=10<% if @dependencies.size > 1 -%>
+
+
+<% @dependencies.map do |k, v| %>
+<%= k %>=<%= v %>
+<% end -%>
+<% end %>#{appconfig}
+EOC
+
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
@@ -184,29 +204,9 @@ module Stacks::Services::AppService
         }.merge(standard_labels)
       },
       'data' => {
-        'config.properties' => <<EOC
-port=8000
-
-log.directory=/var/log/#{application}/#{@environment.name}-#{application}-#{group}
-log.tags=["env:#{@environment.name}", "app:#{application}", "instance:#{group}"]
-
-graphite.enabled=true
-graphite.host=#{site}-mon-001.mgmt.#{site}.net.local
-graphite.port=2013
-graphite.prefix=#{app_name}.k8s_#{@environment.name}_#{site}
-graphite.period=10#{generate_dependency_config(fabric)}#{"\n\n" + ConfigERB.new(appconfig, erb_vars, hiera_provider).render unless appconfig.nil?}
-EOC
+        'config.properties' => ConfigERB.new(template, erb_vars, hiera_provider).render
       }
     }
-  end
-
-  def generate_dependency_config(fabric)
-    config_params = dependency_config(fabric, nil)
-    return '' if config_params.empty?
-
-    "\n\n" + config_params.map do |k, v|
-      "#{k}=#{v}"
-    end.join("\n")
   end
 
   def generate_k8s_service(dns_resolver, app_name, standard_labels)
