@@ -396,7 +396,7 @@ EOC
       else
         vs.endpoints(self, fabric).each do |e|
           ip_blocks = []
-          e[:fqdns].each do |fqdn|
+          e[:fqdns].uniq.each do |fqdn|
             ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
           end
           egresses << {
