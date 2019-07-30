@@ -77,6 +77,23 @@ describe 'kubernetes' do
               }
             },
             'spec' => {
+              'initContainers' => [{
+                'image' => 'busybox:1.31.0',
+                'name' => 'config-generator',
+                'command' => [
+                  '/bin/sh', '-c', 'cp /input/config.properties /config/config.properties'
+                ],
+                'volumeMounts' => [
+                  {
+                    'name' => 'config-volume',
+                    'mountPath' => '/config'
+                  },
+                  {
+                    'name' => 'config-template',
+                    'mountPath' => '/input/config.properties',
+                    'subPath' => 'config.properties'
+                  }]
+              }],
               'containers' => [{
                 'image' => 'repo.net.local:8080/myapplication:1.2.3',
                 'name' => 'myapplication',
@@ -85,7 +102,7 @@ describe 'kubernetes' do
                   '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
                   '-jar',
                   '/app/app.jar',
-                  'config.properties'
+                  '/config/config.properties'
                 ],
                 'ports' => [{
                   'containerPort' => 8000,
@@ -93,8 +110,8 @@ describe 'kubernetes' do
                 }],
                 'volumeMounts' => [{
                   'name' => 'config-volume',
-                  'mountPath' => '/app/config.properties',
-                  'subPath' => 'config.properties'
+                  'mountPath' => '/config',
+                  'readOnly' => true
                 }],
                 'readinessProbe' => {
                   'periodSeconds' => 2,
@@ -104,12 +121,17 @@ describe 'kubernetes' do
                   }
                 }
               }],
-              'volumes' => [{
-                'name' => 'config-volume',
-                'configMap' => {
-                  'name' => 'myapplication-config'
-                }
-              }]
+              'volumes' => [
+                {
+                  'name' => 'config-volume',
+                  'emptyDir' => {}
+                },
+                {
+                  'name' => 'config-template',
+                  'configMap' => {
+                    'name' => 'myapplication-config'
+                  }
+                }]
             }
           }
         }
