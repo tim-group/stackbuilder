@@ -149,7 +149,7 @@ module Stacks::Services::AppService
       'stackname' => @stack.name,
       'environment' => @environment.name,
       'group' => group,
-      'site' => site,
+      'site' => site
     }
     erb_vars = {
       'dependencies' => dependency_config(fabric, nil),
