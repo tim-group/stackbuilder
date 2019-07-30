@@ -78,10 +78,13 @@ describe 'kubernetes' do
             },
             'spec' => {
               'initContainers' => [{
-                'image' => 'busybox:1.31.0',
+                'image' => 'ruby:2.6-alpine',
                 'name' => 'config-generator',
                 'command' => [
-                  '/bin/sh', '-c', 'cp /input/config.properties /config/config.properties'
+                  '/bin/sh',
+                  '-c',
+                  'cat /input/config.properties | ruby -ne \'if $_ =~ /(.*)\{SECRET:([^}]*)\}/; ' \
+                  'puts "#{$1}#{ENV[%Q{SECRET_#{$2}}]}" else puts $_ end\' > /config/config.properties'
                 ],
                 'env' => [],
                 'volumeMounts' => [
