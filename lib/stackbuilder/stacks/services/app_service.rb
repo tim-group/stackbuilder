@@ -1,4 +1,5 @@
 require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/kubernetes_resources'
 require 'erb'
 
 module Stacks::Services::AppService
@@ -141,7 +142,7 @@ module Stacks::Services::AppService
     fabric = environment.options[location]
     domain = "mgmt.#{environment.domain(fabric)}"
 
-    erb_vars = {
+    hiera_scope = {
       'domain' => domain,
       'hostname' => kubernetes ? identity : children.first.hostname,
       'application' => application,
@@ -149,9 +150,11 @@ module Stacks::Services::AppService
       'environment' => @environment.name,
       'group' => group,
       'site' => site,
-      'dependencies' => dependency_config(fabric, nil)
     }
-    erb_vars['credentials_selector'] = hiera_provider.lookup(erb_vars, 'stacks/application_credentials_selector', nil)
+    erb_vars = {
+      'dependencies' => dependency_config(fabric, nil),
+      'credentials_selector' => hiera_provider.lookup(hiera_scope, 'stacks/application_credentials_selector', nil)
+    }.merge(hiera_scope)
 
     standard_labels = {
       'app.kubernetes.io/name' => app_name,
@@ -167,7 +170,7 @@ module Stacks::Services::AppService
     output << generate_k8s_service(dns_resolver, app_name, standard_labels)
     output << generate_k8s_deployment(app_name, app_version, standard_labels, used_secrets)
     output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
-    output
+    Stacks::KubernetesResources.new(@stack.name, name, output, used_secrets, hiera_scope)
   end
 
   def prod_fqdn(fabric)

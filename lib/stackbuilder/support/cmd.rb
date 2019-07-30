@@ -289,7 +289,7 @@ class CMD
       @dns.do_allocate_vips(t)
       @puppet.do_puppet_run_on_dependencies(t)
 
-      apply_k8s(t, t.stack.name)
+      apply_k8s(t)
     end
 
     vm_targets.each do |t|
@@ -309,7 +309,7 @@ class CMD
     end
 
     k8s_targets.each do |t|
-      apply_k8s(t, t.stack.name)
+      apply_k8s(t)
     end
 
     vm_targets.each do |t|
@@ -619,11 +619,8 @@ class CMD
     provision_vm(services, thing, false)
   end
 
-  def apply_k8s(machineset, stack_name)
-    k8s_defns = machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
-    k8s_defns_yaml = generate_k8s_defns_yaml(k8s_defns)
-
-    apply_and_prune_k8s_defns(k8s_defns_yaml, stack_name, machineset.name)
+  def apply_k8s(machineset)
+    machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider).apply_and_prune
   end
 
   def provision_vm(services, thing, initial = true)
@@ -660,22 +657,5 @@ class CMD
     @nagios.nagios_schedule_uptime(thing)
 
     @nagios.do_nagios_register_new(thing) if initial
-  end
-
-  def generate_k8s_defns_yaml(k8s_defns)
-    k8s_defns.map do |k8s_defn|
-      ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(k8s_defn))
-    end.join("\n")
-  end
-
-  def apply_and_prune_k8s_defns(k8s_defns_yaml, stack_name, machine_set_name)
-    command = ['kubectl', 'apply', '--prune', '-l', "stack=#{stack_name},machineset=#{machine_set_name}", '-f', '-']
-    logger(Logger::DEBUG) { "running command: #{command.join(' ')}" }
-    stdout_str, error_str, status = Open3.capture3(*command, :stdin_data => k8s_defns_yaml)
-    if status.success?
-      logger(Logger::INFO) { stdout_str }
-    else
-      fail "Failed to apply k8s resource definitions - error: #{error_str}"
-    end
   end
 end

@@ -9,4 +9,5 @@ module Stacks
   require 'stackbuilder/stacks/machine_def_container'
   require 'stackbuilder/stacks/machine_set'
   require 'stackbuilder/stacks/custom_services'
+  require 'stackbuilder/stacks/kubernetes_resources'
 end
