@@ -95,15 +95,24 @@ module Stacks::Services::AppService
   end
 
   class ConfigERB < ERB
+    attr_reader :used_secrets
+
     def initialize(template, vars, hiera_provider)
       super(template, nil, '-')
       vars.each { |k, v| instance_variable_set("@#{k}", v) }
       @vars = vars
       @hiera_provider = hiera_provider
+      @used_secrets = []
     end
 
     def hiera(key, default = nil)
       @hiera_provider.lookup(@vars, key, default)
+    end
+
+    def secret(key)
+      secret_name = key.gsub(/[^a-zA-Z0-9]/, '_')
+      @used_secrets << secret_name
+      "{SECRET:#{secret_name}}"
     end
 
     def render
@@ -152,9 +161,11 @@ module Stacks::Services::AppService
       'app.kubernetes.io/managed-by' => 'stacks'
     }
 
-    output << generate_k8s_config_map(hiera_provider, erb_vars, app_name, standard_labels)
+    config, used_secrets = generate_app_config(erb_vars, hiera_provider)
+
+    output << generate_k8s_config_map(config, app_name, standard_labels)
     output << generate_k8s_service(dns_resolver, app_name, standard_labels)
-    output << generate_k8s_deployment(app_name, app_version, standard_labels)
+    output << generate_k8s_deployment(app_name, app_version, standard_labels, used_secrets)
     output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
     output
   end
@@ -173,8 +184,8 @@ module Stacks::Services::AppService
     "#{service.environment.name}-#{service.stack.name}-#{service.application.downcase}"
   end
 
-  def generate_k8s_config_map(hiera_provider, erb_vars, app_name, standard_labels)
-    template = <<EOC
+  def generate_app_config(erb_vars, hiera_provider)
+    template = <<'EOC'
 port=8000
 
 log.directory=/var/log/<%= @application %>/<%= @environment %>-<%= @application %>-<%= @group %>
@@ -190,15 +201,23 @@ graphite.period=10
 <%- if k.start_with?('db.') && k.end_with?('.username') -%>
 <%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
 <%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
-<%= k.gsub(/_hiera_key$/, '') %>={SECRET:<%= v.gsub(/[^a-zA-Z0-9]/, '_') %>s_<%= @credentials_selector %>}
+<%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s_#{@credentials_selector}") %>
 <%# TODO: support non-db _hiera_key. For example for a rabbitmq connection -%>
 <%- else -%>
 <%= k %>=<%= v %>
 <%- end -%>
 <%- end -%>
-<%- end -%>#{appconfig}
+<%- end -%>
 EOC
+    template += appconfig if appconfig
 
+    erb = ConfigERB.new(template, erb_vars, hiera_provider)
+    contents = erb.render
+
+    [contents, erb.used_secrets]
+  end
+
+  def generate_k8s_config_map(config, app_name, standard_labels)
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
@@ -211,7 +230,7 @@ EOC
         }.merge(standard_labels)
       },
       'data' => {
-        'config.properties' => ConfigERB.new(template, erb_vars, hiera_provider).render
+        'config.properties' => config
       }
     }
   end
@@ -245,7 +264,7 @@ EOC
     }
   end
 
-  def generate_k8s_deployment(app_name, app_version, standard_labels)
+  def generate_k8s_deployment(app_name, app_version, standard_labels, secrets)
     {
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
@@ -285,6 +304,17 @@ EOC
               'command' => [
                 '/bin/sh', '-c', 'cp /input/config.properties /config/config.properties'
               ],
+              'env' => secrets.map do |s|
+                {
+                  'name' => "SECRET_#{s}",
+                  'valueFrom' => {
+                    'secretKeyRef' => {
+                      'name' => "#{app_name}-secret",
+                      'key' => s
+                    }
+                  }
+                }
+              end,
               'volumeMounts' => [
                 {
                   'name' => 'config-volume',

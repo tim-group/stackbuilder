@@ -83,6 +83,7 @@ describe 'kubernetes' do
                 'command' => [
                   '/bin/sh', '-c', 'cp /input/config.properties /config/config.properties'
                 ],
+                'env' => [],
                 'volumeMounts' => [
                   {
                     'name' => 'config-volume',
@@ -261,6 +262,40 @@ EOL
       expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).
                  find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
         to match(/site=space/)
+    end
+
+    it 'tracks secrets needed from hiera' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.application = 'MyApplication'
+            self.appconfig = <<EOL
+  secret=<%= secret('my/very/secret.data') %>
+EOL
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      k8s = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+      expect(k8s.find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+        to match(/secret={SECRET:my_very_secret_data/)
+
+      expect(k8s.find { |s| s['kind'] == 'Deployment' }['spec']['template']['spec']['initContainers'].first['env']).
+        to eql([
+          {
+            'name' => 'SECRET_my_very_secret_data',
+            'valueFrom' => {
+              'secretKeyRef' => {
+                'name' => 'myapplication-secret',
+                'key' => 'my_very_secret_data'
+              }
+            }
+          }])
     end
 
     it 'has config for it\'s db dependencies' do
