@@ -7,7 +7,7 @@ describe Stacks::KubernetesResources do
     open3 = double('Open3')
     stub_const("Open3", open3)
 
-    r = Stacks::KubernetesResources.new('stack', 'ms', [], ['secret'], 'environment' => 'test')
+    r = Stacks::KubernetesResources.new('site', 'test_env', 'stack', 'ms', [], ['secret'], 'environment' => 'test_env')
 
     expect(open3).to receive(:capture3).with(any_args).and_return(['stdout', 'stderr', return_status])
     expect(return_status).to receive(:success?).and_return(true)

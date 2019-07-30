@@ -170,7 +170,7 @@ module Stacks::Services::AppService
     output << generate_k8s_service(dns_resolver, app_name, standard_labels)
     output << generate_k8s_deployment(app_name, app_version, standard_labels, used_secrets)
     output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
-    Stacks::KubernetesResources.new(@stack.name, name, output, used_secrets, hiera_scope)
+    Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, output, used_secrets, hiera_scope)
   end
 
   def prod_fqdn(fabric)

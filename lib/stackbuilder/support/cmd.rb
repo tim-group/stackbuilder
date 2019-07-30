@@ -586,25 +586,7 @@ class CMD
   end
 
   def clean_k8s(machineset)
-    k8s_defns = machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
-
-    environment = machineset.environment.name
-    machineset_name = machineset.name
-    k8s_defns.each do |defn|
-      resource_kind = defn['kind'].downcase
-
-      stdout_str, error_str, status = Open3.capture3('kubectl',
-                                                     'delete',
-                                                     resource_kind,
-                                                     '-l',
-                                                     "stack=#{machineset.stack.name},machineset=#{machineset_name}",
-                                                     '-n', environment)
-      if status.success?
-        logger(Logger::INFO) { stdout_str }
-      else
-        fail "Failed to delete k8s resource definitions - error: #{error_str}"
-      end
-    end
+    machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider).clean
   end
 
   def clean_vm(thing, all = false)

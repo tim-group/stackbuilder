@@ -99,6 +99,8 @@ describe 'cmd' do
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
+               '--context',
+               'space',
                '--prune',
                '-l',
                'stack=myk8sstack,machineset=myk8sappservice',
@@ -114,6 +116,8 @@ describe 'cmd' do
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
+               '--context',
+               'space',
                '--prune',
                '-l',
                'stack=myk8sstack,machineset=myrelatedk8sappservice',
@@ -189,6 +193,8 @@ describe 'cmd' do
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
+               '--context',
+               'space',
                '--prune',
                '-l',
                'stack=myk8sstack,machineset=myk8sappservice',
@@ -204,6 +210,8 @@ describe 'cmd' do
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
+               '--context',
+               'space',
                '--prune',
                '-l',
                'stack=myk8sstack,machineset=myrelatedk8sappservice',
@@ -228,6 +236,8 @@ describe 'cmd' do
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
+               '--context',
+               'space',
                '--prune',
                '-l',
                'stack=myk8sstack,machineset=myk8sappservice',
@@ -307,6 +317,8 @@ describe 'cmd' do
             with('kubectl',
                  'delete',
                  kind,
+                 '--context',
+                 'space',
                  '-l',
                  'stack=myk8sstack,machineset=myk8sappservice',
                  '-n', 'e1').
@@ -317,6 +329,8 @@ describe 'cmd' do
             with('kubectl',
                  'delete',
                  kind,
+                 '--context',
+                 'space',
                  '-l',
                  'stack=myk8sstack,machineset=myrelatedk8sappservice',
                  '-n', 'e1').
@@ -338,6 +352,8 @@ describe 'cmd' do
             with('kubectl',
                  'delete',
                  kind,
+                 '--context',
+                 'space',
                  '-l',
                  'stack=myk8sstack,machineset=myk8sappservice',
                  '-n', 'e1').
