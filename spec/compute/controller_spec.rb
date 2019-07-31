@@ -30,7 +30,7 @@ describe Compute::Controller do
       :fabric => "local"
     }]
 
-    localhost = `hostname -f`.chomp
+    localhost = `hostname -f`.chomp.downcase
 
     expect(@compute_controller.allocate(specs)).to eql(localhost => specs)
   end
