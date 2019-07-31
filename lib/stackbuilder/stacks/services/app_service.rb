@@ -110,7 +110,7 @@ module Stacks::Services::AppService
       @hiera_provider.lookup(@vars, key, default)
     end
 
-    def secret(key, index=nil)
+    def secret(key, index = nil)
       secret_name = key.gsub(/[^a-zA-Z0-9]/, '_')
       secret_name += "_#{index}" unless index.nil?
       @used_secrets[key] = secret_name
