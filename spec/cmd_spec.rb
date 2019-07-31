@@ -99,7 +99,7 @@ describe 'cmd' do
         mco = double('mcollective client')
         expect(mco).to receive(:insert).with(any_args).and_return([]).twice
 
-        expect(cmd).to receive(:mco_client).with('k8ssecret').twice do |*_args, &block|
+        expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space').twice do |*_args, &block|
           block.call(mco)
         end
 
@@ -200,7 +200,7 @@ describe 'cmd' do
         mco = double('mcollective client')
         expect(mco).to receive(:insert).with(any_args).and_return([]).twice
 
-        expect(cmd).to receive(:mco_client).with('k8ssecret').twice do |*_args, &block|
+        expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space').twice do |*_args, &block|
           block.call(mco)
         end
 
@@ -250,7 +250,7 @@ describe 'cmd' do
         mco = double('mcollective client')
         expect(mco).to receive(:insert).with(any_args).and_return([])
 
-        expect(cmd).to receive(:mco_client).with('k8ssecret') do |*_args, &block|
+        expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space') do |*_args, &block|
           block.call(mco)
         end
 

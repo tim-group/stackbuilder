@@ -604,7 +604,7 @@ class CMD
   def apply_k8s(machineset)
     resources = machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
     self.class.include Support::MCollective
-    mco_client('k8ssecret') do |client|
+    mco_client('k8ssecret', :fabric => resources.site) do |client|
       resources.apply_and_prune(client)
     end
   end
