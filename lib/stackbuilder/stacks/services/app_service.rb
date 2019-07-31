@@ -110,8 +110,9 @@ module Stacks::Services::AppService
       @hiera_provider.lookup(@vars, key, default)
     end
 
-    def secret(key)
+    def secret(key, index=nil)
       secret_name = key.gsub(/[^a-zA-Z0-9]/, '_')
+      secret_name += "_#{index}" unless index.nil?
       @used_secrets[key] = secret_name
       "{SECRET:#{secret_name}}"
     end
@@ -204,7 +205,7 @@ graphite.period=10
 <%- if k.start_with?('db.') && k.end_with?('.username') -%>
 <%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
 <%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
-<%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s_#{@credentials_selector}") %>
+<%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s", @credentials_selector) %>
 <%# TODO: support non-db _hiera_key. For example for a rabbitmq connection -%>
 <%- else -%>
 <%= k %>=<%= v %>

@@ -1,6 +1,7 @@
 class Stacks::KubernetesResources
   attr_reader :site
   attr_reader :resources
+  attr_reader :secrets
 
   def initialize(site, environment, stack_name, machine_set_name, labels, resources, secrets, hiera_scope)
     @site = site

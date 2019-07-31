@@ -274,6 +274,7 @@ EOL
             self.application = 'MyApplication'
             self.appconfig = <<EOL
   secret=<%= secret('my/very/secret.data') %>
+  array_secret=<%= secret('my/very/secret.array', 0) %>
 EOL
           end
         end
@@ -286,19 +287,35 @@ EOL
       k8s = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
 
       expect(k8s.resources.find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
-        to match(/secret={SECRET:my_very_secret_data/)
+        to match(/secret={SECRET:my_very_secret_data.*array_secret={SECRET:my_very_secret_array_0/m)
 
-      expect(k8s.resources.find { |s| s['kind'] == 'Deployment' }['spec']['template']['spec']['initContainers'].first['env']).
-        to eql([
-          {
-            'name' => 'SECRET_my_very_secret_data',
-            'valueFrom' => {
-              'secretKeyRef' => {
-                'name' => 'myapplication-secret',
-                'key' => 'my_very_secret_data'
-              }
+      expect(k8s.resources.find { |s| s['kind'] == 'Deployment' }['spec']['template']['spec']['initContainers'].
+             first['env'].
+             find { |e| e['name'] =~ /data/ }).
+        to eql(
+          'name' => 'SECRET_my_very_secret_data',
+          'valueFrom' => {
+            'secretKeyRef' => {
+              'name' => 'myapplication-secret',
+              'key' => 'my_very_secret_data'
             }
-          }])
+          })
+
+      expect(k8s.resources.find { |s| s['kind'] == 'Deployment' }['spec']['template']['spec']['initContainers'].
+             first['env'].
+             find { |e| e['name'] =~ /array/ }).
+        to eql(
+          'name' => 'SECRET_my_very_secret_array_0',
+          'valueFrom' => {
+            'secretKeyRef' => {
+              'name' => 'myapplication-secret',
+              'key' => 'my_very_secret_array_0'
+            }
+          })
+
+      expect(k8s.secrets).to eql(
+        'my/very/secret.data' => 'my_very_secret_data',
+        'my/very/secret.array' => 'my_very_secret_array_0')
     end
 
     it 'has config for it\'s db dependencies' do
