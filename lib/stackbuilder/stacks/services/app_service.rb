@@ -148,7 +148,7 @@ module Stacks::Services::AppService
       'hostname' => kubernetes ? identity : children.first.hostname,
       'application' => application,
       'stackname' => @stack.name,
-      'logicalenv' => @environment.name,
+      'environment' => @environment.name,
       'group' => group,
       'site' => site
     }
