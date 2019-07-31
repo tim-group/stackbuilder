@@ -103,7 +103,7 @@ module Stacks::Services::AppService
       vars.each { |k, v| instance_variable_set("@#{k}", v) }
       @vars = vars
       @hiera_provider = hiera_provider
-      @used_secrets = []
+      @used_secrets = {}
     end
 
     def hiera(key, default = nil)
@@ -112,7 +112,7 @@ module Stacks::Services::AppService
 
     def secret(key)
       secret_name = key.gsub(/[^a-zA-Z0-9]/, '_')
-      @used_secrets << secret_name
+      @used_secrets[key] = secret_name
       "{SECRET:#{secret_name}}"
     end
 
@@ -166,11 +166,11 @@ module Stacks::Services::AppService
 
     config, used_secrets = generate_app_config(erb_vars, hiera_provider)
 
-    output << generate_k8s_config_map(config, app_name, standard_labels)
-    output << generate_k8s_service(dns_resolver, app_name, standard_labels)
-    output << generate_k8s_deployment(app_name, app_version, standard_labels, used_secrets)
+    output << generate_k8s_config_map(config, standard_labels)
+    output << generate_k8s_service(dns_resolver, standard_labels)
+    output << generate_k8s_deployment(standard_labels, used_secrets)
     output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
-    Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, output, used_secrets, hiera_scope)
+    Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
   end
 
   def prod_fqdn(fabric)
@@ -220,7 +220,9 @@ EOC
     [contents, erb.used_secrets]
   end
 
-  def generate_k8s_config_map(config, app_name, standard_labels)
+  def generate_k8s_config_map(config, standard_labels)
+    app_name = standard_labels['app.kubernetes.io/name']
+
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
@@ -238,7 +240,9 @@ EOC
     }
   end
 
-  def generate_k8s_service(dns_resolver, app_name, standard_labels)
+  def generate_k8s_service(dns_resolver, standard_labels)
+    app_name = standard_labels['app.kubernetes.io/name']
+
     {
       'apiVersion' => 'v1',
       'kind' => 'Service',
@@ -267,7 +271,10 @@ EOC
     }
   end
 
-  def generate_k8s_deployment(app_name, app_version, standard_labels, secrets)
+  def generate_k8s_deployment(standard_labels, secrets)
+    app_name = standard_labels['app.kubernetes.io/name']
+    app_version = standard_labels['app.kubernetes.io/version']
+
     {
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
@@ -310,13 +317,13 @@ EOC
                 'cat /input/config.properties | ruby -ne \'if $_ =~ /(.*)\{SECRET:([^}]*)\}/;' \
                 ' puts "#{$1}#{ENV[%Q{SECRET_#{$2}}]}" else puts $_ end\' > /config/config.properties'
               ],
-              'env' => secrets.map do |s|
+              'env' => secrets.map do |_hiera_key, secret_name|
                 {
-                  'name' => "SECRET_#{s}",
+                  'name' => "SECRET_#{secret_name}",
                   'valueFrom' => {
                     'secretKeyRef' => {
                       'name' => "#{app_name}-secret",
-                      'key' => s
+                      'key' => secret_name
                     }
                   }
                 }

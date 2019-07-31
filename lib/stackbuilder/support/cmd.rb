@@ -602,7 +602,11 @@ class CMD
   end
 
   def apply_k8s(machineset)
-    machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider).apply_and_prune
+    resources = machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
+    self.class.include Support::MCollective
+    mco_client('k8ssecret') do |client|
+      resources.apply_and_prune(client)
+    end
   end
 
   def provision_vm(services, thing, initial = true)

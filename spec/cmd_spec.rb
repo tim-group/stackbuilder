@@ -96,6 +96,13 @@ describe 'cmd' do
         expect(@dns).to receive(:do_allocate_vips).with(myrelatedk8sappservice_machineset)
         expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(myrelatedk8sappservice_machineset)
 
+        mco = double('mcollective client')
+        expect(mco).to receive(:insert).with(any_args).and_return([]).twice
+
+        expect(cmd).to receive(:mco_client).with('k8ssecret').twice do |*_args, &block|
+          block.call(mco)
+        end
+
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
@@ -190,6 +197,13 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
 
+        mco = double('mcollective client')
+        expect(mco).to receive(:insert).with(any_args).and_return([]).twice
+
+        expect(cmd).to receive(:mco_client).with('k8ssecret').twice do |*_args, &block|
+          block.call(mco)
+        end
+
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
@@ -232,6 +246,13 @@ describe 'cmd' do
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         cmd = cmd(factory, 'e1', 'myk8sappservice')
+
+        mco = double('mcollective client')
+        expect(mco).to receive(:insert).with(any_args).and_return([])
+
+        expect(cmd).to receive(:mco_client).with('k8ssecret') do |*_args, &block|
+          block.call(mco)
+        end
 
         expect(@open3).to receive(:capture3).
           with('kubectl',

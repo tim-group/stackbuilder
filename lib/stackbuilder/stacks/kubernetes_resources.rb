@@ -1,7 +1,7 @@
 class Stacks::KubernetesResources
   attr_reader :resources
 
-  def initialize(site, environment, stack_name, machine_set_name, resources, secrets, hiera_scope)
+  def initialize(site, environment, stack_name, machine_set_name, labels, resources, secrets, hiera_scope)
     @site = site
     @environment = environment
     @stack_name = stack_name
@@ -9,10 +9,7 @@ class Stacks::KubernetesResources
     @resources = resources
     @secrets = secrets
     @hiera_scope = hiera_scope
-  end
-
-  def each
-    @resources.each { |r| yield r }
+    @labels = labels
   end
 
   def to_defns_yaml
@@ -21,7 +18,26 @@ class Stacks::KubernetesResources
     end.join("\n")
   end
 
-  def apply_and_prune
+  def apply_and_prune(mco_secrets_client)
+    secret_resource = "#{@labels['app.kubernetes.io/name']}-secret"
+    logger(Logger::INFO) { "Preparing #{@secrets.size} secrets for #{@machine_set_name} in resource #{secret_resource}" }
+    logger(Logger::DEBUG) { "Secrets to load: #{@secrets.keys.join(', ')}" }
+    responses = mco_secrets_client.insert(:namespace => @environment,
+                                          :context => @site,
+                                          :secret_resource => secret_resource,
+                                          :labels => @labels,
+                                          :keys => @secrets.keys,
+                                          :scope => @hiera_scope)
+
+    if responses.any? { |r| r.results[:statuscode] != 0 }
+      responses.each do |r|
+        logger(Logger::ERROR) { "#{r.results[:sender]} responded #{r.results[:statusmsg]}" }
+      end
+      fail "Failed to prepare secrets"
+    else
+      logger(Logger::INFO) { "Successfully prepared secrets" }
+    end
+
     k8s_defns_yaml = to_defns_yaml
     command = ['kubectl', 'apply',
                '--context', @site,
