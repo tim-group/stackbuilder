@@ -193,12 +193,12 @@ module Stacks::Services::AppService
 port=8000
 
 log.directory=/var/log/app
-log.tags=["env:<%= @environment %>", "app:<%= @application %>", "instance:<%= @group %>"]
+log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @group %>"]
 
 graphite.enabled=true
 graphite.host=<%= @site %>-mon-001.mgmt.<%= @site %>.net.local
 graphite.port=2013
-graphite.prefix=<%= @application.downcase %>.k8s_<%= @environment %>_<%= @site %>
+graphite.prefix=<%= @application.downcase %>.k8s_<%= @logicalenv %>_<%= @site %>
 graphite.period=10
 <%- if @dependencies.size > 1 -%>
 <%- @dependencies.map do |k, v| -%>

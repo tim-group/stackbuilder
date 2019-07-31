@@ -71,7 +71,7 @@ describe Support::HieraProvider do
     scope = {
       'domain' => 'dummy',
       'hostname' => 'dummy',
-      'environment' => 'dummy',
+      'logicalenv' => 'dummy',
       'stackname' => 'dummy'
     }
 
@@ -92,7 +92,7 @@ EOF
     scope = {
       'domain' => 'dummy',
       'hostname' => 'dummy',
-      'environment' => 'e1',
+      'logicalenv' => 'e1',
       'stackname' => 'dummy'
     }
 
@@ -120,7 +120,7 @@ EOF
     scope = {
       'domain' => 'dummy',
       'hostname' => 'dummy',
-      'environment' => 'e1',
+      'logicalenv' => 'e1',
       'stackname' => 'dummy'
     }
 
@@ -135,7 +135,7 @@ EOF
     scope = {
       'domain' => 'dummy',
       'hostname' => 'dummy',
-      'environment' => 'dummy',
+      'logicalenv' => 'dummy',
       'stackname' => 'dummy'
     }
 
@@ -165,7 +165,7 @@ EOF
     scope = {
       'domain' => 'mgmt.oy.net.local',
       'hostname' => 'dummy',
-      'environment' => 'dummy',
+      'logicalenv' => 'dummy',
       'stackname' => 'dummy'
     }
 

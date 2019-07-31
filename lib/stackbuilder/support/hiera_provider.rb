@@ -6,8 +6,8 @@ require 'open3'
 class Support::HieraProvider
   HIERARCHY = [
     lambda { |hieradata, scope| hieradata.fetch(scope['domain'], {}).fetch(scope['hostname'], {}) },
-    lambda { |hieradata, scope| hieradata.fetch(scope['domain'], {}).fetch(scope['environment'], {}) },
-    lambda { |hieradata, scope| hieradata.fetch("logicalenv_#{scope['environment']}", {}) },
+    lambda { |hieradata, scope| hieradata.fetch(scope['domain'], {}).fetch(scope['logicalenv'], {}) },
+    lambda { |hieradata, scope| hieradata.fetch("logicalenv_#{scope['logicalenv']}", {}) },
     lambda { |hieradata, scope| hieradata.fetch("domain_#{scope['domain']}", {}) },
     lambda { |hieradata, scope| hieradata.fetch('stacks', {}).fetch(scope['stackname'], {}) },
     lambda { |hieradata, _scope| hieradata.fetch('dbrights', {}) },
@@ -26,7 +26,7 @@ class Support::HieraProvider
   end
 
   def lookup(scope, key, default_value = nil)
-    %w(domain hostname environment stackname).each do |s|
+    %w(domain hostname logicalenv stackname).each do |s|
       fail("Missing variable - Hiera lookup requires #{s} in scope") if !scope[s]
     end
 
