@@ -41,7 +41,7 @@ describe 'machine_set' do
 
       machine_sets = factory.inventory.find_environment('e1').definitions['test_stack'].k8s_machinesets
       app1_machine_set = machine_sets['app1']
-      network_policies = app1_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).select do |policy|
+      network_policies = app1_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
         policy['kind'] == "NetworkPolicy"
       end
       expect(network_policies.size).to be(1)

@@ -624,6 +624,7 @@ describe 'cmd' do
         expect(out).to match(/\bspace-e1-myk8sappservice:.*
                             \bkind:.*
                             /mx)
+        expect(YAML.load(out)['space-e1-myk8sappservice'].map { |r| r['kind'] }).to include('Deployment', 'ConfigMap')
       end
     end
   end

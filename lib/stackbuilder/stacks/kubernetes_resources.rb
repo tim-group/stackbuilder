@@ -1,5 +1,5 @@
 class Stacks::KubernetesResources
-  include Enumerable
+  attr_reader :resources
 
   def initialize(site, environment, stack_name, machine_set_name, resources, secrets, hiera_scope)
     @site = site
