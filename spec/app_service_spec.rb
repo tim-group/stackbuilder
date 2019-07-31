@@ -110,7 +110,7 @@ describe 'kubernetes' do
                 ],
                 'ports' => [{
                   'containerPort' => 8000,
-                  'name' => 'myapplication'
+                  'name' => 'http'
                 }],
                 'volumeMounts' => [{
                   'name' => 'config-volume',

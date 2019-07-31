@@ -344,7 +344,7 @@ EOC
               ],
               'ports' => [{
                 'containerPort' => 8000,
-                'name' => app_name
+                'name' => 'http'
               }],
               'volumeMounts' => [{
                 'name' => 'config-volume',
