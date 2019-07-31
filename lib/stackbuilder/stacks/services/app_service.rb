@@ -192,7 +192,7 @@ module Stacks::Services::AppService
     template = <<'EOC'
 port=8000
 
-log.directory=/var/log/<%= @application %>/<%= @environment %>-<%= @application %>-<%= @group %>
+log.directory=/var/log/app
 log.tags=["env:<%= @environment %>", "app:<%= @application %>", "instance:<%= @group %>"]
 
 graphite.enabled=true
