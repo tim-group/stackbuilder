@@ -288,7 +288,11 @@ describe 'k8s stack-with-dependencies' do
                           'e-exampledb-005.earth.net.local' => '3.1.4.6')
   end
   let(:hiera_provider) do
-    TestHieraProvider.new('stacks/application_credentials_selector' => 0)
+    TestHieraProvider.new(
+      'stacks/application_credentials_selector' => 0,
+      'kubernetes/hosts/space' => [],
+      'kubernetes/hosts/earth' => []
+    )
   end
 
   it 'example_db_depended_on_in_different_ways' do
@@ -321,9 +325,9 @@ describe 'k8s stack-with-dependencies' do
       policy['kind'] == "NetworkPolicy"
     end
 
-    expect(network_policies.size).to eq(1)
-    expect(network_policies.first['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
-    egress = network_policies.first['spec']['egress']
+    expect(network_policies.size).to eq(2)
+    expect(network_policies[1]['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
+    egress = network_policies[1]['spec']['egress']
     expect(egress.size).to eq(1)
     expect(egress.first['to'].size).to eq(4)
     expect(egress.first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
@@ -366,9 +370,9 @@ describe 'k8s stack-with-dependencies' do
       policy['kind'] == "NetworkPolicy"
     end
 
-    expect(network_policies.size).to eq(1)
-    expect(network_policies.first['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
-    egress = network_policies.first['spec']['egress']
+    expect(network_policies.size).to eq(2)
+    expect(network_policies[1]['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
+    egress = network_policies[1]['spec']['egress']
     expect(egress.size).to eq(1)
     expect(egress.first['to'].size).to eq(1)
     expect(egress.first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
