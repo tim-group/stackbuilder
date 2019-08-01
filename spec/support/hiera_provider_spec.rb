@@ -38,6 +38,10 @@ describe Support::HieraProvider do
 
   def given_hieradata(&block)
     Dir.chdir(@tmpdir) do
+      ENV['GIT_AUTHOR_NAME'] = 'Test'
+      ENV['GIT_COMMITTER_NAME'] = 'Test'
+      ENV['GIT_AUTHOR_EMAIL'] = 'test@example.com'
+      ENV['GIT_COMMITTER_EMAIL'] = 'test@example.com'
       system_call('git', 'init')
       File.write('unused_empty_file_to_ensure_git_commit', '')
       GivenHieradata.new(@tmpdir).instance_eval(&block)
