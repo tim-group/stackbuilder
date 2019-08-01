@@ -170,7 +170,7 @@ module Stacks::Services::AppService
     output << generate_k8s_config_map(config, standard_labels)
     output << generate_k8s_service(dns_resolver, standard_labels)
     output << generate_k8s_deployment(standard_labels, used_secrets)
-    output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels, hiera_provider.lookup(hiera_scope, "kubernetes/hosts/#{fabric}", nil))
+    output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
     Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
   end
 
@@ -382,46 +382,8 @@ EOC
     }
   end
 
-  def generate_k8s_network_policies(dns_resolver, fabric, standard_labels, k8s_host_machines)
+  def generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
     network_policies = []
-    #    k8s_hosts_ip_blocks = [
-    #      {'ipBlock' => {'cidr' => '3.1.4.1/32'}},
-    #      {'ipBlock' => {'cidr' => '3.1.4.2/32'}}
-    #    ]
-    fail("You need to set kubernetes/hosts/#{fabric} in hiera to a list of host for fabric '#{fabric}'") if k8s_host_machines.nil?
-    k8s_hosts_ip_blocks = k8s_host_machines.map do |machine|
-      { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(machine)}/32" } }
-    end
-    network_policies << {
-      'apiVersion' => 'networking.k8s.io/v1',
-      'kind' => 'NetworkPolicy',
-      'metadata' => {
-        'name' => "allow-kube-proxy-in-to-#{@name}-8000",
-        'namespace' => @environment.name,
-        'labels' => {
-          'stack' => @stack.name,
-          'machineset' => @name
-        }.merge(standard_labels)
-      },
-      'spec' => {
-        'podSelector' => {
-          'matchLabels' => {
-            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
-          }
-        },
-        'policyTypes' => [
-          'Ingress'
-        ],
-        'ingress' => [{
-          'from' => k8s_hosts_ip_blocks,
-          'ports' => [{
-            'protocol' => 'TCP',
-            'port' => 'http'
-          }]
-        }]
-      }
-    }
-
     virtual_services_that_depend_on_me.each do |vs|
       filters = []
       if vs.kubernetes

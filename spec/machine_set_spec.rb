@@ -9,12 +9,7 @@ describe 'machine_set' do
       'e1-app1-vip.space.net.local' => '3.4.5.6'
     )
   end
-  let(:hiera_provider) do
-    TestHieraProvider.new(
-      'the_hiera_key' => 'the_hiera_value',
-      'kubernetes/hosts/space' => []
-    )
-  end
+  let(:hiera_provider) { TestHieraProvider.new('the_hiera_key' => 'the_hiera_value') }
 
   describe 'allow_outbound_connection' do
     it 'should fail if the machine_set isn\'t a kubernetes enabled machine_set' do
@@ -49,7 +44,7 @@ describe 'machine_set' do
       network_policies = app1_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
         policy['kind'] == "NetworkPolicy"
       end
-      expect(network_policies.size).to be(2)
+      expect(network_policies.size).to be(1)
       expect(network_policies.first['metadata']['name']).to eql('allow-app1-out-to-somewhere-on-ports-80-443')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app1')
