@@ -104,10 +104,15 @@ describe 'kubernetes' do
                 'args' => [
                   'java',
                   '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                  '-Xmx1024M',
                   '-jar',
                   '/app/app.jar',
                   '/config/config.properties'
                 ],
+                'resources' => {
+                  'limits' => { 'memory' => '1153433Ki' },
+                  'requests' => { 'memory' => '1153433Ki' }
+                },
                 'ports' => [{
                   'containerPort' => 8000,
                   'name' => 'http'
@@ -388,6 +393,55 @@ EOL
       lb_first_machine_def = factory.inventory.find_environment("e1").
                              definitions['loadbalancer_service'].children.first.children.first
       expect(lb_first_machine_def.to_enc["role::loadbalancer"]["virtual_servers"].size).to eq(0)
+    end
+
+    describe 'memory limits (max) and requests (min) ' do
+      def k8s_resource(set, kind)
+        set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == kind }
+      end
+
+      it 'bases container limits and requests on the max heap memory' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.application = 'MyApplication'
+              self.jvm_heap = '100G'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        app_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first
+
+        expect(app_container['resources']['limits']['memory']).to eq('115343360Ki')
+        expect(app_container['resources']['requests']['memory']).to eq('115343360Ki')
+        expect(app_container['args'].find { |arg| arg =~ /-Xmx/ }).to match(/-Xmx100G/)
+      end
+
+      it 'controls container limits by reserving headspace computed from the heap size' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.application = 'MyApplication'
+              self.jvm_heap = '100G'
+              self.headspace = 0.5
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        app_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first
+
+        expect(app_container['resources']['limits']['memory']).to eq('157286400Ki')
+        expect(app_container['resources']['requests']['memory']).to eq('157286400Ki')
+        expect(app_container['args'].find { |arg| arg =~ /-Xmx/ }).to match(/-Xmx100G/)
+      end
     end
   end
 

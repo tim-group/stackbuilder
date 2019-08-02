@@ -14,7 +14,10 @@ module Stacks::Services::AppService
   attr_accessor :tomcat_session_replication
   attr_accessor :use_ha_mysql_ordering
   attr_accessor :ha_mysql_ordering_exclude
+
   attr_accessor :appconfig
+  attr_accessor :jvm_heap
+  attr_accessor :headspace
 
   alias_method :database_username, :application
   alias_method :database_username=, :application=
@@ -35,6 +38,8 @@ module Stacks::Services::AppService
     @tomcat_session_replication = false
     @use_ha_mysql_ordering = false
     @ha_mysql_ordering_exclude = []
+    @jvm_heap = '1024M'
+    @headspace = 0.1
   end
 
   def enable_ehcache
@@ -346,10 +351,15 @@ EOC
               'args' => [
                 'java',
                 '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                "-Xmx#{@jvm_heap}",
                 '-jar',
                 '/app/app.jar',
                 '/config/config.properties'
               ],
+              'resources' => {
+                'limits' => { 'memory' => scale_memory(@jvm_heap, @headspace) + 'i' },
+                'requests' => { 'memory' => scale_memory(@jvm_heap, @headspace) + 'i' }
+              },
               'ports' => [{
                 'containerPort' => 8000,
                 'name' => 'http'
@@ -380,6 +390,20 @@ EOC
         }
       }
     }
+  end
+
+  def scale_memory(memory, coeff)
+    m = memory.match(/^(\d+)(G|M|K)i?$/)
+    byte_conversion_factor = case m.captures[1].upcase
+                             when 'G'
+                               1024**3
+                             when 'M'
+                               1024**2
+                             when 'K'
+                               1024
+                             end
+    bytes = (1 + coeff) * m.captures[0].to_i * byte_conversion_factor
+    "#{(bytes / 1024).floor}K"
   end
 
   def generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
