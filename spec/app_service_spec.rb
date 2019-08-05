@@ -78,14 +78,8 @@ describe 'kubernetes' do
             },
             'spec' => {
               'initContainers' => [{
-                'image' => 'ruby:2.6-alpine',
+                'image' => 'repo.net.local:8080/config-generator:1.0.1',
                 'name' => 'config-generator',
-                'command' => [
-                  '/bin/sh',
-                  '-c',
-                  'cat /input/config.properties | ruby -ne \'if $_ =~ /(.*)\{SECRET:([^}]*)\}/; ' \
-                  'puts "#{$1}#{ENV[%Q{SECRET_#{$2}}]}" else puts $_ end\' > /config/config.properties'
-                ],
                 'env' => [],
                 'volumeMounts' => [
                   {
