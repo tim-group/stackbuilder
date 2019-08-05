@@ -28,21 +28,21 @@ class Support::EnvListing
     end
   end
 
-  def traverse(indent, is_last, machine_def, envs_only)
-    case machine_def.type_of?
+  def traverse(indent, is_last, thing, envs_only)
+    case thing.type_of?
     when :environment
-      name = machine_def.identity
-      sub = machine_def.parent.nil? ? '' : '(sub)'
-      type = "[0;35m#{machine_def.type_of?}#{sub}[0m"
+      name = thing.identity
+      sub = thing.parent.nil? ? '' : '(sub)'
+      type = "[0;35m#{thing.type_of?}#{sub}[0m"
     when :custom_service, :machine_set, :virtual_service
-      type = "[0;36m#{machine_def.type_of?}[0m"
-      name = machine_def.name
+      type = "[0;36m#{thing.type_of?}[0m"
+      name = thing.name
     when :machine_def
-      type = "[0;32m#{machine_def.type_of?}[0m"
-      name = machine_def.identity
+      type = "[0;32m#{thing.type_of?}[0m"
+      name = thing.identity
     else
-      type = "[0;36m#{machine_def.clazz}[0m"
-      name = machine_def.name
+      type = "[0;36m#{thing.clazz}[0m"
+      name = thing.name
     end
 
     ptr, space, char = case is_last
@@ -54,9 +54,9 @@ class Support::EnvListing
     printf("[0;33m%s[0m%s %s\n", indent + char + ptr, type, name)
     indent += space
 
-    return unless machine_def.respond_to?(:children)
+    return unless thing.respond_to?(:children) || thing.respond_to?(:k8s_children)
 
-    children = machine_def.children
+    children = thing.children + thing.k8s_children
     children.select! { |m| m.clazz != 'machine' } if @terse
     children.select! { |m| m.respond_to?(:domain_suffix) } if envs_only
 

@@ -9,6 +9,14 @@ module Stacks::MachineDefContainer
     @definitions.sort.map { |_k, v| v }
   end
 
+  def k8s_children
+    if @k8s_machinesets
+      @k8s_machinesets.sort.map { |_k, v| v }
+    else
+      []
+    end
+  end
+
   def accept(&block)
     block.call(self)
     children.each do |child|
