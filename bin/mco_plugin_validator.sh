@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 case $1 in
 validate)
@@ -131,8 +131,8 @@ install)
       pushd $LIBDIR >/dev/null
         mkdir -p $(dirname ${file})
         if [ ! -d $INSTALL_PATH/${REPO_CLONE_DIRS[${FROM[$file]}]} ]; then
-          echo "Cloning ${FROM[$file]} repo from $REPOS[${FROM[$file]}] into $INSTALL_PATH/${REPO_CLONE_DIRS[${FROM[$file]}]}"
-          git clone $REPOS[${FROM[$file]}] $INSTALL_PATH/${REPO_CLONE_DIRS[${FROM[$file]}]}
+          echo "Cloning ${FROM[$file]} repo from ${REPOS[${FROM[$file]}]} into $INSTALL_PATH/${REPO_CLONE_DIRS[${FROM[$file]}]}"
+          git clone ${REPOS[${FROM[$file]}]} $INSTALL_PATH/${REPO_CLONE_DIRS[${FROM[$file]}]}
         fi
         echo "Symlinking $INSTALL_PATH/${REPO_CLONE_DIRS[${FROM[$file]}]}/${REPO_PATH[$file]} to ${LIBDIR}/${file}"
         ln -s $INSTALL_PATH/${REPO_CLONE_DIRS[${FROM[$file]}]}/${REPO_PATH[$file]} $file
