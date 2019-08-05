@@ -256,7 +256,7 @@ subscription.start(["provision.*", "puppet_status"])
 puppet = Support::Puppet.new(subscription)
 app_deployer = Support::AppDeployer.new
 dns_resolver = Support::DnsResolver.new
-hiera_provider = Support::HieraProvider.new(:origin => 'git@git:puppet')
+hiera_provider = Support::HieraProvider.new(:origin => 'http://git/puppet.git')
 cleaner = Support::Cleaner.new(factory.compute_controller)
 commands = CMD.new(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver,
                    hiera_provider, cleaner, environment, $options[:stack], $options[:stash])
