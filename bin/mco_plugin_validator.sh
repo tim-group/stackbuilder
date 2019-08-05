@@ -44,6 +44,7 @@ FROM[mcollective/agent/puppetng.rb]='mcollective-puppetng'
 FROM[mcollective/agent/puppetng.ddl]='mcollective-puppetng'
 FROM[mcollective/agent/computenodestorage.ddl]='provisioning-tools'
 FROM[mcollective/agent/libvirt.ddl]='puppet'
+FROM[mcollective/agent/lvm.ddl]='puppet'
 FROM[mcollective/agent/computenode.ddl]='provisioning-tools'
 FROM[mcollective/agent/k8ssecret.ddl]='puppet'
 FROM[mcollective/agent/k8ssecret.rb]='puppet'
@@ -124,6 +125,7 @@ install)
   REPO_PATH[mcollective/agent/computenode.ddl]='mcollective/agent/computenode.ddl'
   REPO_PATH[mcollective/agent/k8ssecret.ddl]='modules/mcollective/files/mcollective/agent/k8ssecret.ddl'
   REPO_PATH[mcollective/agent/k8ssecret.rb]='modules/mcollective/files/mcollective/agent/k8ssecret.rb'
+  REPO_PATH[mcollective/agent/lvm.ddl]='modules/mcollective/files/mcollective/agent/lvm.ddl'
 
   for file in "${!FROM[@]}"; do
     if [ ! -e "${LIBDIR}/${file}" ]; then

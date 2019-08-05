@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'ci_reporter_rspec', '1.0.0'
+gem 'collimator', '0.0.3'
 gem 'mcollective-client', '2.8.2'
 gem 'rake', '10.1.0'
 gem 'rspec', '3.3.0'
