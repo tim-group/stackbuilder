@@ -122,6 +122,17 @@ describe 'kubernetes' do
                     'path' => '/info/ready',
                     'port' => 8000
                   }
+                },
+                'lifecycle' => {
+                  'preStop' => {
+                    'exec' => {
+                      'command' => [
+                        '/bin/sh',
+                        '-c',
+                        'sleep 10; while [ "$(curl -s localhost:8000/info/stoppable)" != "safe" ]; do sleep 1; done'
+                      ]
+                    }
+                  }
                 }
               }],
               'volumes' => [
