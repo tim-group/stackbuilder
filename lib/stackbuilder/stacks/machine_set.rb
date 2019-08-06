@@ -222,7 +222,7 @@ class Stacks::MachineSet
     SecureRandom.hex(20)
   end
 
-  def to_k8s(_app_deployer, _dns_resolver, _hiera_provider)
+  def to_k8s(_app_deployer, _dns_resolver, _hiera_provider, standard_labels)
     policies = []
     @allowed_outbound_connections.each_key do |outbound_connection|
       filters = []
@@ -246,8 +246,7 @@ class Stacks::MachineSet
         'spec' => {
           'podSelector' => {
             'matchLabels' => {
-              'machine_set' => @name,
-              'stack' => @stack.name
+              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
             }
           },
           'policyTypes' => [

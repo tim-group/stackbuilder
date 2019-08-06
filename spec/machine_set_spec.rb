@@ -47,8 +47,7 @@ describe 'machine_set' do
       expect(network_policies.size).to be(1)
       expect(network_policies.first['metadata']['name']).to eql('allow-app1-out-to-somewhere-on-ports-80-443')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(network_policies.first['spec']['podSelector']['matchLabels']['machine_set']).to eql('app1')
-      expect(network_policies.first['spec']['podSelector']['matchLabels']['stack']).to eql('test_stack')
+      expect(network_policies.first['spec']['podSelector']['matchLabels']['app.kubernetes.io/instance']).to eql('e1-test_stack-app')
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
 
       egress = network_policies.first['spec']['egress']

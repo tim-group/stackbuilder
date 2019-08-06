@@ -128,7 +128,6 @@ module Stacks::Services::AppService
   end
 
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
-    output = super
     fail("app_service requires application") if application.nil?
     app_name = application.downcase
     fail('app_service to_k8s doesn\'t know how to deal with multiple groups yet') if @groups.size > 1
@@ -172,6 +171,7 @@ module Stacks::Services::AppService
 
     config, used_secrets = generate_app_config(erb_vars, hiera_provider)
 
+    output = super app_deployer, dns_resolver, hiera_provider, standard_labels
     output << generate_k8s_config_map(config, standard_labels)
     output << generate_k8s_service(dns_resolver, standard_labels)
     output << generate_k8s_deployment(standard_labels, used_secrets)
