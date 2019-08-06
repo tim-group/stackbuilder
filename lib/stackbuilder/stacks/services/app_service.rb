@@ -38,7 +38,7 @@ module Stacks::Services::AppService
     @tomcat_session_replication = false
     @use_ha_mysql_ordering = false
     @ha_mysql_ordering_exclude = []
-    @jvm_heap = '1024M'
+    @jvm_heap = '64M'
     @headspace = 0.1
   end
 

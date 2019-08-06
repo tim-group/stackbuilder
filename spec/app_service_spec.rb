@@ -101,14 +101,14 @@ describe 'kubernetes' do
                   '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
                   '-XX:+UseConcMarkSweepGC',
                   '-XX:+CMSClassUnloadingEnabled',
-                  '-Xmx1024M',
+                  '-Xmx64M',
                   '-jar',
                   '/app/app.jar',
                   '/config/config.properties'
                 ],
                 'resources' => {
-                  'limits' => { 'memory' => '1153433Ki' },
-                  'requests' => { 'memory' => '1153433Ki' }
+                  'limits' => { 'memory' => '72089Ki' },
+                  'requests' => { 'memory' => '72089Ki' }
                 },
                 'ports' => [{
                   'containerPort' => 8000,
