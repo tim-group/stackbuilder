@@ -280,6 +280,7 @@ EOC
   def generate_k8s_deployment(standard_labels, secrets)
     app_name = standard_labels['app.kubernetes.io/name']
     app_version = standard_labels['app.kubernetes.io/version']
+    jvm_args = @jvm_args.is_a?(String) ? @jvm_args.split(' ') : []
 
     {
       'apiVersion' => 'apps/v1',
@@ -344,7 +345,8 @@ EOC
               'name' => app_name,
               'args' => [
                 'java',
-                '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000'
+              ] + jvm_args + [
                 "-Xmx#{@jvm_heap}",
                 '-jar',
                 '/app/app.jar',

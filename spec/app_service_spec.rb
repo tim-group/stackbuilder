@@ -26,6 +26,7 @@ describe 'kubernetes' do
         stack "mystack" do
           app_service "x", :kubernetes => true do
             self.application = 'MyApplication'
+            self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
           end
         end
         env "e1", :primary_site => 'space' do
@@ -98,6 +99,8 @@ describe 'kubernetes' do
                 'args' => [
                   'java',
                   '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000',
+                  '-XX:+UseConcMarkSweepGC',
+                  '-XX:+CMSClassUnloadingEnabled',
                   '-Xmx1024M',
                   '-jar',
                   '/app/app.jar',
