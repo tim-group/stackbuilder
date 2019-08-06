@@ -356,10 +356,16 @@ EOC
                 'limits' => { 'memory' => scale_memory(@jvm_heap, @headspace) + 'i' },
                 'requests' => { 'memory' => scale_memory(@jvm_heap, @headspace) + 'i' }
               },
-              'ports' => [{
-                'containerPort' => 8000,
-                'name' => 'http'
-              }],
+              'ports' => [
+                {
+                  'containerPort' => 8000,
+                  'name' => 'http'
+                },
+                {
+                  'containerPort' => 5000,
+                  'name' => 'debug'
+                }
+              ],
               'volumeMounts' => [{
                 'name' => 'config-volume',
                 'mountPath' => '/config',

@@ -110,10 +110,16 @@ describe 'kubernetes' do
                   'limits' => { 'memory' => '72089Ki' },
                   'requests' => { 'memory' => '72089Ki' }
                 },
-                'ports' => [{
-                  'containerPort' => 8000,
-                  'name' => 'http'
-                }],
+                'ports' => [
+                  {
+                    'containerPort' => 8000,
+                    'name' => 'http'
+                  },
+                  {
+                    'containerPort' => 5000,
+                    'name' => 'debug'
+                  }
+                ],
                 'volumeMounts' => [{
                   'name' => 'config-volume',
                   'mountPath' => '/config',
