@@ -49,6 +49,7 @@ FROM[mcollective/agent/computenode.ddl]='provisioning-tools'
 FROM[mcollective/agent/k8ssecret.ddl]='puppet'
 FROM[mcollective/agent/nagsrv.ddl]='puppet'
 FROM[mcollective/agent/puppetca.ddl]='puppet'
+FROM[mcollective/agent/service.ddl]='puppet'
 
 case $COMMAND in
 validate)
@@ -128,6 +129,7 @@ install)
   REPO_PATH[mcollective/agent/lvm.ddl]='modules/mcollective/files/mcollective/agent/lvm.ddl'
   REPO_PATH[mcollective/agent/nagsrv.ddl]='modules/mcollective/files/mcollective/agent/nagsrv.ddl'
   REPO_PATH[mcollective/agent/puppetca.ddl]='modules/mcollective/files/mcollective/agent/puppetca.ddl'
+  REPO_PATH[mcollective/agent/service.ddl]='modules/mcollective/files/mcollective/agent/service.ddl'
 
   for file in "${!FROM[@]}"; do
     if [ ! -e "${LIBDIR}/${file}" ]; then
