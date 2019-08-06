@@ -8,7 +8,7 @@ require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
 require 'open3'
 
-# all public methods in this class are valid stacks commands.
+# public methods in this class (and whose name is included in the :cmds instance variable) are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
 class CMD
   attr_reader :cmds # this list is just a safety check
@@ -37,66 +37,19 @@ class CMD
   end
   # rubocop:enable Metrics/ParameterLists
 
+  #############################################################################
+  # Commands that operate on a specific thing:
+  #   * stack
+  #   * machineset
+  #   * machinedef
+  #   * vm fqdn
+  #   * environment
+  #############################################################################
+
   # dump all the info from stackbuilder-config into one file, to enable manipulation with external tools.
   # use yaml, as that's what puppet reads in
   def compile(_argv)
     puts generate_compile_output
-  end
-
-  def diff(_argv)
-    diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
-    sbc_path = @factory.path
-    logger(Logger::DEBUG) { "Using sbc_path: #{sbc_path}" }
-
-    require 'tempfile'
-    before_file = Tempfile.new('before')
-    after_file = Tempfile.new('after')
-
-    Dir.chdir(sbc_path) do
-      system("git diff --quiet") # returns 0 if working tree clean, 1 if dirty
-      if $CHILD_STATUS.to_i == 0
-        system("git checkout HEAD~1")
-        @factory.refresh
-        before_file.write(generate_compile_output)
-        system("git checkout -")
-        @factory.refresh
-        after_file.write(generate_compile_output)
-      else
-        fail('Stackbuilder-config working tree not clean. Commit your changes or use --stash') unless @stash
-        after_file.write(generate_compile_output)
-        system("git stash")
-        @factory.refresh
-        before_file.write(generate_compile_output)
-        system("git stash pop --index")
-      end
-    end
-    system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
-    before_file.unlink
-    after_file.unlink
-  end
-
-  def sbdiff(_argv)
-    diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
-
-    require 'tempfile'
-    before_file = Tempfile.new('before')
-    after_file = Tempfile.new('after')
-    system("sudo apt-get install stackbuilder && stacks compile > #{before_file.path}")
-    system("rake package install && stacks compile > #{after_file.path}") if $CHILD_STATUS.to_i == 0
-    system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
-    before_file.unlink
-    after_file.unlink
-  end
-
-  def terminus(_argv)
-    output = {}
-    @factory.inventory.environments.sort.each do |_envname, env|
-      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
-        box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
-        output[box_id] = stack.to_enc
-      end
-    end
-    puts ZAMLS.to_zamls(output)
   end
 
   def enc(_argv)
@@ -142,6 +95,96 @@ class CMD
     else
       logger(Logger::FATAL) { "invalid sub command \"#{cmd}\"" }
       fail 'Unknown subcommand'
+    end
+  end
+
+  def dependencies(_argv)
+    machine_set = convert_to_machine_set(check_and_get_stack(true))
+
+    puts ZAMLS.to_zamls(machine_set.virtual_services_that_i_depend_on.map do |s|
+      if s.kubernetes
+        s
+      else
+        s.children
+      end
+    end.flatten.map(&:identity))
+  end
+
+  def dependents(_argv)
+    machine_set = convert_to_machine_set(check_and_get_stack(true))
+
+    puts ZAMLS.to_zamls(machine_set.virtual_services_that_depend_on_me.map do |s|
+      if s.kubernetes
+        s
+      else
+        s.children
+      end
+    end.flatten.map(&:identity))
+  end
+
+  def showvnc(_argv)
+    machine_def = check_and_get_stack
+
+    hosts = []
+    machine_def.accept do |child|
+      hosts << child.name if child.is_a? Stacks::MachineDef
+    end
+
+    self.class.include Support::MCollective
+    mco_client("libvirt") do |mco|
+      mco.fact_filter "domain=/(st|ci)/"
+      results = {}
+      hosts.each do |host|
+        mco.domainxml(:domain => host) do |result|
+          xml = result[:body][:data][:xml]
+          sender = result[:senderid]
+          unless xml.nil?
+            matches = /type='vnc' port='(\-?\d+)'/.match(xml)
+            fail "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
+            fail "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
+                  if matches.captures.empty?
+            results[host] = {
+              :host => sender,
+              :port => matches.captures.first
+            }
+          end
+        end
+      end
+      results.each do |vm, location|
+        puts "#{vm}  -> #{location[:host]}:#{location[:port]}"
+      end
+    end
+  end
+
+  def check_definition(_argv)
+    machine_def = check_and_get_stack
+    specs = machine_def.flatten.map(&:to_spec)
+    fabric_grouped_specs = specs.group_by { |spec| spec[:fabric] }
+    fabric_grouped_specs.map do |fabric, fabric_specs|
+      hosts = @factory.host_repository.find_compute_nodes(fabric, false, false, false)
+
+      host_fqdn_by_machine_name = Hash[hosts.map do |host|
+        host.allocated_machines.map do |machine|
+          [machine[:hostname], host.fqdn]
+        end
+      end.flatten(1)]
+
+      host_grouped_specs = fabric_specs.group_by { |spec| host_fqdn_by_machine_name[spec[:hostname]] }
+      host_grouped_specs.each do |host_fqdn, host_specs|
+        if host_fqdn.nil?
+          host_specs.each { |spec| puts "[0;31m#{spec[:hostname]} ==> failed (not provisioned)[0m" }
+        else
+          results = @factory.compute_node_client.check_vm_definitions(host_fqdn, host_specs)
+          results.each do |host_result|
+            sender = host_result[0]
+            host_result[1].each do |vm_name, vm_result|
+              colour = vm_result[0] == 'success' ? "[0;32m" : "[0;31m"
+              puts "#{colour}#{vm_name} ==> #{vm_result[0]} (on host #{sender})[0m"
+              puts "  #{vm_result[1].gsub("\n", "  \n")}" unless vm_result[0] == 'success'
+            end
+          end
+        end
+      end
     end
   end
 
@@ -199,10 +242,6 @@ class CMD
     Support::EnvListing.new($options[:terse]).ls(@stack_name ? check_and_get_stack : @environment)
   end
 
-  def lsenv(_argv)
-    Support::EnvListing.new($options[:terse]).ls(@environment.environments.values, true)
-  end
-
   def audit(_argv)
     site = @environment.options[:primary_site]
     logger(Logger::DEBUG) { ":primary_site for \"#{@environment.name}\" is \"#{site}\"" }
@@ -222,13 +261,13 @@ class CMD
   end
 
   def clean(_argv)
-    machine_def = check_and_get_stack
+    machine_def = check_and_get_stack(true)
     do_clean(machine_def)
     0
   end
 
   def clean_all(_argv)
-    machine_def = check_and_get_stack
+    machine_def = check_and_get_stack(true)
     do_clean(machine_def, true)
     0
   end
@@ -243,40 +282,8 @@ class CMD
     @core_actions.get_action("allocate").call(@factory.services, machine_def)
   end
 
-  def check_definition(_argv)
-    machine_def = check_and_get_stack
-    specs = machine_def.flatten.map(&:to_spec)
-    fabric_grouped_specs = specs.group_by { |spec| spec[:fabric] }
-    fabric_grouped_specs.map do |fabric, fabric_specs|
-      hosts = @factory.host_repository.find_compute_nodes(fabric, false, false, false)
-
-      host_fqdn_by_machine_name = Hash[hosts.map do |host|
-        host.allocated_machines.map do |machine|
-          [machine[:hostname], host.fqdn]
-        end
-      end.flatten(1)]
-
-      host_grouped_specs = fabric_specs.group_by { |spec| host_fqdn_by_machine_name[spec[:hostname]] }
-      host_grouped_specs.each do |host_fqdn, host_specs|
-        if host_fqdn.nil?
-          host_specs.each { |spec| puts "[0;31m#{spec[:hostname]} ==> failed (not provisioned)[0m" }
-        else
-          results = @factory.compute_node_client.check_vm_definitions(host_fqdn, host_specs)
-          results.each do |host_result|
-            sender = host_result[0]
-            host_result[1].each do |vm_name, vm_result|
-              colour = vm_result[0] == 'success' ? "[0;32m" : "[0;31m"
-              puts "#{colour}#{vm_name} ==> #{vm_result[0]} (on host #{sender})[0m"
-              puts "  #{vm_result[1].gsub("\n", "  \n")}" unless vm_result[0] == 'success'
-            end
-          end
-        end
-      end
-    end
-  end
-
   def provision(_argv)
-    thing = check_and_get_stack
+    thing = check_and_get_stack(true)
     k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
       if x.is_a?(Stacks::CustomServices)
         x.children
@@ -298,7 +305,7 @@ class CMD
   end
 
   def reprovision(_argv)
-    thing = check_and_get_stack
+    thing = check_and_get_stack(true)
 
     k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
       if x.is_a?(Stacks::CustomServices)
@@ -339,6 +346,14 @@ class CMD
     Support::LiveMigrator.new(@factory, host).move(machine)
   end
 
+  #############################################################################
+  # Commands that only operate on a specific environment and/or KVM host
+  #############################################################################
+
+  def lsenv(_argv)
+    Support::EnvListing.new($options[:terse]).ls(@environment.environments.values, true)
+  end
+
   def clear_host(argv)
     if argv.size != 1
       logger(Logger::FATAL) { "You must specify a host to clear" }
@@ -374,62 +389,64 @@ class CMD
     Support::HostBuilder.new(@factory, @nagios, @puppet).build_new(argv[0])
   end
 
-  def dependencies(_argv)
-    machine_set = convert_to_machine_set(check_and_get_stack)
+  #############################################################################
+  # Commands that operate on the whole inventory at once
+  #############################################################################
 
-    puts ZAMLS.to_zamls(machine_set.virtual_services_that_i_depend_on.map do |s|
-      if s.kubernetes
-        s
+  def diff(_argv)
+    diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
+    sbc_path = @factory.path
+    logger(Logger::DEBUG) { "Using sbc_path: #{sbc_path}" }
+
+    require 'tempfile'
+    before_file = Tempfile.new('before')
+    after_file = Tempfile.new('after')
+
+    Dir.chdir(sbc_path) do
+      system("git diff --quiet") # returns 0 if working tree clean, 1 if dirty
+      if $CHILD_STATUS.to_i == 0
+        system("git checkout HEAD~1")
+        @factory.refresh
+        before_file.write(generate_compile_output)
+        system("git checkout -")
+        @factory.refresh
+        after_file.write(generate_compile_output)
       else
-        s.children
-      end
-    end.flatten.map(&:identity))
-  end
-
-  def dependents(_argv)
-    machine_set = convert_to_machine_set(check_and_get_stack)
-
-    puts ZAMLS.to_zamls(machine_set.virtual_services_that_depend_on_me.map do |s|
-      if s.kubernetes
-        s
-      else
-        s.children
-      end
-    end.flatten.map(&:identity))
-  end
-
-  def showvnc(_argv)
-    machine_def = check_and_get_stack
-
-    hosts = []
-    machine_def.accept do |child|
-      hosts << child.name if child.is_a? Stacks::MachineDef
-    end
-
-    self.class.include Support::MCollective
-    mco_client("libvirt") do |mco|
-      mco.fact_filter "domain=/(st|ci)/"
-      results = {}
-      hosts.each do |host|
-        mco.domainxml(:domain => host) do |result|
-          xml = result[:body][:data][:xml]
-          sender = result[:senderid]
-          unless xml.nil?
-            matches = /type='vnc' port='(\-?\d+)'/.match(xml)
-            fail "Pattern match for vnc port was nil for #{host}\n XML output:\n#{xml}" if matches.nil?
-            fail "Pattern match for vnc port contains no captures for #{host}\n XML output:\n#{xml}" \
-                  if matches.captures.empty?
-            results[host] = {
-              :host => sender,
-              :port => matches.captures.first
-            }
-          end
-        end
-      end
-      results.each do |vm, location|
-        puts "#{vm}  -> #{location[:host]}:#{location[:port]}"
+        fail('Stackbuilder-config working tree not clean. Commit your changes or use --stash') unless @stash
+        after_file.write(generate_compile_output)
+        system("git stash")
+        @factory.refresh
+        before_file.write(generate_compile_output)
+        system("git stash pop --index")
       end
     end
+    system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    before_file.unlink
+    after_file.unlink
+  end
+
+  def sbdiff(_argv)
+    diff_tool = ENV['DIFF'] || '/usr/bin/sdiff -s'
+
+    require 'tempfile'
+    before_file = Tempfile.new('before')
+    after_file = Tempfile.new('after')
+    system("sudo apt-get install stackbuilder && stacks compile > #{before_file.path}")
+    system("rake package install && stacks compile > #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    system("#{diff_tool} #{before_file.path} #{after_file.path}") if $CHILD_STATUS.to_i == 0
+    before_file.unlink
+    after_file.unlink
+  end
+
+  def terminus(_argv)
+    output = {}
+    @factory.inventory.environments.sort.each do |_envname, env|
+      env.flatten.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
+        box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
+        output[box_id] = stack.to_enc
+      end
+    end
+    puts ZAMLS.to_zamls(output)
   end
 
   private
@@ -448,7 +465,7 @@ class CMD
         end
       end
     else
-      thing = check_and_get_stack
+      thing = check_and_get_stack(true)
       k8s_targets, vm_targets = split_k8s_from_vms(thing) { |x| x.flatten }
     end
 
@@ -466,7 +483,7 @@ class CMD
     end
   end
 
-  def check_and_get_stack
+  def check_and_get_stack(accept_k8s = false)
     if @stack_name.nil?
       logger(Logger::FATAL) { 'option "stack" not set' }
       fail "Internal error"
@@ -499,7 +516,16 @@ class CMD
       fail "Too many entities found"
     end
 
+    fail_on_k8s_if_command_not_supported(stacks.first, accept_k8s)
+
     stacks.first
+  end
+
+  def fail_on_k8s_if_command_not_supported(stack, accept_k8s)
+    stack_contains_k8s_things = (stack.is_a?(Stacks::CustomServices) && !stack.k8s_machinesets.empty?) ||
+                                (stack.is_a?(Stacks::MachineSet) && stack.kubernetes)
+
+    fail "The specified command cannot be used on stacks and/or services containing kubernetes definitions" if !accept_k8s && stack_contains_k8s_things
   end
 
   def split_k8s_from_vms(thing, &vm_extraction)
