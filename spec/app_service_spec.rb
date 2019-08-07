@@ -113,7 +113,7 @@ describe 'kubernetes' do
                 'ports' => [
                   {
                     'containerPort' => 8000,
-                    'name' => 'http'
+                    'name' => 'app'
                   },
                   {
                     'containerPort' => 5000,
