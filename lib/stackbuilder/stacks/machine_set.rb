@@ -241,7 +241,11 @@ class Stacks::MachineSet
         'kind' => 'NetworkPolicy',
         'metadata' => {
           'name' => "allow-#{@name}-out-to-#{outbound_connection}-on-ports-#{ports.map { |port| port['port'] }.join('-')}",
-          'namespace' => @environment.name
+          'namespace' => @environment.name,
+          'labels' => {
+            'stack' => @stack.name,
+            'machineset' => @name
+          }.merge(standard_labels)
         },
         'spec' => {
           'podSelector' => {
