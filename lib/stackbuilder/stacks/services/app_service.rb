@@ -166,7 +166,8 @@ module Stacks::Services::AppService
       'app.kubernetes.io/instance' => instance_name_of(self),
       'app.kubernetes.io/component' => 'app_service',
       'app.kubernetes.io/version' => app_version,
-      'app.kubernetes.io/managed-by' => 'stacks'
+      'app.kubernetes.io/managed-by' => 'stacks',
+      'stack' => @stack.name,
     }
 
     config, used_secrets = generate_app_config(erb_vars, hiera_provider)
@@ -236,7 +237,6 @@ EOC
         'name' => app_name + '-config',
         'namespace' => @environment.name,
         'labels' => {
-          'stack' => @stack.name,
           'machineset' => @name
         }.merge(standard_labels)
       },
@@ -256,7 +256,6 @@ EOC
         'name' => app_name,
         'namespace' => @environment.name,
         'labels' => {
-          'stack' => @stack.name,
           'machineset' => @name
         }.merge(standard_labels)
       },
@@ -289,7 +288,6 @@ EOC
         'name' => app_name,
         'namespace' => @environment.name,
         'labels' => {
-          'stack' => @stack.name,
           'machineset' => @name
         }.merge(standard_labels)
       },

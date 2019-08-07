@@ -74,7 +74,8 @@ describe 'kubernetes' do
                 'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
                 'app.kubernetes.io/component' => 'app_service',
                 'app.kubernetes.io/version' => '1.2.3',
-                'app.kubernetes.io/managed-by' => 'stacks'
+                'app.kubernetes.io/managed-by' => 'stacks',
+                'stack' => 'mystack'
               }
             },
             'spec' => {
