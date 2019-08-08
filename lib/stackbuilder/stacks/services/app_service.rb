@@ -343,7 +343,25 @@ EOC
               'name' => app_name,
               'args' => [
                 'java',
-                '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000'
+                '-Djava.awt.headless=true',
+                '-Dfile.encoding=UTF-8',
+                '-XX:ErrorFile=/var/log/app/error.log',
+                '-XX:HeapDumpPath=/var/log/app',
+                '-XX:+HeapDumpOnOutOfMemoryError',
+                '-Djava.security.egd=file:/dev/./urandom',
+                '-Dcom.sun.management.jmxremote.port=5000',
+                '-Dcom.sun.management.jmxremote.authenticate=false',
+                '-Dcom.sun.management.jmxremote.ssl=false',
+                '-XX:+PrintGC',
+                '-XX:+PrintGCTimeStamps',
+                '-XX:+PrintGCDateStamps',
+                '-XX:+PrintGCDetails',
+                '-XX:+UseGCLogFileRotation',
+                '-XX:NumberOfGCLogFiles=10',
+                '-XX:GCLogFileSize=25M',
+                '-XX:+PrintGCApplicationStoppedTime',
+                '-Xlog:gc*,safepoint:/var/log/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400',
+                '-Xloggc:/var/log/gc.log'
               ] + jvm_args + [
                 "-Xmx#{@jvm_heap}",
                 '-jar',
