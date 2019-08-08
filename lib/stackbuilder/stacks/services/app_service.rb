@@ -257,7 +257,8 @@ EOC
         'namespace' => @environment.name,
         'labels' => {
           'machineset' => @name
-        }.merge(standard_labels)
+        }.merge(standard_labels),
+        'metallb.universe.tf/address-pool' => 'prod-static'
       },
       'spec' => {
         'type' => 'LoadBalancer',

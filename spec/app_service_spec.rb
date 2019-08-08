@@ -184,7 +184,8 @@ describe 'kubernetes' do
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
-          }
+          },
+          'metallb.universe.tf/address-pool' => 'prod-static'
         },
         'spec' => {
           'type' => 'LoadBalancer',
