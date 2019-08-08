@@ -458,7 +458,6 @@ EOC
           'name' => "allow-#{vs.environment.name}-#{vs.name}-in-to-#{@name}-8000",
           'namespace' => @environment.name,
           'labels' => {
-            'stack' => @stack.name,
             'machineset' => @name
           }.merge(standard_labels)
         },
@@ -527,7 +526,6 @@ EOC
           'name' => "allow-#{@name}-out-to-#{vs.environment.name}-#{vs.name}-#{vs.endpoints(self, fabric).map { |e| e[:port] }.join('-')}",
           'namespace' => @environment.name,
           'labels' => {
-            'stack' => @stack.name,
             'machineset' => @name
           }.merge(standard_labels)
         },
