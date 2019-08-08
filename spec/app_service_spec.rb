@@ -7,13 +7,13 @@ describe 'kubernetes' do
   let(:failing_app_deployer) { TestAppDeployer.new(nil) }
   let(:dns_resolver) do
     MyTestDnsResolver.new('e1-x-vip.space.net.local' => '3.1.4.1',
-                          'e1-app1-001.space.net.local' => '3.1.4.1',
-                          'e1-app1-002.space.net.local' => '3.1.4.2',
-                          'e1-app2-vip.space.net.local' => '3.1.4.3',
-                          'e1-app1-vip.space.net.local' => '3.1.4.4',
-                          'e2-app2-vip.space.net.local' => '3.1.4.5',
-                          'e1-mydb-001.space.net.local' => '3.1.4.6',
-                          'e1-mydb-002.space.net.local' => '3.1.4.6')
+                          'e1-app1-001.space.net.local' => '3.1.4.2',
+                          'e1-app1-002.space.net.local' => '3.1.4.3',
+                          'e1-app2-vip.space.net.local' => '3.1.4.4',
+                          'e1-app1-vip.space.net.local' => '3.1.4.5',
+                          'e2-app2-vip.space.net.local' => '3.1.4.6',
+                          'e1-mydb-001.space.net.local' => '3.1.4.7',
+                          'e1-mydb-002.space.net.local' => '3.1.4.8')
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
@@ -523,8 +523,8 @@ EOL
       expect(network_policies.first['spec']['ingress'].size).to eq(1)
       expect(network_policies.first['spec']['ingress'].first['from'].size).to eq(2)
       expect(network_policies.first['spec']['ingress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.1/32' })
       expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
+      expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.3/32' })
       expect(network_policies.first['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
       expect(network_policies.first['spec']['ingress'].first['ports'].first['port']).to eq(8000)
     end
@@ -573,7 +573,7 @@ EOL
       expect(network_policies.first['spec']['egress'].size).to eq(1)
       expect(network_policies.first['spec']['egress'].first['to'].size).to eq(1)
       expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['egress'].first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.4/32' })
+      expect(network_policies.first['spec']['egress'].first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.5/32' })
       expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
       expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(8000)
     end
