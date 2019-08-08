@@ -167,7 +167,7 @@ module Stacks::Services::AppService
       'app.kubernetes.io/component' => 'app_service',
       'app.kubernetes.io/version' => app_version,
       'app.kubernetes.io/managed-by' => 'stacks',
-      'stack' => @stack.name,
+      'stack' => @stack.name
     }
 
     config, used_secrets = generate_app_config(erb_vars, hiera_provider)
