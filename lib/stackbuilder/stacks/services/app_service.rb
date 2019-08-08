@@ -451,34 +451,7 @@ EOC
         end
       end
 
-      network_policies << {
-        'apiVersion' => 'networking.k8s.io/v1',
-        'kind' => 'NetworkPolicy',
-        'metadata' => {
-          'name' => "allow-#{vs.environment.name}-#{vs.name}-in-to-#{@name}-8000",
-          'namespace' => @environment.name,
-          'labels' => {
-            'machineset' => @name
-          }.merge(standard_labels)
-        },
-        'spec' => {
-          'podSelector' => {
-            'matchLabels' => {
-              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
-            }
-          },
-          'policyTypes' => [
-            'Ingress'
-          ],
-          'ingress' => [{
-            'from' => filters,
-            'ports' => [{
-              'protocol' => 'TCP',
-              'port' => 8000
-            }]
-          }]
-        }
-      }
+      network_policies << create_ingress_network_policy(vs.environment.name, vs.name, @name, @environment.name, @stack.name, standard_labels, filters)
     end
 
     virtual_services_that_i_depend_on(false).each do |vs|
@@ -542,6 +515,50 @@ EOC
         }
       }
     end
+
+    filters = []
+    %w(001 002).each do |server_index|
+      filters << {
+        'ipBlock' => {
+          'cidr' => "#{dns_resolver.lookup("production-sharedproxy-#{server_index}.#{fabric}.net.local")}/32"
+        }
+      }
+    end
+
+    network_policies << create_ingress_network_policy('production', 'sharedproxy', @name, @environment.name, @stack.name, standard_labels, filters)
+
     network_policies
+  end
+
+  def create_ingress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name, stack_name, standard_labels, filters)
+    {
+      'apiVersion' => 'networking.k8s.io/v1',
+      'kind' => 'NetworkPolicy',
+      'metadata' => {
+        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-8000",
+        'namespace' => env_name,
+        'labels' => {
+          'stack' => stack_name,
+          'machineset' => app_name
+        }.merge(standard_labels)
+      },
+      'spec' => {
+        'podSelector' => {
+          'matchLabels' => {
+            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
+          }
+        },
+        'policyTypes' => [
+          'Ingress'
+        ],
+        'ingress' => [{
+          'from' => filters,
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => 8000
+          }]
+        }]
+      }
+    }
   end
 end

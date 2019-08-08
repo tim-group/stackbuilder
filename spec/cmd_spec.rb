@@ -333,7 +333,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
 
-        %w(deployment configmap service).each do |kind|
+        %w(deployment configmap service networkpolicy).each do |kind|
           expect(@open3).to receive(:capture3).
             with('kubectl',
                  'delete',
@@ -368,7 +368,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sappservice')
 
-        %w(deployment configmap service).each do |kind|
+        %w(deployment configmap service networkpolicy).each do |kind|
           expect(@open3).to receive(:capture3).
             with('kubectl',
                  'delete',
