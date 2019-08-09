@@ -108,6 +108,11 @@ describe 'kubernetes' do
                   '-XX:+HeapDumpOnOutOfMemoryError',
                   '-Djava.security.egd=file:/dev/./urandom',
                   '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400',
+                  '-Dcom.sun.management.jmxremote',
+                  '-Dcom.sun.management.jmxremote.port=5000',
+                  '-Dcom.sun.management.jmxremote.local.only=false',
+                  '-Dcom.sun.management.jmxremote.authenticate=false',
+                  '-Dcom.sun.management.jmxremote.ssl=false',
                   '-XX:+UseConcMarkSweepGC',
                   '-XX:+CMSClassUnloadingEnabled',
                   '-Xmx64M',
@@ -126,7 +131,7 @@ describe 'kubernetes' do
                   },
                   {
                     'containerPort' => 5000,
-                    'name' => 'debug'
+                    'name' => 'jmx'
                   }
                 ],
                 'volumeMounts' => [{

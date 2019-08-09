@@ -350,7 +350,12 @@ EOC
                 '-XX:HeapDumpPath=/var/log/app',
                 '-XX:+HeapDumpOnOutOfMemoryError',
                 '-Djava.security.egd=file:/dev/./urandom',
-                '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400'
+                '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400',
+                '-Dcom.sun.management.jmxremote',
+                '-Dcom.sun.management.jmxremote.port=5000',
+                '-Dcom.sun.management.jmxremote.local.only=false',
+                '-Dcom.sun.management.jmxremote.authenticate=false',
+                '-Dcom.sun.management.jmxremote.ssl=false'
               ] + jvm_args + [
                 "-Xmx#{@jvm_heap}",
                 '-jar',
@@ -368,7 +373,7 @@ EOC
                 },
                 {
                   'containerPort' => 5000,
-                  'name' => 'debug'
+                  'name' => 'jmx'
                 }
               ],
               'volumeMounts' => [{
