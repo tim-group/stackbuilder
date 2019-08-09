@@ -201,7 +201,7 @@ port=8000
 log.directory=/var/log/app
 log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @group %>"]
 
-graphite.enabled=true
+graphite.enabled=false
 graphite.host=<%= @site %>-mon-001.mgmt.<%= @site %>.net.local
 graphite.port=2013
 graphite.prefix=<%= @application.downcase %>.k8s_<%= @logicalenv %>_<%= @site %>

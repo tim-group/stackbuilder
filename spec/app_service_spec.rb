@@ -234,7 +234,7 @@ port=8000
 log.directory=/var/log/app
 log.tags=["env:e1", "app:MyApplication", "instance:blue"]
 
-graphite.enabled=true
+graphite.enabled=false
 graphite.host=space-mon-001.mgmt.space.net.local
 graphite.port=2013
 graphite.prefix=myapplication.k8s_e1_space
