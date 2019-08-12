@@ -92,7 +92,7 @@ describe 'kubernetes' do
                   },
                   {
                     'name' => 'APP_JVM_ARGS',
-                    'value' => '-Xmx64M -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
+                    'value' => '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Xmx64M'
                   },
                   {
                     'name' => 'BASE_JVM_ARGS',
