@@ -206,7 +206,7 @@ graphite.host=<%= @site %>-mon-001.mgmt.<%= @site %>.net.local
 graphite.port=2013
 graphite.prefix=<%= @application.downcase %>.k8s_<%= @logicalenv %>_<%= @site %>
 graphite.period=10
-<%- if @dependencies.size > 1 -%>
+<%- if @dependencies.size > 0 -%>
 <%- @dependencies.map do |k, v| -%>
 <%- if k.start_with?('db.') && k.end_with?('.username') -%>
 <%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
