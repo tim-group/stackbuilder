@@ -8,7 +8,8 @@ describe 'machine_set' do
     MyTestDnsResolver.new(
       'e1-app1-vip.space.net.local' => '3.4.5.6',
       'production-sharedproxy-001.space.net.local' => '3.4.5.7',
-      'production-sharedproxy-002.space.net.local' => '3.4.5.8')
+      'production-sharedproxy-002.space.net.local' => '3.4.5.8',
+      'office-nexus-001.mgmt.lon.net.local' => '3.4.5.9')
   end
   let(:hiera_provider) { TestHieraProvider.new('the_hiera_key' => 'the_hiera_value') }
 
@@ -45,7 +46,7 @@ describe 'machine_set' do
       network_policies = app1_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
         policy['kind'] == "NetworkPolicy"
       end
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-app1-out-to-somewhere-on-ports-80-443')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['spec']['podSelector']['matchLabels']['app.kubernetes.io/instance']).to eql('e1-test_stack-app')

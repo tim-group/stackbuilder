@@ -287,7 +287,8 @@ describe 'k8s stack-with-dependencies' do
                           'e-exampledb-004.earth.net.local' => '3.1.4.5',
                           'e-exampledb-005.earth.net.local' => '3.1.4.6',
                           'production-sharedproxy-001.earth.net.local' => '3.1.4.7',
-                          'production-sharedproxy-002.earth.net.local' => '3.1.4.8')
+                          'production-sharedproxy-002.earth.net.local' => '3.1.4.8',
+                          'office-nexus-001.mgmt.lon.net.local' => '3.1.4.9')
   end
   let(:hiera_provider) do
     TestHieraProvider.new('stacks/application_credentials_selector' => 0)
@@ -323,7 +324,7 @@ describe 'k8s stack-with-dependencies' do
       policy['kind'] == "NetworkPolicy"
     end
 
-    expect(network_policies.size).to eq(2)
+    expect(network_policies.size).to eq(3)
     expect(network_policies.first['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
     egress = network_policies.first['spec']['egress']
     expect(egress.size).to eq(1)
@@ -368,7 +369,7 @@ describe 'k8s stack-with-dependencies' do
       policy['kind'] == "NetworkPolicy"
     end
 
-    expect(network_policies.size).to eq(2)
+    expect(network_policies.size).to eq(3)
     expect(network_policies.first['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
     egress = network_policies.first['spec']['egress']
     expect(egress.size).to eq(1)

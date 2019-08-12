@@ -56,22 +56,20 @@ class Stacks::KubernetesResources
   end
 
   def clean
-    @resources.each do |defn|
-      resource_kind = defn['kind'].downcase
+    kinds = @resources.map { |r| r['kind'].downcase }.uniq.join(',')
 
-      stdout_str, error_str, status = Open3.capture3('kubectl',
-                                                     'delete',
-                                                     resource_kind,
-                                                     '--context',
-                                                     @site,
-                                                     '-l',
-                                                     "stack=#{@stack_name},machineset=#{@machine_set_name}",
-                                                     '-n', @environment)
-      if status.success?
-        logger(Logger::INFO) { stdout_str }
-      else
-        fail "Failed to delete k8s resource definitions - error: #{error_str}"
-      end
+    stdout_str, error_str, status = Open3.capture3('kubectl',
+                                                   'delete',
+                                                   kinds,
+                                                   '--context',
+                                                   @site,
+                                                   '-l',
+                                                   "stack=#{@stack_name},machineset=#{@machine_set_name}",
+                                                   '-n', @environment)
+    if status.success?
+      logger(Logger::INFO) { stdout_str }
+    else
+      fail "Failed to delete k8s resource definitions - error: #{error_str}"
     end
   end
 end

@@ -15,7 +15,8 @@ describe 'kubernetes' do
                           'e1-mydb-001.space.net.local' => '3.1.4.7',
                           'e1-mydb-002.space.net.local' => '3.1.4.8',
                           'production-sharedproxy-001.space.net.local' => '3.1.4.9',
-                          'production-sharedproxy-002.space.net.local' => '3.1.4.10')
+                          'production-sharedproxy-002.space.net.local' => '3.1.4.10',
+                          'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11')
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
@@ -82,9 +83,35 @@ describe 'kubernetes' do
             },
             'spec' => {
               'initContainers' => [{
-                'image' => 'repo.net.local:8080/config-generator:1.0.1',
+                'image' => 'repo.net.local:8080/config-generator:1.0.5',
                 'name' => 'config-generator',
-                'env' => [],
+                'env' => [
+                  {
+                    'name' => 'CONTAINER_IMAGE',
+                    'value' => 'repo.net.local:8080/myapplication:1.2.3'
+                  },
+                  {
+                    'name' => 'APP_JVM_ARGS',
+                    'value' => '-Xmx64M -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
+                  },
+                  {
+                    'name' => 'BASE_JVM_ARGS',
+                    'value' => "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -XX:ErrorFile=/var/log/app/error.log \
+-XX:HeapDumpPath=/var/log/app -XX:+HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom \
+-Dcom.sun.management.jmxremote.port=5000 -Dcom.sun.management.jmxremote.authenticate=false \
+-Dcom.sun.management.jmxremote.ssl=false"
+                  },
+                  {
+                    'name' => 'GC_JVM_ARGS_JAVA_8',
+                    'value' => "-XX:+PrintGC -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
+-Xloggc:/var/log/app/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=25M \
+-XX:+PrintGCApplicationStoppedTime"
+                  },
+                  {
+                    'name' => 'GC_JVM_ARGS_JAVA_11',
+                    'value' => '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400'
+                  }
+                ],
                 'volumeMounts' => [
                   {
                     'name' => 'config-volume',
@@ -99,26 +126,10 @@ describe 'kubernetes' do
               'containers' => [{
                 'image' => 'repo.net.local:8080/myapplication:1.2.3',
                 'name' => 'myapplication',
+                'command' => ["/bin/sh"],
                 'args' => [
-                  'java',
-                  '-Djava.awt.headless=true',
-                  '-Dfile.encoding=UTF-8',
-                  '-XX:ErrorFile=/var/log/app/error.log',
-                  '-XX:HeapDumpPath=/var/log/app',
-                  '-XX:+HeapDumpOnOutOfMemoryError',
-                  '-Djava.security.egd=file:/dev/./urandom',
-                  '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400',
-                  '-Dcom.sun.management.jmxremote',
-                  '-Dcom.sun.management.jmxremote.port=5000',
-                  '-Dcom.sun.management.jmxremote.local.only=false',
-                  '-Dcom.sun.management.jmxremote.authenticate=false',
-                  '-Dcom.sun.management.jmxremote.ssl=false',
-                  '-XX:+UseConcMarkSweepGC',
-                  '-XX:+CMSClassUnloadingEnabled',
-                  '-Xmx64M',
-                  '-jar',
-                  '/app/app.jar',
-                  '/config/config.properties'
+                  '-c',
+                  'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
                 ],
                 'resources' => {
                   'limits' => { 'memory' => '72089Ki' },
@@ -182,13 +193,13 @@ describe 'kubernetes' do
           'name' => 'myapplication',
           'namespace' => 'e1',
           'labels' => {
-            'stack' => 'mystack',
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
             'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
-            'app.kubernetes.io/managed-by' => 'stacks'
+            'app.kubernetes.io/managed-by' => 'stacks',
+            'stack' => 'mystack'
           },
           'annotations' => {
             'metallb.universe.tf/address-pool' => 'prod-static'
@@ -446,10 +457,11 @@ EOL
 
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
         app_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first
+        init_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].first
 
         expect(app_container['resources']['limits']['memory']).to eq('115343360Ki')
         expect(app_container['resources']['requests']['memory']).to eq('115343360Ki')
-        expect(app_container['args'].find { |arg| arg =~ /-Xmx/ }).to match(/-Xmx100G/)
+        expect(init_container['env'].find { |env_var| env_var['name'] == 'APP_JVM_ARGS' }['value']).to match(/-Xmx100G/)
       end
 
       it 'controls container limits by reserving headspace computed from the heap size' do
@@ -468,10 +480,11 @@ EOL
 
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
         app_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first
+        init_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].first
 
         expect(app_container['resources']['limits']['memory']).to eq('157286400Ki')
         expect(app_container['resources']['requests']['memory']).to eq('157286400Ki')
-        expect(app_container['args'].find { |arg| arg =~ /-Xmx/ }).to match(/-Xmx100G/)
+        expect(init_container['env'].find { |env_var| env_var['name'] == 'APP_JVM_ARGS' }['value']).to match(/-Xmx100G/)
       end
     end
   end
@@ -514,7 +527,7 @@ EOL
         policy['kind'] == "NetworkPolicy"
       end
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -564,7 +577,7 @@ EOL
         policy['kind'] == "NetworkPolicy"
       end
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -610,7 +623,7 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(3)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e1-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
@@ -637,7 +650,7 @@ EOL
       expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(3)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
@@ -679,8 +692,51 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
-      expect(network_policies.size).to eq(1)
-      expect(network_policies.first['metadata']['name']).to eql('allow-production-sharedproxy-in-to-app1-8000')
+      expect(network_policies.size).to eq(2)
+
+      proxy_network_policy = network_policies.find { |p| p['metadata']['name'] =~ /sharedproxy/ }
+
+      expect(proxy_network_policy['metadata']['name']).to eql('allow-production-sharedproxy-in-to-app1-8000')
+      expect(proxy_network_policy['metadata']['namespace']).to eql('e1')
+      expect(proxy_network_policy['metadata']['labels']).to eql(
+        'stack' => 'test_app_servers',
+        'machineset' => 'app1',
+        'app.kubernetes.io/name' => 'app1',
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1',
+        'app.kubernetes.io/component' => 'app_service',
+        'app.kubernetes.io/version' => '1.2.3',
+        'app.kubernetes.io/managed-by' => 'stacks'
+      )
+      expect(proxy_network_policy['spec']['podSelector']['matchLabels']).to eql(
+        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1'
+      )
+      expect(proxy_network_policy['spec']['policyTypes']).to eql(['Ingress'])
+      expect(proxy_network_policy['spec']['ingress'].size).to eq(1)
+      expect(proxy_network_policy['spec']['ingress'].first['from'].size).to eq(2)
+      expect(proxy_network_policy['spec']['ingress'].first['ports'].size).to eq(1)
+      expect(proxy_network_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.9/32' })
+      expect(proxy_network_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.10/32' })
+      expect(proxy_network_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
+      expect(proxy_network_policy['spec']['ingress'].first['ports'].first['port']).to eq(8000)
+    end
+
+    it 'should create an egress policy to allow the init container to talk to nexus' do
+      factory = eval_stacks do
+        stack "test_app_servers" do
+          app_service 'app1', :kubernetes => true do
+            self.application = 'app1'
+          end
+        end
+
+        env "e1", :primary_site => "space" do
+          instantiate_stack "test_app_servers"
+        end
+      end
+
+      network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
+
+      expect(network_policies.size).to eq(2)
+      expect(network_policies.first['metadata']['name']).to eql('allow-app1-out-to-office-nexus-8080')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
         'stack' => 'test_app_servers',
@@ -694,14 +750,13 @@ EOL
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'app.kubernetes.io/instance' => 'e1-test_app_servers-app1'
       )
-      expect(network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
-      expect(network_policies.first['spec']['ingress'].size).to eq(1)
-      expect(network_policies.first['spec']['ingress'].first['from'].size).to eq(2)
-      expect(network_policies.first['spec']['ingress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.9/32' })
-      expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.10/32' })
-      expect(network_policies.first['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(network_policies.first['spec']['ingress'].first['ports'].first['port']).to eq(8000)
+      expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
+      expect(network_policies.first['spec']['egress'].size).to eq(1)
+      expect(network_policies.first['spec']['egress'].first['to'].size).to eq(1)
+      expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
+      expect(network_policies.first['spec']['egress'].first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.11/32' })
+      expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
+      expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(8080)
     end
 
     it 'should create the correct network policies for two services in \
@@ -732,7 +787,7 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(3)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e2-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -750,7 +805,7 @@ depends on the other' do
       expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(3)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(

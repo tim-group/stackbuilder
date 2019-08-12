@@ -282,7 +282,7 @@ EOC
   def generate_k8s_deployment(standard_labels, secrets)
     app_name = standard_labels['app.kubernetes.io/name']
     app_version = standard_labels['app.kubernetes.io/version']
-    jvm_args = @jvm_args.is_a?(String) ? @jvm_args.split(' ') : []
+    container_image = "repo.net.local:8080/#{app_name}:#{app_version}"
 
     {
       'apiVersion' => 'apps/v1',
@@ -317,7 +317,7 @@ EOC
           },
           'spec' => {
             'initContainers' => [{
-              'image' => 'repo.net.local:8080/config-generator:1.0.1',
+              'image' => 'repo.net.local:8080/config-generator:1.0.5',
               'name' => 'config-generator',
               'env' => secrets.map do |_hiera_key, secret_name|
                 {
@@ -329,7 +329,31 @@ EOC
                     }
                   }
                 }
-              end,
+              end.push(
+                {
+                  'name' => 'CONTAINER_IMAGE',
+                  'value' => container_image
+                },
+                {
+                  'name' => 'APP_JVM_ARGS',
+                  'value' => "-Xmx#{@jvm_heap} #{@jvm_args}"
+                },
+                {
+                  'name' => 'BASE_JVM_ARGS',
+                  'value' => "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -XX:ErrorFile=/var/log/app/error.log \
+-XX:HeapDumpPath=/var/log/app -XX:+HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom \
+-Dcom.sun.management.jmxremote.port=5000 -Dcom.sun.management.jmxremote.authenticate=false \
+-Dcom.sun.management.jmxremote.ssl=false"
+                },
+                {
+                  'name' => 'GC_JVM_ARGS_JAVA_8',
+                  'value' => "-XX:+PrintGC -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
+-Xloggc:/var/log/app/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=25M \
+-XX:+PrintGCApplicationStoppedTime"
+                },
+                'name' => 'GC_JVM_ARGS_JAVA_11',
+                'value' => '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400'
+              ),
               'volumeMounts' => [
                 {
                   'name' => 'config-volume',
@@ -342,27 +366,12 @@ EOC
                 }]
             }],
             'containers' => [{
-              'image' => "repo.net.local:8080/#{app_name}:#{app_version}",
+              'image' => container_image,
               'name' => app_name,
+              'command' => ["/bin/sh"],
               'args' => [
-                'java',
-                '-Djava.awt.headless=true',
-                '-Dfile.encoding=UTF-8',
-                '-XX:ErrorFile=/var/log/app/error.log',
-                '-XX:HeapDumpPath=/var/log/app',
-                '-XX:+HeapDumpOnOutOfMemoryError',
-                '-Djava.security.egd=file:/dev/./urandom',
-                '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400',
-                '-Dcom.sun.management.jmxremote',
-                '-Dcom.sun.management.jmxremote.port=5000',
-                '-Dcom.sun.management.jmxremote.local.only=false',
-                '-Dcom.sun.management.jmxremote.authenticate=false',
-                '-Dcom.sun.management.jmxremote.ssl=false'
-              ] + jvm_args + [
-                "-Xmx#{@jvm_heap}",
-                '-jar',
-                '/app/app.jar',
-                '/config/config.properties'
+                '-c',
+                'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
               ],
               'resources' => {
                 'limits' => { 'memory' => scale_memory(@jvm_heap, @headspace) + 'i' },
@@ -459,7 +468,7 @@ EOC
         end
       end
 
-      network_policies << create_ingress_network_policy(vs.environment.name, vs.name, @name, @environment.name, @stack.name, standard_labels, filters)
+      network_policies << create_ingress_network_policy(vs.environment.name, vs.name, @name, @environment.name, standard_labels, filters)
     end
 
     virtual_services_that_i_depend_on(false).each do |vs|
@@ -500,29 +509,19 @@ EOC
           }
         end
       end
-      network_policies << {
-        'apiVersion' => 'networking.k8s.io/v1',
-        'kind' => 'NetworkPolicy',
-        'metadata' => {
-          'name' => "allow-#{@name}-out-to-#{vs.environment.name}-#{vs.name}-#{vs.endpoints(self, fabric).map { |e| e[:port] }.join('-')}",
-          'namespace' => @environment.name,
-          'labels' => {
-            'machineset' => @name
-          }.merge(standard_labels)
-        },
-        'spec' => {
-          'podSelector' => {
-            'matchLabels' => {
-              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
-            }
-          },
-          'policyTypes' => [
-            'Egress'
-          ],
-          'egress' => egresses
-        }
-      }
+      ports = vs.endpoints(self, fabric).map { |e| e[:port] }.join('-')
+      network_policies << create_egress_network_policy(vs.environment.name, vs.name, @name, @environment.name, standard_labels, ports, egresses)
     end
+
+    nexus_filters = [{
+      'to' => [{ 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup('office-nexus-001.mgmt.lon.net.local')}/32" } }],
+      'ports' => [{
+        'protocol' => 'TCP',
+        'port' => 8080
+      }]
+    }]
+
+    network_policies << create_egress_network_policy('office', 'nexus', @name, @environment.name, standard_labels, '8080', nexus_filters)
 
     filters = []
     %w(001 002).each do |server_index|
@@ -533,12 +532,12 @@ EOC
       }
     end
 
-    network_policies << create_ingress_network_policy('production', 'sharedproxy', @name, @environment.name, @stack.name, standard_labels, filters)
+    network_policies << create_ingress_network_policy('production', 'sharedproxy', @name, @environment.name, standard_labels, filters)
 
     network_policies
   end
 
-  def create_ingress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name, stack_name, standard_labels, filters)
+  def create_ingress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, filters)
     {
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
@@ -546,7 +545,6 @@ EOC
         'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-8000",
         'namespace' => env_name,
         'labels' => {
-          'stack' => stack_name,
           'machineset' => app_name
         }.merge(standard_labels)
       },
@@ -566,6 +564,31 @@ EOC
             'port' => 8000
           }]
         }]
+      }
+    }
+  end
+
+  def create_egress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, ports, egresses)
+    {
+      'apiVersion' => 'networking.k8s.io/v1',
+      'kind' => 'NetworkPolicy',
+      'metadata' => {
+        'name' => "allow-#{app_name}-out-to-#{virtual_service_env}-#{virtual_service_name}-#{ports}",
+        'namespace' => env_name,
+        'labels' => {
+          'machineset' => app_name
+        }.merge(standard_labels)
+      },
+      'spec' => {
+        'podSelector' => {
+          'matchLabels' => {
+            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
+          }
+        },
+        'policyTypes' => [
+          'Egress'
+        ],
+        'egress' => egresses
       }
     }
   end

@@ -333,31 +333,29 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
 
-        %w(deployment configmap service networkpolicy).each do |kind|
-          expect(@open3).to receive(:capture3).
-            with('kubectl',
-                 'delete',
-                 kind,
-                 '--context',
-                 'space',
-                 '-l',
-                 'stack=myk8sstack,machineset=myk8sappservice',
-                 '-n', 'e1').
-            and_return(['Some stdout output', 'Some stderr output', @return_status])
-          expect(@return_status).to receive(:success?).and_return(true)
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'delete',
+               include('deployment', 'configmap', 'service', 'networkpolicy'),
+               '--context',
+               'space',
+               '-l',
+               'stack=myk8sstack,machineset=myk8sappservice',
+               '-n', 'e1').
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
 
-          expect(@open3).to receive(:capture3).
-            with('kubectl',
-                 'delete',
-                 kind,
-                 '--context',
-                 'space',
-                 '-l',
-                 'stack=myk8sstack,machineset=myrelatedk8sappservice',
-                 '-n', 'e1').
-            and_return(['Some stdout output', 'Some stderr output', @return_status])
-          expect(@return_status).to receive(:success?).and_return(true)
-        end
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'delete',
+               include('deployment', 'configmap', 'service', 'networkpolicy'),
+               '--context',
+               'space',
+               '-l',
+               'stack=myk8sstack,machineset=myrelatedk8sappservice',
+               '-n', 'e1').
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
 
         cmd.clean nil
       end
@@ -368,19 +366,17 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sappservice')
 
-        %w(deployment configmap service networkpolicy).each do |kind|
-          expect(@open3).to receive(:capture3).
-            with('kubectl',
-                 'delete',
-                 kind,
-                 '--context',
-                 'space',
-                 '-l',
-                 'stack=myk8sstack,machineset=myk8sappservice',
-                 '-n', 'e1').
-            and_return(['Some stdout output', 'Some stderr output', @return_status])
-          expect(@return_status).to receive(:success?).and_return(true)
-        end
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'delete',
+               include('deployment', 'configmap', 'service', 'networkpolicy'),
+               '--context',
+               'space',
+               '-l',
+               'stack=myk8sstack,machineset=myk8sappservice',
+               '-n', 'e1').
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
 
         cmd.clean nil
       end
