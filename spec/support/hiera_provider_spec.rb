@@ -2,6 +2,7 @@ require 'stackbuilder/support/hiera_provider'
 require 'tmpdir'
 require 'open3'
 require 'stackbuilder/stacks/factory'
+require 'fileutils'
 
 class GivenHieradata
   def initialize(dir)
@@ -20,7 +21,11 @@ class GivenFile
   end
 
   def contents(contents)
-    File.write(@dir + '/' + @filename, contents)
+    path = @dir + '/' + @filename
+    dirname = File.dirname(path)
+    FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
+
+    File.write(path, contents)
   end
 end
 
@@ -44,7 +49,7 @@ describe Support::HieraProvider do
       ENV['GIT_COMMITTER_EMAIL'] = 'test@example.com'
       system_call('git', 'init')
       File.write('unused_empty_file_to_ensure_git_commit', '')
-      GivenHieradata.new(@tmpdir).instance_eval(&block)
+      GivenHieradata.new(@tmpdir + '/hieradata').instance_eval(&block)
       system_call('git', 'add', '--all')
       system_call('git', 'commit', '--message', 'initial commit')
     end
@@ -178,5 +183,33 @@ EOF
 
     expect(true_value).to eq(true)
     expect(false_value).to eq(false)
+  end
+
+  it 'creates hierarchy based on folders' do
+    given_hieradata do
+      file 'mgmt.oy.net.local/experiment-foo-bar.yaml' do
+        contents <<EOF
+---
+river: nile
+EOF
+      end
+      file 'common.yaml' do
+        contents <<EOF
+---
+river: amazon
+EOF
+      end
+    end
+
+    scope = {
+      'domain' => 'mgmt.oy.net.local',
+      'hostname' => 'experiment-foo-bar',
+      'logicalenv' => 'dummy',
+      'stackname' => 'dummy'
+    }
+
+    value = @hiera_provider.lookup(scope, 'river')
+
+    expect(value).to eq('nile')
   end
 end

@@ -47,9 +47,24 @@ class Support::HieraProvider
     the_hieradata = {}
     Dir.glob("#{@local_path}/**/*.yaml").each do |f|
       contents = YAML.load(File.open(f))
-      the_hieradata[File.basename(f, File.extname(f))] = contents
+      relative_dirs = File.dirname(f).sub(/^#{@local_path}\/hieradata/, '').sub(/^\//, '')
+
+      hash_bury(the_hieradata, *relative_dirs.split('/').push(File.basename(f, File.extname(f))).push(contents))
     end
 
     the_hieradata
+  end
+
+  def hash_bury(hash, *args)
+    if args.count < 2
+      fail ArgumentError "2 or more arguments required"
+    elsif args.count == 2
+      hash[args[0]] = args[1]
+    else
+      arg = args.shift
+      hash[arg] = {} unless hash[arg]
+      hash_bury(hash[arg], *args) unless args.empty?
+    end
+    hash
   end
 end
