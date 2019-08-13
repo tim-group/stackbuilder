@@ -82,6 +82,10 @@ describe 'kubernetes' do
               }
             },
             'spec' => {
+              'securityContext' => {
+                'runAsUser' => 2055,
+                'runAsGroup' => 3017
+              },
               'initContainers' => [{
                 'image' => 'repo.net.local:8080/config-generator:1.0.5',
                 'name' => 'config-generator',
