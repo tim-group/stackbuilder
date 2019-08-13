@@ -6,7 +6,6 @@ module Stacks::Services::VirtualMailService
   def configure
     @ports = [25]
     add_vip_network :mgmt
-    remove_vip_network :prod
   end
 
   def to_loadbalancer_config(location, fabric)
@@ -24,5 +23,22 @@ module Stacks::Services::VirtualMailService
       }
     end
     lb_config
+  end
+
+  def endpoints(_dependent_service, fabric)
+    endpoints = []
+    @ports.each do |port|
+      endpoints << { :port => port, :fqdns => [vip_fqdn(:prod, fabric)] }
+    end
+    endpoints
+  end
+
+  def config_params(_dependant, fabric, dependent_service)
+    mail_server = endpoints(dependent_service, fabric).map do |endpoint|
+      "#{endpoint[:fqdns].first}:#{endpoint[:port]}"
+    end
+    {
+      "smtp.server" => mail_server.join(',')
+    }
   end
 end
