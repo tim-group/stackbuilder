@@ -58,7 +58,8 @@ describe 'kubernetes' do
       'production-sharedproxy-001.space.net.local' => '1.2.3.5',
       'production-sharedproxy-002.space.net.local' => '1.2.3.6',
       'e1-mail-vip.mgmt.space.net.local' => '1.2.3.7',
-      'e1-mail-vip.space.net.local' => '1.2.3.8'
+      'e1-mail-vip.space.net.local' => '1.2.3.8',
+      'office-nexus-001.mgmt.lon.net.local' => '1.2.3.9'
     )
   end
   let(:hiera_provider) do
@@ -95,7 +96,7 @@ describe 'kubernetes' do
         expect(config_maps.size).to eql(1)
         expect(config_maps.first['data']['config.properties']).to include('smtp.server=e1-mail-vip.space.net.local:25')
 
-        expect(network_policies.size).to eq(2)
+        expect(network_policies.size).to eq(3)
         expect(network_policies.first['metadata']['name']).to eql('allow-x-out-to-e1-mail-25')
         expect(network_policies.first['spec']['egress'].size).to eq(1)
         expect(network_policies.first['spec']['egress'].first['to'].size).to eq(1)
