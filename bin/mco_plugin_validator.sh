@@ -50,6 +50,7 @@ FROM[mcollective/agent/k8ssecret.ddl]='puppet'
 FROM[mcollective/agent/nagsrv.ddl]='puppet'
 FROM[mcollective/agent/puppetca.ddl]='puppet'
 FROM[mcollective/agent/service.ddl]='puppet'
+FROM[mcollective/agent/hostcleanup.ddl]='puppet'
 
 case $COMMAND in
 validate)
@@ -130,6 +131,7 @@ install)
   REPO_PATH[mcollective/agent/nagsrv.ddl]='modules/mcollective/files/mcollective/agent/nagsrv.ddl'
   REPO_PATH[mcollective/agent/puppetca.ddl]='modules/mcollective/files/mcollective/agent/puppetca.ddl'
   REPO_PATH[mcollective/agent/service.ddl]='modules/mcollective/files/mcollective/agent/service.ddl'
+  REPO_PATH[mcollective/agent/hostcleanup.ddl]='modules/mcollective/files/mcollective/agent/hostcleanup.ddl'
 
   for file in "${!FROM[@]}"; do
     if [ ! -e "${LIBDIR}/${file}" ]; then
