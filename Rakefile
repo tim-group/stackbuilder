@@ -55,5 +55,5 @@ end
 
 desc 'Run lint (Rubocop)'
 task :lint do
-  sh 'rubocop'
+  sh 'rubocop bin lib spec'
 end
