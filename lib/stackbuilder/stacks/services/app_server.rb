@@ -102,7 +102,17 @@ class Stacks::Services::AppServer < Stacks::MachineDef
     end
 
     return unless dependant_app_services.any?(&:kubernetes)
-    enc['role::http_app']['allow_kubernetes_clusters'] = dependant_app_services.select(&:kubernetes).map { |vs| vs.environment.options[location] }.uniq
+
+    k8s_dependant_app_fabrics = dependant_app_services.select(&:kubernetes).map { |vs| vs.environment.options[:primary_site] }
+
+    my_service_is_in_a_single_site = @virtual_service.instances.is_a?(Numeric) ||
+                                     (@virtual_service.instances.is_a?(Hash) && @virtual_service.instances.size == 1)
+
+    k8s_clusters = k8s_dependant_app_fabrics.reject do |s|
+      s != site unless my_service_is_in_a_single_site
+    end.uniq
+
+    enc['role::http_app']['allow_kubernetes_clusters'] = k8s_clusters
   end
 
   def enc_ehcache(enc)
