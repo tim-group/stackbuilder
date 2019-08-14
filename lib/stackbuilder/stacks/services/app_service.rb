@@ -21,7 +21,9 @@ module Stacks::Services::AppService
   attr_accessor :appconfig
   attr_accessor :jvm_heap
   attr_accessor :headspace
+
   attr_accessor :maintainers
+  attr_accessor :description
 
   alias_method :database_username, :application
   alias_method :database_username=, :application=
@@ -289,6 +291,10 @@ EOC
     app_version = standard_labels['app.kubernetes.io/version']
     container_image = "repo.net.local:8080/#{app_name}:#{app_version}"
 
+    annotations = {}
+    annotations['maintainers'] = JSON.dump(@maintainers) unless @maintainers.empty?
+    annotations['description'] = description unless @description.nil?
+
     {
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
@@ -298,9 +304,7 @@ EOC
         'labels' => {
           'machineset' => @name
         }.merge(standard_labels),
-        'annotations' => {
-          'maintainers' => JSON.dump(@maintainers)
-        }
+        'annotations' => annotations
       },
       'spec' => {
         'selector' => {

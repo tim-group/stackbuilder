@@ -57,7 +57,7 @@ describe 'kubernetes' do
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
           },
-          'annotations' => { 'maintainers' => '[]' }
+          'annotations' => {}
         },
         'spec' => {
           'selector' => {
@@ -538,6 +538,27 @@ EOL
           annotations = k8s_resource(set, 'Deployment')['metadata']['annotations']
 
           expect(JSON.load(annotations['maintainers'])).to eq([{ 'type' => 'Group', 'slack_channel' => '#technology' }])
+        end
+      end
+
+      describe 'description' do
+        it 'provides a description of the service' do
+          factory = eval_stacks do
+            stack "mystack" do
+              app_service "x", :kubernetes => true do
+                self.application = 'MyApplication'
+                self.description = "This application is useful for testing stacks"
+              end
+            end
+            env "e1", :primary_site => 'space' do
+              instantiate_stack "mystack"
+            end
+          end
+
+          set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+          annotations = k8s_resource(set, 'Deployment')['metadata']['annotations']
+
+          expect(annotations['description']).to eq("This application is useful for testing stacks")
         end
       end
     end

@@ -1,5 +1,5 @@
 module Stacks::Maintainers
-  def person(name, contacts={})
+  def person(name, contacts = {})
     {
       'type' => 'Individual',
       'name' => name
