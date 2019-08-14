@@ -10,3 +10,4 @@ tags
 stackbuilder.iml
 /.buildpath
 spec/reports/*.xml
+.ruby-version
