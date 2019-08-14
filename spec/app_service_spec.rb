@@ -32,6 +32,9 @@ describe 'kubernetes' do
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
             self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
           end
@@ -57,7 +60,10 @@ describe 'kubernetes' do
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
           },
-          'annotations' => {}
+          'annotations' => {
+            'maintainers' => '[{"type":"Individual","name":"Testers"}]',
+            'description' => 'Testing'
+          }
         },
         'spec' => {
           'selector' => {
@@ -274,6 +280,9 @@ EOL
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
             self.instances = 3000
           end
@@ -290,6 +299,9 @@ EOL
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
             self.instances = 1
           end
@@ -307,6 +319,9 @@ EOL
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
             self.appconfig = <<EOL
   site=<%= @site %>
@@ -327,6 +342,9 @@ EOL
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
             self.appconfig = <<EOL
   secret=<%= secret('my/very/secret.data') %>
@@ -378,6 +396,9 @@ EOL
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
             depend_on 'mydb'
           end
@@ -413,6 +434,9 @@ EOL
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
           end
         end
@@ -429,6 +453,9 @@ EOL
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyApplication'
           end
         end
@@ -451,6 +478,9 @@ EOL
         factory = eval_stacks do
           stack "mystack" do
             app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
               self.application = 'MyApplication'
               self.jvm_heap = '100G'
             end
@@ -473,6 +503,9 @@ EOL
         factory = eval_stacks do
           stack "mystack" do
             app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
               self.application = 'MyApplication'
               self.jvm_heap = '100G'
               self.headspace = 0.5
@@ -504,6 +537,7 @@ EOL
                   person('Andrew Parker', :slack => '@aparker', :email => 'andy.parker@timgroup.com'),
                   person('Uncontactable'),
                   person('Joe Maille', :email => 'joe@example.com')]
+                self.description = 'testing'
               end
             end
             env "e1", :primary_site => 'space' do
@@ -527,6 +561,7 @@ EOL
               app_service "x", :kubernetes => true do
                 self.application = 'MyApplication'
                 self.maintainers = [slack('#technology')]
+                self.description = 'testing'
               end
             end
             env "e1", :primary_site => 'space' do
@@ -539,6 +574,24 @@ EOL
 
           expect(JSON.load(annotations['maintainers'])).to eq([{ 'type' => 'Group', 'slack_channel' => '#technology' }])
         end
+
+        it 'is required' do
+          factory = eval_stacks do
+            stack "mystack" do
+              app_service "x", :kubernetes => true do
+                self.application = 'MyApplication'
+                self.description = 'testing'
+              end
+            end
+            env "e1", :primary_site => 'space' do
+              instantiate_stack "mystack"
+            end
+          end
+
+          expect do
+            factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
+          end.to raise_error(/app_service 'x' in 'e1' requires maintainers \(set self\.maintainers\)/)
+        end
       end
 
       describe 'description' do
@@ -546,7 +599,9 @@ EOL
           factory = eval_stacks do
             stack "mystack" do
               app_service "x", :kubernetes => true do
+                self.maintainers = [person('Testers')]
                 self.application = 'MyApplication'
+
                 self.description = "This application is useful for testing stacks"
               end
             end
@@ -559,6 +614,24 @@ EOL
           annotations = k8s_resource(set, 'Deployment')['metadata']['annotations']
 
           expect(annotations['description']).to eq("This application is useful for testing stacks")
+        end
+
+        it 'is required' do
+          factory = eval_stacks do
+            stack "mystack" do
+              app_service "x", :kubernetes => true do
+                self.application = 'MyApplication'
+                self.maintainers = [person('Testers')]
+              end
+            end
+            env "e1", :primary_site => 'space' do
+              instantiate_stack "mystack"
+            end
+          end
+
+          expect do
+            factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
+          end.to raise_error(/app_service 'x' in 'e1' requires description \(set self\.description\)/)
         end
       end
     end
@@ -582,6 +655,9 @@ EOL
           end
 
           app_service 'app2', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app2'
           end
         end
@@ -635,6 +711,9 @@ EOL
           end
 
           app_service 'app2', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app2'
             depend_on 'app1'
           end
@@ -680,10 +759,16 @@ EOL
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app1'
           end
 
           app_service 'app2', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app2'
             depend_on 'app1'
           end
@@ -756,6 +841,9 @@ EOL
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app1'
           end
         end
@@ -799,6 +887,9 @@ EOL
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app1'
           end
         end
@@ -840,11 +931,17 @@ depends on the other' do
       factory = eval_stacks do
         stack "test_app_server1" do
           app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app1'
           end
         end
         stack "test_app_server2" do
           app_service 'app2', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app2'
             depend_on 'app1', 'e1'
           end
@@ -902,6 +999,9 @@ depends on the other' do
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app'
             depend_on 'logstash-receiver'
           end
@@ -926,6 +1026,9 @@ depends on the other' do
       factory = eval_stacks do
         stack "mystack" do
           app_service 'app1', :kubernetes => { 'e1' => true, 'e2' => false } do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'myapp'
           end
         end
@@ -949,6 +1052,9 @@ depends on the other' do
       factory = eval_stacks do
         stack "mystack" do
           app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'myapp'
           end
         end
@@ -972,6 +1078,9 @@ depends on the other' do
       factory = eval_stacks do
         stack "mystack" do
           app_service 'app1', :kubernetes => false do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'myapp'
           end
         end
@@ -1022,6 +1131,9 @@ depends on the other' do
         eval_stacks do
           stack "mystack" do
             app_service 'app1', :kubernetes => { 'e1' => true } do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
               self.application = 'myapp'
             end
           end
@@ -1040,6 +1152,9 @@ depends on the other' do
         eval_stacks do
           stack "mystack" do
             app_service 'app1', :kubernetes => { 'e1' => 'foo' } do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
               self.application = 'myapp'
             end
           end

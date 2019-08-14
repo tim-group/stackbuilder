@@ -306,6 +306,9 @@ describe 'k8s stack-with-dependencies' do
           self.include_master_in_read_only_cluster = false
         end
         app_service 'myapp', :kubernetes => true do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+
           self.groups = ['blue']
           self.application = 'rw-app'
           self.use_ha_mysql_ordering = true
@@ -351,6 +354,9 @@ describe 'k8s stack-with-dependencies' do
           }
         end
         app_service 'myapp', :kubernetes => true do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+
           self.groups = ['blue']
           self.application = 'rw-app'
           self.use_ha_mysql_ordering = true
@@ -391,6 +397,9 @@ describe 'k8s stack-with-dependencies' do
           }
         end
         app_service 'myapp', :kubernetes => true do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+
           self.groups = ['blue']
           self.application = 'rw-app'
           self.use_ha_mysql_ordering = true

@@ -32,6 +32,9 @@ describe 'machine_set' do
       factory = eval_stacks do
         stack 'test_stack' do
           app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'app'
             allow_outbound_to 'somewhere', '1.2.3.4/32', [80, 443]
           end

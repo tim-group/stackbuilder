@@ -135,11 +135,14 @@ module Stacks::Services::AppService
   end
 
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
-    fail("app_service requires application") if application.nil?
-    app_name = application.downcase
+    fail("app_service '#{name}' in '#{@environment.name}' requires maintainers (set self.maintainers)") if @maintainers.empty?
+    fail("app_service '#{name}' in '#{@environment.name}' requires description (set self.description)") if @description.nil?
+    fail("app_service '#{name}' in '#{@environment.name}' requires application") if application.nil?
     fail('app_service to_k8s doesn\'t know how to deal with multiple groups yet') if @groups.size > 1
-    group = @groups.first
     fail('app_service to_k8s doesn\'t know how to deal with multiple sites yet') if @enable_secondary_site || @instances.is_a?(Hash)
+
+    app_name = application.downcase
+    group = @groups.first
     site = @environment.sites.first
 
     begin

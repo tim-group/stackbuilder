@@ -61,10 +61,16 @@ describe 'cmd' do
       end
       stack "myk8sstack" do
         app_service "myk8sappservice", :kubernetes => true do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+
           self.application = 'MyK8sApplication'
           self.instances = 2
         end
         app_service "myrelatedk8sappservice", :kubernetes => true do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+
           self.application = 'MyRelatedK8sApplication'
           self.instances = 1
         end
@@ -553,11 +559,17 @@ describe 'cmd' do
               self.application = 'MyApplication'
             end
             app_service "myk8sappservice", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
               self.application = 'MyK8sApplication'
             end
           end
           stack "myotherstack" do
             app_service "myotherk8sappservice", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
               self.application = 'MyOtherK8sApplication'
             end
           end
@@ -668,10 +680,16 @@ describe 'cmd' do
         end
         stack "myk8sstack" do
           app_service "myk8sappservice", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyK8sApplication'
             self.instances = 2
           end
           app_service "myrelatedk8sappservice", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
             self.application = 'MyRelatedK8sApplication'
             self.instances = 1
             depend_on 'myotherappservice', 'e2'
