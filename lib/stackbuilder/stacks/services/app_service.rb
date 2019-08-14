@@ -297,6 +297,8 @@ EOC
     annotations = {}
     annotations['maintainers'] = JSON.dump(@maintainers) unless @maintainers.empty?
     annotations['description'] = description unless @description.nil?
+    annotations['configmap.reloader.stakater.com/reload'] = app_name + '-config'
+    annotations['secret.reloader.stakater.com/reload'] = app_name + '-secret'
 
     {
       'apiVersion' => 'apps/v1',

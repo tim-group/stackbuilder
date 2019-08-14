@@ -62,7 +62,9 @@ describe 'kubernetes' do
           },
           'annotations' => {
             'maintainers' => '[{"type":"Individual","name":"Testers"}]',
-            'description' => 'Testing'
+            'description' => 'Testing',
+            'configmap.reloader.stakater.com/reload' => 'myapplication-config',
+            'secret.reloader.stakater.com/reload' =>  'myapplication-secret'
           }
         },
         'spec' => {
