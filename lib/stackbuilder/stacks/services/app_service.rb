@@ -1,9 +1,12 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/kubernetes_resources'
+require 'stackbuilder/stacks/maintainers'
 require 'erb'
+require 'json'
 
 module Stacks::Services::AppService
   include Stacks::Services::RabbitMqDependent
+  include Stacks::Maintainers
 
   attr_accessor :ajp_port
   attr_accessor :application
@@ -18,6 +21,7 @@ module Stacks::Services::AppService
   attr_accessor :appconfig
   attr_accessor :jvm_heap
   attr_accessor :headspace
+  attr_accessor :maintainers
 
   alias_method :database_username, :application
   alias_method :database_username=, :application=
@@ -40,6 +44,7 @@ module Stacks::Services::AppService
     @ha_mysql_ordering_exclude = []
     @jvm_heap = '64M'
     @headspace = 0.1
+    @maintainers = []
   end
 
   def enable_ehcache
@@ -292,7 +297,10 @@ EOC
         'namespace' => @environment.name,
         'labels' => {
           'machineset' => @name
-        }.merge(standard_labels)
+        }.merge(standard_labels),
+        'annotations' => {
+          'maintainers' => JSON.dump(@maintainers)
+        }
       },
       'spec' => {
         'selector' => {

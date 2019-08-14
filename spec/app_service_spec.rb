@@ -24,6 +24,10 @@ describe 'kubernetes' do
   end
 
   describe 'resource definitions' do
+    def k8s_resource(set, kind)
+      set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == kind }
+    end
+
     it 'defines a Deployment' do
       factory = eval_stacks do
         stack "mystack" do
@@ -52,7 +56,8 @@ describe 'kubernetes' do
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
-          }
+          },
+          'annotations' => { 'maintainers' => '[]' }
         },
         'spec' => {
           'selector' => {
@@ -442,10 +447,6 @@ EOL
     end
 
     describe 'memory limits (max) and requests (min) ' do
-      def k8s_resource(set, kind)
-        set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == kind }
-      end
-
       it 'bases container limits and requests on the max heap memory' do
         factory = eval_stacks do
           stack "mystack" do
@@ -489,6 +490,55 @@ EOL
         expect(app_container['resources']['limits']['memory']).to eq('157286400Ki')
         expect(app_container['resources']['requests']['memory']).to eq('157286400Ki')
         expect(init_container['env'].find { |env_var| env_var['name'] == 'APP_JVM_ARGS' }['value']).to match(/-Xmx100G/)
+      end
+    end
+
+    describe 'metadata' do
+      describe 'maintainers' do
+        it 'allows maintainers to be people' do
+          factory = eval_stacks do
+            stack "mystack" do
+              app_service "x", :kubernetes => true do
+                self.application = 'MyApplication'
+                self.maintainers = [
+                  person('Andrew Parker', :slack => '@aparker', :email => 'andy.parker@timgroup.com'),
+                  person('Uncontactable'),
+                  person('Joe Maille', :email => 'joe@example.com')]
+              end
+            end
+            env "e1", :primary_site => 'space' do
+              instantiate_stack "mystack"
+            end
+          end
+
+          set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+          annotations = k8s_resource(set, 'Deployment')['metadata']['annotations']
+
+          expect(JSON.load(annotations['maintainers'])).to eq([
+            { 'type' => 'Individual', 'name' => 'Andrew Parker', 'slack' => '@aparker', 'email' => 'andy.parker@timgroup.com' },
+            { 'type' => 'Individual', 'name' => 'Uncontactable' },
+            { 'type' => 'Individual', 'name' => 'Joe Maille', 'email' => 'joe@example.com' }
+          ])
+        end
+
+        it 'allows maintainers to be slack channels' do
+          factory = eval_stacks do
+            stack "mystack" do
+              app_service "x", :kubernetes => true do
+                self.application = 'MyApplication'
+                self.maintainers = [slack('#technology')]
+              end
+            end
+            env "e1", :primary_site => 'space' do
+              instantiate_stack "mystack"
+            end
+          end
+
+          set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+          annotations = k8s_resource(set, 'Deployment')['metadata']['annotations']
+
+          expect(JSON.load(annotations['maintainers'])).to eq([{ 'type' => 'Group', 'slack_channel' => '#technology' }])
+        end
       end
     end
   end
