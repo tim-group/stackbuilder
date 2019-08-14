@@ -97,7 +97,8 @@ describe 'kubernetes' do
             'spec' => {
               'securityContext' => {
                 'runAsUser' => 2055,
-                'runAsGroup' => 3017
+                'runAsGroup' => 3017,
+                'fsGroup' => 3017
               },
               'initContainers' => [{
                 'image' => 'repo.net.local:8080/config-generator:1.0.5',
@@ -141,6 +142,9 @@ describe 'kubernetes' do
                   }]
               }],
               'containers' => [{
+                'securityContext' => {
+                  'readOnlyRootFilesystem' => true,
+                },
                 'image' => 'repo.net.local:8080/myapplication:1.2.3',
                 'name' => 'myapplication',
                 'command' => ["/bin/sh"],
@@ -162,11 +166,21 @@ describe 'kubernetes' do
                     'name' => 'jmx'
                   }
                 ],
-                'volumeMounts' => [{
-                  'name' => 'config-volume',
-                  'mountPath' => '/config',
-                  'readOnly' => true
-                }],
+                'volumeMounts' => [
+                  {
+                    'name' => 'config-volume',
+                    'mountPath' => '/config',
+                    'readOnly' => true
+                  },
+                  {
+                    'name' => 'log-volume',
+                    'mountPath' => '/var/log/app',
+                  },
+                  {
+                    'name' => 'tmp-volume',
+                    'mountPath' => '/tmp',
+                  }
+                ],
                 'readinessProbe' => {
                   'periodSeconds' => 2,
                   'httpGet' => {
@@ -196,7 +210,16 @@ describe 'kubernetes' do
                   'configMap' => {
                     'name' => 'myapplication-config'
                   }
-                }]
+                },
+                {
+                  'name' => 'log-volume',
+                  'emptyDir' => {},
+                },
+                {
+                  'name' => 'tmp-volume',
+                  'emptyDir' => {},
+                }
+              ]
             }
           }
         }

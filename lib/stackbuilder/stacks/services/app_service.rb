@@ -335,7 +335,8 @@ EOC
           'spec' => {
             'securityContext' => {
               'runAsUser' => 2055,
-              'runAsGroup' => 3017
+              'runAsGroup' => 3017,
+              'fsGroup' => 3017
             },
             'initContainers' => [{
               'image' => 'repo.net.local:8080/config-generator:1.0.5',
@@ -387,6 +388,9 @@ EOC
                 }]
             }],
             'containers' => [{
+              'securityContext' => {
+                'readOnlyRootFilesystem' => true,
+              },
               'image' => container_image,
               'name' => app_name,
               'command' => ["/bin/sh"],
@@ -408,11 +412,21 @@ EOC
                   'name' => 'jmx'
                 }
               ],
-              'volumeMounts' => [{
-                'name' => 'config-volume',
-                'mountPath' => '/config',
-                'readOnly' => true
-              }],
+              'volumeMounts' => [
+                {
+                  'name' => 'config-volume',
+                  'mountPath' => '/config',
+                  'readOnly' => true
+                },
+                {
+                  'name' => 'log-volume',
+                  'mountPath' => '/var/log/app',
+                },
+                {
+                  'name' => 'tmp-volume',
+                  'mountPath' => '/tmp',
+                }
+              ],
               'readinessProbe' => {
                 'periodSeconds' => 2,
                 'httpGet' => {
@@ -440,7 +454,16 @@ EOC
               {
                 'name' => 'config-template',
                 'configMap' => { 'name' => "#{app_name}-config" }
-              }]
+              },
+              {
+                'name' => 'log-volume',
+                'emptyDir' => {},
+              },
+              {
+                'name' => 'tmp-volume',
+                'emptyDir' => {},
+              }
+            ]
           }
         }
       }
