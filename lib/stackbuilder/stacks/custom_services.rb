@@ -174,6 +174,10 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
                     Stacks::Services::VpnServer, &block)
   end
 
+  def s3_proxy_service(name, &block)
+    machineset_with(name, [Stacks::Services::S3ProxyService], Stacks::Services::StandardServer, &block)
+  end
+
   def [](key)
     @definitions[key]
   end
