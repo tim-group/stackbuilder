@@ -20,7 +20,8 @@ describe 'kubernetes' do
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
-      'stacks/application_credentials_selector' => 0)
+      'stacks/application_credentials_selector' => 0,
+      'secrety/looking/thing' => 'ENC[GPG,hQIMAyhja+HHo')
   end
 
   describe 'resource definitions' do
@@ -422,6 +423,29 @@ EOL
       expect(k8s.secrets).to eql(
         'my/very/secret.data' => 'my_very_secret_data',
         'my/very/secret.array' => 'my_very_secret_array_0')
+    end
+
+    it 'blows up when hiera function used for an encrypted value' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
+            self.application = 'MyApplication'
+            self.appconfig = <<EOL
+  secret=<%= hiera('secrety/looking/thing') %>
+EOL
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      expect { set.to_k8s(app_deployer, dns_resolver, hiera_provider) }.
+        to raise_error(/The hiera value for .* is encrypted/)
     end
 
     it 'has config for it\'s db dependencies' do

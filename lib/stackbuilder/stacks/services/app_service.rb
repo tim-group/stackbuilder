@@ -121,7 +121,10 @@ module Stacks::Services::AppService
     end
 
     def hiera(key, default = nil)
-      @hiera_provider.lookup(@vars, key, default)
+      value = @hiera_provider.lookup(@vars, key, default)
+      fail "The hiera value for #{key} is encrypted. \
+Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String) && value.match(/^ENC\[GPG/)
+      value
     end
 
     def secret(key, index = nil)
