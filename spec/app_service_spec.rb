@@ -145,7 +145,8 @@ describe 'kubernetes' do
               }],
               'containers' => [{
                 'securityContext' => {
-                  'readOnlyRootFilesystem' => true
+                  'readOnlyRootFilesystem' => true,
+                  'allowPrivilegeEscalation' => false
                 },
                 'image' => 'repo.net.local:8080/myapplication:1.2.3',
                 'name' => 'myapplication',
