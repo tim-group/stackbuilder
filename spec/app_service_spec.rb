@@ -143,7 +143,7 @@ describe 'kubernetes' do
               }],
               'containers' => [{
                 'securityContext' => {
-                  'readOnlyRootFilesystem' => true,
+                  'readOnlyRootFilesystem' => true
                 },
                 'image' => 'repo.net.local:8080/myapplication:1.2.3',
                 'name' => 'myapplication',
@@ -174,11 +174,11 @@ describe 'kubernetes' do
                   },
                   {
                     'name' => 'log-volume',
-                    'mountPath' => '/var/log/app',
+                    'mountPath' => '/var/log/app'
                   },
                   {
                     'name' => 'tmp-volume',
-                    'mountPath' => '/tmp',
+                    'mountPath' => '/tmp'
                   }
                 ],
                 'readinessProbe' => {
@@ -213,11 +213,11 @@ describe 'kubernetes' do
                 },
                 {
                   'name' => 'log-volume',
-                  'emptyDir' => {},
+                  'emptyDir' => {}
                 },
                 {
                   'name' => 'tmp-volume',
-                  'emptyDir' => {},
+                  'emptyDir' => {}
                 }
               ]
             }

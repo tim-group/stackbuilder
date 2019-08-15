@@ -389,7 +389,7 @@ EOC
             }],
             'containers' => [{
               'securityContext' => {
-                'readOnlyRootFilesystem' => true,
+                'readOnlyRootFilesystem' => true
               },
               'image' => container_image,
               'name' => app_name,
@@ -420,11 +420,11 @@ EOC
                 },
                 {
                   'name' => 'log-volume',
-                  'mountPath' => '/var/log/app',
+                  'mountPath' => '/var/log/app'
                 },
                 {
                   'name' => 'tmp-volume',
-                  'mountPath' => '/tmp',
+                  'mountPath' => '/tmp'
                 }
               ],
               'readinessProbe' => {
@@ -457,11 +457,11 @@ EOC
               },
               {
                 'name' => 'log-volume',
-                'emptyDir' => {},
+                'emptyDir' => {}
               },
               {
                 'name' => 'tmp-volume',
-                'emptyDir' => {},
+                'emptyDir' => {}
               }
             ]
           }
