@@ -37,6 +37,7 @@ describe 'kubernetes' do
 
             self.application = 'MyApplication'
             self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
+            self.ephemeral_storage_size = '10G'
           end
         end
         env "e1", :primary_site => 'space' do
@@ -153,8 +154,14 @@ describe 'kubernetes' do
                   'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
                 ],
                 'resources' => {
-                  'limits' => { 'memory' => '72089Ki' },
-                  'requests' => { 'memory' => '72089Ki' }
+                  'limits' => {
+                    'memory' => '72089Ki',
+                    'ephemeral-storage' => '10G'
+                  },
+                  'requests' => {
+                    'memory' => '72089Ki',
+                    'ephemeral-storage' => '10G'
+                  }
                 },
                 'ports' => [
                   {

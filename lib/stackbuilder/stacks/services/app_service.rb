@@ -21,6 +21,7 @@ module Stacks::Services::AppService
   attr_accessor :appconfig
   attr_accessor :jvm_heap
   attr_accessor :headspace
+  attr_accessor :ephemeral_storage_size
 
   attr_accessor :maintainers
   attr_accessor :description
@@ -46,6 +47,7 @@ module Stacks::Services::AppService
     @ha_mysql_ordering_exclude = []
     @jvm_heap = '64M'
     @headspace = 0.1
+    @ephemeral_storage_size = nil
     @maintainers = []
   end
 
@@ -300,6 +302,8 @@ EOC
     annotations['configmap.reloader.stakater.com/reload'] = app_name + '-config'
     annotations['secret.reloader.stakater.com/reload'] = app_name + '-secret'
 
+    ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
+
     {
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
@@ -399,8 +403,12 @@ EOC
                 'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
               ],
               'resources' => {
-                'limits' => { 'memory' => scale_memory(@jvm_heap, @headspace) + 'i' },
-                'requests' => { 'memory' => scale_memory(@jvm_heap, @headspace) + 'i' }
+                'limits' => {
+                  'memory' => scale_memory(@jvm_heap, @headspace) + 'i'
+                }.merge(ephemeral_storage_limit),
+                'requests' => {
+                  'memory' => scale_memory(@jvm_heap, @headspace) + 'i'
+                }.merge(ephemeral_storage_limit)
               },
               'ports' => [
                 {
