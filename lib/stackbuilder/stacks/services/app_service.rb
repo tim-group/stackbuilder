@@ -315,6 +315,10 @@ EOC
     deployment_annotations['secret.reloader.stakater.com/reload'] = app_name + '-secret'
     deployment_annotations.merge!(annotations)
 
+    pod_annotations = {}
+    pod_annotations['seccomp.security.alpha.kubernetes.io/pod'] = 'runtime/default'
+    pod_annotations.merge!(annotations)
+
     ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
 
     {
@@ -348,7 +352,7 @@ EOC
             'labels' => {
               'participation' => 'enabled'
             }.merge(standard_labels),
-            'annotations' => annotations
+            'annotations' => pod_annotations
           },
           'spec' => {
             'securityContext' => {
