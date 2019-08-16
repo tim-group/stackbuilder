@@ -21,8 +21,7 @@ class Stacks::Environment
 
   def initialize(name, options, parent, environments, stack_procs, calculated_dependencies_cache)
     @name = name
-    @short_name = @name.slice(0, 3)
-    @short_name << '_' while @short_name.length < 3
+    @short_name = @name.slice(0, 3).ljust(3, '_')
     @options = options
     @environments = environments
     @stack_procs = stack_procs
