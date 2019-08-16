@@ -102,6 +102,7 @@ describe 'kubernetes' do
               }
             },
             'spec' => {
+              'automountServiceAccountToken' => false,
               'securityContext' => {
                 'runAsUser' => 2055,
                 'runAsGroup' => 3017,
