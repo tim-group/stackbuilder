@@ -97,9 +97,9 @@ describe_stack 'stack-with-dependencies' do
     expect(rights['example2@e1-exampleapp2-002.space.net.local/example']).to eql(
       'password_hiera_key' => 'e1/example2/mysql_password',
       'passwords_hiera_key' => 'e1/example2/mysql_passwords')
-    expect(rights['kubeexample@space-e1-kubeexampleapp/example']).to eql(
-      'password_hiera_key' => 'e1/kubeexample/mysql_password',
-      'passwords_hiera_key' => 'e1/kubeexample/mysql_passwords',
+    expect(rights['e1_kubeexamplea@space-e1-kubeexampleapp/example']).to eql(
+      'password_hiera_key' => 'e1/e1_kubeexamplea/mysql_password',
+      'passwords_hiera_key' => 'e1/e1_kubeexamplea/mysql_passwords',
       'allow_kubernetes_clusters' => ['space'])
   end
 end

@@ -457,6 +457,7 @@ EOL
             self.description = 'Testing'
 
             self.application = 'MyApplication'
+            self.short_name = 'myappl'
             depend_on 'mydb'
           end
         end
@@ -469,7 +470,7 @@ EOL
             self.include_master_in_read_only_cluster = false
           end
         end
-        env "e1", :primary_site => 'space' do
+        env "e1", :primary_site => 'space', :short_name => 'spc' do
           instantiate_stack "mystack"
           instantiate_stack "my_db"
         end
@@ -481,7 +482,7 @@ EOL
                   db.exampledb.database=exampledb.*
                   db.exampledb.driver=com.mysql.jdbc.Driver.*
                   db.exampledb.port=3306.*
-                  db.exampledb.username=MyApplication0.*
+                  db.exampledb.username=spcmyappl0.*
                   db.exampledb.password=\{SECRET:e1_MyApplication_mysql_passwords_0\}.*
                   db.exampledb.read_only_cluster=e1-mydb-002.space.net.local.*
                  /mx)

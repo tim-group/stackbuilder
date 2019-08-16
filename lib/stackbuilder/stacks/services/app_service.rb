@@ -26,9 +26,6 @@ module Stacks::Services::AppService
   attr_accessor :maintainers
   attr_accessor :description
 
-  alias_method :database_username, :application
-  alias_method :database_username=, :application=
-
   def self.extended(object)
     object.configure
   end
@@ -73,6 +70,14 @@ module Stacks::Services::AppService
 
   def rabbitmq_config
     create_rabbitmq_config(@application)
+  end
+
+  def database_username
+    if @kubernetes
+      @environment.short_name + @short_name
+    else
+      @application
+    end
   end
 
   def endpoints(_dependent_service, fabric)
