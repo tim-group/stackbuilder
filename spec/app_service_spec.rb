@@ -94,6 +94,10 @@ describe 'kubernetes' do
                 'app.kubernetes.io/version' => '1.2.3',
                 'app.kubernetes.io/managed-by' => 'stacks',
                 'stack' => 'mystack'
+              },
+              'annotations' => {
+                'maintainers' => '[{"type":"Individual","name":"Testers"}]',
+                'description' => 'Testing',
               }
             },
             'spec' => {

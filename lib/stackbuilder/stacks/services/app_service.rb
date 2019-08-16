@@ -302,8 +302,11 @@ EOC
     annotations = {}
     annotations['maintainers'] = JSON.dump(@maintainers) unless @maintainers.empty?
     annotations['description'] = description unless @description.nil?
-    annotations['configmap.reloader.stakater.com/reload'] = app_name + '-config'
-    annotations['secret.reloader.stakater.com/reload'] = app_name + '-secret'
+
+    deployment_annotations = {}
+    deployment_annotations['configmap.reloader.stakater.com/reload'] = app_name + '-config'
+    deployment_annotations['secret.reloader.stakater.com/reload'] = app_name + '-secret'
+    deployment_annotations.merge!(annotations)
 
     ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
 
@@ -316,7 +319,7 @@ EOC
         'labels' => {
           'machineset' => @name
         }.merge(standard_labels),
-        'annotations' => annotations
+        'annotations' => deployment_annotations
       },
       'spec' => {
         'selector' => {
@@ -337,7 +340,8 @@ EOC
           'metadata' => {
             'labels' => {
               'participation' => 'enabled'
-            }.merge(standard_labels)
+            }.merge(standard_labels),
+            'annotations' => annotations
           },
           'spec' => {
             'securityContext' => {
