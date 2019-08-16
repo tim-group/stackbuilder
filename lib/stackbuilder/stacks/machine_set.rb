@@ -9,6 +9,7 @@ class Stacks::MachineSet
   attr_accessor :groups
   attr_accessor :instances
   attr_accessor :name
+  attr_accessor :short_name
   attr_accessor :ports
   attr_accessor :type
   attr_accessor :server_offset
@@ -35,6 +36,7 @@ class Stacks::MachineSet
     @groups = ['blue']
     @instances = 2
     @name = name
+    @short_name = @name.slice(0, 12)
     @stack = stack
 
     @allowed_hosts = []
@@ -268,6 +270,11 @@ class Stacks::MachineSet
 
   def fabric
     @environment.primary_site
+  end
+
+  def set_short_name(short_name)
+    fail("The short name of a machine_set must be less than twelve characters. You tried to set_short_name of machine_set '#{@name}' in environment '#{@environment.name}' to '#{short_name}'") if short_name.length > 12
+    @short_name = short_name
   end
 
   private

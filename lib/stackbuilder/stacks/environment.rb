@@ -6,6 +6,7 @@ class Stacks::Environment
   attr_reader :environments # XXX this is silly and leads to an infinite data structure
   attr_reader :parent
   attr_reader :name
+  attr_reader :short_name
   attr_reader :options
   attr_reader :primary_site
   attr_reader :secondary_site
@@ -20,6 +21,8 @@ class Stacks::Environment
 
   def initialize(name, options, parent, environments, stack_procs, calculated_dependencies_cache)
     @name = name
+    @short_name = @name.slice(0, 3)
+    @short_name << '_' while @short_name.length < 3
     @options = options
     @environments = environments
     @stack_procs = stack_procs
@@ -121,6 +124,11 @@ class Stacks::Environment
 
   def identity
     name.to_sym
+  end
+
+  def set_short_name(short_name)
+    fail("The short name of an environment must be three characters. You tried to set_short_name of environment '#{@name}' to '#{short_name}'") if short_name.length != 3
+    @short_name = short_name
   end
 
   def all_environments

@@ -66,4 +66,48 @@ describe 'machine_set' do
       expect(egress.first['ports'].last['port']).to be(443)
     end
   end
+  describe 'short_name' do
+    it 'should default to the first 12 characters of the name of the machine_set' do
+      factory = eval_stacks do
+        stack 'mystack' do
+          app_service 'supercalifragilisticexpialidocious' do
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack 'mystack'
+        end
+      end
+      machine_set = factory.inventory.find_environment('e1').definitions['mystack'].definitions['supercalifragilisticexpialidocious']
+      expect(machine_set.short_name).to eql('supercalifra')
+    end
+
+    it 'should default to the name of the machine_set if the machine_set name is less than 12 characters' do
+      factory = eval_stacks do
+        stack 'mystack' do
+          app_service 'app' do
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack 'mystack'
+        end
+      end
+      machine_set = factory.inventory.find_environment('e1').definitions['mystack'].definitions['app']
+      expect(machine_set.short_name).to eql('app')
+    end
+
+    it 'should raise an error if you try to set the short_name to more than 12 characters' do
+      expect do
+        eval_stacks do
+          stack 'mystack' do
+            app_service 'app' do
+              set_short_name 'supercalifragilisticexpialidocious'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack 'mystack'
+          end
+        end
+      end.to raise_error('The short name of a machine_set must be less than twelve characters. You tried to set_short_name of machine_set \'app\' in environment \'e1\' to \'supercalifragilisticexpialidocious\'')
+    end
+  end
 end
