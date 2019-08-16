@@ -194,10 +194,6 @@ class Stacks::MachineSet
     end
   end
 
-  def database_dependent(username)
-    self.database_username = username
-  end
-
   public
 
   def configure
