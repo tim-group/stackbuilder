@@ -348,6 +348,7 @@ EOC
             'annotations' => pod_annotations
           },
           'spec' => {
+            'automountServiceAccountToken' => false,
             'securityContext' => {
               'runAsUser' => 2055,
               'runAsGroup' => 3017,
