@@ -98,6 +98,7 @@ describe 'kubernetes' do
               'annotations' => {
                 'maintainers' => '[{"type":"Individual","name":"Testers"}]',
                 'description' => 'Testing',
+                'seccomp.security.alpha.kubernetes.io/pod' => 'runtime/default'
               }
             },
             'spec' => {
