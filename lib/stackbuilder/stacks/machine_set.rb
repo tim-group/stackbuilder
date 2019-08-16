@@ -36,7 +36,7 @@ class Stacks::MachineSet
     @groups = ['blue']
     @instances = 2
     @name = name
-    @short_name = @name.slice(0, 12)
+    self.short_name = @name.slice(0, 12)
     @stack = stack
 
     @allowed_hosts = []
@@ -272,8 +272,9 @@ class Stacks::MachineSet
     @environment.primary_site
   end
 
-  def set_short_name(short_name)
-    fail("The short name of a machine_set must be less than twelve characters. You tried to set_short_name of machine_set '#{@name}' in environment '#{@environment.name}' to '#{short_name}'") if short_name.length > 12
+  def short_name=(short_name)
+    fail('The short name of a machine_set must be less than twelve characters.' \
+         " You tried to set the short_name of machine_set '#{@name}' in environment '#{@environment.name}' to '#{short_name}'") if short_name.length > 12
     @short_name = short_name
   end
 

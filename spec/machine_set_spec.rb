@@ -100,14 +100,15 @@ describe 'machine_set' do
         eval_stacks do
           stack 'mystack' do
             app_service 'app' do
-              set_short_name 'supercalifragilisticexpialidocious'
+              self.short_name = 'supercalifragilisticexpialidocious'
             end
           end
           env "e1", :primary_site => 'space' do
             instantiate_stack 'mystack'
           end
         end
-      end.to raise_error('The short name of a machine_set must be less than twelve characters. You tried to set_short_name of machine_set \'app\' in environment \'e1\' to \'supercalifragilisticexpialidocious\'')
+      end.to raise_error('The short name of a machine_set must be less than twelve characters.' \
+                         ' You tried to set the short_name of machine_set \'app\' in environment \'e1\' to \'supercalifragilisticexpialidocious\'')
     end
   end
 end
