@@ -152,7 +152,10 @@ describe 'kubernetes' do
               'containers' => [{
                 'securityContext' => {
                   'readOnlyRootFilesystem' => true,
-                  'allowPrivilegeEscalation' => false
+                  'allowPrivilegeEscalation' => false,
+                  'capabilities' => {
+                    'drop' => ['ALL']
+                  }
                 },
                 'image' => 'repo.net.local:8080/myapplication:1.2.3',
                 'name' => 'myapplication',

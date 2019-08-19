@@ -406,7 +406,10 @@ EOC
             'containers' => [{
               'securityContext' => {
                 'readOnlyRootFilesystem' => true,
-                'allowPrivilegeEscalation' => false
+                'allowPrivilegeEscalation' => false,
+                'capabilities' => {
+                  'drop' => ['ALL']
+                }
               },
               'image' => container_image,
               'name' => app_name,
