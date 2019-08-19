@@ -1,84 +1,104 @@
 require 'stackbuilder/stacks/environment'
 require 'stackbuilder/stacks/factory'
+require 'test_classes'
+require 'spec_helper'
 require 'stacks/test_framework'
 
-describe_stack 'stack-with-dependencies' do
-  given do
-    stack 'loadbalancer' do
-      loadbalancer_service
-    end
-    stack 'example' do
-      proxy_service 'exampleproxy' do
-        vhost('exampleapp') do
-          use_for_lb_healthcheck
+describe 'stack-with-dependencies' do
+  let(:app_deployer) { TestAppDeployer.new('1.2.3') }
+  let(:dns_resolver) { AllocatingDnsResolver.new }
+  let(:hiera_provider) { TestHieraProvider.new('stacks/application_credentials_selector' => 0) }
+
+  let(:factory) do
+    eval_stacks do
+      stack 'loadbalancer' do
+        loadbalancer_service
+      end
+      stack 'example' do
+        proxy_service 'exampleproxy' do
+          vhost('exampleapp') do
+            use_for_lb_healthcheck
+          end
+          nat_config.dnat_enabled = true
         end
-        nat_config.dnat_enabled = true
+
+        app_service 'exampleapp' do
+          self.groups = ['blue']
+          self.application = 'ExAmPLE'
+        end
+
+        app_service 'exampleapp2' do
+          self.groups = ['blue']
+          self.application = 'example2'
+          depend_on 'exampleapp'
+          depend_on 'exampledb'
+        end
+
+        app_service 'kubeexampleapp', :kubernetes => true do
+          self.maintainers = [person('Test')]
+          self.description = 'Check dependency evaluation for k8s apps'
+          self.groups = ['blue']
+          self.application = 'kubeexample'
+          self.instances = 1
+          depend_on 'exampledb'
+          depend_on 'exampleapp'
+        end
+
+        standard_service 'otherservice' do
+          self.database_username = 'other'
+          depend_on 'exampledb'
+        end
+      end
+      stack 'example_db' do
+        mysql_cluster 'exampledb' do
+          self.instances = 1
+          self.database_name = 'example'
+          self.role_in_name = false
+          self.backup_instances = 0
+          self.slave_instances = 0
+        end
       end
 
-      app_service 'exampleapp' do
-        self.groups = ['blue']
-        self.application = 'ExAmPLE'
+      env 'e1', :primary_site => 'space' do
+        instantiate_stack 'example'
+        instantiate_stack 'example_db'
+        instantiate_stack 'loadbalancer'
       end
-
-      app_service 'exampleapp2' do
-        self.groups = ['blue']
-        self.application = 'example2'
-        depend_on 'exampleapp'
-        depend_on 'exampledb'
-      end
-
-      app_service 'kubeexampleapp' do
-        self.groups = ['blue']
-        self.application = 'kubeexample'
-        self.kubernetes = true
-        self.instances = 1
-        depend_on 'exampledb'
-        depend_on 'exampleapp'
-      end
-    end
-    stack 'example_db' do
-      mysql_cluster 'exampledb' do
-        self.instances = 1
-        self.database_name = 'example'
-        self.role_in_name = false
-        self.backup_instances = 0
-        self.slave_instances = 0
-      end
-    end
-
-    env 'e1', :primary_site => 'space' do
-      instantiate_stack 'example'
-      instantiate_stack 'example_db'
-      instantiate_stack 'loadbalancer'
     end
   end
 
-  host('e1-lb-001.mgmt.space.net.local') do |host|
+  it 'configures the loadbalancer' do
+    host = factory.inventory.find('e1-lb-001.mgmt.space.net.local')
+
     rs = host.to_enc['role::loadbalancer']['virtual_servers']['e1-exampleapp-vip.space.net.local']['realservers']
     expect(rs['blue']).to eql(['e1-exampleapp-001.space.net.local', 'e1-exampleapp-002.space.net.local'])
     rs = host.to_enc['role::loadbalancer']['virtual_servers']['e1-exampleapp2-vip.space.net.local']['realservers']
     expect(rs['blue']).to eql(['e1-exampleapp2-001.space.net.local', 'e1-exampleapp2-002.space.net.local'])
   end
 
-  host('e1-exampleproxy-001.mgmt.space.net.local') do |host|
+  it 'configures the proxy' do
+    host = factory.inventory.find('e1-exampleproxy-001.mgmt.space.net.local')
+
     ppr = host.to_enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['proxy_pass_rules']
     expect(ppr).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
   end
 
-  host('e1-exampleapp2-002.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
+  it 'configures a VM app server' do
+    app = factory.inventory.find('e1-exampleapp-002.mgmt.space.net.local')
+    app2 = factory.inventory.find('e1-exampleapp2-002.mgmt.space.net.local')
+
+    expect(app2.to_enc['role::http_app']['application_dependant_instances']).to eql([
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
-    deps = host.to_enc['role::http_app']['dependencies']
+    deps = app2.to_enc['role::http_app']['dependencies']
     expect(deps['db.example.database']).to eql('example')
     expect(deps['db.example.hostname']).to eql('e1-exampledb-001.space.net.local')
     expect(deps['db.example.password_hiera_key']).to eql('e1/example2/mysql_password')
     expect(deps['db.example.username']).to eql('example2')
     expect(deps['example.url']).to eql('http://e1-exampleapp-vip.space.net.local:8000')
-  end
-  host('e1-exampleapp-002.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::http_app']['application_dependant_instances']).to eql([
+
+    expect(app.to_enc['role::http_app']['application_dependant_instances']).to eql([
       'e1-exampleapp2-001.space.net.local',
       'e1-exampleapp2-002.space.net.local',
       'e1-exampleproxy-001.space.net.local',
@@ -86,10 +106,22 @@ describe_stack 'stack-with-dependencies' do
       'e1-lb-001.space.net.local',
       'e1-lb-002.space.net.local'
     ])
-    expect(host.to_enc['role::http_app']['dependencies']).to eql({})
-    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(['space'])
+    expect(app.to_enc['role::http_app']['dependencies']).to eql({})
+    expect(app.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(['space'])
   end
-  host('e1-exampledb-001.mgmt.space.net.local') do |host|
+
+  it 'configures a K8s app pod' do
+    set = factory.inventory.find_environment('e1').definitions['example'].k8s_machinesets['kubeexampleapp']
+
+    config = set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == 'ConfigMap' }
+
+    expect(config['data']['config.properties']).to match(/username=e1_kubeexamplea0/)
+    expect(config['data']['config.properties']).to match(/password={SECRET:e1_kubeexample_mysql_passwords_0/)
+  end
+
+  it 'configures the db' do
+    host = factory.inventory.find('e1-exampledb-001.mgmt.space.net.local')
+
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
     expect(rights['example2@e1-exampleapp2-001.space.net.local/example']).to eql(
       'password_hiera_key' => 'e1/example2/mysql_password',
@@ -98,9 +130,12 @@ describe_stack 'stack-with-dependencies' do
       'password_hiera_key' => 'e1/example2/mysql_password',
       'passwords_hiera_key' => 'e1/example2/mysql_passwords')
     expect(rights['e1_kubeexamplea@space-e1-kubeexampleapp/example']).to eql(
-      'password_hiera_key' => 'e1/e1_kubeexamplea/mysql_password',
-      'passwords_hiera_key' => 'e1/e1_kubeexamplea/mysql_passwords',
+      'password_hiera_key' => 'e1/kubeexample/mysql_password',
+      'passwords_hiera_key' => 'e1/kubeexample/mysql_passwords',
       'allow_kubernetes_clusters' => ['space'])
+    expect(rights['other@e1-otherservice-001.space.net.local/example']).to eql(
+      'password_hiera_key' => 'e1/other/mysql_password',
+      'passwords_hiera_key' => 'e1/other/mysql_passwords')
   end
 end
 

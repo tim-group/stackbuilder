@@ -132,8 +132,8 @@ module Stacks::Services::MysqlCluster
     }
     virtual_services_that_depend_on_me.each do |service|
       right = {
-        'passwords_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_passwords",
-        'password_hiera_key' => "#{service.environment.name}/#{service.database_username}/mysql_password"
+        'passwords_hiera_key' => "#{service.environment.name}/#{service.database_application_name}/mysql_passwords",
+        'password_hiera_key' => "#{service.environment.name}/#{service.database_application_name}/mysql_password"
       }
       if service.kubernetes
         fail('k8s services don\'t know how to deal with multiple sites yet') if @enable_secondary_site || @instances.is_a?(Hash)
@@ -299,7 +299,7 @@ module Stacks::Services::MysqlCluster
       "db.#{@database_name}.port"               => '3306',
       "db.#{@database_name}.username"           => mysql_username(dependent_service),
       "db.#{@database_name}.password_hiera_key" =>
-        "#{dependent_service.environment.name}/#{dependent_service.application}/mysql_password"
+        "#{dependent_service.environment.name}/#{dependent_service.database_application_name}/mysql_password"
     }
     unless read_only_cluster.empty?
       roc = read_only_cluster

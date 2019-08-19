@@ -246,9 +246,9 @@ describe_stack 'should provide the correct application rights if the app server 
   host("testing-mydb-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['mysql_hacks::application_rights_wrapper']['rights']
     expect(rights['tesapplong@space-testing-applong/ref']['password_hiera_key']).to \
-      eql('testing/tesapplong/mysql_password')
+      eql('testing/SuperLongLengthName/mysql_password')
     expect(rights['tesapplong@space-testing-applong/ref']['passwords_hiera_key']).to \
-      eql('testing/tesapplong/mysql_passwords')
+      eql('testing/SuperLongLengthName/mysql_passwords')
     expect(rights['tesapplong@space-testing-applong/ref']['allow_kubernetes_clusters']).to eql(['space'])
   end
 end

@@ -26,6 +26,8 @@ module Stacks::Services::AppService
   attr_accessor :maintainers
   attr_accessor :description
 
+  alias_method :database_application_name, :application
+
   def self.extended(object)
     object.configure
   end
