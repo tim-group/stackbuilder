@@ -166,7 +166,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
   end
 
   def standard_service(name, &block)
-    machineset_with(name, [], Stacks::Services::StandardServer, &block)
+    machineset_with(name, [Stacks::Services::StandardService], Stacks::Services::StandardServer, &block)
   end
 
   def vpn_service(name, &block)

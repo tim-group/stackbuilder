@@ -47,6 +47,7 @@ module Stacks
     require 'stackbuilder/stacks/services/selenium/hub'
     require 'stackbuilder/stacks/services/sftp_server'
     require 'stackbuilder/stacks/services/standalone_server'
+    require 'stackbuilder/stacks/services/standard_service'
     require 'stackbuilder/stacks/services/standard_server'
     require 'stackbuilder/stacks/services/virtual_bind_service'
     require 'stackbuilder/stacks/services/virtual_mail_service'

@@ -23,6 +23,34 @@ class MyTestDnsResolver
   end
 end
 
+class AllocatingDnsResolver
+  def initialize
+    @current = [10, 1, 2, 0]
+    @ip_address_map = {}
+  end
+
+  def lookup(fqdn)
+    if @ip_address_map[fqdn]
+      @ip_address_map[fqdn]
+    else
+      @current = inc(@current)
+      @ip_address_map[fqdn] = Resolv::IPv4.create(@current.join('.'))
+    end
+  rescue ArgumentError
+    raise Resolv::ResolvError, "no address for #{fqdn}"
+  end
+
+  def inc(octets)
+    if octets[-1] < 255
+      octets[0, octets.length - 1] + [octets[-1] + 1]
+    elsif octets.length > 1
+      inc(octets[0, octets.length - 1]) + [0]
+    else
+      fail('Unable to allocate IP address, ran out of octets')
+    end
+  end
+end
+
 class TestHieraProvider
   def initialize(data)
     @data = data

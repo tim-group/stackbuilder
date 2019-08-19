@@ -25,8 +25,6 @@ class Stacks::MachineSet
   attr_reader :depends_on
   attr_reader :stack
 
-  attr_accessor :database_username
-
   include Stacks::MachineDefContainer
 
   def initialize(name, stack, &config_block)
