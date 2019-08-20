@@ -1,5 +1,6 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/machine_def_container'
+require 'stackbuilder/stacks/validator'
 
 class Stacks::Environment
   attr_reader :domain_suffix
