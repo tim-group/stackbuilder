@@ -540,6 +540,28 @@ EOL
       expect(lb_first_machine_def.to_enc["role::loadbalancer"]["virtual_servers"].size).to eq(0)
     end
 
+    it 'connects a service acocunt' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.application = 'MyApplication'
+
+            use_service_account
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      pod_spec = k8s_resource(set, 'Deployment')['spec']['template']['spec']
+
+      expect(pod_spec['automountServiceAccountToken']).to eq(true)
+      expect(pod_spec['serviceAccountName']).to eq('x')
+    end
+
     describe 'memory limits (max) and requests (min) ' do
       it 'bases container limits and requests on the max heap memory' do
         factory = eval_stacks do

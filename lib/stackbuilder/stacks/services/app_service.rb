@@ -18,10 +18,12 @@ module Stacks::Services::AppService
   attr_accessor :use_ha_mysql_ordering
   attr_accessor :ha_mysql_ordering_exclude
 
+  # Kubernetes specific attributes
   attr_accessor :appconfig
   attr_accessor :jvm_heap
   attr_accessor :headspace
   attr_accessor :ephemeral_storage_size
+  attr_accessor :enable_service_account
 
   attr_accessor :maintainers
   attr_accessor :description
@@ -48,6 +50,7 @@ module Stacks::Services::AppService
     @headspace = 0.1
     @ephemeral_storage_size = nil
     @maintainers = []
+    @enable_service_account = false
   end
 
   def enable_ehcache
@@ -68,6 +71,10 @@ module Stacks::Services::AppService
 
   def disable_http_lb_hack
     @disable_http_lb_hack = true
+  end
+
+  def use_service_account
+    self.enable_service_account = true
   end
 
   def rabbitmq_config
@@ -187,7 +194,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
       'app.kubernetes.io/name' => app_name,
       'app.kubernetes.io/instance' => instance_name_of(self),
       'app.kubernetes.io/component' => 'app_service',
-      'app.kubernetes.io/version' => app_version,
+      'app.kubernetes.io/version' => app_version.to_s,
       'app.kubernetes.io/managed-by' => 'stacks',
       'stack' => @stack.name
     }
@@ -321,7 +328,7 @@ EOC
 
     ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
 
-    {
+    deployment = {
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
       'metadata' => {
@@ -499,6 +506,13 @@ EOC
         }
       }
     }
+
+    if enable_service_account
+      deployment['spec']['template']['spec']['automountServiceAccountToken'] = true
+      deployment['spec']['template']['spec']['serviceAccountName'] = name
+    end
+
+    deployment
   end
 
   def scale_memory(memory, coeff)
