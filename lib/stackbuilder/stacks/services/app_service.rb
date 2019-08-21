@@ -206,6 +206,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
     output << generate_k8s_service(dns_resolver, standard_labels)
     output << generate_k8s_deployment(standard_labels, used_secrets)
     output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
+    output += generate_k8s_service_account(standard_labels)
     Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
   end
 
@@ -624,6 +625,22 @@ EOC
     network_policies << create_ingress_network_policy('production', 'sharedproxy', @name, @environment.name, standard_labels, filters)
 
     network_policies
+  end
+
+  def generate_k8s_service_account(standard_labels)
+    if enable_service_account
+      [{
+        'apiVersion' => 'v1',
+        'kind' => 'ServiceAccount',
+        'metadata' => {
+          'namespace' => @environment.name,
+          'name' => @name,
+          'labels' => standard_labels
+        }
+      }]
+    else
+      []
+    end
   end
 
   def create_ingress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, filters)

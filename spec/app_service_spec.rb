@@ -557,9 +557,27 @@ EOL
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
       pod_spec = k8s_resource(set, 'Deployment')['spec']['template']['spec']
+      service_account = k8s_resource(set, 'ServiceAccount')
 
       expect(pod_spec['automountServiceAccountToken']).to eq(true)
       expect(pod_spec['serviceAccountName']).to eq('x')
+
+      expect(service_account).to eq(
+        'apiVersion' => 'v1',
+        'kind' => 'ServiceAccount',
+        'metadata' => {
+          'namespace' => 'e1',
+          'name' => 'x',
+          'labels' => {
+            'stack' => 'mystack',
+            'app.kubernetes.io/name' => 'myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/component' => 'app_service',
+            'app.kubernetes.io/version' => '1.2.3',
+            'app.kubernetes.io/managed-by' => 'stacks'
+          }
+        }
+      )
     end
 
     describe 'memory limits (max) and requests (min) ' do
