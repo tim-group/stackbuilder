@@ -540,7 +540,7 @@ EOL
       expect(lb_first_machine_def.to_enc["role::loadbalancer"]["virtual_servers"].size).to eq(0)
     end
 
-    it 'connects a service acocunt' do
+    it 'connects a service account' do
       factory = eval_stacks do
         stack "mystack" do
           app_service "x", :kubernetes => true do
