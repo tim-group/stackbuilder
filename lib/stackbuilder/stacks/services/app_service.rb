@@ -206,7 +206,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
     output << generate_k8s_service(dns_resolver, standard_labels)
     output << generate_k8s_deployment(standard_labels, used_secrets)
     output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
-    output += generate_k8s_service_account(standard_labels)
+    output += generate_k8s_service_account(dns_resolver, fabric, standard_labels)
     Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
   end
 
@@ -627,7 +627,7 @@ EOC
     network_policies
   end
 
-  def generate_k8s_service_account(standard_labels)
+  def generate_k8s_service_account(dns_resolver, fabric, standard_labels)
     if enable_service_account
       [{
         'apiVersion' => 'v1',
@@ -636,6 +636,37 @@ EOC
           'namespace' => @environment.name,
           'name' => @name,
           'labels' => standard_labels
+        }
+      }, {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => "allow-#{@name}-out-to-#{fabric}-kubernetes-api-6443",
+          'namespace' => @environment.name,
+          'labels' => {
+            'machineset' => @name
+          }.merge(standard_labels)
+        },
+        'spec' => {
+          'podSelector' => {
+            'matchLabels' => {
+              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
+            }
+          },
+          'policyTypes' => [
+            'Egress'
+          ],
+          'egress' => [{
+            'to' => [{
+              'ipBlock' => {
+                'cidr' => "#{dns_resolver.lookup("#{fabric}-kube-apiserver-vip.mgmt.#{fabric}.net.local")}/32"
+              }
+            }],
+            'ports' => [{
+              'protocol' => 'TCP',
+              'port' => 6443
+            }]
+          }]
         }
       }]
     else

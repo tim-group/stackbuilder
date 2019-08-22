@@ -16,12 +16,22 @@ describe 'kubernetes' do
                           'e1-mydb-002.space.net.local' => '3.1.4.8',
                           'production-sharedproxy-001.space.net.local' => '3.1.4.9',
                           'production-sharedproxy-002.space.net.local' => '3.1.4.10',
-                          'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11')
+                          'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11',
+                          'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12')
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
       'stacks/application_credentials_selector' => 0,
       'secrety/looking/thing' => 'ENC[GPG,hQIMAyhja+HHo')
+  end
+
+  def network_policies_for(factory, env, stack, service)
+    machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
+    machine_set = machine_sets[service]
+
+    machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
+      policy['kind'] == "NetworkPolicy"
+    end
   end
 
   describe 'resource definitions' do
@@ -580,6 +590,49 @@ EOL
       )
     end
 
+    it 'creates the correct network polices to allow the pods to talk to the Kubernetes api' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.application = 'MyApplication'
+
+            use_service_account
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack "mystack"
+        end
+      end
+
+      network_policies = network_policies_for(factory, 'e1', 'mystack', 'x')
+
+      expect(network_policies.size).to eq(3)
+      network_policy = network_policies.last
+      expect(network_policy['metadata']['name']).to eql('allow-x-out-to-space-kubernetes-api-6443')
+      expect(network_policy['metadata']['namespace']).to eql('e1')
+      expect(network_policy['metadata']['labels']).to eql(
+        'stack' => 'mystack',
+        'app.kubernetes.io/name' => 'myapplication',
+        'app.kubernetes.io/instance' => 'e1-mystack-x',
+        'app.kubernetes.io/component' => 'app_service',
+        'app.kubernetes.io/version' => '1.2.3',
+        'app.kubernetes.io/managed-by' => 'stacks',
+        'machineset' => 'x'
+      )
+      expect(network_policy['spec']['podSelector']['matchLabels']).to eql(
+        'app.kubernetes.io/instance' => 'e1-mystack-x'
+      )
+      expect(network_policy['spec']['policyTypes']).to eql(['Egress'])
+      expect(network_policy['spec']['egress'].size).to eq(1)
+      expect(network_policy['spec']['egress'].first['to'].size).to eq(1)
+      expect(network_policy['spec']['egress'].first['ports'].size).to eq(1)
+      expect(network_policy['spec']['egress'].first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.12/32' })
+      expect(network_policy['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
+      expect(network_policy['spec']['egress'].first['ports'].first['port']).to eq(6443)
+    end
+
     describe 'memory limits (max) and requests (min) ' do
       it 'bases container limits and requests on the max heap memory' do
         factory = eval_stacks do
@@ -745,15 +798,6 @@ EOL
   end
 
   describe 'dependencies' do
-    def network_policies_for(factory, env, stack, service)
-      machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
-      machine_set = machine_sets[service]
-
-      machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
-        policy['kind'] == "NetworkPolicy"
-      end
-    end
-
     it 'should create the correct ingress network policies for a service in kubernetes when another non kubernetes service depends on it' do
       factory = eval_stacks do
         stack "test_app_servers" do
