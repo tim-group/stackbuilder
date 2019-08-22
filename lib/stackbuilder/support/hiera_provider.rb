@@ -17,7 +17,6 @@ class Support::HieraProvider
 
   def initialize(opts)
     fail('Origin option is required') if !opts[:origin]
-    @local_path = opts[:local_path] || '/tmp/stacks-puppet-repo'
     @origin = opts[:origin].start_with?('/') ? 'file://' + opts[:origin] : opts[:origin]
   end
 
@@ -40,16 +39,17 @@ class Support::HieraProvider
   end
 
   def fetch_hieradata
-    FileUtils.remove_dir(@local_path, true)
-    _stdout_str, stderr_str, status = Open3.capture3('git', 'clone', '--quiet', '--depth', '1', @origin, @local_path)
-    fail "Unable to clone '#{@origin}' - error: '#{stderr_str}'" if !status.success?
-
     the_hieradata = {}
-    Dir.glob("#{@local_path}/**/*.yaml").each do |f|
-      contents = YAML.load(File.open(f))
-      relative_dirs = File.dirname(f).sub(/^#{@local_path}\/hieradata/, '').sub(/^\//, '')
+    Dir.mktmpdir do |local_path|
+      _stdout_str, stderr_str, status = Open3.capture3('git', 'clone', '--quiet', '--depth', '1', @origin, local_path)
+      fail "Unable to clone '#{@origin}' - error: '#{stderr_str}'" if !status.success?
 
-      hash_bury(the_hieradata, *relative_dirs.split('/').push(File.basename(f, File.extname(f))).push(contents))
+      Dir.glob("#{local_path}/**/*.yaml").each do |f|
+        contents = YAML.load(File.open(f))
+        relative_dirs = File.dirname(f).sub(/^#{local_path}\/hieradata/, '').sub(/^\//, '')
+
+        hash_bury(the_hieradata, *relative_dirs.split('/').push(File.basename(f, File.extname(f))).push(contents))
+      end
     end
 
     the_hieradata

@@ -32,13 +32,11 @@ end
 describe Support::HieraProvider do
   before(:each) do
     @tmpdir = Dir.mktmpdir
-    @local_path = Dir.mktmpdir
-    @hiera_provider = Support::HieraProvider.new(:origin => @tmpdir, :local_path => @local_path)
+    @hiera_provider = Support::HieraProvider.new(:origin => @tmpdir)
   end
 
   after(:each) do
     FileUtils.remove_dir(@tmpdir)
-    FileUtils.remove_dir(@local_path)
   end
 
   def given_hieradata(&block)
