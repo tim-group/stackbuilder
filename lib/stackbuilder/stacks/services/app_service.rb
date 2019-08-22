@@ -221,7 +221,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
   private
 
   def instance_name_of(service)
-    "#{service.environment.name}-#{service.stack.name}-#{service.application.downcase}"
+    "#{service.environment.name}-#{service.stack.name}-#{service.name}"
   end
 
   def generate_app_config(erb_vars, hiera_provider)

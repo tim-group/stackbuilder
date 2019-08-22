@@ -57,7 +57,7 @@ describe 'kubernetes' do
             'stack' => 'mystack',
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
@@ -72,7 +72,7 @@ describe 'kubernetes' do
         'spec' => {
           'selector' => {
             'matchLabels' => {
-              'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+              'app.kubernetes.io/instance' => 'e1-mystack-x',
               'participation' => 'enabled'
             }
           },
@@ -89,7 +89,7 @@ describe 'kubernetes' do
               'labels' => {
                 'participation' => 'enabled',
                 'app.kubernetes.io/name' => 'myapplication',
-                'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+                'app.kubernetes.io/instance' => 'e1-mystack-x',
                 'app.kubernetes.io/component' => 'app_service',
                 'app.kubernetes.io/version' => '1.2.3',
                 'app.kubernetes.io/managed-by' => 'stacks',
@@ -253,7 +253,7 @@ describe 'kubernetes' do
           'labels' => {
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks',
@@ -266,7 +266,7 @@ describe 'kubernetes' do
         'spec' => {
           'type' => 'LoadBalancer',
           'selector' => {
-            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-x',
             'participation' => 'enabled'
           },
           'ports' => [{
@@ -290,7 +290,7 @@ describe 'kubernetes' do
             'stack' => 'mystack',
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
@@ -571,7 +571,7 @@ EOL
           'labels' => {
             'stack' => 'mystack',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-myapplication',
+            'app.kubernetes.io/instance' => 'e1-mystack-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'

@@ -55,7 +55,7 @@ describe 's3 proxy service' do
     expect(s3proxy_network_policy['metadata']['name']).to eql('allow-k8sapp-out-to-e2-s3proxy-80')
     expect(s3proxy_network_policy['metadata']['namespace']).to eql('e1')
     expect(s3proxy_network_policy['spec']['podSelector']['matchLabels']).to eql(
-      'app.kubernetes.io/instance' => 'e1-k8s_app-example'
+      'app.kubernetes.io/instance' => 'e1-k8s_app-k8sapp'
     )
     expect(s3proxy_network_policy['spec']['policyTypes']).to eql(['Egress'])
     expect(s3proxy_network_policy['spec']['egress'].size).to eq(1)
