@@ -221,7 +221,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
   private
 
   def instance_name_of(service)
-    "#{service.environment.name}-#{service.stack.name}-#{service.name}"
+    "#{service.environment.name}-#{service.stack.name}-#{service.short_name}"
   end
 
   def generate_app_config(erb_vars, hiera_provider)
@@ -558,7 +558,7 @@ EOC
         end
       end
 
-      network_policies << create_ingress_network_policy(vs.environment.name, vs.name, @name, @environment.name, standard_labels, filters)
+      network_policies << create_ingress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name, standard_labels, filters)
     end
 
     virtual_services_that_i_depend_on(false).each do |vs|
@@ -600,7 +600,7 @@ EOC
         end
       end
       ports = vs.endpoints(self, fabric).map { |e| e[:port] }.join('-')
-      network_policies << create_egress_network_policy(vs.environment.name, vs.name, @name, @environment.name, standard_labels, ports, egresses)
+      network_policies << create_egress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name, standard_labels, ports, egresses)
     end
 
     nexus_filters = [{
