@@ -23,11 +23,7 @@ class Stacks::CalculatedDependenciesCache
       next if !thing.is_a?(Stacks::MachineDefContainer)
       next if !thing.respond_to?(:depends_on)
 
-      if thing.respond_to?(:establish_dependencies)
-        dependencies.push [thing, thing.establish_dependencies]
-      else
-        dependencies.push [thing, thing.depends_on]
-      end
+      dependencies.push [thing, thing.depends_on + (thing.respond_to?(:establish_dependencies) ? thing.establish_dependencies : [])]
     end
 
     dependencies

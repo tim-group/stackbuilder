@@ -72,7 +72,7 @@ module Stacks::Dependencies
   end
 
   def virtual_services_that_i_depend_on(include_env_dependencies = true)
-    dependencies = @depends_on
+    dependencies = @depends_on + (self.respond_to?(:establish_dependencies) ? establish_dependencies : [])
     dependencies += environment.depends_on if include_env_dependencies
     dependencies.map do |depends_on|
       find_virtual_service_that_i_depend_on(DependencyId.new(depends_on[0], depends_on[1]))

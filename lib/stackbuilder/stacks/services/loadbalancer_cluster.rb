@@ -17,7 +17,7 @@ module Stacks::Services::LoadBalancerCluster
       if thing.respond_to?(:to_loadbalancer_config) &&
          thing.respond_to?(:load_balanced_service?) &&
          thing.load_balanced_service?
-        services << [thing.name, environment.name]
+        services << [thing.name, thing.environment.name]
       end
     end
     services
