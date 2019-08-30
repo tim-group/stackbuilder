@@ -271,14 +271,8 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
                  'monitoring_checks'        => @monitoring_checks
                })
 
-    dependant_instances = @virtual_service.dependant_instance_fqdns(location, [:prod], false)
-    dependant_instances.concat(@virtual_service.children.map(&:prod_fqdn))
-    dependant_instances.delete prod_fqdn
-
-    if dependant_instances && !dependant_instances.nil? && dependant_instances != []
-      unless role_of?(:backup) || role_of?(:user_access)
-        recurse_merge!(enc, @virtual_service.dependant_instance_mysql_rights)
-      end
+    unless role_of?(:backup) || role_of?(:user_access)
+      recurse_merge!(enc, @virtual_service.dependant_instance_mysql_rights)
     end
 
     recurse_merge!(enc, @environment.cross_site_routing(@fabric)) if @environment.cross_site_routing_required?

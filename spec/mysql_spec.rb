@@ -224,12 +224,14 @@ describe_stack 'should provide the correct application rights' do
   end
 end
 
-describe_stack 'should provide the correct application rights if the app server is in kubernetes' do
+describe_stack 'should provide the correct application rights if the app server is in kubernetes (and the only dependant)' do
   given do
     stack "mysql" do
       mysql_cluster "mydb" do
         self.role_in_name = false
         self.database_name = "ref"
+        self.backup_instances = 0
+        self.slave_instances = 0
       end
     end
     stack "app_server" do
