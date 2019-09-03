@@ -44,13 +44,13 @@ describe 's3 proxy service' do
     machine_sets = factory.inventory.find_environment('e1').definitions['k8s_app'].k8s_machinesets
     k8s = machine_sets['k8sapp'].to_k8s(app_deployer, dns_resolver, hiera_provider)
 
-    expect(k8s.resources.find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+    expect(k8s.flat_map(&:resources).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
       to match(/s3\.proxyhost=e2-s3proxy-001.earth.net.local/)
 
-    expect(k8s.resources.find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+    expect(k8s.flat_map(&:resources).find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
       to match(/s3\.proxyport=80/)
 
-    s3proxy_network_policy = k8s.resources.find { |s| s['kind'] == 'NetworkPolicy' && s['metadata']['name'].match(/s3proxy/) }
+    s3proxy_network_policy = k8s.flat_map(&:resources).find { |s| s['kind'] == 'NetworkPolicy' && s['metadata']['name'].match(/s3proxy/) }
 
     expect(s3proxy_network_policy['metadata']['name']).to eql('allow-k8sapp-out-to-e2-s3proxy-80')
     expect(s3proxy_network_policy['metadata']['namespace']).to eql('e1')

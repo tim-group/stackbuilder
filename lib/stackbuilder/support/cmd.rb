@@ -565,7 +565,7 @@ class CMD
     output = {}
     targets.each do |machine_set|
       machine_set_id = "#{machine_set.fabric}-#{machine_set.environment.name}-#{machine_set.name}"
-      output[machine_set_id] = machine_set.to_k8s(@app_deployer, @dns_resolver, @hiera_provider).resources
+      output[machine_set_id] = machine_set.to_k8s(@app_deployer, @dns_resolver, @hiera_provider).flat_map(&:resources)
     end
 
     ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
@@ -612,7 +612,7 @@ class CMD
   end
 
   def clean_k8s(machineset)
-    machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider).clean
+    machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider).each(&:clean)
   end
 
   def clean_vm(thing, all = false)
@@ -630,8 +630,10 @@ class CMD
   def apply_k8s(machineset)
     resources = machineset.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
     self.class.include Support::MCollective
-    mco_client('k8ssecret', :fabric => resources.site) do |client|
-      resources.apply_and_prune(client)
+    resources.each do |r|
+      mco_client('k8ssecret', :fabric => r.site) do |client|
+        r.apply_and_prune(client)
+      end
     end
   end
 

@@ -158,56 +158,62 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
     fail("app_service '#{name}' in '#{@environment.name}' requires description (set self.description)") if @description.nil?
     fail("app_service '#{name}' in '#{@environment.name}' requires application") if application.nil?
     fail('app_service to_k8s doesn\'t know how to deal with multiple groups yet') if @groups.size > 1
-    fail('app_service to_k8s doesn\'t know how to deal with multiple sites yet') if @enable_secondary_site || @instances.is_a?(Hash)
+    fail('app_service to_k8s doesn\'t know how to deal with @enable_secondary_site yet') if @enable_secondary_site
 
-    app_name = application.downcase
-    group = @groups.first
-    site = @environment.sites.first
+    instances = if @instances.is_a?(Hash)
+                  @instances
+                else
+                  { @environment.sites.first => @instances }
+                end
+    instances.map do |site, replicas|
+      app_name = application.downcase
+      group = @groups.first
 
-    begin
-      app_version = app_deployer.query_cmdb_for(:application => application,
-                                                :environment => @environment.name,
-                                                :group => group)[:target_version]
-    rescue
-      raise("Version not found in cmdb for application: '#{application}', group: '#{group}' in environment: '#{environment.name}'")
+      begin
+        app_version = app_deployer.query_cmdb_for(:application => application,
+                                                  :environment => @environment.name,
+                                                  :group => group)[:target_version]
+      rescue
+        raise("Version not found in cmdb for application: '#{application}', group: '#{group}' in environment: '#{environment.name}'")
+      end
+
+      location = environment.translate_site_symbol(site)
+      fabric = environment.options[location]
+      domain = "mgmt.#{environment.domain(fabric)}"
+
+      hiera_scope = {
+        'domain' => domain,
+        'hostname' => kubernetes ? identity : children.first.hostname,
+        'application' => application,
+        'stackname' => @stack.name,
+        'logicalenv' => @environment.name,
+        'group' => group,
+        'site' => site
+      }
+      erb_vars = {
+        'dependencies' => dependency_config(fabric, nil),
+        'credentials_selector' => hiera_provider.lookup(hiera_scope, 'stacks/application_credentials_selector', nil)
+      }.merge(hiera_scope)
+
+      standard_labels = {
+        'app.kubernetes.io/name' => app_name,
+        'app.kubernetes.io/instance' => instance_name_of(self),
+        'app.kubernetes.io/component' => 'app_service',
+        'app.kubernetes.io/version' => app_version.to_s,
+        'app.kubernetes.io/managed-by' => 'stacks',
+        'stack' => @stack.name
+      }
+
+      config, used_secrets = generate_app_config(erb_vars, hiera_provider)
+
+      output = super app_deployer, dns_resolver, hiera_provider, standard_labels
+      output << generate_k8s_config_map(config, standard_labels)
+      output << generate_k8s_service(dns_resolver, standard_labels)
+      output << generate_k8s_deployment(standard_labels, replicas, used_secrets)
+      output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
+      output += generate_k8s_service_account(dns_resolver, fabric, standard_labels)
+      Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
     end
-
-    location = environment.translate_site_symbol(site)
-    fabric = environment.options[location]
-    domain = "mgmt.#{environment.domain(fabric)}"
-
-    hiera_scope = {
-      'domain' => domain,
-      'hostname' => kubernetes ? identity : children.first.hostname,
-      'application' => application,
-      'stackname' => @stack.name,
-      'logicalenv' => @environment.name,
-      'group' => group,
-      'site' => site
-    }
-    erb_vars = {
-      'dependencies' => dependency_config(fabric, nil),
-      'credentials_selector' => hiera_provider.lookup(hiera_scope, 'stacks/application_credentials_selector', nil)
-    }.merge(hiera_scope)
-
-    standard_labels = {
-      'app.kubernetes.io/name' => app_name,
-      'app.kubernetes.io/instance' => instance_name_of(self),
-      'app.kubernetes.io/component' => 'app_service',
-      'app.kubernetes.io/version' => app_version.to_s,
-      'app.kubernetes.io/managed-by' => 'stacks',
-      'stack' => @stack.name
-    }
-
-    config, used_secrets = generate_app_config(erb_vars, hiera_provider)
-
-    output = super app_deployer, dns_resolver, hiera_provider, standard_labels
-    output << generate_k8s_config_map(config, standard_labels)
-    output << generate_k8s_service(dns_resolver, standard_labels)
-    output << generate_k8s_deployment(standard_labels, used_secrets)
-    output += generate_k8s_network_policies(dns_resolver, fabric, standard_labels)
-    output += generate_k8s_service_account(dns_resolver, fabric, standard_labels)
-    Stacks::KubernetesResources.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
   end
 
   def prod_fqdn(fabric)
@@ -309,7 +315,7 @@ EOC
     }
   end
 
-  def generate_k8s_deployment(standard_labels, secrets)
+  def generate_k8s_deployment(standard_labels, replicas, secrets)
     app_name = standard_labels['app.kubernetes.io/name']
     app_version = standard_labels['app.kubernetes.io/version']
     container_image = "repo.net.local:8080/#{app_name}:#{app_version}"
@@ -354,7 +360,7 @@ EOC
             'maxSurge' => 0
           }
         },
-        'replicas' => @instances,
+        'replicas' => replicas,
         'template' => {
           'metadata' => {
             'labels' => {

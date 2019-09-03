@@ -113,7 +113,7 @@ describe 'stack-with-dependencies' do
   it 'configures a K8s app pod' do
     set = factory.inventory.find_environment('e1').definitions['example'].k8s_machinesets['kubeexampleapp']
 
-    config = set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == 'ConfigMap' }
+    config = set.to_k8s(app_deployer, dns_resolver, hiera_provider).flat_map(&:resources).find { |s| s['kind'] == 'ConfigMap' }
 
     expect(config['data']['config.properties']).to match(/username=e1_kubeexamplea0/)
     expect(config['data']['config.properties']).to match(/password={SECRET:e1_kubeexample_mysql_passwords_0/)
