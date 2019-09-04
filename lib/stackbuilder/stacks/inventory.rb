@@ -32,6 +32,10 @@ class Stacks::Inventory
     @stacks.find_environment(name)
   end
 
+  def find_sited_environment(environment_name, site_name)
+    @stacks.find_sited_environment(environment_name, site_name)
+  end
+
   def environments
     @stacks.environments
   end

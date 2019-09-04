@@ -236,8 +236,10 @@ class Stacks::Environment
   def instantiate_stack(stack_name)
     factory = @stack_procs[stack_name]
     fail "no stack found '#{stack_name}'" if factory.nil?
-    instantiated_stack = factory.call(self)
-    @definitions[instantiated_stack.name] = instantiated_stack
+    sited_environment = Stacks::SitedEnvironment.new(self, sites.first)
+    instantiated_stack = factory.call(sited_environment)
+    sited_environment.definitions[instantiated_stack.name] = instantiated_stack
+    @definitions[sited_environment.name] = sited_environment
   end
 
   def contains_node_of_type?(clazz)

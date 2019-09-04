@@ -1196,6 +1196,28 @@ depends on the other' do
     end
   end
 
+  describe 'spike' do
+    it 'blah' do
+      factory = eval_stacks do
+        stack "test_app_servers" do
+          app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
+            self.application = 'app'
+          end
+        end
+        env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+          instantiate_stack "test_app_servers"
+        end
+      end
+
+      machine_sets = factory.inventory.find_sited_environment('e1', 'space').definitions['test_app_servers'].k8s_machinesets
+      machine_set = machine_sets['app1']
+      expect(machine_set.site).to eq('space')
+    end
+  end
+
   describe 'stacks' do
     it 'should allow app services to be k8s or non-k8s by environment' do
       factory = eval_stacks do

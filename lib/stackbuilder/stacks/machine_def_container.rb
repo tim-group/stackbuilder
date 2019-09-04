@@ -3,6 +3,7 @@ require 'stackbuilder/stacks/namespace'
 module Stacks::MachineDefContainer
   attr_reader :definitions
   attr_reader :environment
+  attr_reader :sited_environment
 
   def children
     # pretend we have a sorted dictionary
@@ -32,10 +33,12 @@ module Stacks::MachineDefContainer
     list
   end
 
-  def bind_to(environment)
-    @environment = environment
+  def bind_to(sited_environment)
+    require 'pry'; binding.pry
+    @environment = sited_environment.environment
+    @sited_environment = sited_environment
     children.each do |child|
-      child.bind_to(environment)
+      child.bind_to(sited_environment)
     end
   end
 

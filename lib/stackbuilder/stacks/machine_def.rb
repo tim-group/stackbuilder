@@ -128,8 +128,8 @@ class Stacks::MachineDef
     @destroyable = destroyable
   end
 
-  def bind_to(environment)
-    @environment = environment
+  def bind_to(sited_environment)
+    @environment = sited_environment.environment
     @fabric = environment.options[@location]
     case @fabric
     when 'local'
@@ -137,7 +137,7 @@ class Stacks::MachineDef
     else
       @hostname = "#{@environment.name}-#{@base_hostname}"
     end
-    @domain = environment.domain(@fabric)
+    @domain = @environment.domain(@fabric)
     @routes.concat(@environment.routes[@fabric]) unless @environment.routes.nil? || !@environment.routes.key?(@fabric)
 
     @allocation_tags = @environment.allocation_tags[@fabric] if !@environment.allocation_tags.nil? &&

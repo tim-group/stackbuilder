@@ -66,6 +66,11 @@ class Stacks::MachineSet
     "#{environment.name}-#{@stack.name}-#{name}"
   end
 
+  def site
+    require 'pry'; binding.pry
+    sited_environment.site
+  end
+
   def instances_usage_with_role
     "Below is an example of correct usage:\n \
  @instances = {\n \
@@ -116,33 +121,33 @@ class Stacks::MachineSet
     end
   end
 
-  def instantiate_machines(environment)
-    validate_instances(environment)
+  def instantiate_machines(sited_environment)
+    validate_instances(sited_environment.environment)
     if @instances.is_a?(Integer)
       1.upto(@instances) do |i|
         server_index = i + @server_offset
-        instantiate_machine(server_index, environment, environment.sites.first)
+        instantiate_machine(server_index, environment, sited_environment.site)
         if @enable_secondary_site
-          instantiate_machine(server_index, environment, environment.sites.last)
+          fail("not supported")
         end
       end
     elsif @instances.is_a?(Hash)
-      @instances.each do |site, count|
-        if count.is_a?(Integer)
-          1.upto(count) do |c|
-            server_index = @server_offset + c
-            instantiate_machine(server_index, environment, site)
-          end
-        elsif count.is_a?(Hash)
-          count.each do |role, num|
-            1.upto(num) do |c|
-              server_index = @server_offset + c
-              instantiate_machine(server_index, environment, site, role)
-            end
-          end
-        else
-          fail "Instances hash contains invalid item #{count} which is a #{count.class} expected Integer / Symbol"
+      count = @instances[sited_environment.site]
+      site = sited_environment.site
+      if count.is_a?(Integer)
+        1.upto(count) do |c|
+          server_index = @server_offset + c
+          instantiate_machine(server_index, environment, site)
         end
+      elsif count.is_a?(Hash)
+        count.each do |role, num|
+          1.upto(num) do |c|
+            server_index = @server_offset + c
+            instantiate_machine(server_index, environment, site, role)
+          end
+        end
+      else
+        fail "Instances hash contains invalid item #{count} which is a #{count.class} expected Integer / Symbol"
       end
     end
   end
@@ -178,9 +183,9 @@ class Stacks::MachineSet
     @bind_steps << block
   end
 
-  def bind_to(environment)
+  def bind_to(sited_environment)
     @bind_steps.each do |step|
-      step.call(self, environment)
+      step.call(self, sited_environment)
     end
   end
 
@@ -195,17 +200,17 @@ class Stacks::MachineSet
   public
 
   def configure
-    on_bind do |_machineset, environment|
-      @environment = environment
+    on_bind do |_machineset, sited_environment|
+      @environment = sited_environment.environment
       instance_eval(&@config_block) unless @config_block.nil?
-      instantiate_machines(environment) unless kubernetes
-      bind_children(environment)
+      instantiate_machines(sited_environment) unless kubernetes
+      bind_children(sited_environment)
     end
   end
 
-  def bind_children(environment)
+  def bind_children(sited_environment)
     children.each do |child|
-      child.bind_to(environment)
+      child.bind_to(sited_environment)
     end
   end
 

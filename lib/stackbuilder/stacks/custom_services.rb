@@ -8,11 +8,12 @@ class Stacks::CustomServices
 
   include Stacks::MachineDefContainer
 
-  def initialize(name, environment)
+  def initialize(name, sited_environment)
     @name = name
     @definitions = {}
     @k8s_machinesets = {}
-    @environment = environment
+    @environment = sited_environment.environment
+    @sited_environment = sited_environment
   end
 
   def type_of?
@@ -183,9 +184,9 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
   end
 
   alias_method :orig_bind_to, :bind_to
-  def bind_to(environment)
-    orig_bind_to(environment)
-    k8s_machinesets.values.each { |s| s.bind_to(environment) }
+  def bind_to(sited_environment)
+    orig_bind_to(sited_environment)
+    k8s_machinesets.values.each { |s| s.bind_to(sited_environment) }
   end
 
   private

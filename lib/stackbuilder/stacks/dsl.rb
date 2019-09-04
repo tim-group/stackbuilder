@@ -1,6 +1,25 @@
 require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/stacks/machine_def_container'
 
 module Stacks
+  class SitedEnvironment
+    include Stacks::MachineDefContainer
+
+    attr_reader :environment
+    attr_reader :site
+    attr_reader :definitions
+
+    def initialize(environment, site)
+      @environment = environment
+      @site = site
+      @definitions = {}
+    end
+
+    def name
+      "#{@environment.name}-#{@site}"
+    end
+  end
+
   module DSL
     attr_accessor :stack_procs
     attr_accessor :environments
@@ -17,10 +36,10 @@ module Stacks
     end
 
     def stack(name, &block)
-      @stack_procs[name] = Proc.new do |environment|
-        stack = Stacks::CustomServices.new(name, environment)
+      @stack_procs[name] = Proc.new do |sited_environment|
+        stack = Stacks::CustomServices.new(name, sited_environment)
         stack.instance_eval(&block)
-        stack.bind_to(environment)
+        stack.bind_to(sited_environment)
         stack
       end
     end
@@ -105,6 +124,16 @@ module Stacks
       end
 
       return_environment
+    end
+
+    def find_sited_environment(environment_name, site_name)
+      return_node = nil
+      accept do |node|
+        if node.is_a?(Stacks::SitedEnvironment) && node.environment.name == environment_name && node.site == site_name
+          return_node = node
+        end
+      end
+      return_node
     end
   end
 end
