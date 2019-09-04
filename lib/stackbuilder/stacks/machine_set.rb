@@ -272,6 +272,14 @@ class Stacks::MachineSet
     @short_name = short_name
   end
 
+  def sites
+    if instances.is_a?(Integer)
+      [@environment.sites.first]
+    elsif instances.is_a?(Hash)
+      instances.keys
+    end
+  end
+
   private
 
   def instantiate_machine(index, environment, site, role = nil, custom_name = '')

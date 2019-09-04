@@ -1,11 +1,13 @@
-class Stacks::KubernetesResources
+class Stacks::KubernetesResourceBundle
   attr_reader :site
+  attr_reader :environment_name
+  attr_reader :machine_set_name
   attr_reader :resources
   attr_reader :secrets
 
-  def initialize(site, environment, stack_name, machine_set_name, labels, resources, secrets, hiera_scope)
+  def initialize(site, environment_name, stack_name, machine_set_name, labels, resources, secrets, hiera_scope)
     @site = site
-    @environment = environment
+    @environment_name = environment_name
     @stack_name = stack_name
     @machine_set_name = machine_set_name
     @resources = resources
@@ -24,7 +26,7 @@ class Stacks::KubernetesResources
     secret_resource = "#{@labels['app.kubernetes.io/name']}-secret"
     logger(Logger::INFO) { "Preparing #{@secrets.size} secrets for #{@machine_set_name} in resource #{secret_resource}" }
     logger(Logger::DEBUG) { "Secrets to load: #{@secrets.keys.join(', ')}" }
-    responses = mco_secrets_client.insert(:namespace => @environment,
+    responses = mco_secrets_client.insert(:namespace => @environment_name,
                                           :context => @site,
                                           :secret_resource => secret_resource,
                                           :labels => @labels,
@@ -65,7 +67,7 @@ class Stacks::KubernetesResources
                                                    @site,
                                                    '-l',
                                                    "stack=#{@stack_name},machineset=#{@machine_set_name}",
-                                                   '-n', @environment)
+                                                   '-n', @environment_name)
     if status.success?
       logger(Logger::INFO) { stdout_str }
     else

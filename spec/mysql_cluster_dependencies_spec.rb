@@ -323,7 +323,7 @@ describe 'k8s stack-with-dependencies' do
     machine_sets = factory.inventory.find_environment('e').definitions['master_with_slaves_example'].k8s_machinesets
     k8s = machine_sets['myapp'].to_k8s(app_deployer, dns_resolver, hiera_provider)
 
-    network_policies = k8s.resources.select do |policy|
+    network_policies = k8s.flat_map(&:resources).select do |policy|
       policy['kind'] == "NetworkPolicy"
     end
 
@@ -371,7 +371,7 @@ describe 'k8s stack-with-dependencies' do
     machine_sets = factory.inventory.find_environment('e').definitions['db_supported_reqs'].k8s_machinesets
     k8s = machine_sets['myapp'].to_k8s(app_deployer, dns_resolver, hiera_provider)
 
-    network_policies = k8s.resources.select do |policy|
+    network_policies = k8s.flat_map(&:resources).select do |policy|
       policy['kind'] == "NetworkPolicy"
     end
 

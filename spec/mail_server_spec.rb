@@ -89,10 +89,10 @@ describe 'kubernetes' do
 
         k8s_machine_sets = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets
         app_service_k8s_resources = k8s_machine_sets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
-        config_maps = app_service_k8s_resources.resources.select do |policy|
+        config_maps = app_service_k8s_resources.flat_map(&:resources).select do |policy|
           policy['kind'] == "ConfigMap"
         end
-        network_policies = app_service_k8s_resources.resources.select do |policy|
+        network_policies = app_service_k8s_resources.flat_map(&:resources).select do |policy|
           policy['kind'] == "NetworkPolicy"
         end
 

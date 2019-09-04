@@ -1,7 +1,7 @@
 require 'stackbuilder/stacks/namespace'
 require 'spec_helper'
 
-describe Stacks::KubernetesResources do
+describe Stacks::KubernetesResourceBundle do
   it 'uploads the secrets using mcollective' do
     return_status = double('return_status')
     open3 = double('Open3')
@@ -10,14 +10,14 @@ describe Stacks::KubernetesResources do
     allow(return_status).to receive(:success?).and_return(true)
     client = double('mco client')
 
-    r = Stacks::KubernetesResources.new('site',
-                                        'test_env',
-                                        'stack',
-                                        'ms',
-                                        { 'app.kubernetes.io/name' => 'testapp' },
-                                        [],
-                                        { 'secret/data' => 'secret_data' },
-                                        'environment' => 'test_env')
+    r = Stacks::KubernetesResourceBundle.new('site',
+                                             'test_env',
+                                             'stack',
+                                             'ms',
+                                             { 'app.kubernetes.io/name' => 'testapp' },
+                                             [],
+                                             { 'secret/data' => 'secret_data' },
+                                             'environment' => 'test_env')
 
     expect(client).to receive(:insert).with(:namespace => 'test_env',
                                             :context => 'site',

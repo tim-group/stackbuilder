@@ -16,6 +16,8 @@ describe 'kubernetes' do
                           'e1-mydb-002.space.net.local' => '3.1.4.8',
                           'production-sharedproxy-001.space.net.local' => '3.1.4.9',
                           'production-sharedproxy-002.space.net.local' => '3.1.4.10',
+                          'production-sharedproxy-001.earth.net.local' => '4.1.4.9',
+                          'production-sharedproxy-002.earth.net.local' => '4.1.4.10',
                           'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11',
                           'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12')
   end
@@ -29,16 +31,16 @@ describe 'kubernetes' do
     machine_sets = factory.inventory.find_environment(env).definitions[stack].k8s_machinesets
     machine_set = machine_sets[service]
 
-    machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
+    machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).flat_map(&:resources).select do |policy|
       policy['kind'] == "NetworkPolicy"
     end
   end
 
-  describe 'resource definitions' do
-    def k8s_resource(set, kind)
-      set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == kind }
-    end
+  def k8s_resource(set, kind)
+    set.to_k8s(app_deployer, dns_resolver, hiera_provider).flat_map(&:resources).find { |s| s['kind'] == kind }
+  end
 
+  describe 'resource definitions' do
     it 'defines a Deployment' do
       factory = eval_stacks do
         stack "mystack" do
@@ -55,8 +57,7 @@ describe 'kubernetes' do
           instantiate_stack "mystack"
         end
       end
-      machine_sets = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets
-      k8s = machine_sets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
       expected_deployment = {
         'apiVersion' => 'apps/v1',
         'kind' => 'Deployment',
@@ -252,7 +253,7 @@ describe 'kubernetes' do
           }
         }
       }
-      expect(k8s.resources.find { |s| s['kind'] == 'Deployment' }).to eql(expected_deployment)
+      expect(k8s_resource(set, 'Deployment')).to eql(expected_deployment)
 
       expected_service = {
         'apiVersion' => 'v1',
@@ -288,7 +289,7 @@ describe 'kubernetes' do
           'loadBalancerIP' => '3.1.4.1'
         }
       }
-      expect(k8s.resources.find { |s| s['kind'] == 'Service' }).to eql(expected_service)
+      expect(k8s_resource(set, 'Service')).to eql(expected_service)
 
       expected_config_map = {
         'apiVersion' => 'v1',
@@ -321,31 +322,58 @@ graphite.period=10
 EOL
         }
       }
-      expect(k8s.resources.find { |s| s['kind'] == 'ConfigMap' }).to eql(expected_config_map)
+      expect(k8s_resource(set, 'ConfigMap')).to eql(expected_config_map)
 
       ordering = {}
-      k8s.resources.each_with_index { |s, index| ordering[s['kind']] = index }
+      set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources.each_with_index { |s, index| ordering[s['kind']] = index }
       expect(ordering['Service']).to be < ordering['Deployment']
       expect(ordering['ConfigMap']).to be < ordering['Deployment']
     end
 
-    it 'controls the number of replicas' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service "x", :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
+    describe 'instance control' do
+      it 'controls the number of replicas in the primary site' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
 
-            self.application = 'MyApplication'
-            self.instances = 3000
+              self.application = 'MyApplication'
+              self.instances = 3000
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
           end
         end
-        env "e1", :primary_site => 'space' do
-          instantiate_stack "mystack"
-        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        expect(k8s_resource(set, 'Deployment')['spec']['replicas']).to eql(3000)
       end
-      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == 'Deployment' }['spec']['replicas']).to eql(3000)
+
+      it 'controls the number of replicas in the specific sites' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = {
+                'space' => 2,
+                'earth' => 3
+              }
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expect(resources.find { |r| r.site == 'space' }.resources.find { |r| r['kind'] == 'Deployment' }['spec']['replicas']).to eql(2)
+        expect(resources.find { |r| r.site == 'earth' }.resources.find { |r| r['kind'] == 'Deployment' }['spec']['replicas']).to eql(3)
+      end
     end
 
     it 'labels metrics using the site' do
@@ -364,8 +392,7 @@ EOL
         end
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
-        to match(/space-mon-001.mgmt.space.net.local/)
+      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).to match(/space-mon-001.mgmt.space.net.local/)
     end
 
     it 'generates config from app-defined template' do
@@ -386,9 +413,7 @@ EOL
         end
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.
-                 find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
-        to match(/site=space/)
+      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).to match(/site=space/)
     end
 
     it 'tracks secrets needed from hiera' do
@@ -411,12 +436,11 @@ EOL
       end
 
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      k8s = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
 
-      expect(k8s.resources.find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
         to match(/secret={SECRET:my_very_secret_data.*array_secret={SECRET:my_very_secret_array_0/m)
 
-      expect(k8s.resources.find { |s| s['kind'] == 'Deployment' }['spec']['template']['spec']['initContainers'].
+      expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].
              first['env'].
              find { |e| e['name'] =~ /data/ }).
         to eql(
@@ -428,7 +452,7 @@ EOL
             }
           })
 
-      expect(k8s.resources.find { |s| s['kind'] == 'Deployment' }['spec']['template']['spec']['initContainers'].
+      expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].
              first['env'].
              find { |e| e['name'] =~ /array/ }).
         to eql(
@@ -440,7 +464,8 @@ EOL
             }
           })
 
-      expect(k8s.secrets).to eql(
+      k8s = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+      expect(k8s.first.secrets).to eql(
         'my/very/secret.data' => 'my_very_secret_data',
         'my/very/secret.array' => 'my_very_secret_array_0')
     end
@@ -495,8 +520,7 @@ EOL
         end
       end
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.
-                 find { |s| s['kind'] == 'ConfigMap' }['data']['config.properties']).
+      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
         to match(/db.exampledb.hostname=e1-mydb-001.space.net.local.*
                   db.exampledb.database=exampledb.*
                   db.exampledb.driver=com.mysql.jdbc.Driver.*
@@ -798,6 +822,57 @@ EOL
   end
 
   describe 'dependencies' do
+    it 'only connects dependant instances in the same site, when requested' do
+      factory = eval_stacks do
+        stack 'testing' do
+          app_service 'depends_on_everything', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.instances = {
+              'mars' => 1
+            }
+
+            self.application = 'application'
+
+            depend_on 'just_an_app', 'e1', :same_site
+          end
+          app_service 'just_an_app', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.instances = {
+              'io' => 1,
+              'mars' => 1
+            }
+
+            self.application = 'application'
+          end
+        end
+        env 'e1', :primary_site => 'io', :secondary_site => 'mars' do
+          instantiate_stack 'testing'
+        end
+      end
+
+      dns = AllocatingDnsResolver.new
+
+      machine_sets = factory.inventory.find_environment('e1').definitions['testing'].k8s_machinesets
+      depends_on_everything_resources = machine_sets['depends_on_everything'].to_k8s(app_deployer, dns, hiera_provider)
+      just_an_app_resources = machine_sets['just_an_app'].to_k8s(app_deployer, dns, hiera_provider)
+
+      just_an_app_in_io = just_an_app_resources.find { |r| r.site == 'io' }
+      just_an_app_in_mars = just_an_app_resources.find { |r| r.site == 'mars' }
+
+      expect(just_an_app_in_io.resources.find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-depends_on_e-in-to-just_an_app-8000'
+      end).to be_nil
+      expect(just_an_app_in_mars.resources.find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-depends_on_e-in-to-just_an_app-8000'
+      end).not_to be_nil
+
+      expect(depends_on_everything_resources.first.resources.find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-depends_on_everything-out-to-e1-just_an_app-8000'
+      end).not_to be_nil
+    end
+
     it 'should create the correct ingress network policies for a service in kubernetes when another non kubernetes service depends on it' do
       factory = eval_stacks do
         stack "test_app_servers" do
@@ -825,9 +900,9 @@ EOL
         "e1-app1-002.space.net.local"
       ])
 
-      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
-        policy['kind'] == "NetworkPolicy"
-      end
+      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).
+                         flat_map(&:resources).
+                         select { |s| s['kind'] == "NetworkPolicy" }
 
       expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
@@ -878,9 +953,9 @@ EOL
       machine_sets = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets
       app2_machine_set = machine_sets['app2']
 
-      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).resources.select do |policy|
-        policy['kind'] == "NetworkPolicy"
-      end
+      network_policies = app2_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).
+                         flat_map(&:resources).
+                         select { |s| s['kind'] == "NetworkPolicy" }
 
       expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
