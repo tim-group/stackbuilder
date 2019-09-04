@@ -22,7 +22,10 @@ describe Stacks::KubernetesResourceBundle do
     expect(client).to receive(:insert).with(:namespace => 'test_env',
                                             :context => 'site',
                                             :secret_resource => 'testapp-secret',
-                                            :labels => { 'app.kubernetes.io/name' => 'testapp' },
+                                            :labels => {
+                                              'app.kubernetes.io/name' => 'testapp',
+                                              'app.kubernetes.io/managed-by' => 'mco-secretagent'
+                                            },
                                             :keys => ['secret/data'],
                                             :scope => { 'environment' => 'test_env' }).and_return([])
 

@@ -116,7 +116,7 @@ describe 'cmd' do
                'space',
                '--prune',
                '-l',
-               'stack=myk8sstack,machineset=myk8sappservice',
+               'stack=myk8sstack,machineset=myk8sappservice,app.kubernetes.io/managed-by=stacks',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -133,7 +133,7 @@ describe 'cmd' do
                'space',
                '--prune',
                '-l',
-               'stack=myk8sstack,machineset=myrelatedk8sappservice',
+               'stack=myk8sstack,machineset=myrelatedk8sappservice,app.kubernetes.io/managed-by=stacks',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -217,7 +217,7 @@ describe 'cmd' do
                'space',
                '--prune',
                '-l',
-               'stack=myk8sstack,machineset=myk8sappservice',
+               'stack=myk8sstack,machineset=myk8sappservice,app.kubernetes.io/managed-by=stacks',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -234,7 +234,7 @@ describe 'cmd' do
                'space',
                '--prune',
                '-l',
-               'stack=myk8sstack,machineset=myrelatedk8sappservice',
+               'stack=myk8sstack,machineset=myrelatedk8sappservice,app.kubernetes.io/managed-by=stacks',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -267,7 +267,7 @@ describe 'cmd' do
                'space',
                '--prune',
                '-l',
-               'stack=myk8sstack,machineset=myk8sappservice',
+               'stack=myk8sstack,machineset=myk8sappservice,app.kubernetes.io/managed-by=stacks',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*

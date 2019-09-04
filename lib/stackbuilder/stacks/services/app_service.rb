@@ -199,7 +199,8 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => app_version.to_s,
         'app.kubernetes.io/managed-by' => 'stacks',
-        'stack' => @stack.name
+        'stack' => @stack.name,
+        'machineset' => name
       }
 
       config, used_secrets = generate_app_config(erb_vars, hiera_provider)
@@ -270,9 +271,7 @@ EOC
       'metadata' => {
         'name' => app_name + '-config',
         'namespace' => @environment.name,
-        'labels' => {
-          'machineset' => @name
-        }.merge(standard_labels)
+        'labels' => standard_labels
       },
       'data' => {
         'config.properties' => config
@@ -289,9 +288,7 @@ EOC
       'metadata' => {
         'name' => app_name,
         'namespace' => @environment.name,
-        'labels' => {
-          'machineset' => @name
-        }.merge(standard_labels),
+        'labels' => standard_labels,
         'annotations' => {
           'metallb.universe.tf/address-pool' => 'prod-static'
         }
@@ -339,9 +336,7 @@ EOC
       'metadata' => {
         'name' => app_name,
         'namespace' => @environment.name,
-        'labels' => {
-          'machineset' => @name
-        }.merge(standard_labels),
+        'labels' => standard_labels,
         'annotations' => deployment_annotations
       },
       'spec' => {
@@ -649,9 +644,7 @@ EOC
         'metadata' => {
           'name' => "allow-#{@name}-out-to-#{site}-kubernetes-api-6443",
           'namespace' => @environment.name,
-          'labels' => {
-            'machineset' => @name
-          }.merge(standard_labels)
+          'labels' => standard_labels
         },
         'spec' => {
           'podSelector' => {
@@ -687,9 +680,7 @@ EOC
       'metadata' => {
         'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-8000",
         'namespace' => env_name,
-        'labels' => {
-          'machineset' => app_name
-        }.merge(standard_labels)
+        'labels' => standard_labels
       },
       'spec' => {
         'podSelector' => {
@@ -718,9 +709,7 @@ EOC
       'metadata' => {
         'name' => "allow-#{app_name}-out-to-#{virtual_service_env}-#{virtual_service_name}-#{ports}",
         'namespace' => env_name,
-        'labels' => {
-          'machineset' => app_name
-        }.merge(standard_labels)
+        'labels' => standard_labels
       },
       'spec' => {
         'podSelector' => {

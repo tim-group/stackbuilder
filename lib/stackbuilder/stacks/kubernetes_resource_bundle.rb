@@ -29,7 +29,7 @@ class Stacks::KubernetesResourceBundle
     responses = mco_secrets_client.insert(:namespace => @environment_name,
                                           :context => @site,
                                           :secret_resource => secret_resource,
-                                          :labels => @labels,
+                                          :labels => @labels.merge('app.kubernetes.io/managed-by' => 'mco-secretagent'),
                                           :keys => @secrets.keys,
                                           :scope => @hiera_scope)
 
@@ -40,13 +40,16 @@ class Stacks::KubernetesResourceBundle
       fail "Failed to prepare secrets"
     else
       logger(Logger::INFO) { "Successfully prepared secrets" }
+      responses.each do |r|
+        logger(Logger::INFO) { r.results[:data][:output] }
+      end
     end
 
     k8s_defns_yaml = to_defns_yaml
     command = ['kubectl', 'apply',
                '--context', @site,
                '--prune',
-               '-l', "stack=#{@stack_name},machineset=#{@machine_set_name}",
+               '-l', "stack=#{@stack_name},machineset=#{@machine_set_name},app.kubernetes.io/managed-by=stacks",
                '-f', '-']
     logger(Logger::DEBUG) { "running command: #{command.join(' ')}" }
     stdout_str, error_str, status = Open3.capture3(*command, :stdin_data => k8s_defns_yaml)
@@ -58,7 +61,7 @@ class Stacks::KubernetesResourceBundle
   end
 
   def clean
-    kinds = @resources.map { |r| r['kind'].downcase }.uniq.join(',')
+    kinds = (@resources.map { |r| r['kind'].downcase } + ['secret']).uniq.join(',')
 
     stdout_str, error_str, status = Open3.capture3('kubectl',
                                                    'delete',
