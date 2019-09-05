@@ -280,6 +280,10 @@ class Stacks::MachineSet
     end
   end
 
+  def exists_in_site?(site)
+    sites.include?(site)
+  end
+
   private
 
   def instantiate_machine(index, environment, site, role = nil, custom_name = '')

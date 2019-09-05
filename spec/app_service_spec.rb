@@ -19,7 +19,8 @@ describe 'kubernetes' do
                           'production-sharedproxy-001.earth.net.local' => '4.1.4.9',
                           'production-sharedproxy-002.earth.net.local' => '4.1.4.10',
                           'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11',
-                          'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12')
+                          'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12',
+                          'e1-x-vip.earth.net.local' => '3.1.4.13')
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
@@ -329,6 +330,35 @@ EOL
       set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources.each_with_index { |s, index| ordering[s['kind']] = index }
       expect(ordering['Service']).to be < ordering['Deployment']
       expect(ordering['ConfigMap']).to be < ordering['Deployment']
+    end
+
+    describe 'Service' do
+      it 'connects to the vip in the deployment\'s site' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = {
+                'space' => 1,
+                'earth' => 1
+              }
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expect(resources.find { |r| r.site == 'space' }.resources.find { |r| r['kind'] == 'Service' }['spec']['loadBalancerIP']).
+          to eql(dns_resolver.lookup('e1-x-vip.space.net.local').to_s)
+        expect(resources.find { |r| r.site == 'earth' }.resources.find { |r| r['kind'] == 'Service' }['spec']['loadBalancerIP']).
+          to eql(dns_resolver.lookup('e1-x-vip.earth.net.local').to_s)
+      end
     end
 
     describe 'instance control' do

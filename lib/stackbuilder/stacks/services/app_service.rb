@@ -207,7 +207,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
 
       output = super app_deployer, dns_resolver, hiera_provider, standard_labels
       output << generate_k8s_config_map(config, standard_labels)
-      output << generate_k8s_service(dns_resolver, standard_labels)
+      output << generate_k8s_service(dns_resolver, site, standard_labels)
       output << generate_k8s_deployment(standard_labels, replicas, used_secrets)
       output += generate_k8s_network_policies(dns_resolver, site, standard_labels)
       output += generate_k8s_service_account(dns_resolver, site, standard_labels)
@@ -279,7 +279,7 @@ EOC
     }
   end
 
-  def generate_k8s_service(dns_resolver, standard_labels)
+  def generate_k8s_service(dns_resolver, site, standard_labels)
     app_name = standard_labels['app.kubernetes.io/name']
 
     {
@@ -305,7 +305,7 @@ EOC
           'port' => 8000,
           'targetPort' => 8000
         }],
-        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(fabric)).to_s
+        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(site)).to_s
       }
     }
   end
@@ -532,7 +532,7 @@ EOC
   def generate_k8s_network_policies(dns_resolver, site, standard_labels)
     network_policies = []
     virtual_services_that_depend_on_me.each do |vs|
-      next if requirements_of(vs).include?(:same_site) && !vs.sites.include?(site)
+      next if requirements_of(vs).include?(:same_site) && !vs.exists_in_site?(site)
 
       filters = []
       if vs.kubernetes
@@ -565,6 +565,9 @@ EOC
     virtual_services_that_i_depend_on(false).each do |vs|
       fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
 
+      chosen_site_of_vs = vs.exists_in_site?(site) ? site : vs.environment.primary_site
+      endpoints = vs.endpoints(self, chosen_site_of_vs)
+
       egresses = []
       if vs.kubernetes
         egresses << {
@@ -586,7 +589,7 @@ EOC
           }]
         }
       else
-        vs.endpoints(self, fabric).each do |e|
+        endpoints.each do |e|
           ip_blocks = []
           e[:fqdns].uniq.each do |fqdn|
             ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
@@ -600,7 +603,7 @@ EOC
           }
         end
       end
-      ports = vs.endpoints(self, fabric).map { |e| e[:port] }.join('-')
+      ports = endpoints.map { |e| e[:port] }.join('-')
       network_policies << create_egress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name, standard_labels, ports, egresses)
     end
 
@@ -618,7 +621,7 @@ EOC
     %w(001 002).each do |server_index|
       filters << {
         'ipBlock' => {
-          'cidr' => "#{dns_resolver.lookup("production-sharedproxy-#{server_index}.#{fabric}.net.local")}/32"
+          'cidr' => "#{dns_resolver.lookup("production-sharedproxy-#{server_index}.#{site}.net.local")}/32"
         }
       }
     end

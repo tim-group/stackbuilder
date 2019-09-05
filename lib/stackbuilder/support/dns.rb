@@ -34,7 +34,9 @@ class Support::Dns
     machine_def.accept do |child_machine_def|
       if child_machine_def.respond_to?(:to_vip_spec)
         vips << child_machine_def.to_vip_spec(:primary_site)
-        vips << child_machine_def.to_vip_spec(:secondary_site) if child_machine_def.enable_secondary_site
+        if child_machine_def.enable_secondary_site || child_machine_def.sites.include?(child_machine_def.environment.secondary_site)
+          vips << child_machine_def.to_vip_spec(:secondary_site)
+        end
       end
     end
     vips
