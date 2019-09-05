@@ -200,6 +200,17 @@ module Stacks::Services::MysqlCluster
     masters
   end
 
+  def exists_in_site?(environment, site)
+    if (master_instances > 0 && site == environment.sites.first) ||
+       (slave_instances > 0 && site == environment.sites.first) ||
+       (secondary_site_slave_instances > 0 && site == environment.sites.last) ||
+       (standalone_instances > 0 && site == environment.sites.first)
+      true
+    else
+      false
+    end
+  end
+
   private
 
   def validate_supported_requirements_specify_at_least_one_server

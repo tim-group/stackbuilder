@@ -280,7 +280,7 @@ class Stacks::MachineSet
     end
   end
 
-  def exists_in_site?(site)
+  def exists_in_site?(_environment, site)
     sites.include?(site)
   end
 

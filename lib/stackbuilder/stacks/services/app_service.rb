@@ -532,7 +532,7 @@ EOC
   def generate_k8s_network_policies(dns_resolver, site, standard_labels)
     network_policies = []
     virtual_services_that_depend_on_me.each do |vs|
-      next if requirements_of(vs).include?(:same_site) && !vs.exists_in_site?(site)
+      next if requirements_of(vs).include?(:same_site) && !vs.exists_in_site?(vs.environment, site)
 
       filters = []
       if vs.kubernetes
@@ -565,7 +565,7 @@ EOC
     virtual_services_that_i_depend_on(false).each do |vs|
       fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
 
-      chosen_site_of_vs = vs.exists_in_site?(site) ? site : vs.environment.primary_site
+      chosen_site_of_vs = vs.exists_in_site?(vs.environment, site) ? site : vs.environment.primary_site
       endpoints = vs.endpoints(self, chosen_site_of_vs)
 
       egresses = []
