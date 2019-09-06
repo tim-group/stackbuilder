@@ -313,7 +313,7 @@ EOC
   def generate_k8s_deployment(standard_labels, replicas, secrets)
     app_name = standard_labels['app.kubernetes.io/name']
     app_version = standard_labels['app.kubernetes.io/version']
-    container_image = "repo.net.local:8080/#{app_name}:#{app_version}"
+    container_image = "repo.net.local:8080/timgroup/#{app_name}:#{app_version}"
 
     annotations = {}
     annotations['maintainers'] = JSON.dump(@maintainers) unless @maintainers.empty?
@@ -369,7 +369,7 @@ EOC
               'fsGroup' => 3017
             },
             'initContainers' => [{
-              'image' => 'repo.net.local:8080/config-generator:1.0.5',
+              'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.5',
               'name' => 'config-generator',
               'env' => secrets.map do |_hiera_key, secret_name|
                 {

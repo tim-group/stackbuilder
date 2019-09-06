@@ -122,12 +122,12 @@ describe 'kubernetes' do
                 'fsGroup' => 3017
               },
               'initContainers' => [{
-                'image' => 'repo.net.local:8080/config-generator:1.0.5',
+                'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.5',
                 'name' => 'config-generator',
                 'env' => [
                   {
                     'name' => 'CONTAINER_IMAGE',
-                    'value' => 'repo.net.local:8080/myapplication:1.2.3'
+                    'value' => 'repo.net.local:8080/timgroup/myapplication:1.2.3'
                   },
                   {
                     'name' => 'APP_JVM_ARGS',
@@ -170,7 +170,7 @@ describe 'kubernetes' do
                     'drop' => ['ALL']
                   }
                 },
-                'image' => 'repo.net.local:8080/myapplication:1.2.3',
+                'image' => 'repo.net.local:8080/timgroup/myapplication:1.2.3',
                 'name' => 'myapplication',
                 'command' => ["/bin/sh"],
                 'args' => [
