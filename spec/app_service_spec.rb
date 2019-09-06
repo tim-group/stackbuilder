@@ -664,7 +664,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'mystack', 'x')
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(2)
       network_policy = network_policies.last
       expect(network_policy['metadata']['name']).to eql('allow-x-out-to-space-kubernetes-api-6443')
       expect(network_policy['metadata']['namespace']).to eql('e1')
@@ -905,6 +905,47 @@ EOL
       end).not_to be_nil
     end
 
+    it 'only connects dependant vms in the same site, when requested' do
+      factory = eval_stacks do
+        stack 'testing' do
+          app_service 'target', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.instances = {
+              'mars' => 1
+            }
+
+            self.application = 'application'
+          end
+          app_service 'source' do
+            self.instances = {
+              'io' => 1,
+              'mars' => 1
+            }
+
+            self.application = 'application'
+            depend_on 'target', 'e1', :same_site
+          end
+        end
+        env 'e1', :primary_site => 'io', :secondary_site => 'mars' do
+          instantiate_stack 'testing'
+        end
+      end
+
+      dns = AllocatingDnsResolver.new
+
+      machine_sets = factory.inventory.find_environment('e1').definitions['testing'].k8s_machinesets
+      depends_on_everything_resources = machine_sets['target'].to_k8s(app_deployer, dns, hiera_provider)
+
+      policy = depends_on_everything_resources.first.resources.find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-source-in-to-target-8000'
+      end
+
+      expect(policy['spec']['ingress'][0]['from']).to eq([
+        { 'ipBlock' => { 'cidr' => dns.lookup('e1-source-001.mars.net.local').to_s + '/32' } }
+      ])
+    end
+
     it 'should create the correct ingress network policies for a service in kubernetes when another non kubernetes service depends on it' do
       factory = eval_stacks do
         stack "test_app_servers" do
@@ -936,7 +977,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(2)
       expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -989,7 +1030,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(2)
       expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -1041,7 +1082,7 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(3)
+      expect(app1_network_policies.size).to eq(2)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e1-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
@@ -1068,7 +1109,7 @@ EOL
       expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(3)
+      expect(app2_network_policies.size).to eq(2)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
@@ -1095,52 +1136,6 @@ EOL
       expect(egress.first['ports'].first['port']).to eq(8000)
     end
 
-    it 'should create the correct network policies to allow the shared proxies to talk to the pods for status page access' do
-      factory = eval_stacks do
-        stack "test_app_servers" do
-          app_service 'app1', :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-
-            self.application = 'app1'
-          end
-        end
-
-        env "e1", :primary_site => "space" do
-          instantiate_stack "test_app_servers"
-        end
-      end
-
-      network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
-
-      expect(network_policies.size).to eq(2)
-
-      proxy_network_policy = network_policies.find { |p| p['metadata']['name'] =~ /sharedproxy/ }
-
-      expect(proxy_network_policy['metadata']['name']).to eql('allow-production-sharedproxy-in-to-app1-8000')
-      expect(proxy_network_policy['metadata']['namespace']).to eql('e1')
-      expect(proxy_network_policy['metadata']['labels']).to eql(
-        'stack' => 'test_app_servers',
-        'machineset' => 'app1',
-        'app.kubernetes.io/name' => 'app1',
-        'app.kubernetes.io/instance' => 'e1_-app1',
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => '1.2.3',
-        'app.kubernetes.io/managed-by' => 'stacks'
-      )
-      expect(proxy_network_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app1'
-      )
-      expect(proxy_network_policy['spec']['policyTypes']).to eql(['Ingress'])
-      expect(proxy_network_policy['spec']['ingress'].size).to eq(1)
-      expect(proxy_network_policy['spec']['ingress'].first['from'].size).to eq(2)
-      expect(proxy_network_policy['spec']['ingress'].first['ports'].size).to eq(1)
-      expect(proxy_network_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.9/32' })
-      expect(proxy_network_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.10/32' })
-      expect(proxy_network_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(proxy_network_policy['spec']['ingress'].first['ports'].first['port']).to eq(8000)
-    end
-
     it 'should create an egress policy to allow the init container to talk to nexus' do
       factory = eval_stacks do
         stack "test_app_servers" do
@@ -1159,7 +1154,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(1)
       expect(network_policies.first['metadata']['name']).to eql('allow-app1-out-to-office-nexus-8080')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -1217,7 +1212,7 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(3)
+      expect(app1_network_policies.size).to eq(2)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e2-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -1235,7 +1230,7 @@ depends on the other' do
       expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(3)
+      expect(app2_network_policies.size).to eq(2)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(

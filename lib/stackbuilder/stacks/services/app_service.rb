@@ -532,7 +532,8 @@ EOC
   def generate_k8s_network_policies(dns_resolver, site, standard_labels)
     network_policies = []
     virtual_services_that_depend_on_me.each do |vs|
-      next if requirements_of(vs).include?(:same_site) && !vs.exists_in_site?(vs.environment, site)
+      is_same_site = requirements_of(vs).include?(:same_site)
+      next if is_same_site && !vs.exists_in_site?(vs.environment, site)
 
       filters = []
       if vs.kubernetes
@@ -549,11 +550,11 @@ EOC
           }
         }
       else
-        virtual_service_instance_fqdns = dependant_instance_fqdns(location, [@environment.primary_network])
-        virtual_service_instance_fqdns.each do |instance_fqdn|
+        dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }
+        dependant_vms.each do |vm|
           filters << {
             'ipBlock' => {
-              'cidr' => "#{dns_resolver.lookup(instance_fqdn)}/32"
+              'cidr' => "#{dns_resolver.lookup(vm.qualified_hostname(@environment.primary_network))}/32"
             }
           }
         end
@@ -616,17 +617,6 @@ EOC
     }]
 
     network_policies << create_egress_network_policy('office', 'nexus', @name, @environment.name, standard_labels, '8080', nexus_filters)
-
-    filters = []
-    %w(001 002).each do |server_index|
-      filters << {
-        'ipBlock' => {
-          'cidr' => "#{dns_resolver.lookup("production-sharedproxy-#{server_index}.#{site}.net.local")}/32"
-        }
-      }
-    end
-
-    network_policies << create_ingress_network_policy('production', 'sharedproxy', @name, @environment.name, standard_labels, filters)
 
     network_policies
   end
