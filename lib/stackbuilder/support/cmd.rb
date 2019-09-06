@@ -639,6 +639,7 @@ class CMD
     self.class.include Support::MCollective
     bundles.each do |bundle|
       mco_client('k8ssecret', :fabric => bundle.site) do |client|
+        logger(Logger::INFO) { "Applying #{bundle.site} #{bundle.environment_name} #{bundle.machine_set_name}" }
         bundle.apply_and_prune(client)
       end
     end
