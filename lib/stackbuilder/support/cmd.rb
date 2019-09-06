@@ -292,7 +292,7 @@ class CMD
       end
     end
 
-    k8s_targets.each do |t|
+    expand_dependencies(k8s_targets).each do |t|
       @dns.do_allocate_vips(t)
       @puppet.do_puppet_run_on_dependencies(t)
 
@@ -315,7 +315,7 @@ class CMD
       end
     end
 
-    k8s_targets.each do |t|
+    expand_dependencies(k8s_targets).each do |t|
       apply_k8s(t)
     end
 
@@ -572,6 +572,12 @@ class CMD
     end
 
     ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
+  end
+
+  def expand_dependencies(machine_sets)
+    machine_sets.flat_map do |t|
+      t.virtual_services_that_i_depend_on.select(&:kubernetes) + [t]
+    end
   end
 
   def deep_dup_to_avoid_yaml_aliases(output)

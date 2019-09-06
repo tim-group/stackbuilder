@@ -145,6 +145,88 @@ describe 'cmd' do
 
         cmd.provision nil
       end
+
+      it 'provisions k8s services that it depends on' do
+        factory = eval_stacks do
+          stack 'myk8sstack' do
+            app_service 'myk8sappservice', :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyK8sApplication'
+              self.instances = 2
+
+              depend_on 'myrelatedk8sappservice'
+            end
+            app_service 'myrelatedk8sappservice', :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyRelatedK8sApplication'
+              self.instances = 1
+            end
+          end
+          env 'e1', :primary_site => 'space' do
+            instantiate_stack 'myk8sstack'
+          end
+        end
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        myk8sappservice_machineset = have_attributes(:name => 'myk8sappservice')
+        myrelatedk8sappservice_machineset = have_attributes(:name => 'myrelatedk8sappservice')
+
+        cmd = cmd(factory, 'e1', 'myk8sappservice')
+
+        expect(@dns).to receive(:do_allocate_vips).with(myk8sappservice_machineset)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(myk8sappservice_machineset)
+
+        expect(@dns).to receive(:do_allocate_vips).with(myrelatedk8sappservice_machineset)
+        expect(@puppet).to receive(:do_puppet_run_on_dependencies).with(myrelatedk8sappservice_machineset)
+
+        mco = double('mcollective client')
+        expect(mco).to receive(:insert).with(any_args).and_return([]).twice
+
+        expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space').twice do |*_args, &block|
+          block.call(mco)
+        end
+
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--context',
+               'space',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myk8sappservice,app.kubernetes.io/managed-by=stacks',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
+
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--context',
+               'space',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myrelatedk8sappservice,app.kubernetes.io/managed-by=stacks',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
+
+        cmd.provision nil
+      end
     end
 
     describe 'for VMs' do
@@ -268,6 +350,79 @@ describe 'cmd' do
                '--prune',
                '-l',
                'stack=myk8sstack,machineset=myk8sappservice,app.kubernetes.io/managed-by=stacks',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
+
+        cmd.reprovision nil
+      end
+
+      it 'reprovisions dependent k8s services' do
+        factory = eval_stacks do
+          stack 'myk8sstack' do
+            app_service 'myk8sappservice', :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyK8sApplication'
+              self.instances = 2
+
+              depend_on 'myrelatedk8sappservice'
+            end
+            app_service 'myrelatedk8sappservice', :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyRelatedK8sApplication'
+              self.instances = 1
+            end
+          end
+          env 'e1', :primary_site => 'space' do
+            instantiate_stack 'myk8sstack'
+          end
+        end
+        allow(@app_deployer).to receive(:query_cmdb_for).with(anything).and_return(:target_version => '0.0.0')
+        allow(@dns_resolver).to receive(:lookup).with(anything)
+
+        cmd = cmd(factory, 'e1', 'myk8sappservice')
+
+        mco = double('mcollective client')
+        expect(mco).to receive(:insert).with(any_args).and_return([]).twice
+
+        expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space').twice do |*_args, &block|
+          block.call(mco)
+        end
+
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--context',
+               'space',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myk8sappservice,app.kubernetes.io/managed-by=stacks',
+               '-f',
+               '-',
+               :stdin_data => match(/^---\s*$.*
+                                     \bkind:\s*Service.*
+                                     \bkind:\s*Deployment.*
+                                     /mx)).
+          and_return(['Some stdout output', 'Some stderr output', @return_status])
+        expect(@return_status).to receive(:success?).and_return(true)
+
+        expect(@open3).to receive(:capture3).
+          with('kubectl',
+               'apply',
+               '--context',
+               'space',
+               '--prune',
+               '-l',
+               'stack=myk8sstack,machineset=myrelatedk8sappservice,app.kubernetes.io/managed-by=stacks',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
