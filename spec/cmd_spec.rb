@@ -684,7 +684,7 @@ describe 'cmd' do
     end
 
     it 'fails if more than one entity is found' do
-      factory = eval_stacks do
+      factory = eval_stacks false do
         stack "mystack" do
           app_service "dupedservice" do
             self.application = 'MyApplication'

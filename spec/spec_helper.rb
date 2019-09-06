@@ -1,6 +1,6 @@
 module Helpers
-  def eval_stacks(&block)
-    Stacks::Factory.new(Stacks::Inventory.from(&block))
+  def eval_stacks(validate = true, &block)
+    Stacks::Factory.new(Stacks::Inventory.from(validate, &block))
   end
 end
 

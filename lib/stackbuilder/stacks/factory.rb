@@ -89,7 +89,7 @@ class Stacks::Factory
     )
   end
 
-  def refresh
-    @inventory = Stacks::Inventory.from_dir(@path)
+  def refresh(validate = true)
+    @inventory = Stacks::Inventory.from_dir(@path, validate)
   end
 end

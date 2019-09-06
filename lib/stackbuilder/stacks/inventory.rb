@@ -1,19 +1,29 @@
 require 'English'
 require 'stackbuilder/stacks/validation/no_duplicate_short_names'
+require 'stackbuilder/stacks/validation/service_names_unique_across_stacks'
 
 class Stacks::Inventory
-  def self.from_dir(stack_dir)
+  def self.from_dir(stack_dir, validate = true)
     stacks = prepare_inventory_from_dir(stack_dir)
-    Stacks::Inventory.new(stacks)
+    if validate
+      Stacks::Inventory.new(stacks)
+    else
+      Stacks::Inventory.new(stacks, [])
+    end
   end
 
-  def self.from(&block)
+  def self.from(validate = true, &block)
     stacks = prepare_inventory_from(&block)
-    Stacks::Inventory.new(stacks)
+    if validate
+      Stacks::Inventory.new(stacks)
+    else
+      Stacks::Inventory.new(stacks, [])
+    end
   end
 
   def initialize(stacks, validators = [
-    Stacks::Validation::NoDuplicateShortName
+    Stacks::Validation::NoDuplicateShortName,
+    Stacks::Validation::ServiceNamesUniqueAcrossStacks
   ])
     validation_output = Stacks::Validator.validate(stacks, validators)
     fail(validation_output) unless validation_output.empty?

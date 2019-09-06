@@ -16,7 +16,7 @@ describe 'bind servers' do
 
   describe 'nameservers with bi-directional slave_from dependencies' do
     let(:factory) do
-      eval_stacks do
+      eval_stacks false do
         stack 'lb' do
           loadbalancer_service
         end
@@ -174,7 +174,7 @@ describe 'bind servers' do
 
   describe 'nameservers with single slave_from dependency' do
     let(:factory) do
-      eval_stacks do
+      eval_stacks false do
         stack 'lb' do
           loadbalancer_service
         end

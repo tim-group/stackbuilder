@@ -17,7 +17,7 @@ class CMD
 
   # rubocop:disable Metrics/ParameterLists
   def initialize(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver,
-                 hiera_provider, cleaner, environment, stack_name = nil, stash = false)
+                 hiera_provider, cleaner, environment, stack_name = nil, stash = false, validate = true)
     @factory = factory
     @core_actions = core_actions
     @dns = dns
@@ -31,6 +31,7 @@ class CMD
     @environment = environment
     @stack_name = stack_name
     @stash = stash
+    @validate = validate
     @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
     @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host rebuild_host build_new_host)
     @cmds = @read_cmds + @write_cmds
@@ -415,7 +416,7 @@ class CMD
         fail('Stackbuilder-config working tree not clean. Commit your changes or use --stash') unless @stash
         after_file.write(generate_compile_output)
         system("git stash")
-        @factory.refresh
+        @factory.refresh(@validate)
         before_file.write(generate_compile_output)
         system("git stash pop --index")
       end
