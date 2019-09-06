@@ -575,9 +575,7 @@ class CMD
   end
 
   def expand_dependencies(machine_sets)
-    machine_sets.flat_map do |t|
-      t.virtual_services_that_i_depend_on.select(&:kubernetes) + [t]
-    end
+    (machine_sets.flat_map { |t| t.virtual_services_that_i_depend_on.select(&:kubernetes) } + machine_sets).uniq
   end
 
   def deep_dup_to_avoid_yaml_aliases(output)
