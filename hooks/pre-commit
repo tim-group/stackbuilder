@@ -26,7 +26,8 @@ fi
 
 echo -n "Running stacks compile: "
 USER=`whoami`
-OUTPUT=`dev=true bundle exec bin/stacks compile -c -- > /tmp/$USER-stacks-pre-commit`
+#OUTPUT=`dev=true bundle exec bin/stacks compile -c -- > /tmp/$USER-stacks-pre-commit`
+OUTPUT=`dev=true bundle exec bin/stacks compile -- > /tmp/$USER-stacks-pre-commit`
 RC=$?
 if [ $RC -ne 0 ]; then
   echo "FAIL"

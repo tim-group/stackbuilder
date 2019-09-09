@@ -69,7 +69,7 @@ describe 'kubernetes' do
             'stack' => 'mystack',
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-x',
+            'app.kubernetes.io/instance' => 'e1_-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
@@ -84,7 +84,7 @@ describe 'kubernetes' do
         'spec' => {
           'selector' => {
             'matchLabels' => {
-              'app.kubernetes.io/instance' => 'e1-mystack-x',
+              'app.kubernetes.io/instance' => 'e1_-x',
               'participation' => 'enabled'
             }
           },
@@ -101,7 +101,7 @@ describe 'kubernetes' do
               'labels' => {
                 'participation' => 'enabled',
                 'app.kubernetes.io/name' => 'myapplication',
-                'app.kubernetes.io/instance' => 'e1-mystack-x',
+                'app.kubernetes.io/instance' => 'e1_-x',
                 'app.kubernetes.io/component' => 'app_service',
                 'app.kubernetes.io/version' => '1.2.3',
                 'app.kubernetes.io/managed-by' => 'stacks',
@@ -266,7 +266,7 @@ describe 'kubernetes' do
           'labels' => {
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-x',
+            'app.kubernetes.io/instance' => 'e1_-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks',
@@ -279,7 +279,7 @@ describe 'kubernetes' do
         'spec' => {
           'type' => 'LoadBalancer',
           'selector' => {
-            'app.kubernetes.io/instance' => 'e1-mystack-x',
+            'app.kubernetes.io/instance' => 'e1_-x',
             'participation' => 'enabled'
           },
           'ports' => [{
@@ -303,7 +303,7 @@ describe 'kubernetes' do
             'stack' => 'mystack',
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-x',
+            'app.kubernetes.io/instance' => 'e1_-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
@@ -637,7 +637,7 @@ EOL
             'stack' => 'mystack',
             'machineset' => 'x',
             'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1-mystack-x',
+            'app.kubernetes.io/instance' => 'e1_-x',
             'app.kubernetes.io/component' => 'app_service',
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks'
@@ -671,14 +671,14 @@ EOL
       expect(network_policy['metadata']['labels']).to eql(
         'stack' => 'mystack',
         'app.kubernetes.io/name' => 'myapplication',
-        'app.kubernetes.io/instance' => 'e1-mystack-x',
+        'app.kubernetes.io/instance' => 'e1_-x',
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks',
         'machineset' => 'x'
       )
       expect(network_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-mystack-x'
+        'app.kubernetes.io/instance' => 'e1_-x'
       )
       expect(network_policy['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policy['spec']['egress'].size).to eq(1)
@@ -943,13 +943,13 @@ EOL
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
         'app.kubernetes.io/name' => 'app2',
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+        'app.kubernetes.io/instance' => 'e1_-app2',
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2'
+        'app.kubernetes.io/instance' => 'e1_-app2'
       )
       expect(network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(network_policies.first['spec']['ingress'].size).to eq(1)
@@ -996,13 +996,13 @@ EOL
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
         'app.kubernetes.io/name' => 'app2',
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+        'app.kubernetes.io/instance' => 'e1_-app2',
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2'
+        'app.kubernetes.io/instance' => 'e1_-app2'
       )
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policies.first['spec']['egress'].size).to eq(1)
@@ -1048,20 +1048,20 @@ EOL
         'stack' => 'test_app_servers',
         'machineset' => 'app1',
         'app.kubernetes.io/name' => 'app1',
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1',
+        'app.kubernetes.io/instance' => 'e1_-app1',
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1'
+        'app.kubernetes.io/instance' => 'e1_-app1'
       )
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)
       expect(ingress.first['from'].size).to eq(1)
       expect(ingress.first['ports'].size).to eq(1)
       expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2'
+        'app.kubernetes.io/instance' => 'e1_-app2'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
@@ -1075,20 +1075,20 @@ EOL
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
         'app.kubernetes.io/name' => 'app2',
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2',
+        'app.kubernetes.io/instance' => 'e1_-app2',
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app2'
+        'app.kubernetes.io/instance' => 'e1_-app2'
       )
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
       expect(egress.first['to'].size).to eq(1)
       expect(egress.first['ports'].size).to eq(1)
       expect(egress.first['to'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1'
+        'app.kubernetes.io/instance' => 'e1_-app1'
       )
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
@@ -1123,13 +1123,13 @@ EOL
         'stack' => 'test_app_servers',
         'machineset' => 'app1',
         'app.kubernetes.io/name' => 'app1',
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1',
+        'app.kubernetes.io/instance' => 'e1_-app1',
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(proxy_network_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1'
+        'app.kubernetes.io/instance' => 'e1_-app1'
       )
       expect(proxy_network_policy['spec']['policyTypes']).to eql(['Ingress'])
       expect(proxy_network_policy['spec']['ingress'].size).to eq(1)
@@ -1166,13 +1166,13 @@ EOL
         'stack' => 'test_app_servers',
         'machineset' => 'app1',
         'app.kubernetes.io/name' => 'app1',
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1',
+        'app.kubernetes.io/instance' => 'e1_-app1',
         'app.kubernetes.io/component' => 'app_service',
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_servers-app1'
+        'app.kubernetes.io/instance' => 'e1_-app1'
       )
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policies.first['spec']['egress'].size).to eq(1)
@@ -1221,14 +1221,14 @@ depends on the other' do
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e2-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_server1-app1'
+        'app.kubernetes.io/instance' => 'e1_-app1'
       )
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)
       expect(ingress.first['from'].size).to eq(1)
       expect(ingress.first['ports'].size).to eq(1)
       expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e2-test_app_server2-app2'
+        'app.kubernetes.io/instance' => 'e2_-app2'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e2')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
@@ -1239,14 +1239,14 @@ depends on the other' do
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e2-test_app_server2-app2'
+        'app.kubernetes.io/instance' => 'e2_-app2'
       )
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
       expect(egress.first['to'].size).to eq(1)
       expect(egress.first['ports'].size).to eq(1)
       expect(egress.first['to'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1-test_app_server1-app1'
+        'app.kubernetes.io/instance' => 'e1_-app1'
       )
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
