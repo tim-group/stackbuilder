@@ -283,7 +283,7 @@ class CMD
     @core_actions.get_action("allocate").call(@factory.services, machine_def)
   end
 
-  def provision(_argv)
+  def provision(argv)
     thing = check_and_get_stack(true)
     k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
       if x.is_a?(Stacks::CustomServices)
@@ -293,19 +293,19 @@ class CMD
       end
     end
 
-    expand_dependencies(k8s_targets).each do |t|
+    (argv[:dependencies] ? expand_dependencies(k8s_targets) : k8s_targets).each do |t|
       @dns.do_allocate_vips(t)
-      @puppet.do_puppet_run_on_dependencies(t)
+      @puppet.do_puppet_run_on_dependencies(t) if argv[:dependencies]
 
       apply_k8s(t)
     end
 
     vm_targets.each do |t|
-      provision_vm(@factory.services, t)
+      provision_vm(@factory.services, t, true, argv[:dependencies])
     end
   end
 
-  def reprovision(_argv)
+  def reprovision(argv)
     thing = check_and_get_stack(true)
 
     k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
@@ -316,12 +316,12 @@ class CMD
       end
     end
 
-    expand_dependencies(k8s_targets).each do |t|
+    (argv[:dependencies] ? expand_dependencies(k8s_targets) : k8s_targets).each do |t|
       apply_k8s(t)
     end
 
     vm_targets.each do |t|
-      reprovision_vm(@factory.services, t)
+      reprovision_vm(@factory.services, t, argv[:dependencies])
     end
 
     0
@@ -630,9 +630,9 @@ class CMD
     @cleaner.clean_traces(thing) if all
   end
 
-  def reprovision_vm(services, thing)
+  def reprovision_vm(services, thing, run_on_dependencies)
     clean_vm(thing)
-    provision_vm(services, thing, false)
+    provision_vm(services, thing, false, run_on_dependencies)
   end
 
   def apply_k8s(machineset)
@@ -646,12 +646,12 @@ class CMD
     end
   end
 
-  def provision_vm(services, thing, initial = true)
+  def provision_vm(services, thing, initial, run_on_dependencies)
     if initial
       # prepare dependencies
       @dns.do_allocate_vips(thing)
       @dns.do_allocate_ips(thing)
-      @puppet.do_puppet_run_on_dependencies(thing)
+      @puppet.do_puppet_run_on_dependencies(thing) if run_on_dependencies
     end
 
     @core_actions.get_action("launch").call(services, thing)

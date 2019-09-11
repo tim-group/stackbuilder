@@ -57,6 +57,7 @@ Options:
                                            policy that a spectre-patched VM can only be allocated to a spectre-patched host and vice versa
     --stash                                for diff command - compare uncommitted changes against HEAD (uses git stash and git stash pop --index)
     --no-validate                          do not validate the stacks model
+    --no-dependencies                      do not run puppet or kubectl apply for dependencies
 
   For further information about options, read bin/stacks.
 
@@ -90,9 +91,11 @@ Options:
         [--ignore-spectre-patching-host-policy]
     provision [-e] -s                     allocates and spins up a stack
         [--ignore-spectre-patching-host-policy]
+        [--no-dependencies]
     rebuild_host HOST                     re-install a clean operating system on a KVM host (host must be empty)
     reprovision [-e] -s                   "clean", and then "provision" a stack
         [--ignore-spectre-patching-host-policy]
+        [--no-dependencies]
     sbdiff                                show compile diff between latest stackbuilder and local stackbuilder.
     spec [-e] -s                          print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
     terminus                              create a yaml puppet terminus
@@ -135,7 +138,8 @@ $options = {
   :'ignore-spectre-patching-host-policy' => false,
   :'ignore-safe-diffs'                   => false,
   :stash                                 => false,
-  :validate                              => true
+  :validate                              => true,
+  :dependencies                          => true
 }
 # change the default path on puppetservers puppet.conf node_terminus does not take parameters
 require 'socket'
@@ -158,6 +162,7 @@ GetoptLong.new(
   ['--ignore-safe-diffs', GetoptLong::NO_ARGUMENT],
   ['--ignore-spectre-patching-host-policy', GetoptLong::NO_ARGUMENT],
   ['--no-tmux', GetoptLong::NO_ARGUMENT],
+  ['--no-dependencies', GetoptLong::NO_ARGUMENT],
   ['--stash', GetoptLong::NO_ARGUMENT],
   ['--no-validate', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
@@ -174,6 +179,8 @@ GetoptLong.new(
     $options[:terse] = true
   when '--no-tmux'
     $options[:no_tmux] = true
+  when '--no-dependencies'
+    $options[:dependencies] = false
   when '--checkout-config'
     $options[:'checkout-config'] = (arg == '') ? 'http://git/stackbuilder-config.git' : arg
   when '--diffs-only'
