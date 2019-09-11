@@ -115,6 +115,23 @@ describe 'kubernetes' do
               }
             },
             'spec' => {
+              'affinity' => {
+                'podAntiAffinity' => {
+                  'preferredDuringSchedulingIgnoredDuringExecution' => [{
+                    'podAffinityTerm' => {
+                      'labelSelector' => {
+                        'matchExpressions' => [{
+                          'key' => 'app.kubernetes.io/instance',
+                          'operator' => 'In',
+                          'values' => ['e1_-x']
+                        }]
+                      },
+                      'topologyKey' => 'kubernetes.io/hostname'
+                    },
+                    'weight' => 100
+                  }]
+                }
+              },
               'automountServiceAccountToken' => false,
               'securityContext' => {
                 'runAsUser' => 2055,

@@ -362,6 +362,23 @@ EOC
             'annotations' => pod_annotations
           },
           'spec' => {
+            'affinity' => {
+              'podAntiAffinity' => {
+                'preferredDuringSchedulingIgnoredDuringExecution' => [{
+                  'podAffinityTerm' => {
+                    'labelSelector' => {
+                      'matchExpressions' => [{
+                        'key' => 'app.kubernetes.io/instance',
+                        'operator' => 'In',
+                        'values' => [standard_labels['app.kubernetes.io/instance']]
+                      }]
+                    },
+                    'topologyKey' => 'kubernetes.io/hostname'
+                  },
+                  'weight' => 100
+                }]
+              }
+            },
             'automountServiceAccountToken' => false,
             'securityContext' => {
               'runAsUser' => 2055,
