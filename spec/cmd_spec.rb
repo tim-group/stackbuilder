@@ -47,7 +47,6 @@ describe 'cmd' do
     out.string
   end
 
-
   let(:factory) do
     eval_stacks do
       stack "mystack" do
