@@ -283,7 +283,7 @@ class CMD
     @core_actions.get_action("allocate").call(@factory.services, machine_def)
   end
 
-  def provision(argv)
+  def provision(_argv)
     thing = check_and_get_stack(true)
     k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
       if x.is_a?(Stacks::CustomServices)
@@ -293,19 +293,19 @@ class CMD
       end
     end
 
-    (argv[:dependencies] ? expand_dependencies(k8s_targets) : k8s_targets).each do |t|
+    ($options[:dependencies] ? expand_dependencies(k8s_targets) : k8s_targets).each do |t|
       @dns.do_allocate_vips(t)
-      @puppet.do_puppet_run_on_dependencies(t) if argv[:dependencies]
+      @puppet.do_puppet_run_on_dependencies(t) if $options[:dependencies]
 
       apply_k8s(t)
     end
 
     vm_targets.each do |t|
-      provision_vm(@factory.services, t, true, argv[:dependencies])
+      provision_vm(@factory.services, t, true, $options[:dependencies])
     end
   end
 
-  def reprovision(argv)
+  def reprovision(_argv)
     thing = check_and_get_stack(true)
 
     k8s_targets, vm_targets = split_k8s_from_vms(thing) do |x|
@@ -316,12 +316,12 @@ class CMD
       end
     end
 
-    (argv[:dependencies] ? expand_dependencies(k8s_targets) : k8s_targets).each do |t|
+    ($options[:dependencies] ? expand_dependencies(k8s_targets) : k8s_targets).each do |t|
       apply_k8s(t)
     end
 
     vm_targets.each do |t|
-      reprovision_vm(@factory.services, t, argv[:dependencies])
+      reprovision_vm(@factory.services, t, $options[:dependencies])
     end
 
     0

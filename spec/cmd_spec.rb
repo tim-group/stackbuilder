@@ -20,6 +20,11 @@ describe 'cmd' do
     stub_const("Open3", @open3)
     @launch_action = double("launch_action")
     @return_status = double('return_status')
+
+    $options = {
+      :dependencies => true,
+      :verbose => 0
+    }
   end
 
   def cmd(factory, env_name, stack_selector)
@@ -42,7 +47,6 @@ describe 'cmd' do
     out.string
   end
 
-  let(:argv) { { :dependencies => true } }
 
   let(:factory) do
     eval_stacks do
@@ -145,7 +149,7 @@ describe 'cmd' do
           and_return(['Some stdout output', 'Some stderr output', @return_status])
         expect(@return_status).to receive(:success?).and_return(true)
 
-        cmd.provision argv
+        cmd.provision nil
       end
 
       it 'provisions k8s services that it depends on' do
@@ -227,7 +231,7 @@ describe 'cmd' do
           and_return(['Some stdout output', 'Some stderr output', @return_status])
         expect(@return_status).to receive(:success?).and_return(true)
 
-        cmd.provision argv
+        cmd.provision nil
       end
     end
 
@@ -256,7 +260,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'mystack')
 
-        cmd.provision argv
+        cmd.provision nil
       end
 
       it 'provisions a specific machineset' do
@@ -265,7 +269,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myappservice')
 
-        cmd.provision argv
+        cmd.provision nil
       end
 
       it 'provisions a specific VM' do
@@ -274,7 +278,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
 
-        cmd.provision argv
+        cmd.provision nil
       end
     end
   end
@@ -328,7 +332,7 @@ describe 'cmd' do
           and_return(['Some stdout output', 'Some stderr output', @return_status])
         expect(@return_status).to receive(:success?).and_return(true)
 
-        cmd.reprovision argv
+        cmd.reprovision nil
       end
 
       it 'reprovisions a machineset' do
@@ -361,7 +365,7 @@ describe 'cmd' do
           and_return(['Some stdout output', 'Some stderr output', @return_status])
         expect(@return_status).to receive(:success?).and_return(true)
 
-        cmd.reprovision argv
+        cmd.reprovision nil
       end
 
       it 'reprovisions dependent k8s services' do
@@ -434,7 +438,7 @@ describe 'cmd' do
           and_return(['Some stdout output', 'Some stderr output', @return_status])
         expect(@return_status).to receive(:success?).and_return(true)
 
-        cmd.reprovision argv
+        cmd.reprovision nil
       end
     end
 
@@ -465,7 +469,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'mystack')
 
-        cmd.reprovision argv
+        cmd.reprovision nil
       end
 
       it 'reprovisions a specific machineset' do
@@ -474,7 +478,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myappservice')
 
-        cmd.reprovision argv
+        cmd.reprovision nil
       end
 
       it 'reprovisions a specific VM' do
@@ -483,7 +487,7 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
 
-        cmd.reprovision argv
+        cmd.reprovision nil
       end
     end
   end
@@ -597,7 +601,7 @@ describe 'cmd' do
 
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
@@ -618,7 +622,7 @@ describe 'cmd' do
       it 'prints enc and spec for a stack' do
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'mystack')
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
@@ -641,7 +645,7 @@ describe 'cmd' do
       it 'prints enc and spec for a specific machineset' do
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'myappservice')
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
@@ -662,7 +666,7 @@ describe 'cmd' do
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'e1-myappservice-001.mgmt.space.net.local')
 
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out).to match(/\be1-myappservice-001.mgmt.space.net.local:.*
@@ -682,7 +686,7 @@ describe 'cmd' do
     it 'fails if the name is not found' do
       cmd = cmd(factory, 'e1', 'notfound')
 
-      expect { cmd.compile argv }.to raise_error('Entity not found')
+      expect { cmd.compile nil }.to raise_error('Entity not found')
     end
 
     it 'fails if more than one entity is found' do
@@ -705,7 +709,7 @@ describe 'cmd' do
 
       cmd = cmd(factory, 'e1', 'dupedservice')
 
-      expect { cmd.compile argv }.to raise_error('Too many entities found')
+      expect { cmd.compile nil }.to raise_error('Too many entities found')
     end
 
     describe "for k8s" do
@@ -746,7 +750,7 @@ describe 'cmd' do
 
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out).to match(/\be1-myvmappservice-001.mgmt.space.net.local:.*
@@ -774,7 +778,7 @@ describe 'cmd' do
 
         out = capture_stdout do
           cmd = cmd(factory, nil, nil)
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out.scan(/---/).size).to eq 1
@@ -786,7 +790,7 @@ describe 'cmd' do
 
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'mystack')
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out).to match(/\be1-myvmappservice-001.mgmt.space.net.local:.*
@@ -803,7 +807,7 @@ describe 'cmd' do
 
         out = capture_stdout do
           cmd = cmd(factory, 'e1', 'myk8sappservice')
-          cmd.compile argv
+          cmd.compile nil
         end
 
         expect(out.scan(/---/).size).to eq 1
