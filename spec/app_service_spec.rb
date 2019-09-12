@@ -148,7 +148,7 @@ describe 'kubernetes' do
                   },
                   {
                     'name' => 'APP_JVM_ARGS',
-                    'value' => '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Xmx64M'
+                    'value' => '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Xms64M -Xmx64M'
                   },
                   {
                     'name' => 'BASE_JVM_ARGS',

@@ -405,7 +405,7 @@ EOC
                 },
                 {
                   'name' => 'APP_JVM_ARGS',
-                  'value' => "#{@jvm_args} -Xmx#{@jvm_heap}"
+                  'value' => "#{@jvm_args} -Xms#{@jvm_heap} -Xmx#{@jvm_heap}"
                 },
                 {
                   'name' => 'BASE_JVM_ARGS',
