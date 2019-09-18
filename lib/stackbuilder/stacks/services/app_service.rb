@@ -305,7 +305,8 @@ EOC
           'port' => 8000,
           'targetPort' => 8000
         }],
-        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(site)).to_s
+        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(site)).to_s,
+        'externalTrafficPolicy' => 'Local'
       }
     }
   end

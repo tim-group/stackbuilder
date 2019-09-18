@@ -305,7 +305,8 @@ describe 'kubernetes' do
             'port' => 8000,
             'targetPort' => 8000
           }],
-          'loadBalancerIP' => '3.1.4.1'
+          'loadBalancerIP' => '3.1.4.1',
+          'externalTrafficPolicy' => 'Local'
         }
       }
       expect(k8s_resource(set, 'Service')).to eql(expected_service)
