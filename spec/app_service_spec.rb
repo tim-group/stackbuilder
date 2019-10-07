@@ -995,7 +995,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -1100,7 +1100,7 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(3)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e1-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
@@ -1230,7 +1230,7 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(3)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-e2-app2-in-to-app1-8000')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
