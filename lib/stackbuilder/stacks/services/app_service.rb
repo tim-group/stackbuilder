@@ -580,6 +580,20 @@ EOC
       end
 
       network_policies << create_ingress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name, standard_labels, filters)
+
+      prom_filters = [{
+        'namespaceSelector' => {
+          'matchLabels' => {
+            'name' => 'monitoring'
+          }
+        },
+        'podSelector' => {
+          'matchLabels' => {
+            'prometheus' => 'main'
+          }
+        }
+      }]
+      network_policies << create_ingress_network_policy('monitoring', 'prom-main', @name, @environment.name, standard_labels, prom_filters)
     end
 
     virtual_services_that_i_depend_on(false).each do |vs|
