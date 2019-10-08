@@ -20,7 +20,8 @@ describe 'kubernetes' do
                           'production-sharedproxy-002.earth.net.local' => '4.1.4.10',
                           'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11',
                           'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12',
-                          'e1-x-vip.earth.net.local' => '3.1.4.13')
+                          'e1-x-vip.earth.net.local' => '3.1.4.13',
+                          'e1-nonk8sapp-001.space.net.local' => '3.1.4.14')
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
@@ -344,10 +345,19 @@ EOL
       }
       expect(k8s_resource(set, 'ConfigMap')).to eql(expected_config_map)
 
-      ordering = {}
-      set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources.each_with_index { |s, index| ordering[s['kind']] = index }
-      expect(ordering['Service']).to be < ordering['Deployment']
-      expect(ordering['ConfigMap']).to be < ordering['Deployment']
+      k8s_resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
+      k8s_resources.group_by { |r| r['metadata']['labels']['app.kubernetes.io/component'] }.each do |_component, resources|
+        ordering = {}
+        resources.each_with_index do |s, index|
+          ordering[s['kind']] = index
+        end
+        if %w(Service Deployment).all? { |k| ordering.key? k }
+          expect(ordering['Service']).to be < ordering['Deployment']
+        end
+        if %w(ConfigMap Deployment).all? { |k| ordering.key? k }
+          expect(ordering['ConfigMap']).to be < ordering['Deployment']
+        end
+      end
     end
 
     describe 'Service' do
@@ -376,6 +386,338 @@ EOL
           to eql(dns_resolver.lookup('e1-x-vip.space.net.local').to_s)
         expect(resources.find { |r| r.site == 'earth' }.resources.find { |r| r['kind'] == 'Service' }['spec']['loadBalancerIP']).
           to eql(dns_resolver.lookup('e1-x-vip.earth.net.local').to_s)
+      end
+    end
+
+    describe 'Ingress' do
+      it 'does not create ingress resources when there are no dependencies external to the cluster' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+        ingress_resources = resources.flat_map(&:resources).select { |r| r['metadata']['labels']['app.kubernetes.io/component'] == 'ingress' }
+        expect(ingress_resources).to be_empty
+      end
+
+      it 'creates ingress resources' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+
+        expected_ingress = {
+          'apiVersion' => 'extensions/v1beta1',
+          'kind' => 'Ingress',
+          'metadata' => {
+            'name' => 'e1_-x',
+            'namespace' => 'e1',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'myapplication',
+              'app.kubernetes.io/instance' => 'e1_-x',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/version' => '1.2.3',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            },
+            'annotations' => {
+              'kubernetes.io/ingress.class' => 'ingress-e1_-x'
+            },
+            'spec' => {
+              'backend' => {
+                'serviceName' => 'myapplication',
+                'servicePort' => 8000
+              }
+            }
+          }
+        }
+
+        expect(k8s_resource(set, 'Ingress')).to eql(expected_ingress)
+      end
+
+      it 'creates a deployment resource for ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_deployment = {
+          'apiVersion' => 'apps/v1',
+          'kind' => 'Deployment',
+          'metadata' => {
+            'name' => 'e1_-x-ingress-controller',
+            'namespace' => 'e1',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'nginx-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/version' => '0.26.1',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            }
+          },
+          'spec' => {
+            'replicas' => 2,
+            'selector' => {
+              'matchLabels' => {
+                'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress'
+              }
+            },
+            'template' => {
+              'metadata' => {
+                'labels' => {
+                  'stack' => 'mystack',
+                  'machineset' => 'x',
+                  'app.kubernetes.io/name' => 'nginx-ingress',
+                  'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress',
+                  'app.kubernetes.io/component' => 'ingress',
+                  'app.kubernetes.io/version' => '0.26.1',
+                  'app.kubernetes.io/managed-by' => 'stacks'
+                }
+              },
+              'spec' => {
+                'containers' => [
+                  {
+                    'args' => [
+                      '/nginx-ingress-controller',
+                      '--configmap=$(POD_NAMESPACE)/myapplication-nginx-config',
+                      '--election-id=ingress-controller-leader-e1_-x',
+                      '--publish-service=$(POD_NAMESPACE)/myapplication-ingress',
+                      '--ingress-class=nginx-e1_-x',
+                      '--http-port=8000'
+                    ],
+                    'env' => [
+                      #          {
+                      #            'name' => 'POD_NAME',
+                      #            'valueFrom' => {
+                      #              'fieldRef' => {
+                      #                'apiVersion' => 'v1',
+                      #                'fieldPath' => 'metadata.name'
+                      #              }
+                      #            }
+                      #          },
+                      {
+                        'name' => 'POD_NAMESPACE',
+                        'valueFrom' => {
+                          'fieldRef' => {
+                            'apiVersion' => 'v1',
+                            'fieldPath' => 'metadata.namespace'
+                          }
+                        }
+                      }
+                    ],
+                    'image' => 'quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1',
+                    'imagePullPolicy' => 'IfNotPresent',
+                    'lifecycle' => {
+                      'preStop' => {
+                        'exec' => {
+                          'command' => [
+                            '/wait-shutdown'
+                          ]
+                        }
+                      }
+                    },
+                    'livenessProbe' => {
+                      'failureThreshold' => 3,
+                      'httpGet' => {
+                        'path' => '/healthz',
+                        'port' => 10254,
+                        'scheme' => 'HTTP'
+                      },
+                      'initialDelaySeconds' => 10,
+                      'periodSeconds' => 10,
+                      'successThreshold' => 1,
+                      'timeoutSeconds' => 10
+                    },
+                    'name' => 'nginx-ingress-controller',
+                    'ports' => [
+                      {
+                        'containerPort' => 80,
+                        'name' => 'http',
+                        'protocol' => 'TCP'
+                      }
+                    ],
+                    'readinessProbe' => {
+                      'failureThreshold' => 3,
+                      'httpGet' => {
+                        'path' => '/healthz',
+                        'port' => 10254,
+                        'scheme' => 'HTTP'
+                      },
+                      'periodSeconds' => 10,
+                      'successThreshold' => 1,
+                      'timeoutSeconds' => 10
+                    },
+                    # FIXME:                    'resources' => {},
+                    'securityContext' => {
+                      'runAsUser' => 33
+                    },
+                    'terminationMessagePath' => '/dev/termination-log',
+                    'terminationMessagePolicy' => 'File'
+                  }
+                ],
+                # FIXME:               'serviceAccountName' => 'nginx-ingress-serviceaccount',
+                'terminationGracePeriodSeconds' => 300
+              }
+            }
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Deployment' && r['metadata']['name'] == 'e1_-x-ingress-controller'
+        end).to eql(expected_deployment)
+      end
+
+      it 'creates a service resource for ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_service = {
+          'apiVersion' => 'v1',
+          'kind' => 'Service',
+          'metadata' => {
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'myapplication-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            },
+            'name' => 'myapplication-ingress',
+            'namespace' => 'e1'
+          },
+          'spec' => {
+            'externalTrafficPolicy' => 'Local',
+            'ports' => [
+              {
+                'name' => 'http',
+                'port' => 80,
+                'protocol' => 'TCP',
+                'targetPort' => 'http'
+              },
+              {
+                'name' => 'https',
+                'port' => 443,
+                'protocol' => 'TCP',
+                'targetPort' => 'https'
+              }
+            ],
+            'selector' => {
+              'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress'
+            },
+            'type' => 'LoadBalancer'
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Service' && r['metadata']['name'] == 'myapplication-ingress'
+        end).to eql(expected_service)
+      end
+
+      it 'creates a configmap resource for ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_configmap = {
+          'kind' => 'ConfigMap',
+          'apiVersion' => 'v1',
+          'metadata' => {
+            'name' => 'myapplication-nginx-config',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'myapplication-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            }
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'ConfigMap' && r['metadata']['name'] == 'myapplication-nginx-config'
+        end).to eql(expected_configmap)
       end
     end
 

@@ -211,6 +211,9 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
       output << generate_k8s_deployment(standard_labels, replicas, used_secrets)
       output += generate_k8s_network_policies(dns_resolver, site, standard_labels)
       output += generate_k8s_service_account(dns_resolver, site, standard_labels)
+
+      output += generate_k8s_ingress_resources(standard_labels)
+
       Stacks::KubernetesResourceBundle.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
     end
   end
@@ -681,6 +684,7 @@ EOC
           'policyTypes' => [
             'Egress'
           ],
+
           'egress' => [{
             'to' => [{
               'ipBlock' => {
@@ -749,5 +753,217 @@ EOC
         'egress' => egresses
       }
     }
+  end
+
+  def generate_k8s_ingress(standard_labels)
+    instance = standard_labels['app.kubernetes.io/instance']
+
+    {
+      'apiVersion' => 'extensions/v1beta1',
+      'kind' => 'Ingress',
+      'metadata' => {
+        'name' => instance,
+        'namespace' => @environment.name,
+        'labels' => standard_labels.merge(
+          'app.kubernetes.io/component' => 'ingress'
+        ),
+        'annotations' => {
+          'kubernetes.io/ingress.class' => "ingress-#{instance}"
+        },
+        'spec' => {
+          'backend' => {
+            'serviceName' => standard_labels['app.kubernetes.io/name'],
+            'servicePort' => 8000
+          }
+        }
+      }
+    }
+  end
+
+  def generate_k8s_ingress_controller_config_map(standard_labels)
+    instance = standard_labels['app.kubernetes.io/instance']
+    app_name = standard_labels['app.kubernetes.io/name']
+    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
+                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
+                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
+    {
+      'kind' => 'ConfigMap',
+      'apiVersion' => 'v1',
+      'metadata' => {
+        'name' => "#{app_name}-nginx-config",
+        'labels' => labels
+      }
+    }
+  end
+
+  def generate_k8s_ingress_controller_service(standard_labels)
+    instance = standard_labels['app.kubernetes.io/instance']
+    app_name = standard_labels['app.kubernetes.io/name']
+    ingress_service_labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
+                                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
+                                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
+    {
+      'apiVersion' => 'v1',
+      'kind' => 'Service',
+      'metadata' => {
+        'labels' => ingress_service_labels,
+        'name' => "#{app_name}-ingress",
+        'namespace' => @environment.name
+      },
+      'spec' => {
+        'externalTrafficPolicy' => 'Local',
+        'ports' => [
+          {
+            'name' => 'http',
+            'port' => 80,
+            'protocol' => 'TCP',
+            'targetPort' => 'http'
+          },
+          {
+            'name' => 'https',
+            'port' => 443,
+            'protocol' => 'TCP',
+            'targetPort' => 'https'
+          }
+        ],
+        'selector' => {
+          'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
+        },
+        'type' => 'LoadBalancer'
+      }
+    }
+  end
+
+  def generate_k8s_ingress_controller_deployment(standard_labels)
+    instance = standard_labels['app.kubernetes.io/instance']
+    app_name = standard_labels['app.kubernetes.io/name']
+    ingress_controller_labels = standard_labels.merge('app.kubernetes.io/name' => 'nginx-ingress',
+                                                      'app.kubernetes.io/instance' => "#{instance}-nginx-ingress",
+                                                      'app.kubernetes.io/component' => 'ingress',
+                                                      'app.kubernetes.io/version' => '0.26.1')
+
+    {
+      'apiVersion' => 'apps/v1',
+      'kind' => 'Deployment',
+      'metadata' => {
+        'name' => "#{instance}-ingress-controller",
+        'namespace' => @environment.name,
+        'labels' => ingress_controller_labels
+      },
+      'spec' => {
+        'replicas' => 2,
+        'selector' => {
+          'matchLabels' => {
+            'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
+          }
+        },
+        'template' => {
+          'metadata' => {
+            'labels' => ingress_controller_labels
+          },
+          'spec' => {
+            'containers' => [
+              {
+                'args' => [
+                  '/nginx-ingress-controller',
+                  "--configmap=$(POD_NAMESPACE)/#{app_name}-nginx-config",
+                  "--election-id=ingress-controller-leader-#{instance}",
+                  "--publish-service=$(POD_NAMESPACE)/#{app_name}-ingress",
+                  "--ingress-class=nginx-#{instance}",
+                  '--http-port=8000'
+                ],
+                'env' => [
+                  #          {
+                  #            'name' => 'POD_NAME',
+                  #            'valueFrom' => {
+                  #              'fieldRef' => {
+                  #                'apiVersion' => 'v1',
+                  #                'fieldPath' => 'metadata.name'
+                  #              }
+                  #            }
+                  #          },
+                  {
+                    'name' => 'POD_NAMESPACE',
+                    'valueFrom' => {
+                      'fieldRef' => {
+                        'apiVersion' => 'v1',
+                        'fieldPath' => 'metadata.namespace'
+                      }
+                    }
+                  }
+                ],
+                'image' => 'quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1',
+                'imagePullPolicy' => 'IfNotPresent',
+                'lifecycle' => {
+                  'preStop' => {
+                    'exec' => {
+                      'command' => [
+                        '/wait-shutdown'
+                      ]
+                    }
+                  }
+                },
+                'livenessProbe' => {
+                  'failureThreshold' => 3,
+                  'httpGet' => {
+                    'path' => '/healthz',
+                    'port' => 10254,
+                    'scheme' => 'HTTP'
+                  },
+                  'initialDelaySeconds' => 10,
+                  'periodSeconds' => 10,
+                  'successThreshold' => 1,
+                  'timeoutSeconds' => 10
+                },
+                'name' => 'nginx-ingress-controller',
+                'ports' => [
+                  {
+                    'containerPort' => 80,
+                    'name' => 'http',
+                    'protocol' => 'TCP'
+                  }
+                ],
+                'readinessProbe' => {
+                  'failureThreshold' => 3,
+                  'httpGet' => {
+                    'path' => '/healthz',
+                    'port' => 10254,
+                    'scheme' => 'HTTP'
+                  },
+                  'periodSeconds' => 10,
+                  'successThreshold' => 1,
+                  'timeoutSeconds' => 10
+                },
+                # FIXME:                    'resources' => {},
+                'securityContext' => {
+                  'runAsUser' => 33
+                },
+                'terminationMessagePath' => '/dev/termination-log',
+                'terminationMessagePolicy' => 'File'
+              }
+            ],
+            # FIXME:               'serviceAccountName' => 'nginx-ingress-serviceaccount',
+            'terminationGracePeriodSeconds' => 300
+          }
+        }
+      }
+    }
+  end
+
+  def generate_k8s_ingress_resources(standard_labels)
+    output = []
+    non_k8s_deps = virtual_services_that_depend_on_me.collect do |vs|
+      !vs.kubernetes
+    end
+
+    if non_k8s_deps.size > 0
+      output << generate_k8s_ingress(standard_labels)
+      output << generate_k8s_ingress_controller_config_map(standard_labels)
+      output << generate_k8s_ingress_controller_service(standard_labels)
+      output << generate_k8s_ingress_controller_deployment(standard_labels)
+    end
+    output
   end
 end
