@@ -449,12 +449,12 @@ EOL
             },
             'annotations' => {
               'kubernetes.io/ingress.class' => 'ingress-e1_-x'
-            },
-            'spec' => {
-              'backend' => {
-                'serviceName' => 'myapplication',
-                'servicePort' => 8000
-              }
+            }
+          },
+          'spec' => {
+            'backend' => {
+              'serviceName' => 'myapplication',
+              'servicePort' => 8000
             }
           }
         }

@@ -769,12 +769,12 @@ EOC
         ),
         'annotations' => {
           'kubernetes.io/ingress.class' => "ingress-#{instance}"
-        },
-        'spec' => {
-          'backend' => {
-            'serviceName' => standard_labels['app.kubernetes.io/name'],
-            'servicePort' => 8000
-          }
+        }
+      },
+      'spec' => {
+        'backend' => {
+          'serviceName' => standard_labels['app.kubernetes.io/name'],
+          'servicePort' => 8000
         }
       }
     }
