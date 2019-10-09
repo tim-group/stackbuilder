@@ -46,13 +46,13 @@ class Stacks::KubernetesResourceBundle
     end
 
     k8s_defns_yaml = to_defns_yaml
-    command = ['kubectl', 'apply',
+    command = ['apply',
                '--context', @site,
                '--prune',
                '-l', "stack=#{@stack_name},machineset=#{@machine_set_name},app.kubernetes.io/managed-by=stacks",
                '-f', '-']
     logger(Logger::DEBUG) { "running command: #{command.join(' ')}" }
-    stdout_str, error_str, status = Open3.capture3(*command, :stdin_data => k8s_defns_yaml)
+    stdout_str, error_str, status = run_kubectl(*command, :stdin_data => k8s_defns_yaml)
     if status.success?
       logger(Logger::INFO) { stdout_str }
     else
@@ -63,18 +63,32 @@ class Stacks::KubernetesResourceBundle
   def clean
     kinds = (@resources.map { |r| r['kind'].downcase } + ['secret']).uniq.join(',')
 
-    stdout_str, error_str, status = Open3.capture3('kubectl',
-                                                   'delete',
-                                                   kinds,
-                                                   '--context',
-                                                   @site,
-                                                   '-l',
-                                                   "stack=#{@stack_name},machineset=#{@machine_set_name}",
-                                                   '-n', @environment_name)
+    stdout_str, error_str, status = run_kubectl('delete',
+                                                kinds,
+                                                '--context',
+                                                @site,
+                                                '-l',
+                                                "stack=#{@stack_name},machineset=#{@machine_set_name}",
+                                                '-n', @environment_name)
     if status.success?
       logger(Logger::INFO) { stdout_str }
     else
       fail "Failed to delete k8s resource definitions - error: #{error_str}"
     end
+  end
+
+  private
+
+  def run_kubectl(*args)
+    stdout_str, _error_str, _status = Open3.capture3('kubectl', 'version', '--context', @site, '-o', 'yaml')
+    cmd_output_hash = YAML.load(stdout_str)
+    client_version = cmd_output_hash['clientVersion']
+    server_version = cmd_output_hash['serverVersion']
+
+    if client_version['major'] < server_version['major'] ||
+       (client_version['major'] == server_version['major']) && (client_version['minor'] < server_version['minor'])
+      fail "Your kubectl version is out of date. Please update to at least version #{server_version['major']}.#{server_version['minor']}"
+    end
+    Open3.capture3('kubectl', *args)
   end
 end

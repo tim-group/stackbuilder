@@ -114,6 +114,24 @@ describe 'cmd' do
           block.call(mco)
         end
 
+        stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+
+        allow(@open3).to receive(:capture3).
+          with('kubectl',
+               'version',
+               '--context',
+               'space',
+               '-o',
+               'yaml').
+          and_return([stdout, 'Some stderr output', @return_status])
+
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
@@ -191,6 +209,24 @@ describe 'cmd' do
 
         mco = double('mcollective client')
         expect(mco).to receive(:insert).with(any_args).and_return([]).twice
+
+        stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+
+        allow(@open3).to receive(:capture3).
+          with('kubectl',
+               'version',
+               '--context',
+               'space',
+               '-o',
+               'yaml').
+          and_return([stdout, 'Some stderr output', @return_status])
 
         expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space').twice do |*_args, &block|
           block.call(mco)
@@ -297,6 +333,24 @@ describe 'cmd' do
           block.call(mco)
         end
 
+        stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+
+        allow(@open3).to receive(:capture3).
+          with('kubectl',
+               'version',
+               '--context',
+               'space',
+               '-o',
+               'yaml').
+          and_return([stdout, 'Some stderr output', @return_status])
+
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'apply',
@@ -346,6 +400,24 @@ describe 'cmd' do
         expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space') do |*_args, &block|
           block.call(mco)
         end
+
+        stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+
+        allow(@open3).to receive(:capture3).
+          with('kubectl',
+               'version',
+               '--context',
+               'space',
+               '-o',
+               'yaml').
+          and_return([stdout, 'Some stderr output', @return_status])
 
         expect(@open3).to receive(:capture3).
           with('kubectl',
@@ -402,6 +474,24 @@ describe 'cmd' do
         expect(cmd).to receive(:mco_client).with('k8ssecret', :fabric => 'space').twice do |*_args, &block|
           block.call(mco)
         end
+
+        stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+
+        allow(@open3).to receive(:capture3).
+          with('kubectl',
+               'version',
+               '--context',
+               'space',
+               '-o',
+               'yaml').
+          and_return([stdout, 'Some stderr output', @return_status])
 
         expect(@open3).to receive(:capture3).
           with('kubectl',
@@ -499,6 +589,24 @@ describe 'cmd' do
 
         cmd = cmd(factory, 'e1', 'myk8sstack')
 
+        stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+
+        allow(@open3).to receive(:capture3).
+          with('kubectl',
+               'version',
+               '--context',
+               'space',
+               '-o',
+               'yaml').
+          and_return([stdout, 'Some stderr output', @return_status])
+
         expect(@open3).to receive(:capture3).
           with('kubectl',
                'delete',
@@ -531,6 +639,24 @@ describe 'cmd' do
         allow(@dns_resolver).to receive(:lookup).with(anything)
 
         cmd = cmd(factory, 'e1', 'myk8sappservice')
+
+        stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+
+        allow(@open3).to receive(:capture3).
+          with('kubectl',
+               'version',
+               '--context',
+               'space',
+               '-o',
+               'yaml').
+          and_return([stdout, 'Some stderr output', @return_status])
 
         expect(@open3).to receive(:capture3).
           with('kubectl',
