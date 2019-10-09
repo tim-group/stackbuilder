@@ -704,6 +704,7 @@ EOL
           'apiVersion' => 'v1',
           'metadata' => {
             'name' => 'myapplication-nginx-config',
+            'namespace' => 'e1',
             'labels' => {
               'stack' => 'mystack',
               'machineset' => 'x',

@@ -792,6 +792,7 @@ EOC
       'apiVersion' => 'v1',
       'metadata' => {
         'name' => "#{app_name}-nginx-config",
+        'namespace' => @environment.name,
         'labels' => labels
       }
     }
