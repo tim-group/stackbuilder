@@ -553,96 +553,9 @@ EOC
 
   def generate_k8s_network_policies(dns_resolver, site, standard_labels)
     network_policies = []
-    virtual_services_that_depend_on_me.each do |vs|
-      is_same_site = requirements_of(vs).include?(:same_site)
-      next if is_same_site && !vs.exists_in_site?(vs.environment, site)
 
-      filters = []
-      if vs.kubernetes
-        filters << {
-          'podSelector' => {
-            'matchLabels' => {
-              'app.kubernetes.io/instance' => instance_name_of(vs)
-            }
-          },
-          'namespaceSelector' => {
-            'matchLabels' => {
-              'name' => vs.environment.name
-            }
-          }
-        }
-      else
-        dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }
-        dependant_vms.each do |vm|
-          filters << {
-            'ipBlock' => {
-              'cidr' => "#{dns_resolver.lookup(vm.qualified_hostname(@environment.primary_network))}/32"
-            }
-          }
-        end
-      end
-
-      network_policies << create_ingress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name, standard_labels, filters)
-
-      prom_filters = [{
-        'namespaceSelector' => {
-          'matchLabels' => {
-            'name' => 'monitoring'
-          }
-        },
-        'podSelector' => {
-          'matchLabels' => {
-            'prometheus' => 'main'
-          }
-        }
-      }]
-      network_policies << create_ingress_network_policy('monitoring', 'prom-main', @name, @environment.name, standard_labels, prom_filters)
-    end
-
-    virtual_services_that_i_depend_on(false).each do |vs|
-      fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
-
-      chosen_site_of_vs = vs.exists_in_site?(vs.environment, site) ? site : vs.environment.primary_site
-      endpoints = vs.endpoints(self, chosen_site_of_vs)
-
-      egresses = []
-      if vs.kubernetes
-        egresses << {
-          'to' => [{
-            'podSelector' => {
-              'matchLabels' => {
-                'app.kubernetes.io/instance' => instance_name_of(vs)
-              }
-            },
-            'namespaceSelector' => {
-              'matchLabels' => {
-                'name' => vs.environment.name
-              }
-            }
-          }],
-          'ports' => [{
-            'protocol' => 'TCP',
-            'port' => 8000
-          }]
-        }
-      else
-        endpoints.each do |e|
-          ip_blocks = []
-          e[:fqdns].uniq.each do |fqdn|
-            ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
-          end
-          egresses << {
-            'to' => ip_blocks,
-            'ports' => [{
-              'protocol' => 'TCP',
-              'port' => e[:port]
-            }]
-          }
-        end
-      end
-      ports = endpoints.map { |e| e[:port] }.join('-')
-      network_policies << create_egress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name, standard_labels, ports, egresses)
-    end
+    network_policies += generate_k8s_network_policies_for_dependents(dns_resolver, site, standard_labels)
+    network_policies += generate_k8s_network_policies_for_dependencies(dns_resolver, site, standard_labels)
 
     nexus_filters = [{
       'to' => [{ 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup('office-nexus-001.mgmt.lon.net.local')}/32" } }],
@@ -652,7 +565,8 @@ EOC
       }]
     }]
 
-    network_policies << create_egress_network_policy('office', 'nexus', @name, @environment.name, standard_labels, '8080', nexus_filters)
+    network_policies << create_egress_network_policy('office', 'nexus', @name, @environment.name, standard_labels,
+                                                     '8080', nexus_filters, standard_labels['app.kubernetes.io/instance'])
 
     network_policies
   end
@@ -703,12 +617,46 @@ EOC
     end
   end
 
-  def create_ingress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, filters)
+  def create_ingress_network_policy_for_external_service(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, filters)
+    instance = standard_labels['app.kubernetes.io/instance']
+    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
+                                   'app.kubernetes.io/instance' => "#{instance}-ingress",
+                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
     {
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
       'metadata' => {
-        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-8000",
+        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-ingress-http",
+        'namespace' => env_name,
+        'labels' => labels
+      },
+      'spec' => {
+        'podSelector' => {
+          'matchLabels' => {
+            'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
+          }
+        },
+        'policyTypes' => [
+          'Ingress'
+        ],
+        'ingress' => [{
+          'from' => filters,
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => 'http'
+          }]
+        }]
+      }
+    }
+  end
+
+  def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, port, filters)
+    {
+      'apiVersion' => 'networking.k8s.io/v1',
+      'kind' => 'NetworkPolicy',
+      'metadata' => {
+        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-#{port}",
         'namespace' => env_name,
         'labels' => standard_labels
       },
@@ -725,14 +673,15 @@ EOC
           'from' => filters,
           'ports' => [{
             'protocol' => 'TCP',
-            'port' => 8000
+            'port' => port
           }]
         }]
       }
     }
   end
 
-  def create_egress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, ports, egresses)
+  def create_egress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name,
+                                   standard_labels, ports, egresses, pod_selector_instance_value)
     {
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
@@ -744,7 +693,7 @@ EOC
       'spec' => {
         'podSelector' => {
           'matchLabels' => {
-            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
+            'app.kubernetes.io/instance' => pod_selector_instance_value
           }
         },
         'policyTypes' => [
@@ -1095,5 +1044,117 @@ EOC
       output << generate_k8s_ingress_controller_deployment(standard_labels)
     end
     output
+  end
+
+  def generate_pod_and_namespace_selector_filter(namespace, pod_label, pod_label_value)
+    {
+      'podSelector' => {
+        'matchLabels' => {
+          pod_label => pod_label_value
+        }
+      },
+      'namespaceSelector' => {
+        'matchLabels' => {
+          'name' => namespace
+        }
+      }
+    }
+  end
+
+  def generate_k8s_network_policies_for_dependents(dns_resolver, site, standard_labels)
+    network_policies = []
+    virtual_services_that_depend_on_me.each do |vs|
+      is_same_site = requirements_of(vs).include?(:same_site)
+      next if is_same_site && !vs.exists_in_site?(vs.environment, site)
+
+      filters = []
+      if vs.kubernetes
+        filters << generate_pod_and_namespace_selector_filter(vs.environment.name, 'app.kubernetes.io/instance', instance_name_of(vs))
+        network_policies << create_ingress_network_policy_for_internal_service(vs.environment.name, vs.short_name,
+                                                                               @name, @environment.name, standard_labels, 8000, filters)
+      else
+        dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }
+        dependant_vms.each do |vm|
+          filters << {
+            'ipBlock' => {
+              'cidr' => "#{dns_resolver.lookup(vm.qualified_hostname(@environment.primary_network))}/32"
+            }
+          }
+        end
+        network_policies << create_ingress_network_policy_for_external_service(vs.environment.name, vs.short_name,
+                                                                               @name, @environment.name, standard_labels, filters)
+
+        instance = standard_labels['app.kubernetes.io/instance']
+        labels = standard_labels.merge('app.kubernetes.io/name' => "#{short_name}-ingress",
+                                       'app.kubernetes.io/instance' => "#{instance}-ingress",
+                                       'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
+        egresses = [{
+          'to' => [
+            generate_pod_and_namespace_selector_filter(@environment.name, 'app.kubernetes.io/instance', standard_labels['app.kubernetes.io/instance'])
+          ],
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => 'app'
+          }]
+        }]
+        network_policies << create_egress_network_policy(@environment.name, short_name, "#{short_name}-ingress",
+                                                         @environment.name, labels, 'app', egresses, "#{instance}-nginx-ingress")
+
+        internal_ingress_filters = [generate_pod_and_namespace_selector_filter(@environment.name, 'app.kubernetes.io/instance',
+                                                                               "#{instance}-nginx-ingress")]
+        network_policies << create_ingress_network_policy_for_internal_service(@environment.name, "#{short_name}-ingress",
+                                                                               short_name, @environment.name, standard_labels, 'app',
+                                                                               internal_ingress_filters)
+      end
+
+      prom_filters = [
+        generate_pod_and_namespace_selector_filter('monitoring', 'prometheus', 'main')
+      ]
+      network_policies << create_ingress_network_policy_for_internal_service('monitoring', 'prom-main',
+                                                                             @name, @environment.name, standard_labels, 8000, prom_filters)
+    end
+    network_policies
+  end
+
+  def generate_k8s_network_policies_for_dependencies(dns_resolver, site, standard_labels)
+    network_policies = []
+    virtual_services_that_i_depend_on(false).each do |vs|
+      fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
+
+      chosen_site_of_vs = vs.exists_in_site?(vs.environment, site) ? site : vs.environment.primary_site
+      endpoints = vs.endpoints(self, chosen_site_of_vs)
+
+      egresses = []
+      if vs.kubernetes
+        egresses << {
+          'to' => [
+            generate_pod_and_namespace_selector_filter(vs.environment.name, 'app.kubernetes.io/instance', instance_name_of(vs))
+          ],
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => 8000
+          }]
+        }
+      else
+        endpoints.each do |e|
+          ip_blocks = []
+          e[:fqdns].uniq.each do |fqdn|
+            ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
+          end
+          egresses << {
+            'to' => ip_blocks,
+            'ports' => [{
+              'protocol' => 'TCP',
+              'port' => e[:port]
+            }]
+          }
+        end
+      end
+      ports = endpoints.map { |e| e[:port] }.join('-')
+      network_policies << create_egress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name,
+                                                       standard_labels, ports, egresses, standard_labels['app.kubernetes.io/instance'])
+    end
+    network_policies
   end
 end

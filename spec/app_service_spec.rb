@@ -1503,7 +1503,7 @@ EOL
       depends_on_everything_resources = machine_sets['target'].to_k8s(app_deployer, dns, hiera_provider)
 
       policy = depends_on_everything_resources.first.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-source-in-to-target-8000'
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-source-in-to-target-ingress-http'
       end
 
       expect(policy['spec']['ingress'][0]['from']).to eq([
@@ -1511,7 +1511,7 @@ EOL
       ])
     end
 
-    it 'should create the correct ingress network policies for a service in kubernetes when another non kubernetes service depends on it' do
+    it 'should create the correct network policies for a service in kubernetes when another non kubernetes service depends on it' do
       factory = eval_stacks do
         stack "test_app_servers" do
           app_service 'app1' do
@@ -1542,10 +1542,69 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(3)
-      expect(network_policies.first['metadata']['name']).to eql('allow-e1-app1-in-to-app2-8000')
-      expect(network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(network_policies.first['metadata']['labels']).to eql(
+      expect(network_policies.size).to eq(5)
+
+      ingress_controller_ingress_policy = network_policies.find do |r|
+        r['metadata']['name'] == 'allow-e1-app1-in-to-app2-ingress-http'
+      end
+
+      expect(ingress_controller_ingress_policy).not_to be_nil
+      expect(ingress_controller_ingress_policy['metadata']['namespace']).to eql('e1')
+      expect(ingress_controller_ingress_policy['metadata']['labels']).to eql(
+        'stack' => 'test_app_servers',
+        'machineset' => 'app2',
+        'app.kubernetes.io/name' => 'app2-ingress',
+        'app.kubernetes.io/instance' => 'e1_-app2-ingress',
+        'app.kubernetes.io/component' => 'ingress',
+        'app.kubernetes.io/managed-by' => 'stacks'
+      )
+      expect(ingress_controller_ingress_policy['spec']['podSelector']['matchLabels']).to eql(
+        'app.kubernetes.io/instance' => 'e1_-app2-nginx-ingress'
+      )
+      expect(ingress_controller_ingress_policy['spec']['policyTypes']).to eql(['Ingress'])
+      expect(ingress_controller_ingress_policy['spec']['ingress'].size).to eq(1)
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['from'].size).to eq(2)
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].size).to eq(1)
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.3/32' })
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('http')
+
+      ingress_controller_egress_policy = network_policies.find do |r|
+        r['metadata']['name'] == 'allow-app2-ingress-out-to-e1-app2-app'
+      end
+
+      expect(ingress_controller_egress_policy).not_to be_nil
+      expect(ingress_controller_egress_policy['metadata']['namespace']).to eql('e1')
+      expect(ingress_controller_egress_policy['metadata']['labels']).to eql(
+        'stack' => 'test_app_servers',
+        'machineset' => 'app2',
+        'app.kubernetes.io/name' => 'app2-ingress',
+        'app.kubernetes.io/instance' => 'e1_-app2-ingress',
+        'app.kubernetes.io/component' => 'ingress',
+        'app.kubernetes.io/managed-by' => 'stacks'
+      )
+      expect(ingress_controller_egress_policy['spec']['podSelector']['matchLabels']).to eql(
+        'app.kubernetes.io/instance' => 'e1_-app2-nginx-ingress'
+      )
+      expect(ingress_controller_egress_policy['spec']['policyTypes']).to eql(['Egress'])
+      expect(ingress_controller_egress_policy['spec']['egress'].size).to eq(1)
+      expect(ingress_controller_egress_policy['spec']['egress'].first['to'].size).to eq(1)
+      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].size).to eq(1)
+      expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['podSelector']['matchLabels']).to eql(
+        'app.kubernetes.io/instance' => 'e1_-app2'
+      )
+      expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
+      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
+      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['port']).to eq('app')
+
+      app_ingress_policy = network_policies.find do |r|
+        r['metadata']['name'] == 'allow-e1-app2-ingress-in-to-app2-app'
+      end
+
+      expect(app_ingress_policy).not_to be_nil
+      expect(app_ingress_policy['metadata']['namespace']).to eql('e1')
+      expect(app_ingress_policy['metadata']['labels']).to eql(
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
         'app.kubernetes.io/name' => 'app2',
@@ -1554,17 +1613,19 @@ EOL
         'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks'
       )
-      expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
+      expect(app_ingress_policy['spec']['podSelector']['matchLabels']).to eql(
         'app.kubernetes.io/instance' => 'e1_-app2'
       )
-      expect(network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
-      expect(network_policies.first['spec']['ingress'].size).to eq(1)
-      expect(network_policies.first['spec']['ingress'].first['from'].size).to eq(2)
-      expect(network_policies.first['spec']['ingress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
-      expect(network_policies.first['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.3/32' })
-      expect(network_policies.first['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(network_policies.first['spec']['ingress'].first['ports'].first['port']).to eq(8000)
+      expect(app_ingress_policy['spec']['policyTypes']).to eql(['Ingress'])
+      expect(app_ingress_policy['spec']['ingress'].size).to eq(1)
+      expect(app_ingress_policy['spec']['ingress'].first['from'].size).to eq(1)
+      expect(app_ingress_policy['spec']['ingress'].first['ports'].size).to eq(1)
+      expect(app_ingress_policy['spec']['ingress'].first['from'].first['podSelector']['matchLabels']).to eql(
+        'app.kubernetes.io/instance' => 'e1_-app2-nginx-ingress'
+      )
+      expect(app_ingress_policy['spec']['ingress'].first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
+      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
+      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('app')
     end
 
     it 'should create the correct egress network policies for a service in kubernetes when that service depends on another non kubernetes service' do
