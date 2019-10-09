@@ -984,7 +984,7 @@ EOC
                 'terminationMessagePolicy' => 'File'
               }
             ],
-            # FIXME:               'serviceAccountName' => 'nginx-ingress-serviceaccount',
+            'serviceAccountName' => "#{app_name}-ingress",
             'terminationGracePeriodSeconds' => 300
           }
         }

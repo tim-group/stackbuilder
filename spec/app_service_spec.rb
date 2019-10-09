@@ -600,7 +600,7 @@ EOL
                     'terminationMessagePolicy' => 'File'
                   }
                 ],
-                # FIXME:               'serviceAccountName' => 'nginx-ingress-serviceaccount',
+                'serviceAccountName' => 'myapplication-ingress',
                 'terminationGracePeriodSeconds' => 300
               }
             }
