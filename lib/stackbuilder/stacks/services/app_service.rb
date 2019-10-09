@@ -1043,6 +1043,42 @@ EOC
     }
   end
 
+  def generate_k8s_ingress_controller_service_account(standard_labels)
+    instance = standard_labels['app.kubernetes.io/instance']
+    app_name = standard_labels['app.kubernetes.io/name']
+    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
+                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
+                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
+    {
+      'kind' => 'ServiceAccount',
+      'apiVersion' => 'v1',
+      'metadata' => {
+        'name' => "#{app_name}-ingress",
+        'namespace' => @environment.name,
+        'labels' => labels
+      }
+    }
+  end
+
+  def generate_k8s_ingress_controller_role_binding(standard_labels)
+    instance = standard_labels['app.kubernetes.io/instance']
+    app_name = standard_labels['app.kubernetes.io/name']
+    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
+                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
+                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
+    {
+      'kind' => 'RoleBinding',
+      'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+      'metadata' => {
+        'name' => "#{app_name}-ingress",
+        'namespace' => @environment.name,
+        'labels' => labels
+      }
+    }
+  end
+
   def generate_k8s_ingress_resources(standard_labels)
     output = []
     non_k8s_deps = virtual_services_that_depend_on_me.collect do |vs|
@@ -1051,7 +1087,9 @@ EOC
 
     if non_k8s_deps.size > 0
       output << generate_k8s_ingress(standard_labels)
+      output << generate_k8s_ingress_controller_service_account(standard_labels)
       output << generate_k8s_ingress_controller_role(standard_labels)
+      output << generate_k8s_ingress_controller_role_binding(standard_labels)
       output << generate_k8s_ingress_controller_config_map(standard_labels)
       output << generate_k8s_ingress_controller_service(standard_labels)
       output << generate_k8s_ingress_controller_deployment(standard_labels)

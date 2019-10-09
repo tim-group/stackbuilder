@@ -836,6 +836,94 @@ EOL
           r['kind'] == 'Role' && r['metadata']['name'] == 'myapplication-ingress'
         end).to eql(expected_role)
       end
+
+      it 'creates a serviceaccount resource for ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_service_account = {
+          'kind' => 'ServiceAccount',
+          'apiVersion' => 'v1',
+          'metadata' => {
+            'name' => 'myapplication-ingress',
+            'namespace' => 'e1',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'myapplication-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            }
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'ServiceAccount' && r['metadata']['name'] == 'myapplication-ingress'
+        end).to eql(expected_service_account)
+      end
+
+      it 'creates a role binding resource for ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_role_binding = {
+          'kind' => 'RoleBinding',
+          'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+          'metadata' => {
+            'name' => 'myapplication-ingress',
+            'namespace' => 'e1',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'myapplication-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            }
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'RoleBinding' && r['metadata']['name'] == 'myapplication-ingress'
+        end).to eql(expected_role_binding)
+      end
     end
 
     describe 'instance control' do
