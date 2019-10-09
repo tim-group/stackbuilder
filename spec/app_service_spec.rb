@@ -930,7 +930,16 @@ EOL
               'app.kubernetes.io/component' => 'ingress',
               'app.kubernetes.io/managed-by' => 'stacks'
             }
-          }
+          },
+          'roleRef' => {
+            'apiGroup' => 'rbac.authorization.k8s.io',
+            'kind' => 'Role',
+            'name' => 'myapplication-ingress'
+          },
+          'subjects' => [{
+            'kind' => 'ServiceAccount',
+            'name' => 'myapplication-ingress'
+          }]
         }
 
         expect(resources.flat_map(&:resources).find do |r|

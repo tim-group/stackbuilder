@@ -1023,7 +1023,16 @@ EOC
         'name' => "#{app_name}-ingress",
         'namespace' => @environment.name,
         'labels' => labels
-      }
+      },
+      'roleRef' => {
+        'apiGroup' => 'rbac.authorization.k8s.io',
+        'kind' => 'Role',
+        'name' => "#{app_name}-ingress"
+      },
+      'subjects' => [{
+        'kind' => 'ServiceAccount',
+        'name' => "#{app_name}-ingress"
+      }]
     }
   end
 
