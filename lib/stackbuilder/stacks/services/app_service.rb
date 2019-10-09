@@ -780,6 +780,96 @@ EOC
     }
   end
 
+  def generate_k8s_ingress_controller_role(standard_labels)
+    instance = standard_labels['app.kubernetes.io/instance']
+    app_name = standard_labels['app.kubernetes.io/name']
+    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
+                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
+                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
+    {
+      'kind' => 'Role',
+      'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+      'metadata' => {
+        'name' => "#{app_name}-ingress",
+        'namespace' => @environment.name,
+        'labels' => labels
+      },
+      'rules' => [
+        {
+          'apiGroups' => [
+            ""
+          ],
+          'resources' => %w(configmaps pods secrets endpoints),
+          'verbs' => %w(get list watch)
+        },
+        {
+          "apiGroups" => [
+            ""
+          ],
+          "resourceNames" => [
+            "ingress-controller-leader-#{instance}-nginx-#{instance}"
+          ],
+          "resources" => [
+            "configmaps"
+          ],
+          "verbs" => %w(create get update)
+        },
+        {
+          "apiGroups" => [
+            ""
+          ],
+          "resources" => [
+            "endpoints"
+          ],
+          "verbs" => [
+            "get"
+          ]
+        },
+        {
+          "apiGroups" => [
+            ""
+          ],
+          "resources" => [
+            "services"
+          ],
+          "verbs" => %w(get list watch)
+        },
+        {
+          "apiGroups" => [
+            ""
+          ],
+          "resources" => [
+            "events"
+          ],
+          "verbs" => %w(create patch)
+        },
+        {
+          "apiGroups" => [
+            "extensions",
+            "networking.k8s.io"
+          ],
+          "resources" => [
+            "ingresses"
+          ],
+          "verbs" => %w(get list watch)
+        },
+        {
+          "apiGroups" => [
+            "extensions",
+            "networking.k8s.io"
+          ],
+          "resources" => [
+            "ingresses/status"
+          ],
+          "verbs" => [
+            "update"
+          ]
+        }
+      ]
+    }
+  end
+
   def generate_k8s_ingress_controller_config_map(standard_labels)
     instance = standard_labels['app.kubernetes.io/instance']
     app_name = standard_labels['app.kubernetes.io/name']
@@ -961,6 +1051,7 @@ EOC
 
     if non_k8s_deps.size > 0
       output << generate_k8s_ingress(standard_labels)
+      output << generate_k8s_ingress_controller_role(standard_labels)
       output << generate_k8s_ingress_controller_config_map(standard_labels)
       output << generate_k8s_ingress_controller_service(standard_labels)
       output << generate_k8s_ingress_controller_deployment(standard_labels)

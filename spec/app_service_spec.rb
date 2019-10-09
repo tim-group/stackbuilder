@@ -720,6 +720,122 @@ EOL
           r['kind'] == 'ConfigMap' && r['metadata']['name'] == 'myapplication-nginx-config'
         end).to eql(expected_configmap)
       end
+
+      it 'creates a role resource for ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_role = {
+          'kind' => 'Role',
+          'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+          'metadata' => {
+            'name' => 'myapplication-ingress',
+            'namespace' => 'e1',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'myapplication-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            }
+          },
+          'rules' => [
+            {
+              'apiGroups' => [
+                ""
+              ],
+              'resources' => %w(configmaps pods secrets endpoints),
+              'verbs' => %w(get list watch)
+            },
+            {
+              "apiGroups" => [
+                ""
+              ],
+              "resourceNames" => [
+                "ingress-controller-leader-e1_-x-nginx-e1_-x"
+              ],
+              "resources" => [
+                "configmaps"
+              ],
+              "verbs" => %w(create get update)
+            },
+            {
+              "apiGroups" => [
+                ""
+              ],
+              "resources" => [
+                "endpoints"
+              ],
+              "verbs" => [
+                "get"
+              ]
+            },
+            {
+              "apiGroups" => [
+                ""
+              ],
+              "resources" => [
+                "services"
+              ],
+              "verbs" => %w(get list watch)
+            },
+            {
+              "apiGroups" => [
+                ""
+              ],
+              "resources" => [
+                "events"
+              ],
+              "verbs" => %w(create patch)
+            },
+            {
+              "apiGroups" => [
+                "extensions",
+                "networking.k8s.io"
+              ],
+              "resources" => [
+                "ingresses"
+              ],
+              "verbs" => %w(get list watch)
+            },
+            {
+              "apiGroups" => [
+                "extensions",
+                "networking.k8s.io"
+              ],
+              "resources" => [
+                "ingresses/status"
+              ],
+              "verbs" => [
+                "update"
+              ]
+            }
+          ]
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Role' && r['metadata']['name'] == 'myapplication-ingress'
+        end).to eql(expected_role)
+      end
     end
 
     describe 'instance control' do
