@@ -289,13 +289,10 @@ describe 'kubernetes' do
             'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks',
             'stack' => 'mystack'
-          },
-          'annotations' => {
-            'metallb.universe.tf/address-pool' => 'prod-static'
           }
         },
         'spec' => {
-          'type' => 'LoadBalancer',
+          'type' => 'ClusterIP',
           'selector' => {
             'app.kubernetes.io/instance' => 'e1_-x',
             'participation' => 'enabled'
@@ -305,9 +302,7 @@ describe 'kubernetes' do
             'protocol' => 'TCP',
             'port' => 8000,
             'targetPort' => 8000
-          }],
-          'loadBalancerIP' => '3.1.4.1',
-          'externalTrafficPolicy' => 'Local'
+          }]
         }
       }
       expect(k8s_resource(set, 'Service')).to eql(expected_service)
@@ -374,6 +369,10 @@ EOL
                 'earth' => 1
               }
             end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
           end
           env "e1", :primary_site => 'space', :secondary_site => 'earth' do
             instantiate_stack "mystack"
@@ -382,9 +381,19 @@ EOL
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
         resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
 
-        expect(resources.find { |r| r.site == 'space' }.resources.find { |r| r['kind'] == 'Service' }['spec']['loadBalancerIP']).
+        resources_in_space = resources.find { |r| r.site == 'space' }.resources
+        ingress_service_resources_in_space = resources_in_space.find do |r|
+          r['kind'] == 'Service' && r['metadata']['labels']['app.kubernetes.io/component'] == 'ingress'
+        end
+
+        resources_in_earth = resources.find { |r| r.site == 'earth' }.resources
+        ingress_service_resources_in_earth = resources_in_earth.find do |r|
+          r['kind'] == 'Service' && r['metadata']['labels']['app.kubernetes.io/component'] == 'ingress'
+        end
+
+        expect(ingress_service_resources_in_space['spec']['loadBalancerIP']).
           to eql(dns_resolver.lookup('e1-x-vip.space.net.local').to_s)
-        expect(resources.find { |r| r.site == 'earth' }.resources.find { |r| r['kind'] == 'Service' }['spec']['loadBalancerIP']).
+        expect(ingress_service_resources_in_earth['spec']['loadBalancerIP']).
           to eql(dns_resolver.lookup('e1-x-vip.earth.net.local').to_s)
       end
     end
@@ -646,6 +655,9 @@ EOL
               'app.kubernetes.io/component' => 'ingress',
               'app.kubernetes.io/managed-by' => 'stacks'
             },
+            'annotations' => {
+              'metallb.universe.tf/address-pool' => 'prod-static'
+            },
             'name' => 'myapplication-ingress',
             'namespace' => 'e1'
           },
@@ -668,7 +680,8 @@ EOL
             'selector' => {
               'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress'
             },
-            'type' => 'LoadBalancer'
+            'type' => 'LoadBalancer',
+            'loadBalancerIP' => '3.1.4.1'
           }
         }
 

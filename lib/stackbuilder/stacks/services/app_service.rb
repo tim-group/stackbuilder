@@ -207,12 +207,12 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
 
       output = super app_deployer, dns_resolver, hiera_provider, standard_labels
       output << generate_k8s_config_map(config, standard_labels)
-      output << generate_k8s_service(dns_resolver, site, standard_labels)
+      output << generate_k8s_service(standard_labels)
       output << generate_k8s_deployment(standard_labels, replicas, used_secrets)
       output += generate_k8s_network_policies(dns_resolver, site, standard_labels)
       output += generate_k8s_service_account(dns_resolver, site, standard_labels)
 
-      output += generate_k8s_ingress_resources(standard_labels)
+      output += generate_k8s_ingress_resources(dns_resolver, site, standard_labels)
 
       Stacks::KubernetesResourceBundle.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
     end
@@ -282,7 +282,7 @@ EOC
     }
   end
 
-  def generate_k8s_service(dns_resolver, site, standard_labels)
+  def generate_k8s_service(standard_labels)
     app_name = standard_labels['app.kubernetes.io/name']
 
     {
@@ -291,13 +291,10 @@ EOC
       'metadata' => {
         'name' => app_name,
         'namespace' => @environment.name,
-        'labels' => standard_labels,
-        'annotations' => {
-          'metallb.universe.tf/address-pool' => 'prod-static'
-        }
+        'labels' => standard_labels
       },
       'spec' => {
-        'type' => 'LoadBalancer',
+        'type' => 'ClusterIP',
         'selector' => {
           'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance'],
           'participation' => 'enabled'
@@ -307,9 +304,7 @@ EOC
           'protocol' => 'TCP',
           'port' => 8000,
           'targetPort' => 8000
-        }],
-        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(site)).to_s,
-        'externalTrafficPolicy' => 'Local'
+        }]
       }
     }
   end
@@ -837,7 +832,7 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_service(standard_labels)
+  def generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
     instance = standard_labels['app.kubernetes.io/instance']
     app_name = standard_labels['app.kubernetes.io/name']
     ingress_service_labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
@@ -850,10 +845,18 @@ EOC
       'metadata' => {
         'labels' => ingress_service_labels,
         'name' => "#{app_name}-ingress",
-        'namespace' => @environment.name
+        'namespace' => @environment.name,
+        'annotations' => {
+          'metallb.universe.tf/address-pool' => 'prod-static'
+        }
       },
       'spec' => {
+        'type' => 'LoadBalancer',
+        'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(site)).to_s,
         'externalTrafficPolicy' => 'Local',
+        'selector' => {
+          'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
+        },
         'ports' => [
           {
             'name' => 'http',
@@ -867,11 +870,7 @@ EOC
             'protocol' => 'TCP',
             'targetPort' => 'https'
           }
-        ],
-        'selector' => {
-          'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
-        },
-        'type' => 'LoadBalancer'
+        ]
       }
     }
   end
@@ -1028,7 +1027,7 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_resources(standard_labels)
+  def generate_k8s_ingress_resources(dns_resolver, site, standard_labels)
     output = []
     non_k8s_deps = virtual_services_that_depend_on_me.collect do |vs|
       !vs.kubernetes
@@ -1040,7 +1039,7 @@ EOC
       output << generate_k8s_ingress_controller_role(standard_labels)
       output << generate_k8s_ingress_controller_role_binding(standard_labels)
       output << generate_k8s_ingress_controller_config_map(standard_labels)
-      output << generate_k8s_ingress_controller_service(standard_labels)
+      output << generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
       output << generate_k8s_ingress_controller_deployment(standard_labels)
     end
     output
