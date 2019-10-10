@@ -50,6 +50,14 @@ class Stacks::KubernetesResourceBundle
                '--context', @site,
                '--prune',
                '-l', "stack=#{@stack_name},machineset=#{@machine_set_name},app.kubernetes.io/managed-by=stacks",
+               '--prune-whitelist', '/v1/ConfigMap',
+               '--prune-whitelist', 'apps/v1/Deployment',
+               '--prune-whitelist', 'networking.k8s.io/v1beta1/Ingress',
+               '--prune-whitelist', 'networking.k8s.io/v1/NetworkPolicy',
+               '--prune-whitelist', 'rbac.authorization.k8s.io/v1/Role',
+               '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
+               '--prune-whitelist', '/v1/Service',
+               '--prune-whitelist', '/v1/ServiceAccount',
                '-f', '-']
     logger(Logger::DEBUG) { "running command: #{command.join(' ')}" }
     stdout_str, error_str, status = run_kubectl(*command, :stdin_data => k8s_defns_yaml)
