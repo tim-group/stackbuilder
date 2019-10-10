@@ -1,3 +1,5 @@
+require 'stackbuilder/support/zamls'
+
 class Stacks::KubernetesResourceBundle
   attr_reader :site
   attr_reader :environment_name
@@ -45,20 +47,36 @@ class Stacks::KubernetesResourceBundle
       end
     end
 
+    prune_whitelist = [
+      '/v1/ConfigMap',
+      'apps/v1/Deployment',
+      'extensions/v1beta1/Ingress',
+      'networking.k8s.io/v1beta1/Ingress',
+      'networking.k8s.io/v1/NetworkPolicy',
+      'rbac.authorization.k8s.io/v1beta1/Role',
+      'rbac.authorization.k8s.io/v1/Role',
+      'rbac.authorization.k8s.io/v1beta1/RoleBinding',
+      'rbac.authorization.k8s.io/v1/RoleBinding',
+      '/v1/Service',
+      '/v1/ServiceAccount'
+    ]
+
+    rest_mappings_found = @resources.map { |r| r['apiVersion'].include?('/') ? "#{r['apiVersion']}/#{r['kind']}" : "/#{r['apiVersion']}/#{r['kind']}" }
+
+    unexpected_rest_mappings = rest_mappings_found - prune_whitelist
+    if unexpected_rest_mappings.size > 0
+      fail "Found new resource type(s) (#{unexpected_rest_mappings.join(', ')}) that is not in the prune whitelist. Please add it."
+    end
+
     k8s_defns_yaml = to_defns_yaml
+
     command = ['apply',
                '--context', @site,
                '--prune',
-               '-l', "stack=#{@stack_name},machineset=#{@machine_set_name},app.kubernetes.io/managed-by=stacks",
-               '--prune-whitelist', '/v1/ConfigMap',
-               '--prune-whitelist', 'apps/v1/Deployment',
-               '--prune-whitelist', 'networking.k8s.io/v1beta1/Ingress',
-               '--prune-whitelist', 'networking.k8s.io/v1/NetworkPolicy',
-               '--prune-whitelist', 'rbac.authorization.k8s.io/v1/Role',
-               '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
-               '--prune-whitelist', '/v1/Service',
-               '--prune-whitelist', '/v1/ServiceAccount',
-               '-f', '-']
+               '-l', "stack=#{@stack_name},machineset=#{@machine_set_name},app.kubernetes.io/managed-by=stacks"
+              ] +
+              prune_whitelist.map { |m| ['--prune-whitelist', m] }.flatten +
+              ['-f', '-']
     logger(Logger::DEBUG) { "running command: #{command.join(' ')}" }
     stdout_str, error_str, status = run_kubectl(*command, :stdin_data => k8s_defns_yaml)
     if status.success?
