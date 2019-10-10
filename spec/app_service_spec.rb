@@ -457,7 +457,7 @@ EOL
               'app.kubernetes.io/managed-by' => 'stacks'
             },
             'annotations' => {
-              'kubernetes.io/ingress.class' => 'ingress-e1_-x'
+              'kubernetes.io/ingress.class' => 'nginx-e1_-x'
             }
           },
           'spec' => {
@@ -537,18 +537,19 @@ EOL
                       '--election-id=ingress-controller-leader-e1_-x',
                       '--publish-service=$(POD_NAMESPACE)/myapplication-ingress',
                       '--ingress-class=nginx-e1_-x',
-                      '--http-port=8000'
+                      '--http-port=8000',
+                      '--watch-namespace=e1'
                     ],
                     'env' => [
-                      #          {
-                      #            'name' => 'POD_NAME',
-                      #            'valueFrom' => {
-                      #              'fieldRef' => {
-                      #                'apiVersion' => 'v1',
-                      #                'fieldPath' => 'metadata.name'
-                      #              }
-                      #            }
-                      #          },
+                      {
+                        'name' => 'POD_NAME',
+                        'valueFrom' => {
+                          'fieldRef' => {
+                            'apiVersion' => 'v1',
+                            'fieldPath' => 'metadata.name'
+                          }
+                        }
+                      },
                       {
                         'name' => 'POD_NAMESPACE',
                         'valueFrom' => {
@@ -732,6 +733,27 @@ EOL
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'ConfigMap' && r['metadata']['name'] == 'myapplication-nginx-config'
         end).to eql(expected_configmap)
+
+        expected_configmap = {
+          'kind' => 'ConfigMap',
+          'apiVersion' => 'v1',
+          'metadata' => {
+            'name' => 'ingress-controller-leader-e1_-x-nginx-e1_-x',
+            'namespace' => 'e1',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'myapplication-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            }
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'ConfigMap' && r['metadata']['name'] == 'ingress-controller-leader-e1_-x-nginx-e1_-x'
+        end).to eql(expected_configmap)
       end
 
       it 'creates a role resource for ingress controllers' do
@@ -776,7 +798,7 @@ EOL
               'apiGroups' => [
                 ""
               ],
-              'resources' => %w(configmaps pods secrets endpoints),
+              'resources' => %w(configmaps pods secrets endpoints namespaces),
               'verbs' => %w(get list watch)
             },
             {
@@ -789,7 +811,7 @@ EOL
               "resources" => [
                 "configmaps"
               ],
-              "verbs" => %w(create get update)
+              "verbs" => %w(get update)
             },
             {
               "apiGroups" => [

@@ -712,7 +712,7 @@ EOC
           'app.kubernetes.io/component' => 'ingress'
         ),
         'annotations' => {
-          'kubernetes.io/ingress.class' => "ingress-#{instance}"
+          'kubernetes.io/ingress.class' => "nginx-#{instance}"
         }
       },
       'spec' => {
@@ -744,7 +744,7 @@ EOC
           'apiGroups' => [
             ""
           ],
-          'resources' => %w(configmaps pods secrets endpoints),
+          'resources' => %w(configmaps pods secrets endpoints namespaces),
           'verbs' => %w(get list watch)
         },
         {
@@ -757,7 +757,7 @@ EOC
           "resources" => [
             "configmaps"
           ],
-          "verbs" => %w(create get update)
+          "verbs" => %w(get update)
         },
         {
           "apiGroups" => [
@@ -814,14 +814,14 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_config_map(standard_labels)
+  def generate_k8s_ingress_controller_config_maps(standard_labels)
     instance = standard_labels['app.kubernetes.io/instance']
     app_name = standard_labels['app.kubernetes.io/name']
     labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
                                    'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
                                    'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
 
-    {
+    [{
       'kind' => 'ConfigMap',
       'apiVersion' => 'v1',
       'metadata' => {
@@ -829,7 +829,16 @@ EOC
         'namespace' => @environment.name,
         'labels' => labels
       }
-    }
+    },
+     {
+       'kind' => 'ConfigMap',
+       'apiVersion' => 'v1',
+       'metadata' => {
+         'name' => "ingress-controller-leader-#{instance}-nginx-#{instance}",
+         'namespace' => @environment.name,
+         'labels' => labels
+       }
+     }]
   end
 
   def generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
@@ -911,18 +920,19 @@ EOC
                   "--election-id=ingress-controller-leader-#{instance}",
                   "--publish-service=$(POD_NAMESPACE)/#{app_name}-ingress",
                   "--ingress-class=nginx-#{instance}",
-                  '--http-port=8000'
+                  '--http-port=8000',
+                  "--watch-namespace=#{@environment.name}"
                 ],
                 'env' => [
-                  #          {
-                  #            'name' => 'POD_NAME',
-                  #            'valueFrom' => {
-                  #              'fieldRef' => {
-                  #                'apiVersion' => 'v1',
-                  #                'fieldPath' => 'metadata.name'
-                  #              }
-                  #            }
-                  #          },
+                  {
+                    'name' => 'POD_NAME',
+                    'valueFrom' => {
+                      'fieldRef' => {
+                        'apiVersion' => 'v1',
+                        'fieldPath' => 'metadata.name'
+                      }
+                    }
+                  },
                   {
                     'name' => 'POD_NAMESPACE',
                     'valueFrom' => {
@@ -1038,7 +1048,7 @@ EOC
 
   def generate_k8s_ingress_resources(dns_resolver, site, standard_labels)
     output = []
-    non_k8s_deps = virtual_services_that_depend_on_me.collect do |vs|
+    non_k8s_deps = virtual_services_that_depend_on_me.select do |vs|
       !vs.kubernetes
     end
 
@@ -1047,7 +1057,7 @@ EOC
       output << generate_k8s_ingress_controller_service_account(standard_labels)
       output << generate_k8s_ingress_controller_role(standard_labels)
       output << generate_k8s_ingress_controller_role_binding(standard_labels)
-      output << generate_k8s_ingress_controller_config_map(standard_labels)
+      output += generate_k8s_ingress_controller_config_maps(standard_labels)
       output << generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
       output << generate_k8s_ingress_controller_deployment(standard_labels)
     end
