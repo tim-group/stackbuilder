@@ -969,7 +969,7 @@ EOC
                 'name' => 'nginx-ingress-controller',
                 'ports' => [
                   {
-                    'containerPort' => 80,
+                    'containerPort' => 8000,
                     'name' => 'http',
                     'protocol' => 'TCP'
                   }
