@@ -703,7 +703,7 @@ EOC
     instance = standard_labels['app.kubernetes.io/instance']
 
     {
-      'apiVersion' => 'extensions/v1beta1',
+      'apiVersion' => 'networking.k8s.io/v1beta1',
       'kind' => 'Ingress',
       'metadata' => {
         'name' => instance,
@@ -733,7 +733,7 @@ EOC
 
     {
       'kind' => 'Role',
-      'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+      'apiVersion' => 'rbac.authorization.k8s.io/v1',
       'metadata' => {
         'name' => "#{app_name}-ingress",
         'namespace' => @environment.name,
@@ -1028,7 +1028,7 @@ EOC
 
     {
       'kind' => 'RoleBinding',
-      'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+      'apiVersion' => 'rbac.authorization.k8s.io/v1',
       'metadata' => {
         'name' => "#{app_name}-ingress",
         'namespace' => @environment.name,

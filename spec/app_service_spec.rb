@@ -442,7 +442,7 @@ EOL
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
 
         expected_ingress = {
-          'apiVersion' => 'extensions/v1beta1',
+          'apiVersion' => 'networking.k8s.io/v1beta1',
           'kind' => 'Ingress',
           'metadata' => {
             'name' => 'e1_-x',
@@ -780,7 +780,7 @@ EOL
 
         expected_role = {
           'kind' => 'Role',
-          'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+          'apiVersion' => 'rbac.authorization.k8s.io/v1',
           'metadata' => {
             'name' => 'myapplication-ingress',
             'namespace' => 'e1',
@@ -940,7 +940,7 @@ EOL
 
         expected_role_binding = {
           'kind' => 'RoleBinding',
-          'apiVersion' => 'rbac.authorization.k8s.io/v1beta1',
+          'apiVersion' => 'rbac.authorization.k8s.io/v1',
           'metadata' => {
             'name' => 'myapplication-ingress',
             'namespace' => 'e1',
