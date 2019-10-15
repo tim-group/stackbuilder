@@ -583,6 +583,16 @@ EOL
                       'successThreshold' => 1,
                       'timeoutSeconds' => 10
                     },
+                    'resources' => {
+                      'limits' => {
+                        'cpu' => '300m',
+                        'memory' => '32Mi'
+                      },
+                      'requests' => {
+                        'cpu' => '200m',
+                        'memory' => '24Mi'
+                      }
+                    },
                     'terminationMessagePath' => '/dev/termination-log',
                     'terminationMessagePolicy' => 'File'
                   }
