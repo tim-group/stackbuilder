@@ -629,7 +629,7 @@ EOC
       'spec' => {
         'podSelector' => {
           'matchLabels' => {
-            'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
+            'app.kubernetes.io/instance' => "#{instance}-traefik-ingress"
           }
         },
         'policyTypes' => [
@@ -712,14 +712,21 @@ EOC
           'app.kubernetes.io/component' => 'ingress'
         ),
         'annotations' => {
-          'kubernetes.io/ingress.class' => "nginx-#{instance}"
+          'kubernetes.io/ingress.class' => "traefik-#{instance}"
         }
       },
       'spec' => {
-        'backend' => {
-          'serviceName' => standard_labels['app.kubernetes.io/name'],
-          'servicePort' => 8000
-        }
+        'rules' => [{
+          'http' => {
+            'paths' => [{
+              'path' => '/',
+              'backend' => {
+                'serviceName' => standard_labels['app.kubernetes.io/name'],
+                'servicePort' => 8000
+              }
+            }]
+          }
+        }]
       }
     }
   end
@@ -744,49 +751,8 @@ EOC
           'apiGroups' => [
             ""
           ],
-          'resources' => %w(configmaps pods secrets endpoints namespaces),
+          'resources' => %w(services endpoints),
           'verbs' => %w(get list watch)
-        },
-        {
-          "apiGroups" => [
-            ""
-          ],
-          "resourceNames" => [
-            "ingress-controller-leader-#{instance}-nginx-#{instance}"
-          ],
-          "resources" => [
-            "configmaps"
-          ],
-          "verbs" => %w(get update)
-        },
-        {
-          "apiGroups" => [
-            ""
-          ],
-          "resources" => [
-            "endpoints"
-          ],
-          "verbs" => [
-            "get"
-          ]
-        },
-        {
-          "apiGroups" => [
-            ""
-          ],
-          "resources" => [
-            "services"
-          ],
-          "verbs" => %w(get list watch)
-        },
-        {
-          "apiGroups" => [
-            ""
-          ],
-          "resources" => [
-            "events"
-          ],
-          "verbs" => %w(create patch)
         },
         {
           "apiGroups" => [
@@ -814,33 +780,6 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_config_maps(standard_labels)
-    instance = standard_labels['app.kubernetes.io/instance']
-    app_name = standard_labels['app.kubernetes.io/name']
-    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
-                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
-                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
-
-    [{
-      'kind' => 'ConfigMap',
-      'apiVersion' => 'v1',
-      'metadata' => {
-        'name' => "#{app_name}-nginx-config",
-        'namespace' => @environment.name,
-        'labels' => labels
-      }
-    },
-     {
-       'kind' => 'ConfigMap',
-       'apiVersion' => 'v1',
-       'metadata' => {
-         'name' => "ingress-controller-leader-#{instance}-nginx-#{instance}",
-         'namespace' => @environment.name,
-         'labels' => labels
-       }
-     }]
-  end
-
   def generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
     instance = standard_labels['app.kubernetes.io/instance']
     app_name = standard_labels['app.kubernetes.io/name']
@@ -864,7 +803,7 @@ EOC
         'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(site)).to_s,
         'externalTrafficPolicy' => 'Local',
         'selector' => {
-          'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
+          'app.kubernetes.io/instance' => "#{instance}-traefik-ingress"
         },
         'ports' => [
           {
@@ -887,10 +826,10 @@ EOC
   def generate_k8s_ingress_controller_deployment(standard_labels)
     instance = standard_labels['app.kubernetes.io/instance']
     app_name = standard_labels['app.kubernetes.io/name']
-    ingress_controller_labels = standard_labels.merge('app.kubernetes.io/name' => 'nginx-ingress',
-                                                      'app.kubernetes.io/instance' => "#{instance}-nginx-ingress",
+    ingress_controller_labels = standard_labels.merge('app.kubernetes.io/name' => 'traefik-ingress',
+                                                      'app.kubernetes.io/instance' => "#{instance}-traefik-ingress",
                                                       'app.kubernetes.io/component' => 'ingress',
-                                                      'app.kubernetes.io/version' => '0.26.1')
+                                                      'app.kubernetes.io/version' => '2.0')
 
     {
       'apiVersion' => 'apps/v1',
@@ -904,7 +843,7 @@ EOC
         'replicas' => 2,
         'selector' => {
           'matchLabels' => {
-            'app.kubernetes.io/instance' => "#{instance}-nginx-ingress"
+            'app.kubernetes.io/instance' => "#{instance}-traefik-ingress"
           }
         },
         'template' => {
@@ -915,49 +854,23 @@ EOC
             'containers' => [
               {
                 'args' => [
-                  '/nginx-ingress-controller',
-                  "--configmap=$(POD_NAMESPACE)/#{app_name}-nginx-config",
-                  "--election-id=ingress-controller-leader-#{instance}",
-                  "--publish-service=$(POD_NAMESPACE)/#{app_name}-ingress",
-                  "--ingress-class=nginx-#{instance}",
-                  '--http-port=8000',
-                  "--watch-namespace=#{@environment.name}"
+                  "--accesslog",
+                  "--ping",
+                  "--api.insecure",
+                  "--api.dashboard",
+                  "--entrypoints.http.Address=:8000",
+                  "--entrypoints.traefik.Address=:10254",
+                  "--providers.kubernetesingress",
+                  "--providers.kubernetesingress.ingressclass=traefik-#{instance}",
+                  "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{app_name}-ingress",
+                  "--providers.kubernetesingress.namespaces=#{@environment.name}"
                 ],
-                'env' => [
-                  {
-                    'name' => 'POD_NAME',
-                    'valueFrom' => {
-                      'fieldRef' => {
-                        'apiVersion' => 'v1',
-                        'fieldPath' => 'metadata.name'
-                      }
-                    }
-                  },
-                  {
-                    'name' => 'POD_NAMESPACE',
-                    'valueFrom' => {
-                      'fieldRef' => {
-                        'apiVersion' => 'v1',
-                        'fieldPath' => 'metadata.namespace'
-                      }
-                    }
-                  }
-                ],
-                'image' => 'quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1',
+                'image' => 'traefik:v2.0',
                 'imagePullPolicy' => 'IfNotPresent',
-                'lifecycle' => {
-                  'preStop' => {
-                    'exec' => {
-                      'command' => [
-                        '/wait-shutdown'
-                      ]
-                    }
-                  }
-                },
                 'livenessProbe' => {
                   'failureThreshold' => 3,
                   'httpGet' => {
-                    'path' => '/healthz',
+                    'path' => '/ping',
                     'port' => 10254,
                     'scheme' => 'HTTP'
                   },
@@ -966,7 +879,7 @@ EOC
                   'successThreshold' => 1,
                   'timeoutSeconds' => 10
                 },
-                'name' => 'nginx-ingress-controller',
+                'name' => 'traefik-ingress-controller',
                 'ports' => [
                   {
                     'containerPort' => 8000,
@@ -977,7 +890,7 @@ EOC
                 'readinessProbe' => {
                   'failureThreshold' => 3,
                   'httpGet' => {
-                    'path' => '/healthz',
+                    'path' => '/ping',
                     'port' => 10254,
                     'scheme' => 'HTTP'
                   },
@@ -986,15 +899,12 @@ EOC
                   'timeoutSeconds' => 10
                 },
                 # FIXME:                    'resources' => {},
-                'securityContext' => {
-                  'runAsUser' => 33
-                },
                 'terminationMessagePath' => '/dev/termination-log',
                 'terminationMessagePolicy' => 'File'
               }
             ],
             'serviceAccountName' => "#{app_name}-ingress",
-            'terminationGracePeriodSeconds' => 300
+            'terminationGracePeriodSeconds' => 60
           }
         }
       }
@@ -1057,7 +967,6 @@ EOC
       output << generate_k8s_ingress_controller_service_account(standard_labels)
       output << generate_k8s_ingress_controller_role(standard_labels)
       output << generate_k8s_ingress_controller_role_binding(standard_labels)
-      output += generate_k8s_ingress_controller_config_maps(standard_labels)
       output << generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
       output << generate_k8s_ingress_controller_deployment(standard_labels)
     end
@@ -1117,10 +1026,10 @@ EOC
           }]
         }]
         network_policies << create_egress_network_policy(@environment.name, short_name, "#{short_name}-ingress",
-                                                         @environment.name, labels, 'app', egresses, "#{instance}-nginx-ingress")
+                                                         @environment.name, labels, 'app', egresses, "#{instance}-traefik-ingress")
 
         internal_ingress_filters = [generate_pod_and_namespace_selector_filter(@environment.name, 'app.kubernetes.io/instance',
-                                                                               "#{instance}-nginx-ingress")]
+                                                                               "#{instance}-traefik-ingress")]
         network_policies << create_ingress_network_policy_for_internal_service(@environment.name, "#{short_name}-ingress",
                                                                                short_name, @environment.name, standard_labels, 'app',
                                                                                internal_ingress_filters)

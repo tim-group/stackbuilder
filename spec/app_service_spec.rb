@@ -457,14 +457,21 @@ EOL
               'app.kubernetes.io/managed-by' => 'stacks'
             },
             'annotations' => {
-              'kubernetes.io/ingress.class' => 'nginx-e1_-x'
+              'kubernetes.io/ingress.class' => 'traefik-e1_-x'
             }
           },
           'spec' => {
-            'backend' => {
-              'serviceName' => 'myapplication',
-              'servicePort' => 8000
-            }
+            'rules' => [{
+              'http' => {
+                'paths' => [{
+                  'path' => '/',
+                  'backend' => {
+                    'serviceName' => 'myapplication',
+                    'servicePort' => 8000
+                  }
+                }]
+              }
+            }]
           }
         }
 
@@ -502,10 +509,10 @@ EOL
             'labels' => {
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'nginx-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress',
+              'app.kubernetes.io/name' => 'traefik-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress',
               'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/version' => '0.26.1',
+              'app.kubernetes.io/version' => '2.0',
               'app.kubernetes.io/managed-by' => 'stacks'
             }
           },
@@ -513,7 +520,7 @@ EOL
             'replicas' => 2,
             'selector' => {
               'matchLabels' => {
-                'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress'
+                'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress'
               }
             },
             'template' => {
@@ -521,10 +528,10 @@ EOL
                 'labels' => {
                   'stack' => 'mystack',
                   'machineset' => 'x',
-                  'app.kubernetes.io/name' => 'nginx-ingress',
-                  'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress',
+                  'app.kubernetes.io/name' => 'traefik-ingress',
+                  'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress',
                   'app.kubernetes.io/component' => 'ingress',
-                  'app.kubernetes.io/version' => '0.26.1',
+                  'app.kubernetes.io/version' => '2.0',
                   'app.kubernetes.io/managed-by' => 'stacks'
                 }
               },
@@ -532,49 +539,23 @@ EOL
                 'containers' => [
                   {
                     'args' => [
-                      '/nginx-ingress-controller',
-                      '--configmap=$(POD_NAMESPACE)/myapplication-nginx-config',
-                      '--election-id=ingress-controller-leader-e1_-x',
-                      '--publish-service=$(POD_NAMESPACE)/myapplication-ingress',
-                      '--ingress-class=nginx-e1_-x',
-                      '--http-port=8000',
-                      '--watch-namespace=e1'
+                      '--accesslog',
+                      '--ping',
+                      '--api.insecure',
+                      '--api.dashboard',
+                      '--entrypoints.http.Address=:8000',
+                      '--entrypoints.traefik.Address=:10254',
+                      '--providers.kubernetesingress',
+                      '--providers.kubernetesingress.ingressclass=traefik-e1_-x',
+                      '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/myapplication-ingress',
+                      '--providers.kubernetesingress.namespaces=e1'
                     ],
-                    'env' => [
-                      {
-                        'name' => 'POD_NAME',
-                        'valueFrom' => {
-                          'fieldRef' => {
-                            'apiVersion' => 'v1',
-                            'fieldPath' => 'metadata.name'
-                          }
-                        }
-                      },
-                      {
-                        'name' => 'POD_NAMESPACE',
-                        'valueFrom' => {
-                          'fieldRef' => {
-                            'apiVersion' => 'v1',
-                            'fieldPath' => 'metadata.namespace'
-                          }
-                        }
-                      }
-                    ],
-                    'image' => 'quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1',
+                    'image' => 'traefik:v2.0',
                     'imagePullPolicy' => 'IfNotPresent',
-                    'lifecycle' => {
-                      'preStop' => {
-                        'exec' => {
-                          'command' => [
-                            '/wait-shutdown'
-                          ]
-                        }
-                      }
-                    },
                     'livenessProbe' => {
                       'failureThreshold' => 3,
                       'httpGet' => {
-                        'path' => '/healthz',
+                        'path' => '/ping',
                         'port' => 10254,
                         'scheme' => 'HTTP'
                       },
@@ -583,7 +564,7 @@ EOL
                       'successThreshold' => 1,
                       'timeoutSeconds' => 10
                     },
-                    'name' => 'nginx-ingress-controller',
+                    'name' => 'traefik-ingress-controller',
                     'ports' => [
                       {
                         'containerPort' => 8000,
@@ -594,7 +575,7 @@ EOL
                     'readinessProbe' => {
                       'failureThreshold' => 3,
                       'httpGet' => {
-                        'path' => '/healthz',
+                        'path' => '/ping',
                         'port' => 10254,
                         'scheme' => 'HTTP'
                       },
@@ -602,16 +583,12 @@ EOL
                       'successThreshold' => 1,
                       'timeoutSeconds' => 10
                     },
-                    # FIXME:                    'resources' => {},
-                    'securityContext' => {
-                      'runAsUser' => 33
-                    },
                     'terminationMessagePath' => '/dev/termination-log',
                     'terminationMessagePolicy' => 'File'
                   }
                 ],
                 'serviceAccountName' => 'myapplication-ingress',
-                'terminationGracePeriodSeconds' => 300
+                'terminationGracePeriodSeconds' => 60
               }
             }
           }
@@ -679,7 +656,7 @@ EOL
               }
             ],
             'selector' => {
-              'app.kubernetes.io/instance' => 'e1_-x-nginx-ingress'
+              'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress'
             },
             'type' => 'LoadBalancer',
             'loadBalancerIP' => '3.1.4.1'
@@ -689,71 +666,6 @@ EOL
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'Service' && r['metadata']['name'] == 'myapplication-ingress'
         end).to eql(expected_service)
-      end
-
-      it 'creates a configmap resource for ingress controllers' do
-        factory = eval_stacks do
-          stack "mystack" do
-            app_service "x", :kubernetes => true do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
-
-              self.application = 'MyApplication'
-              self.instances = 2
-            end
-            app_service 'nonk8sapp' do
-              self.instances = 1
-              depend_on 'x', 'e1'
-            end
-          end
-          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
-            instantiate_stack "mystack"
-          end
-        end
-        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
-
-        expected_configmap = {
-          'kind' => 'ConfigMap',
-          'apiVersion' => 'v1',
-          'metadata' => {
-            'name' => 'myapplication-nginx-config',
-            'namespace' => 'e1',
-            'labels' => {
-              'stack' => 'mystack',
-              'machineset' => 'x',
-              'app.kubernetes.io/name' => 'myapplication-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/managed-by' => 'stacks'
-            }
-          }
-        }
-
-        expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'ConfigMap' && r['metadata']['name'] == 'myapplication-nginx-config'
-        end).to eql(expected_configmap)
-
-        expected_configmap = {
-          'kind' => 'ConfigMap',
-          'apiVersion' => 'v1',
-          'metadata' => {
-            'name' => 'ingress-controller-leader-e1_-x-nginx-e1_-x',
-            'namespace' => 'e1',
-            'labels' => {
-              'stack' => 'mystack',
-              'machineset' => 'x',
-              'app.kubernetes.io/name' => 'myapplication-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/managed-by' => 'stacks'
-            }
-          }
-        }
-
-        expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'ConfigMap' && r['metadata']['name'] == 'ingress-controller-leader-e1_-x-nginx-e1_-x'
-        end).to eql(expected_configmap)
       end
 
       it 'creates a role resource for ingress controllers' do
@@ -798,49 +710,8 @@ EOL
               'apiGroups' => [
                 ""
               ],
-              'resources' => %w(configmaps pods secrets endpoints namespaces),
+              'resources' => %w(services endpoints),
               'verbs' => %w(get list watch)
-            },
-            {
-              "apiGroups" => [
-                ""
-              ],
-              "resourceNames" => [
-                "ingress-controller-leader-e1_-x-nginx-e1_-x"
-              ],
-              "resources" => [
-                "configmaps"
-              ],
-              "verbs" => %w(get update)
-            },
-            {
-              "apiGroups" => [
-                ""
-              ],
-              "resources" => [
-                "endpoints"
-              ],
-              "verbs" => [
-                "get"
-              ]
-            },
-            {
-              "apiGroups" => [
-                ""
-              ],
-              "resources" => [
-                "services"
-              ],
-              "verbs" => %w(get list watch)
-            },
-            {
-              "apiGroups" => [
-                ""
-              ],
-              "resources" => [
-                "events"
-              ],
-              "verbs" => %w(create patch)
             },
             {
               "apiGroups" => [
@@ -1603,7 +1474,7 @@ EOL
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(ingress_controller_ingress_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2-nginx-ingress'
+        'app.kubernetes.io/instance' => 'e1_-app2-traefik-ingress'
       )
       expect(ingress_controller_ingress_policy['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress_controller_ingress_policy['spec']['ingress'].size).to eq(1)
@@ -1629,7 +1500,7 @@ EOL
         'app.kubernetes.io/managed-by' => 'stacks'
       )
       expect(ingress_controller_egress_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2-nginx-ingress'
+        'app.kubernetes.io/instance' => 'e1_-app2-traefik-ingress'
       )
       expect(ingress_controller_egress_policy['spec']['policyTypes']).to eql(['Egress'])
       expect(ingress_controller_egress_policy['spec']['egress'].size).to eq(1)
@@ -1665,7 +1536,7 @@ EOL
       expect(app_ingress_policy['spec']['ingress'].first['from'].size).to eq(1)
       expect(app_ingress_policy['spec']['ingress'].first['ports'].size).to eq(1)
       expect(app_ingress_policy['spec']['ingress'].first['from'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2-nginx-ingress'
+        'app.kubernetes.io/instance' => 'e1_-app2-traefik-ingress'
       )
       expect(app_ingress_policy['spec']['ingress'].first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(app_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
