@@ -548,7 +548,8 @@ EOL
                       '--providers.kubernetesingress',
                       '--providers.kubernetesingress.ingressclass=traefik-e1_-x',
                       '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/myapplication-ingress',
-                      '--providers.kubernetesingress.namespaces=e1'
+                      '--providers.kubernetesingress.namespaces=e1',
+                      '--metrics.prometheus'
                     ],
                     'image' => 'traefik:v2.0',
                     'imagePullPolicy' => 'IfNotPresent',
@@ -556,7 +557,7 @@ EOL
                       'failureThreshold' => 3,
                       'httpGet' => {
                         'path' => '/ping',
-                        'port' => 10254,
+                        'port' => 'traefik',
                         'scheme' => 'HTTP'
                       },
                       'initialDelaySeconds' => 10,
@@ -570,13 +571,18 @@ EOL
                         'containerPort' => 8000,
                         'name' => 'http',
                         'protocol' => 'TCP'
+                      },
+                      {
+                        'containerPort' => 10254,
+                        'name' => 'traefik',
+                        'protocol' => 'TCP'
                       }
                     ],
                     'readinessProbe' => {
                       'failureThreshold' => 3,
                       'httpGet' => {
                         'path' => '/ping',
-                        'port' => 10254,
+                        'port' => 'traefik',
                         'scheme' => 'HTTP'
                       },
                       'periodSeconds' => 10,
@@ -659,10 +665,10 @@ EOL
                 'targetPort' => 'http'
               },
               {
-                'name' => 'https',
-                'port' => 443,
+                'name' => 'traefik',
+                'port' => 10254,
                 'protocol' => 'TCP',
-                'targetPort' => 'https'
+                'targetPort' => 'traefik'
               }
             ],
             'selector' => {
@@ -848,6 +854,78 @@ EOL
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'RoleBinding' && r['metadata']['name'] == 'myapplication-ingress'
         end).to eql(expected_role_binding)
+      end
+
+      it 'creates network policies allowing prometheus to monitor the ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_network_policy = {
+          'apiVersion' => 'networking.k8s.io/v1',
+          'kind' => 'NetworkPolicy',
+          'metadata' => {
+            'name' => 'allow-monitoring-prom-main-in-to-x-ingress-traefik',
+            'namespace' => 'e1',
+            'labels' => {
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'app.kubernetes.io/name' => 'x-ingress',
+              'app.kubernetes.io/instance' => 'e1_-x-ingress',
+              'app.kubernetes.io/component' => 'ingress',
+              'app.kubernetes.io/managed-by' => 'stacks'
+            }
+          },
+          'spec' => {
+            'ingress' => [{
+              'from' => [{
+                'namespaceSelector' => {
+                  'matchLabels' => {
+                    'name' => 'monitoring'
+                  }
+                },
+                'podSelector' => {
+                  'matchLabels' => {
+                    'prometheus' => 'main'
+                  }
+                }
+              }],
+              'ports' => [{
+                'port' => 'traefik',
+                'protocol' => 'TCP'
+              }]
+            }],
+            'podSelector' => {
+              'matchLabels' => {
+                'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress'
+              }
+            },
+            'policyTypes' => [
+              'Ingress'
+            ]
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-monitoring-prom-main-in-to-x-ingress-traefik'
+        end).to eql(expected_network_policy)
       end
     end
 
@@ -1154,7 +1232,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'mystack', 'x')
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(3)
       network_policy = network_policies.last
       expect(network_policy['metadata']['name']).to eql('allow-x-out-to-space-kubernetes-api-6443')
       expect(network_policy['metadata']['namespace']).to eql('e1')
@@ -1467,7 +1545,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(5)
+      expect(network_policies.size).to eq(6)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
         r['metadata']['name'] == 'allow-e1-app1-in-to-app2-ingress-http'
@@ -1581,7 +1659,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -1660,7 +1738,7 @@ EOL
       expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(3)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
@@ -1705,7 +1783,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
-      expect(network_policies.size).to eq(1)
+      expect(network_policies.size).to eq(2)
       expect(network_policies.first['metadata']['name']).to eql('allow-app1-out-to-office-nexus-8080')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -1781,7 +1859,7 @@ depends on the other' do
       expect(ingress.first['ports'].first['port']).to eq(8000)
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(3)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(

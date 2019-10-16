@@ -563,6 +563,12 @@ EOC
     network_policies << create_egress_network_policy('office', 'nexus', @name, @environment.name, standard_labels,
                                                      '8080', nexus_filters, standard_labels['app.kubernetes.io/instance'])
 
+    prom_filters = [
+      generate_pod_and_namespace_selector_filter('monitoring', 'prometheus', 'main')
+    ]
+    network_policies << create_ingress_network_policy_for_internal_service('monitoring', 'prom-main',
+                                                                           @name, @environment.name, standard_labels, 8000, prom_filters)
+
     network_policies
   end
 
@@ -659,6 +665,36 @@ EOC
         'podSelector' => {
           'matchLabels' => {
             'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
+          }
+        },
+        'policyTypes' => [
+          'Ingress'
+        ],
+        'ingress' => [{
+          'from' => filters,
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => port
+          }]
+        }]
+      }
+    }
+  end
+
+  def create_ingress_network_policy_to_ingress_for_internal_service(virtual_service_env, virtual_service_name,
+                                                                    app_name, env_name, standard_labels, port, filters)
+    {
+      'apiVersion' => 'networking.k8s.io/v1',
+      'kind' => 'NetworkPolicy',
+      'metadata' => {
+        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-ingress-#{port}",
+        'namespace' => env_name,
+        'labels' => standard_labels
+      },
+      'spec' => {
+        'podSelector' => {
+          'matchLabels' => {
+            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance'].gsub('ingress', 'traefik-ingress')
           }
         },
         'policyTypes' => [
@@ -813,10 +849,10 @@ EOC
             'targetPort' => 'http'
           },
           {
-            'name' => 'https',
-            'port' => 443,
+            'name' => 'traefik',
+            'port' => 10254,
             'protocol' => 'TCP',
-            'targetPort' => 'https'
+            'targetPort' => 'traefik'
           }
         ]
       }
@@ -863,7 +899,8 @@ EOC
                   "--providers.kubernetesingress",
                   "--providers.kubernetesingress.ingressclass=traefik-#{instance}",
                   "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{app_name}-ingress",
-                  "--providers.kubernetesingress.namespaces=#{@environment.name}"
+                  "--providers.kubernetesingress.namespaces=#{@environment.name}",
+                  "--metrics.prometheus"
                 ],
                 'image' => 'traefik:v2.0',
                 'imagePullPolicy' => 'IfNotPresent',
@@ -871,7 +908,7 @@ EOC
                   'failureThreshold' => 3,
                   'httpGet' => {
                     'path' => '/ping',
-                    'port' => 10254,
+                    'port' => 'traefik',
                     'scheme' => 'HTTP'
                   },
                   'initialDelaySeconds' => 10,
@@ -885,13 +922,18 @@ EOC
                     'containerPort' => 8000,
                     'name' => 'http',
                     'protocol' => 'TCP'
+                  },
+                  {
+                    'containerPort' => 10254,
+                    'name' => 'traefik',
+                    'protocol' => 'TCP'
                   }
                 ],
                 'readinessProbe' => {
                   'failureThreshold' => 3,
                   'httpGet' => {
                     'path' => '/ping',
-                    'port' => 10254,
+                    'port' => 'traefik',
                     'scheme' => 'HTTP'
                   },
                   'periodSeconds' => 10,
@@ -999,6 +1041,13 @@ EOC
 
   def generate_k8s_network_policies_for_dependents(dns_resolver, site, standard_labels)
     network_policies = []
+    external_dependencies_count = 0
+
+    instance = standard_labels['app.kubernetes.io/instance']
+    ingress_labels = standard_labels.merge('app.kubernetes.io/name' => "#{short_name}-ingress",
+                                           'app.kubernetes.io/instance' => "#{instance}-ingress",
+                                           'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+
     virtual_services_that_depend_on_me.each do |vs|
       is_same_site = requirements_of(vs).include?(:same_site)
       next if is_same_site && !vs.exists_in_site?(vs.environment, site)
@@ -1009,6 +1058,7 @@ EOC
         network_policies << create_ingress_network_policy_for_internal_service(vs.environment.name, vs.short_name,
                                                                                @name, @environment.name, standard_labels, 8000, filters)
       else
+        external_dependencies_count += 1
         dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }
         dependant_vms.each do |vm|
           filters << {
@@ -1020,11 +1070,6 @@ EOC
         network_policies << create_ingress_network_policy_for_external_service(vs.environment.name, vs.short_name,
                                                                                @name, @environment.name, standard_labels, filters)
 
-        instance = standard_labels['app.kubernetes.io/instance']
-        labels = standard_labels.merge('app.kubernetes.io/name' => "#{short_name}-ingress",
-                                       'app.kubernetes.io/instance' => "#{instance}-ingress",
-                                       'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
-
         egresses = [{
           'to' => [
             generate_pod_and_namespace_selector_filter(@environment.name, 'app.kubernetes.io/instance', standard_labels['app.kubernetes.io/instance'])
@@ -1035,7 +1080,7 @@ EOC
           }]
         }]
         network_policies << create_egress_network_policy(@environment.name, short_name, "#{short_name}-ingress",
-                                                         @environment.name, labels, 'app', egresses, "#{instance}-traefik-ingress")
+                                                         @environment.name, ingress_labels, 'app', egresses, "#{instance}-traefik-ingress")
 
         internal_ingress_filters = [generate_pod_and_namespace_selector_filter(@environment.name, 'app.kubernetes.io/instance',
                                                                                "#{instance}-traefik-ingress")]
@@ -1043,13 +1088,17 @@ EOC
                                                                                short_name, @environment.name, standard_labels, 'app',
                                                                                internal_ingress_filters)
       end
+    end
 
+    if external_dependencies_count > 0
       prom_filters = [
         generate_pod_and_namespace_selector_filter('monitoring', 'prometheus', 'main')
       ]
-      network_policies << create_ingress_network_policy_for_internal_service('monitoring', 'prom-main',
-                                                                             @name, @environment.name, standard_labels, 8000, prom_filters)
+      network_policies << create_ingress_network_policy_to_ingress_for_internal_service('monitoring', 'prom-main',
+                                                                                        short_name, @environment.name,
+                                                                                        ingress_labels, 'traefik', prom_filters)
     end
+
     network_policies
   end
 
