@@ -328,7 +328,7 @@ describe 'k8s stack-with-dependencies' do
     end
 
     expect(network_policies.size).to eq(3)
-    expect(network_policies.first['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
+    expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e__-exampledb-bdcfd1e')
     egress = network_policies.first['spec']['egress']
     expect(egress.size).to eq(1)
     expect(egress.first['to'].size).to eq(4)
@@ -376,7 +376,7 @@ describe 'k8s stack-with-dependencies' do
     end
 
     expect(network_policies.size).to eq(3)
-    expect(network_policies.first['metadata']['name']).to eql('allow-myapp-out-to-e-exampledb-3306')
+    expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e__-exampledb-52961e1')
     egress = network_policies.first['spec']['egress']
     expect(egress.size).to eq(1)
     expect(egress.first['to'].size).to eq(1)

@@ -2,6 +2,7 @@ require 'securerandom'
 require 'stackbuilder/stacks/machine_def_container'
 require 'stackbuilder/stacks/dependencies'
 require 'stackbuilder/stacks/namespace'
+require 'stackbuilder/support/digest_generator'
 require 'uri'
 
 class Stacks::MachineSet
@@ -232,31 +233,38 @@ class Stacks::MachineSet
           'port' => port
         }
       end
+
+      spec = {
+        'podSelector' => {
+          'matchLabels' => {
+            'machineset' => @name,
+            'group' => @groups.first,
+            'app.kubernetes.io/component' => 'app_service'
+          }
+        },
+        'policyTypes' => [
+          'Egress'
+        ],
+        'egress' => [{
+          'to' => filters,
+          'ports' => ports
+        }]
+      }
+
+      hash = Support::DigestGenerator.from_hash(spec)
+
       policies << {
         'apiVersion' => 'networking.k8s.io/v1',
         'kind' => 'NetworkPolicy',
         'metadata' => {
-          'name' => "allow-#{@name}-out-to-#{outbound_connection}-on-ports-#{ports.map { |port| port['port'] }.join('-')}",
+          'name' => "allow-out-to-#{outbound_connection}-#{hash}",
           'namespace' => @environment.name,
           'labels' => {
             'stack' => @stack.name,
             'machineset' => @name
           }.merge(standard_labels)
         },
-        'spec' => {
-          'podSelector' => {
-            'matchLabels' => {
-              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
-            }
-          },
-          'policyTypes' => [
-            'Egress'
-          ],
-          'egress' => [{
-            'to' => filters,
-            'ports' => ports
-          }]
-        }
+        'spec' => spec
       }
     end
     policies

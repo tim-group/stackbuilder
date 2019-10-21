@@ -12,12 +12,13 @@ describe Stacks::KubernetesResourceBundle do
 
     r = Stacks::KubernetesResourceBundle.new('site',
                                              'test_env',
-                                             'stack',
-                                             'ms',
-                                             { 'app.kubernetes.io/name' => 'testapp' },
+                                             { 'app.kubernetes.io/name' => 'testapp',
+                                               'stack' => 'stack',
+                                               'machineset' => 'ms' },
                                              [],
                                              { 'secret/data' => 'secret_data' },
-                                             'environment' => 'test_env')
+                                             { 'environment' => 'test_env' },
+                                             'foo')
 
     stdout = <<EOF
 clientVersion:
@@ -31,10 +32,12 @@ EOF
 
     expect(client).to receive(:insert).with(:namespace => 'test_env',
                                             :context => 'site',
-                                            :secret_resource => 'testapp-secret',
+                                            :secret_resource => 'foo',
                                             :labels => {
                                               'app.kubernetes.io/name' => 'testapp',
-                                              'app.kubernetes.io/managed-by' => 'mco-secretagent'
+                                              'app.kubernetes.io/managed-by' => 'mco-secretagent',
+                                              'stack' => 'stack',
+                                              'machineset' => 'ms'
                                             },
                                             :keys => ['secret/data'],
                                             :scope => { 'environment' => 'test_env' }).and_return([])
@@ -60,22 +63,25 @@ EOF
 
     allow(client).to receive(:insert).with(:namespace => 'test_env',
                                            :context => 'site',
-                                           :secret_resource => 'testapp-secret',
+                                           :secret_resource => 'foo',
                                            :labels => {
                                              'app.kubernetes.io/name' => 'testapp',
-                                             'app.kubernetes.io/managed-by' => 'mco-secretagent'
+                                             'app.kubernetes.io/managed-by' => 'mco-secretagent',
+                                             'stack' => 'stack',
+                                             'machineset' => 'ms'
                                            },
                                            :keys => ['secret/data'],
                                            :scope => { 'environment' => 'test_env' }).and_return([])
 
     r = Stacks::KubernetesResourceBundle.new('site',
                                              'test_env',
-                                             'stack',
-                                             'ms',
-                                             { 'app.kubernetes.io/name' => 'testapp' },
+                                             { 'app.kubernetes.io/name' => 'testapp',
+                                               'stack' => 'stack',
+                                               'machineset' => 'ms' },
                                              [],
                                              { 'secret/data' => 'secret_data' },
-                                             'environment' => 'test_env')
+                                             { 'environment' => 'test_env' },
+                                             'foo')
 
     expect { r.apply_and_prune(client) }.to raise_error('Your kubectl version is out of date. Please update to at least version 1.16')
   end
@@ -98,25 +104,28 @@ EOF
 
     allow(client).to receive(:insert).with(:namespace => 'test_env',
                                            :context => 'site',
-                                           :secret_resource => 'testapp-secret',
+                                           :secret_resource => 'foo',
                                            :labels => {
                                              'app.kubernetes.io/name' => 'testapp',
-                                             'app.kubernetes.io/managed-by' => 'mco-secretagent'
+                                             'app.kubernetes.io/managed-by' => 'mco-secretagent',
+                                             'stack' => 'stack',
+                                             'machineset' => 'ms'
                                            },
                                            :keys => ['secret/data'],
                                            :scope => { 'environment' => 'test_env' }).and_return([])
 
     r = Stacks::KubernetesResourceBundle.new('site',
                                              'test_env',
-                                             'stack',
-                                             'ms',
-                                             { 'app.kubernetes.io/name' => 'testapp' },
+                                             { 'app.kubernetes.io/name' => 'testapp',
+                                               'stack' => 'stack',
+                                               'machineset' => 'ms' },
                                              [{
                                                'kind' => 'ThisIsANewResourceKind',
                                                'apiVersion' => 'v1'
                                              }],
                                              { 'secret/data' => 'secret_data' },
-                                             'environment' => 'test_env')
+                                             { 'environment' => 'test_env' },
+                                             'foo')
 
     expect { r.apply_and_prune(client) }.
       to raise_error('Found new resource type(s) (/v1/ThisIsANewResourceKind) that is not in the prune whitelist. Please add it.')
@@ -140,22 +149,25 @@ EOF
 
     allow(client).to receive(:insert).with(:namespace => 'test_env',
                                            :context => 'site',
-                                           :secret_resource => 'testapp-secret',
+                                           :secret_resource => 'foo',
                                            :labels => {
                                              'app.kubernetes.io/name' => 'testapp',
-                                             'app.kubernetes.io/managed-by' => 'mco-secretagent'
+                                             'app.kubernetes.io/managed-by' => 'mco-secretagent',
+                                             'stack' => 'stack',
+                                             'machineset' => 'ms'
                                            },
                                            :keys => ['secret/data'],
                                            :scope => { 'environment' => 'test_env' }).and_return([])
 
     r = Stacks::KubernetesResourceBundle.new('site',
                                              'test_env',
-                                             'stack',
-                                             'ms',
-                                             { 'app.kubernetes.io/name' => 'testapp' },
+                                             { 'app.kubernetes.io/name' => 'testapp',
+                                               'stack' => 'stack',
+                                               'machineset' => 'ms' },
                                              [],
                                              { 'secret/data' => 'secret_data' },
-                                             'environment' => 'test_env')
+                                             { 'environment' => 'test_env' },
+                                             'foo')
 
     expect { r.apply_and_prune(client) }.not_to raise_error
   end

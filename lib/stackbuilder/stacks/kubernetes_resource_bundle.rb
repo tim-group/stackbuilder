@@ -7,15 +7,16 @@ class Stacks::KubernetesResourceBundle
   attr_reader :resources
   attr_reader :secrets
 
-  def initialize(site, environment_name, stack_name, machine_set_name, labels, resources, secrets, hiera_scope)
+  def initialize(site, environment_name, labels, resources, secrets, hiera_scope, secret_name)
     @site = site
     @environment_name = environment_name
-    @stack_name = stack_name
-    @machine_set_name = machine_set_name
+    @stack_name = labels['stack']
+    @machine_set_name = labels['machineset']
     @resources = resources
     @secrets = secrets
     @hiera_scope = hiera_scope
     @labels = labels
+    @secret_name = secret_name
   end
 
   def to_defns_yaml
@@ -25,12 +26,11 @@ class Stacks::KubernetesResourceBundle
   end
 
   def apply_and_prune(mco_secrets_client)
-    secret_resource = "#{@labels['app.kubernetes.io/name']}-secret"
-    logger(Logger::INFO) { "Preparing #{@secrets.size} secrets for #{@machine_set_name} in resource #{secret_resource}" }
+    logger(Logger::INFO) { "Preparing #{@secrets.size} secrets for #{@machine_set_name} in resource #{@secret_name}" }
     logger(Logger::DEBUG) { "Secrets to load: #{@secrets.keys.join(', ')}" }
     responses = mco_secrets_client.insert(:namespace => @environment_name,
                                           :context => @site,
-                                          :secret_resource => secret_resource,
+                                          :secret_resource => @secret_name,
                                           :labels => @labels.merge('app.kubernetes.io/managed-by' => 'mco-secretagent'),
                                           :keys => @secrets.keys,
                                           :scope => @hiera_scope)

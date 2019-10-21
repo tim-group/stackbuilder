@@ -64,28 +64,33 @@ describe 'kubernetes' do
         'apiVersion' => 'apps/v1',
         'kind' => 'Deployment',
         'metadata' => {
-          'name' => 'myapplication',
+          'name' => 'x-blue-app',
           'namespace' => 'e1',
           'labels' => {
+            'app.kubernetes.io/managed-by' => 'stacks',
             'stack' => 'mystack',
             'machineset' => 'x',
-            'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1_-x',
+            'group' => 'blue',
+            'app.kubernetes.io/instance' => 'blue',
+            'app.kubernetes.io/part-of' => 'x',
             'app.kubernetes.io/component' => 'app_service',
-            'app.kubernetes.io/version' => '1.2.3',
-            'app.kubernetes.io/managed-by' => 'stacks'
+            'application' => 'myapplication',
+            'app.kubernetes.io/name' => 'myapplication',
+            'app.kubernetes.io/version' => '1.2.3'
           },
           'annotations' => {
             'maintainers' => '[{"type":"Individual","name":"Testers"}]',
             'description' => 'Testing',
-            'configmap.reloader.stakater.com/reload' => 'myapplication-config',
-            'secret.reloader.stakater.com/reload' =>  'myapplication-secret'
+            'configmap.reloader.stakater.com/reload' => 'x-blue-app',
+            'secret.reloader.stakater.com/reload' =>  'x-blue-app'
           }
         },
         'spec' => {
           'selector' => {
             'matchLabels' => {
-              'app.kubernetes.io/instance' => 'e1_-x',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/component' => 'app_service',
               'participation' => 'enabled'
             }
           },
@@ -100,14 +105,17 @@ describe 'kubernetes' do
           'template' => {
             'metadata' => {
               'labels' => {
-                'participation' => 'enabled',
-                'app.kubernetes.io/name' => 'myapplication',
-                'app.kubernetes.io/instance' => 'e1_-x',
-                'app.kubernetes.io/component' => 'app_service',
-                'app.kubernetes.io/version' => '1.2.3',
                 'app.kubernetes.io/managed-by' => 'stacks',
                 'stack' => 'mystack',
-                'machineset' => 'x'
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/instance' => 'blue',
+                'app.kubernetes.io/part-of' => 'x',
+                'app.kubernetes.io/component' => 'app_service',
+                'application' => 'myapplication',
+                'app.kubernetes.io/name' => 'myapplication',
+                'app.kubernetes.io/version' => '1.2.3',
+                'participation' => 'enabled'
               },
               'annotations' => {
                 'maintainers' => '[{"type":"Individual","name":"Testers"}]',
@@ -121,11 +129,11 @@ describe 'kubernetes' do
                   'preferredDuringSchedulingIgnoredDuringExecution' => [{
                     'podAffinityTerm' => {
                       'labelSelector' => {
-                        'matchExpressions' => [{
-                          'key' => 'app.kubernetes.io/instance',
-                          'operator' => 'In',
-                          'values' => ['e1_-x']
-                        }]
+                        'matchLabels' => {
+                          'machineset' => 'x',
+                          'group' => 'blue',
+                          'app.kubernetes.io/component' => 'app_service'
+                        }
                       },
                       'topologyKey' => 'kubernetes.io/hostname'
                     },
@@ -257,7 +265,7 @@ describe 'kubernetes' do
                 {
                   'name' => 'config-template',
                   'configMap' => {
-                    'name' => 'myapplication-config'
+                    'name' => 'x-blue-app'
                   }
                 },
                 {
@@ -279,22 +287,24 @@ describe 'kubernetes' do
         'apiVersion' => 'v1',
         'kind' => 'Service',
         'metadata' => {
-          'name' => 'myapplication',
+          'name' => 'x-blue-app',
           'namespace' => 'e1',
           'labels' => {
-            'machineset' => 'x',
-            'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1_-x',
-            'app.kubernetes.io/component' => 'app_service',
-            'app.kubernetes.io/version' => '1.2.3',
             'app.kubernetes.io/managed-by' => 'stacks',
-            'stack' => 'mystack'
+            'stack' => 'mystack',
+            'machineset' => 'x',
+            'group' => 'blue',
+            'app.kubernetes.io/instance' => 'blue',
+            'app.kubernetes.io/part-of' => 'x',
+            'app.kubernetes.io/component' => 'app_service'
           }
         },
         'spec' => {
           'type' => 'ClusterIP',
           'selector' => {
-            'app.kubernetes.io/instance' => 'e1_-x',
+            'machineset' => 'x',
+            'group' => 'blue',
+            'app.kubernetes.io/component' => 'app_service',
             'participation' => 'enabled'
           },
           'ports' => [{
@@ -311,16 +321,16 @@ describe 'kubernetes' do
         'apiVersion' => 'v1',
         'kind' => 'ConfigMap',
         'metadata' => {
-          'name' => 'myapplication-config',
+          'name' => 'x-blue-app',
           'namespace' => 'e1',
           'labels' => {
+            'app.kubernetes.io/managed-by' => 'stacks',
             'stack' => 'mystack',
             'machineset' => 'x',
-            'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1_-x',
-            'app.kubernetes.io/component' => 'app_service',
-            'app.kubernetes.io/version' => '1.2.3',
-            'app.kubernetes.io/managed-by' => 'stacks'
+            'group' => 'blue',
+            'app.kubernetes.io/instance' => 'blue',
+            'app.kubernetes.io/part-of' => 'x',
+            'app.kubernetes.io/component' => 'app_service'
           }
         },
         'data' => {
@@ -445,19 +455,19 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1beta1',
           'kind' => 'Ingress',
           'metadata' => {
-            'name' => 'e1_-x',
+            'name' => 'x-blue-app',
             'namespace' => 'e1',
             'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'myapplication',
-              'app.kubernetes.io/instance' => 'e1_-x',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/version' => '1.2.3',
-              'app.kubernetes.io/managed-by' => 'stacks'
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'app_service'
             },
             'annotations' => {
-              'kubernetes.io/ingress.class' => 'traefik-e1_-x'
+              'kubernetes.io/ingress.class' => 'traefik-x-blue'
             }
           },
           'spec' => {
@@ -466,7 +476,7 @@ EOL
                 'paths' => [{
                   'path' => '/',
                   'backend' => {
-                    'serviceName' => 'myapplication',
+                    'serviceName' => 'x-blue-app',
                     'servicePort' => 8000
                   }
                 }]
@@ -504,35 +514,43 @@ EOL
           'apiVersion' => 'apps/v1',
           'kind' => 'Deployment',
           'metadata' => {
-            'name' => 'e1_-x-ingress-controller',
+            'name' => 'x-blue-ing',
             'namespace' => 'e1',
             'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'traefik-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
               'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/version' => '2.0',
-              'app.kubernetes.io/managed-by' => 'stacks'
+              'application' => 'traefik',
+              'app.kubernetes.io/name' => 'traefik',
+              'app.kubernetes.io/version' => '2.0'
             }
           },
           'spec' => {
             'replicas' => 2,
             'selector' => {
               'matchLabels' => {
-                'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress'
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/component' => 'ingress'
               }
             },
             'template' => {
               'metadata' => {
                 'labels' => {
+                  'app.kubernetes.io/managed-by' => 'stacks',
                   'stack' => 'mystack',
                   'machineset' => 'x',
-                  'app.kubernetes.io/name' => 'traefik-ingress',
-                  'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress',
+                  'group' => 'blue',
+                  'app.kubernetes.io/instance' => 'blue',
+                  'app.kubernetes.io/part-of' => 'x',
                   'app.kubernetes.io/component' => 'ingress',
-                  'app.kubernetes.io/version' => '2.0',
-                  'app.kubernetes.io/managed-by' => 'stacks'
+                  'application' => 'traefik',
+                  'app.kubernetes.io/name' => 'traefik',
+                  'app.kubernetes.io/version' => '2.0'
                 }
               },
               'spec' => {
@@ -546,8 +564,8 @@ EOL
                       '--entrypoints.http.Address=:8000',
                       '--entrypoints.traefik.Address=:10254',
                       '--providers.kubernetesingress',
-                      '--providers.kubernetesingress.ingressclass=traefik-e1_-x',
-                      '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/myapplication-ingress',
+                      '--providers.kubernetesingress.ingressclass=traefik-x-blue',
+                      '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing',
                       '--providers.kubernetesingress.namespaces=e1',
                       '--metrics.prometheus'
                     ],
@@ -603,7 +621,7 @@ EOL
                     'terminationMessagePolicy' => 'File'
                   }
                 ],
-                'serviceAccountName' => 'myapplication-ingress',
+                'serviceAccountName' => 'x-blue-ing',
                 'terminationGracePeriodSeconds' => 60
               }
             }
@@ -611,7 +629,7 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'Deployment' && r['metadata']['name'] == 'e1_-x-ingress-controller'
+          r['kind'] == 'Deployment' && r['metadata']['name'] == 'x-blue-ing'
         end).to eql(expected_deployment)
       end
 
@@ -641,19 +659,20 @@ EOL
           'apiVersion' => 'v1',
           'kind' => 'Service',
           'metadata' => {
+            'name' => 'x-blue-ing',
+            'namespace' => 'e1',
             'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'myapplication-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/managed-by' => 'stacks'
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
             },
             'annotations' => {
               'metallb.universe.tf/address-pool' => 'prod-static'
-            },
-            'name' => 'myapplication-ingress',
-            'namespace' => 'e1'
+            }
           },
           'spec' => {
             'externalTrafficPolicy' => 'Local',
@@ -672,7 +691,9 @@ EOL
               }
             ],
             'selector' => {
-              'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress'
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/component' => 'ingress'
             },
             'type' => 'LoadBalancer',
             'loadBalancerIP' => '3.1.4.1'
@@ -680,7 +701,7 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'Service' && r['metadata']['name'] == 'myapplication-ingress'
+          r['kind'] == 'Service' && r['metadata']['name'] == 'x-blue-ing'
         end).to eql(expected_service)
       end
 
@@ -710,15 +731,16 @@ EOL
           'kind' => 'Role',
           'apiVersion' => 'rbac.authorization.k8s.io/v1',
           'metadata' => {
-            'name' => 'myapplication-ingress',
+            'name' => 'x-blue-ing',
             'namespace' => 'e1',
             'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'myapplication-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/managed-by' => 'stacks'
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
             }
           },
           'rules' => [
@@ -755,7 +777,7 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'Role' && r['metadata']['name'] == 'myapplication-ingress'
+          r['kind'] == 'Role' && r['metadata']['name'] == 'x-blue-ing'
         end).to eql(expected_role)
       end
 
@@ -785,21 +807,22 @@ EOL
           'kind' => 'ServiceAccount',
           'apiVersion' => 'v1',
           'metadata' => {
-            'name' => 'myapplication-ingress',
+            'name' => 'x-blue-ing',
             'namespace' => 'e1',
             'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'myapplication-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/managed-by' => 'stacks'
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
             }
           }
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'ServiceAccount' && r['metadata']['name'] == 'myapplication-ingress'
+          r['kind'] == 'ServiceAccount' && r['metadata']['name'] == 'x-blue-ing'
         end).to eql(expected_service_account)
       end
 
@@ -829,30 +852,31 @@ EOL
           'kind' => 'RoleBinding',
           'apiVersion' => 'rbac.authorization.k8s.io/v1',
           'metadata' => {
-            'name' => 'myapplication-ingress',
+            'name' => 'x-blue-ing',
             'namespace' => 'e1',
             'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'myapplication-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-myapplication-ingress',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/managed-by' => 'stacks'
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
             }
           },
           'roleRef' => {
             'apiGroup' => 'rbac.authorization.k8s.io',
             'kind' => 'Role',
-            'name' => 'myapplication-ingress'
+            'name' => 'x-blue-ing'
           },
           'subjects' => [{
             'kind' => 'ServiceAccount',
-            'name' => 'myapplication-ingress'
+            'name' => 'x-blue-ing'
           }]
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'RoleBinding' && r['metadata']['name'] == 'myapplication-ingress'
+          r['kind'] == 'RoleBinding' && r['metadata']['name'] == 'x-blue-ing'
         end).to eql(expected_role_binding)
       end
 
@@ -882,15 +906,16 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-monitoring-prom-main-in-to-x-ingress-traefik',
+            'name' => 'allow-in-from-mon-prom-main-1f525ea',
             'namespace' => 'e1',
             'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',
               'machineset' => 'x',
-              'app.kubernetes.io/name' => 'x-ingress',
-              'app.kubernetes.io/instance' => 'e1_-x-ingress',
-              'app.kubernetes.io/component' => 'ingress',
-              'app.kubernetes.io/managed-by' => 'stacks'
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
             }
           },
           'spec' => {
@@ -914,7 +939,9 @@ EOL
             }],
             'podSelector' => {
               'matchLabels' => {
-                'app.kubernetes.io/instance' => 'e1_-x-traefik-ingress'
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/component' => 'ingress'
               }
             },
             'policyTypes' => [
@@ -924,7 +951,7 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-monitoring-prom-main-in-to-x-ingress-traefik'
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-in-from-mon-prom-main-1f525ea'
         end).to eql(expected_network_policy)
       end
     end
@@ -1046,7 +1073,7 @@ EOL
           'name' => 'SECRET_my_very_secret_data',
           'valueFrom' => {
             'secretKeyRef' => {
-              'name' => 'myapplication-secret',
+              'name' => 'x-blue-app',
               'key' => 'my_very_secret_data'
             }
           })
@@ -1058,7 +1085,7 @@ EOL
           'name' => 'SECRET_my_very_secret_array_0',
           'valueFrom' => {
             'secretKeyRef' => {
-              'name' => 'myapplication-secret',
+              'name' => 'x-blue-app',
               'key' => 'my_very_secret_array_0'
             }
           })
@@ -1193,22 +1220,22 @@ EOL
       service_account = k8s_resource(set, 'ServiceAccount')
 
       expect(pod_spec['automountServiceAccountToken']).to eq(true)
-      expect(pod_spec['serviceAccountName']).to eq('x')
+      expect(pod_spec['serviceAccountName']).to eq('x-blue-app')
 
       expect(service_account).to eq(
         'apiVersion' => 'v1',
         'kind' => 'ServiceAccount',
         'metadata' => {
           'namespace' => 'e1',
-          'name' => 'x',
+          'name' => 'x-blue-app',
           'labels' => {
+            'app.kubernetes.io/managed-by' => 'stacks',
             'stack' => 'mystack',
             'machineset' => 'x',
-            'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/instance' => 'e1_-x',
-            'app.kubernetes.io/component' => 'app_service',
-            'app.kubernetes.io/version' => '1.2.3',
-            'app.kubernetes.io/managed-by' => 'stacks'
+            'group' => 'blue',
+            'app.kubernetes.io/instance' => 'blue',
+            'app.kubernetes.io/part-of' => 'x',
+            'app.kubernetes.io/component' => 'app_service'
           }
         }
       )
@@ -1234,19 +1261,21 @@ EOL
 
       expect(network_policies.size).to eq(3)
       network_policy = network_policies.last
-      expect(network_policy['metadata']['name']).to eql('allow-x-out-to-space-kubernetes-api-6443')
+      expect(network_policy['metadata']['name']).to eql('allow-out-to-space-kubernetes-api-dcbf68f')
       expect(network_policy['metadata']['namespace']).to eql('e1')
       expect(network_policy['metadata']['labels']).to eql(
-        'stack' => 'mystack',
-        'app.kubernetes.io/name' => 'myapplication',
-        'app.kubernetes.io/instance' => 'e1_-x',
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => '1.2.3',
         'app.kubernetes.io/managed-by' => 'stacks',
-        'machineset' => 'x'
+        'stack' => 'mystack',
+        'machineset' => 'x',
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'x',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(network_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-x'
+        'machineset' => 'x',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(network_policy['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policy['spec']['egress'].size).to eq(1)
@@ -1462,14 +1491,14 @@ EOL
       just_an_app_in_mars = just_an_app_resources.find { |r| r.site == 'mars' }
 
       expect(just_an_app_in_io.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-depends_on_e-in-to-just_an_app-8000'
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
       end).to be_nil
       expect(just_an_app_in_mars.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-depends_on_e-in-to-just_an_app-8000'
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
       end).not_to be_nil
 
       expect(depends_on_everything_resources.first.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-depends_on_everything-out-to-e1-just_an_app-8000'
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-out-to-e1_-just_an_app')
       end).not_to be_nil
     end
 
@@ -1506,7 +1535,7 @@ EOL
       depends_on_everything_resources = machine_sets['target'].to_k8s(app_deployer, dns, hiera_provider)
 
       policy = depends_on_everything_resources.first.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-e1-source-in-to-target-ingress-http'
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-source')
       end
 
       expect(policy['spec']['ingress'][0]['from']).to eq([
@@ -1548,21 +1577,24 @@ EOL
       expect(network_policies.size).to eq(6)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
-        r['metadata']['name'] == 'allow-e1-app1-in-to-app2-ingress-http'
+        r['metadata']['name'].include?('allow-in-from-e1_-app1')
       end
 
       expect(ingress_controller_ingress_policy).not_to be_nil
       expect(ingress_controller_ingress_policy['metadata']['namespace']).to eql('e1')
       expect(ingress_controller_ingress_policy['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
-        'app.kubernetes.io/name' => 'app2-ingress',
-        'app.kubernetes.io/instance' => 'e1_-app2-ingress',
-        'app.kubernetes.io/component' => 'ingress',
-        'app.kubernetes.io/managed-by' => 'stacks'
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app2',
+        'app.kubernetes.io/component' => 'ingress'
       )
       expect(ingress_controller_ingress_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2-traefik-ingress'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'ingress'
       )
       expect(ingress_controller_ingress_policy['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress_controller_ingress_policy['spec']['ingress'].size).to eq(1)
@@ -1574,57 +1606,66 @@ EOL
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('http')
 
       ingress_controller_egress_policy = network_policies.find do |r|
-        r['metadata']['name'] == 'allow-app2-ingress-out-to-e1-app2-app'
+        r['metadata']['name'].include?('allow-out-to-e1_-app2')
       end
 
       expect(ingress_controller_egress_policy).not_to be_nil
       expect(ingress_controller_egress_policy['metadata']['namespace']).to eql('e1')
       expect(ingress_controller_egress_policy['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
-        'app.kubernetes.io/name' => 'app2-ingress',
-        'app.kubernetes.io/instance' => 'e1_-app2-ingress',
-        'app.kubernetes.io/component' => 'ingress',
-        'app.kubernetes.io/managed-by' => 'stacks'
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app2',
+        'app.kubernetes.io/component' => 'ingress'
       )
       expect(ingress_controller_egress_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2-traefik-ingress'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'ingress'
       )
       expect(ingress_controller_egress_policy['spec']['policyTypes']).to eql(['Egress'])
       expect(ingress_controller_egress_policy['spec']['egress'].size).to eq(1)
       expect(ingress_controller_egress_policy['spec']['egress'].first['to'].size).to eq(1)
       expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].size).to eq(1)
       expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
       expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['port']).to eq('app')
 
       app_ingress_policy = network_policies.find do |r|
-        r['metadata']['name'] == 'allow-e1-app2-ingress-in-to-app2-app'
+        r['metadata']['name'].include?('allow-in-from-e1_-app2')
       end
 
       expect(app_ingress_policy).not_to be_nil
       expect(app_ingress_policy['metadata']['namespace']).to eql('e1')
       expect(app_ingress_policy['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
-        'app.kubernetes.io/name' => 'app2',
-        'app.kubernetes.io/instance' => 'e1_-app2',
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => '1.2.3',
-        'app.kubernetes.io/managed-by' => 'stacks'
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app2',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app_ingress_policy['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app_ingress_policy['spec']['policyTypes']).to eql(['Ingress'])
       expect(app_ingress_policy['spec']['ingress'].size).to eq(1)
       expect(app_ingress_policy['spec']['ingress'].first['from'].size).to eq(1)
       expect(app_ingress_policy['spec']['ingress'].first['ports'].size).to eq(1)
       expect(app_ingress_policy['spec']['ingress'].first['from'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2-traefik-ingress'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'ingress'
       )
       expect(app_ingress_policy['spec']['ingress'].first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(app_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
@@ -1660,19 +1701,21 @@ EOL
                          select { |s| s['kind'] == "NetworkPolicy" }
 
       expect(network_policies.size).to eq(3)
-      expect(network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
+      expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e1_-app1-23bb767')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
-        'app.kubernetes.io/name' => 'app2',
-        'app.kubernetes.io/instance' => 'e1_-app2',
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => '1.2.3',
-        'app.kubernetes.io/managed-by' => 'stacks'
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app2',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policies.first['spec']['egress'].size).to eq(1)
@@ -1712,57 +1755,65 @@ EOL
 
       ingress = app1_network_policies.first['spec']['ingress']
       expect(app1_network_policies.size).to eq(3)
-      expect(app1_network_policies.first['metadata']['name']).to eql('allow-e1-app2-in-to-app1-8000')
+      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e1_-app2-581c0bf')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => 'test_app_servers',
         'machineset' => 'app1',
-        'app.kubernetes.io/name' => 'app1',
-        'app.kubernetes.io/instance' => 'e1_-app1',
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => '1.2.3',
-        'app.kubernetes.io/managed-by' => 'stacks'
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app1',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app1'
+        'machineset' => 'app1',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)
       expect(ingress.first['from'].size).to eq(1)
       expect(ingress.first['ports'].size).to eq(1)
       expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress.first['ports'].first['port']).to eq(8000)
+      expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(3)
-      expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
+      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1_-app1-ea24b2a')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => 'test_app_servers',
         'machineset' => 'app2',
-        'app.kubernetes.io/name' => 'app2',
-        'app.kubernetes.io/instance' => 'e1_-app2',
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => '1.2.3',
-        'app.kubernetes.io/managed-by' => 'stacks'
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app2',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app2'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
       expect(egress.first['to'].size).to eq(1)
       expect(egress.first['ports'].size).to eq(1)
       expect(egress.first['to'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app1'
+        'machineset' => 'app1',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
-      expect(egress.first['ports'].first['port']).to eq(8000)
+      expect(egress.first['ports'].first['port']).to eq('app')
     end
 
     it 'should create an egress policy to allow the init container to talk to nexus' do
@@ -1784,19 +1835,21 @@ EOL
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
       expect(network_policies.size).to eq(2)
-      expect(network_policies.first['metadata']['name']).to eql('allow-app1-out-to-office-nexus-8080')
+      expect(network_policies.first['metadata']['name']).to eql('allow-out-to-off-nexus-31b0d71')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => 'test_app_servers',
         'machineset' => 'app1',
-        'app.kubernetes.io/name' => 'app1',
-        'app.kubernetes.io/instance' => 'e1_-app1',
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => '1.2.3',
-        'app.kubernetes.io/managed-by' => 'stacks'
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app1',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app1'
+        'machineset' => 'app1',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policies.first['spec']['egress'].size).to eq(1)
@@ -1842,39 +1895,47 @@ depends on the other' do
 
       ingress = app1_network_policies.first['spec']['ingress']
       expect(app1_network_policies.size).to eq(3)
-      expect(app1_network_policies.first['metadata']['name']).to eql('allow-e2-app2-in-to-app1-8000')
+      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e2_-app2-af5c735')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app1'
+        'machineset' => 'app1',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)
       expect(ingress.first['from'].size).to eq(1)
       expect(ingress.first['ports'].size).to eq(1)
       expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e2_-app2'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e2')
       expect(ingress.first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress.first['ports'].first['port']).to eq(8000)
+      expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(3)
-      expect(app2_network_policies.first['metadata']['name']).to eql('allow-app2-out-to-e1-app1-8000')
+      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1_-app1-ea24b2a')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e2_-app2'
+        'machineset' => 'app2',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
       expect(egress.first['to'].size).to eq(1)
       expect(egress.first['ports'].size).to eq(1)
       expect(egress.first['to'].first['podSelector']['matchLabels']).to eql(
-        'app.kubernetes.io/instance' => 'e1_-app1'
+        'machineset' => 'app1',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
       )
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
-      expect(egress.first['ports'].first['port']).to eq(8000)
+      expect(egress.first['ports'].first['port']).to eq('app')
     end
 
     it 'should fail when dependency does not provide endpoints' do

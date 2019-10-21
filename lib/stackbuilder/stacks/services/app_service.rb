@@ -1,6 +1,7 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/kubernetes_resource_bundle'
 require 'stackbuilder/stacks/maintainers'
+require 'stackbuilder/support/digest_generator'
 require 'erb'
 require 'json'
 
@@ -194,27 +195,30 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
       }.merge(hiera_scope)
 
       standard_labels = {
-        'app.kubernetes.io/name' => app_name,
-        'app.kubernetes.io/instance' => instance_name_of(self),
-        'app.kubernetes.io/component' => 'app_service',
-        'app.kubernetes.io/version' => app_version.to_s,
         'app.kubernetes.io/managed-by' => 'stacks',
         'stack' => @stack.name,
-        'machineset' => name
+        'machineset' => name,
+        'group' => group,
+        'app.kubernetes.io/instance' => group,
+        'app.kubernetes.io/part-of' => @short_name
       }
+
+      app_service_labels = standard_labels.merge('app.kubernetes.io/component' => 'app_service')
+
+      k8s_app_resources_name = "#{name}-#{group}-app"
 
       config, used_secrets = generate_app_config(erb_vars, hiera_provider)
 
-      output = super app_deployer, dns_resolver, hiera_provider, standard_labels
-      output << generate_k8s_config_map(config, standard_labels)
-      output << generate_k8s_service(standard_labels)
-      output << generate_k8s_deployment(standard_labels, replicas, used_secrets)
-      output += generate_k8s_network_policies(dns_resolver, site, standard_labels)
-      output += generate_k8s_service_account(dns_resolver, site, standard_labels)
+      output = super app_deployer, dns_resolver, hiera_provider, app_service_labels
+      output << generate_k8s_config_map(k8s_app_resources_name, app_service_labels, config)
+      output << generate_k8s_service(k8s_app_resources_name, app_service_labels)
+      output << generate_k8s_deployment(k8s_app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets)
+      output += generate_k8s_network_policies(dns_resolver, site, app_service_labels)
+      output += generate_k8s_service_account(k8s_app_resources_name, dns_resolver, site, app_service_labels)
 
-      output += generate_k8s_ingress_resources(dns_resolver, site, standard_labels)
+      output += generate_k8s_ingress_resources(k8s_app_resources_name, dns_resolver, site, standard_labels, app_service_labels)
 
-      Stacks::KubernetesResourceBundle.new(site, @environment.name, @stack.name, name, standard_labels, output, used_secrets, hiera_scope)
+      Stacks::KubernetesResourceBundle.new(site, @environment.name, app_service_labels, output, used_secrets, hiera_scope, k8s_app_resources_name)
     end
   end
 
@@ -265,16 +269,14 @@ EOC
     [contents, erb.used_secrets]
   end
 
-  def generate_k8s_config_map(config, standard_labels)
-    app_name = standard_labels['app.kubernetes.io/name']
-
+  def generate_k8s_config_map(name, labels, config)
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
       'metadata' => {
-        'name' => app_name + '-config',
+        'name' => name,
         'namespace' => @environment.name,
-        'labels' => standard_labels
+        'labels' => labels
       },
       'data' => {
         'config.properties' => config
@@ -282,21 +284,21 @@ EOC
     }
   end
 
-  def generate_k8s_service(standard_labels)
-    app_name = standard_labels['app.kubernetes.io/name']
-
+  def generate_k8s_service(name, labels)
     {
       'apiVersion' => 'v1',
       'kind' => 'Service',
       'metadata' => {
-        'name' => app_name,
+        'name' => name,
         'namespace' => @environment.name,
-        'labels' => standard_labels
+        'labels' => labels
       },
       'spec' => {
         'type' => 'ClusterIP',
         'selector' => {
-          'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance'],
+          'machineset' => labels['machineset'],
+          'group' => labels['group'],
+          'app.kubernetes.io/component' => labels['app.kubernetes.io/component'],
           'participation' => 'enabled'
         },
         'ports' => [{
@@ -309,9 +311,11 @@ EOC
     }
   end
 
-  def generate_k8s_deployment(standard_labels, replicas, secrets)
-    app_name = standard_labels['app.kubernetes.io/name']
-    app_version = standard_labels['app.kubernetes.io/version']
+  def generate_k8s_deployment(name, app_service_labels, app_name, app_version, replicas, secrets)
+    labels = app_service_labels.merge('application' => app_name,
+                                      'app.kubernetes.io/name' => app_name,
+                                      'app.kubernetes.io/version' => app_version)
+
     container_image = "repo.net.local:8080/timgroup/#{app_name}:#{app_version}"
 
     annotations = {}
@@ -319,8 +323,8 @@ EOC
     annotations['description'] = description unless @description.nil?
 
     deployment_annotations = {}
-    deployment_annotations['configmap.reloader.stakater.com/reload'] = app_name + '-config'
-    deployment_annotations['secret.reloader.stakater.com/reload'] = app_name + '-secret'
+    deployment_annotations['configmap.reloader.stakater.com/reload'] = name
+    deployment_annotations['secret.reloader.stakater.com/reload'] = name
     deployment_annotations.merge!(annotations)
 
     pod_annotations = {}
@@ -333,15 +337,17 @@ EOC
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
       'metadata' => {
-        'name' => app_name,
+        'name' => name,
         'namespace' => @environment.name,
-        'labels' => standard_labels,
+        'labels' => labels,
         'annotations' => deployment_annotations
       },
       'spec' => {
         'selector' => {
           'matchLabels' => {
-            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance'],
+            'machineset' => labels['machineset'],
+            'group' => labels['group'],
+            'app.kubernetes.io/component' => labels['app.kubernetes.io/component'],
             'participation' => 'enabled'
           }
         },
@@ -357,7 +363,7 @@ EOC
           'metadata' => {
             'labels' => {
               'participation' => 'enabled'
-            }.merge(standard_labels),
+            }.merge(labels),
             'annotations' => pod_annotations
           },
           'spec' => {
@@ -366,11 +372,11 @@ EOC
                 'preferredDuringSchedulingIgnoredDuringExecution' => [{
                   'podAffinityTerm' => {
                     'labelSelector' => {
-                      'matchExpressions' => [{
-                        'key' => 'app.kubernetes.io/instance',
-                        'operator' => 'In',
-                        'values' => [standard_labels['app.kubernetes.io/instance']]
-                      }]
+                      'matchLabels' => {
+                        'machineset' => labels['machineset'],
+                        'group' => labels['group'],
+                        'app.kubernetes.io/component' => labels['app.kubernetes.io/component']
+                      }
                     },
                     'topologyKey' => 'kubernetes.io/hostname'
                   },
@@ -392,7 +398,7 @@ EOC
                   'name' => "SECRET_#{secret_name}",
                   'valueFrom' => {
                     'secretKeyRef' => {
-                      'name' => "#{app_name}-secret",
+                      'name' => name,
                       'key' => secret_name
                     }
                   }
@@ -508,7 +514,7 @@ EOC
               },
               {
                 'name' => 'config-template',
-                'configMap' => { 'name' => "#{app_name}-config" }
+                'configMap' => { 'name' => name }
               },
               {
                 'name' => 'log-volume',
@@ -547,6 +553,7 @@ EOC
   end
 
   def generate_k8s_network_policies(dns_resolver, site, standard_labels)
+    # this method only does the network policies for the app pods
     network_policies = []
 
     network_policies += generate_k8s_network_policies_for_dependents(dns_resolver, site, standard_labels)
@@ -559,196 +566,217 @@ EOC
         'port' => 8080
       }]
     }]
+    ingress_match_labels = {
+      'machineset' => standard_labels['machineset'],
+      'group' => standard_labels['group'],
+      'app.kubernetes.io/component' => 'app_service'
+    }
+    network_policies << create_egress_network_policy('off', 'nexus', @environment.name, standard_labels,
+                                                     nexus_filters, ingress_match_labels)
 
-    network_policies << create_egress_network_policy('office', 'nexus', @name, @environment.name, standard_labels,
-                                                     '8080', nexus_filters, standard_labels['app.kubernetes.io/instance'])
-
-    prom_filters = [
-      generate_pod_and_namespace_selector_filter('monitoring', 'prometheus', 'main')
-    ]
-    network_policies << create_ingress_network_policy_for_internal_service('monitoring', 'prom-main',
-                                                                           @name, @environment.name, standard_labels, 8000, prom_filters)
+    prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
+    network_policies << create_ingress_network_policy_for_internal_service('mon', 'prom-main',
+                                                                           @environment.name, standard_labels,
+                                                                           prom_filters)
 
     network_policies
   end
 
-  def generate_k8s_service_account(dns_resolver, site, standard_labels)
+  def generate_k8s_service_account(name, dns_resolver, site, standard_labels)
     if enable_service_account
+
+      network_policy_spec = {
+        'podSelector' => {
+          'matchLabels' => {
+            'machineset' => standard_labels['machineset'],
+            'group' => standard_labels['group'],
+            'app.kubernetes.io/component' => 'app_service'
+          }
+        },
+        'policyTypes' => [
+          'Egress'
+        ],
+
+        'egress' => [{
+          'to' => [{
+            'ipBlock' => {
+              'cidr' => "#{dns_resolver.lookup("#{site}-kube-apiserver-vip.mgmt.#{site}.net.local")}/32"
+            }
+          }],
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => 6443
+          }]
+        }]
+      }
+
+      hash = Support::DigestGenerator.from_hash(network_policy_spec)
+
       [{
         'apiVersion' => 'v1',
         'kind' => 'ServiceAccount',
         'metadata' => {
           'namespace' => @environment.name,
-          'name' => @name,
+          'name' => name,
           'labels' => standard_labels
         }
       }, {
         'apiVersion' => 'networking.k8s.io/v1',
         'kind' => 'NetworkPolicy',
         'metadata' => {
-          'name' => "allow-#{@name}-out-to-#{site}-kubernetes-api-6443",
+          'name' => "allow-out-to-#{site}-kubernetes-api-#{hash}",
           'namespace' => @environment.name,
           'labels' => standard_labels
         },
-        'spec' => {
-          'podSelector' => {
-            'matchLabels' => {
-              'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
-            }
-          },
-          'policyTypes' => [
-            'Egress'
-          ],
-
-          'egress' => [{
-            'to' => [{
-              'ipBlock' => {
-                'cidr' => "#{dns_resolver.lookup("#{site}-kube-apiserver-vip.mgmt.#{site}.net.local")}/32"
-              }
-            }],
-            'ports' => [{
-              'protocol' => 'TCP',
-              'port' => 6443
-            }]
-          }]
-        }
+        'spec' => network_policy_spec
       }]
     else
       []
     end
   end
 
-  def create_ingress_network_policy_for_external_service(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, filters)
-    instance = standard_labels['app.kubernetes.io/instance']
-    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
-                                   'app.kubernetes.io/instance' => "#{instance}-ingress",
-                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+  def create_ingress_network_policy_for_external_service(virtual_service_env, virtual_service_name, env_name, labels, filters)
+    spec = {
+      'podSelector' => {
+        'matchLabels' => {
+          'machineset' => labels['machineset'],
+          'group' => labels['group'],
+          'app.kubernetes.io/component' => 'ingress'
+        }
+      },
+      'policyTypes' => [
+        'Ingress'
+      ],
+      'ingress' => [{
+        'from' => filters,
+        'ports' => [{
+          'protocol' => 'TCP',
+          'port' => 'http'
+        }]
+      }]
+    }
+
+    hash = Support::DigestGenerator.from_hash(spec)
 
     {
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
       'metadata' => {
-        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-ingress-http",
+        'name' => "allow-in-from-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
         'namespace' => env_name,
         'labels' => labels
       },
-      'spec' => {
-        'podSelector' => {
-          'matchLabels' => {
-            'app.kubernetes.io/instance' => "#{instance}-traefik-ingress"
-          }
-        },
-        'policyTypes' => [
-          'Ingress'
-        ],
-        'ingress' => [{
-          'from' => filters,
-          'ports' => [{
-            'protocol' => 'TCP',
-            'port' => 'http'
-          }]
-        }]
-      }
+      'spec' => spec
     }
   end
 
-  def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, app_name, env_name, standard_labels, port, filters)
+  def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, env_name, labels, filters)
+    spec = {
+      'podSelector' => {
+        'matchLabels' => {
+          'machineset' => labels['machineset'],
+          'group' => labels['group'],
+          'app.kubernetes.io/component' => 'app_service'
+        }
+      },
+      'policyTypes' => [
+        'Ingress'
+      ],
+      'ingress' => [{
+        'from' => filters,
+        'ports' => [{
+          'protocol' => 'TCP',
+          'port' => 'app'
+        }]
+      }]
+    }
+
+    hash = Support::DigestGenerator.from_hash(spec)
+
     {
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
       'metadata' => {
-        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-#{port}",
+        'name' => "allow-in-from-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
         'namespace' => env_name,
-        'labels' => standard_labels
+        'labels' => labels
       },
-      'spec' => {
-        'podSelector' => {
-          'matchLabels' => {
-            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance']
-          }
-        },
-        'policyTypes' => [
-          'Ingress'
-        ],
-        'ingress' => [{
-          'from' => filters,
-          'ports' => [{
-            'protocol' => 'TCP',
-            'port' => port
-          }]
-        }]
-      }
+      'spec' => spec
     }
   end
 
   def create_ingress_network_policy_to_ingress_for_internal_service(virtual_service_env, virtual_service_name,
-                                                                    app_name, env_name, standard_labels, port, filters)
-    {
-      'apiVersion' => 'networking.k8s.io/v1',
-      'kind' => 'NetworkPolicy',
-      'metadata' => {
-        'name' => "allow-#{virtual_service_env}-#{virtual_service_name}-in-to-#{app_name}-ingress-#{port}",
-        'namespace' => env_name,
-        'labels' => standard_labels
+                                                                    env_name, labels, port, filters)
+    spec = {
+      'podSelector' => {
+        'matchLabels' => {
+          'machineset' => labels['machineset'],
+          'group' => labels['group'],
+          'app.kubernetes.io/component' => 'ingress'
+        }
       },
-      'spec' => {
-        'podSelector' => {
-          'matchLabels' => {
-            'app.kubernetes.io/instance' => standard_labels['app.kubernetes.io/instance'].gsub('ingress', 'traefik-ingress')
-          }
-        },
-        'policyTypes' => [
-          'Ingress'
-        ],
-        'ingress' => [{
-          'from' => filters,
-          'ports' => [{
-            'protocol' => 'TCP',
-            'port' => port
-          }]
+      'policyTypes' => [
+        'Ingress'
+      ],
+      'ingress' => [{
+        'from' => filters,
+        'ports' => [{
+          'protocol' => 'TCP',
+          'port' => port
         }]
-      }
+      }]
     }
-  end
 
-  def create_egress_network_policy(virtual_service_env, virtual_service_name, app_name, env_name,
-                                   standard_labels, ports, egresses, pod_selector_instance_value)
+    hash = Support::DigestGenerator.from_hash(spec)
+
     {
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
       'metadata' => {
-        'name' => "allow-#{app_name}-out-to-#{virtual_service_env}-#{virtual_service_name}-#{ports}",
+        'name' => "allow-in-from-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
         'namespace' => env_name,
-        'labels' => standard_labels
+        'labels' => labels
       },
-      'spec' => {
-        'podSelector' => {
-          'matchLabels' => {
-            'app.kubernetes.io/instance' => pod_selector_instance_value
-          }
-        },
-        'policyTypes' => [
-          'Egress'
-        ],
-        'egress' => egresses
-      }
+      'spec' => spec
     }
   end
 
-  def generate_k8s_ingress(standard_labels)
-    instance = standard_labels['app.kubernetes.io/instance']
+  def create_egress_network_policy(virtual_service_env, virtual_service_name, env_name,
+                                   labels, egresses, pod_selector_match_labels)
+    spec = {
+      'podSelector' => {
+        'matchLabels' => pod_selector_match_labels
+      },
+      'policyTypes' => [
+        'Egress'
+      ],
+      'egress' => egresses
+    }
 
+    hash = Support::DigestGenerator.from_hash(spec)
+
+    {
+      'apiVersion' => 'networking.k8s.io/v1',
+      'kind' => 'NetworkPolicy',
+      'metadata' => {
+        'name' => "allow-out-to-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
+        'namespace' => env_name,
+        'labels' => labels
+      },
+      'spec' => spec
+    }
+  end
+
+  def generate_k8s_ingress(name, labels)
     {
       'apiVersion' => 'networking.k8s.io/v1beta1',
       'kind' => 'Ingress',
       'metadata' => {
-        'name' => instance,
+        'name' => name,
         'namespace' => @environment.name,
-        'labels' => standard_labels.merge(
-          'app.kubernetes.io/component' => 'ingress'
-        ),
+        'labels' => labels,
         'annotations' => {
-          'kubernetes.io/ingress.class' => "traefik-#{instance}"
+          'kubernetes.io/ingress.class' => "traefik-#{labels['machineset']}-#{labels['group']}"
         }
       },
       'spec' => {
@@ -757,7 +785,7 @@ EOC
             'paths' => [{
               'path' => '/',
               'backend' => {
-                'serviceName' => standard_labels['app.kubernetes.io/name'],
+                'serviceName' => name,
                 'servicePort' => 8000
               }
             }]
@@ -767,20 +795,14 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_role(standard_labels)
-    instance = standard_labels['app.kubernetes.io/instance']
-    app_name = standard_labels['app.kubernetes.io/name']
-    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
-                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
-                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
-
+  def generate_k8s_ingress_controller_role(name, ingress_labels)
     {
       'kind' => 'Role',
       'apiVersion' => 'rbac.authorization.k8s.io/v1',
       'metadata' => {
-        'name' => "#{app_name}-ingress",
+        'name' => name,
         'namespace' => @environment.name,
-        'labels' => labels
+        'labels' => ingress_labels
       },
       'rules' => [
         {
@@ -816,19 +838,65 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
-    instance = standard_labels['app.kubernetes.io/instance']
-    app_name = standard_labels['app.kubernetes.io/name']
-    ingress_service_labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
-                                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
-                                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+  def generate_k8s_ingress_controller_network_policies(_name, ingress_labels, dns_resolver, site)
+    network_policies = []
 
+    app_service_match_labels = {
+      'machineset' => ingress_labels['machineset'],
+      'group' => 'blue',
+      'app.kubernetes.io/component' => 'app_service'
+    }
+    egresses = [{
+      'to' => [
+        generate_pod_and_namespace_selector_filter(@environment.name, app_service_match_labels)
+      ],
+      'ports' => [{
+        'protocol' => 'TCP',
+        'port' => 'app'
+      }]
+    }]
+    ingress_match_labels = {
+      'machineset' => ingress_labels['machineset'],
+      'group' => 'blue',
+      'app.kubernetes.io/component' => 'ingress'
+    }
+    network_policies << create_egress_network_policy(@environment.short_name, short_name, @environment.name, ingress_labels, egresses, ingress_match_labels)
+
+    virtual_services_that_depend_on_me.each do |vs|
+      is_same_site = requirements_of(vs).include?(:same_site)
+      next if is_same_site && !vs.exists_in_site?(vs.environment, site)
+
+      next if vs.kubernetes
+
+      filters = []
+      dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }
+
+      dependant_vms.each do |vm|
+        filters << {
+          'ipBlock' => {
+            'cidr' => "#{dns_resolver.lookup(vm.qualified_hostname(@environment.primary_network))}/32"
+          }
+        }
+      end
+      network_policies << create_ingress_network_policy_for_external_service(vs.environment.short_name, vs.short_name,
+                                                                             @environment.name, ingress_labels, filters)
+    end
+
+    prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
+    network_policies << create_ingress_network_policy_to_ingress_for_internal_service('mon', 'prom-main',
+                                                                                      @environment.name, ingress_labels,
+                                                                                      'traefik', prom_filters)
+
+    network_policies
+  end
+
+  def generate_k8s_ingress_controller_service(name, ingress_labels, dns_resolver, site)
     {
       'apiVersion' => 'v1',
       'kind' => 'Service',
       'metadata' => {
-        'labels' => ingress_service_labels,
-        'name' => "#{app_name}-ingress",
+        'labels' => ingress_labels,
+        'name' => name,
         'namespace' => @environment.name,
         'annotations' => {
           'metallb.universe.tf/address-pool' => 'prod-static'
@@ -839,7 +907,9 @@ EOC
         'loadBalancerIP' => dns_resolver.lookup(prod_fqdn(site)).to_s,
         'externalTrafficPolicy' => 'Local',
         'selector' => {
-          'app.kubernetes.io/instance' => "#{instance}-traefik-ingress"
+          'machineset' => ingress_labels['machineset'],
+          'group' => ingress_labels['group'],
+          'app.kubernetes.io/component' => 'ingress'
         },
         'ports' => [
           {
@@ -859,19 +929,16 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_deployment(standard_labels)
-    instance = standard_labels['app.kubernetes.io/instance']
-    app_name = standard_labels['app.kubernetes.io/name']
-    ingress_controller_labels = standard_labels.merge('app.kubernetes.io/name' => 'traefik-ingress',
-                                                      'app.kubernetes.io/instance' => "#{instance}-traefik-ingress",
-                                                      'app.kubernetes.io/component' => 'ingress',
-                                                      'app.kubernetes.io/version' => '2.0')
+  def generate_k8s_ingress_controller_deployment(name, ingress_labels)
+    ingress_controller_labels = ingress_labels.merge('app.kubernetes.io/name' => 'traefik',
+                                                     'application' => 'traefik',
+                                                     'app.kubernetes.io/version' => '2.0')
 
     {
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
       'metadata' => {
-        'name' => "#{instance}-ingress-controller",
+        'name' => name,
         'namespace' => @environment.name,
         'labels' => ingress_controller_labels
       },
@@ -879,7 +946,9 @@ EOC
         'replicas' => 2,
         'selector' => {
           'matchLabels' => {
-            'app.kubernetes.io/instance' => "#{instance}-traefik-ingress"
+            'machineset' => ingress_labels['machineset'],
+            'group' => ingress_labels['group'],
+            'app.kubernetes.io/component' => ingress_labels['app.kubernetes.io/component']
           }
         },
         'template' => {
@@ -897,8 +966,8 @@ EOC
                   "--entrypoints.http.Address=:8000",
                   "--entrypoints.traefik.Address=:10254",
                   "--providers.kubernetesingress",
-                  "--providers.kubernetesingress.ingressclass=traefik-#{instance}",
-                  "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{app_name}-ingress",
+                  "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}",
+                  "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}",
                   "--providers.kubernetesingress.namespaces=#{@environment.name}",
                   "--metrics.prometheus"
                 ],
@@ -954,7 +1023,7 @@ EOC
                 'terminationMessagePolicy' => 'File'
               }
             ],
-            'serviceAccountName' => "#{app_name}-ingress",
+            'serviceAccountName' => name,
             'terminationGracePeriodSeconds' => 60
           }
         }
@@ -962,74 +1031,65 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_service_account(standard_labels)
-    instance = standard_labels['app.kubernetes.io/instance']
-    app_name = standard_labels['app.kubernetes.io/name']
-    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
-                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
-                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
-
+  def generate_k8s_ingress_controller_service_account(name, ingress_labels)
     {
       'kind' => 'ServiceAccount',
       'apiVersion' => 'v1',
       'metadata' => {
-        'name' => "#{app_name}-ingress",
+        'name' => name,
         'namespace' => @environment.name,
-        'labels' => labels
+        'labels' => ingress_labels
       }
     }
   end
 
-  def generate_k8s_ingress_controller_role_binding(standard_labels)
-    instance = standard_labels['app.kubernetes.io/instance']
-    app_name = standard_labels['app.kubernetes.io/name']
-    labels = standard_labels.merge('app.kubernetes.io/name' => "#{app_name}-ingress",
-                                   'app.kubernetes.io/instance' => "#{instance}-#{app_name}-ingress",
-                                   'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
-
+  def generate_k8s_ingress_controller_role_binding(name, ingress_labels)
     {
       'kind' => 'RoleBinding',
       'apiVersion' => 'rbac.authorization.k8s.io/v1',
       'metadata' => {
-        'name' => "#{app_name}-ingress",
+        'name' => name,
         'namespace' => @environment.name,
-        'labels' => labels
+        'labels' => ingress_labels
       },
       'roleRef' => {
         'apiGroup' => 'rbac.authorization.k8s.io',
         'kind' => 'Role',
-        'name' => "#{app_name}-ingress"
+        'name' => name
       },
       'subjects' => [{
         'kind' => 'ServiceAccount',
-        'name' => "#{app_name}-ingress"
+        'name' => name
       }]
     }
   end
 
-  def generate_k8s_ingress_resources(dns_resolver, site, standard_labels)
+  def generate_k8s_ingress_resources(k8s_app_resources_name, dns_resolver, site, standard_labels, app_service_labels)
     output = []
     non_k8s_deps = virtual_services_that_depend_on_me.select do |vs|
       !vs.kubernetes
     end
 
     if non_k8s_deps.size > 0
-      output << generate_k8s_ingress(standard_labels)
-      output << generate_k8s_ingress_controller_service_account(standard_labels)
-      output << generate_k8s_ingress_controller_role(standard_labels)
-      output << generate_k8s_ingress_controller_role_binding(standard_labels)
-      output << generate_k8s_ingress_controller_service(dns_resolver, site, standard_labels)
-      output << generate_k8s_ingress_controller_deployment(standard_labels)
+      ingress_labels = standard_labels.merge('app.kubernetes.io/component' => 'ingress')
+
+      k8s_ingress_resources_name = "#{standard_labels['machineset']}-#{standard_labels['group']}-ing"
+
+      output << generate_k8s_ingress(k8s_app_resources_name, app_service_labels)
+      output << generate_k8s_ingress_controller_service_account(k8s_ingress_resources_name, ingress_labels)
+      output << generate_k8s_ingress_controller_role(k8s_ingress_resources_name, ingress_labels)
+      output << generate_k8s_ingress_controller_role_binding(k8s_ingress_resources_name, ingress_labels)
+      output += generate_k8s_ingress_controller_network_policies(k8s_ingress_resources_name, ingress_labels, dns_resolver, site)
+      output << generate_k8s_ingress_controller_service(k8s_ingress_resources_name, ingress_labels, dns_resolver, site)
+      output << generate_k8s_ingress_controller_deployment(k8s_ingress_resources_name, ingress_labels)
     end
     output
   end
 
-  def generate_pod_and_namespace_selector_filter(namespace, pod_label, pod_label_value)
+  def generate_pod_and_namespace_selector_filter(namespace, match_labels)
     {
       'podSelector' => {
-        'matchLabels' => {
-          pod_label => pod_label_value
-        }
+        'matchLabels' => match_labels
       },
       'namespaceSelector' => {
         'matchLabels' => {
@@ -1039,64 +1099,49 @@ EOC
     }
   end
 
-  def generate_k8s_network_policies_for_dependents(dns_resolver, site, standard_labels)
+  def generate_k8s_network_policies_for_dependents(_dns_resolver, site, standard_labels)
     network_policies = []
-    external_dependencies_count = 0
 
-    instance = standard_labels['app.kubernetes.io/instance']
-    ingress_labels = standard_labels.merge('app.kubernetes.io/name' => "#{short_name}-ingress",
-                                           'app.kubernetes.io/instance' => "#{instance}-ingress",
-                                           'app.kubernetes.io/component' => 'ingress').delete_if { |k, _v| k == 'app.kubernetes.io/version' }
+    if non_k8s_dependencies_exist?
+      ingress_selector = {
+        'machineset' => name,
+        'group' => @groups.first,
+        'app.kubernetes.io/component' => 'ingress'
+      }
+      ingress_filters = [generate_pod_and_namespace_selector_filter(@environment.name, ingress_selector)]
+      network_policies << create_ingress_network_policy_for_internal_service(@environment.short_name, "#{name}-#{@groups.first}-ing",
+                                                                             @environment.name, standard_labels,
+                                                                             ingress_filters)
 
-    virtual_services_that_depend_on_me.each do |vs|
-      is_same_site = requirements_of(vs).include?(:same_site)
-      next if is_same_site && !vs.exists_in_site?(vs.environment, site)
+      virtual_services_that_depend_on_me.each do |vs|
+        is_same_site = requirements_of(vs).include?(:same_site)
+        next if is_same_site && !vs.exists_in_site?(vs.environment, site)
 
-      filters = []
-      if vs.kubernetes
-        filters << generate_pod_and_namespace_selector_filter(vs.environment.name, 'app.kubernetes.io/instance', instance_name_of(vs))
-        network_policies << create_ingress_network_policy_for_internal_service(vs.environment.name, vs.short_name,
-                                                                               @name, @environment.name, standard_labels, 8000, filters)
-      else
-        external_dependencies_count += 1
-        dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }
-        dependant_vms.each do |vm|
-          filters << {
-            'ipBlock' => {
-              'cidr' => "#{dns_resolver.lookup(vm.qualified_hostname(@environment.primary_network))}/32"
-            }
-          }
-        end
-        network_policies << create_ingress_network_policy_for_external_service(vs.environment.name, vs.short_name,
-                                                                               @name, @environment.name, standard_labels, filters)
+        next if !vs.kubernetes
 
-        egresses = [{
-          'to' => [
-            generate_pod_and_namespace_selector_filter(@environment.name, 'app.kubernetes.io/instance', standard_labels['app.kubernetes.io/instance'])
-          ],
-          'ports' => [{
-            'protocol' => 'TCP',
-            'port' => 'app'
-          }]
-        }]
-        network_policies << create_egress_network_policy(@environment.name, short_name, "#{short_name}-ingress",
-                                                         @environment.name, ingress_labels, 'app', egresses, "#{instance}-traefik-ingress")
-
-        internal_ingress_filters = [generate_pod_and_namespace_selector_filter(@environment.name, 'app.kubernetes.io/instance',
-                                                                               "#{instance}-traefik-ingress")]
-        network_policies << create_ingress_network_policy_for_internal_service(@environment.name, "#{short_name}-ingress",
-                                                                               short_name, @environment.name, standard_labels, 'app',
-                                                                               internal_ingress_filters)
+        match_labels = {
+          'machineset' => vs.name,
+          'group' => vs.groups.first,
+          'app.kubernetes.io/component' => 'app_service'
+        }
+        filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
+        network_policies << create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
+                                                                               @environment.name, standard_labels, filters)
       end
-    end
+    else
+      virtual_services_that_depend_on_me.each do |vs|
+        is_same_site = requirements_of(vs).include?(:same_site)
+        next if is_same_site && !vs.exists_in_site?(vs.environment, site)
 
-    if external_dependencies_count > 0
-      prom_filters = [
-        generate_pod_and_namespace_selector_filter('monitoring', 'prometheus', 'main')
-      ]
-      network_policies << create_ingress_network_policy_to_ingress_for_internal_service('monitoring', 'prom-main',
-                                                                                        short_name, @environment.name,
-                                                                                        ingress_labels, 'traefik', prom_filters)
+        match_labels = {
+          'machineset' => vs.name,
+          'group' => vs.groups.first,
+          'app.kubernetes.io/component' => 'app_service'
+        }
+        filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
+        network_policies << create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
+                                                                               @environment.name, standard_labels, filters)
+      end
     end
 
     network_policies
@@ -1112,13 +1157,18 @@ EOC
 
       egresses = []
       if vs.kubernetes
+        match_labels = {
+          'machineset' => vs.name,
+          'group' => vs.groups.first,
+          'app.kubernetes.io/component' => 'app_service'
+        }
         egresses << {
           'to' => [
-            generate_pod_and_namespace_selector_filter(vs.environment.name, 'app.kubernetes.io/instance', instance_name_of(vs))
+            generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)
           ],
           'ports' => [{
             'protocol' => 'TCP',
-            'port' => 8000
+            'port' => 'app'
           }]
         }
       else
@@ -1136,10 +1186,18 @@ EOC
           }
         end
       end
-      ports = endpoints.map { |e| e[:port] }.join('-')
-      network_policies << create_egress_network_policy(vs.environment.name, vs.short_name, @name, @environment.name,
-                                                       standard_labels, ports, egresses, standard_labels['app.kubernetes.io/instance'])
+      app_service_match_labels = {
+        'machineset' => standard_labels['machineset'],
+        'group' => standard_labels['group'],
+        'app.kubernetes.io/component' => 'app_service'
+      }
+      network_policies << create_egress_network_policy(vs.environment.short_name, vs.short_name, @environment.name,
+                                                       standard_labels, egresses, app_service_match_labels)
     end
     network_policies
+  end
+
+  def non_k8s_dependencies_exist?
+    virtual_services_that_depend_on_me.count { |vs| !vs.kubernetes } > 0
   end
 end
