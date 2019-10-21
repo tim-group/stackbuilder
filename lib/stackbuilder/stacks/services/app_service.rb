@@ -869,7 +869,7 @@ EOC
       next if vs.kubernetes
 
       filters = []
-      dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }
+      dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }.sort_by(&:prod_fqdn)
 
       dependant_vms.each do |vm|
         filters << {

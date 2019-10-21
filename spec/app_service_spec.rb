@@ -21,7 +21,10 @@ describe 'kubernetes' do
                           'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11',
                           'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12',
                           'e1-x-vip.earth.net.local' => '3.1.4.13',
-                          'e1-nonk8sapp-001.space.net.local' => '3.1.4.14')
+                          'e1-nonk8sapp-001.space.net.local' => '3.1.4.14',
+                          'e1-sharedproxy-001.space.net.local' => '3.1.4.15',
+                          'e1-sharedproxy-002.space.net.local' => '3.1.4.16'
+                         )
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
@@ -1007,6 +1010,77 @@ EOL
 
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-in-from-mon-prom-main-1f525ea'
+        end).to eql(expected_network_policy)
+      end
+
+      it 'creates network policies allowing dependent proxies outside of the cluster to talk to the ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            proxy_service 'sharedproxy' do
+              depend_on 'x', 'e1', :same_site
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_network_policy = {
+          'apiVersion' => 'networking.k8s.io/v1',
+          'kind' => 'NetworkPolicy',
+          'metadata' => {
+            'name' => 'allow-in-from-e1_-sharedproxy-43b85ac',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
+            }
+          },
+          'spec' => {
+            'ingress' => [{
+              'from' => [{
+                'ipBlock' => {
+                  'cidr' => '3.1.4.15/32'
+                }
+              }, {
+                'ipBlock' => {
+                  'cidr' => '3.1.4.16/32'
+                }
+              }],
+              'ports' => [{
+                'port' => 'http',
+                'protocol' => 'TCP'
+              }]
+            }],
+            'podSelector' => {
+              'matchLabels' => {
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/component' => 'ingress'
+              }
+            },
+            'policyTypes' => [
+              'Ingress'
+            ]
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-sharedproxy-')
         end).to eql(expected_network_policy)
       end
     end
