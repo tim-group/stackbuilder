@@ -917,7 +917,29 @@ EOC
             'port' => 80,
             'protocol' => 'TCP',
             'targetPort' => 'http'
-          },
+          }
+        ]
+      }
+    }
+  end
+
+  def generate_k8s_ingress_controller_monitoring_service(name, ingress_labels)
+    {
+      'apiVersion' => 'v1',
+      'kind' => 'Service',
+      'metadata' => {
+        'labels' => ingress_labels.merge('app.kubernetes.io/component' => 'ingress-monitoring'),
+        'name' => "#{name}-mon",
+        'namespace' => @environment.name
+      },
+      'spec' => {
+        'clusterIP' => 'None',
+        'selector' => {
+          'machineset' => ingress_labels['machineset'],
+          'group' => ingress_labels['group'],
+          'app.kubernetes.io/component' => 'ingress'
+        },
+        'ports' => [
           {
             'name' => 'traefik',
             'port' => 10254,
@@ -1081,6 +1103,7 @@ EOC
       output << generate_k8s_ingress_controller_role_binding(k8s_ingress_resources_name, ingress_labels)
       output += generate_k8s_ingress_controller_network_policies(k8s_ingress_resources_name, ingress_labels, dns_resolver, site)
       output << generate_k8s_ingress_controller_service(k8s_ingress_resources_name, ingress_labels, dns_resolver, site)
+      output << generate_k8s_ingress_controller_monitoring_service(k8s_ingress_resources_name, ingress_labels)
       output << generate_k8s_ingress_controller_deployment(k8s_ingress_resources_name, ingress_labels)
     end
     output

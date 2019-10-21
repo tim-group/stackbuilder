@@ -682,12 +682,6 @@ EOL
                 'port' => 80,
                 'protocol' => 'TCP',
                 'targetPort' => 'http'
-              },
-              {
-                'name' => 'traefik',
-                'port' => 10254,
-                'protocol' => 'TCP',
-                'targetPort' => 'traefik'
               }
             ],
             'selector' => {
@@ -702,6 +696,67 @@ EOL
 
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'Service' && r['metadata']['name'] == 'x-blue-ing'
+        end).to eql(expected_service)
+      end
+
+      it 'creates a headless service resource for ingress controllers to expose the traefik admin interface to prometheus' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_service = {
+          'apiVersion' => 'v1',
+          'kind' => 'Service',
+          'metadata' => {
+            'name' => 'x-blue-ing-mon',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress-monitoring'
+            }
+          },
+          'spec' => {
+            'ports' => [
+              {
+                'name' => 'traefik',
+                'port' => 10254,
+                'protocol' => 'TCP',
+                'targetPort' => 'traefik'
+              }
+            ],
+            'selector' => {
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/component' => 'ingress'
+            },
+            'clusterIP' => 'None'
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Service' && r['metadata']['name'] == 'x-blue-ing-mon'
         end).to eql(expected_service)
       end
 
