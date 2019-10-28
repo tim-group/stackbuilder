@@ -1034,11 +1034,11 @@ EOC
                 'resources' => {
                   'limits' => {
                     'cpu' => '300m',
-                    'memory' => '32Mi'
+                    'memory' => '64Mi'
                   },
                   'requests' => {
                     'cpu' => '200m',
-                    'memory' => '24Mi'
+                    'memory' => '48Mi'
                   }
                 },
                 'terminationMessagePath' => '/dev/termination-log',
