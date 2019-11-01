@@ -1085,6 +1085,83 @@ EOL
       end
     end
 
+    describe 'PrometheusRule' do
+      it 'creates an alert rule for critical status components' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        expect(k8s_resource(set, 'PrometheusRule')).to eql(
+          'apiVersion' => 'monitoring.coreos.com/v1',
+          'kind' => 'PrometheusRule',
+          'metadata' => {
+            'labels' => {
+              'prometheus' => 'main',
+              'role' => 'alert-rules',
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'app_service'
+            },
+            'name' => 'x-blue-app',
+            'namespace' => 'e1'
+          },
+          'spec' => {
+            'groups' => [
+              {
+                'name' => 'stacks-alerts',
+                'rules' => [
+                  {
+                    'alert' => 'StatusCritical',
+                    'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod) > 0',
+                    'labels' => {
+                      'severity' => 'critical',
+                      'alertname' => 'x-blue-app CRITICAL'
+                    },
+                    'annotations' => {
+                      'message' => '{{ $value }} components are critical on {{ $labels.pod }}',
+                      'status_page_url' => "https://go.timgroup.com/insight/space/proxy/e1/{{ $labels.pod }}/info/status"
+                    }
+                  }
+                ]
+              }
+            ]
+          })
+      end
+
+      it 'sends component alerts to the specified alerting channel' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.alerts_channel = "testing-alerts"
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        expect(k8s_resource(set, 'PrometheusRule')['spec']['groups'][0]['rules'][0]['labels']['alert_owner_channel']).to eql('testing-alerts')
+      end
+    end
+
     describe 'instance control' do
       it 'controls the number of replicas in the primary site' do
         factory = eval_stacks do

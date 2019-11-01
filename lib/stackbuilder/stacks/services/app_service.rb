@@ -28,6 +28,7 @@ module Stacks::Services::AppService
 
   attr_accessor :maintainers
   attr_accessor :description
+  attr_accessor :alerts_channel
 
   alias_method :database_application_name, :application
 
@@ -213,6 +214,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
       output << generate_k8s_config_map(k8s_app_resources_name, app_service_labels, config)
       output << generate_k8s_service(k8s_app_resources_name, app_service_labels)
       output << generate_k8s_deployment(k8s_app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets)
+      output << generate_k8s_alerting(k8s_app_resources_name, site, app_service_labels, app_name)
       output += generate_k8s_network_policies(dns_resolver, site, app_service_labels)
       output += generate_k8s_service_account(k8s_app_resources_name, dns_resolver, site, app_service_labels)
 
@@ -536,6 +538,44 @@ EOC
     end
 
     deployment
+  end
+
+  def generate_k8s_alerting(name, site, app_service_labels, app_name)
+    alert_labels = { 'severity' => 'critical', 'alertname' => "#{name} CRITICAL" }
+    if alerts_channel
+      alert_labels['alert_owner_channel'] = alerts_channel
+    end
+
+    {
+      'apiVersion' => 'monitoring.coreos.com/v1',
+      'kind' => 'PrometheusRule',
+      'metadata' => {
+        'labels' => {
+          'prometheus' => 'main',
+          'role' => 'alert-rules'
+        }.merge(app_service_labels),
+        'name' => name,
+        'namespace' => @environment.name
+      },
+      'spec' => {
+        'groups' => [
+          {
+            'name' => 'stacks-alerts',
+            'rules' => [
+              {
+                'alert' => 'StatusCritical',
+                'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod) > 0",
+                'labels' => alert_labels,
+                'annotations' => {
+                  'message' => '{{ $value }} components are critical on {{ $labels.pod }}',
+                  'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
   end
 
   def scale_memory(memory, coeff)

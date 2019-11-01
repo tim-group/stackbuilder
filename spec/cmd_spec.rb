@@ -151,6 +151,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -179,6 +180,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -273,6 +275,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -301,6 +304,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -414,6 +418,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -442,6 +447,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -504,6 +510,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -589,6 +596,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -617,6 +625,7 @@ EOF
                '--prune-whitelist', 'rbac.authorization.k8s.io/v1/RoleBinding',
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
+               '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
