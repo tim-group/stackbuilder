@@ -214,7 +214,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
       output << generate_k8s_config_map(k8s_app_resources_name, app_service_labels, config)
       output << generate_k8s_service(k8s_app_resources_name, app_service_labels)
       output << generate_k8s_deployment(k8s_app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets)
-      output << generate_k8s_alerting(k8s_app_resources_name, site, app_service_labels, app_name)
+      output << generate_k8s_alerting(k8s_app_resources_name, site, app_service_labels)
       output += generate_k8s_network_policies(dns_resolver, site, app_service_labels)
       output += generate_k8s_service_account(k8s_app_resources_name, dns_resolver, site, app_service_labels)
 
@@ -540,11 +540,9 @@ EOC
     deployment
   end
 
-  def generate_k8s_alerting(name, site, app_service_labels, app_name)
+  def generate_k8s_alerting(name, site, app_service_labels)
     alert_labels = { 'severity' => 'critical', 'alertname' => "#{name} CRITICAL" }
-    if alerts_channel
-      alert_labels['alert_owner_channel'] = alerts_channel
-    end
+    alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
 
     {
       'apiVersion' => 'monitoring.coreos.com/v1',
