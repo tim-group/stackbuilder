@@ -570,7 +570,8 @@ EOL
                       '--providers.kubernetesingress.ingressclass=traefik-x-blue',
                       '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing',
                       '--providers.kubernetesingress.namespaces=e1',
-                      '--metrics.prometheus'
+                      '--metrics.prometheus',
+                      '--log.level=DEBUG'
                     ],
                     'image' => 'traefik:v2.0',
                     'imagePullPolicy' => 'IfNotPresent',

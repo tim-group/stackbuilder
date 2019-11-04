@@ -1029,7 +1029,8 @@ EOC
                   "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}",
                   "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}",
                   "--providers.kubernetesingress.namespaces=#{@environment.name}",
-                  "--metrics.prometheus"
+                  "--metrics.prometheus",
+                  "--log.level=DEBUG"
                 ],
                 'image' => 'traefik:v2.0',
                 'imagePullPolicy' => 'IfNotPresent',
