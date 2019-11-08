@@ -243,6 +243,8 @@ describe 'kubernetes' do
                 ],
                 'readinessProbe' => {
                   'periodSeconds' => 2,
+                  'timeoutSeconds' => 1,
+                  'failureThreshold' => 6,
                   'httpGet' => {
                     'path' => '/info/ready',
                     'port' => 8000
