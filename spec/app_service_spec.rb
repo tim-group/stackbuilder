@@ -342,12 +342,6 @@ port=8000
 
 log.directory=/var/log/app
 log.tags=["env:e1", "app:MyApplication", "instance:blue"]
-
-graphite.enabled=false
-graphite.host=space-mon-001.mgmt.space.net.local
-graphite.port=2013
-graphite.prefix=myapplication.k8s_e1_space
-graphite.period=10
 EOL
         }
       }
@@ -1207,25 +1201,6 @@ EOL
         expect(resources.find { |r| r.site == 'space' }.resources.find { |r| r['kind'] == 'Deployment' }['spec']['replicas']).to eql(2)
         expect(resources.find { |r| r.site == 'earth' }.resources.find { |r| r['kind'] == 'Deployment' }['spec']['replicas']).to eql(3)
       end
-    end
-
-    it 'labels metrics using the site' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service "x", :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-
-            self.application = 'MyApplication'
-            self.instances = 1
-          end
-        end
-        env "e1", :primary_site => 'space' do
-          instantiate_stack "mystack"
-        end
-      end
-      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).to match(/space-mon-001.mgmt.space.net.local/)
     end
 
     it 'generates config from app-defined template' do
