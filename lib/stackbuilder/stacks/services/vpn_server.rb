@@ -31,14 +31,13 @@ class Stacks::Services::VpnServer < Stacks::MachineDef
     enc
   end
 
-  def add_vpn_network(network_of_local_endpoint, remote_vpn_endpoint, local_network, remote_network)
-    local_vpn_endpoint = @virtual_service.vip_fqdn(network_of_local_endpoint, fabric)
+  def add_vpn(vpn)
+    local_vpn_endpoint = @virtual_service.vip_fqdn(vpn[:network_of_local_endpoint], fabric)
     @vpns[local_vpn_endpoint] = {} if @vpns[local_vpn_endpoint].nil?
     local_endpoint = @vpns[local_vpn_endpoint]
-    local_endpoint[remote_vpn_endpoint] = {} if local_endpoint[remote_vpn_endpoint].nil?
-    remote_endpoint = local_endpoint[remote_vpn_endpoint]
-    remote_endpoint[local_network] = [] if remote_endpoint[local_network].nil?
-    local_net = remote_endpoint[local_network]
-    local_net << remote_network unless local_net.include? remote_network
+    local_endpoint[vpn[:remote_vpn_endpoint]] = {} if local_endpoint[vpn[:remote_vpn_endpoint]].nil?
+    remote_endpoint = local_endpoint[vpn[:remote_vpn_endpoint]]
+    remote_endpoint['networks'] = vpn[:networks]
+    remote_endpoint['settings'] = vpn[:settings] unless vpn[:settings].nil?
   end
 end

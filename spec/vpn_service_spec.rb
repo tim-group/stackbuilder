@@ -1,4 +1,3 @@
-
 require 'stackbuilder/stacks/factory'
 require 'stacks/test_framework'
 
@@ -17,9 +16,15 @@ describe_stack 'test enc of vpn servers' do
         nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
         each_machine do |machine|
-          machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '10.108.0.0/16')
-          machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '10.111.0.0/16')
-          machine.add_vpn_network(:prod, 'ldn-office.youdevise.com', '172.16.0.0/21', '172.20.0.0/16')
+          machine.add_vpn(:network_of_local_endpoint => :prod,
+                          :remote_vpn_endpoint => 'ldn-office.youdevise.com',
+                          :networks => {
+                            '172.16.0.0/21' => [
+                              '10.108.0.0/16',
+                              '10.111.0.0/16',
+                              '172.20.0.0/16'
+                            ]
+                          })
         end
       end
     end
@@ -39,11 +44,13 @@ describe_stack 'test enc of vpn servers' do
         'vpns' => {
           'oymigration-vpn-vip.oy.net.local' => {
             'ldn-office.youdevise.com' => {
-              '172.16.0.0/21' => [
-                '10.108.0.0/16',
-                '10.111.0.0/16',
-                '172.20.0.0/16'
-              ]
+              'networks' => {
+                '172.16.0.0/21' => [
+                  '10.108.0.0/16',
+                  '10.111.0.0/16',
+                  '172.20.0.0/16'
+                ]
+              }
             }
           }
         },
