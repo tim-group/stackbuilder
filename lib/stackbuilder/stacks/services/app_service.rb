@@ -1028,7 +1028,7 @@ EOC
                   "--metrics.prometheus",
                   "--log.level=DEBUG"
                 ],
-                'image' => 'traefik:v2.0',
+                'image' => 'repo.net.local:8080/timgroup/traefik:tim1',
                 'imagePullPolicy' => 'IfNotPresent',
                 'livenessProbe' => {
                   'failureThreshold' => 3,
