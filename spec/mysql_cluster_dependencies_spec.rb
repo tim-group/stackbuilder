@@ -311,6 +311,7 @@ describe 'k8s stack-with-dependencies' do
 
           self.groups = ['blue']
           self.application = 'rw-app'
+          self.startup_alert_threshold = '1h'
           self.use_ha_mysql_ordering = true
           depend_on 'exampledb', environment.name
         end
@@ -359,6 +360,7 @@ describe 'k8s stack-with-dependencies' do
 
           self.groups = ['blue']
           self.application = 'rw-app'
+          self.startup_alert_threshold = '1h'
           self.use_ha_mysql_ordering = true
           depend_on 'exampledb', environment.name, :master
         end

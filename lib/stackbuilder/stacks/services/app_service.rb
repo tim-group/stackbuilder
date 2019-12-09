@@ -29,6 +29,7 @@ module Stacks::Services::AppService
   attr_accessor :maintainers
   attr_accessor :description
   attr_accessor :alerts_channel
+  attr_accessor :startup_alert_threshold
 
   alias_method :database_application_name, :application
 
@@ -537,8 +538,11 @@ EOC
   end
 
   def generate_k8s_alerting(name, site, app_service_labels)
-    alert_labels = { 'severity' => 'critical', 'alertname' => "#{name} CRITICAL" }
-    alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
+    status_critical_alert_labels = { 'severity' => 'critical', 'alertname' => "#{name} CRITICAL" }
+    status_critical_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
+
+    failed_readiness_alert_labels = { 'severity' => 'warning', 'alertname' => "#{name} failed readiness probe when deployment not in progress" }
+    failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
 
     {
       'apiVersion' => 'monitoring.coreos.com/v1',
@@ -559,9 +563,19 @@ EOC
               {
                 'alert' => 'StatusCritical',
                 'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod) > 0",
-                'labels' => alert_labels,
+                'labels' => status_critical_alert_labels,
                 'annotations' => {
                   'message' => '{{ $value }} components are critical on {{ $labels.pod }}',
+                  'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"
+                }
+              },
+              {
+                'alert' => 'FailedReadinessProbe',
+                'expr' => "(((time() - kube_pod_start_time{pod=~\".*#{name}.*\"}) > #{startup_alert_threshold_seconds}) "\
+                    "and on(pod) (rate(prober_probe_total{probe_type=\"Readiness\",result=\"failed\",pod=~\"^#{name}.*\"}[1m]) > 0))",
+                'labels' => failed_readiness_alert_labels,
+                'annotations' => {
+                  'message' => '{{ $labels.pod }} has failed readiness probe when deployment not in progress',
                   'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"
                 }
               }
@@ -1257,5 +1271,19 @@ EOC
 
   def non_k8s_dependencies_exist?
     virtual_services_that_depend_on_me.count { |vs| !vs.kubernetes } > 0
+  end
+
+  def startup_alert_threshold_seconds
+    fail "You must specify a maximum startup time threshold in a kubernetes app service" if @startup_alert_threshold.nil?
+
+    t = @startup_alert_threshold.match(/^(\d+)(s|m|h)$/)
+    case t.captures[1].upcase
+    when 'S'
+      t.captures[0].to_i
+    when 'M'
+      t.captures[0].to_i * 60
+    when 'H'
+      t.captures[0].to_i * 60 * 60
+    end
   end
 end

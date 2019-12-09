@@ -71,6 +71,7 @@ describe 'cmd' do
 
           self.application = 'MyK8sApplication'
           self.instances = 2
+          self.startup_alert_threshold = '1h'
         end
         app_service "myrelatedk8sappservice", :kubernetes => true do
           self.maintainers = [person('Testers')]
@@ -78,6 +79,7 @@ describe 'cmd' do
 
           self.application = 'MyRelatedK8sApplication'
           self.instances = 1
+          self.startup_alert_threshold = '1h'
         end
       end
       env 'e1', :primary_site => 'space' do
@@ -202,6 +204,7 @@ EOF
 
               self.application = 'MyK8sApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
 
               depend_on 'myrelatedk8sappservice'
             end
@@ -211,6 +214,7 @@ EOF
 
               self.application = 'MyRelatedK8sApplication'
               self.instances = 1
+              self.startup_alert_threshold = '1h'
             end
           end
           env 'e1', :primary_site => 'space' do
@@ -532,6 +536,7 @@ EOF
 
               self.application = 'MyK8sApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
 
               depend_on 'myrelatedk8sappservice'
             end
@@ -541,6 +546,7 @@ EOF
 
               self.application = 'MyRelatedK8sApplication'
               self.instances = 1
+              self.startup_alert_threshold = '1h'
             end
           end
           env 'e1', :primary_site => 'space' do
@@ -957,6 +963,7 @@ EOF
               self.description = 'Testing'
 
               self.application = 'MyK8sApplication'
+              self.startup_alert_threshold = '1h'
             end
           end
           stack "myotherstack" do
@@ -965,6 +972,7 @@ EOF
               self.description = 'Testing'
 
               self.application = 'MyOtherK8sApplication'
+              self.startup_alert_threshold = '1h'
             end
           end
           env 'e1', :primary_site => 'space' do

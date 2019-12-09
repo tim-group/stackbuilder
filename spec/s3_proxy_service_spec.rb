@@ -24,6 +24,7 @@ describe 's3 proxy service' do
           self.application = 'example'
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
+          self.startup_alert_threshold = '1h'
           depend_on 's3proxy', 'e2'
         end
       end

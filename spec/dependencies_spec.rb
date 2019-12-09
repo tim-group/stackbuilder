@@ -40,6 +40,7 @@ describe 'stack-with-dependencies' do
           self.groups = ['blue']
           self.application = 'kubeexample'
           self.instances = 1
+          self.startup_alert_threshold = '1h'
           depend_on 'exampledb'
           depend_on 'exampleapp'
         end

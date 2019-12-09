@@ -36,6 +36,7 @@ describe 'machine_set' do
             self.description = 'Testing'
 
             self.application = 'app'
+            self.startup_alert_threshold = '1h'
             allow_outbound_to 'somewhere', '1.2.3.4/32', [80, 443]
           end
         end

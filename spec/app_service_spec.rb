@@ -56,6 +56,7 @@ describe 'kubernetes' do
             self.application = 'MyApplication'
             self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
             self.ephemeral_storage_size = '10G'
+            self.startup_alert_threshold = '1h'
           end
         end
         env "e1", :primary_site => 'space' do
@@ -377,6 +378,7 @@ EOL
                 'space' => 1,
                 'earth' => 1
               }
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -417,6 +419,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
           end
           env "e1", :primary_site => 'space', :secondary_site => 'earth' do
@@ -438,6 +441,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -496,6 +500,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -642,6 +647,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -708,6 +714,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -769,6 +776,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -845,6 +853,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -890,6 +899,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -944,6 +954,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             app_service 'nonk8sapp' do
               self.instances = 1
@@ -1019,6 +1030,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 2
+              self.startup_alert_threshold = '1h'
             end
             proxy_service 'sharedproxy' do
               depend_on 'x', 'e1', :same_site
@@ -1091,6 +1103,7 @@ EOL
               self.description = 'Testing'
 
               self.application = 'MyApplication'
+              self.startup_alert_threshold = '1h'
             end
           end
           env "e1", :primary_site => 'space' do
@@ -1098,45 +1111,73 @@ EOL
           end
         end
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-        expect(k8s_resource(set, 'PrometheusRule')).to eql(
-          'apiVersion' => 'monitoring.coreos.com/v1',
-          'kind' => 'PrometheusRule',
-          'metadata' => {
-            'labels' => {
-              'prometheus' => 'main',
-              'role' => 'alert-rules',
-              'app.kubernetes.io/managed-by' => 'stacks',
-              'stack' => 'mystack',
-              'machineset' => 'x',
-              'group' => 'blue',
-              'app.kubernetes.io/instance' => 'blue',
-              'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'app_service'
-            },
-            'name' => 'x-blue-app',
-            'namespace' => 'e1'
-          },
-          'spec' => {
-            'groups' => [
-              {
-                'name' => 'stacks-alerts',
-                'rules' => [
-                  {
-                    'alert' => 'StatusCritical',
-                    'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod) > 0',
+        prometheus_rule = k8s_resource(set, 'PrometheusRule')
+
+        expect(prometheus_rule['apiVersion']).to eql('monitoring.coreos.com/v1')
+        expect(prometheus_rule['metadata']).to eql('labels' => {
+                                                     'prometheus' => 'main',
+                                                     'role' => 'alert-rules',
+                                                     'app.kubernetes.io/managed-by' => 'stacks',
+                                                     'stack' => 'mystack',
+                                                     'machineset' => 'x',
+                                                     'group' => 'blue',
+                                                     'app.kubernetes.io/instance' => 'blue',
+                                                     'app.kubernetes.io/part-of' => 'x',
+                                                     'app.kubernetes.io/component' => 'app_service'
+                                                   },
+                                                   'name' => 'x-blue-app',
+                                                   'namespace' => 'e1')
+
+        expect(prometheus_rule['spec']['groups'].first['name']).to eql('stacks-alerts')
+        status_critical_rule = prometheus_rule['spec']['groups'].first['rules'].find do |r|
+          r['alert'] == 'StatusCritical'
+        end
+        expect(status_critical_rule).to eql('alert' => 'StatusCritical',
+                                            'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod) > 0',
+                                            'labels' => {
+                                              'severity' => 'critical',
+                                              'alertname' => 'x-blue-app CRITICAL'
+                                            },
+                                            'annotations' => {
+                                              'message' => '{{ $value }} components are critical on {{ $labels.pod }}',
+                                              'status_page_url' => "https://go.timgroup.com/insight/space/proxy/e1/{{ $labels.pod }}/info/status"
+                                            })
+      end
+
+      it 'creates an alert rule for readiness probe failures occurring post-startup' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+
+              self.startup_alert_threshold = '1h'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'PrometheusRule'
+        end['spec']['groups'].first['rules'].find do |rule|
+          rule['alert'] == 'FailedReadinessProbe'
+        end).to eql('alert' => 'FailedReadinessProbe',
+                    'expr' => '(((time() - kube_pod_start_time{pod=~".*x-blue-app.*"}) > 3600) '\
+                        'and on(pod) (rate(prober_probe_total{probe_type="Readiness",result="failed",pod=~"^x-blue-app.*"}[1m]) > 0))',
                     'labels' => {
-                      'severity' => 'critical',
-                      'alertname' => 'x-blue-app CRITICAL'
+                      'severity' => 'warning',
+                      'alertname' => 'x-blue-app failed readiness probe when deployment not in progress'
                     },
                     'annotations' => {
-                      'message' => '{{ $value }} components are critical on {{ $labels.pod }}',
+                      'message' => '{{ $labels.pod }} has failed readiness probe when deployment not in progress',
                       'status_page_url' => "https://go.timgroup.com/insight/space/proxy/e1/{{ $labels.pod }}/info/status"
-                    }
-                  }
-                ]
-              }
-            ]
-          })
+                    })
       end
 
       it 'sends component alerts to the specified alerting channel' do
@@ -1148,6 +1189,7 @@ EOL
               self.description = 'Testing'
 
               self.application = 'MyApplication'
+              self.startup_alert_threshold = '1h'
             end
           end
           env "e1", :primary_site => 'space' do
@@ -1155,7 +1197,10 @@ EOL
           end
         end
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-        expect(k8s_resource(set, 'PrometheusRule')['spec']['groups'][0]['rules'][0]['labels']['alert_owner_channel']).to eql('testing-alerts')
+        status_critical_rule = k8s_resource(set, 'PrometheusRule')['spec']['groups'].first['rules'].find do |r|
+          r['alert'] == 'StatusCritical'
+        end
+        expect(status_critical_rule['labels']['alert_owner_channel']).to eql('testing-alerts')
       end
     end
 
@@ -1169,6 +1214,7 @@ EOL
 
               self.application = 'MyApplication'
               self.instances = 3000
+              self.startup_alert_threshold = '1h'
             end
           end
           env "e1", :primary_site => 'space' do
@@ -1191,6 +1237,7 @@ EOL
                 'space' => 2,
                 'earth' => 3
               }
+              self.startup_alert_threshold = '1h'
             end
           end
           env "e1", :primary_site => 'space', :secondary_site => 'earth' do
@@ -1216,6 +1263,7 @@ EOL
             self.appconfig = <<EOL
   site=<%= @site %>
 EOL
+            self.startup_alert_threshold = '1h'
           end
         end
         env "e1", :primary_site => 'space' do
@@ -1238,6 +1286,7 @@ EOL
   secret=<%= secret('my/very/secret.data') %>
   array_secret=<%= secret('my/very/secret.array', 0) %>
 EOL
+            self.startup_alert_threshold = '1h'
           end
         end
         env "e1", :primary_site => 'space' do
@@ -1312,6 +1361,7 @@ EOL
 
             self.application = 'MyApplication'
             self.short_name = 'myappl'
+            self.startup_alert_threshold = '1h'
             depend_on 'mydb'
           end
         end
@@ -1391,6 +1441,7 @@ EOL
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.application = 'MyApplication'
+            self.startup_alert_threshold = '1h'
 
             use_service_account
           end
@@ -1432,6 +1483,7 @@ EOL
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.application = 'MyApplication'
+            self.startup_alert_threshold = '1h'
 
             use_service_account
           end
@@ -1480,6 +1532,7 @@ EOL
 
               self.application = 'MyApplication'
               self.jvm_heap = '100G'
+              self.startup_alert_threshold = '1h'
             end
           end
           env "e1", :primary_site => 'space' do
@@ -1506,6 +1559,7 @@ EOL
               self.application = 'MyApplication'
               self.jvm_heap = '100G'
               self.headspace = 0.5
+              self.startup_alert_threshold = '1h'
             end
           end
           env "e1", :primary_site => 'space' do
@@ -1535,6 +1589,7 @@ EOL
                   person('Uncontactable'),
                   person('Joe Maille', :email => 'joe@example.com')]
                 self.description = 'testing'
+                self.startup_alert_threshold = '1h'
               end
             end
             env "e1", :primary_site => 'space' do
@@ -1559,6 +1614,7 @@ EOL
                 self.application = 'MyApplication'
                 self.maintainers = [slack('#technology')]
                 self.description = 'testing'
+                self.startup_alert_threshold = '1h'
               end
             end
             env "e1", :primary_site => 'space' do
@@ -1600,6 +1656,7 @@ EOL
                 self.application = 'MyApplication'
 
                 self.description = "This application is useful for testing stacks"
+                self.startup_alert_threshold = '1h'
               end
             end
             env "e1", :primary_site => 'space' do
@@ -1646,6 +1703,7 @@ EOL
             }
 
             self.application = 'application'
+            self.startup_alert_threshold = '1h'
 
             depend_on 'just_an_app', 'e1', :same_site
           end
@@ -1658,6 +1716,7 @@ EOL
             }
 
             self.application = 'application'
+            self.startup_alert_threshold = '1h'
           end
         end
         env 'e1', :primary_site => 'io', :secondary_site => 'mars' do
@@ -1697,6 +1756,7 @@ EOL
             }
 
             self.application = 'application'
+            self.startup_alert_threshold = '1h'
           end
           app_service 'source' do
             self.instances = {
@@ -1739,6 +1799,7 @@ EOL
             self.description = 'Testing'
 
             self.application = 'app2'
+            self.startup_alert_threshold = '1h'
           end
         end
 
@@ -1868,6 +1929,7 @@ EOL
             self.description = 'Testing'
 
             self.application = 'app2'
+            self.startup_alert_threshold = '1h'
             depend_on 'app1'
           end
         end
@@ -1918,6 +1980,7 @@ EOL
             self.description = 'Testing'
 
             self.application = 'app1'
+            self.startup_alert_threshold = '1h'
           end
 
           app_service 'app2', :kubernetes => true do
@@ -1925,6 +1988,7 @@ EOL
             self.description = 'Testing'
 
             self.application = 'app2'
+            self.startup_alert_threshold = '1h'
             depend_on 'app1'
           end
         end
@@ -2008,6 +2072,7 @@ EOL
             self.description = 'Testing'
 
             self.application = 'app1'
+            self.startup_alert_threshold = '1h'
           end
         end
 
@@ -2054,6 +2119,7 @@ depends on the other' do
             self.description = 'Testing'
 
             self.application = 'app1'
+            self.startup_alert_threshold = '1h'
           end
         end
         stack "test_app_server2" do
@@ -2062,6 +2128,7 @@ depends on the other' do
             self.description = 'Testing'
 
             self.application = 'app2'
+            self.startup_alert_threshold = '1h'
             depend_on 'app1', 'e1'
           end
         end
@@ -2130,6 +2197,7 @@ depends on the other' do
             self.description = 'Testing'
 
             self.application = 'app'
+            self.startup_alert_threshold = '1h'
             depend_on 'logstash-receiver'
           end
           logstash_receiver 'logstash-receiver' do

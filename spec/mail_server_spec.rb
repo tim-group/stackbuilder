@@ -78,6 +78,7 @@ describe 'kubernetes' do
 
               self.application = 'MyApplication'
               self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
+              self.startup_alert_threshold = '1h'
               depend_on 'mail'
             end
           end
