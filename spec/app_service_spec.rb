@@ -1172,7 +1172,8 @@ EOL
                         'and on(pod) (rate(prober_probe_total{probe_type="Readiness",result="failed",pod=~"^x-blue-app.*"}[1m]) > 0))',
                     'labels' => {
                       'severity' => 'warning',
-                      'alertname' => 'x-blue-app failed readiness probe when deployment not in progress'
+                      'alertname' => 'x-blue-app failed readiness probe when deployment not in progress',
+                      'alert_owner_channel' => 'kubernetes-alerts-nonprod'
                     },
                     'annotations' => {
                       'message' => '{{ $labels.pod }} has failed readiness probe when deployment not in progress',

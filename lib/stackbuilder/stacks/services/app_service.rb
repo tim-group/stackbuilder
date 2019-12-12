@@ -542,7 +542,7 @@ EOC
     status_critical_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
 
     failed_readiness_alert_labels = { 'severity' => 'warning', 'alertname' => "#{name} failed readiness probe when deployment not in progress" }
-    failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
+    failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel ? alerts_channel : 'kubernetes-alerts-nonprod'
 
     {
       'apiVersion' => 'monitoring.coreos.com/v1',
