@@ -1133,7 +1133,7 @@ EOL
           r['alert'] == 'StatusCritical'
         end
         expect(status_critical_rule).to eql('alert' => 'StatusCritical',
-                                            'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod) > 0',
+                                            'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod, namespace) > 0',
                                             'labels' => {
                                               'severity' => 'critical',
                                               'alertname' => 'x-blue-app CRITICAL'

@@ -562,7 +562,7 @@ EOC
             'rules' => [
               {
                 'alert' => 'StatusCritical',
-                'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod) > 0",
+                'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod, namespace) > 0",
                 'labels' => status_critical_alert_labels,
                 'annotations' => {
                   'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
