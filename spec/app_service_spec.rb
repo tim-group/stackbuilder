@@ -1139,8 +1139,8 @@ EOL
                                               'alertname' => 'x-blue-app CRITICAL'
                                             },
                                             'annotations' => {
-                                              'message' => '{{ $value }} components are critical on {{ $labels.pod }}',
-                                              'status_page_url' => "https://go.timgroup.com/insight/space/proxy/e1/{{ $labels.pod }}/info/status"
+                                              'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
+                                              'status_page_url' => "https://go.timgroup.com/insight/space/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
                                             })
       end
 

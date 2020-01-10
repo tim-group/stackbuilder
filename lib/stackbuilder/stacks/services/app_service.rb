@@ -565,8 +565,8 @@ EOC
                 'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod) > 0",
                 'labels' => status_critical_alert_labels,
                 'annotations' => {
-                  'message' => '{{ $value }} components are critical on {{ $labels.pod }}',
-                  'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"
+                  'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
+                  'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
                 }
               },
               {
