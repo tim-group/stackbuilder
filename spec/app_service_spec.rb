@@ -1132,6 +1132,7 @@ EOL
         status_critical_rule = prometheus_rule['spec']['groups'].first['rules'].find do |r|
           r['alert'] == 'StatusCritical'
         end
+        expected_status_page_url = "https://go.timgroup.com/insight/space/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
         expect(status_critical_rule).to eql('alert' => 'StatusCritical',
                                             'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod, namespace) > 0',
                                             'labels' => {
@@ -1140,7 +1141,7 @@ EOL
                                             },
                                             'annotations' => {
                                               'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
-                                              'status_page_url' => "https://go.timgroup.com/insight/space/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
+                                              'status_page_url' => expected_status_page_url
                                             })
       end
 
