@@ -25,6 +25,8 @@ module Stacks::Services::AppService
   attr_accessor :headspace
   attr_accessor :ephemeral_storage_size
   attr_accessor :enable_service_account
+  attr_accessor :cpu_request
+  attr_accessor :cpu_limit
 
   attr_accessor :maintainers
   attr_accessor :description
@@ -54,6 +56,8 @@ module Stacks::Services::AppService
     @ephemeral_storage_size = nil
     @maintainers = []
     @enable_service_account = false
+    @cpu_request = false
+    @cpu_limit = false
   end
 
   def enable_ehcache
@@ -329,6 +333,8 @@ EOC
     pod_annotations.merge!(annotations)
 
     ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
+    cpu_request = @cpu_request ? { 'cpu' => @cpu_request } : {}
+    cpu_limit = @cpu_limit ? { 'cpu' => @cpu_limit } : {}
 
     deployment = {
       'apiVersion' => 'apps/v1',
@@ -455,10 +461,10 @@ EOC
               'resources' => {
                 'limits' => {
                   'memory' => scale_memory(@jvm_heap, @headspace) + 'i'
-                }.merge(ephemeral_storage_limit),
+                }.merge(ephemeral_storage_limit).merge(cpu_limit),
                 'requests' => {
                   'memory' => scale_memory(@jvm_heap, @headspace) + 'i'
-                }.merge(ephemeral_storage_limit)
+                }.merge(ephemeral_storage_limit).merge(cpu_request)
               },
               'ports' => [
                 {

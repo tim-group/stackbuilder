@@ -1524,7 +1524,7 @@ EOL
       expect(network_policy['spec']['egress'].first['ports'].first['port']).to eq(6443)
     end
 
-    describe 'memory limits (max) and requests (min) ' do
+    describe 'limits (max) and requests (min)' do
       it 'bases container limits and requests on the max heap memory' do
         factory = eval_stacks do
           stack "mystack" do
@@ -1576,6 +1576,30 @@ EOL
         expect(app_container['resources']['limits']['memory']).to eq('157286400Ki')
         expect(app_container['resources']['requests']['memory']).to eq('157286400Ki')
         expect(init_container['env'].find { |env_var| env_var['name'] == 'APP_JVM_ARGS' }['value']).to match(/-Xmx100G/)
+      end
+
+      it 'allows setting a milli cpu limit and request' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+              self.application = 'MyApplication'
+              self.startup_alert_threshold = '1h'
+
+              self.cpu_request = '100m'
+              self.cpu_limit = '500m'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'][0]['resources']
+        expect(resources['requests']['cpu']).to eq('100m')
+        expect(resources['limits']['cpu']).to eq('500m')
       end
     end
 

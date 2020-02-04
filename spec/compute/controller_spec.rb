@@ -19,7 +19,7 @@ describe Compute::Controller do
     end.to raise_error("unable to find any suitable compute nodes")
   end
 
-  it 'allocates to the local fabric' do
+  xit 'allocates to the local fabric' do
     allow(@compute_node_client).to receive(:audit_fabric).and_return([])
 
     specs = [{
