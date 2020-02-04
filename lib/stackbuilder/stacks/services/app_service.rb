@@ -99,7 +99,7 @@ module Stacks::Services::AppService
   def config_params(_dependant, fabric, _dependent_instance)
     if respond_to? :vip_fqdn
       fail("app_service requires application") if application.nil?
-      { "#{application.downcase}.url" => "http://#{prod_fqdn(fabric)}:8000" }
+      { "#{application.downcase}.url" => "http://#{prod_fqdn(fabric)}#{@kubernetes ? '' : ':8000'}" }
     else
       {}
     end

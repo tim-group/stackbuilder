@@ -45,6 +45,12 @@ describe 'stack-with-dependencies' do
           depend_on 'exampleapp'
         end
 
+        app_service 'exampleapp-with-k8s-dependency' do
+          self.groups = ['blue']
+          self.application = 'exampleapp'
+          depend_on 'kubeexampleapp'
+        end
+
         standard_service 'otherservice' do
           self.database_username = 'other'
           depend_on 'exampledb'
@@ -66,6 +72,12 @@ describe 'stack-with-dependencies' do
         instantiate_stack 'loadbalancer'
       end
     end
+  end
+
+  it 'presents the correct config port for k8s app vips' do
+    host = factory.inventory.find('e1-exampleapp-with-k8s-dependency-001.mgmt.space.net.local')
+    deps = host.to_enc['role::http_app']['dependencies']
+    expect(deps['kubeexample.url']).to eql('http://e1-kubeexampleapp-vip.space.net.local')
   end
 
   it 'configures the loadbalancer' do
