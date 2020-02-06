@@ -333,6 +333,11 @@ EOC
     pod_annotations.merge!(annotations)
 
     ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
+
+    if cpu_limit and !cpu_request
+      fail "You must specify a cpu_request if specifying a cpu_limit"
+    end
+
     cpu_request = @cpu_request ? { 'cpu' => @cpu_request } : {}
     cpu_limit = @cpu_limit ? { 'cpu' => @cpu_limit } : {}
 
