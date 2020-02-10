@@ -1177,7 +1177,7 @@ EOL
                       'alert_owner_channel' => 'kubernetes-alerts-nonprod'
                     },
                     'annotations' => {
-                      'message' => '{{ $labels.pod }} has failed readiness probe when deployment not in progress',
+                      'message' => '{{ $labels.namespace }}/{{ $labels.pod }} has failed readiness probe when deployment not in progress',
                       'status_page_url' => "https://go.timgroup.com/insight/space/proxy/e1/{{ $labels.pod }}/info/status"
                     })
       end

@@ -586,7 +586,7 @@ EOC
                     "and on(pod) (rate(prober_probe_total{probe_type=\"Readiness\",result=\"failed\",pod=~\"^#{name}.*\"}[1m]) > 0))",
                 'labels' => failed_readiness_alert_labels,
                 'annotations' => {
-                  'message' => '{{ $labels.pod }} has failed readiness probe when deployment not in progress',
+                  'message' => '{{ $labels.namespace }}/{{ $labels.pod }} has failed readiness probe when deployment not in progress',
                   'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"
                 }
               }
