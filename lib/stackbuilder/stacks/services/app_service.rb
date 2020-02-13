@@ -32,6 +32,7 @@ module Stacks::Services::AppService
   attr_accessor :description
   attr_accessor :alerts_channel
   attr_accessor :startup_alert_threshold
+  attr_accessor :monitor_readiness_probe
 
   alias_method :database_application_name, :application
 
@@ -58,6 +59,7 @@ module Stacks::Services::AppService
     @enable_service_account = false
     @cpu_request = false
     @cpu_limit = false
+    @monitor_readiness_probe = true
   end
 
   def enable_ehcache
@@ -555,6 +557,31 @@ EOC
     failed_readiness_alert_labels = { 'severity' => 'warning', 'alertname' => "#{name} failed readiness probe when deployment not in progress" }
     failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel ? alerts_channel : 'kubernetes-alerts-nonprod'
 
+    rules = []
+
+    rules << {
+      'alert' => 'StatusCritical',
+      'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod, namespace) > 0",
+      'labels' => status_critical_alert_labels,
+      'annotations' => {
+        'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
+        'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
+      }
+    }
+
+    if @monitor_readiness_probe
+      rules << {
+        'alert' => 'FailedReadinessProbe',
+        'expr' => "(((time() - kube_pod_start_time{pod=~\".*#{name}.*\"}) > #{startup_alert_threshold_seconds}) "\
+            "and on(pod) (rate(prober_probe_total{probe_type=\"Readiness\",result=\"failed\",pod=~\"^#{name}.*\"}[1m]) > 0))",
+        'labels' => failed_readiness_alert_labels,
+        'annotations' => {
+          'message' => '{{ $labels.namespace }}/{{ $labels.pod }} has failed readiness probe when deployment not in progress',
+          'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"
+        }
+      }
+    end
+
     {
       'apiVersion' => 'monitoring.coreos.com/v1',
       'kind' => 'PrometheusRule',
@@ -570,27 +597,7 @@ EOC
         'groups' => [
           {
             'name' => 'stacks-alerts',
-            'rules' => [
-              {
-                'alert' => 'StatusCritical',
-                'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod, namespace) > 0",
-                'labels' => status_critical_alert_labels,
-                'annotations' => {
-                  'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
-                  'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
-                }
-              },
-              {
-                'alert' => 'FailedReadinessProbe',
-                'expr' => "(((time() - kube_pod_start_time{pod=~\".*#{name}.*\"}) > #{startup_alert_threshold_seconds}) "\
-                    "and on(pod) (rate(prober_probe_total{probe_type=\"Readiness\",result=\"failed\",pod=~\"^#{name}.*\"}[1m]) > 0))",
-                'labels' => failed_readiness_alert_labels,
-                'annotations' => {
-                  'message' => '{{ $labels.namespace }}/{{ $labels.pod }} has failed readiness probe when deployment not in progress',
-                  'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"
-                }
-              }
-            ]
+            'rules' => rules
           }
         ]
       }
