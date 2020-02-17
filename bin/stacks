@@ -182,7 +182,7 @@ GetoptLong.new(
   when '--no-dependencies'
     $options[:dependencies] = false
   when '--checkout-config'
-    $options[:'checkout-config'] = (arg == '') ? 'http://git/stackbuilder-config.git' : arg
+    $options[:'checkout-config'] = (arg == '') ? 'http://git.net.local/stackbuilder-config.git' : arg
   when '--diffs-only'
     $options[:'diffs-only'] = true
   when '--ignore-safe-diffs'
@@ -268,7 +268,7 @@ subscription.start(["provision.*", "puppet_status"])
 puppet = Support::Puppet.new(subscription)
 app_deployer = Support::AppDeployer.new
 dns_resolver = Support::DnsResolver.new
-hiera_provider = Support::HieraProvider.new(:origin => 'http://git/puppet.git')
+hiera_provider = Support::HieraProvider.new(:origin => 'http://git.net.local/puppet.git')
 cleaner = Support::Cleaner.new(factory.compute_controller)
 commands = CMD.new(factory, core_actions, dns, nagios, subscription, puppet, app_deployer, dns_resolver,
                    hiera_provider, cleaner, environment, $options[:stack], $options[:stash], $options[:validate])

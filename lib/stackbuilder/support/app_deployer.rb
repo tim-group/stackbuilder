@@ -30,7 +30,7 @@ class Support::AppDeployer
   end
 
   def query_cmdb_for(spec)
-    cmdb_repo_url = 'http://git/cmdb' # TODO: parameterise?
+    cmdb_repo_url = 'http://git.net.local/cmdb' # TODO: parameterise?
 
     require 'tmpdir'
     cmdb_dir = Dir.mktmpdir
