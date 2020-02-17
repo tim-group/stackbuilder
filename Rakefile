@@ -68,12 +68,15 @@ namespace :docker do
       ENV['DOCKER_BUILDKIT'] = '1'
     end
     sh "docker build --network host -t stacks:#{version} ."
-    sh "docker tag stacks:#{version} stacks:latest"
   end
 
   desc 'Push/publish the docker image'
   task :push => [:build] do
-    sh "docker tag stacks:#{version} docker.pkg.github.com/tim-group/stackbuilder/stacks:#{version}"
-    sh "docker push docker.pkg.github.com/tim-group/stackbuilder/stacks:#{version}"
+    image = '662373364858.dkr.ecr.eu-west-2.amazonaws.com/timgroup/stacks'
+    sh "docker tag stacks:#{version} #{image}:#{version}"
+    sh "docker push #{image}:#{version}"
+
+    sh "docker tag stacks:#{version} 662373364858.dkr.ecr.eu-west-2.amazonaws.com/timgroup/stacks:latest"
+    sh "docker push #{image}:latest"
   end
 end
