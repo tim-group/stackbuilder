@@ -1,0 +1,6 @@
+*
+!Gemfile
+!Gemfile.lock
+!lib
+!bin
+!build_deps

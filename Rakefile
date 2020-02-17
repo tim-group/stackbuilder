@@ -1,6 +1,11 @@
 require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
 
+def version
+  v = ENV['BUILD_NUMBER'] || "0.#{`git rev-parse --short HEAD`.chomp.hex}"
+  "0.0.#{v}"
+end
+
 desc 'Run specs'
 RSpec::Core::RakeTask.new(:spec => ['ci:setup:rspec'])
 
@@ -11,9 +16,6 @@ end
 
 desc 'Create a debian package'
 task :package do
-  v = ENV['BUILD_NUMBER'] || "0.#{`git rev-parse --short HEAD`.chomp.hex}"
-  version = "0.0.#{v}"
-
   sh 'rm -rf build/package'
   sh 'mkdir -p build/package/usr/local/lib/site_ruby/timgroup/'
   sh 'cp -r lib/* build/package/usr/local/lib/site_ruby/timgroup/'
@@ -56,4 +58,14 @@ end
 desc 'Run lint (Rubocop)'
 task :lint do
   sh 'rubocop bin lib spec'
+end
+
+desc 'Build the docker image'
+task :build do
+  docker_version = `docker version --format "{{ .Client.Version }}"`
+  if Gem::Version.new(docker_version) >= Gem::Version.new('18.06')
+    ENV['DOCKER_BUILDKIT'] = '1'
+  end
+  sh "docker build -t stacks:#{version} ."
+  sh "docker tag stacks:#{version} stacks:latest"
 end
