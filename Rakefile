@@ -60,12 +60,20 @@ task :lint do
   sh 'rubocop bin lib spec'
 end
 
-desc 'Build the docker image'
-task :build do
-  docker_version = `docker version --format "{{ .Client.Version }}"`.tr('^0-9.', '')
-  if Gem::Version.new(docker_version) >= Gem::Version.new('18.09')
-    ENV['DOCKER_BUILDKIT'] = '1'
+namespace :docker do
+  desc 'Build the docker image'
+  task :build do
+    docker_version = `docker version --format "{{ .Client.Version }}"`.tr('^0-9.', '')
+    if Gem::Version.new(docker_version) >= Gem::Version.new('18.09')
+      ENV['DOCKER_BUILDKIT'] = '1'
+    end
+    sh "docker build --network host -t stacks:#{version} ."
+    sh "docker tag stacks:#{version} stacks:latest"
   end
-  sh "docker build --network host -t stacks:#{version} ."
-  sh "docker tag stacks:#{version} stacks:latest"
+
+  desc 'Push/publish the docker image'
+  task :push => [:build] do
+    sh "docker tag stacks:#{version} docker.pkg.github.com/tim-group/stackbuilder/stacks:#{version}"
+    sh "docker push docker.pkg.github.com/tim-group/stackbuilder/stacks:#{version}"
+  end
 end
