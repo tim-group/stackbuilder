@@ -63,7 +63,7 @@ end
 desc 'Build the docker image'
 task :build do
   docker_version = `docker version --format "{{ .Client.Version }}"`.tr('^0-9.', '')
-  if Gem::Version.new(docker_version) >= Gem::Version.new('18.06')
+  if Gem::Version.new(docker_version) >= Gem::Version.new('18.09')
     ENV['DOCKER_BUILDKIT'] = '1'
   end
   sh "docker build -t stacks:#{version} ."
