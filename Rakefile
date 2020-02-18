@@ -73,10 +73,12 @@ namespace :docker do
   desc 'Push/publish the docker image'
   task :push => [:build] do
     image = '662373364858.dkr.ecr.eu-west-2.amazonaws.com/timgroup/stacks'
+
     sh "docker tag stacks:#{version} #{image}:#{version}"
     sh "docker push #{image}:#{version}"
 
-    sh "docker tag stacks:#{version} 662373364858.dkr.ecr.eu-west-2.amazonaws.com/timgroup/stacks:latest"
+    sh "docker tag stacks:#{version} stacks:latest"
+    sh "docker tag stacks:#{version} #{image}:latest"
     sh "docker push #{image}:latest"
   end
 end
