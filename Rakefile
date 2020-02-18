@@ -67,7 +67,7 @@ namespace :docker do
     if Gem::Version.new(docker_version) >= Gem::Version.new('18.09')
       ENV['DOCKER_BUILDKIT'] = '1'
     end
-    sh "docker build --network host -t stacks:#{version} ."
+    sh "docker build --network host --build-arg version=#{version} -t stacks:#{version} ."
   end
 
   desc 'Push/publish the docker image'

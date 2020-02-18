@@ -15,6 +15,12 @@ RUN bundle install --no-cache --deployment --without development && \
 FROM ruby:${ruby_version}-alpine
 
 ARG kubectl_version=1.16.2
+ARG version=DEV
+
+LABEL org.opencontainers.image.title="Stackbuilder" \
+  org.opencontainers.image.vendor="TIM Group" \
+  org.opencontainers.image.source="https://github.com/tim-group/stackbuilder" \
+  org.opencontainers.image.version="${version}"
 
 ADD https://storage.googleapis.com/kubernetes-release/release/v${kubectl_version}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 
