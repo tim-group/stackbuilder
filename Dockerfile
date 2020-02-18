@@ -25,14 +25,11 @@ LABEL org.opencontainers.image.title="Stackbuilder" \
 ADD https://storage.googleapis.com/kubernetes-release/release/v${kubectl_version}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 
 RUN chmod +x /usr/local/bin/kubectl && \
-      addgroup -S stacks && \
-      adduser -S stacks -G stacks && \
       apk add --no-cache git
 
-USER stacks
-WORKDIR /home/stacks
+WORKDIR /root
 
-COPY --from=build /build /home/stacks
+COPY --from=build /build /root
 COPY --from=build /usr/local/bundle /usr/local/bundle
 
 COPY bin /usr/local/bin/
