@@ -4,10 +4,10 @@ FROM ruby:${ruby_version}-alpine as build
 
 RUN apk add --no-cache make gcc libc-dev
 
-WORKDIR /build
+WORKDIR /root
 COPY Gemfile Gemfile.lock ./
 
-WORKDIR /build/vendor/bundle/ruby
+WORKDIR /root/vendor/bundle/ruby
 RUN bundle install --no-cache --deployment --without development && \
       rm -rf ./*/cache ./*/gems/*/spec/* ./*/gems/*/tests/*
 
@@ -29,7 +29,7 @@ RUN chmod +x /usr/local/bin/kubectl && \
 
 WORKDIR /root
 
-COPY --from=build /build /root
+COPY --from=build /root /root
 COPY --from=build /usr/local/bundle /usr/local/bundle
 
 COPY bin /usr/local/bin/
