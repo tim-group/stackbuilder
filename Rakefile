@@ -61,6 +61,23 @@ task :lint do
 end
 
 namespace :docker do
+  $region = 'eu-west-2'
+  $repo = 'timgroup/stacks'
+
+  def ecr_url
+    account_id = %x{aws sts get-caller-identity --query Account --output text}.chomp
+    "#{account_id}.dkr.ecr.#{$region}.amazonaws.com"
+  end
+
+  def image
+    "#{ecr_url}/#{$repo}"
+  end
+
+  desc 'Login to the docker repository'
+  task :login do
+    sh "aws ecr get-login-password --region #{$region} | docker login --username AWS --password-stdin #{ecr_url}"
+  end
+
   desc 'Build the docker image'
   task :build do
     docker_version = `docker version --format "{{ .Client.Version }}"`.tr('^0-9.', '')
@@ -70,15 +87,18 @@ namespace :docker do
     sh "docker build --network host --build-arg version=#{version} -t stacks:#{version} ."
   end
 
-  desc 'Push/publish the docker image'
-  task :push => [:build] do
-    image = '662373364858.dkr.ecr.eu-west-2.amazonaws.com/timgroup/stacks'
-
+  desc 'Tag and publish an unstable image'
+  task :publish_unstable => [:login] do
     sh "docker tag stacks:#{version} #{image}:#{version}"
     sh "docker push #{image}:#{version}"
 
-    sh "docker tag stacks:#{version} stacks:latest"
-    sh "docker tag stacks:#{version} #{image}:latest"
-    sh "docker push #{image}:latest"
+    sh "docker tag stacks:#{version} #{image}:unstable"
+    sh "docker push #{image}:unstable"
+  end
+
+  desc 'Promote and publish an image to stable'
+  task :promote_stable => [:login] do
+    manifest = %x{aws ecr batch-get-image --region #{$region} --repository-name #{$repo} --image-ids imageTag=#{version} --query 'images[].imageManifest' --output text}.chomp
+    sh "aws ecr put-image --region #{$region} --repository-name #{$repo} --image-tag stable --image-manifest '#{manifest}'"
   end
 end
