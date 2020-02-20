@@ -73,6 +73,11 @@ namespace :docker do
     "#{ecr_url}/#{$repo}"
   end
 
+  def tag_image(version, tag)
+    manifest = %x{aws ecr batch-get-image --region #{$region} --repository-name #{$repo} --image-ids imageTag=#{version} --query 'images[].imageManifest' --output text}.chomp
+    sh "aws ecr put-image --region #{$region} --repository-name #{$repo} --image-tag #{tag} --image-manifest '#{manifest}'"
+  end
+
   desc 'Login to the docker repository'
   task :login do
     sh "aws ecr get-login-password --region #{$region} | docker login --username AWS --password-stdin #{ecr_url}"
@@ -92,13 +97,11 @@ namespace :docker do
     sh "docker tag stacks:#{version} #{image}:#{version}"
     sh "docker push #{image}:#{version}"
 
-    sh "docker tag stacks:#{version} #{image}:unstable"
-    sh "docker push #{image}:unstable"
+    tag_image(version, 'unstable')
   end
 
   desc 'Promote and publish an image to stable'
   task :promote_stable => [:login] do
-    manifest = %x{aws ecr batch-get-image --region #{$region} --repository-name #{$repo} --image-ids imageTag=#{version} --query 'images[].imageManifest' --output text}.chomp
-    sh "aws ecr put-image --region #{$region} --repository-name #{$repo} --image-tag stable --image-manifest '#{manifest}'"
+    tag_image(version, 'stable')
   end
 end
