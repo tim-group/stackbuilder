@@ -101,8 +101,10 @@ namespace :docker do
   end
 
   desc 'Promote and publish an image to stable'
-  task :promote_stable => [:login] do
-    tag_image(version, 'stable')
-    tag_image(version, 'latest')
+  task :promote_stable, [:version] => [:login] do |_, args|
+    args.with_defaults :version => version
+
+    tag_image(args.version, 'stable')
+    tag_image(args.version, 'latest')
   end
 end
