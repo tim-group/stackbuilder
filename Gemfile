@@ -4,6 +4,7 @@ gem 'collimator', '0.0.3'
 gem 'mcollective-client', '2.8.2'
 gem 'puppet', '3.7.5'
 gem 'rspec', '3.3.0' # used by stacks test command
+gem 'net-ping'
 
 group :development do
   gem 'ci_reporter_rspec', '1.0.0'

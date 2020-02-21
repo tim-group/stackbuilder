@@ -29,6 +29,7 @@ GEM
       stomp
       systemu
     method_source (0.9.2)
+    net-ping (2.0.6)
     parser (2.7.0.2)
       ast (~> 2.4.0)
     powerpack (0.1.2)
@@ -78,6 +79,7 @@ DEPENDENCIES
   ci_reporter_rspec (= 1.0.0)
   collimator (= 0.0.3)
   mcollective-client (= 2.8.2)
+  net-ping
   pry
   pry-byebug
   puppet (= 3.7.5)
