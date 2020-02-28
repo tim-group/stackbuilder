@@ -24,6 +24,21 @@ class Stacks::Services::RabbitMQServer < Stacks::MachineDef
                                           'rabbit_users'        => [])
     end
 
+    add_dependant_kubernetes_things enc
+
     enc
+  end
+
+  private
+
+  def add_dependant_kubernetes_things(enc)
+    dependant_app_services = @virtual_service.virtual_services_that_depend_on_me.select do |machine_set|
+      machine_set.is_a? Stacks::Services::AppService
+    end
+
+    return unless dependant_app_services.any?(&:kubernetes)
+    enc['role::rabbitmq_server']['allow_kubernetes_clusters'] = dependant_app_services.select(&:kubernetes).map do |vs|
+      vs.environment.options[location]
+    end.uniq
   end
 end

@@ -39,6 +39,14 @@ module Stacks::Services::RabbitMQCluster
     }
   end
 
+  def endpoints(_dependent_service, _fabric)
+    endpoints = []
+    @ports.each do |port|
+      endpoints << { :port => port, :fqdns => children.map(&:prod_fqdn) }
+    end
+    endpoints
+  end
+
   def validate_dependency(dependant, dependency)
     fail "Stack '#{dependant.name}' must specify requirement when using depend_on #{name} "\
           "in environment '#{environment.name}'. Usage: depend_on <environment>, <requirement>" \

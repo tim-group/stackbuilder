@@ -23,7 +23,9 @@ describe 'kubernetes' do
                           'e1-x-vip.earth.net.local' => '3.1.4.13',
                           'e1-nonk8sapp-001.space.net.local' => '3.1.4.14',
                           'e1-sharedproxy-001.space.net.local' => '3.1.4.15',
-                          'e1-sharedproxy-002.space.net.local' => '3.1.4.16'
+                          'e1-sharedproxy-002.space.net.local' => '3.1.4.16',
+                          'e1-myrabbit-001.space.net.local' => '3.1.4.17',
+                          'e1-myrabbit-002.space.net.local' => '3.1.4.18'
                          )
   end
   let(:hiera_provider) do
@@ -1417,6 +1419,36 @@ EOL
                   db.exampledb.username=spcmyappl0.*
                   db.exampledb.password=\{SECRET:e1_MyApplication_mysql_passwords_0\}.*
                   db.exampledb.read_only_cluster=e1-mydb-002.space.net.local.*
+                 /mx)
+    end
+
+    it 'has config for it\'s rabbitmq dependencies' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service "x", :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+
+            self.application = 'MyApplication'
+            self.short_name = 'myappl'
+            self.startup_alert_threshold = '1h'
+            depend_on 'myrabbit', 'e1', 'test'
+          end
+        end
+        stack "my_rabbit" do
+          rabbitmq_cluster "myrabbit"
+        end
+        env "e1", :primary_site => 'space', :short_name => 'spc' do
+          instantiate_stack "mystack"
+          instantiate_stack "my_rabbit"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
+        to match(/test.messaging.enabled=true.*
+                  test.messaging.broker_fqdns=e1-myrabbit-001.space.net.local,e1-myrabbit-002.space.net.local.*
+                  test.messaging.username=MyApplication.*
+                  test.messaging.password=\{SECRET:e1_MyApplication_messaging_password\}.*
                  /mx)
     end
 

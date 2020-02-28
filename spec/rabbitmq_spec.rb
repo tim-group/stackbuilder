@@ -82,6 +82,29 @@ describe_stack 'app with rabbitmq dependency' do
   end
 end
 
+describe_stack 'when a k8s app is a dependant the cluster appears in the enc' do
+  given do
+    stack 'test' do
+      rabbitmq_cluster 'rabbitmq'
+      app_service 'exampleapp', :kubernetes => true do
+        self.application = 'example'
+        self.maintainers = [person('Testers')]
+        self.description = 'Testing'
+        depend_on 'rabbitmq', 'e1', :magic
+      end
+    end
+
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'test'
+    end
+  end
+
+  host('e1-rabbitmq-001.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::rabbitmq_server']['allow_kubernetes_clusters']).to include(
+      'space')
+  end
+end
+
 describe_stack 'rabbitmq users are created from dependencies' do
   given do
     stack 'test' do

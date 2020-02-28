@@ -257,7 +257,8 @@ log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @gr
 <%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
 <%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
 <%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s", @credentials_selector) %>
-<%# TODO: support non-db _hiera_key. For example for a rabbitmq connection -%>
+<%- elsif k.end_with?('_hiera_key') -%>
+<%= k.gsub(/_hiera_key$/, '') -%>=<%= secret("#{v}") %>
 <%- else -%>
 <%= k %>=<%= v %>
 <%- end -%>
