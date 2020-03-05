@@ -974,7 +974,7 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-out-to-api-server-67a480a',
+            'name' => 'allow-out-to-api-server-6f5fb60',
             'namespace' => 'e1',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
@@ -1011,8 +1011,12 @@ EOL
           }
         }
 
+        resources.flat_map(&:resources).each do |r|
+     puts r['metadata']['name']
+        end
+
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-67a480a'
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-6f5fb60'
         end).to eql(expected_network_policy)
       end
 
