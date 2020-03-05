@@ -834,6 +834,31 @@ EOC
     }
   end
 
+  def create_egress_network_policy_for_external_service(service_name, env_name, labels, egresses, pod_selector_match_labels)
+    spec = {
+      'podSelector' => {
+        'matchLabels' => pod_selector_match_labels
+      },
+      'policyTypes' => [
+        'Egress'
+      ],
+      'egress' => egresses
+    }
+
+    hash = Support::DigestGenerator.from_hash(spec)
+
+    {
+      'apiVersion' => 'networking.k8s.io/v1',
+      'kind' => 'NetworkPolicy',
+      'metadata' => {
+        'name' => "allow-out-to-#{service_name}-#{hash}",
+        'namespace' => env_name,
+        'labels' => labels
+      },
+      'spec' => spec
+    }
+  end
+
   def generate_k8s_ingress(name, labels)
     {
       'apiVersion' => 'networking.k8s.io/v1beta1',
@@ -928,6 +953,21 @@ EOC
       'app.kubernetes.io/component' => 'ingress'
     }
     network_policies << create_egress_network_policy(@environment.short_name, short_name, @environment.name, ingress_labels, egresses, ingress_match_labels)
+
+    api_server_egresses = [{
+      'to' => [{
+        'ipBlock' => {
+          'cidr' => '10.50.0.1/32'
+        }
+      }],
+      'ports' => [{
+        'port' => '443',
+        'protocol' => 'TCP'
+      }]
+    }]
+
+    network_policies << create_egress_network_policy_for_external_service('api-server', @environment.name, ingress_labels,
+                                                                          api_server_egresses, ingress_match_labels)
 
     virtual_services_that_depend_on_me.each do |vs|
       is_same_site = requirements_of(vs).include?(:same_site)

@@ -947,6 +947,75 @@ EOL
         end).to eql(expected_role_binding)
       end
 
+      it 'creates network policies allowing ingress controllers to talk out to the api server' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+              self.startup_alert_threshold = '1h'
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_network_policy = {
+          'apiVersion' => 'networking.k8s.io/v1',
+          'kind' => 'NetworkPolicy',
+          'metadata' => {
+            'name' => 'allow-out-to-api-server-67a480a',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
+            }
+          },
+          'spec' => {
+            'egress' => [{
+              'to' => [{
+                'ipBlock' => {
+                  'cidr' => '10.50.0.1/32'
+                },
+              }],
+              'ports' => [{
+                'port' => '443',
+                'protocol' => 'TCP'
+              }]
+            }],
+            'podSelector' => {
+              'matchLabels' => {
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/component' => 'ingress'
+              }
+            },
+            'policyTypes' => [
+              'Egress'
+            ]
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-67a480a'
+        end).to eql(expected_network_policy)
+      end
+
       it 'creates network policies allowing prometheus to monitor the ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
@@ -1904,7 +1973,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(6)
+      expect(network_policies.size).to eq(7)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-in-from-e1_-app1')
