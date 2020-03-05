@@ -961,7 +961,7 @@ EOC
         }
       }],
       'ports' => [{
-        'port' => '443',
+        'port' => 443,
         'protocol' => 'TCP'
       }]
     }]
