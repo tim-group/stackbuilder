@@ -991,7 +991,7 @@ EOL
               'to' => [{
                 'ipBlock' => {
                   'cidr' => '10.50.0.1/32'
-                },
+                }
               }],
               'ports' => [{
                 'port' => 443,
@@ -1012,7 +1012,7 @@ EOL
         }
 
         resources.flat_map(&:resources).each do |r|
-     puts r['metadata']['name']
+          puts r['metadata']['name']
         end
 
         expect(resources.flat_map(&:resources).find do |r|
