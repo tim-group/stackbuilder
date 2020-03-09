@@ -1011,10 +1011,6 @@ EOL
           }
         }
 
-        resources.flat_map(&:resources).each do |r|
-          puts r['metadata']['name']
-        end
-
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-6f5fb60'
         end).to eql(expected_network_policy)
