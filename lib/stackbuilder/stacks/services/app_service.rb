@@ -90,6 +90,11 @@ module Stacks::Services::AppService
     create_rabbitmq_config(@application)
   end
 
+  def k8s_app_resources_name
+    group = @groups.first
+    "#{name}-#{group}-app"
+  end
+
   def database_username
     if @kubernetes
       @environment.short_name + @short_name
@@ -102,10 +107,19 @@ module Stacks::Services::AppService
     [{ :port => 8000, :fqdns => [prod_fqdn(fabric)] }]
   end
 
-  def config_params(_dependant, fabric, _dependent_instance)
+  def config_params(dependant, fabric, _dependent_instance)
     if respond_to? :vip_fqdn
       fail("app_service requires application") if application.nil?
-      { "#{application.downcase}.url" => "http://#{prod_fqdn(fabric)}#{@kubernetes ? '' : ':8000'}" }
+      url = if @kubernetes
+              if dependant.kubernetes
+                "http://#{k8s_app_resources_name}.#{environment.name}.svc"
+              else
+                "http://#{prod_fqdn(fabric)}"
+              end
+            else
+              "http://#{prod_fqdn(fabric)}:8000"
+            end
+      { "#{application.downcase}.url" => url }
     else
       {}
     end
@@ -213,19 +227,17 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
 
       app_service_labels = standard_labels.merge('app.kubernetes.io/component' => 'app_service')
 
-      k8s_app_resources_name = "#{name}-#{group}-app"
-
       config, used_secrets = generate_app_config(erb_vars, hiera_provider)
 
       output = super app_deployer, dns_resolver, hiera_provider, app_service_labels
-      output << generate_k8s_config_map(k8s_app_resources_name, app_service_labels, config)
-      output << generate_k8s_service(k8s_app_resources_name, app_service_labels)
-      output << generate_k8s_deployment(k8s_app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets)
-      output << generate_k8s_alerting(k8s_app_resources_name, site, app_service_labels)
+      output << generate_k8s_config_map(app_service_labels, config)
+      output << generate_k8s_service(app_service_labels)
+      output << generate_k8s_deployment(app_service_labels, app_name, app_version, replicas, used_secrets)
+      output << generate_k8s_alerting(site, app_service_labels)
       output += generate_k8s_network_policies(dns_resolver, site, app_service_labels)
-      output += generate_k8s_service_account(k8s_app_resources_name, dns_resolver, site, app_service_labels)
+      output += generate_k8s_service_account(dns_resolver, site, app_service_labels)
 
-      output += generate_k8s_ingress_resources(k8s_app_resources_name, dns_resolver, site, standard_labels, app_service_labels)
+      output += generate_k8s_ingress_resources(dns_resolver, site, standard_labels, app_service_labels)
 
       Stacks::KubernetesResourceBundle.new(site, @environment.name, app_service_labels, output, used_secrets, hiera_scope, k8s_app_resources_name)
     end
@@ -273,12 +285,12 @@ EOC
     [contents, erb.used_secrets]
   end
 
-  def generate_k8s_config_map(name, labels, config)
+  def generate_k8s_config_map(labels, config)
     {
       'apiVersion' => 'v1',
       'kind' => 'ConfigMap',
       'metadata' => {
-        'name' => name,
+        'name' => k8s_app_resources_name,
         'namespace' => @environment.name,
         'labels' => labels
       },
@@ -288,12 +300,12 @@ EOC
     }
   end
 
-  def generate_k8s_service(name, labels)
+  def generate_k8s_service(labels)
     {
       'apiVersion' => 'v1',
       'kind' => 'Service',
       'metadata' => {
-        'name' => name,
+        'name' => k8s_app_resources_name,
         'namespace' => @environment.name,
         'labels' => labels
       },
@@ -315,7 +327,7 @@ EOC
     }
   end
 
-  def generate_k8s_deployment(name, app_service_labels, app_name, app_version, replicas, secrets)
+  def generate_k8s_deployment(app_service_labels, app_name, app_version, replicas, secrets)
     labels = app_service_labels.merge('application' => app_name,
                                       'app.kubernetes.io/name' => app_name,
                                       'app.kubernetes.io/version' => app_version)
@@ -327,8 +339,8 @@ EOC
     annotations['description'] = description unless @description.nil?
 
     deployment_annotations = {}
-    deployment_annotations['configmap.reloader.stakater.com/reload'] = name
-    deployment_annotations['secret.reloader.stakater.com/reload'] = name
+    deployment_annotations['configmap.reloader.stakater.com/reload'] = k8s_app_resources_name
+    deployment_annotations['secret.reloader.stakater.com/reload'] = k8s_app_resources_name
     deployment_annotations.merge!(annotations)
 
     pod_annotations = {}
@@ -348,7 +360,7 @@ EOC
       'apiVersion' => 'apps/v1',
       'kind' => 'Deployment',
       'metadata' => {
-        'name' => name,
+        'name' => k8s_app_resources_name,
         'namespace' => @environment.name,
         'labels' => labels,
         'annotations' => deployment_annotations
@@ -409,7 +421,7 @@ EOC
                   'name' => "SECRET_#{secret_name}",
                   'valueFrom' => {
                     'secretKeyRef' => {
-                      'name' => name,
+                      'name' => k8s_app_resources_name,
                       'key' => secret_name
                     }
                   }
@@ -527,7 +539,7 @@ EOC
               },
               {
                 'name' => 'config-template',
-                'configMap' => { 'name' => name }
+                'configMap' => { 'name' => k8s_app_resources_name }
               },
               {
                 'name' => 'log-volume',
@@ -545,24 +557,24 @@ EOC
 
     if enable_service_account
       deployment['spec']['template']['spec']['automountServiceAccountToken'] = true
-      deployment['spec']['template']['spec']['serviceAccountName'] = name
+      deployment['spec']['template']['spec']['serviceAccountName'] = k8s_app_resources_name
     end
 
     deployment
   end
 
-  def generate_k8s_alerting(name, site, app_service_labels)
-    status_critical_alert_labels = { 'severity' => 'critical', 'alertname' => "#{name} CRITICAL" }
+  def generate_k8s_alerting(site, app_service_labels)
+    status_critical_alert_labels = { 'severity' => 'critical', 'alertname' => "#{k8s_app_resources_name} CRITICAL" }
     status_critical_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
 
-    failed_readiness_alert_labels = { 'severity' => 'warning', 'alertname' => "#{name} failed readiness probe when deployment not in progress" }
+    failed_readiness_alert_labels = { 'severity' => 'warning', 'alertname' => "#{k8s_app_resources_name} failed readiness probe when deployment not in progress" }
     failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel ? alerts_channel : 'kubernetes-alerts-nonprod'
 
     rules = []
 
     rules << {
       'alert' => 'StatusCritical',
-      'expr' => "sum(tucker_component_status{job=\"#{name}\",status=\"critical\"}) by (pod, namespace) > 0",
+      'expr' => "sum(tucker_component_status{job=\"#{k8s_app_resources_name}\",status=\"critical\"}) by (pod, namespace) > 0",
       'labels' => status_critical_alert_labels,
       'annotations' => {
         'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
@@ -573,8 +585,8 @@ EOC
     if @monitor_readiness_probe
       rules << {
         'alert' => 'FailedReadinessProbe',
-        'expr' => "(((time() - kube_pod_start_time{pod=~\".*#{name}.*\"}) > #{startup_alert_threshold_seconds}) "\
-            "and on(pod) (rate(prober_probe_total{probe_type=\"Readiness\",result=\"failed\",pod=~\"^#{name}.*\"}[1m]) > 0))",
+        'expr' => "(((time() - kube_pod_start_time{pod=~\".*#{k8s_app_resources_name}.*\"}) > #{startup_alert_threshold_seconds}) "\
+            "and on(pod) (rate(prober_probe_total{probe_type=\"Readiness\",result=\"failed\",pod=~\"^#{k8s_app_resources_name}.*\"}[1m]) > 0))",
         'labels' => failed_readiness_alert_labels,
         'annotations' => {
           'message' => '{{ $labels.namespace }}/{{ $labels.pod }} has failed readiness probe when deployment not in progress',
@@ -591,7 +603,7 @@ EOC
           'prometheus' => 'main',
           'role' => 'alert-rules'
         }.merge(app_service_labels),
-        'name' => name,
+        'name' => k8s_app_resources_name,
         'namespace' => @environment.name
       },
       'spec' => {
@@ -649,7 +661,7 @@ EOC
     network_policies
   end
 
-  def generate_k8s_service_account(name, dns_resolver, site, standard_labels)
+  def generate_k8s_service_account(dns_resolver, site, standard_labels)
     if enable_service_account
 
       network_policy_spec = {
@@ -684,7 +696,7 @@ EOC
         'kind' => 'ServiceAccount',
         'metadata' => {
           'namespace' => @environment.name,
-          'name' => name,
+          'name' => k8s_app_resources_name,
           'labels' => standard_labels
         }
       }, {
@@ -1194,7 +1206,7 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_resources(k8s_app_resources_name, dns_resolver, site, standard_labels, app_service_labels)
+  def generate_k8s_ingress_resources(dns_resolver, site, standard_labels, app_service_labels)
     output = []
     non_k8s_deps = virtual_services_that_depend_on_me.select do |vs|
       !vs.kubernetes

@@ -1452,6 +1452,37 @@ EOL
         to raise_error(/The hiera value for .* is encrypted/)
     end
 
+    it 'connects two k8s services using the internal Service DNS name' do
+      factory = eval_stacks do
+        stack "test_app_servers" do
+          app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.startup_alert_threshold = '1h'
+
+            self.application = 'app1'
+          end
+
+          app_service 'app2', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.startup_alert_threshold = '1h'
+
+            self.application = 'app2'
+            depend_on 'app1'
+          end
+        end
+
+        env "e1", :primary_site => "space" do
+          instantiate_stack "test_app_servers"
+        end
+      end
+
+      set = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets['app2']
+      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
+        to match(/app1\.url=http:\/\/app1-blue-app\.e1\.svc/mx)
+    end
+
     it 'has config for it\'s db dependencies' do
       factory = eval_stacks do
         stack "mystack" do
