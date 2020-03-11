@@ -567,7 +567,10 @@ EOC
     status_critical_alert_labels = { 'severity' => 'critical', 'alertname' => "#{k8s_app_resources_name} CRITICAL" }
     status_critical_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
 
-    failed_readiness_alert_labels = { 'severity' => 'warning', 'alertname' => "#{k8s_app_resources_name} failed readiness probe when deployment not in progress" }
+    failed_readiness_alert_labels = {
+      'severity' => 'warning',
+      'alertname' => "#{k8s_app_resources_name} failed readiness probe when deployment not in progress"
+    }
     failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel ? alerts_channel : 'kubernetes-alerts-nonprod'
 
     rules = []
