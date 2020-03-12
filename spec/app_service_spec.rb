@@ -318,7 +318,7 @@ describe 'kubernetes' do
           'ports' => [{
             'name' => 'app',
             'protocol' => 'TCP',
-            'port' => 8000,
+            'port' => 80,
             'targetPort' => 8000
           }]
         }
@@ -482,7 +482,7 @@ EOL
                   'path' => '/',
                   'backend' => {
                     'serviceName' => 'x-blue-app',
-                    'servicePort' => 8000
+                    'servicePort' => 80
                   }
                 }]
               }
@@ -1480,7 +1480,7 @@ EOL
 
       set = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets['app2']
       expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
-        to match(/app1\.url=http:\/\/app1-blue-app\.e1\.svc/mx)
+        to match(/app1\.url=http:\/\/app1-blue-app\.e1\.svc$/mx)
     end
 
     it 'has config for it\'s db dependencies' do

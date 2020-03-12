@@ -320,7 +320,7 @@ EOC
         'ports' => [{
           'name' => 'app',
           'protocol' => 'TCP',
-          'port' => 8000,
+          'port' => 80,
           'targetPort' => 8000
         }]
       }
@@ -893,7 +893,7 @@ EOC
               'path' => '/',
               'backend' => {
                 'serviceName' => name,
-                'servicePort' => 8000
+                'servicePort' => 80
               }
             }]
           }
