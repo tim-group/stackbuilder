@@ -84,6 +84,7 @@ Options:
       allocate_vips                       allocate all vip addresses for a stack (service(s))
       free_vips                           free all vip addresses for a stack (service(s))
     enc [-e] -s                           print the enc of the specified stack. Stack must be a single fqdn. Used for debugging
+    kubernetes_vm_recording_rules -e      express the model of VM machines as Prometheus Recording Rules
     launch [-e] -s                        allocate and create a stack, but do not spin it up (you probably want to use provision)
         [--ignore-spectre-patching-host-policy]
     ls [-est]                             show the entire environment. Show just one stack if -s is specified. Using -t skips stacks of type "machine".

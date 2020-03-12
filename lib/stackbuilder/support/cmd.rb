@@ -6,6 +6,7 @@ require 'stackbuilder/support/live_migration'
 require 'stackbuilder/support/host_builder'
 require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
+require 'stackbuilder/support/kubernetes_vm_model'
 require 'open3'
 
 # public methods in this class (and whose name is included in the :cmds instance variable) are valid stacks commands.
@@ -32,7 +33,7 @@ class CMD
     @stack_name = stack_name
     @stash = stash
     @validate = validate
-    @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition)
+    @read_cmds = %w(audit audit_vms compile dependencies dependents diff sbdiff ls lsenv enc spec terminus test showvnc check_definition kubernetes_vm_recording_rules)
     @write_cmds = %w(dns clean clean_all launch allocate provision reprovision move clear_host rebuild_host build_new_host)
     @cmds = @read_cmds + @write_cmds
   end
@@ -388,6 +389,13 @@ class CMD
     end
 
     Support::HostBuilder.new(@factory, @nagios, @puppet).build_new(argv[0])
+  end
+
+  # express the model as prometheus metrics
+  def kubernetes_vm_recording_rules(_argv)
+    vm_model = Support::KubernetesVmModel.new()
+    crd = vm_model.generate(@factory.inventory.environments.map(&:last), @environment.options[:primary_site])
+    puts YAML.dump(crd)
   end
 
   #############################################################################
