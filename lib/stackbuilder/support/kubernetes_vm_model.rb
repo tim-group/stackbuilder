@@ -18,8 +18,8 @@ class Support::KubernetesVmModel
       },
       'spec' => {
         'groups' => [{
-            'name' => 'stacks.rules',
-            'rules' => rules
+          'name' => 'stacks.rules',
+          'rules' => rules
         }]
       }
     }

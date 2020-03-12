@@ -1,32 +1,31 @@
 require 'stackbuilder/support/namespace'
 
 module Support::UnitConversion
-
   SCALE = {
     'G' => {
       'G' => 1,
       'M' => 1024,
-      'K' => 1024 ** 2,
-      'B' => 1024 ** 3
+      'K' => 1024**2,
+      'B' => 1024**3
     },
     'M' => {
-      'G' => 1/1024.0,
+      'G' => 1 / 1024.0,
       'M' => 1,
       'K' => 1024,
-      'B' => 1024 ** 2
+      'B' => 1024**2
     },
     'K' => {
-      'G' => 1/(1024.0 ** 2),
-      'M' => 1/1024.0,
+      'G' => 1 / (1024.0**2),
+      'M' => 1 / 1024.0,
       'K' => 1,
       'B' => 1024
     },
     'B' => {
-      'G' => 1/(1024.0 ** 3),
-      'M' => 1/(1024.0 ** 2),
-      'K' => 1/1024.0,
+      'G' => 1 / (1024.0**3),
+      'M' => 1 / (1024.0**2),
+      'K' => 1 / 1024.0,
       'B' => 1
-    },
+    }
   }
 
   # Convert data size specifications to a desired unit.
@@ -48,9 +47,9 @@ module Support::UnitConversion
     normalized_target = target_unit.upcase
     source_value, source_unit = spec.upcase.match(/(\d*(?:\.\d+)?)(.)/).captures
 
-    raise ArgumentError.new("Unknown target unit #{target_unit}") unless SCALE.has_key?(normalized_target)
-    raise ArgumentError.new("Unknown source unit #{source_unit} in \"#{spec}\"") unless SCALE.has_key?(source_unit)
-    raise ArgumentError.new("No value specified in \"#{spec}\"") if source_value.nil? || source_value.empty?
+    fail(ArgumentError, "Unknown target unit #{target_unit}") unless SCALE.key?(normalized_target)
+    fail(ArgumentError, "Unknown source unit #{source_unit} in \"#{spec}\"") unless SCALE.key?(source_unit)
+    fail(ArgumentError, "No value specified in \"#{spec}\"") if source_value.nil? || source_value.empty?
 
     source_value.to_f * SCALE[source_unit][normalized_target]
   end

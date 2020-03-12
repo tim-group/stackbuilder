@@ -2,7 +2,7 @@ require 'stackbuilder/support/unit_conversion'
 require 'spec_helper'
 
 describe Support::UnitConversion do
-  Happy_cases = [
+  HAPPY_CASES = [
     ['1G', 'M', 1024],
     ['1M', 'K', 1024],
     ['1K', 'B', 1024],
@@ -22,20 +22,20 @@ describe Support::UnitConversion do
     ['3m', 'k', 1024 * 3] # be case insensitive
   ]
 
-  Sad_cases = [
+  SAD_CASES = [
     ['1U', 'B', 'Unknown source unit U in "1U"'],
     ['B', 'B', 'No value specified in "B"'],
     ['1M', 'U', 'Unknown target unit U']
   ]
 
   describe 'data_to_unit' do
-    Happy_cases.each do |spec|
+    HAPPY_CASES.each do |spec|
       it "converts #{spec[0]} into #{spec[2]} #{spec[1]}" do
         expect(Support::UnitConversion.data_to_unit(spec[0], spec[1])).to eq(spec[2])
       end
     end
 
-    Sad_cases.each do |spec|
+    SAD_CASES.each do |spec|
       it "errors when given #{spec[0]} and #{spec[1]}" do
         expect do
           Support::UnitConversion.data_to_unit(spec[0], spec[1])
@@ -45,13 +45,13 @@ describe Support::UnitConversion do
   end
 
   describe 'data_to_unit_s' do
-    Happy_cases.each do |spec|
+    HAPPY_CASES.each do |spec|
       it "converts #{spec[0]} into the string '#{spec[2]}#{spec[1]}'" do
         expect(Support::UnitConversion.data_to_unit_s(spec[0], spec[1])).to eq("#{spec[2]}#{spec[1]}")
       end
     end
 
-    Sad_cases.each do |spec|
+    SAD_CASES.each do |spec|
       it "errors when given #{spec[0]} and #{spec[1]}" do
         expect do
           Support::UnitConversion.data_to_unit_s(spec[0], spec[1])
