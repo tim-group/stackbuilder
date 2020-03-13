@@ -52,25 +52,25 @@ describe Support::KubernetesVmModel do
 
   describe 'stacks:vm_info' do
     it "records a metric for each VM in the site" do
-      vm_model = Support::KubernetesVmModel.new
-      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space')
+      vm_model = Support::KubernetesVmModel.new(10)
+      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space').first
 
       # underscores so that this can be joined with another metric
       # (uptime_uptime) that uses underscores. Not ideal, but this shouldn't
       # be a major use case
       expect(out['spec']['groups'].
-             first['rules'].
+             flat_map { |g| g['rules'] }.
              select { |r| r['record'] == 'stacks:vm_info' }.
              map { |r| r['labels']['server'] }
             ).to contain_exactly('e1-myappservice-001_mgmt_space_net_local', 'e1-myappservice-002_mgmt_space_net_local')
     end
 
     it "labels the metrics with the OS that the VM has" do
-      vm_model = Support::KubernetesVmModel.new
-      out = vm_model.generate(factory.inventory.environments.map(&:last), 'sun')
+      vm_model = Support::KubernetesVmModel.new(10)
+      out = vm_model.generate(factory.inventory.environments.map(&:last), 'sun').first
 
       expect(out['spec']['groups'].
-             first['rules'].
+             flat_map { |g| g['rules'] }.
              select { |r| r['record'] == 'stacks:vm_info' }.
              map { |r| r['labels']['os'] }
             ).to contain_exactly('trusty', 'precise', 'precise')
@@ -79,11 +79,11 @@ describe Support::KubernetesVmModel do
 
   describe 'stacks:vm_ram' do
     it "records the RAM in bytes" do
-      vm_model = Support::KubernetesVmModel.new
-      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space')
+      vm_model = Support::KubernetesVmModel.new(10)
+      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space').first
 
       expect(out['spec']['groups'].
-             first['rules'].
+             flat_map { |g| g['rules'] }.
              select { |r| r['record'] == 'stacks:vm_ram' }.
              map { |r| r['expr'] }
             ).to contain_exactly('vector(3221225472.0)', 'vector(3221225472.0)')
@@ -92,11 +92,11 @@ describe Support::KubernetesVmModel do
 
   describe 'stacks:vm_vcpus' do
     it "records the number of virtual CPUs" do
-      vm_model = Support::KubernetesVmModel.new
-      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space')
+      vm_model = Support::KubernetesVmModel.new(10)
+      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space').first
 
       expect(out['spec']['groups'].
-             first['rules'].
+             flat_map { |g| g['rules'] }.
              select { |r| r['record'] == 'stacks:vm_vcpus' }.
              map { |r| r['expr'] }
             ).to contain_exactly('vector(3)', 'vector(3)')
@@ -105,14 +105,23 @@ describe Support::KubernetesVmModel do
 
   describe 'stacks:vm_storage' do
     it "records the mounted storage space" do
-      vm_model = Support::KubernetesVmModel.new
-      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space')
+      vm_model = Support::KubernetesVmModel.new(10)
+      out = vm_model.generate(factory.inventory.environments.map(&:last), 'space').first
 
       expect(out['spec']['groups'].
-             first['rules'].
+             flat_map { |g| g['rules'] }.
              select { |r| r['record'] == 'stacks:vm_storage' }.
              map { |r| r['expr'] }
             ).to contain_exactly('vector(3221225472.0)', 'vector(3221225472.0)')
+    end
+  end
+
+  describe "size limits" do
+    it "splits the metrics into multiple resources to limit the size" do
+      vm_model = Support::KubernetesVmModel.new(2)
+      out = vm_model.generate(factory.inventory.environments.map(&:last), 'sun')
+
+      expect(out.size).to eq(2)
     end
   end
 end

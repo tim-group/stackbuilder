@@ -400,9 +400,11 @@ class CMD
 
   # express the model as prometheus metrics
   def kubernetes_vm_recording_rules(_argv)
-    vm_model = Support::KubernetesVmModel.new
-    crd = vm_model.generate(@factory.inventory.environments.map(&:last), @environment.options[:primary_site])
-    puts YAML.dump(crd)
+    vm_model = Support::KubernetesVmModel.new(100)
+    crds = vm_model.generate(@factory.inventory.environments.map(&:last), @environment.options[:primary_site])
+    crds.each do |crd|
+      puts YAML.dump(crd)
+    end
   end
 
   #############################################################################
