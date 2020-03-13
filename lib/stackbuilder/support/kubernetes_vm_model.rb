@@ -86,7 +86,7 @@ class Support::KubernetesVmModel
         'kind' => 'PrometheusRule',
         'metadata' => {
           'name' => "stacks-model-rules-part-#{number}",
-          'namespace' => 'monitoring',
+          'namespace' => 'production',
           'labels' => {
             'app.kubernetes.io/component' => 'stacks-model',
             'prometheus' => 'main',
