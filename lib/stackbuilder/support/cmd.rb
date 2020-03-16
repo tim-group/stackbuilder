@@ -40,7 +40,7 @@ class CMD
                     check_definition kubernetes_vm_recording_rules)
     @write_cmds = %w(dns clean clean_all
                      launch allocate provision
-                     reprovision move clear_host
+                     reprovision apply move clear_host
                      rebuild_host build_new_host)
     @cmds = @read_cmds + @write_cmds
   end
@@ -334,6 +334,7 @@ class CMD
 
     0
   end
+  alias apply reprovision
 
   def move(_argv)
     machines = check_and_get_stack.flatten
