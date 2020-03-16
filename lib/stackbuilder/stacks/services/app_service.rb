@@ -237,7 +237,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
       output += generate_k8s_network_policies(dns_resolver, site, app_service_labels)
       output += generate_k8s_service_account(dns_resolver, site, app_service_labels)
 
-      output += generate_k8s_ingress_resources(dns_resolver, site, standard_labels, app_service_labels)
+      output += generate_k8s_ingress_resources(dns_resolver, hiera_provider, hiera_scope, site, standard_labels, app_service_labels)
 
       Stacks::KubernetesResourceBundle.new(site, @environment.name, app_service_labels, output, used_secrets, hiera_scope, k8s_app_resources_name)
     end
@@ -945,7 +945,7 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_controller_network_policies(_name, ingress_labels, dns_resolver, site)
+  def generate_k8s_ingress_controller_network_policies(_name, ingress_labels, dns_resolver, site, masters)
     network_policies = []
 
     app_service_match_labels = {
@@ -970,11 +970,13 @@ EOC
     network_policies << create_egress_network_policy(@environment.short_name, short_name, @environment.name, ingress_labels, egresses, ingress_match_labels)
 
     api_server_egresses = [{
-      'to' => [{
-        'ipBlock' => {
-          'cidr' => '10.50.0.1/32'
+      'to' => masters.map do |master|
+        {
+          'ipBlock' => {
+            'cidr' => "#{dns_resolver.lookup(master)}/32"
+          }
         }
-      }],
+      end,
       'ports' => [{
         'port' => 443,
         'protocol' => 'TCP'
@@ -1209,7 +1211,9 @@ EOC
     }
   end
 
-  def generate_k8s_ingress_resources(dns_resolver, site, standard_labels, app_service_labels)
+  def generate_k8s_ingress_resources(dns_resolver, hiera_provider, hiera_scope, site, standard_labels, app_service_labels)
+    masters = hiera_provider.lookup(hiera_scope, "kubernetes/masters/#{site}", [])
+
     output = []
     non_k8s_deps = virtual_services_that_depend_on_me.select do |vs|
       !vs.kubernetes
@@ -1224,7 +1228,7 @@ EOC
       output << generate_k8s_ingress_controller_service_account(k8s_ingress_resources_name, ingress_labels)
       output << generate_k8s_ingress_controller_role(k8s_ingress_resources_name, ingress_labels)
       output << generate_k8s_ingress_controller_role_binding(k8s_ingress_resources_name, ingress_labels)
-      output += generate_k8s_ingress_controller_network_policies(k8s_ingress_resources_name, ingress_labels, dns_resolver, site)
+      output += generate_k8s_ingress_controller_network_policies(k8s_ingress_resources_name, ingress_labels, dns_resolver, site, masters)
       output << generate_k8s_ingress_controller_service(k8s_ingress_resources_name, ingress_labels, dns_resolver, site)
       output << generate_k8s_ingress_controller_monitoring_service(k8s_ingress_resources_name, ingress_labels)
       output << generate_k8s_ingress_controller_deployment(k8s_ingress_resources_name, ingress_labels)

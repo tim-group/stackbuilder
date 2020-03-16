@@ -25,13 +25,17 @@ describe 'kubernetes' do
                           'e1-sharedproxy-001.space.net.local' => '3.1.4.15',
                           'e1-sharedproxy-002.space.net.local' => '3.1.4.16',
                           'e1-myrabbit-001.space.net.local' => '3.1.4.17',
-                          'e1-myrabbit-002.space.net.local' => '3.1.4.18'
+                          'e1-myrabbit-002.space.net.local' => '3.1.4.18',
+                          'space-kvm-001.space.net.local' => '10.30.0.252',
+                          'space-kvm-005.space.net.local' => '10.30.0.251',
+                          'space-kvm-010.space.net.local' => '10.30.0.250'
                          )
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
       'stacks/application_credentials_selector' => 0,
-      'secrety/looking/thing' => 'ENC[GPG,hQIMAyhja+HHo')
+      'secrety/looking/thing' => 'ENC[GPG,hQIMAyhja+HHo',
+      'kubernetes/masters/space' => ['space-kvm-001.space.net.local', 'space-kvm-005.space.net.local', 'space-kvm-010.space.net.local'])
   end
 
   def network_policies_for(factory, env, stack, service)
@@ -974,7 +978,7 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-out-to-api-server-6f5fb60',
+            'name' => 'allow-out-to-api-server-3e0eb92',
             'namespace' => 'e1',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
@@ -988,11 +992,23 @@ EOL
           },
           'spec' => {
             'egress' => [{
-              'to' => [{
-                'ipBlock' => {
-                  'cidr' => '10.50.0.1/32'
+              'to' => [
+                {
+                  'ipBlock' => {
+                    'cidr' => '10.30.0.252/32'
+                  }
+                },
+                {
+                  'ipBlock' => {
+                    'cidr' => '10.30.0.251/32'
+                  }
+                },
+                {
+                  'ipBlock' => {
+                    'cidr' => '10.30.0.250/32'
+                  }
                 }
-              }],
+              ],
               'ports' => [{
                 'port' => 443,
                 'protocol' => 'TCP'
@@ -1012,7 +1028,7 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-6f5fb60'
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-3e0eb92'
         end).to eql(expected_network_policy)
       end
 
