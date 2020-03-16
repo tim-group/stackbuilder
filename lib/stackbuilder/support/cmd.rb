@@ -334,7 +334,7 @@ class CMD
 
     0
   end
-  alias apply reprovision
+  alias_method :apply, :reprovision
 
   def move(_argv)
     machines = check_and_get_stack.flatten
