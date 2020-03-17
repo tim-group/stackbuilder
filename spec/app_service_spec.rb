@@ -978,7 +978,7 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-out-to-api-server-3e0eb92',
+            'name' => 'allow-out-to-api-server-65cf5ba',
             'namespace' => 'e1',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
@@ -1010,7 +1010,7 @@ EOL
                 }
               ],
               'ports' => [{
-                'port' => 443,
+                'port' => 6443,
                 'protocol' => 'TCP'
               }]
             }],
@@ -1028,7 +1028,7 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-3e0eb92'
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-65cf5ba'
         end).to eql(expected_network_policy)
       end
 
