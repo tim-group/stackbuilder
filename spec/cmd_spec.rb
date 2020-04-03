@@ -154,6 +154,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -183,6 +184,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -280,6 +282,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -309,6 +312,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -423,6 +427,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -452,6 +457,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -515,6 +521,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -603,6 +610,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -632,6 +640,7 @@ EOF
                '--prune-whitelist', '/v1/Service',
                '--prune-whitelist', '/v1/ServiceAccount',
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
+               '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*

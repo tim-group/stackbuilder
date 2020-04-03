@@ -59,7 +59,8 @@ class Stacks::KubernetesResourceBundle
       'rbac.authorization.k8s.io/v1/RoleBinding',
       '/v1/Service',
       '/v1/ServiceAccount',
-      'monitoring.coreos.com/v1/PrometheusRule'
+      'monitoring.coreos.com/v1/PrometheusRule',
+      'policy/v1beta1/PodDisruptionBudget'
     ]
 
     rest_mappings_found = @resources.map { |r| r['apiVersion'].include?('/') ? "#{r['apiVersion']}/#{r['kind']}" : "/#{r['apiVersion']}/#{r['kind']}" }

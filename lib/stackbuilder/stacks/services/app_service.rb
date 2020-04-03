@@ -233,6 +233,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
       output << generate_k8s_config_map(app_service_labels, config)
       output << generate_k8s_service(app_service_labels)
       output << generate_k8s_deployment(app_service_labels, app_name, app_version, replicas, used_secrets)
+      output << generate_k8s_pod_disruption_budget(app_service_labels)
       output << generate_k8s_alerting(site, app_service_labels)
       output += generate_k8s_network_policies(dns_resolver, site, app_service_labels)
       output += generate_k8s_service_account(dns_resolver, site, app_service_labels)
@@ -561,6 +562,28 @@ EOC
     end
 
     deployment
+  end
+
+  def generate_k8s_pod_disruption_budget(app_service_labels)
+    {
+      'apiVersion' => 'policy/v1beta1',
+      'kind' => 'PodDisruptionBudget',
+      'metadata' => {
+        'name' => k8s_app_resources_name,
+        'namespace' => @environment.name,
+        'labels' => app_service_labels
+      },
+      'spec' => {
+        'maxUnavailable' => 1,
+        'selector' => {
+          'matchLabels' => {
+            'machineset' => app_service_labels['machineset'],
+            'group' => app_service_labels['group'],
+            'app.kubernetes.io/component' => app_service_labels['app.kubernetes.io/component']
+          }
+        }
+      }
+    }
   end
 
   def generate_k8s_alerting(site, app_service_labels)

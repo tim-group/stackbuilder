@@ -295,6 +295,35 @@ describe 'kubernetes' do
       }
       expect(k8s_resource(set, 'Deployment')).to eql(expected_deployment)
 
+      expected_pod_disruption_budget = {
+        'apiVersion' => 'policy/v1beta1',
+        'kind' => 'PodDisruptionBudget',
+        'metadata' => {
+          'name' => 'x-blue-app',
+          'namespace' => 'e1',
+          'labels' => {
+            'app.kubernetes.io/managed-by' => 'stacks',
+            'stack' => 'mystack',
+            'machineset' => 'x',
+            'group' => 'blue',
+            'app.kubernetes.io/instance' => 'blue',
+            'app.kubernetes.io/part-of' => 'x',
+            'app.kubernetes.io/component' => 'app_service'
+          }
+        },
+        'spec' => {
+          'maxUnavailable' => 1,
+          'selector' => {
+            'matchLabels' => {
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/component' => 'app_service'
+            }
+          }
+        }
+      }
+      expect(k8s_resource(set, 'PodDisruptionBudget')).to eql(expected_pod_disruption_budget)
+
       expected_service = {
         'apiVersion' => 'v1',
         'kind' => 'Service',
