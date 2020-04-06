@@ -673,6 +673,62 @@ EOL
         end).to eql(expected_deployment)
       end
 
+      it 'creates a pod disruption budget resource for ingress controllers' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+              self.startup_alert_threshold = '1h'
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_pod_disruption_budget = {
+          'apiVersion' => 'policy/v1beta1',
+          'kind' => 'PodDisruptionBudget',
+          'metadata' => {
+            'name' => 'x-blue-ing',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'ingress'
+            }
+          },
+          'spec' => {
+            'maxUnavailable' => 1,
+            'selector' => {
+              'matchLabels' => {
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/component' => 'ingress'
+              }
+            }
+          }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'PodDisruptionBudget' && r['metadata']['name'] == 'x-blue-ing'
+        end).to eql(expected_pod_disruption_budget)
+      end
+
       it 'creates a service resource for ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do

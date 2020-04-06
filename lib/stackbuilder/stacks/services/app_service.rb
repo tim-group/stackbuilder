@@ -1201,6 +1201,28 @@ EOC
     }
   end
 
+  def generate_k8s_ingress_pod_disruption_budget(name, ingress_labels)
+    {
+      'apiVersion' => 'policy/v1beta1',
+      'kind' => 'PodDisruptionBudget',
+      'metadata' => {
+        'name' => name,
+        'namespace' => @environment.name,
+        'labels' => ingress_labels
+      },
+      'spec' => {
+        'maxUnavailable' => 1,
+        'selector' => {
+          'matchLabels' => {
+            'machineset' => ingress_labels['machineset'],
+            'group' => ingress_labels['group'],
+            'app.kubernetes.io/component' => ingress_labels['app.kubernetes.io/component']
+          }
+        }
+      }
+    }
+  end
+
   def generate_k8s_ingress_controller_service_account(name, ingress_labels)
     {
       'kind' => 'ServiceAccount',
@@ -1255,6 +1277,7 @@ EOC
       output << generate_k8s_ingress_controller_service(k8s_ingress_resources_name, ingress_labels, dns_resolver, site)
       output << generate_k8s_ingress_controller_monitoring_service(k8s_ingress_resources_name, ingress_labels)
       output << generate_k8s_ingress_controller_deployment(k8s_ingress_resources_name, ingress_labels)
+      output << generate_k8s_ingress_pod_disruption_budget(k8s_ingress_resources_name, ingress_labels)
     end
     output
   end
