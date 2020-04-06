@@ -111,6 +111,7 @@ describe 'kubernetes' do
               'maxSurge' => 0
             }
           },
+          'progressDeadlineSeconds' => 3600,
           'replicas' => 2,
           'template' => {
             'metadata' => {

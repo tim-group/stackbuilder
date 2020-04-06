@@ -382,6 +382,7 @@ EOC
             'maxSurge' => 0
           }
         },
+        'progressDeadlineSeconds' => startup_alert_threshold_seconds,
         'replicas' => replicas,
         'template' => {
           'metadata' => {
