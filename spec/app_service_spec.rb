@@ -1382,6 +1382,41 @@ EOL
         end).to eql(nil)
       end
 
+      it 'creates an alert rule for missing replicas in a deployment' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+
+              self.startup_alert_threshold = '1h'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'PrometheusRule'
+        end['spec']['groups'].first['rules'].find do |rule|
+          rule['alert'] == 'DeploymentReplicasMismatch'
+        end).to eql('alert' => 'DeploymentReplicasMismatch',
+                    'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', deployment='x-blue-app'} != kube_deployment_status_replicas_available{job='kube-state-metrics', deployment='x-blue-app'}",
+                    'for' => '1h',
+                    'labels' => {
+                      'severity' => 'warning',
+                      'alertname' => 'x-blue-app is missing replicas',
+                    },
+                    'annotations' => {
+                      'message' => 'Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not matched the expected number of replicas for longer than 1h.',
+                    })
+      end
+
       it 'sends component alerts to the specified alerting channel' do
         factory = eval_stacks do
           stack "mystack" do

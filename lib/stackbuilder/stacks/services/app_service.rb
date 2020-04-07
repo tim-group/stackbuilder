@@ -588,17 +588,10 @@ EOC
   end
 
   def generate_k8s_alerting(site, app_service_labels)
-    status_critical_alert_labels = { 'severity' => 'critical', 'alertname' => "#{k8s_app_resources_name} CRITICAL" }
-    status_critical_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
-
-    failed_readiness_alert_labels = {
-      'severity' => 'warning',
-      'alertname' => "#{k8s_app_resources_name} failed readiness probe when deployment not in progress"
-    }
-    failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel ? alerts_channel : 'kubernetes-alerts-nonprod'
-
     rules = []
 
+    status_critical_alert_labels = { 'severity' => 'critical', 'alertname' => "#{k8s_app_resources_name} CRITICAL" }
+    status_critical_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
     rules << {
       'alert' => 'StatusCritical',
       'expr' => "sum(tucker_component_status{job=\"#{k8s_app_resources_name}\",status=\"critical\"}) by (pod, namespace) > 0",
@@ -609,7 +602,27 @@ EOC
       }
     }
 
+    deployment_replicas_mismatch_labels = { 'severity' => 'warning', 'alertname' => "#{k8s_app_resources_name} is missing replicas" }
+    deployment_replicas_mismatch_labels['alert_owner_channel'] = alerts_channel if alerts_channel
+    rules << {
+      'alert' => 'DeploymentReplicasMismatch',
+      'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', deployment='#{k8s_app_resources_name}'} " \
+        "!= kube_deployment_status_replicas_available{job='kube-state-metrics', deployment='#{k8s_app_resources_name}'}",
+      'for' => startup_alert_threshold,
+      'labels' => deployment_replicas_mismatch_labels,
+      'annotations' => {
+        'message' => "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not matched the " \
+          "expected number of replicas for longer than #{startup_alert_threshold}."
+      }
+    }
+
     if @monitor_readiness_probe
+      failed_readiness_alert_labels = {
+        'severity' => 'warning',
+        'alertname' => "#{k8s_app_resources_name} failed readiness probe when deployment not in progress"
+      }
+      failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel ? alerts_channel : 'kubernetes-alerts-nonprod'
+
       rules << {
         'alert' => 'FailedReadinessProbe',
         'expr' => "(((time() - kube_pod_start_time{pod=~\".*#{k8s_app_resources_name}.*\"}) > #{startup_alert_threshold_seconds}) "\
