@@ -1406,14 +1406,16 @@ EOL
         end['spec']['groups'].first['rules'].find do |rule|
           rule['alert'] == 'DeploymentReplicasMismatch'
         end).to eql('alert' => 'DeploymentReplicasMismatch',
-                    'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', deployment='x-blue-app'} != kube_deployment_status_replicas_available{job='kube-state-metrics', deployment='x-blue-app'}",
+                    'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', deployment='x-blue-app'} != " \
+                      "kube_deployment_status_replicas_available{job='kube-state-metrics', deployment='x-blue-app'}",
                     'for' => '1h',
                     'labels' => {
                       'severity' => 'warning',
-                      'alertname' => 'x-blue-app is missing replicas',
+                      'alertname' => 'x-blue-app is missing replicas'
                     },
                     'annotations' => {
-                      'message' => 'Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not matched the expected number of replicas for longer than 1h.',
+                      'message' => 'Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not ' \
+                        'matched the expected number of replicas for longer than 1h.'
                     })
       end
 
