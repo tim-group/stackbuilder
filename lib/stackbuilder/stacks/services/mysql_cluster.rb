@@ -278,8 +278,8 @@ module Stacks::Services::MysqlCluster
   end
 
   def requirement_of(dependent_service)
-    dependent_on_this_cluster = dependent_service.depends_on.find { |dependency| dependency[0] == name }
-    dependent_on_this_cluster[2]
+    dependent_on_this_cluster = dependent_service.depends_on.find { |dependency| dependency.to_selector.service_name == name }
+    dependent_on_this_cluster.to_selector.requirement
   end
 
   def config_to_fulfil_requirement(dependent_service, hosts, requirement, dependent_instance)

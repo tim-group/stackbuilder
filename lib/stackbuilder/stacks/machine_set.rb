@@ -151,7 +151,8 @@ class Stacks::MachineSet
   def depend_on(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     fail('Environment cannot be nil') if env.nil? || env.eql?('')
-    @depends_on << [dependant, env, requirement] unless @depends_on.include? [dependant, env, requirement]
+    dep = Stacks::Dependencies::ServiceDependency.new(self, Stacks::Dependencies::ServiceSelector.new(dependant, env, requirement))
+    @depends_on << dep unless @depends_on.include? dep
   end
 
   def dependency_config(fabric, dependent_instance)

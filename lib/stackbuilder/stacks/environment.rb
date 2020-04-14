@@ -262,13 +262,14 @@ class Stacks::Environment
     @calculated_dependencies_cache.get
   end
 
-  def lookup_dependency(dependency_id)
-    @calculated_dependencies_cache.lookup(dependency_id, find_all_environments)
+  def lookup_dependency(dependency_selector)
+    @calculated_dependencies_cache.lookup(dependency_selector, find_all_environments)
   end
 
   def depend_on(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     fail('Environment cannot be nil') if env.nil? || env.eql?('')
-    @depends_on << [dependant, env, requirement] unless @depends_on.include? [dependant, env, requirement]
+    dep = Stacks::Dependencies::EnvironmentDependency.new(self, Stacks::Dependencies::ServiceSelector.new(dependant, env, requirement))
+    @depends_on << dep unless @depends_on.include? dep
   end
 end
