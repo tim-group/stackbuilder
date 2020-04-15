@@ -58,14 +58,22 @@ module Stacks::Dependencies
   end
 
   def virtual_services_that_depend_on_me
-    virtual_services_that_depend_on_me = []
-    @environment.calculated_dependencies.each do |virtual_service, depends_on|
-      next if !depends_on.any? { |depend| depend.to_selector.matches(self) }
+    dependants.map(&:from).uniq
+  end
 
-      virtual_services_that_depend_on_me.push virtual_service
+  def dependencies
+    dynamic_deps = (self.respond_to?(:establish_dependencies) ? establish_dependencies : []).map do |dep|
+      ServiceDependency.new(self, ServiceSelector.new(dep[0], dep[1]))
     end
 
-    virtual_services_that_depend_on_me.uniq
+    @depends_on + dynamic_deps + environment.depends_on
+  end
+
+  # These are the dependencies from others onto this service
+  def dependants
+    @environment.calculated_dependencies.map(&:last).flatten.select do |dep|
+      dep.to_selector.matches(self)
+    end
   end
 
   def get_children_for_virtual_services(virtual_services,
@@ -92,11 +100,9 @@ module Stacks::Dependencies
   end
 
   def virtual_services_that_i_depend_on(include_env_dependencies = true)
-    dependencies = @depends_on + (self.respond_to?(:establish_dependencies) ? establish_dependencies : []).map do |dep|
-      ServiceDependency.new(self, ServiceSelector.new(dep[0], dep[1]))
-    end
-    dependencies += environment.depends_on if include_env_dependencies
-    dependencies.map do |depends_on|
+    dependencies.reject do |dep|
+      dep.is_a?(Stacks::Dependencies::EnvironmentDependency) && !include_env_dependencies
+    end.map do |depends_on|
       find_virtual_service_that_i_depend_on(depends_on)
     end
   end
