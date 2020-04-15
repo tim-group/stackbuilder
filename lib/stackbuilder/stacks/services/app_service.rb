@@ -675,7 +675,7 @@ EOC
     # this method only does the network policies for the app pods
     network_policies = []
 
-    network_policies += generate_k8s_network_policies_for_dependents(dns_resolver, site, standard_labels)
+    network_policies += generate_k8s_network_policies_for_dependants(dns_resolver, site, standard_labels)
     network_policies += generate_k8s_network_policies_for_dependencies(dns_resolver, site, standard_labels)
 
     nexus_filters = [{
@@ -1023,11 +1023,10 @@ EOC
     network_policies << create_egress_network_policy_for_external_service('api-server', @environment.name, ingress_labels,
                                                                           api_server_egresses, ingress_match_labels)
 
-    virtual_services_that_depend_on_me.each do |vs|
-      is_same_site = requirements_of(vs).include?(:same_site)
+    dependants.reject { |dep| dep.from.kubernetes }.each do |dep|
+      vs = dep.from
+      is_same_site = dep.to_selector.requirement == :same_site
       next if is_same_site && !vs.exists_in_site?(vs.environment, site)
-
-      next if vs.kubernetes
 
       filters = []
       dependant_vms = vs.children.select { |vm| vm.site == (is_same_site ? site : @environment.primary_site) }.sort_by(&:prod_fqdn)
@@ -1274,11 +1273,8 @@ EOC
     masters = hiera_provider.lookup(hiera_scope, "kubernetes/masters/#{site}", [])
 
     output = []
-    non_k8s_deps = virtual_services_that_depend_on_me.select do |vs|
-      !vs.kubernetes
-    end
 
-    if non_k8s_deps.size > 0
+    if non_k8s_dependencies_exist?
       ingress_labels = standard_labels.merge('app.kubernetes.io/component' => 'ingress')
 
       k8s_ingress_resources_name = "#{standard_labels['machineset']}-#{standard_labels['group']}-ing"
@@ -1309,7 +1305,8 @@ EOC
     }
   end
 
-  def generate_k8s_network_policies_for_dependents(_dns_resolver, site, standard_labels)
+  def generate_k8s_network_policies_for_dependants(_dns_resolver, site, standard_labels)
+    important_dependants = []
     network_policies = []
 
     if non_k8s_dependencies_exist?
@@ -1323,35 +1320,24 @@ EOC
                                                                              @environment.name, standard_labels,
                                                                              ingress_filters)
 
-      virtual_services_that_depend_on_me.each do |vs|
-        is_same_site = requirements_of(vs).include?(:same_site)
-        next if is_same_site && !vs.exists_in_site?(vs.environment, site)
-
-        next if !vs.kubernetes
-
-        match_labels = {
-          'machineset' => vs.name,
-          'group' => vs.groups.first,
-          'app.kubernetes.io/component' => 'app_service'
-        }
-        filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
-        network_policies << create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
-                                                                               @environment.name, standard_labels, filters)
-      end
+      important_dependants = dependants.select { |dep| dep.from.kubernetes }
     else
-      virtual_services_that_depend_on_me.each do |vs|
-        is_same_site = requirements_of(vs).include?(:same_site)
-        next if is_same_site && !vs.exists_in_site?(vs.environment, site)
+      important_dependants = dependants
+    end
 
-        match_labels = {
-          'machineset' => vs.name,
-          'group' => vs.groups.first,
-          'app.kubernetes.io/component' => 'app_service'
-        }
-        filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
-        network_policies << create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
-                                                                               @environment.name, standard_labels, filters)
-      end
+    important_dependants.each do |dep|
+      vs = dep.from
+      is_same_site = dep.to_selector.requirement == :same_site
+      next if is_same_site && !vs.exists_in_site?(vs.environment, site)
+
+      match_labels = {
+        'machineset' => vs.name,
+        'group' => vs.groups.first,
+        'app.kubernetes.io/component' => 'app_service'
+      }
+      filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
+      network_policies << create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
+                                                                             @environment.name, standard_labels, filters)
     end
 
     network_policies
@@ -1359,7 +1345,8 @@ EOC
 
   def generate_k8s_network_policies_for_dependencies(dns_resolver, site, standard_labels)
     network_policies = []
-    virtual_services_that_i_depend_on(false).each do |vs|
+    dependencies.each do |dep|
+      vs = @environment.lookup_dependency(dep.to_selector)
       fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
 
       chosen_site_of_vs = vs.exists_in_site?(vs.environment, site) ? site : vs.environment.primary_site
@@ -1408,7 +1395,7 @@ EOC
   end
 
   def non_k8s_dependencies_exist?
-    virtual_services_that_depend_on_me.count { |vs| !vs.kubernetes } > 0
+    dependants.count { |dep| !dep.from.kubernetes } > 0
   end
 
   def startup_alert_threshold_seconds

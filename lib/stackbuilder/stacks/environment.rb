@@ -230,7 +230,7 @@ class Stacks::Environment
         end
       end
     end
-    things
+    things.uniq
   end
 
   def instantiate_stack(stack_name)

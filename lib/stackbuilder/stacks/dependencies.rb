@@ -58,7 +58,7 @@ module Stacks::Dependencies
   end
 
   def virtual_services_that_depend_on_me
-    dependants.map(&:from).uniq
+    dependants.map(&:from)
   end
 
   def dependencies
