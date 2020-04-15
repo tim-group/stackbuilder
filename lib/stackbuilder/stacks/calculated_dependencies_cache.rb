@@ -32,25 +32,25 @@ class Stacks::CalculatedDependenciesCache
     dependencies
   end
 
-  def lookup(dependency_selector, all_environments)
-    cached_virtual_service = @lookup_cache[dependency_selector]
+  def lookup(dependency, all_environments)
+    cached_virtual_service = @lookup_cache[dependency]
     return cached_virtual_service unless cached_virtual_service.nil?
 
-    virtual_service = lookup_single_dependency(all_environments, dependency_selector)
-    @lookup_cache[dependency_selector] = virtual_service
+    virtual_service = lookup_single_dependency(all_environments, dependency)
+    @lookup_cache[dependency] = virtual_service
     virtual_service
   end
 
-  def lookup_single_dependency(all_environments, dependency_selector)
+  def lookup_single_dependency(all_environments, dependency)
     found_virtual_service = nil
     all_environments.each do |env|
       env.accept do |virtual_service|
         if virtual_service.is_a?(Stacks::CustomServices)
           virtual_service.k8s_machinesets.values.each do |machineset|
-            found_virtual_service = machineset if dependency_selector.matches(machineset)
+            found_virtual_service = machineset if dependency.to_selector.matches(dependency.from, machineset)
           end
         end
-        found_virtual_service = virtual_service if dependency_selector.matches(virtual_service)
+        found_virtual_service = virtual_service if dependency.to_selector.matches(dependency.from, virtual_service)
       end
     end
     found_virtual_service

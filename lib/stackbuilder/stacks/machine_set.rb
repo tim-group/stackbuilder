@@ -151,14 +151,27 @@ class Stacks::MachineSet
   def depend_on(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     fail('Environment cannot be nil') if env.nil? || env.eql?('')
-    dep = Stacks::Dependencies::ServiceDependency.new(self, Stacks::Dependencies::ServiceSelector.new(dependant, env, requirement))
+    selector = if dependant == :all
+                 if env == :all
+                   Stacks::Dependencies::AllKubernetesSelector.new(requirement)
+                 else
+                   fail('Selection by a specific environment not yet support for :all dependency')
+                 end
+               else
+                 Stacks::Dependencies::ServiceSelector.new(dependant, env, requirement)
+               end
+
+    dep = Stacks::Dependencies::ServiceDependency.new(self, selector)
     @depends_on << dep unless @depends_on.include? dep
   end
 
   def dependency_config(fabric, dependent_instance)
     config = {}
-    virtual_services_that_i_depend_on.each do |dependency|
-      config.merge! dependency.config_params(self, fabric, dependent_instance)
+    dependencies.each do |dependency|
+      case dependency.to_selector
+      when Stacks::Dependencies::ServiceSelector
+        config.merge! @environment.lookup_dependency(dependency).config_params(self, fabric, dependent_instance)
+      end
     end
     config
   end

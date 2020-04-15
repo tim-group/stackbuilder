@@ -262,8 +262,8 @@ class Stacks::Environment
     @calculated_dependencies_cache.get
   end
 
-  def lookup_dependency(dependency_selector)
-    @calculated_dependencies_cache.lookup(dependency_selector, find_all_environments)
+  def lookup_dependency(dependency)
+    @calculated_dependencies_cache.lookup(dependency, find_all_environments)
   end
 
   def depend_on(dependant, env = environment.name, requirement = nil)

@@ -2069,6 +2069,70 @@ EOL
       end).not_to be_nil
     end
 
+    it 'can depend on all kubernetes instances in the same site' do
+      factory = eval_stacks do
+        stack 'testing' do
+          app_service 'depends_on_everything', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.instances = {
+              'mars' => 1
+            }
+
+            self.application = 'application'
+            self.startup_alert_threshold = '1h'
+
+            depend_on :all, :all, :same_site
+          end
+          app_service 'just_an_app', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.instances = {
+              'io' => 1,
+              'mars' => 1
+            }
+
+            self.application = 'application'
+            self.startup_alert_threshold = '1h'
+          end
+          app_service 'another_app', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.instances = {
+              'io' => 1,
+              'mars' => 1
+            }
+
+            self.application = 'application'
+            self.startup_alert_threshold = '1h'
+          end
+        end
+        env 'e1', :primary_site => 'io', :secondary_site => 'mars' do
+          instantiate_stack 'testing'
+        end
+      end
+
+      dns = AllocatingDnsResolver.new
+
+      machine_sets = factory.inventory.find_environment('e1').definitions['testing'].k8s_machinesets
+      depends_on_everything_resources = machine_sets['depends_on_everything'].to_k8s(app_deployer, dns, hiera_provider)
+      just_an_app_resources = machine_sets['just_an_app'].to_k8s(app_deployer, dns, hiera_provider)
+
+      just_an_app_in_io = just_an_app_resources.find { |r| r.site == 'io' }
+      just_an_app_in_mars = just_an_app_resources.find { |r| r.site == 'mars' }
+
+      expect(just_an_app_in_io.resources.find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
+      end).to be_nil
+      expect(just_an_app_in_mars.resources.find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
+      end).not_to be_nil
+
+      expect(depends_on_everything_resources.first.resources.find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-out-to-all')
+      end).not_to be_nil
+    end
+
     it 'only connects dependant vms in the same site, when requested' do
       factory = eval_stacks do
         stack 'testing' do

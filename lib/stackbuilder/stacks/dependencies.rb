@@ -3,23 +3,31 @@ require 'stackbuilder/stacks/namespace'
 module Stacks::Dependencies
   ServiceDependency = Struct.new(:from, :to_selector) do
     def [](_)
-      raise "Don't use this"
+      fail("Don't use this")
     end
   end
 
   EnvironmentDependency = Struct.new(:from, :to_selector) do
     def [](_)
-      raise "Don't use this"
+      fail("Don't use this")
     end
   end
 
   ServiceSelector = Struct.new(:service_name, :env_name, :requirement) do
-    def matches(thing)
-      thing.is_a?(Stacks::MachineSet) && service_name.eql?(thing.name) && env_name.eql?(thing.environment.name)
+    def matches(_from, to)
+      to.is_a?(Stacks::MachineSet) && service_name.eql?(to.name) && env_name.eql?(to.environment.name)
     end
   end
 
-  SiteSelector = Struct.new(:site, :requirement) do
+  AllKubernetesSelector = Struct.new(:requirement) do
+    def matches(from, to)
+      return false unless to.is_a?(Stacks::MachineSet)
+      if requirement == :same_site
+        to.kubernetes && from.sites.any? { |site| to.exists_in_site?(to.environment, site) }
+      else
+        to.kubernetes
+      end
+    end
   end
 
   public
@@ -72,7 +80,7 @@ module Stacks::Dependencies
   # These are the dependencies from others onto this service
   def dependants
     @environment.calculated_dependencies.map(&:last).flatten.select do |dep|
-      dep.to_selector.matches(self)
+      dep.to_selector.matches(dep.from, self)
     end
   end
 
@@ -122,7 +130,7 @@ module Stacks::Dependencies
   end
 
   def find_virtual_service_that_i_depend_on(dependency)
-    virtual_service = @environment.lookup_dependency(dependency.to_selector)
+    virtual_service = @environment.lookup_dependency(dependency)
 
     fail "Cannot find service #{dependency.to_selector.service_name} in #{dependency.to_selector.env_name}, that I depend_on" if virtual_service.nil?
 
@@ -130,7 +138,7 @@ module Stacks::Dependencies
   end
 
   def requirements_of(dependant)
-    dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency.to_selector.matches(self) }
+    dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency.to_selector.matches(dependency.from, self) }
     dependent_on_this_cluster.map do |dependency|
       dependency.to_selector.requirement
     end

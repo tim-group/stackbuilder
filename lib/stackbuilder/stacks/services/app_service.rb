@@ -690,7 +690,7 @@ EOC
       'group' => standard_labels['group'],
       'app.kubernetes.io/component' => 'app_service'
     }
-    network_policies << create_egress_network_policy('off', 'nexus', @environment.name, standard_labels,
+    network_policies << create_egress_network_policy('off-nexus', @environment.name, standard_labels,
                                                      nexus_filters, ingress_match_labels)
 
     prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
@@ -860,8 +860,7 @@ EOC
     }
   end
 
-  def create_egress_network_policy(virtual_service_env, virtual_service_name, env_name,
-                                   labels, egresses, pod_selector_match_labels)
+  def create_egress_network_policy(name, env_name, labels, egresses, pod_selector_match_labels)
     spec = {
       'podSelector' => {
         'matchLabels' => pod_selector_match_labels
@@ -878,7 +877,7 @@ EOC
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
       'metadata' => {
-        'name' => "allow-out-to-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
+        'name' => "allow-out-to-#{name}-#{hash}",
         'namespace' => env_name,
         'labels' => labels
       },
@@ -1004,7 +1003,8 @@ EOC
       'group' => 'blue',
       'app.kubernetes.io/component' => 'ingress'
     }
-    network_policies << create_egress_network_policy(@environment.short_name, short_name, @environment.name, ingress_labels, egresses, ingress_match_labels)
+    network_policies << create_egress_network_policy("#{@environment.short_name}-#{short_name}", @environment.name,
+                                                     ingress_labels, egresses, ingress_match_labels)
 
     api_server_egresses = [{
       'to' => masters.map do |master|
@@ -1346,52 +1346,84 @@ EOC
   def generate_k8s_network_policies_for_dependencies(dns_resolver, site, standard_labels)
     network_policies = []
     dependencies.each do |dep|
-      vs = @environment.lookup_dependency(dep.to_selector)
-      fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
-
-      chosen_site_of_vs = vs.exists_in_site?(vs.environment, site) ? site : vs.environment.primary_site
-      endpoints = vs.endpoints(self, chosen_site_of_vs)
-
-      egresses = []
-      if vs.kubernetes
-        match_labels = {
-          'machineset' => vs.name,
-          'group' => vs.groups.first,
-          'app.kubernetes.io/component' => 'app_service'
-        }
-        egresses << {
-          'to' => [
-            generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)
-          ],
-          'ports' => [{
-            'protocol' => 'TCP',
-            'port' => 'app'
-          }]
-        }
-      else
-        endpoints.each do |e|
-          ip_blocks = []
-          e[:fqdns].uniq.each do |fqdn|
-            ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
-          end
-          egresses << {
-            'to' => ip_blocks,
-            'ports' => [{
-              'protocol' => 'TCP',
-              'port' => e[:port]
-            }]
-          }
-        end
+      case dep.to_selector
+      when Stacks::Dependencies::ServiceSelector
+        vs = @environment.lookup_dependency(dep)
+        network_policies << create_egress_to_specific_service(vs, dns_resolver, site, standard_labels)
+      when Stacks::Dependencies::AllKubernetesSelector
+        network_policies << create_egress_network_policy('all', @environment.name, standard_labels,
+                                                         [
+                                                           {
+                                                             'to' => [{
+                                                               'podSelector' => {
+                                                                 'matchLabels' => {
+                                                                   'app.kubernetes.io/component' => 'app_service'
+                                                                 }
+                                                               },
+                                                               'namespaceSelector' => {
+                                                                 'matchLabels' => {
+                                                                   'isStacksEnvironment' => 'true'
+                                                                 }
+                                                               }
+                                                             }],
+                                                             'ports' => [{
+                                                               'protocol' => 'TCP',
+                                                               'port' => 'app'
+                                                             }]
+                                                           }],
+                                                         'machineset' => standard_labels['machineset'],
+                                                         'group' => standard_labels['group'],
+                                                         'app.kubernetes.io/component' => 'app_service')
       end
-      app_service_match_labels = {
-        'machineset' => standard_labels['machineset'],
-        'group' => standard_labels['group'],
-        'app.kubernetes.io/component' => 'app_service'
-      }
-      network_policies << create_egress_network_policy(vs.environment.short_name, vs.short_name, @environment.name,
-                                                       standard_labels, egresses, app_service_match_labels)
     end
     network_policies
+  end
+
+  def create_egress_to_specific_service(vs, dns_resolver, site, standard_labels)
+    fail "Dependency '#{vs.name}' is not supported for k8s - endpoints method is not implemented" if !vs.respond_to?(:endpoints)
+
+    chosen_site_of_vs = vs.exists_in_site?(vs.environment, site) ? site : vs.environment.primary_site
+    endpoints = vs.endpoints(self, chosen_site_of_vs)
+
+    egresses = []
+    if vs.kubernetes
+      match_labels = {
+        'machineset' => vs.name,
+        'group' => vs.groups.first,
+        'app.kubernetes.io/component' => 'app_service'
+      }
+      egresses << {
+        'to' => [
+          generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)
+        ],
+        'ports' => [{
+          'protocol' => 'TCP',
+          'port' => 'app'
+        }]
+      }
+    else
+      endpoints.each do |e|
+        ip_blocks = []
+        e[:fqdns].uniq.each do |fqdn|
+          ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
+        end
+        egresses << {
+          'to' => ip_blocks,
+          'ports' => [{
+            'protocol' => 'TCP',
+            'port' => e[:port]
+          }]
+        }
+      end
+    end
+    app_service_match_labels = {
+      'machineset' => standard_labels['machineset'],
+      'group' => standard_labels['group'],
+      'app.kubernetes.io/component' => 'app_service'
+    }
+
+    create_egress_network_policy("#{vs.environment.short_name}-#{vs.short_name}", @environment.name,
+                                 standard_labels, egresses, app_service_match_labels)
   end
 
   def non_k8s_dependencies_exist?
