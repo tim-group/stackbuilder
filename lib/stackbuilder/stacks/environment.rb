@@ -262,10 +262,6 @@ class Stacks::Environment
     @calculated_dependencies_cache.get
   end
 
-  def lookup_dependency(dependency)
-    @calculated_dependencies_cache.lookup(dependency, find_all_environments)
-  end
-
   def depend_on(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     fail('Environment cannot be nil') if env.nil? || env.eql?('')

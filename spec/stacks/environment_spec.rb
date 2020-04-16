@@ -178,6 +178,6 @@ describe_stack 'missing dependencies should fail' do
     end
   end
   host("staging-appx-001.mgmt.st.net.local") do |host|
-    expect { host.to_enc }.to raise_error(RuntimeError, /Cannot find service missing in staging, that I depend_on/)
+    expect { host.to_enc }.to raise_error(RuntimeError, /Cannot find service missing in staging. Depended on by appx in staging./)
   end
 end

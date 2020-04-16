@@ -5,11 +5,27 @@ module Stacks::Dependencies
     def [](_)
       fail("Don't use this")
     end
+
+    def resolve_targets(environment)
+      targets = environment.all_things.select do |thing|
+        to_selector.matches(from, thing)
+      end.uniq
+
+      fail("Cannot find service #{to_selector.service_name} in #{to_selector.env_name}."\
+           " Depended on by #{from.name} in #{from.environment.name}.") if targets.empty?
+      targets
+    end
   end
 
   EnvironmentDependency = Struct.new(:from, :to_selector) do
     def [](_)
       fail("Don't use this")
+    end
+
+    def resolve_targets(environment)
+      environment.all_things.select do |thing|
+        to_selector.matches(from, thing)
+      end.uniq
     end
   end
 
@@ -110,8 +126,8 @@ module Stacks::Dependencies
   def virtual_services_that_i_depend_on(include_env_dependencies = true)
     dependencies.reject do |dep|
       dep.is_a?(Stacks::Dependencies::EnvironmentDependency) && !include_env_dependencies
-    end.map do |depends_on|
-      find_virtual_service_that_i_depend_on(depends_on)
+    end.flat_map do |dep|
+      dep.resolve_targets(@environment)
     end
   end
 
@@ -127,14 +143,6 @@ module Stacks::Dependencies
       location,
       reject_nodes_in_different_location,
       reject_k8s_nodes)
-  end
-
-  def find_virtual_service_that_i_depend_on(dependency)
-    virtual_service = @environment.lookup_dependency(dependency)
-
-    fail "Cannot find service #{dependency.to_selector.service_name} in #{dependency.to_selector.env_name}, that I depend_on" if virtual_service.nil?
-
-    virtual_service
   end
 
   def requirements_of(dependant)

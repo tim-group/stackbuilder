@@ -1350,8 +1350,9 @@ EOC
 
       case dep.to_selector
       when Stacks::Dependencies::ServiceSelector
-        vs = @environment.lookup_dependency(dep)
-        network_policies << create_egress_to_specific_service(vs, dns_resolver, site, standard_labels)
+        dep.resolve_targets(@environment).each do |vs|
+          network_policies << create_egress_to_specific_service(vs, dns_resolver, site, standard_labels)
+        end
       when Stacks::Dependencies::AllKubernetesSelector
         network_policies << create_egress_network_policy('all', @environment.name, standard_labels,
                                                          [

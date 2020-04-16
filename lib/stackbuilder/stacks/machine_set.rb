@@ -167,11 +167,10 @@ class Stacks::MachineSet
 
   def dependency_config(fabric, dependent_instance)
     config = {}
-    dependencies.each do |dependency|
-      case dependency.to_selector
-      when Stacks::Dependencies::ServiceSelector
-        config.merge! @environment.lookup_dependency(dependency).config_params(self, fabric, dependent_instance)
-      end
+    dependencies.flat_map do |dependency|
+      dependency.resolve_targets(@environment)
+    end.uniq.each do |target|
+      config.merge! target.config_params(self, fabric, dependent_instance)
     end
     config
   end
