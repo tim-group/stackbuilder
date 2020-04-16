@@ -46,10 +46,10 @@ module Stacks::Services::NatCluster
   def find_rules_for(nat_rule_type)
     nat_site = environment.primary_site
 
-    virtual_services_that_depend_on_me.select do |dependency|
-      dependency.environment.sites.include? nat_site
+    dependants.select do |dependency|
+      dependency.from.environment.sites.include? nat_site
     end.map do |dependency_in_nat_site|
-      dependency_in_nat_site.calculate_nat_rules(nat_rule_type, nat_site, requirements_of(dependency_in_nat_site))
+      dependency_in_nat_site.from.calculate_nat_rules(nat_rule_type, nat_site, [dependency_in_nat_site.to_selector.requirement])
     end.flatten
   end
 end

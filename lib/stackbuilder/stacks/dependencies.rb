@@ -57,16 +57,6 @@ module Stacks::Dependencies
     {} # parameters for config.properties of apps depending on this service
   end
 
-  def fqdn_list(instances, networks = [:prod])
-    fqdns = []
-    networks.each do |network|
-      instances.map do |instance|
-        fqdns << instance.qualified_hostname(network)
-      end
-    end
-    fqdns.sort
-  end
-
   def dependant_load_balancer_fqdns(location, networks = [:prod])
     instances = dependant_instances_of_type(Stacks::Services::LoadBalancer, location)
     fqdn_list(instances, networks)
@@ -131,11 +121,21 @@ module Stacks::Dependencies
     end
   end
 
+  private
+
+  def fqdn_list(instances, networks = [:prod])
+    fqdns = []
+    networks.each do |network|
+      instances.map do |instance|
+        fqdns << instance.qualified_hostname(network)
+      end
+    end
+    fqdns.sort
+  end
+
   def dependant_instances_of_type(type, location)
     dependant_instances(location).reject { |machine_def| machine_def.class != type }
   end
-
-  private
 
   def dependant_instances(location, reject_nodes_in_different_location = true, reject_k8s_nodes = false)
     get_children_for_virtual_services(
@@ -143,12 +143,5 @@ module Stacks::Dependencies
       location,
       reject_nodes_in_different_location,
       reject_k8s_nodes)
-  end
-
-  def requirements_of(dependant)
-    dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency.to_selector.matches(dependency.from, self) }
-    dependent_on_this_cluster.map do |dependency|
-      dependency.to_selector.requirement
-    end
   end
 end
