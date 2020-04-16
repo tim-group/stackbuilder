@@ -1346,6 +1346,8 @@ EOC
   def generate_k8s_network_policies_for_dependencies(dns_resolver, site, standard_labels)
     network_policies = []
     dependencies.each do |dep|
+      next if dep.is_a?(Stacks::Dependencies::EnvironmentDependency)
+
       case dep.to_selector
       when Stacks::Dependencies::ServiceSelector
         vs = @environment.lookup_dependency(dep)
