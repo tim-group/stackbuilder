@@ -104,7 +104,7 @@ module Stacks::Dependencies
         nodes.reject! { |node| node.virtual_service.secondary_site? == false }
       end
     end
-    nodes
+    nodes.uniq
   end
 
   def virtual_services_that_i_depend_on(include_env_dependencies = true)
