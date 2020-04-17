@@ -1318,6 +1318,56 @@ EOL
                                             })
       end
 
+      it 'creates an alert rule for pods stuck in a crash loop' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.startup_alert_threshold = '1h'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        prometheus_rule = k8s_resource(set, 'PrometheusRule')
+
+        expect(prometheus_rule['apiVersion']).to eql('monitoring.coreos.com/v1')
+        expect(prometheus_rule['metadata']).to eql('labels' => {
+                                                     'prometheus' => 'main',
+                                                     'role' => 'alert-rules',
+                                                     'app.kubernetes.io/managed-by' => 'stacks',
+                                                     'stack' => 'mystack',
+                                                     'machineset' => 'x',
+                                                     'group' => 'blue',
+                                                     'app.kubernetes.io/instance' => 'blue',
+                                                     'app.kubernetes.io/part-of' => 'x',
+                                                     'app.kubernetes.io/component' => 'app_service'
+                                                   },
+                                                   'name' => 'x-blue-app',
+                                                   'namespace' => 'e1')
+
+        expect(prometheus_rule['spec']['groups'].first['name']).to eql('stacks-alerts')
+        rule = prometheus_rule['spec']['groups'].first['rules'].find do |r|
+          r['alert'] == 'PodCrashLooping'
+        end
+        expect(rule).to eql('alert' => 'PodCrashLooping',
+                            'expr' => "kube_pod_container_status_last_terminated_reason{namespace='e1', pod=~'^x-blue-app.*'} == 1 and " \
+                                              "on(pod, container) rate(kube_pod_container_status_restarts_total[5m]) * 300 > 1",
+                            'labels' => {
+                              'severity' => 'critical',
+                              'alertname' => 'x-blue-app is stuck in a crash loop'
+                            },
+                            'annotations' => {
+                              'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting ' \
+                                '{{ printf "%.2f" $value }} times / 5 minutes.'
+                            })
+      end
+
       it 'creates an alert rule for readiness probe failures occurring post-startup' do
         factory = eval_stacks do
           stack "mystack" do

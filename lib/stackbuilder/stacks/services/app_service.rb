@@ -616,6 +616,19 @@ EOC
       }
     }
 
+    pod_crashloop_labels = { 'severity' => 'critical', 'alertname' => "#{k8s_app_resources_name} is stuck in a crash loop" }
+    pod_crashloop_labels['alert_owner_channel'] = alerts_channel if alerts_channel
+    rules << {
+      'alert' => 'PodCrashLooping',
+      'expr' => "kube_pod_container_status_last_terminated_reason{namespace='#{environment.name}', pod=~'^#{k8s_app_resources_name}.*'} == 1 and " \
+        "on(pod, container) rate(kube_pod_container_status_restarts_total[5m]) * 300 > 1",
+      'labels' => pod_crashloop_labels,
+      'annotations' => {
+        'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting ' \
+          '{{ printf "%.2f" $value }} times / 5 minutes.'
+      }
+    }
+
     if @monitor_readiness_probe
       failed_readiness_alert_labels = {
         'severity' => 'warning',
