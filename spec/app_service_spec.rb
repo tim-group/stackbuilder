@@ -1367,6 +1367,56 @@ EOL
                                 '{{ printf "%.2f" $value }} times / 5 minutes.'
                             })
       end
+      j
+      it 'creates an alert rule for pods failing to retrieve their image' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+
+              self.application = 'MyApplication'
+              self.startup_alert_threshold = '1h'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        prometheus_rule = k8s_resource(set, 'PrometheusRule')
+
+        expect(prometheus_rule['apiVersion']).to eql('monitoring.coreos.com/v1')
+        expect(prometheus_rule['metadata']).to eql('labels' => {
+                                                     'prometheus' => 'main',
+                                                     'role' => 'alert-rules',
+                                                     'app.kubernetes.io/managed-by' => 'stacks',
+                                                     'stack' => 'mystack',
+                                                     'machineset' => 'x',
+                                                     'group' => 'blue',
+                                                     'app.kubernetes.io/instance' => 'blue',
+                                                     'app.kubernetes.io/part-of' => 'x',
+                                                     'app.kubernetes.io/component' => 'app_service'
+                                                   },
+                                                   'name' => 'x-blue-app',
+                                                   'namespace' => 'e1')
+
+        expect(prometheus_rule['spec']['groups'].first['name']).to eql('stacks-alerts')
+        rule = prometheus_rule['spec']['groups'].first['rules'].find do |r|
+          r['alert'] == 'ImageRetrievalFailure'
+        end
+        expect(rule).to eql('alert' => 'ImageRetrievalFailure',
+                            'expr' => "kube_pod_container_status_waiting_reason{reason=~'^(ErrImagePull|ImagePullBackOff|InvalidImageName)$', " \
+                              "namespace='e1', pod=~'^x-blue-app.*'} == 1",
+                            'labels' => {
+                              'severity' => 'warning',
+                              'alertname' => 'x-blue-app is failing to retrieve the requested image'
+                            },
+                            'annotations' => {
+                              'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is failing to retrieve ' \
+                                'the requested image.'
+                            })
+      end
 
       it 'creates an alert rule for readiness probe failures occurring post-startup' do
         factory = eval_stacks do

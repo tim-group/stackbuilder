@@ -629,6 +629,19 @@ EOC
       }
     }
 
+    pod_image_error_labels = { 'severity' => 'warning', 'alertname' => "#{k8s_app_resources_name} is failing to retrieve the requested image" }
+    pod_image_error_labels['alert_owner_channel'] = alerts_channel if alerts_channel
+    rules << {
+      'alert' => 'ImageRetrievalFailure',
+      'expr' => "kube_pod_container_status_waiting_reason{reason=~'^(ErrImagePull|ImagePullBackOff|InvalidImageName)$', " \
+        "namespace='#{environment.name}', pod=~'^#{k8s_app_resources_name}.*'} == 1",
+      'labels' => pod_image_error_labels,
+      'annotations' => {
+        'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is failing to retrieve ' \
+          'the requested image.'
+      }
+    }
+
     if @monitor_readiness_probe
       failed_readiness_alert_labels = {
         'severity' => 'warning',
