@@ -588,54 +588,64 @@ EOC
   end
 
   def generate_k8s_alerting(site, app_service_labels)
+    fail("app_service '#{name}' in '#{@environment.name}' requires alerts_channel (set self.alerts_channel)") if @alerts_channel.nil?
+
     rules = []
 
-    status_critical_alert_labels = { 'severity' => 'critical', 'alertname' => "#{k8s_app_resources_name} CRITICAL" }
-    status_critical_alert_labels['alert_owner_channel'] = alerts_channel if alerts_channel
     rules << {
       'alert' => 'StatusCritical',
       'expr' => "sum(tucker_component_status{job=\"#{k8s_app_resources_name}\",status=\"critical\"}) by (pod, namespace) > 0",
-      'labels' => status_critical_alert_labels,
+      'labels' => {
+        'severity' => 'critical',
+        'alertname' => "#{k8s_app_resources_name} CRITICAL",
+        'alert_owner_channel' => alerts_channel
+      },
       'annotations' => {
         'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
         'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
       }
     }
 
-    deployment_replicas_mismatch_labels = { 'severity' => 'warning', 'alertname' => "#{k8s_app_resources_name} is missing replicas" }
-    deployment_replicas_mismatch_labels['alert_owner_channel'] = alerts_channel if alerts_channel
     rules << {
       'alert' => 'DeploymentReplicasMismatch',
       'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', deployment='#{k8s_app_resources_name}'} " \
         "!= kube_deployment_status_replicas_available{job='kube-state-metrics', deployment='#{k8s_app_resources_name}'}",
       'for' => startup_alert_threshold,
-      'labels' => deployment_replicas_mismatch_labels,
+      'labels' => {
+        'severity' => 'warning',
+        'alertname' => "#{k8s_app_resources_name} is missing replicas",
+        'alert_owner_channel' => alerts_channel
+      },
       'annotations' => {
         'message' => "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not matched the " \
           "expected number of replicas for longer than #{startup_alert_threshold}."
       }
     }
 
-    pod_crashloop_labels = { 'severity' => 'critical', 'alertname' => "#{k8s_app_resources_name} is stuck in a crash loop" }
-    pod_crashloop_labels['alert_owner_channel'] = alerts_channel if alerts_channel
     rules << {
       'alert' => 'PodCrashLooping',
       'expr' => "kube_pod_container_status_last_terminated_reason{namespace='#{environment.name}', pod=~'^#{k8s_app_resources_name}.*'} == 1 and " \
         "on(pod, container) rate(kube_pod_container_status_restarts_total[5m]) * 300 > 1",
-      'labels' => pod_crashloop_labels,
+      'labels' => {
+        'severity' => 'critical',
+        'alertname' => "#{k8s_app_resources_name} is stuck in a crash loop",
+        'alert_owner_channel' => alerts_channel
+      },
       'annotations' => {
         'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting ' \
           '{{ printf "%.2f" $value }} times / 5 minutes.'
       }
     }
 
-    pod_image_error_labels = { 'severity' => 'warning', 'alertname' => "#{k8s_app_resources_name} is failing to retrieve the requested image" }
-    pod_image_error_labels['alert_owner_channel'] = alerts_channel if alerts_channel
     rules << {
       'alert' => 'ImageRetrievalFailure',
       'expr' => "kube_pod_container_status_waiting_reason{reason=~'^(ErrImagePull|ImagePullBackOff|InvalidImageName)$', " \
         "namespace='#{environment.name}', pod=~'^#{k8s_app_resources_name}.*'} == 1",
-      'labels' => pod_image_error_labels,
+      'labels' => {
+        'severity' => 'warning',
+        'alertname' => "#{k8s_app_resources_name} is failing to retrieve the requested image",
+        'alert_owner_channel' => alerts_channel
+      },
       'annotations' => {
         'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is failing to retrieve ' \
           'the requested image.'
@@ -643,17 +653,15 @@ EOC
     }
 
     if @monitor_readiness_probe
-      failed_readiness_alert_labels = {
-        'severity' => 'warning',
-        'alertname' => "#{k8s_app_resources_name} failed readiness probe when deployment not in progress"
-      }
-      failed_readiness_alert_labels['alert_owner_channel'] = alerts_channel ? alerts_channel : 'kubernetes-alerts-nonprod'
-
       rules << {
         'alert' => 'FailedReadinessProbe',
         'expr' => "(((time() - kube_pod_start_time{pod=~\".*#{k8s_app_resources_name}.*\"}) > #{startup_alert_threshold_seconds}) "\
             "and on(pod) (rate(prober_probe_total{probe_type=\"Readiness\",result=\"failed\",pod=~\"^#{k8s_app_resources_name}.*\"}[1m]) > 0))",
-        'labels' => failed_readiness_alert_labels,
+        'labels' => {
+          'severity' => 'warning',
+          'alertname' => "#{k8s_app_resources_name} failed readiness probe when deployment not in progress",
+          'alert_owner_channel' => alerts_channel
+        },
         'annotations' => {
           'message' => '{{ $labels.namespace }}/{{ $labels.pod }} has failed readiness probe when deployment not in progress',
           'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/#{@environment.name}/{{ $labels.pod }}/info/status"

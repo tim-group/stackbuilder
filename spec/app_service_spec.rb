@@ -58,6 +58,7 @@ describe 'kubernetes' do
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
             self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
@@ -408,6 +409,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = {
@@ -452,6 +454,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -474,6 +477,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -533,6 +537,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -680,6 +685,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -736,6 +742,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -803,6 +810,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -865,6 +873,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -942,6 +951,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -988,6 +998,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -1043,6 +1054,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -1124,6 +1136,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -1200,6 +1213,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -1274,6 +1288,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.startup_alert_threshold = '1h'
@@ -1310,7 +1325,8 @@ EOL
                                             'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod, namespace) > 0',
                                             'labels' => {
                                               'severity' => 'critical',
-                                              'alertname' => 'x-blue-app CRITICAL'
+                                              'alertname' => 'x-blue-app CRITICAL',
+                                              'alert_owner_channel' => 'test'
                                             },
                                             'annotations' => {
                                               'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
@@ -1324,6 +1340,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.startup_alert_threshold = '1h'
@@ -1360,7 +1377,8 @@ EOL
                                               "on(pod, container) rate(kube_pod_container_status_restarts_total[5m]) * 300 > 1",
                             'labels' => {
                               'severity' => 'critical',
-                              'alertname' => 'x-blue-app is stuck in a crash loop'
+                              'alertname' => 'x-blue-app is stuck in a crash loop',
+                              'alert_owner_channel' => 'test'
                             },
                             'annotations' => {
                               'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting ' \
@@ -1374,6 +1392,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.startup_alert_threshold = '1h'
@@ -1410,7 +1429,8 @@ EOL
                               "namespace='e1', pod=~'^x-blue-app.*'} == 1",
                             'labels' => {
                               'severity' => 'warning',
-                              'alertname' => 'x-blue-app is failing to retrieve the requested image'
+                              'alertname' => 'x-blue-app is failing to retrieve the requested image',
+                              'alert_owner_channel' => 'test'
                             },
                             'annotations' => {
                               'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is failing to retrieve ' \
@@ -1424,6 +1444,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
 
@@ -1447,7 +1468,7 @@ EOL
                     'labels' => {
                       'severity' => 'warning',
                       'alertname' => 'x-blue-app failed readiness probe when deployment not in progress',
-                      'alert_owner_channel' => 'kubernetes-alerts-nonprod'
+                      'alert_owner_channel' => 'test'
                     },
                     'annotations' => {
                       'message' => '{{ $labels.namespace }}/{{ $labels.pod }} has failed readiness probe when deployment not in progress',
@@ -1461,6 +1482,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
 
@@ -1488,6 +1510,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
 
@@ -1511,7 +1534,8 @@ EOL
                     'for' => '1h',
                     'labels' => {
                       'severity' => 'warning',
-                      'alertname' => 'x-blue-app is missing replicas'
+                      'alertname' => 'x-blue-app is missing replicas',
+                      'alert_owner_channel' => 'test'
                     },
                     'annotations' => {
                       'message' => 'Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not ' \
@@ -1550,6 +1574,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = 3000
@@ -1570,6 +1595,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.instances = {
@@ -1597,6 +1623,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
             self.appconfig = <<EOL
@@ -1619,6 +1646,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
             self.appconfig = <<EOL
@@ -1674,6 +1702,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
             self.appconfig = <<EOL
@@ -1697,6 +1726,7 @@ EOL
           app_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.startup_alert_threshold = '1h'
 
             self.application = 'app1'
@@ -1705,6 +1735,7 @@ EOL
           app_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.startup_alert_threshold = '1h'
 
             self.application = 'app2'
@@ -1728,6 +1759,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
             self.short_name = 'myappl'
@@ -1767,6 +1799,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
             self.short_name = 'myappl'
@@ -1797,6 +1830,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
           end
@@ -1816,6 +1850,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyApplication'
           end
@@ -1840,6 +1875,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.application = 'MyApplication'
             self.startup_alert_threshold = '1h'
 
@@ -1882,6 +1918,7 @@ EOL
           app_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.application = 'MyApplication'
             self.startup_alert_threshold = '1h'
 
@@ -1929,6 +1966,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.jvm_heap = '100G'
@@ -1955,6 +1993,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.jvm_heap = '100G'
@@ -1982,6 +2021,7 @@ EOL
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
               self.application = 'MyApplication'
               self.startup_alert_threshold = '1h'
 
@@ -2013,6 +2053,7 @@ EOL
                   person('Uncontactable'),
                   person('Joe Maille', :email => 'joe@example.com')]
                 self.description = 'testing'
+                self.alerts_channel = 'test'
                 self.startup_alert_threshold = '1h'
               end
             end
@@ -2038,6 +2079,7 @@ EOL
                 self.application = 'MyApplication'
                 self.maintainers = [slack('#technology')]
                 self.description = 'testing'
+                self.alerts_channel = 'test'
                 self.startup_alert_threshold = '1h'
               end
             end
@@ -2058,6 +2100,7 @@ EOL
               app_service "x", :kubernetes => true do
                 self.application = 'MyApplication'
                 self.description = 'testing'
+                self.alerts_channel = 'test'
               end
             end
             env "e1", :primary_site => 'space' do
@@ -2080,6 +2123,7 @@ EOL
                 self.application = 'MyApplication'
 
                 self.description = "This application is useful for testing stacks"
+                self.alerts_channel = 'test'
                 self.startup_alert_threshold = '1h'
               end
             end
@@ -2122,6 +2166,7 @@ EOL
           app_service 'depends_on_everything', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.instances = {
               'mars' => 1
             }
@@ -2134,6 +2179,7 @@ EOL
           app_service 'just_an_app', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.instances = {
               'io' => 1,
               'mars' => 1
@@ -2175,6 +2221,7 @@ EOL
           app_service 'depends_on_everything', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.instances = {
               'mars' => 1
             }
@@ -2187,6 +2234,7 @@ EOL
           app_service 'just_an_app', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.instances = {
               'io' => 1,
               'mars' => 1
@@ -2198,6 +2246,7 @@ EOL
           app_service 'another_app', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.instances = {
               'io' => 1,
               'mars' => 1
@@ -2239,6 +2288,7 @@ EOL
           app_service 'target', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
             self.instances = {
               'mars' => 1
             }
@@ -2285,6 +2335,7 @@ EOL
           app_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app2'
             self.startup_alert_threshold = '1h'
@@ -2415,6 +2466,7 @@ EOL
           app_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app2'
             self.startup_alert_threshold = '1h'
@@ -2466,6 +2518,7 @@ EOL
           app_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app1'
             self.startup_alert_threshold = '1h'
@@ -2474,6 +2527,7 @@ EOL
           app_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app2'
             self.startup_alert_threshold = '1h'
@@ -2558,6 +2612,7 @@ EOL
           app_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app1'
             self.startup_alert_threshold = '1h'
@@ -2605,6 +2660,7 @@ depends on the other' do
           app_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app1'
             self.startup_alert_threshold = '1h'
@@ -2614,6 +2670,7 @@ depends on the other' do
           app_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app2'
             self.startup_alert_threshold = '1h'
@@ -2683,6 +2740,7 @@ depends on the other' do
           app_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app'
             self.startup_alert_threshold = '1h'
@@ -2711,6 +2769,7 @@ depends on the other' do
           app_service 'app1', :kubernetes => { 'e1' => true, 'e2' => false } do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'myapp'
           end
@@ -2737,6 +2796,7 @@ depends on the other' do
           app_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'myapp'
           end
@@ -2763,6 +2823,7 @@ depends on the other' do
           app_service 'app1', :kubernetes => false do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'myapp'
           end
@@ -2816,6 +2877,7 @@ depends on the other' do
             app_service 'app1', :kubernetes => { 'e1' => true } do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'myapp'
             end
@@ -2837,6 +2899,7 @@ depends on the other' do
             app_service 'app1', :kubernetes => { 'e1' => 'foo' } do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'myapp'
             end

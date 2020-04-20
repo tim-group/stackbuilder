@@ -308,6 +308,7 @@ describe 'k8s stack-with-dependencies' do
         app_service 'myapp', :kubernetes => true do
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
+          self.alerts_channel = 'test'
 
           self.groups = ['blue']
           self.application = 'rw-app'
@@ -357,6 +358,7 @@ describe 'k8s stack-with-dependencies' do
         app_service 'myapp', :kubernetes => true do
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
+          self.alerts_channel = 'test'
 
           self.groups = ['blue']
           self.application = 'rw-app'
@@ -401,6 +403,7 @@ describe 'k8s stack-with-dependencies' do
         app_service 'myapp', :kubernetes => true do
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
+          self.alerts_channel = 'test'
 
           self.groups = ['blue']
           self.application = 'rw-app'

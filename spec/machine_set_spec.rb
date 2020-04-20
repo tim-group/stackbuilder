@@ -34,6 +34,7 @@ describe 'machine_set' do
           app_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'app'
             self.startup_alert_threshold = '1h'

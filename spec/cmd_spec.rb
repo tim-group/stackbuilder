@@ -68,6 +68,7 @@ describe 'cmd' do
         app_service "myk8sappservice", :kubernetes => true do
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
+          self.alerts_channel = 'test'
 
           self.application = 'MyK8sApplication'
           self.instances = 2
@@ -76,6 +77,7 @@ describe 'cmd' do
         app_service "myrelatedk8sappservice", :kubernetes => true do
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
+          self.alerts_channel = 'test'
 
           self.application = 'MyRelatedK8sApplication'
           self.instances = 1
@@ -203,6 +205,7 @@ EOF
             app_service 'myk8sappservice', :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyK8sApplication'
               self.instances = 2
@@ -213,6 +216,7 @@ EOF
             app_service 'myrelatedk8sappservice', :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyRelatedK8sApplication'
               self.instances = 1
@@ -540,6 +544,7 @@ EOF
             app_service 'myk8sappservice', :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyK8sApplication'
               self.instances = 2
@@ -550,6 +555,7 @@ EOF
             app_service 'myrelatedk8sappservice', :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyRelatedK8sApplication'
               self.instances = 1
@@ -970,6 +976,7 @@ EOF
             app_service "myk8sappservice", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyK8sApplication'
               self.startup_alert_threshold = '1h'
@@ -979,6 +986,7 @@ EOF
             app_service "myotherk8sappservice", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyOtherK8sApplication'
               self.startup_alert_threshold = '1h'
@@ -1093,6 +1101,7 @@ EOF
           app_service "myk8sappservice", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyK8sApplication'
             self.instances = 2
@@ -1100,6 +1109,7 @@ EOF
           app_service "myrelatedk8sappservice", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
+            self.alerts_channel = 'test'
 
             self.application = 'MyRelatedK8sApplication'
             self.instances = 1

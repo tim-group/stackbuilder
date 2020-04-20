@@ -37,6 +37,7 @@ describe 'stack-with-dependencies' do
         app_service 'kubeexampleapp', :kubernetes => true do
           self.maintainers = [person('Test')]
           self.description = 'Check dependency evaluation for k8s apps'
+          self.alerts_channel = 'test'
           self.groups = ['blue']
           self.application = 'kubeexample'
           self.instances = 1

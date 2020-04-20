@@ -75,6 +75,7 @@ describe 'kubernetes' do
             app_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
+              self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
               self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
