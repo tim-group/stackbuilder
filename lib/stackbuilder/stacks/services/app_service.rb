@@ -608,8 +608,8 @@ EOC
 
     rules << {
       'alert' => 'DeploymentReplicasMismatch',
-      'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', deployment='#{k8s_app_resources_name}'} " \
-        "!= kube_deployment_status_replicas_available{job='kube-state-metrics', deployment='#{k8s_app_resources_name}'}",
+      'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', namespace='#{environment.name}', deployment='#{k8s_app_resources_name}'} " \
+      "!= kube_deployment_status_replicas_available{job='kube-state-metrics', namespace='#{environment.name}', deployment='#{k8s_app_resources_name}'}",
       'for' => startup_alert_threshold,
       'labels' => {
         'severity' => 'warning',
