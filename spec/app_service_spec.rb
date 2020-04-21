@@ -1539,7 +1539,7 @@ EOL
                     },
                     'annotations' => {
                       'message' => 'Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not ' \
-                        'matched the expected number of replicas for longer than 1h.'
+                        'matched the expected number of replicas for longer than the startup_alert_threshold (1h).'
                     })
       end
 
