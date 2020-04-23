@@ -67,6 +67,7 @@ GEM
     ruby-progressbar (1.10.1)
     stomp (1.4.9)
     syck (1.4.0)
+    sync (0.5.0)
     systemu (2.6.5)
 
 PLATFORMS
@@ -85,6 +86,7 @@ DEPENDENCIES
   rspec (= 3.3.0)
   rubocop (= 0.32.1)
   syck
+  sync
 
 BUNDLED WITH
    1.17.3
