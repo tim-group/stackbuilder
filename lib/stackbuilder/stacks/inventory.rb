@@ -59,7 +59,7 @@ class Stacks::Inventory
             Dir.glob("#{stack_dir}/envs/*.rb").sort
     files.each do |stack_file|
       begin
-        stacks.instance_eval(IO.read(stack_file))
+        stacks.instance_eval(IO.read(stack_file), stack_file)
       rescue
         backtrace = $ERROR_POSITION.join("\n")
         raise "Unable to instance_eval #{stack_file}\n#{$ERROR_INFO}\n#{backtrace}"
