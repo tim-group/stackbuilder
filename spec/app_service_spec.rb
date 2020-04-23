@@ -936,6 +936,21 @@ EOL
               "verbs" => [
                 "update"
               ]
+            },
+            {
+              "apiGroups" => [
+                "traefik.containo.us"
+              ],
+              "resources" => [
+                "middlewares",
+                "ingressroutes",
+                "traefikservices",
+                "ingressroutetcps",
+                "ingressrouteudps",
+                "tlsoptions",
+                "tlsstores"
+              ],
+              "verbs" => %w{get list watch }
             }
           ]
         }

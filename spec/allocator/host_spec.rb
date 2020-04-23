@@ -9,6 +9,6 @@ describe StackBuilder::Allocator::Host do
     storage = { :used => '1.0' }
     h1 = StackBuilder::Allocator::Host.new("h1", :policies => policies, :storage => storage)
     expect(h1.relevant_policies("latest").length).to eql(9)
-    expect(h1.relevant_policies("local").length).to eql(8)
+    expect(h1.relevant_policies("local").length).to eql(9)
   end
 end
