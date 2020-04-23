@@ -11,6 +11,5 @@ group :development do
   gem 'pry'
   gem 'pry-byebug'
   gem 'rake', '10.1.0'
-  gem 'sync' if Gem::Version.new(RUBY_VERSION) > Gem::Version.new('2.6')
   gem 'syck' if RUBY_VERSION.split('.').first.to_i > 1
 end
