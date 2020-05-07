@@ -571,7 +571,7 @@ EOL
               'app.kubernetes.io/component' => 'ingress',
               'application' => 'traefik',
               'app.kubernetes.io/name' => 'traefik',
-              'app.kubernetes.io/version' => '2.0'
+              'app.kubernetes.io/version' => '2.2'
             }
           },
           'spec' => {
@@ -595,7 +595,7 @@ EOL
                   'app.kubernetes.io/component' => 'ingress',
                   'application' => 'traefik',
                   'app.kubernetes.io/name' => 'traefik',
-                  'app.kubernetes.io/version' => '2.0'
+                  'app.kubernetes.io/version' => '2.2'
                 }
               },
               'spec' => {
@@ -615,7 +615,7 @@ EOL
                       '--metrics.prometheus',
                       '--log.level=DEBUG'
                     ],
-                    'image' => 'repo.net.local:8080/timgroup/traefik:tim1',
+                    'image' => 'traefik:v2.2',
                     'imagePullPolicy' => 'IfNotPresent',
                     'livenessProbe' => {
                       'failureThreshold' => 3,
@@ -912,7 +912,7 @@ EOL
               'apiGroups' => [
                 ""
               ],
-              'resources' => %w(services endpoints),
+              'resources' => %w(secrets services endpoints),
               'verbs' => %w(get list watch)
             },
             {

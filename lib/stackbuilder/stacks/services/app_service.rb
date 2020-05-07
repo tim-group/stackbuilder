@@ -986,7 +986,7 @@ EOC
           'apiGroups' => [
             ""
           ],
-          'resources' => %w(services endpoints),
+          'resources' => %w(secrets services endpoints),
           'verbs' => %w(get list watch)
         },
         {
@@ -1155,7 +1155,7 @@ EOC
   def generate_k8s_ingress_controller_deployment(name, ingress_labels)
     ingress_controller_labels = ingress_labels.merge('app.kubernetes.io/name' => 'traefik',
                                                      'application' => 'traefik',
-                                                     'app.kubernetes.io/version' => '2.0')
+                                                     'app.kubernetes.io/version' => '2.2')
 
     {
       'apiVersion' => 'apps/v1',
@@ -1195,7 +1195,7 @@ EOC
                   "--metrics.prometheus",
                   "--log.level=DEBUG"
                 ],
-                'image' => 'repo.net.local:8080/timgroup/traefik:tim1',
+                'image' => 'traefik:v2.2',
                 'imagePullPolicy' => 'IfNotPresent',
                 'livenessProbe' => {
                   'failureThreshold' => 3,
