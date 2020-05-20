@@ -14,7 +14,6 @@ class Stacks::Services::Puppetserver < Stacks::MachineDef
                    })
     @vcpus = '9'
     @ram = (10 * 1024 * 1024).to_s
-    @networks = [:mgmt]
   end
 
   def needs_signing?

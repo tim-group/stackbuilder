@@ -17,7 +17,7 @@ describe_stack 'basic dev puppetdb without cname' do
 
   host("e1-puppetdb-001.mgmt.space.net.local") do |host|
     expect(host.to_specs.first[:cnames]).to eql({})
-    expect(host.to_specs.first[:networks]).to eql([:mgmt])
+    expect(host.to_specs.first[:networks]).to eql([:mgmt, :prod])
   end
 end
 
