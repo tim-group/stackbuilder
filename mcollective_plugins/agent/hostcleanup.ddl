@@ -46,18 +46,6 @@ action "puppet", :description => "run host_cleanup" do
            :validation  => ".+"
 end
 
-action "metrics", :description => "remove metrics" do
-    display :always
-    input  :fqdn,
-           :prompt      => "fqdn",
-           :description => "fqdn of the host to be cleaned",
-           :type        => :string,
-           :optional    => false,
-           :maxlength   => 200,
-           :validation  => ".+"
-
-end
-
 action "mongodb", :description => "remove entry from mongodb" do
     input  :fqdn,
            :prompt      => "fqdn",

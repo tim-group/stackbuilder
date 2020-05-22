@@ -18,8 +18,6 @@ class Support::MCollectiveHostcleanup
       when 'nagios'
         hostcleanup_mc.class_filter('nagios')
         hostcleanup_mc.fact_filter 'domain', '/(oy|pg|lon)/'
-      when 'metrics'
-        hostcleanup_mc.class_filter('metrics')
       end
       output_result hostcleanup_mc.send(action, :fqdn => fqdn)
     end
