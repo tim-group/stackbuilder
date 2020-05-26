@@ -1187,6 +1187,7 @@ EOC
                   "--api.insecure",
                   "--api.dashboard",
                   "--entrypoints.http.Address=:8000",
+                  "--entrypoints.http.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8",
                   "--entrypoints.traefik.Address=:10254",
                   "--providers.kubernetesingress",
                   "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}",
