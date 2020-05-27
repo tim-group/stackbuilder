@@ -58,8 +58,9 @@ class Stacks::Services::ProxyVHost
       service_environment = environment
       service_environment = config_hash[:environment] if config_hash.key?(:environment)
       service = @virtual_proxy_service.find_virtual_service(config_hash[:service], service_environment)
+      port = service.kubernetes ? 80 : 8000
       fabric = environments[service_environment].options[vhost_location]
-      [path, "http://#{service.vip_fqdn(:prod, fabric)}:8000#{config_hash[:path]}"]
+      [path, "http://#{service.vip_fqdn(:prod, fabric)}:#{port}#{config_hash[:path]}"]
     end]
   end
 

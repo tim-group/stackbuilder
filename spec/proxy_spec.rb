@@ -740,6 +740,6 @@ describe_stack 'can proxy to apps running in k8s' do
     expect(role_enc['vhosts'].size).to eql(1)
     vhost1_enc = role_enc['vhosts']['e1-exampleproxy-vip.front.space.net.local']
     expect(vhost1_enc['ensure']).to eql('present')
-    expect(vhost1_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:8000')
+    expect(vhost1_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:80')
   end
 end
