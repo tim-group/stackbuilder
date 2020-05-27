@@ -87,7 +87,7 @@ describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs 
   end
 end
 
-describe_stack 'proxy pass rules without an environment default to the environment set (if any) of the vhost' do
+describe_stack 'proxy pass rules without an environment / port default to the environment set (if any) of the vhost / port 8000' do
   given do
     stack 'funds_proxy' do
       proxy_service 'fundsproxy' do
@@ -95,9 +95,10 @@ describe_stack 'proxy pass rules without an environment default to the environme
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
           @cert = 'wildcard_timgroup_com'
           add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
-          add_pass_rule "/HIP/blah", :service => "blondinapp", :environment => 'latest'
+          add_pass_rule "/HIP/blah", :service => "blondinapp", :environment => 'latest', :port => 80
           add_pass_rule "/HIP/blah2", :service => "blondinapp", :environment => 'shared'
-          add_pass_rule "/HIP/blah3", :service => "blondinapp"
+          add_pass_rule "/HIP/blah3", :service => "blondinapp", :port => 80
+          add_pass_rule "/HIP/blah4", :service => "blondinapp"
         end
         nat_config.dnat_enabled = true
       end
@@ -130,9 +131,10 @@ describe_stack 'proxy pass rules without an environment default to the environme
     proxy_pass_rules = host.to_enc['role::proxyserver']['vhosts']['funds-mirror.timgroup.com']['proxy_pass_rules']
     expect(proxy_pass_rules['/']).to eql 'http://mirror-fundsuserapp-vip.oy.net.local:8000'
     expect(proxy_pass_rules['/HIP/resources']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
-    expect(proxy_pass_rules['/HIP/blah']).to eql 'http://latest-blondinapp-vip.oy.net.local:8000'
+    expect(proxy_pass_rules['/HIP/blah']).to eql 'http://latest-blondinapp-vip.oy.net.local:80'
     expect(proxy_pass_rules['/HIP/blah2']).to eql 'http://shared-blondinapp-vip.oy.net.local:8000'
-    expect(proxy_pass_rules['/HIP/blah3']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
+    expect(proxy_pass_rules['/HIP/blah3']).to eql 'http://mirror-blondinapp-vip.oy.net.local:80'
+    expect(proxy_pass_rules['/HIP/blah4']).to eql 'http://mirror-blondinapp-vip.oy.net.local:8000'
   end
 end
 
