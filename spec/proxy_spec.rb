@@ -743,3 +743,46 @@ describe_stack 'can proxy to apps running in k8s' do
     expect(vhost1_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp-vip.space.net.local:80')
   end
 end
+
+describe_stack 'generates the correct proxy_pass and add_pass rules when an array of services is passed to add_pass_rule' do
+  given do
+    stack 'bse' do
+      app_service 'bseapp' do
+        self.application = 'bse'
+      end
+    end
+    stack 'bse_k8s' do
+      app_service 'bseappk8s', :kubernetes => true do
+        self.application = 'bse'
+      end
+    end
+
+    stack 'bse_proxy' do
+      proxy_service 'bseproxy' do
+        vhost(['bseapp', 'bseappk8s'], 'foo.timgroup.com') do
+          add_pass_rule '/api-external', :service => ['bseapp', 'bseappk8s']
+        end
+      end
+    end
+
+    env "production", :primary_site => "pg", :secondary_site => "oy" do
+      instantiate_stack 'bse'
+      instantiate_stack 'bse_k8s'
+      instantiate_stack 'bse_proxy'
+    end
+  end
+
+  host("production-bseapp-001.mgmt.pg.net.local") do |app|
+    enc = app.to_enc
+pp enc
+  end
+
+  host("production-bseproxy-001.mgmt.pg.net.local") do |proxy|
+    enc = proxy.to_enc['role::proxyserver']
+    expect(enc['vhosts']['foo.timgroup.com']['proxy_pass_rules']).to eq({"/api-external"=>"http://production-bseapp-vip.pg.net.local:8000", "/"=>"http://production-bseapp-vip.pg.net.local:8000"})
+  end
+  host("production-bseproxy-002.mgmt.pg.net.local") do |proxy|
+    enc = proxy.to_enc['role::proxyserver']
+    expect(enc['vhosts']['foo.timgroup.com']['proxy_pass_rules']).to eq({"/api-external"=>"http://production-bseappk8s-vip.pg.net.local:80", "/"=>"http://production-bseappk8s-vip.pg.net.local:80"})
+  end
+end

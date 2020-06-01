@@ -7,9 +7,13 @@ module Stacks::Dependencies
     end
 
     def resolve_targets(environment)
-      targets = environment.all_things.select do |thing|
-        to_selector.matches(from, thing)
-      end.uniq
+      if to_selector.respond_to?(:service_name) && to_selector.service_name.kind_of?(Array)
+        return
+      else
+        targets = environment.all_things.select do |thing|
+          to_selector.matches(from, thing)
+        end.uniq
+      end
 
       fail("Cannot find service #{to_selector.service_name} in #{to_selector.env_name}."\
            " Depended on by #{from.name} in #{from.environment.name}.") if targets.empty?

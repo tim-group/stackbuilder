@@ -50,28 +50,28 @@ class Stacks::Services::ProxyVHost
     end
   end
 
-  def proxy_pass_rules(location, environments)
+  def proxy_pass_rules(location, environments, machine_index)
     vhost_location = @virtual_proxy_service.override_vhost_location[@environment]
     vhost_location = location if vhost_location.nil?
 
     Hash[@proxy_pass_rules.map do |path, config_hash|
       service_environment = environment
       service_environment = config_hash[:environment] if config_hash.key?(:environment)
-      service = @virtual_proxy_service.find_virtual_service(config_hash[:service], service_environment)
+      service = @virtual_proxy_service.find_virtual_service(config_hash[:service], machine_index, service_environment)
       port = service.kubernetes ? 80 : 8000
       fabric = environments[service_environment].options[vhost_location]
       [path, "http://#{service.vip_fqdn(:prod, fabric)}:#{port}#{config_hash[:path]}"]
     end]
   end
 
-  def to_proxy_config_hash(location, environment)
+  def to_proxy_config_hash(location, environment, machine_index)
     envs = environment.all_environments
     fabric = envs[@environment].options[location]
     config = {
       'ensure'                  => @ensure,
       'aliases'                 => aliases(fabric),
-      'application'             => @virtual_proxy_service.find_virtual_service(service, @environment).application,
-      'proxy_pass_rules'        => proxy_pass_rules(location, envs),
+      'application'             => @virtual_proxy_service.find_virtual_service(service, machine_index, @environment).application,
+      'proxy_pass_rules'        => proxy_pass_rules(location, envs, machine_index),
       'cert'                    => cert,
       'monitor_vhost'           => @monitor_vhost,
       'log_to_syslog'           => @log_to_syslog

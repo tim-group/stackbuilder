@@ -29,25 +29,27 @@ module Stacks::Services::VirtualProxyService
     @proxy_vhosts << vhost
   end
 
-  def find_virtual_service(service, environment_name = environment.name)
+  def find_virtual_service(service, machine_index, environment_name = environment.name)
+    actual_service = service.kind_of?(Array) ? service[machine_index-1] : service
+
     @environment.find_environment(environment_name).accept do |machine_def|
-      if machine_def.is_a?(Stacks::Services::AbstractVirtualService) && service.eql?(machine_def.name)
+      if machine_def.is_a?(Stacks::Services::AbstractVirtualService) && actual_service.eql?(machine_def.name)
         return machine_def
       end
     end
 
     @environment.find_environment(environment_name).definitions.values.select { |d| d.k8s_machinesets != {} }.each do |stack|
       stack.k8s_machinesets.values.each do |ms|
-        return ms if service.eql?(ms.name)
+        return ms if actual_service.eql?(ms.name)
       end
     end
 
-    fail "Cannot find the service called #{service} in #{environment_name}"
+    fail "Cannot find the service called #{actual_service} in #{environment_name}"
   end
 
-  def downstream_services(proxy_location)
+  def downstream_services(proxy_location, machine_index)
     Hash[@proxy_vhosts.map do |vhost|
-      vhost.to_proxy_config_hash(proxy_location, environment)
+      vhost.to_proxy_config_hash(proxy_location, environment, machine_index)
     end]
   end
 
