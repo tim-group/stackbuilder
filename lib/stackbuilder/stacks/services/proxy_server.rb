@@ -17,7 +17,7 @@ class Stacks::Services::ProxyServer < Stacks::MachineDef
     if @disable_enc
       {}
     else
-      service_resources = Hash[@virtual_service.downstream_services(location)]
+      service_resources = Hash[@virtual_service.downstream_services(location, index)]
       enc = super()
       enc.merge!('role::proxyserver' => {
                    'default_ssl_cert' => @virtual_service.cert,
