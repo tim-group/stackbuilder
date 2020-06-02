@@ -759,8 +759,8 @@ describe_stack 'generates the correct proxy_pass and add_pass rules when an arra
 
     stack 'bse_proxy' do
       proxy_service 'bseproxy' do
-        vhost(['bseapp', 'bseappk8s'], 'foo.timgroup.com') do
-          add_pass_rule '/api-external', :service => ['bseapp', 'bseappk8s']
+        vhost(%w(bseapp bseappk8s), 'foo.timgroup.com') do
+          add_pass_rule '/api-external', :service => %w(bseapp bseappk8s)
         end
       end
     end
@@ -772,17 +772,19 @@ describe_stack 'generates the correct proxy_pass and add_pass rules when an arra
     end
   end
 
-  host("production-bseapp-001.mgmt.pg.net.local") do |app|
-    enc = app.to_enc
-pp enc
-  end
-
   host("production-bseproxy-001.mgmt.pg.net.local") do |proxy|
     enc = proxy.to_enc['role::proxyserver']
-    expect(enc['vhosts']['foo.timgroup.com']['proxy_pass_rules']).to eq({"/api-external"=>"http://production-bseapp-vip.pg.net.local:8000", "/"=>"http://production-bseapp-vip.pg.net.local:8000"})
+    expect(enc['vhosts']['foo.timgroup.com']['proxy_pass_rules']).to eq(
+      "/api-external" => "http://production-bseapp-vip.pg.net.local:8000",
+      "/" => "http://production-bseapp-vip.pg.net.local:8000"
+    )
   end
+
   host("production-bseproxy-002.mgmt.pg.net.local") do |proxy|
     enc = proxy.to_enc['role::proxyserver']
-    expect(enc['vhosts']['foo.timgroup.com']['proxy_pass_rules']).to eq({"/api-external"=>"http://production-bseappk8s-vip.pg.net.local:80", "/"=>"http://production-bseappk8s-vip.pg.net.local:80"})
+    expect(enc['vhosts']['foo.timgroup.com']['proxy_pass_rules']).to eq(
+      "/api-external" => "http://production-bseappk8s-vip.pg.net.local:80",
+      "/" => "http://production-bseappk8s-vip.pg.net.local:80"
+    )
   end
 end
