@@ -570,9 +570,13 @@ class CMD
     output = {}
     targets.sort { |a, b| a.hostname + a.domain <=> b.hostname + b.domain }.each do |stack|
       box_id = "#{stack.hostname}.mgmt.#{stack.domain}" # puppet refers to our hosts using the 'mgmt' name
-      output[box_id] = {}
-      output[box_id]["enc"] = stack.to_enc
-      output[box_id]["spec"] = stack.to_spec
+      begin
+        output[box_id] = {}
+        output[box_id]["enc"] = stack.to_enc
+        output[box_id]["spec"] = stack.to_spec
+      rescue Exception => e
+        raise "Error producing ENC/Spec for #{box_id}: #{e.message}"
+      end
     end
 
     ZAMLS.to_zamls(deep_dup_to_avoid_yaml_aliases(output))
@@ -583,10 +587,14 @@ class CMD
 
     output = {}
     targets.each do |machine_set|
-      bundles = machine_set.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
-      bundles.each do |bundle|
-        machine_set_id = "#{bundle.site}-#{bundle.environment_name}-#{bundle.machine_set_name}"
-        output[machine_set_id] = bundle.resources
+      begin
+        bundles = machine_set.to_k8s(@app_deployer, @dns_resolver, @hiera_provider)
+        bundles.each do |bundle|
+          machine_set_id = "#{bundle.site}-#{bundle.environment_name}-#{bundle.machine_set_name}"
+          output[machine_set_id] = bundle.resources
+        end
+      rescue Exception => e
+        raise "Error producing resource bundle for #{machine_set.name} in #{machine_set.environment.name}: #{e.message}"
       end
     end
 
