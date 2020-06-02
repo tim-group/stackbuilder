@@ -49,7 +49,7 @@ module Stacks::Services::NatCluster
     dependants.select do |dependency|
       dependency.from.environment.sites.include? nat_site
     end.map do |dependency_in_nat_site|
-      dependency_in_nat_site.from.calculate_nat_rules(nat_rule_type, nat_site, [dependency_in_nat_site.to_selector.requirement])
+      dependency_in_nat_site.from.calculate_nat_rules(nat_rule_type, nat_site, [dependency_in_nat_site.requirement])
     end.flatten
   end
 end

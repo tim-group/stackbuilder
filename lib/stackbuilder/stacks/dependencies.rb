@@ -1,7 +1,9 @@
 require 'stackbuilder/stacks/namespace'
 
 module Stacks::Dependencies
-  ServiceDependency = Struct.new(:from, :to_selector) do
+  ##
+  # A dependency on all of the selected targets
+  MultiServiceDependency = Struct.new(:from, :to_selector, :requirement) do
     def [](_)
       fail("Don't use this")
     end
@@ -11,13 +13,24 @@ module Stacks::Dependencies
         to_selector.matches(from, thing)
       end.uniq
 
-      fail("Cannot find service #{to_selector.service_name} in #{to_selector.env_name}."\
-           " Depended on by #{from.name} in #{from.environment.name}.") if targets.empty?
+      fail("Cannot find #{describe}.") if targets.empty?
       targets
+    end
+
+    def describe
+      "all services #{to_selector.describe} depended on by #{from.name} in #{from.environment.name}"
     end
   end
 
-  EnvironmentDependency = Struct.new(:from, :to_selector) do
+  ##
+  # Subclass to tag that this dependency is on only one of the targets.
+  class SingleServiceDependency < MultiServiceDependency
+    def describe
+      "single service #{to_selector.describe} depended on by #{from.name} in #{from.environment.name}"
+    end
+  end
+
+  EnvironmentDependency = Struct.new(:from, :to_selector, :requirement) do
     def [](_)
       fail("Don't use this")
     end
@@ -27,22 +40,49 @@ module Stacks::Dependencies
         to_selector.matches(from, thing)
       end.uniq
     end
-  end
 
-  ServiceSelector = Struct.new(:service_name, :env_name, :requirement) do
-    def matches(_from, to)
-      to.is_a?(Stacks::MachineSet) && service_name.eql?(to.name) && env_name.eql?(to.environment.name)
+    def describe
+      "single service #{to_selector.describe} depended on by #{from.name} in #{from.environment.name} "\
+      "(dependency specified by the environment)"
     end
   end
 
-  AllKubernetesSelector = Struct.new(:requirement) do
+  ServiceSelector = Struct.new(:service_name, :env_name) do
+    def matches(_from, to)
+      to.is_a?(Stacks::MachineSet) && service_name.eql?(to.name) && env_name.eql?(to.environment.name)
+    end
+
+    def describe
+      "#{service_name} in #{env_name}"
+    end
+  end
+
+  MultiSelector = Struct.new(:selectors) do
+    def matches(from, to)
+      selectors.any? { |s| s.matches(from, to) }
+    end
+
+    def describe
+      "any of [#{selectors.map(&:describe).join(', ')}]"
+    end
+  end
+
+  class AllKubernetesSelector
+    def initialize(requirement)
+      @requirement = requirement
+    end
+
     def matches(from, to)
       return false unless to.is_a?(Stacks::MachineSet)
-      if requirement == :same_site
+      if @requirement == :same_site
         to.kubernetes && from.sites.any? { |site| to.exists_in_site?(to.environment, site) }
       else
         to.kubernetes
       end
+    end
+
+    def describe
+      "all kubernetes services"
     end
   end
 
@@ -77,7 +117,7 @@ module Stacks::Dependencies
 
   def dependencies
     dynamic_deps = (self.respond_to?(:establish_dependencies) ? establish_dependencies : []).map do |dep|
-      ServiceDependency.new(self, ServiceSelector.new(dep[0], dep[1]))
+      SingleServiceDependency.new(self, ServiceSelector.new(dep[0], dep[1]))
     end
 
     @depends_on + dynamic_deps + environment.depends_on

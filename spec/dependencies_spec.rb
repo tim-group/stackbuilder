@@ -390,3 +390,48 @@ describe_stack 'stack with sub environment dependencies' do
       'shared-fundsproxy-002.oy.net.local')
   end
 end
+
+describe 'an app with dependencies fulfilled by more than 1 target' do
+  let(:factory) do
+    eval_stacks do
+      stack 'example' do
+        app_service 'exampleapp' do
+          self.groups = ['blue']
+          self.application = 'example'
+
+          depend_on ['vm-instance', 'k8s-instance']
+        end
+
+        app_service 'vm-instance' do
+          self.groups = ['blue']
+          self.application = 'migratory'
+        end
+
+        app_service 'k8s-instance', :kubernetes => true do
+          self.maintainers = [person('Test')]
+          self.description = 'Check dependency evaluation for k8s apps'
+          self.alerts_channel = 'test'
+          self.groups = ['blue']
+          self.application = 'migratory'
+          self.instances = 1
+          self.startup_alert_threshold = '1h'
+        end
+      end
+
+      env 'e1', :primary_site => 'space' do
+        instantiate_stack 'example'
+      end
+    end
+  end
+
+  it 'split the dependencies between the app instances' do
+    app = factory.inventory.find('e1-exampleapp-001.mgmt.space.net.local')
+    app2 = factory.inventory.find('e1-exampleapp-002.mgmt.space.net.local')
+
+    deps = app.to_enc['role::http_app']['dependencies']
+    deps2 = app2.to_enc['role::http_app']['dependencies']
+
+    expect(deps['migratory.url']).to eql('http://e1-vm-instance-vip.space.net.local:8000')
+    expect(deps2['migratory.url']).to eql('http://e1-k8s-instance-vip.space.net.local')
+  end
+end

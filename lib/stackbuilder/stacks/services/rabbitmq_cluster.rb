@@ -50,14 +50,14 @@ module Stacks::Services::RabbitMQCluster
   def validate_dependency(dependant, dependency)
     fail "Stack '#{dependant.name}' must specify requirement when using depend_on #{name} "\
           "in environment '#{environment.name}'. Usage: depend_on <environment>, <requirement>" \
-          if dependency.to_selector.requirement.nil?
+          if dependency.requirement.nil?
   end
 
   def requirements_of(dependant)
     dependent_on_this_cluster = dependant.depends_on.select { |dependency| dependency.to_selector.matches(dependency.from, self) }
     dependent_on_this_cluster.inject([]) do |requirements, dependency|
       validate_dependency(dependant, dependency)
-      requirements << dependency.to_selector.requirement
+      requirements << dependency.requirement
     end
   end
 

@@ -22,7 +22,7 @@ class Stacks::CalculatedDependenciesCache
       next if !thing.respond_to?(:depends_on)
 
       dynamic_deps = (thing.respond_to?(:establish_dependencies) ? thing.establish_dependencies : []).map do |dep|
-        Stacks::Dependencies::ServiceDependency.new(thing, Stacks::Dependencies::ServiceSelector.new(dep[0], dep[1]))
+        Stacks::Dependencies::SingleServiceDependency.new(thing, Stacks::Dependencies::ServiceSelector.new(dep[0], dep[1]), nil)
       end
       dependencies.push [thing, thing.depends_on + dynamic_deps]
     end

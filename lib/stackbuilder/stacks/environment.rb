@@ -265,7 +265,7 @@ class Stacks::Environment
   def depend_on(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     fail('Environment cannot be nil') if env.nil? || env.eql?('')
-    dep = Stacks::Dependencies::EnvironmentDependency.new(self, Stacks::Dependencies::ServiceSelector.new(dependant, env, requirement))
+    dep = Stacks::Dependencies::EnvironmentDependency.new(self, Stacks::Dependencies::ServiceSelector.new(dependant, env), requirement)
     @depends_on << dep unless @depends_on.include? dep
   end
 end

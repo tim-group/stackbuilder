@@ -148,28 +148,57 @@ class Stacks::MachineSet
     end
   end
 
+  ##
+  # Depend on another service. This affects both the depender and the dependee.
+  # The depender recieves entries in its config file to contact the dependee
+  # service (the exact elements will depend on the kind of service depended
+  # upon). The dependee will allow connections from the depender.
+  #
+  # @param dependant Symbol|String|Array[String]
+  #   If a Symbol, then only the symbol :all is supported, which means to depend on all other services (k8s only)
+  #   If a String, then the name of the other service
+  #   If an Array[String], then a list of the other services to depend on. Each instance will depend on a single other service (vm only)
+  # @param environment String|Symbol (Optional)
+  #   The name of the environment to find the depended upon services in. By default the same as the depending service.
+  # @param requirement String|Symbol (Optional)
+  #   Dependency specific
   def depend_on(dependant, env = environment.name, requirement = nil)
     fail('Dependant cannot be nil') if dependant.nil? || dependant.eql?('')
     fail('Environment cannot be nil') if env.nil? || env.eql?('')
-    selector = if dependant == :all
-                 if env == :all
-                   Stacks::Dependencies::AllKubernetesSelector.new(requirement)
-                 else
-                   fail('Selection by a specific environment not yet support for :all dependency')
-                 end
-               else
-                 Stacks::Dependencies::ServiceSelector.new(dependant, env, requirement)
-               end
+    dep = if dependant == :all
+            if env == :all
+              Stacks::Dependencies::MultiServiceDependency.new(self,
+                                                               Stacks::Dependencies::AllKubernetesSelector.new(requirement),
+                                                               requirement)
+            else
+              fail('Selection by a specific environment not yet support for :all dependency')
+            end
+          elsif dependant.is_a?(Array)
+            selectors = dependant.map { |d| Stacks::Dependencies::ServiceSelector.new(d, env) }
+            Stacks::Dependencies::SingleServiceDependency.new(self,
+                                                              Stacks::Dependencies::MultiSelector.new(selectors),
+                                                              requirement)
+          else
+            Stacks::Dependencies::SingleServiceDependency.new(self,
+                                                              Stacks::Dependencies::ServiceSelector.new(dependant, env),
+                                                              requirement)
+          end
 
-    dep = Stacks::Dependencies::ServiceDependency.new(self, selector)
     @depends_on << dep unless @depends_on.include? dep
   end
 
   def dependency_config(fabric, dependent_instance)
     config = {}
-    dependencies.flat_map do |dependency|
-      dependency.resolve_targets(@environment)
-    end.uniq.each do |target|
+    targets = dependencies.flat_map do |dependency|
+      d = dependency.resolve_targets(@environment)
+      if dependency.is_a?(Stacks::Dependencies::SingleServiceDependency)
+        [d[dependent_instance.index % d.length]]
+      else
+        d
+      end
+    end.uniq
+
+    targets.each do |target|
       config.merge! target.config_params(self, fabric, dependent_instance)
     end
     config

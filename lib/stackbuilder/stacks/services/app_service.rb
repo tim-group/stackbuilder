@@ -176,12 +176,16 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
     end
   end
 
-  def to_k8s(app_deployer, dns_resolver, hiera_provider)
+  def assert_k8s_requirements
     fail("app_service '#{name}' in '#{@environment.name}' requires maintainers (set self.maintainers)") if @maintainers.empty?
     fail("app_service '#{name}' in '#{@environment.name}' requires description (set self.description)") if @description.nil?
     fail("app_service '#{name}' in '#{@environment.name}' requires application") if application.nil?
     fail('app_service to_k8s doesn\'t know how to deal with multiple groups yet') if @groups.size > 1
     fail('app_service to_k8s doesn\'t know how to deal with @enable_secondary_site yet') if @enable_secondary_site
+  end
+
+  def to_k8s(app_deployer, dns_resolver, hiera_provider)
+    assert_k8s_requirements
 
     instances = if @instances.is_a?(Hash)
                   @instances
@@ -211,8 +215,10 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
         'group' => group,
         'site' => site
       }
+
+      fake_machine_instance = Struct.new(:index).new(0)
       erb_vars = {
-        'dependencies' => dependency_config(site, nil),
+        'dependencies' => dependency_config(site, fake_machine_instance),
         'credentials_selector' => hiera_provider.lookup(hiera_scope, 'stacks/application_credentials_selector', nil)
       }.merge(hiera_scope)
 
@@ -1067,7 +1073,7 @@ EOC
 
     dependants.reject { |dep| dep.from.kubernetes }.each do |dep|
       vs = dep.from
-      is_same_site = dep.to_selector.requirement == :same_site
+      is_same_site = dep.requirement == :same_site
       next if is_same_site && !vs.exists_in_site?(vs.environment, site)
 
       filters = []
@@ -1370,7 +1376,7 @@ EOC
 
     important_dependants.each do |dep|
       vs = dep.from
-      is_same_site = dep.to_selector.requirement == :same_site
+      is_same_site = dep.requirement == :same_site
       next if is_same_site && !vs.exists_in_site?(vs.environment, site)
 
       match_labels = {

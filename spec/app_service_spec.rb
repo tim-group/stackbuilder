@@ -2249,7 +2249,7 @@ EOL
               'mars' => 1
             }
 
-            self.application = 'application'
+            self.application = 'just_an_app'
             self.startup_alert_threshold = '1h'
           end
           app_service 'another_app', :kubernetes => true do
@@ -2261,7 +2261,7 @@ EOL
               'mars' => 1
             }
 
-            self.application = 'application'
+            self.application = 'another_app'
             self.startup_alert_threshold = '1h'
           end
         end
@@ -2289,6 +2289,10 @@ EOL
       expect(depends_on_everything_resources.first.resources.find do |r|
         r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-out-to-all')
       end).not_to be_nil
+
+      config = depends_on_everything_resources.first.resources.find { |r| r['kind'] == 'ConfigMap' }['data']['config.properties']
+      expect(config).to match(/just_an_app\.url=/)
+      expect(config).to match(/another_app\.url=/)
     end
 
     it 'only connects dependant vms in the same site, when requested' do
