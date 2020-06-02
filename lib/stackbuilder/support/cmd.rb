@@ -574,7 +574,7 @@ class CMD
         output[box_id] = {}
         output[box_id]["enc"] = stack.to_enc
         output[box_id]["spec"] = stack.to_spec
-      rescue Exception => e
+      rescue StandardError => e
         raise "Error producing ENC/Spec for #{box_id}: #{e.message}"
       end
     end
@@ -593,7 +593,7 @@ class CMD
           machine_set_id = "#{bundle.site}-#{bundle.environment_name}-#{bundle.machine_set_name}"
           output[machine_set_id] = bundle.resources
         end
-      rescue Exception => e
+      rescue StandardError => e
         raise "Error producing resource bundle for #{machine_set.name} in #{machine_set.environment.name}: #{e.message}"
       end
     end
