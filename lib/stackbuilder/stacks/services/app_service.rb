@@ -33,6 +33,7 @@ module Stacks::Services::AppService
   attr_accessor :alerts_channel
   attr_accessor :startup_alert_threshold
   attr_accessor :monitor_readiness_probe
+  attr_accessor :page_on_critical
 
   alias_method :database_application_name, :application
 
@@ -60,6 +61,7 @@ module Stacks::Services::AppService
     @cpu_request = false
     @cpu_limit = false
     @monitor_readiness_probe = true
+    @page_on_critical = false
   end
 
   def enable_ehcache
@@ -597,6 +599,8 @@ EOC
   def generate_k8s_alerting(site, app_service_labels)
     fail("app_service '#{name}' in '#{@environment.name}' requires alerts_channel (set self.alerts_channel)") if @alerts_channel.nil?
 
+    pagerduty = page_on_critical ? { 'pagerduty' => 'true' } : {}
+
     rules = []
 
     rules << {
@@ -606,7 +610,7 @@ EOC
         'severity' => 'critical',
         'alertname' => "#{k8s_app_resources_name} CRITICAL",
         'alert_owner_channel' => alerts_channel
-      },
+      }.merge(pagerduty),
       'annotations' => {
         'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
         'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
@@ -637,7 +641,7 @@ EOC
         'severity' => 'critical',
         'alertname' => "#{k8s_app_resources_name} is stuck in a crash loop",
         'alert_owner_channel' => alerts_channel
-      },
+      }.merge(pagerduty),
       'annotations' => {
         'message' => 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting ' \
           '{{ printf "%.2f" $value }} times / 5 minutes.'

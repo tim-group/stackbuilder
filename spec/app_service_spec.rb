@@ -1343,6 +1343,60 @@ EOL
                                             })
       end
 
+      it 'creates a paging alert rule for critical status components' do
+        factory = eval_stacks do
+          stack "mystack" do
+            app_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+              self.alerts_channel = 'test'
+              self.page_on_critical = true
+
+              self.application = 'MyApplication'
+              self.startup_alert_threshold = '1h'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        prometheus_rule = k8s_resource(set, 'PrometheusRule')
+
+        expect(prometheus_rule['apiVersion']).to eql('monitoring.coreos.com/v1')
+        expect(prometheus_rule['metadata']).to eql('labels' => {
+                                                     'prometheus' => 'main',
+                                                     'role' => 'alert-rules',
+                                                     'app.kubernetes.io/managed-by' => 'stacks',
+                                                     'stack' => 'mystack',
+                                                     'machineset' => 'x',
+                                                     'group' => 'blue',
+                                                     'app.kubernetes.io/instance' => 'blue',
+                                                     'app.kubernetes.io/part-of' => 'x',
+                                                     'app.kubernetes.io/component' => 'app_service'
+                                                   },
+                                                   'name' => 'x-blue-app',
+                                                   'namespace' => 'e1')
+
+        expect(prometheus_rule['spec']['groups'].first['name']).to eql('stacks-alerts')
+        status_critical_rule = prometheus_rule['spec']['groups'].first['rules'].find do |r|
+          r['alert'] == 'StatusCritical'
+        end
+        expected_status_page_url = "https://go.timgroup.com/insight/space/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
+        expect(status_critical_rule).to eql('alert' => 'StatusCritical',
+                                            'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod, namespace) > 0',
+                                            'labels' => {
+                                              'severity' => 'critical',
+                                              'alertname' => 'x-blue-app CRITICAL',
+                                              'alert_owner_channel' => 'test',
+                                              'pagerduty' => 'true'
+                                            },
+                                            'annotations' => {
+                                              'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
+                                              'status_page_url' => expected_status_page_url
+                                            })
+      end
+
       it 'creates an alert rule for pods stuck in a crash loop' do
         factory = eval_stacks do
           stack "mystack" do
