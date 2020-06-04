@@ -97,6 +97,7 @@ Options:
     reprovision [-e] -s                   "clean", and then "provision" a stack
         [--ignore-spectre-patching-host-policy]
         [--no-dependencies]
+        [--update-version] <version>      update the application version in cmdb prior to reprovision
     sbdiff                                show compile diff between latest stackbuilder and local stackbuilder.
     spec [-e] -s                          print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
     terminus                              create a yaml puppet terminus
@@ -165,7 +166,8 @@ GetoptLong.new(
   ['--no-tmux', GetoptLong::NO_ARGUMENT],
   ['--no-dependencies', GetoptLong::NO_ARGUMENT],
   ['--stash', GetoptLong::NO_ARGUMENT],
-  ['--no-validate', GetoptLong::NO_ARGUMENT]
+  ['--no-validate', GetoptLong::NO_ARGUMENT],
+  ['--update-version', GetoptLong::REQUIRED_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -194,6 +196,8 @@ GetoptLong.new(
     $options[:stash] = true
   when '--no-validate'
     $options[:validate] = false
+  when '--update-version'
+    $options[:update_version] = arg
   else
     $options[opt_sym] = arg
   end
