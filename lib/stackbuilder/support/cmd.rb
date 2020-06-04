@@ -8,7 +8,6 @@ require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/kubernetes_vm_model'
 require 'open3'
-require 'orc/factory'
 
 # public methods in this class (and whose name is included in the :cmds instance variable) are valid stacks commands.
 # the only argument is argv, i.e. the remaining cli arguments not recognized by getoptlong.
@@ -326,6 +325,7 @@ class CMD
     end
 
     unless $options[:update_version].nil?
+      require 'orc/factory'
       vm_targets.each do |_t|
         fail '--update-version for VMs has not yet been implemented'
       end
