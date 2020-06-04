@@ -2,7 +2,7 @@ ARG ruby_version=2.1.10
 
 FROM ruby:${ruby_version}-alpine as build
 
-RUN apk add --no-cache make gcc libc-dev
+RUN apk add --no-cache make gcc git libc-dev
 
 WORKDIR /root
 COPY Gemfile Gemfile.lock ./
