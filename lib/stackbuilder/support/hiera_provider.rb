@@ -46,6 +46,7 @@ class Support::HieraProvider
 
       Dir.glob("#{local_path}/hieradata/**/*.yaml").each do |f|
         contents = YAML.load(File.open(f))
+        next if contents.nil?
         relative_dirs = File.dirname(f).sub(/^#{local_path}\/hieradata/, '').sub(/^\//, '')
 
         hash_bury(the_hieradata, *relative_dirs.split('/').push(File.basename(f, File.extname(f))).push(contents))
