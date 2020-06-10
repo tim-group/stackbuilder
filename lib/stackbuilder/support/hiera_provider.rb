@@ -44,7 +44,7 @@ class Support::HieraProvider
       _stdout_str, stderr_str, status = Open3.capture3('git', 'clone', '--quiet', '--depth', '1', @origin, local_path)
       fail "Unable to clone '#{@origin}' - error: '#{stderr_str}'" if !status.success?
 
-      Dir.glob("#{local_path}/**/*.yaml").each do |f|
+      Dir.glob("#{local_path}/hieradata/**/*.yaml").each do |f|
         contents = YAML.load(File.open(f))
         relative_dirs = File.dirname(f).sub(/^#{local_path}\/hieradata/, '').sub(/^\//, '')
 
