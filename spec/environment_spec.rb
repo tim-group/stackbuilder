@@ -43,7 +43,8 @@ describe 'environment' do
             self.short_name = 'prod'
           end
         end
-      end.to raise_error('The short name of an environment must be three characters or less. You tried to set_short_name of environment \'production\' to \'prod\'')
+      end.to raise_error('The short name of an environment must be three characters or less.' \
+                         ' You tried to set_short_name of environment \'production\' to \'prod\'')
     end
   end
 end
