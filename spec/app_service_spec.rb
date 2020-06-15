@@ -1243,7 +1243,7 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-in-from-e1_-sharedproxy-43b85ac',
+            'name' => 'allow-in-from-e1-sharedproxy-43b85ac',
             'namespace' => 'e1',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
@@ -1285,7 +1285,7 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-sharedproxy-')
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-sharedproxy-')
         end).to eql(expected_network_policy)
       end
     end
@@ -2267,14 +2267,14 @@ EOL
       just_an_app_in_mars = just_an_app_resources.find { |r| r.site == 'mars' }
 
       expect(just_an_app_in_io.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-depends_on_e')
       end).to be_nil
       expect(just_an_app_in_mars.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-depends_on_e')
       end).not_to be_nil
 
       expect(depends_on_everything_resources.first.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-out-to-e1_-just_an_app')
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-out-to-e1-just_an_app')
       end).not_to be_nil
     end
 
@@ -2334,10 +2334,10 @@ EOL
       just_an_app_in_mars = just_an_app_resources.find { |r| r.site == 'mars' }
 
       expect(just_an_app_in_io.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-depends_on_e')
       end).to be_nil
       expect(just_an_app_in_mars.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-depends_on_e')
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-depends_on_e')
       end).not_to be_nil
 
       expect(depends_on_everything_resources.first.resources.find do |r|
@@ -2384,7 +2384,7 @@ EOL
       depends_on_everything_resources = machine_sets['target'].to_k8s(app_deployer, dns, hiera_provider)
 
       policy = depends_on_everything_resources.first.resources.find do |r|
-        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1_-source')
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-source')
       end
 
       expect(policy['spec']['ingress'][0]['from']).to eq([
@@ -2428,7 +2428,7 @@ EOL
       expect(network_policies.size).to eq(7)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
-        r['metadata']['name'].include?('allow-in-from-e1_-app1')
+        r['metadata']['name'].include?('allow-in-from-e1-app1')
       end
 
       expect(ingress_controller_ingress_policy).not_to be_nil
@@ -2457,7 +2457,7 @@ EOL
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('http')
 
       ingress_controller_egress_policy = network_policies.find do |r|
-        r['metadata']['name'].include?('allow-out-to-e1_-app2')
+        r['metadata']['name'].include?('allow-out-to-e1-app2')
       end
 
       expect(ingress_controller_egress_policy).not_to be_nil
@@ -2490,7 +2490,7 @@ EOL
       expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['port']).to eq('app')
 
       app_ingress_policy = network_policies.find do |r|
-        r['metadata']['name'].include?('allow-in-from-e1_-app2')
+        r['metadata']['name'].include?('allow-in-from-e1-app2')
       end
 
       expect(app_ingress_policy).not_to be_nil
@@ -2554,7 +2554,7 @@ EOL
                          select { |s| s['kind'] == "NetworkPolicy" }
 
       expect(network_policies.size).to eq(3)
-      expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e1_-app1-23bb767')
+      expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-23bb767')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -2612,7 +2612,7 @@ EOL
 
       ingress = app1_network_policies.first['spec']['ingress']
       expect(app1_network_policies.size).to eq(3)
-      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e1_-app2-581c0bf')
+      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e1-app2-581c0bf')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -2643,7 +2643,7 @@ EOL
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(3)
-      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1_-app1-ea24b2a')
+      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -2758,7 +2758,7 @@ depends on the other' do
 
       ingress = app1_network_policies.first['spec']['ingress']
       expect(app1_network_policies.size).to eq(3)
-      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e2_-app2-af5c735')
+      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e2-app2-af5c735')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app1',
@@ -2780,7 +2780,7 @@ depends on the other' do
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(3)
-      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1_-app1-ea24b2a')
+      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',

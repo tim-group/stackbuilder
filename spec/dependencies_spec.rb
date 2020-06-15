@@ -129,7 +129,7 @@ describe 'stack-with-dependencies' do
 
     config = set.to_k8s(app_deployer, dns_resolver, hiera_provider).flat_map(&:resources).find { |s| s['kind'] == 'ConfigMap' }
 
-    expect(config['data']['config.properties']).to match(/username=e1_kubeexamplea0/)
+    expect(config['data']['config.properties']).to match(/username=e1kubeexamplea0/)
     expect(config['data']['config.properties']).to match(/password={SECRET:e1_kubeexample_mysql_passwords_0/)
   end
 
@@ -143,7 +143,7 @@ describe 'stack-with-dependencies' do
     expect(rights['example2@e1-exampleapp2-002.space.net.local/example']).to eql(
       'password_hiera_key' => 'e1/example2/mysql_password',
       'passwords_hiera_key' => 'e1/example2/mysql_passwords')
-    expect(rights['e1_kubeexamplea@space-e1-kubeexampleapp/example']).to eql(
+    expect(rights['e1kubeexamplea@space-e1-kubeexampleapp/example']).to eql(
       'password_hiera_key' => 'e1/kubeexample/mysql_password',
       'passwords_hiera_key' => 'e1/kubeexample/mysql_passwords',
       'allow_kubernetes_clusters' => ['space'])

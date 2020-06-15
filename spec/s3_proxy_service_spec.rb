@@ -54,7 +54,7 @@ describe 's3 proxy service' do
 
     s3proxy_network_policy = k8s.flat_map(&:resources).find { |s| s['kind'] == 'NetworkPolicy' && s['metadata']['name'].match(/s3proxy/) }
 
-    expect(s3proxy_network_policy['metadata']['name']).to eql('allow-out-to-e2_-s3proxy-60145d4')
+    expect(s3proxy_network_policy['metadata']['name']).to eql('allow-out-to-e2-s3proxy-60145d4')
     expect(s3proxy_network_policy['metadata']['namespace']).to eql('e1')
     expect(s3proxy_network_policy['spec']['podSelector']['matchLabels']).to eql(
       "machineset" => "k8sapp",
