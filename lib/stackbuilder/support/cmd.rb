@@ -41,7 +41,8 @@ class CMD
     @write_cmds = %w(dns clean clean_all
                      launch allocate provision
                      reprovision apply move clear_host
-                     rebuild_host build_new_host)
+                     rebuild_host build_new_host
+                     unsafely_start_dependents unsafely_stop_dependents)
     @cmds = @read_cmds + @write_cmds
   end
   # rubocop:enable Metrics/ParameterLists
@@ -129,6 +130,46 @@ class CMD
         s.children
       end
     end.flatten.map(&:identity))
+  end
+
+  def unsafely_stop_dependents(_argv)
+    machine_set = convert_to_machine_set(check_and_get_stack(true))
+
+    machine_set.virtual_services_that_depend_on_me.map do |dependent|
+      if dependent.kubernetes
+        sites = if dependent.instances.is_a?(Hash)
+                  dependent.instances.keys
+                else
+                  [@environment.sites.first]
+                end
+        deployment = dependent.k8s_app_resources_name
+        sites.each do |site|
+          puts "Would stop dependent kubernetes using: `kubectl --contexy=#{site} -n #{@environment.name} scale deploy #{deployment} --replicas=0`"
+        end
+      else
+        dependent.groups.each do |group|
+          service_name = "#{@environment.name}-#{dependent.application}-#{group}"
+          mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
+          puts "Would stop dependent app using equivalent of: `mco service #{service_name} stop #{mco_filters}`"
+        end
+      end
+    end
+  end
+
+  def unsafely_start_dependents(_argv)
+    machine_set = convert_to_machine_set(check_and_get_stack(true))
+
+    machine_set.virtual_services_that_depend_on_me.map do |dependent|
+      if dependent.kubernetes
+        puts "Would start dependent kubernetes using equivalent of: `stacks -e #{@environment.name} -s #{dependent.name} apply`"
+      else
+        dependent.groups.each do |group|
+          service_name = "#{@environment.name}-#{dependent.application}-#{group}"
+          mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
+          puts "Would start dependent app using equivalent of: `mco service #{service_name} start #{mco_filters}`"
+        end
+      end
+    end
   end
 
   def showvnc(_argv)
