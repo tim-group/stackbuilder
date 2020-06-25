@@ -173,4 +173,28 @@ describe 'kubernetes' do
     #      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
     #    end
   end
+
+  it 'raises an error if ports contains both names \'app\' and \'http\'' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => { 'e1' => true } do
+          self.ports = {
+            'app' => { 'port' => 8000 },
+            'http' => { 'port' => 80 }
+          }
+          self.application = 'ntp'
+          self.startup_alert_threshold = '10s'
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    # FIXME: Technically the error should be base_service, not base_k8s_app. But see other FIXME's in base_k8s_app.rb
+    expect do
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
+    end.to raise_error('base_k8s_app \'x\' in \'e1\' defines ports named both \'app\' and \'http\'. This is not possible at the moment ' \
+      'because in some places \'app\' is fudged to be \'http\' to avoid changing lots of things in one go.')
+  end
 end

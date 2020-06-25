@@ -180,6 +180,7 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
   end
 
   def assert_k8s_requirements
+    # FIXME: This isn't right. Other things could technical extend themselves with AppService
     super "app_service"
   end
 
