@@ -229,7 +229,8 @@ describe 'kubernetes' do
                 'ports' => [
                   {
                     'containerPort' => 8000,
-                    'name' => 'app'
+                    'name' => 'app',
+                    'protocol' => 'TCP'
                   },
                   {
                     'containerPort' => 5000,
@@ -238,6 +239,10 @@ describe 'kubernetes' do
                 ],
                 'volumeMounts' => [
                   {
+                    'name' => 'tmp-volume',
+                    'mountPath' => '/tmp'
+                  },
+                  {
                     'name' => 'config-volume',
                     'mountPath' => '/config',
                     'readOnly' => true
@@ -245,10 +250,6 @@ describe 'kubernetes' do
                   {
                     'name' => 'log-volume',
                     'mountPath' => '/var/log/app'
-                  },
-                  {
-                    'name' => 'tmp-volume',
-                    'mountPath' => '/tmp'
                   }
                 ],
                 'readinessProbe' => {
@@ -274,6 +275,10 @@ describe 'kubernetes' do
               }],
               'volumes' => [
                 {
+                  'name' => 'tmp-volume',
+                  'emptyDir' => {}
+                },
+                {
                   'name' => 'config-volume',
                   'emptyDir' => {}
                 },
@@ -285,10 +290,6 @@ describe 'kubernetes' do
                 },
                 {
                   'name' => 'log-volume',
-                  'emptyDir' => {}
-                },
-                {
-                  'name' => 'tmp-volume',
                   'emptyDir' => {}
                 }
               ]
@@ -607,15 +608,15 @@ EOL
                       '--ping',
                       '--api.insecure',
                       '--api.dashboard',
+                      '--metrics.prometheus',
+                      '--log.level=DEBUG',
+                      '--entrypoints.traefik.Address=:10254',
                       '--entrypoints.http.Address=:8000',
                       '--entrypoints.http.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',
-                      '--entrypoints.traefik.Address=:10254',
                       '--providers.kubernetesingress',
                       '--providers.kubernetesingress.ingressclass=traefik-x-blue',
                       '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing',
-                      '--providers.kubernetesingress.namespaces=e1',
-                      '--metrics.prometheus',
-                      '--log.level=DEBUG'
+                      '--providers.kubernetesingress.namespaces=e1'
                     ],
                     'image' => 'traefik:v2.2',
                     'imagePullPolicy' => 'IfNotPresent',
@@ -2834,9 +2835,9 @@ depends on the other' do
       factory = eval_stacks do
         stack "mystack" do
           app_service 'app1', :kubernetes => { 'e1' => true, 'e2' => false } do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
+            self.maintainers = [person('Testers')] if kubernetes
+            self.description = 'Testing' if kubernetes
+            self.alerts_channel = 'test' if kubernetes
 
             self.application = 'myapp'
           end
@@ -2888,9 +2889,9 @@ depends on the other' do
       factory = eval_stacks do
         stack "mystack" do
           app_service 'app1', :kubernetes => false do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
+            self.maintainers = [person('Testers')] if kubernetes
+            self.description = 'Testing' if kubernetes
+            self.alerts_channel = 'test' if kubernetes
 
             self.application = 'myapp'
           end

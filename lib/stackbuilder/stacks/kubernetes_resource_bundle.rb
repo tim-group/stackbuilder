@@ -60,7 +60,8 @@ class Stacks::KubernetesResourceBundle
       '/v1/Service',
       '/v1/ServiceAccount',
       'monitoring.coreos.com/v1/PrometheusRule',
-      'policy/v1beta1/PodDisruptionBudget'
+      'policy/v1beta1/PodDisruptionBudget',
+      'traefik.containo.us/v1alpha1/IngressRouteUDP'
     ]
 
     rest_mappings_found = @resources.map { |r| r['apiVersion'].include?('/') ? "#{r['apiVersion']}/#{r['kind']}" : "/#{r['apiVersion']}/#{r['kind']}" }

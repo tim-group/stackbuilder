@@ -349,7 +349,11 @@ describe_stack 'stack with sub environment dependencies' do
       app_service 'fundsuserapp' do
         self.groups = ['blue']
         self.application = 'tfunds'
-        self.ports = [8443]
+        self.ports = {
+          'sso' => {
+            'port' => 8443
+          }
+        }
         enable_ajp('8009')
         enable_sso('8443')
         disable_http_lb_hack

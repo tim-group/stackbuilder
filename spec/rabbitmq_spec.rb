@@ -232,3 +232,27 @@ describe_stack 'applications can depend on rabbitmq clusters in different enviro
       eql('e2-rabbitmq-001.space.net.local,e2-rabbitmq-002.space.net.local')
   end
 end
+
+describe_stack 'produces the correct loadbalancer config' do
+  given do
+    stack "lb" do
+      loadbalancer_service
+    end
+
+    stack 'rabbit' do
+      rabbitmq_cluster 'rabbitmq'
+    end
+
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'lb'
+      instantiate_stack 'rabbit'
+    end
+  end
+
+  host('e1-lb-001.mgmt.space.net.local') do |host|
+    enc = host.to_enc['role::loadbalancer']['virtual_servers']['e1-rabbitmq-vip.space.net.local']
+    expect(enc['type']).to eql('rabbitmq')
+    expect(enc['ports']).to eql([5672])
+    expect(enc['realservers']).to eql("blue" => ["e1-rabbitmq-001", "e1-rabbitmq-002"])
+  end
+end

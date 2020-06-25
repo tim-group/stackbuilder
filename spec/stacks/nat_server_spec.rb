@@ -148,7 +148,11 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
       app_service 'blahnat' do
         nat_config.dnat_enabled = true
         depend_on 'nat', environment.name, :nat_to_vip
-        self.ports = [8008]
+        self.ports = {
+          'app' => {
+            'port' => '8008'
+          }
+        }
       end
     end
 
@@ -255,7 +259,11 @@ describe_stack 'configures NAT boxes to NAT specific outgoing things to specific
       app_service 'blahnat' do
         nat_config.snat_enabled = true
         depend_on 'nat', 'sub', :nat_to_vip
-        self.ports = [8008]
+        self.ports = {
+          'app' => {
+            'port' => '8008'
+          }
+        }
       end
     end
 
@@ -333,7 +341,11 @@ describe_stack 'can depend_on nat' do
       standard_service 'standardwith-dnat' do
         extend(Stacks::Services::CanBeNatted)
         self.instances = 2
-        self.ports = [22]
+        self.ports = {
+          'ssh' => {
+            'port' => 22
+          }
+        }
 
         configure_dnat(:front, :mgmt, true, false)
         depend_on 'nat', environment.name, :nat_to_host
@@ -341,7 +353,11 @@ describe_stack 'can depend_on nat' do
 
       app_service 'appwith-dnat' do
         self.instances = 2
-        self.ports = [8000]
+        self.ports = {
+          'app' => {
+            'port' => 8000
+          }
+        }
 
         configure_dnat(:front, :prod, true, true)
         depend_on 'nat', environment.name, :nat_to_vip
@@ -350,7 +366,11 @@ describe_stack 'can depend_on nat' do
       standard_service 'standardwith-snat' do
         extend(Stacks::Services::CanBeNatted)
         self.instances = 2
-        self.ports = [22]
+        self.ports = {
+          'ssh' => {
+            'port' => 22
+          }
+        }
 
         configure_snat(:front, :mgmt, true, false)
         depend_on 'nat', environment.name, :nat_to_host
@@ -358,7 +378,11 @@ describe_stack 'can depend_on nat' do
 
       app_service 'appwith-snat' do
         self.instances = 2
-        self.ports = [8000]
+        self.ports = {
+          'app' => {
+            'port' => 8000
+          }
+        }
 
         configure_snat(:front, :prod, true, false)
         depend_on 'nat', environment.name, :nat_to_vip
@@ -366,7 +390,11 @@ describe_stack 'can depend_on nat' do
 
       app_service 'othersitewith-dnat' do
         self.enable_secondary_site = true
-        self.ports = [8443]
+        self.ports = {
+          'app' => {
+            'port' => 8443
+          }
+        }
 
         configure_dnat(:front, :prod, true, true)
 
@@ -382,7 +410,11 @@ describe_stack 'can depend_on nat' do
 
       app_service 'othersitewith-snat' do
         self.enable_secondary_site = true
-        self.ports = [8443]
+        self.ports = {
+          'app' => {
+            'port' => 8443
+          }
+        }
 
         configure_snat(:front, :prod, true, true)
 

@@ -14,7 +14,14 @@ module Stacks::Services::VirtualProxyService
 
   def configure
     @proxy_vhosts            = []
-    @ports                   = [80, 443]
+    @ports                   = {
+      'http' => {
+        'port' => 80
+      },
+      'https' => {
+        'port' => 443
+      }
+    }
     @cert                    = 'wildcard_timgroup_com_2017'
     @override_vhost_location = {}
     @vhost_for_lb_healthcheck_override_hack = nil
@@ -69,7 +76,7 @@ module Stacks::Services::VirtualProxyService
       'env' => environment.name,
       'app' => 'apache2',
       'type' => type,
-      'ports' => @ports,
+      'ports' => @ports.keys.select { |port_name| %w(http https).include? port_name }.map { |port_name| @ports[port_name]['port'] },
       'realservers' => realservers
     }
 
