@@ -10,7 +10,17 @@ module Stacks::Services::VirtualSftpService
 
   def configure
     @downstream_services = []
-    @ports = [21, 22, 2222]
+    @ports = {
+      'proftpd' => {
+        'port' => 21
+      },
+      'ssh' => {
+        'port' => 22
+      },
+      'proftpd-ssh' => {
+        'port' => 2222
+      }
+    }
   end
 
   def to_loadbalancer_config(location, fabric)
@@ -29,7 +39,7 @@ module Stacks::Services::VirtualSftpService
     {
       vip_fqdn(:prod, fabric) => {
         'type'              => 'sftp',
-        'ports'             => @ports,
+        'ports'             => @ports.keys.map { |port_name| @ports[port_name]['port'] },
         'realservers'       => realservers,
         'persistent_ports'  => @persistent_ports,
         'monitor_warn'      => monitor_warn.to_s

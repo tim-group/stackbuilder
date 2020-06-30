@@ -268,4 +268,8 @@ class Stacks::Environment
     dep = Stacks::Dependencies::EnvironmentDependency.new(self, Stacks::Dependencies::ServiceSelector.new(dependant, env), requirement)
     @depends_on << dep unless @depends_on.include? dep
   end
+
+  def kubernetes
+    false
+  end
 end
