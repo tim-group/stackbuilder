@@ -184,8 +184,4 @@ module Stacks::Dependencies
       reject_nodes_in_different_location,
       reject_k8s_nodes)
   end
-
-  def non_k8s_dependencies_exist?
-    dependants.count { |dep| !dep.from.kubernetes } > 0
-  end
 end

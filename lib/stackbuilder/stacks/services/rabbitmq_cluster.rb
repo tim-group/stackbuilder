@@ -11,11 +11,7 @@ module Stacks::Services::RabbitMQCluster
 
   def configure
     @downstream_services = []
-    @ports = {
-      'rabbitmq' => {
-        'port' => 5672
-      }
-    }
+    @ports = [5672]
     @supported_requirements = :accept_any_requirement_default_all_servers
   end
 
@@ -35,7 +31,7 @@ module Stacks::Services::RabbitMQCluster
     {
       vip_fqdn(:prod, fabric) => {
         'type' => 'rabbitmq',
-        'ports' => @ports.keys.map { |port_name| @ports[port_name]['port'] },
+        'ports' => @ports,
         'realservers' => {
           'blue' => realservers
         }

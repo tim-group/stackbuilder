@@ -4,16 +4,7 @@ module Stacks::Services::VpnService
   end
 
   def configure
-    @ports = {
-      'isakmp' => {
-        'port' => 500,
-        'protocol' => 'udp'
-      },
-      'isakmp-nat-t' => {
-        'port' => 4500,
-        'protocol' => 'udp'
-      }
-    }
+    @ports = [500, 4500]
     add_vip_network :mgmt
     @nat_config.tcp = false
     @nat_config.udp = true

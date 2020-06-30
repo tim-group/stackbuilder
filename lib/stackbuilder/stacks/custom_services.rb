@@ -24,8 +24,7 @@ class Stacks::CustomServices
   end
 
   def service_in_kubernetes?(name, properties)
-    caller_name = caller[0][/`([^']*)'/, 1]
-    fail("#{caller_name} '#{name}' does not specify kubernetes property for environment '#{@environment.name}'. \
+    fail("app_service '#{name}' does not specify kubernetes property for environment '#{@environment.name}'. \
 If any environments are specified then all environments where the stack is instantiated must \
 be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash) && !properties[:kubernetes].key?(@environment.name)
 
@@ -39,18 +38,10 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp, Stacks::Services::AppService], &block)
+      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService], &block)
     else
       machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                       Stacks::Services::AppServer, &block)
-    end
-  end
-
-  def base_service(name, properties = {}, &block)
-    if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp], &block)
-    else
-      fail 'base_service outside of Kubernetes is not implemented'
     end
   end
 

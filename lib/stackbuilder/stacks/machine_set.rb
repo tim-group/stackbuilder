@@ -209,12 +209,11 @@ class Stacks::MachineSet
     @allowed_hosts.uniq!
   end
 
-  def allow_outbound_to(identifier, destination_ips_in_cidr_form, ports, protocol = 'TCP')
+  def allow_outbound_to(identifier, destination_ips_in_cidr_form, ports)
     fail('Allowing outbound connections is only supported if kubernetes is enabled for this machine_set') unless @kubernetes
     @allowed_outbound_connections[identifier] = {
       :ips => destination_ips_in_cidr_form.is_a?(Array) ? destination_ips_in_cidr_form : [destination_ips_in_cidr_form],
-      :ports => ports.is_a?(Array) ? ports : [ports],
-      :protocol => protocol
+      :ports => ports.is_a?(Array) ? ports : [ports]
     }
   end
 
@@ -264,15 +263,15 @@ class Stacks::MachineSet
 
   def to_k8s(_app_deployer, _dns_resolver, _hiera_provider, standard_labels)
     policies = []
-    @allowed_outbound_connections.each do |connection_name, connection_details|
+    @allowed_outbound_connections.each_key do |outbound_connection|
       filters = []
-      connection_details[:ips].each do |ip|
+      @allowed_outbound_connections[outbound_connection][:ips].each do |ip|
         filters << { 'ipBlock' => { 'cidr' => ip } }
       end
       ports = []
-      connection_details[:ports].each do |port|
+      @allowed_outbound_connections[outbound_connection][:ports].each do |port|
         ports << {
-          'protocol' => connection_details[:protocol].nil? ? 'TCP' : connection_details[:protocol],
+          'protocol' => 'TCP',
           'port' => port
         }
       end
@@ -300,7 +299,7 @@ class Stacks::MachineSet
         'apiVersion' => 'networking.k8s.io/v1',
         'kind' => 'NetworkPolicy',
         'metadata' => {
-          'name' => "allow-out-to-#{connection_name}-#{hash}",
+          'name' => "allow-out-to-#{outbound_connection}-#{hash}",
           'namespace' => @environment.name,
           'labels' => {
             'stack' => @stack.name,

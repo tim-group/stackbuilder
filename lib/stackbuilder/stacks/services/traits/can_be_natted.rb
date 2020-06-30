@@ -66,9 +66,9 @@ module Stacks::Services::CanBeNatted
   private
 
   def create_rules_for_hosts(hostnames, site, type)
-    ports.keys.map do |port_name|
+    ports.map do |port|
       hostnames.map do |hostname|
-        nat_config.create_rule(environment, type, hostname, site, ports[port_name]['port'])
+        nat_config.create_rule(environment, type, hostname, site, port)
       end
     end.flatten
   end

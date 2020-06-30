@@ -8,12 +8,7 @@ module Stacks::Services::VirtualBindService
   end
 
   def configure
-    @ports = {
-      'app' => {
-        'port' => 53,
-        'protocol' => 'udp'
-      }
-    }
+    @ports = [53]
     add_vip_network :mgmt
     remove_vip_network :prod
     @nat_config.udp = true
@@ -171,7 +166,7 @@ module Stacks::Services::VirtualBindService
     vip_nets.each do |vip_net|
       lb_config[vip_fqdn(vip_net, fabric)] = {
         'type'         => 'bind',
-        'ports'        => @ports.keys.map { |port_name| @ports[port_name]['port'] },
+        'ports'        => @ports,
         'realservers'  => {
           'blue' => realservers(location).map { |server| server.qualified_hostname(vip_net) }.sort
         },
