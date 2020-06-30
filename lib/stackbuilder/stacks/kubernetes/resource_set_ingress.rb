@@ -40,7 +40,7 @@ module Stacks::Kubernetes::ResourceSetIngress
     output << generate_ingress_controller_service_account_resource(ingress_resources_name, ingress_labels)
     output << generate_ingress_controller_role_resource(ingress_resources_name, ingress_labels)
     output << generate_ingress_controller_role_binding_resource(ingress_resources_name, ingress_labels)
-    output += generate_ingress_controller_network_policies(ingress_resources_name, ingress_labels, dns_resolver, site, masters)
+    output += generate_ingress_controller_network_policies(ingress_resources_name, ingress_labels, dns_resolver, hiera_provider, hiera_scope, site, masters)
     output << generate_ingress_controller_service_resource(ingress_resources_name, ingress_labels, dns_resolver, site)
     output << generate_ingress_controller_monitoring_service_resource(ingress_resources_name, ingress_labels)
     output << generate_ingress_controller_deployment_resource(ingress_resources_name, ingress_labels)
@@ -51,8 +51,6 @@ module Stacks::Kubernetes::ResourceSetIngress
 
   def generate_ingress_resource(name, app_resource_name, labels)
     resource = {
-      'apiVersion' => 'networking.k8s.io/v1beta1',
-      'kind' => 'Ingress',
       'metadata' => {
         'name' => name,
         'namespace' => @environment.name,
@@ -65,6 +63,8 @@ module Stacks::Kubernetes::ResourceSetIngress
 
     @ports.keys.map do |port_name|
       if port_name == 'http' || port_name == 'app'
+        resource['apiVersion'] = 'networking.k8s.io/v1beta1'
+        resource['kind'] = 'Ingress'
         resource['spec'] = {
           'rules' => [{
             'http' => {
@@ -78,10 +78,16 @@ module Stacks::Kubernetes::ResourceSetIngress
             }
           }]
         }
-      elsif @ports[port_name]['protocol'] == 'tcp' || @ports[port_name]['protocol'] == 'udp'
+      else
+        protocol = @ports[port_name]['protocol'].nil? ? 'tcp' : @ports[port_name]['protocol']
+        fail("generate_k8s_ingress doesn't know how to handle port name '#{port_name}' with protocol '#{protocol}'") unless %w(tcp udp).include? protocol
+        fail('IngressRouteTCP support is not completed') if protocol == 'tcp'
+        kind = "IngressRoute#{protocol.upcase}"
+        resource['apiVersion'] = 'traefik.containo.us/v1alpha1'
+        resource['kind'] = kind
         resource['spec'] = {
           'entryPoints' => [
-            'app'
+            port_name
           ],
           'routes' => [{
             'services' => [{
@@ -91,8 +97,6 @@ module Stacks::Kubernetes::ResourceSetIngress
             }]
           }]
         }
-      else
-        fail("generate_k8s_ingress doesn't know how to handle port name '#{port_name}' with protocol '#{@ports[port_name]['protocol']}'")
       end
     end
     resource
@@ -181,7 +185,7 @@ module Stacks::Kubernetes::ResourceSetIngress
     }
   end
 
-  def generate_ingress_controller_network_policies(_name, ingress_labels, dns_resolver, site, masters)
+  def generate_ingress_controller_network_policies(_name, ingress_labels, dns_resolver, hiera_provider, hiera_scope, site, masters)
     network_policies = []
 
     app_service_match_labels = {
@@ -228,11 +232,13 @@ module Stacks::Kubernetes::ResourceSetIngress
     dependants.reject { |dep| dep.from.kubernetes }.each do |dep|
       case dep.from
       when Stacks::Environment
-        filters << {
+        subnet = hiera_provider.lookup(hiera_scope, "networking/#{site}/prod/range")
+        fail("For an environment dependency networking/#{site}/prod/range must be defined in hieradata") if subnet.nil?
+        filters = [{
           'ipBlock' => {
-            'cidr' => "10.30.0.0/16" # FIXME
+            'cidr' => subnet
           }
-        }
+        }]
         network_policies << create_ingress_network_policy_for_external_service(dep.from.short_name, dep.from.short_name,
                                                                                @environment.name, ingress_labels, filters)
       else
@@ -388,11 +394,6 @@ module Stacks::Kubernetes::ResourceSetIngress
                 'name' => 'traefik-ingress-controller',
                 'ports' => [
                   {
-                    'containerPort' => 8000,
-                    'name' => 'http',
-                    'protocol' => 'TCP'
-                  },
-                  {
                     'containerPort' => 10254,
                     'name' => 'traefik',
                     'protocol' => 'TCP'
@@ -434,17 +435,23 @@ module Stacks::Kubernetes::ResourceSetIngress
     container['args'] << "--entrypoints.traefik.Address=:10254"
 
     @ports.keys.map do |port_name|
+      actual_port = @ports[port_name]['port'] < 1024 ? 8000 + @ports[port_name]['port'] : @ports[port_name]['port']
       actual_port_name = port_name == 'app' ? 'http' : port_name
-      case @ports[port_name]['service_port']
-      when 80
-        container['args'] << "--entrypoints.#{actual_port_name}.Address=:8000"
+      container['args'] << "--entrypoints.#{actual_port_name}.Address=:#{actual_port}"
+      container['ports'] << {
+        'containerPort' => actual_port,
+        'name' => actual_port_name,
+        'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
+      }
+
+      case port_name
+      when 'app', 'http'
         container['args'] << "--entrypoints.#{actual_port_name}.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
         container['args'] << "--providers.kubernetesingress"
         container['args'] << "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
         container['args'] << "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}"
         container['args'] << "--providers.kubernetesingress.namespaces=#{@environment.name}"
       else
-        container['args'] << "--entrypoints.#{actual_port_name}.Address=:#{@ports[port_name]['port']}"
         container['args'] << "--providers.kubernetesCRD"
         container['args'] << "--providers.kubernetesCRD.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
         container['args'] << "--providers.kubernetesCRD.namespaces=#{@environment.name}"

@@ -635,13 +635,13 @@ EOL
                     'name' => 'traefik-ingress-controller',
                     'ports' => [
                       {
-                        'containerPort' => 8000,
-                        'name' => 'http',
+                        'containerPort' => 10254,
+                        'name' => 'traefik',
                         'protocol' => 'TCP'
                       },
                       {
-                        'containerPort' => 10254,
-                        'name' => 'traefik',
+                        'containerPort' => 8000,
+                        'name' => 'http',
                         'protocol' => 'TCP'
                       }
                     ],

@@ -1,7 +1,6 @@
 require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/kubernetes_resource_bundle'
 require 'stackbuilder/support/digest_generator'
-require 'erb'
 require 'json'
 
 module Stacks::Services::AppService
@@ -17,7 +16,6 @@ module Stacks::Services::AppService
   attr_accessor :ha_mysql_ordering_exclude
 
   # Kubernetes specific attributes
-  attr_accessor :appconfig
   attr_accessor :jvm_heap
   attr_accessor :headspace
 
@@ -43,6 +41,7 @@ module Stacks::Services::AppService
     @jvm_heap = '64M'
     @headspace = 0.1
     @artifact_from_nexus = true
+    @monitor_tucker = true
     @security_context = {
       'runAsUser' => 2055,
       'runAsGroup' => 3017,
@@ -72,6 +71,25 @@ module Stacks::Services::AppService
       }
     }
     @log_volume_mount_path = '/var/log/app'
+    @pre_appconfig_template = <<'EOC'
+port=8000
+
+log.directory=/var/log/app
+log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @group %>"]
+<%- if @dependencies.size > 0 -%>
+<%- @dependencies.map do |k, v| -%>
+<%- if k.start_with?('db.') && k.end_with?('.username') -%>
+<%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
+<%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
+<%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s", @credentials_selector) %>
+<%- elsif k.end_with?('_hiera_key') -%>
+<%= k.gsub(/_hiera_key$/, '') -%>=<%= secret("#{v}") %>
+<%- else -%>
+<%= k %>=<%= v %>
+<%- end -%>
+<%- end -%>
+<%- end -%>
+EOC
   end
 
   def enable_ehcache
@@ -149,36 +167,6 @@ module Stacks::Services::AppService
     config
   end
 
-  class ConfigERB < ERB
-    attr_reader :used_secrets
-
-    def initialize(template, vars, hiera_provider)
-      super(template, nil, '-')
-      vars.each { |k, v| instance_variable_set("@#{k}", v) }
-      @vars = vars
-      @hiera_provider = hiera_provider
-      @used_secrets = {}
-    end
-
-    def hiera(key, default = nil)
-      value = @hiera_provider.lookup(@vars, key, default)
-      fail "The hiera value for #{key} is encrypted. \
-Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String) && value.match(/^ENC\[GPG/)
-      value
-    end
-
-    def secret(key, index = nil)
-      secret_name = key.gsub(/[^a-zA-Z0-9]/, '_')
-      secret_name += "_#{index}" unless index.nil?
-      @used_secrets[key] = secret_name
-      "{SECRET:#{secret_name}}"
-    end
-
-    def render
-      result(binding)
-    end
-  end
-
   def assert_k8s_requirements
     # FIXME: This isn't right. Other things could technical extend themselves with AppService
     super "app_service"
@@ -197,34 +185,6 @@ Use secret(#{key}) instead of hiera(#{key}) in appconfig" if value.is_a?(String)
 
   def instance_name_of(service)
     "#{service.environment.short_name}-#{service.short_name}"
-  end
-
-  def generate_app_config(erb_vars, hiera_provider)
-    template = <<'EOC'
-port=8000
-
-log.directory=/var/log/app
-log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @group %>"]
-<%- if @dependencies.size > 0 -%>
-<%- @dependencies.map do |k, v| -%>
-<%- if k.start_with?('db.') && k.end_with?('.username') -%>
-<%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
-<%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
-<%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s", @credentials_selector) %>
-<%- elsif k.end_with?('_hiera_key') -%>
-<%= k.gsub(/_hiera_key$/, '') -%>=<%= secret("#{v}") %>
-<%- else -%>
-<%= k %>=<%= v %>
-<%- end -%>
-<%- end -%>
-<%- end -%>
-EOC
-    template += appconfig if appconfig
-
-    erb = ConfigERB.new(template, erb_vars, hiera_provider)
-    contents = erb.render
-
-    [contents, erb.used_secrets]
   end
 
   def generate_app_deployment_resource(resource_name, app_service_labels, app_name, app_version, replicas, secrets, config)

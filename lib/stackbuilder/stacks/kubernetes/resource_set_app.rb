@@ -87,7 +87,7 @@
            port_config = {}
            port_config['name'] = port_name
            port_config['port'] = @ports[port_name]['service_port']
-           port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol']
+           port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
            port_config['targetPort'] = @ports[port_name]['port']
            port_config
          end
@@ -296,7 +296,7 @@
          'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
          'status_page_url' => "https://go.timgroup.com/insight/#{site}/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
        }
-     }
+     } if @monitor_tucker
 
      rules << {
        'alert' => 'DeploymentReplicasMismatch',

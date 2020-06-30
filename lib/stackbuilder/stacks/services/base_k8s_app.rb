@@ -1,5 +1,6 @@
 require 'stackbuilder/stacks/kubernetes/namespace'
 require 'stackbuilder/stacks/maintainers'
+require 'erb'
 
 module Stacks::Services::BaseK8sApp
   include Stacks::Kubernetes::ResourceSetApp
@@ -16,8 +17,11 @@ module Stacks::Services::BaseK8sApp
   attr_accessor :capabilities
   attr_accessor :readiness
 
+  attr_accessor :appconfig
+
   attr_accessor :alerts_channel
   attr_accessor :startup_alert_threshold
+  attr_accessor :monitor_tucker
   attr_accessor :monitor_readiness_probe
   attr_accessor :page_on_critical
 
@@ -36,6 +40,7 @@ module Stacks::Services::BaseK8sApp
     @cpu_request = false
     @cpu_limit = false
     @monitor_readiness_probe = true
+    @monitor_tucker = false
     @page_on_critical = false
     @artifact_from_nexus = false
     @memory_limit = '64Mi'
@@ -43,6 +48,7 @@ module Stacks::Services::BaseK8sApp
     @args = nil
     @capabilities = nil
     @readiness = nil
+    @appconfig = nil
   end
 
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
@@ -104,14 +110,35 @@ module Stacks::Services::BaseK8sApp
     end
   end
 
+  def prod_fqdn(fabric)
+    if respond_to? :vip_fqdn
+      vip_fqdn(:prod, fabric)
+    else
+      children.first.prod_fqdn
+    end
+  end
+
+  def endpoints(_dependent_service, fabric)
+    @ports.keys.map do |port_name|
+      {
+        :port => @ports[port_name]['port'],
+        :fqdns => [prod_fqdn(fabric)]
+      }
+    end
+  end
+
   private
 
   # FIXME: base_k8s_app as a default is wrong, it should be the name of the method in custom_services.rb
   def assert_k8s_requirements(custom_service_name = 'base_k8s_app')
     # FIXME: There must be a better way to get the name of the last module that extended machineset rather than have to pass it in here?
+    fail("#{custom_service_name} '#{name}' in '#{@environment.name}' doesn't define @ports but is depended on by another service") \
+      if @ports.empty? && non_k8s_dependencies_exist?
+
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' defines ports named both 'app' and 'http'. This is not possible at the moment " \
       "because in some places 'app' is fudged to be 'http' to avoid changing lots of things in one go.") \
       if @ports.keys.select { |port_name| %w(app http).include? port_name }.uniq.length > 1
+
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires maintainers (set self.maintainers)") if @maintainers.empty?
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires description (set self.description)") if @description.nil?
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires application") if application.nil?
@@ -141,7 +168,14 @@ module Stacks::Services::BaseK8sApp
     end
   end
 
-  def generate_app_config(_erb_vars, _hiera_provider)
-    nil
+  def generate_app_config(erb_vars, hiera_provider)
+    template = @pre_appconfig_template.nil? ? '' : @pre_appconfig_template
+    template += @appconfig if @appconfig
+    template += @post_appconfig_template.nil? ? '' : @pre_appconfig_template
+
+    erb = ConfigERB.new(template, erb_vars, hiera_provider)
+    contents = erb.render unless template.empty?
+
+    [contents, erb.used_secrets]
   end
 end
