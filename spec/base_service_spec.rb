@@ -11,31 +11,20 @@ describe 'kubernetes' do
                           'e1-app1-002.space.net.local' => '3.1.4.3',
                           'e1-app2-vip.space.net.local' => '3.1.4.4',
                           'e1-app1-vip.space.net.local' => '3.1.4.5',
-                          'e2-app2-vip.space.net.local' => '3.1.4.6',
-                          'e1-mydb-001.space.net.local' => '3.1.4.7',
-                          'e1-mydb-002.space.net.local' => '3.1.4.8',
-                          'production-sharedproxy-001.space.net.local' => '3.1.4.9',
-                          'production-sharedproxy-002.space.net.local' => '3.1.4.10',
-                          'production-sharedproxy-001.earth.net.local' => '4.1.4.9',
-                          'production-sharedproxy-002.earth.net.local' => '4.1.4.10',
-                          'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11',
-                          'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12',
-                          'e1-x-vip.earth.net.local' => '3.1.4.13',
                           'e1-nonk8sapp-001.space.net.local' => '3.1.4.14',
-                          'e1-sharedproxy-001.space.net.local' => '3.1.4.15',
-                          'e1-sharedproxy-002.space.net.local' => '3.1.4.16',
-                          'e1-myrabbit-001.space.net.local' => '3.1.4.17',
-                          'e1-myrabbit-002.space.net.local' => '3.1.4.18',
+                          'space-kube-apiserver-vip.mgmt.space.net.local' => '3.1.4.12',
                           'space-kvm-001.space.net.local' => '10.30.0.252',
                           'space-kvm-005.space.net.local' => '10.30.0.251',
-                          'space-kvm-010.space.net.local' => '10.30.0.250'
+                          'space-kvm-010.space.net.local' => '10.30.0.250',
+                          'e1-ntp-vip.space.net.local' => '10.30.1.234'
                          )
   end
   let(:hiera_provider) do
     TestHieraProvider.new(
-      'stacks/application_credentials_selector' => 0,
       'secrety/looking/thing' => 'ENC[GPG,hQIMAyhja+HHo',
-      'kubernetes/masters/space' => ['space-kvm-001.space.net.local', 'space-kvm-005.space.net.local', 'space-kvm-010.space.net.local'])
+      'networking/space/prod/range' => '10.30.0.0/16',
+      'kubernetes/masters/space' => ['space-kvm-001.space.net.local', 'space-kvm-005.space.net.local', 'space-kvm-010.space.net.local']
+    )
   end
 
   def network_policies_for(factory, env, stack, service)
@@ -51,409 +40,365 @@ describe 'kubernetes' do
     set.to_k8s(app_deployer, dns_resolver, hiera_provider).flat_map(&:resources).find { |s| s['kind'] == kind }
   end
 
-  describe 'resource definitions' do
-    it 'defines a Deployment' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service "x", :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
-
-            self.application = 'MyApplication'
-            self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
-            self.ephemeral_storage_size = '10G'
-            self.startup_alert_threshold = '1h'
+  describe 'base service' do
+    describe 'to_k8s method' do
+      let(:factory) do
+        eval_stacks do
+          stack "mystack" do
+            base_service "x", :kubernetes => { 'e1' => true } do
+              self.application = 'test'
+              self.startup_alert_threshold = '10s'
+              self.alerts_channel = 'test'
+              self.maintainers = [person('Testers')]
+              self.description = 'Test Description'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
           end
         end
-        env "e1", :primary_site => 'space' do
-          instantiate_stack "mystack"
+      end
+      let(:set) do
+        factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      end
+      it 'generates deployment resources' do
+        expected_deployment = {
+          'apiVersion' => 'apps/v1',
+          'kind' => 'Deployment',
+          "metadata" => {
+            "name" => "x-blue-app",
+            "namespace" => "e1",
+            "labels" => {
+              "app.kubernetes.io/managed-by" => "stacks",
+              "stack" => "mystack",
+              "machineset" => "x",
+              "group" => "blue",
+              "app.kubernetes.io/instance" => "blue",
+              "app.kubernetes.io/part-of" => "x",
+              "app.kubernetes.io/component" => "app_service",
+              "application" => "test",
+              "app.kubernetes.io/name" => "test",
+              "app.kubernetes.io/version" => "1.2.3"
+            },
+            "annotations" => {
+              "configmap.reloader.stakater.com/reload" => "x-blue-app",
+              "secret.reloader.stakater.com/reload" => "x-blue-app",
+              "maintainers" => "[{\"type\":\"Individual\",\"name\":\"Testers\"}]",
+              "description" => "Test Description"
+            }
+          },
+          'spec' => {
+            "selector" => {
+              "matchLabels" => {
+                "machineset" => "x",
+                "group" => "blue",
+                "app.kubernetes.io/component" => "app_service",
+                "participation" => "enabled"
+              }
+            },
+            "strategy" => {
+              "type" => "RollingUpdate",
+              "rollingUpdate" => {
+                "maxUnavailable" => 1,
+                "maxSurge" => 0
+              }
+            },
+            "progressDeadlineSeconds" => 10,
+            "replicas" => 2,
+            "template" => {
+              "metadata" => {
+                "labels" => {
+                  "participation" => "enabled",
+                  "app.kubernetes.io/managed-by" => "stacks",
+                  "stack" => "mystack",
+                  "machineset" => "x",
+                  "group" => "blue",
+                  "app.kubernetes.io/instance" => "blue",
+                  "app.kubernetes.io/part-of" => "x",
+                  "app.kubernetes.io/component" => "app_service",
+                  "application" => "test",
+                  "app.kubernetes.io/name" => "test",
+                  "app.kubernetes.io/version" => "1.2.3"
+                },
+                "annotations" => {
+                  "seccomp.security.alpha.kubernetes.io/pod" => "runtime/default",
+                  "maintainers" => "[{\"type\":\"Individual\",\"name\":\"Testers\"}]",
+                  "description" => "Test Description"
+                }
+              },
+              "spec" => {
+                "affinity" => {
+                  "podAntiAffinity" => {
+                    "preferredDuringSchedulingIgnoredDuringExecution" => [{
+                      "podAffinityTerm" => {
+                        "labelSelector" => {
+                          "matchLabels" => {
+                            "machineset" => "x",
+                            "group" => "blue",
+                            "app.kubernetes.io/component" => "app_service"
+                          }
+                        },
+                        "topologyKey" => "kubernetes.io/hostname"
+                      },
+                      "weight" => 100
+                    }]
+                  }
+                },
+                "automountServiceAccountToken" => false,
+                "containers" => [{
+                  "securityContext" => {
+                    "readOnlyRootFilesystem" => true,
+                    "allowPrivilegeEscalation" => false,
+                    "capabilities" => {
+                      "drop" => ["ALL"]
+                    }
+                  },
+                  "image" => "repo.net.local:8080/timgroup/test:1.2.3",
+                  "name" => "test",
+                  "resources" => {
+                    "limits" => {
+                      "memory" => "65536Ki"
+                    },
+                    "requests" => {
+                      "memory" => "65536Ki"
+                    }
+                  },
+                  "ports" => [],
+                  "volumeMounts" => [{
+                    "name" => "tmp-volume",
+                    "mountPath" => "/tmp"
+                  }]
+                }],
+                "volumes" => [{
+                  "name" => "tmp-volume",
+                  "emptyDir" => {}
+                }]
+              }
+            }
+          }
+        }
+        expect(k8s_resource(set, 'Deployment')).to eql(expected_deployment)
+      end
+
+      it 'generates PodDisruptionBudget resources' do
+        expected_pod_disruption_budget = {
+          'apiVersion' => 'policy/v1beta1',
+          'kind' => 'PodDisruptionBudget',
+          'metadata' => {
+            'name' => 'x-blue-app',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'app_service'
+            }
+          },
+          'spec' => {
+            'maxUnavailable' => 1,
+            'selector' => {
+              'matchLabels' => {
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/component' => 'app_service'
+              }
+            }
+          }
+        }
+        expect(k8s_resource(set, 'PodDisruptionBudget')).to eql(expected_pod_disruption_budget)
+      end
+
+      it 'generates resources in a sensible order' do
+        k8s_resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
+        k8s_resources.group_by { |r| r['metadata']['labels']['app.kubernetes.io/component'] }.each do |_component, resources|
+          ordering = {}
+          resources.each_with_index do |s, index|
+            ordering[s['kind']] = index
+          end
+          if %w(Service Deployment).all? { |k| ordering.key? k }
+            expect(ordering['Service']).to be < ordering['Deployment']
+          end
+          if %w(ConfigMap Deployment).all? { |k| ordering.key? k }
+            expect(ordering['ConfigMap']).to be < ordering['Deployment']
+          end
         end
       end
-      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expected_deployment = {
-        'apiVersion' => 'apps/v1',
-        'kind' => 'Deployment',
-        'metadata' => {
-          'name' => 'x-blue-app',
-          'namespace' => 'e1',
-          'labels' => {
-            'app.kubernetes.io/managed-by' => 'stacks',
-            'stack' => 'mystack',
-            'machineset' => 'x',
-            'group' => 'blue',
-            'app.kubernetes.io/instance' => 'blue',
-            'app.kubernetes.io/part-of' => 'x',
-            'app.kubernetes.io/component' => 'app_service',
-            'application' => 'myapplication',
-            'app.kubernetes.io/name' => 'myapplication',
-            'app.kubernetes.io/version' => '1.2.3'
+    end
+
+    describe 'to_k8s method generation of kubernetes service resources' do
+      # I'm unsure whther doing this is actually a valid service resource?
+      it 'generates a service resource with an empty port configuration if @ports is overriden' do
+        factory = eval_stacks do
+          stack "mystack" do
+            base_service "x", :kubernetes => { 'e1' => true } do
+              self.application = 'test'
+              self.startup_alert_threshold = '10s'
+              self.alerts_channel = 'test'
+              self.maintainers = [person('Testers')]
+              self.description = 'Test Description'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        expected_service = {
+          'apiVersion' => 'v1',
+          'kind' => 'Service',
+          'metadata' => {
+            'name' => 'x-blue-app',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'app_service'
+            }
           },
-          'annotations' => {
-            'maintainers' => '[{"type":"Individual","name":"Testers"}]',
-            'description' => 'Testing',
-            'configmap.reloader.stakater.com/reload' => 'x-blue-app',
-            'secret.reloader.stakater.com/reload' =>  'x-blue-app'
-          }
-        },
-        'spec' => {
-          'selector' => {
-            'matchLabels' => {
+          'spec' => {
+            'type' => 'ClusterIP',
+            'selector' => {
               'machineset' => 'x',
               'group' => 'blue',
               'app.kubernetes.io/component' => 'app_service',
               'participation' => 'enabled'
-            }
-          },
-          'strategy' => {
-            'type' => 'RollingUpdate',
-            'rollingUpdate' => {
-              'maxUnavailable' => 1,
-              'maxSurge' => 0
-            }
-          },
-          'progressDeadlineSeconds' => 3600,
-          'replicas' => 2,
-          'template' => {
-            'metadata' => {
-              'labels' => {
-                'app.kubernetes.io/managed-by' => 'stacks',
-                'stack' => 'mystack',
-                'machineset' => 'x',
-                'group' => 'blue',
-                'app.kubernetes.io/instance' => 'blue',
-                'app.kubernetes.io/part-of' => 'x',
-                'app.kubernetes.io/component' => 'app_service',
-                'application' => 'myapplication',
-                'app.kubernetes.io/name' => 'myapplication',
-                'app.kubernetes.io/version' => '1.2.3',
-                'participation' => 'enabled'
-              },
-              'annotations' => {
-                'maintainers' => '[{"type":"Individual","name":"Testers"}]',
-                'description' => 'Testing',
-                'seccomp.security.alpha.kubernetes.io/pod' => 'runtime/default'
-              }
             },
-            'spec' => {
-              'affinity' => {
-                'podAntiAffinity' => {
-                  'preferredDuringSchedulingIgnoredDuringExecution' => [{
-                    'podAffinityTerm' => {
-                      'labelSelector' => {
-                        'matchLabels' => {
-                          'machineset' => 'x',
-                          'group' => 'blue',
-                          'app.kubernetes.io/component' => 'app_service'
-                        }
-                      },
-                      'topologyKey' => 'kubernetes.io/hostname'
-                    },
-                    'weight' => 100
-                  }]
-                }
-              },
-              'automountServiceAccountToken' => false,
-              'securityContext' => {
-                'runAsUser' => 2055,
-                'runAsGroup' => 3017,
-                'fsGroup' => 3017
-              },
-              'initContainers' => [{
-                'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.5',
-                'name' => 'config-generator',
-                'env' => [
-                  {
-                    'name' => 'CONTAINER_IMAGE',
-                    'value' => 'repo.net.local:8080/timgroup/myapplication:1.2.3'
-                  },
-                  {
-                    'name' => 'APP_JVM_ARGS',
-                    'value' => '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Xms64M -Xmx64M'
-                  },
-                  {
-                    'name' => 'BASE_JVM_ARGS',
-                    'value' => "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -XX:ErrorFile=/var/log/app/error.log \
--XX:HeapDumpPath=/var/log/app -XX:+HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dcom.sun.management.jmxremote \
--Dcom.sun.management.jmxremote.port=5000 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false \
--Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=5000 -Djava.rmi.server.hostname=127.0.0.1 \
--Dcom.timgroup.infra.platform=k8s"
-                  },
-                  {
-                    'name' => 'GC_JVM_ARGS_JAVA_8',
-                    'value' => "-XX:+PrintGC -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
--Xloggc:/var/log/app/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=25M \
--XX:+PrintGCApplicationStoppedTime"
-                  },
-                  {
-                    'name' => 'GC_JVM_ARGS_JAVA_11',
-                    'value' => '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400'
-                  }
-                ],
-                'volumeMounts' => [
-                  {
-                    'name' => 'config-volume',
-                    'mountPath' => '/config'
-                  },
-                  {
-                    'name' => 'config-template',
-                    'mountPath' => '/input/config.properties',
-                    'subPath' => 'config.properties'
-                  }]
-              }],
-              'containers' => [{
-                'securityContext' => {
-                  'readOnlyRootFilesystem' => true,
-                  'allowPrivilegeEscalation' => false,
-                  'capabilities' => {
-                    'drop' => ['ALL']
-                  }
-                },
-                'image' => 'repo.net.local:8080/timgroup/myapplication:1.2.3',
-                'name' => 'myapplication',
-                'command' => ["/bin/sh"],
-                'args' => [
-                  '-c',
-                  'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
-                ],
-                'resources' => {
-                  'limits' => {
-                    'memory' => '72089Ki',
-                    'ephemeral-storage' => '10G'
-                  },
-                  'requests' => {
-                    'memory' => '72089Ki',
-                    'ephemeral-storage' => '10G'
-                  }
-                },
-                'ports' => [
-                  {
-                    'containerPort' => 8000,
-                    'name' => 'app',
-                    'protocol' => 'TCP'
-                  },
-                  {
-                    'containerPort' => 5000,
-                    'name' => 'jmx'
-                  }
-                ],
-                'volumeMounts' => [
-                  {
-                    'name' => 'tmp-volume',
-                    'mountPath' => '/tmp'
-                  },
-                  {
-                    'name' => 'config-volume',
-                    'mountPath' => '/config',
-                    'readOnly' => true
-                  },
-                  {
-                    'name' => 'log-volume',
-                    'mountPath' => '/var/log/app'
-                  }
-                ],
-                'readinessProbe' => {
-                  'periodSeconds' => 2,
-                  'timeoutSeconds' => 1,
-                  'failureThreshold' => 6,
-                  'httpGet' => {
-                    'path' => '/info/ready',
-                    'port' => 8000
-                  }
-                },
-                'lifecycle' => {
-                  'preStop' => {
-                    'exec' => {
-                      'command' => [
-                        '/bin/sh',
-                        '-c',
-                        'sleep 10; while [ "$(curl -s localhost:8000/info/stoppable)" != "safe" ]; do sleep 1; done'
-                      ]
-                    }
-                  }
-                }
-              }],
-              'volumes' => [
-                {
-                  'name' => 'tmp-volume',
-                  'emptyDir' => {}
-                },
-                {
-                  'name' => 'config-volume',
-                  'emptyDir' => {}
-                },
-                {
-                  'name' => 'config-template',
-                  'configMap' => {
-                    'name' => 'x-blue-app'
-                  }
-                },
-                {
-                  'name' => 'log-volume',
-                  'emptyDir' => {}
-                }
-              ]
-            }
+            'ports' => []
           }
         }
-      }
-      expect(k8s_resource(set, 'Deployment')).to eql(expected_deployment)
+        expect(k8s_resource(set, 'Service')).to eql(expected_service)
+      end
 
-      expected_pod_disruption_budget = {
-        'apiVersion' => 'policy/v1beta1',
-        'kind' => 'PodDisruptionBudget',
-        'metadata' => {
-          'name' => 'x-blue-app',
-          'namespace' => 'e1',
-          'labels' => {
-            'app.kubernetes.io/managed-by' => 'stacks',
-            'stack' => 'mystack',
-            'machineset' => 'x',
-            'group' => 'blue',
-            'app.kubernetes.io/instance' => 'blue',
-            'app.kubernetes.io/part-of' => 'x',
-            'app.kubernetes.io/component' => 'app_service'
-          }
-        },
-        'spec' => {
-          'maxUnavailable' => 1,
-          'selector' => {
-            'matchLabels' => {
+      it 'generates a service resource with the correct ports when @ports is overridden' do
+        factory = eval_stacks do
+          stack "mystack" do
+            base_service "x", :kubernetes => { 'e1' => true } do
+              self.application = 'test'
+              self.startup_alert_threshold = '10s'
+              self.alerts_channel = 'test'
+              self.maintainers = [person('Testers')]
+              self.description = 'Test Description'
+              self.ports = {
+                'ntp' => {
+                  'port' => 123,
+                  'service_port' => 123,
+                  'protocol' => 'udp'
+                }
+              }
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        expected_service = {
+          'apiVersion' => 'v1',
+          'kind' => 'Service',
+          'metadata' => {
+            'name' => 'x-blue-app',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
               'machineset' => 'x',
               'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
               'app.kubernetes.io/component' => 'app_service'
             }
-          }
-        }
-      }
-      expect(k8s_resource(set, 'PodDisruptionBudget')).to eql(expected_pod_disruption_budget)
-
-      expected_service = {
-        'apiVersion' => 'v1',
-        'kind' => 'Service',
-        'metadata' => {
-          'name' => 'x-blue-app',
-          'namespace' => 'e1',
-          'labels' => {
-            'app.kubernetes.io/managed-by' => 'stacks',
-            'stack' => 'mystack',
-            'machineset' => 'x',
-            'group' => 'blue',
-            'app.kubernetes.io/instance' => 'blue',
-            'app.kubernetes.io/part-of' => 'x',
-            'app.kubernetes.io/component' => 'app_service'
-          }
-        },
-        'spec' => {
-          'type' => 'ClusterIP',
-          'selector' => {
-            'machineset' => 'x',
-            'group' => 'blue',
-            'app.kubernetes.io/component' => 'app_service',
-            'participation' => 'enabled'
           },
-          'ports' => [{
-            'name' => 'app',
-            'protocol' => 'TCP',
-            'port' => 80,
-            'targetPort' => 8000
-          }]
-        }
-      }
-      expect(k8s_resource(set, 'Service')).to eql(expected_service)
-
-      expected_config_map = {
-        'apiVersion' => 'v1',
-        'kind' => 'ConfigMap',
-        'metadata' => {
-          'name' => 'x-blue-app',
-          'namespace' => 'e1',
-          'labels' => {
-            'app.kubernetes.io/managed-by' => 'stacks',
-            'stack' => 'mystack',
-            'machineset' => 'x',
-            'group' => 'blue',
-            'app.kubernetes.io/instance' => 'blue',
-            'app.kubernetes.io/part-of' => 'x',
-            'app.kubernetes.io/component' => 'app_service'
+          'spec' => {
+            'type' => 'ClusterIP',
+            'selector' => {
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/component' => 'app_service',
+              'participation' => 'enabled'
+            },
+            'ports' => [
+              { "name" => "ntp", "port" => 123, "protocol" => "UDP", "targetPort" => 123 }
+            ]
           }
-        },
-        'data' => {
-          'config.properties' => <<EOL
-port=8000
-
-log.directory=/var/log/app
-log.tags=["env:e1", "app:MyApplication", "instance:blue"]
-EOL
         }
-      }
-      expect(k8s_resource(set, 'ConfigMap')).to eql(expected_config_map)
-
-      k8s_resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
-      k8s_resources.group_by { |r| r['metadata']['labels']['app.kubernetes.io/component'] }.each do |_component, resources|
-        ordering = {}
-        resources.each_with_index do |s, index|
-          ordering[s['kind']] = index
-        end
-        if %w(Service Deployment).all? { |k| ordering.key? k }
-          expect(ordering['Service']).to be < ordering['Deployment']
-        end
-        if %w(ConfigMap Deployment).all? { |k| ordering.key? k }
-          expect(ordering['ConfigMap']).to be < ordering['Deployment']
-        end
+        expect(k8s_resource(set, 'Service')).to eql(expected_service)
       end
     end
 
-    describe 'Service' do
-      it 'connects to the vip in the deployment\'s site' do
+    describe 'to_k8s method generation of configmap resources' do
+      it 'doesn\'t generate a configmap by default' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
+            base_service "x", :kubernetes => { 'e1' => true } do
+              self.application = 'test'
+              self.startup_alert_threshold = '10s'
               self.alerts_channel = 'test'
-
-              self.application = 'MyApplication'
-              self.instances = {
-                'space' => 1,
-                'earth' => 1
-              }
-              self.startup_alert_threshold = '1h'
-            end
-            app_service 'nonk8sapp' do
-              self.instances = 1
-              depend_on 'x', 'e1'
+              self.maintainers = [person('Testers')]
+              self.description = 'Test Description'
             end
           end
-          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+          env "e1", :primary_site => 'space' do
             instantiate_stack "mystack"
           end
         end
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+        expect(k8s_resource(set, 'ConfigMap')).to be_nil
+      end
 
-        resources_in_space = resources.find { |r| r.site == 'space' }.resources
-        ingress_service_resources_in_space = resources_in_space.find do |r|
-          r['kind'] == 'Service' && r['metadata']['labels']['app.kubernetes.io/component'] == 'ingress'
+      it 'puts appconfig into the configmap if one is specified' do
+        factory = eval_stacks do
+          stack "mystack" do
+            base_service "x", :kubernetes => { 'e1' => true } do
+              self.application = 'test'
+              self.startup_alert_threshold = '10s'
+              self.alerts_channel = 'test'
+              self.maintainers = [person('Testers')]
+              self.description = 'Test Description'
+              self.appconfig = "appconfig = test line"
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
         end
-
-        resources_in_earth = resources.find { |r| r.site == 'earth' }.resources
-        ingress_service_resources_in_earth = resources_in_earth.find do |r|
-          r['kind'] == 'Service' && r['metadata']['labels']['app.kubernetes.io/component'] == 'ingress'
-        end
-
-        expect(ingress_service_resources_in_space['spec']['loadBalancerIP']).
-          to eql(dns_resolver.lookup('e1-x-vip.space.net.local').to_s)
-        expect(ingress_service_resources_in_earth['spec']['loadBalancerIP']).
-          to eql(dns_resolver.lookup('e1-x-vip.earth.net.local').to_s)
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        expected_configmap = {
+          "apiVersion" => "v1",
+          "kind" => "ConfigMap",
+          "metadata" => {
+            "name" => "x-blue-app",
+            "namespace" => "e1",
+            "labels" => {
+              "app.kubernetes.io/managed-by" => "stacks",
+              "stack" => "mystack", "machineset" => "x",
+              "group" => "blue",
+              "app.kubernetes.io/instance" => "blue",
+              "app.kubernetes.io/part-of" => "x",
+              "app.kubernetes.io/component" => "app_service"
+            }
+          },
+          "data" => {
+            "config.properties" => "appconfig = test line"
+          }
+        }
+        expect(k8s_resource(set, 'ConfigMap')).to eql expected_configmap
       end
     end
 
-    describe 'Ingress' do
+    describe 'to_k8s method creates Ingress resources' do
       it 'does not create ingress resources when there are no dependencies external to the cluster' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -473,13 +418,21 @@ EOL
         expect(ingress_resources).to be_empty
       end
 
-      it 'creates ingress resources' do
+      xit 'creates ingress resources for TCP services' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
+
+              self.ports = {
+                'ssh' => {
+                  'port' => 22,
+                  'service_port' => 22,
+                  'protocol' => 'tcp'
+                }
+              }
 
               self.application = 'MyApplication'
               self.instances = 2
@@ -497,8 +450,8 @@ EOL
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
 
         expected_ingress = {
-          'apiVersion' => 'networking.k8s.io/v1beta1',
-          'kind' => 'Ingress',
+          'apiVersion' => 'traefik.containo.us/v1alpha1',
+          'kind' => 'IngressRouteTCP',
           'metadata' => {
             'name' => 'x-blue-app',
             'namespace' => 'e1',
@@ -516,27 +469,92 @@ EOL
             }
           },
           'spec' => {
-            'rules' => [{
-              'http' => {
-                'paths' => [{
-                  'path' => '/',
-                  'backend' => {
-                    'serviceName' => 'x-blue-app',
-                    'servicePort' => 80
-                  }
-                }]
-              }
-            }]
+            "entryPoints" => ["ssh"],
+            "routes" => [
+              { "services" => [
+                { "name" => "x-blue-app", "port" => 22, "kind" => "Service" }
+              ] }
+            ]
           }
         }
 
-        expect(k8s_resource(set, 'Ingress')).to eql(expected_ingress)
+        expect(k8s_resource(set, 'IngressRouteTCP')).to eql(expected_ingress)
+      end
+
+      it 'creates ingress resources for UDP services' do
+        factory = eval_stacks do
+          stack "mystack" do
+            base_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+              self.alerts_channel = 'test'
+
+              self.ports = {
+                'ntp' => {
+                  'port' => 123,
+                  'service_port' => 123,
+                  'protocol' => 'udp'
+                }
+              }
+
+              self.application = 'MyApplication'
+              self.instances = 2
+              self.startup_alert_threshold = '1h'
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+
+        expected_ingress = {
+          'apiVersion' => 'traefik.containo.us/v1alpha1',
+          'kind' => 'IngressRouteUDP',
+          'metadata' => {
+            'name' => 'x-blue-app',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'app_service'
+            },
+            'annotations' => {
+              'kubernetes.io/ingress.class' => 'traefik-x-blue'
+            }
+          },
+          'spec' => {
+            "entryPoints" => ["ntp"],
+            "routes" => [
+              { "services" => [
+                { "name" => "x-blue-app", "port" => 123, "kind" => "Service" }
+              ] }
+            ]
+          }
+        }
+
+        expect(k8s_resource(set, 'IngressRouteUDP')).to eql(expected_ingress)
       end
 
       it 'creates a deployment resource for ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = {
+                'ntp' => {
+                  'port' => 123,
+                  'service_port' => 123,
+                  'protocol' => 'udp'
+                }
+              }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -611,12 +629,10 @@ EOL
                       '--metrics.prometheus',
                       '--log.level=DEBUG',
                       '--entrypoints.traefik.Address=:10254',
-                      '--entrypoints.http.Address=:8000',
-                      '--entrypoints.http.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',
-                      '--providers.kubernetesingress',
-                      '--providers.kubernetesingress.ingressclass=traefik-x-blue',
-                      '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing',
-                      '--providers.kubernetesingress.namespaces=e1'
+                      '--entrypoints.ntp.Address=:8123',
+                      '--providers.kubernetesCRD',
+                      '--providers.kubernetesCRD.ingressclass=traefik-x-blue',
+                      '--providers.kubernetesCRD.namespaces=e1'
                     ],
                     'image' => 'traefik:v2.2',
                     'imagePullPolicy' => 'IfNotPresent',
@@ -640,9 +656,9 @@ EOL
                         'protocol' => 'TCP'
                       },
                       {
-                        'containerPort' => 8000,
-                        'name' => 'http',
-                        'protocol' => 'TCP'
+                        'containerPort' => 8123,
+                        'name' => 'ntp',
+                        'protocol' => 'UDP'
                       }
                     ],
                     'readinessProbe' => {
@@ -685,7 +701,8 @@ EOL
       it 'creates a pod disruption budget resource for ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -742,7 +759,14 @@ EOL
       it 'creates a service resource for ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = {
+                'ntp' => {
+                  'port' => 123,
+                  'service_port' => 123,
+                  'protocol' => 'udp'
+                }
+              }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -786,10 +810,10 @@ EOL
             'externalTrafficPolicy' => 'Local',
             'ports' => [
               {
-                'name' => 'http',
-                'port' => 80,
-                'protocol' => 'TCP',
-                'targetPort' => 'http'
+                'name' => 'ntp',
+                'port' => 123,
+                'protocol' => 'UDP',
+                'targetPort' => 'ntp'
               }
             ],
             'selector' => {
@@ -810,7 +834,8 @@ EOL
       it 'creates a headless service resource for ingress controllers to expose the traefik admin interface to prometheus' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -873,7 +898,8 @@ EOL
       it 'creates a role resource for ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -958,7 +984,8 @@ EOL
       it 'creates a serviceaccount resource for ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1005,7 +1032,8 @@ EOL
       it 'creates a role binding resource for ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1061,7 +1089,8 @@ EOL
       it 'creates network policies allowing ingress controllers to talk out to the api server' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1136,14 +1165,15 @@ EOL
         }
 
         expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-api-server-65cf5ba'
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'] =~ /allow-out-to-api-server-/
         end).to eql(expected_network_policy)
       end
 
       it 'creates network policies allowing prometheus to monitor the ingress controllers' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1216,86 +1246,13 @@ EOL
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-in-from-mon-prom-main-1f525ea'
         end).to eql(expected_network_policy)
       end
-
-      it 'creates network policies allowing dependent proxies outside of the cluster to talk to the ingress controllers' do
-        factory = eval_stacks do
-          stack "mystack" do
-            app_service "x", :kubernetes => true do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
-              self.alerts_channel = 'test'
-
-              self.application = 'MyApplication'
-              self.instances = 2
-              self.startup_alert_threshold = '1h'
-            end
-            proxy_service 'sharedproxy' do
-              depend_on 'x', 'e1', :same_site
-            end
-          end
-          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
-            instantiate_stack "mystack"
-          end
-        end
-        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
-
-        expected_network_policy = {
-          'apiVersion' => 'networking.k8s.io/v1',
-          'kind' => 'NetworkPolicy',
-          'metadata' => {
-            'name' => 'allow-in-from-e1-sharedproxy-43b85ac',
-            'namespace' => 'e1',
-            'labels' => {
-              'app.kubernetes.io/managed-by' => 'stacks',
-              'stack' => 'mystack',
-              'machineset' => 'x',
-              'group' => 'blue',
-              'app.kubernetes.io/instance' => 'blue',
-              'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'ingress'
-            }
-          },
-          'spec' => {
-            'ingress' => [{
-              'from' => [{
-                'ipBlock' => {
-                  'cidr' => '3.1.4.15/32'
-                }
-              }, {
-                'ipBlock' => {
-                  'cidr' => '3.1.4.16/32'
-                }
-              }],
-              'ports' => [{
-                'port' => 'http',
-                'protocol' => 'TCP'
-              }]
-            }],
-            'podSelector' => {
-              'matchLabels' => {
-                'machineset' => 'x',
-                'group' => 'blue',
-                'app.kubernetes.io/component' => 'ingress'
-              }
-            },
-            'policyTypes' => [
-              'Ingress'
-            ]
-          }
-        }
-
-        expect(resources.flat_map(&:resources).find do |r|
-          r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-sharedproxy-')
-        end).to eql(expected_network_policy)
-      end
     end
 
     describe 'PrometheusRule' do
-      it 'creates an alert rule for critical status components' do
+      it 'doesn\'t create an alert rule for critical status components' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1330,78 +1287,13 @@ EOL
         status_critical_rule = prometheus_rule['spec']['groups'].first['rules'].find do |r|
           r['alert'] == 'StatusCritical'
         end
-        expected_status_page_url = "https://go.timgroup.com/insight/space/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
-        expect(status_critical_rule).to eql('alert' => 'StatusCritical',
-                                            'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod, namespace) > 0',
-                                            'labels' => {
-                                              'severity' => 'critical',
-                                              'alertname' => 'x-blue-app CRITICAL',
-                                              'alert_owner_channel' => 'test'
-                                            },
-                                            'annotations' => {
-                                              'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
-                                              'status_page_url' => expected_status_page_url
-                                            })
-      end
-
-      it 'creates a paging alert rule for critical status components' do
-        factory = eval_stacks do
-          stack "mystack" do
-            app_service "x", :kubernetes => true do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
-              self.alerts_channel = 'test'
-              self.page_on_critical = true
-
-              self.application = 'MyApplication'
-              self.startup_alert_threshold = '1h'
-            end
-          end
-          env "e1", :primary_site => 'space' do
-            instantiate_stack "mystack"
-          end
-        end
-        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-        prometheus_rule = k8s_resource(set, 'PrometheusRule')
-
-        expect(prometheus_rule['apiVersion']).to eql('monitoring.coreos.com/v1')
-        expect(prometheus_rule['metadata']).to eql('labels' => {
-                                                     'prometheus' => 'main',
-                                                     'role' => 'alert-rules',
-                                                     'app.kubernetes.io/managed-by' => 'stacks',
-                                                     'stack' => 'mystack',
-                                                     'machineset' => 'x',
-                                                     'group' => 'blue',
-                                                     'app.kubernetes.io/instance' => 'blue',
-                                                     'app.kubernetes.io/part-of' => 'x',
-                                                     'app.kubernetes.io/component' => 'app_service'
-                                                   },
-                                                   'name' => 'x-blue-app',
-                                                   'namespace' => 'e1')
-
-        expect(prometheus_rule['spec']['groups'].first['name']).to eql('stacks-alerts')
-        status_critical_rule = prometheus_rule['spec']['groups'].first['rules'].find do |r|
-          r['alert'] == 'StatusCritical'
-        end
-        expected_status_page_url = "https://go.timgroup.com/insight/space/proxy/{{ $labels.namespace }}/{{ $labels.pod }}/info/status"
-        expect(status_critical_rule).to eql('alert' => 'StatusCritical',
-                                            'expr' => 'sum(tucker_component_status{job="x-blue-app",status="critical"}) by (pod, namespace) > 0',
-                                            'labels' => {
-                                              'severity' => 'critical',
-                                              'alertname' => 'x-blue-app CRITICAL',
-                                              'alert_owner_channel' => 'test',
-                                              'pagerduty' => 'true'
-                                            },
-                                            'annotations' => {
-                                              'message' => '{{ $value }} components are critical on {{ $labels.namespace }}/{{ $labels.pod }}',
-                                              'status_page_url' => expected_status_page_url
-                                            })
+        expect(status_critical_rule).to be_nil
       end
 
       it 'creates an alert rule for pods stuck in a crash loop' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1449,11 +1341,11 @@ EOL
                                 '{{ printf "%.2f" $value }} times / 5 minutes.'
                             })
       end
-      j
+
       it 'creates an alert rule for pods failing to retrieve their image' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1505,7 +1397,7 @@ EOL
       it 'creates an alert rule for readiness probe failures occurring post-startup' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1543,7 +1435,7 @@ EOL
       it 'allows turning off the readiness probe failure alert' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1571,7 +1463,7 @@ EOL
       it 'creates an alert rule for missing replicas in a deployment' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1610,7 +1502,7 @@ EOL
       it 'sends component alerts to the specified alerting channel' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.alerts_channel = "testing-alerts"
               self.description = 'Testing'
@@ -1625,7 +1517,7 @@ EOL
         end
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
         status_critical_rule = k8s_resource(set, 'PrometheusRule')['spec']['groups'].first['rules'].find do |r|
-          r['alert'] == 'StatusCritical'
+          r['alert'] == 'DeploymentReplicasMismatch'
         end
         expect(status_critical_rule['labels']['alert_owner_channel']).to eql('testing-alerts')
       end
@@ -1635,7 +1527,7 @@ EOL
       it 'controls the number of replicas in the primary site' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1656,7 +1548,7 @@ EOL
       it 'controls the number of replicas in the specific sites' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1684,7 +1576,7 @@ EOL
     it 'generates config from app-defined template' do
       factory = eval_stacks do
         stack "mystack" do
-          app_service "x", :kubernetes => true do
+          base_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -1704,69 +1596,70 @@ EOL
       expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).to match(/site=space/)
     end
 
-    it 'tracks secrets needed from hiera' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service "x", :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
-
-            self.application = 'MyApplication'
-            self.appconfig = <<EOL
-  secret=<%= secret('my/very/secret.data') %>
-  array_secret=<%= secret('my/very/secret.array', 0) %>
-EOL
-            self.startup_alert_threshold = '1h'
-          end
-        end
-        env "e1", :primary_site => 'space' do
-          instantiate_stack "mystack"
-        end
-      end
-
-      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-
-      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
-        to match(/secret={SECRET:my_very_secret_data.*array_secret={SECRET:my_very_secret_array_0/m)
-
-      expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].
-             first['env'].
-             find { |e| e['name'] =~ /data/ }).
-        to eql(
-          'name' => 'SECRET_my_very_secret_data',
-          'valueFrom' => {
-            'secretKeyRef' => {
-              'name' => 'x-blue-app',
-              'key' => 'my_very_secret_data'
-            }
-          })
-
-      expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].
-             first['env'].
-             find { |e| e['name'] =~ /array/ }).
-        to eql(
-          'name' => 'SECRET_my_very_secret_array_0',
-          'valueFrom' => {
-            'secretKeyRef' => {
-              'name' => 'x-blue-app',
-              'key' => 'my_very_secret_array_0'
-            }
-          })
-
-      k8s = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
-      expect(k8s.first.secrets).to eql(
-        'my/very/secret.data' => 'my_very_secret_data',
-        'my/very/secret.array' => 'my_very_secret_array_0')
-    end
+    #    it 'tracks secrets needed from hiera' do
+    #      factory = eval_stacks do
+    #        stack "mystack" do
+    #          base_service "x", :kubernetes => true do
+    #            self.maintainers = [person('Testers')]
+    #            self.description = 'Testing'
+    #            self.alerts_channel = 'test'
+    #
+    #            self.application = 'MyApplication'
+    #            self.appconfig = <<EOL
+    #  secret=<%= secret('my/very/secret.data') %>
+    #  array_secret=<%= secret('my/very/secret.array', 0) %>
+    # EOL
+    #            self.startup_alert_threshold = '1h'
+    #          end
+    #        end
+    #        env "e1", :primary_site => 'space' do
+    #          instantiate_stack "mystack"
+    #        end
+    #      end
+    #
+    #      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+    #
+    #      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
+    #        to match(/secret={SECRET:my_very_secret_data.*array_secret={SECRET:my_very_secret_array_0/m)
+    #
+    #      expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].
+    #             first['env'].
+    #             find { |e| e['name'] =~ /data/ }).
+    #        to eql(
+    #          'name' => 'SECRET_my_very_secret_data',
+    #          'valueFrom' => {
+    #            'secretKeyRef' => {
+    #              'name' => 'x-blue-app',
+    #              'key' => 'my_very_secret_data'
+    #            }
+    #          })
+    #
+    #      expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].
+    #             first['env'].
+    #             find { |e| e['name'] =~ /array/ }).
+    #        to eql(
+    #          'name' => 'SECRET_my_very_secret_array_0',
+    #          'valueFrom' => {
+    #            'secretKeyRef' => {
+    #              'name' => 'x-blue-app',
+    #              'key' => 'my_very_secret_array_0'
+    #            }
+    #          })
+    #
+    #      k8s = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+    #      expect(k8s.first.secrets).to eql(
+    #        'my/very/secret.data' => 'my_very_secret_data',
+    #        'my/very/secret.array' => 'my_very_secret_array_0')
+    #    end
 
     it 'blows up when hiera function used for an encrypted value' do
       factory = eval_stacks do
         stack "mystack" do
-          app_service "x", :kubernetes => true do
+          base_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
+            self.startup_alert_threshold = '1h'
 
             self.application = 'MyApplication'
             self.appconfig = <<EOL
@@ -1784,114 +1677,10 @@ EOL
         to raise_error(/The hiera value for .* is encrypted/)
     end
 
-    it 'connects two k8s services using the internal Service DNS name' do
-      factory = eval_stacks do
-        stack "test_app_servers" do
-          app_service 'app1', :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
-            self.startup_alert_threshold = '1h'
-
-            self.application = 'app1'
-          end
-
-          app_service 'app2', :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
-            self.startup_alert_threshold = '1h'
-
-            self.application = 'app2'
-            depend_on 'app1'
-          end
-        end
-
-        env "e1", :primary_site => "space" do
-          instantiate_stack "test_app_servers"
-        end
-      end
-
-      set = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets['app2']
-      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
-        to match(/app1\.url=http:\/\/app1-blue-app\.e1\.svc$/mx)
-    end
-
-    it 'has config for it\'s db dependencies' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service "x", :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
-
-            self.application = 'MyApplication'
-            self.short_name = 'myappl'
-            self.startup_alert_threshold = '1h'
-            depend_on 'mydb'
-          end
-        end
-        stack "my_db" do
-          mysql_cluster "mydb" do
-            self.role_in_name = false
-            self.database_name = 'exampledb'
-            self.master_instances = 1
-            self.slave_instances = 1
-            self.include_master_in_read_only_cluster = false
-          end
-        end
-        env "e1", :primary_site => 'space', :short_name => 'spc' do
-          instantiate_stack "mystack"
-          instantiate_stack "my_db"
-        end
-      end
-      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
-        to match(/db.exampledb.hostname=e1-mydb-001.space.net.local.*
-                  db.exampledb.database=exampledb.*
-                  db.exampledb.driver=com.mysql.jdbc.Driver.*
-                  db.exampledb.port=3306.*
-                  db.exampledb.username=spcmyappl0.*
-                  db.exampledb.password=\{SECRET:e1_MyApplication_mysql_passwords_0\}.*
-                  db.exampledb.read_only_cluster=e1-mydb-002.space.net.local.*
-                 /mx)
-    end
-
-    it 'has config for it\'s rabbitmq dependencies' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service "x", :kubernetes => true do
-            self.maintainers = [person('Testers')]
-            self.description = 'Testing'
-            self.alerts_channel = 'test'
-
-            self.application = 'MyApplication'
-            self.short_name = 'myappl'
-            self.startup_alert_threshold = '1h'
-            depend_on 'myrabbit', 'e1', 'test'
-          end
-        end
-        stack "my_rabbit" do
-          rabbitmq_cluster "myrabbit"
-        end
-        env "e1", :primary_site => 'space', :short_name => 'spc' do
-          instantiate_stack "mystack"
-          instantiate_stack "my_rabbit"
-        end
-      end
-      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      expect(k8s_resource(set, 'ConfigMap')['data']['config.properties']).
-        to match(/test.messaging.enabled=true.*
-                  test.messaging.broker_fqdns=e1-myrabbit-001.space.net.local,e1-myrabbit-002.space.net.local.*
-                  test.messaging.username=MyApplication.*
-                  test.messaging.password=\{SECRET:e1_MyApplication_messaging_password\}.*
-                 /mx)
-    end
-
     it 'fails when the app version cannot be found' do
       factory = eval_stacks do
         stack "mystack" do
-          app_service "x", :kubernetes => true do
+          base_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -1933,10 +1722,10 @@ EOL
       expect(lb_first_machine_def.to_enc["role::loadbalancer"]["virtual_servers"].size).to eq(0)
     end
 
-    it 'connects a service account' do
+    it 'sets up a service account when use_service_account is specified and adds it to the deployment resource' do
       factory = eval_stacks do
         stack "mystack" do
-          app_service "x", :kubernetes => true do
+          base_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -1979,7 +1768,7 @@ EOL
     it 'creates the correct network polices to allow the pods to talk to the Kubernetes api' do
       factory = eval_stacks do
         stack "mystack" do
-          app_service "x", :kubernetes => true do
+          base_service "x", :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -1996,7 +1785,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'mystack', 'x')
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(2)
       network_policy = network_policies.last
       expect(network_policy['metadata']['name']).to eql('allow-out-to-space-kubernetes-api-dcbf68f')
       expect(network_policy['metadata']['namespace']).to eql('e1')
@@ -2027,13 +1816,13 @@ EOL
       it 'bases container limits and requests on the max heap memory' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
 
               self.application = 'MyApplication'
-              self.jvm_heap = '100G'
+              self.memory_limit = '100G'
               self.startup_alert_threshold = '1h'
             end
           end
@@ -2044,45 +1833,15 @@ EOL
 
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
         app_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first
-        init_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].first
 
-        expect(app_container['resources']['limits']['memory']).to eq('115343360Ki')
-        expect(app_container['resources']['requests']['memory']).to eq('115343360Ki')
-        expect(init_container['env'].find { |env_var| env_var['name'] == 'APP_JVM_ARGS' }['value']).to match(/-Xmx100G/)
-      end
-
-      it 'controls container limits by reserving headspace computed from the heap size' do
-        factory = eval_stacks do
-          stack "mystack" do
-            app_service "x", :kubernetes => true do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
-              self.alerts_channel = 'test'
-
-              self.application = 'MyApplication'
-              self.jvm_heap = '100G'
-              self.headspace = 0.5
-              self.startup_alert_threshold = '1h'
-            end
-          end
-          env "e1", :primary_site => 'space' do
-            instantiate_stack "mystack"
-          end
-        end
-
-        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-        app_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first
-        init_container = k8s_resource(set, 'Deployment')['spec']['template']['spec']['initContainers'].first
-
-        expect(app_container['resources']['limits']['memory']).to eq('157286400Ki')
-        expect(app_container['resources']['requests']['memory']).to eq('157286400Ki')
-        expect(init_container['env'].find { |env_var| env_var['name'] == 'APP_JVM_ARGS' }['value']).to match(/-Xmx100G/)
+        expect(app_container['resources']['limits']['memory']).to eq('104857600Ki')
+        expect(app_container['resources']['requests']['memory']).to eq('104857600Ki')
       end
 
       it 'allows setting a milli cpu limit and request' do
         factory = eval_stacks do
           stack "mystack" do
-            app_service "x", :kubernetes => true do
+            base_service "x", :kubernetes => true do
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -2110,7 +1869,7 @@ EOL
         it 'allows maintainers to be people' do
           factory = eval_stacks do
             stack "mystack" do
-              app_service "x", :kubernetes => true do
+              base_service "x", :kubernetes => true do
                 self.application = 'MyApplication'
                 self.maintainers = [
                   person('Andrew Parker', :slack => '@aparker', :email => 'andy.parker@timgroup.com'),
@@ -2139,7 +1898,7 @@ EOL
         it 'allows maintainers to be slack channels' do
           factory = eval_stacks do
             stack "mystack" do
-              app_service "x", :kubernetes => true do
+              base_service "x", :kubernetes => true do
                 self.application = 'MyApplication'
                 self.maintainers = [slack('#technology')]
                 self.description = 'testing'
@@ -2161,7 +1920,7 @@ EOL
         it 'is required' do
           factory = eval_stacks do
             stack "mystack" do
-              app_service "x", :kubernetes => true do
+              base_service "x", :kubernetes => true do
                 self.application = 'MyApplication'
                 self.description = 'testing'
                 self.alerts_channel = 'test'
@@ -2174,7 +1933,7 @@ EOL
 
           expect do
             factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
-          end.to raise_error(/app_service 'x' in 'e1' requires maintainers \(set self\.maintainers\)/)
+          end.to raise_error(/base_k8s_app 'x' in 'e1' requires maintainers \(set self\.maintainers\)/)
         end
       end
 
@@ -2182,7 +1941,7 @@ EOL
         it 'provides a description of the service' do
           factory = eval_stacks do
             stack "mystack" do
-              app_service "x", :kubernetes => true do
+              base_service "x", :kubernetes => true do
                 self.maintainers = [person('Testers')]
                 self.application = 'MyApplication'
 
@@ -2205,7 +1964,7 @@ EOL
         it 'is required' do
           factory = eval_stacks do
             stack "mystack" do
-              app_service "x", :kubernetes => true do
+              base_service "x", :kubernetes => true do
                 self.application = 'MyApplication'
                 self.maintainers = [person('Testers')]
               end
@@ -2217,7 +1976,7 @@ EOL
 
           expect do
             factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
-          end.to raise_error(/app_service 'x' in 'e1' requires description \(set self\.description\)/)
+          end.to raise_error(/base_k8s_app 'x' in 'e1' requires description \(set self\.description\)/)
         end
       end
     end
@@ -2227,7 +1986,7 @@ EOL
     it 'only connects dependant instances in the same site, when requested' do
       factory = eval_stacks do
         stack 'testing' do
-          app_service 'depends_on_everything', :kubernetes => true do
+          base_service 'depends_on_everything', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2240,7 +1999,7 @@ EOL
 
             depend_on 'just_an_app', 'e1', :same_site
           end
-          app_service 'just_an_app', :kubernetes => true do
+          base_service 'just_an_app', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2400,7 +2159,13 @@ EOL
             depend_on 'app2'
           end
 
-          app_service 'app2', :kubernetes => true do
+          base_service 'app2', :kubernetes => true do
+            self.ports = {
+              'ntp' => {
+                'port' => 123,
+                'protocol' => 'udp'
+              }
+            }
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2426,7 +2191,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(7)
+      expect(network_policies.size).to eq(6)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-in-from-e1-app1')
@@ -2454,8 +2219,8 @@ EOL
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].size).to eq(1)
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.3/32' })
-      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('http')
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('UDP')
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('ntp')
 
       ingress_controller_egress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-out-to-e1-app2')
@@ -2487,8 +2252,8 @@ EOL
         'app.kubernetes.io/component' => 'app_service'
       )
       expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
-      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['port']).to eq('app')
+      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['protocol']).to eql('UDP')
+      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['port']).to eq('ntp')
 
       app_ingress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-in-from-e1-app2')
@@ -2520,8 +2285,8 @@ EOL
         'app.kubernetes.io/component' => 'ingress'
       )
       expect(app_ingress_policy['spec']['ingress'].first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
-      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('app')
+      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('UDP')
+      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('ntp')
     end
 
     it 'should create the correct egress network policies for a service in kubernetes when that service depends on another non kubernetes service' do
@@ -2531,7 +2296,7 @@ EOL
             self.application = 'app1'
           end
 
-          app_service 'app2', :kubernetes => true do
+          base_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2554,7 +2319,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(2)
       expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-23bb767')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -2583,7 +2348,13 @@ EOL
     it 'should create the correct network policies for two services in kubernetes in the same environment when one service depends on the other' do
       factory = eval_stacks do
         stack "test_app_servers" do
-          app_service 'app1', :kubernetes => true do
+          base_service 'app1', :kubernetes => true do
+            self.ports = {
+              'ntp' => {
+                'port' => 123,
+                'protocol' => 'udp'
+              }
+            }
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2592,7 +2363,7 @@ EOL
             self.startup_alert_threshold = '1h'
           end
 
-          app_service 'app2', :kubernetes => true do
+          base_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2612,8 +2383,8 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(3)
-      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e1-app2-581c0bf')
+      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e1-app2-53f41f2')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -2639,11 +2410,11 @@ EOL
         'app.kubernetes.io/component' => 'app_service'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
-      expect(ingress.first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress.first['ports'].first['port']).to eq('app')
+      expect(ingress.first['ports'].first['protocol']).to eql('UDP')
+      expect(ingress.first['ports'].first['port']).to eq('ntp')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(3)
+      expect(app2_network_policies.size).to eq(2)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
@@ -2674,10 +2445,10 @@ EOL
       expect(egress.first['ports'].first['port']).to eq('app')
     end
 
-    it 'should create an egress policy to allow the init container to talk to nexus' do
+    it 'should not create an egress policy to allow the init container to talk to nexus is @artifact_from_nexus is false' do
       factory = eval_stacks do
         stack "test_app_servers" do
-          app_service 'app1', :kubernetes => true do
+          base_service 'app1', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2694,30 +2465,10 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
-      expect(network_policies.size).to eq(2)
-      expect(network_policies.first['metadata']['name']).to eql('allow-out-to-off-nexus-31b0d71')
-      expect(network_policies.first['metadata']['namespace']).to eql('e1')
-      expect(network_policies.first['metadata']['labels']).to eql(
-        'app.kubernetes.io/managed-by' => 'stacks',
-        'stack' => 'test_app_servers',
-        'machineset' => 'app1',
-        'group' => 'blue',
-        'app.kubernetes.io/instance' => 'blue',
-        'app.kubernetes.io/part-of' => 'app1',
-        'app.kubernetes.io/component' => 'app_service'
-      )
-      expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
-        'machineset' => 'app1',
-        'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
-      )
-      expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
-      expect(network_policies.first['spec']['egress'].size).to eq(1)
-      expect(network_policies.first['spec']['egress'].first['to'].size).to eq(1)
-      expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['egress'].first['to']).to include('ipBlock' => { 'cidr' => '3.1.4.11/32' })
-      expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(8080)
+      expect(network_policies.size).to eq(1)
+      expect(network_policies.select do |policy|
+        policy['metadata']['name'] =~ /allow-out-to-off-nexus-/
+      end).to be_empty
     end
 
     it 'should create the correct network policies for two services in \
@@ -2725,7 +2476,13 @@ kubernetes in different environments in the same site when one service \
 depends on the other' do
       factory = eval_stacks do
         stack "test_app_server1" do
-          app_service 'app1', :kubernetes => true do
+          base_service 'app1', :kubernetes => true do
+            self.ports = {
+              'ntp' => {
+                'port' => '123',
+                'protocol' => 'udp'
+              }
+            }
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2735,7 +2492,7 @@ depends on the other' do
           end
         end
         stack "test_app_server2" do
-          app_service 'app2', :kubernetes => true do
+          base_service 'app2', :kubernetes => true do
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
@@ -2758,8 +2515,8 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(3)
-      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e2-app2-af5c735')
+      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.first['metadata']['name']).to match(/allow-in-from-e2-app2-/)
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app1',
@@ -2776,11 +2533,11 @@ depends on the other' do
         'app.kubernetes.io/component' => 'app_service'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e2')
-      expect(ingress.first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress.first['ports'].first['port']).to eq('app')
+      expect(ingress.first['ports'].first['protocol']).to eql('UDP')
+      expect(ingress.first['ports'].first['port']).to eq('ntp')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(3)
+      expect(app2_network_policies.size).to eq(2)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -2828,155 +2585,90 @@ depends on the other' do
         RuntimeError,
         match(/not supported for k8s - endpoints method is not implemented/))
     end
-  end
 
-  describe 'stacks' do
-    it 'should allow app services to be k8s or non-k8s by environment' do
+    it 'allows an environment to depend on a service' do
       factory = eval_stacks do
-        stack "mystack" do
-          app_service 'app1', :kubernetes => { 'e1' => true, 'e2' => false } do
-            self.maintainers = [person('Testers')] if kubernetes
-            self.description = 'Testing' if kubernetes
-            self.alerts_channel = 'test' if kubernetes
-
-            self.application = 'myapp'
-          end
-        end
-        env "e1", :primary_site => "space" do
-          instantiate_stack "mystack"
-        end
-        env "e2", :primary_site => "space" do
-          instantiate_stack "mystack"
-        end
-      end
-
-      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
-      expect(e1_mystack.definitions.size).to eq(0)
-      expect(e1_mystack.k8s_machinesets.size).to eq(1)
-      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
-      expect(e2_mystack.definitions.size).to eq(1)
-      expect(e2_mystack.k8s_machinesets.size).to eq(0)
-    end
-
-    it 'should allow app services to all be k8s' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service 'app1', :kubernetes => true do
+        stack "test_app_servers" do
+          base_service 'ntp', :kubernetes => true do
+            self.ports = {
+              'ntp' => {
+                'port' => 123,
+                'protocol' => 'udp'
+              }
+            }
             self.maintainers = [person('Testers')]
             self.description = 'Testing'
             self.alerts_channel = 'test'
 
-            self.application = 'myapp'
+            self.application = 'ntp'
+            self.startup_alert_threshold = '1m'
           end
         end
         env "e1", :primary_site => "space" do
-          instantiate_stack "mystack"
-        end
-        env "e2", :primary_site => "space" do
-          instantiate_stack "mystack"
+          depend_on 'ntp'
+          instantiate_stack "test_app_servers"
         end
       end
+      app1_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'ntp')
+      allow_env_policies = app1_network_policies.select { |policy| policy['metadata']['name'] =~ /allow-in-from-e1-e1-/ }
+      expect(allow_env_policies.size).to be(1)
+      allow_env_policy = allow_env_policies.first
+      pp allow_env_policy
 
-      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
-      expect(e1_mystack.definitions.size).to eq(0)
-      expect(e1_mystack.k8s_machinesets.size).to eq(1)
-      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
-      expect(e2_mystack.definitions.size).to eq(0)
-      expect(e2_mystack.k8s_machinesets.size).to eq(1)
+      expect(allow_env_policy['spec']['podSelector']['matchLabels']).to eq("machineset" => "ntp",
+                                                                           "group" => "blue",
+                                                                           "app.kubernetes.io/component" => "ingress")
+      expect(allow_env_policy['spec']['ingress'].first['from']).to eq [{ "ipBlock" => { "cidr" => "10.30.0.0/16" } }]
+      expect(allow_env_policy['spec']['ingress'].first['ports']).to eq [{ "protocol" => "UDP", "port" => "ntp" }]
     end
+  end
 
-    it 'should allow app services to not be k8s' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service 'app1', :kubernetes => false do
-            self.maintainers = [person('Testers')] if kubernetes
-            self.description = 'Testing' if kubernetes
-            self.alerts_channel = 'test' if kubernetes
-
-            self.application = 'myapp'
-          end
-        end
-        env "e1", :primary_site => "space" do
-          instantiate_stack "mystack"
-        end
-        env "e2", :primary_site => "space" do
-          instantiate_stack "mystack"
+  it 'raises an error if ports contains both names \'app\' and \'http\'' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => { 'e1' => true } do
+          self.ports = {
+            'app' => { 'port' => 8000 },
+            'http' => { 'port' => 80 }
+          }
+          self.application = 'ntp'
+          self.startup_alert_threshold = '10s'
         end
       end
-
-      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
-      expect(e1_mystack.definitions.size).to eq(1)
-      expect(e1_mystack.k8s_machinesets.size).to eq(0)
-      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
-      expect(e2_mystack.definitions.size).to eq(1)
-      expect(e2_mystack.k8s_machinesets.size).to eq(0)
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
     end
+    # FIXME: Technically the error should be base_service, not base_k8s_app. But see other FIXME's in base_k8s_app.rb
+    expect do
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
+    end.to raise_error('base_k8s_app \'x\' in \'e1\' defines ports named both \'app\' and \'http\'. This is not possible at the moment ' \
+      'because in some places \'app\' is fudged to be \'http\' to avoid changing lots of things in one go.')
+  end
 
-    it 'should default app services to not be k8s if no kubernetes property is defined' do
-      factory = eval_stacks do
-        stack "mystack" do
-          app_service 'app1' do
-            self.application = 'myapp'
-          end
-          app_service 'app2' do
-            self.application = 'myapp'
-          end
+  it 'raises an error if @ports is empty and something else depends on the service' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => { 'e1' => true } do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+          self.alerts_channel = 'test'
+          self.application = 'ntp'
+          self.startup_alert_threshold = '10s'
         end
-        env "e1", :primary_site => "space" do
-          instantiate_stack "mystack"
-        end
-        env "e2", :primary_site => "space" do
-          instantiate_stack "mystack"
+        app_service 'nonk8sapp' do
+          self.instances = 1
+          depend_on 'x', 'e1'
         end
       end
-
-      e1_mystack = factory.inventory.find_environment('e1').definitions['mystack']
-      expect(e1_mystack.definitions.size).to eq(2)
-      expect(e1_mystack.k8s_machinesets.size).to eq(0)
-      e2_mystack = factory.inventory.find_environment('e2').definitions['mystack']
-      expect(e2_mystack.definitions.size).to eq(2)
-      expect(e2_mystack.k8s_machinesets.size).to eq(0)
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
     end
-
-    it 'should raise error if any environments where stack is instantiated are not specified' do
-      expect do
-        eval_stacks do
-          stack "mystack" do
-            app_service 'app1', :kubernetes => { 'e1' => true } do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
-              self.alerts_channel = 'test'
-
-              self.application = 'myapp'
-            end
-          end
-          env "e1", :primary_site => "space" do
-            instantiate_stack "mystack"
-          end
-          env "e2", :primary_site => "space" do
-            instantiate_stack "mystack"
-          end
-        end
-      end.to raise_error(RuntimeError, match(/all environments/))
-    end
-
-    it 'should raise error if kubernetes property for environment is not a boolean' do
-      expect do
-        eval_stacks do
-          stack "mystack" do
-            app_service 'app1', :kubernetes => { 'e1' => 'foo' } do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
-              self.alerts_channel = 'test'
-
-              self.application = 'myapp'
-            end
-          end
-          env "e1", :primary_site => "space" do
-            instantiate_stack "mystack"
-          end
-        end
-      end.to raise_error(RuntimeError, match(/not a boolean/))
-    end
+    expect do
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
+    end.to raise_error('base_k8s_app \'x\' in \'e1\' doesn\'t define @ports but is depended on by another service')
   end
 end

@@ -9,7 +9,7 @@ describe_stack 'sftp servers should support load balancing and dependant instanc
 
     stack "secureftp" do
       sftp_service 'sftp' do
-        self.ports = ['2222']
+        self.ports = { 'proftpd-ssh' => { 'port' => 2222 } }
       end
     end
 
@@ -48,7 +48,7 @@ describe_stack 'sftp servers should support load balancing and dependant instanc
     lb_enc = load_balancer.to_enc
     expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['persistent_ports']).
       to eql([])
-    expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['ports']).to eql(['2222'])
+    expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['ports']).to eql([2222])
     expect(lb_enc['role::loadbalancer']['virtual_servers']['mirror-sftp-vip.oy.net.local']['monitor_warn']).to eql('1')
   end
 end
@@ -56,7 +56,7 @@ describe_stack 'sftp servers should provide specific mounts' do
   given do
     stack "secureftp" do
       sftp_service 'sftp' do
-        self.ports = ['2222']
+        self.ports = { 'proftpd-ssh' => { 'port' => 2222 } }
       end
     end
 
@@ -88,7 +88,7 @@ describe_stack 'sftp servers should allow monitor_warn to be override when non-H
 
     stack "secureftp" do
       sftp_service 'sftp' do
-        self.ports = ['2222']
+        self.ports = { 'proftpd-ssh' => { 'port' => 2222 } }
         self.vip_warning_members = 0
       end
     end

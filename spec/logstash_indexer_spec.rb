@@ -7,7 +7,11 @@ describe_stack 'logstash indexer' do
     stack 'elastic_mq' do
       rabbitmq_cluster 'elasticmq' do
         # FIXME: - this should be default in rabbitmq_cluster
-        self.ports = [5672]
+        self.ports = {
+          'rabbitmq' => {
+            'port' => 5672
+          }
+        }
 
         storage = {
           '/var/lib/rabbitmq' => { :type => 'data', :size => '100G' }
