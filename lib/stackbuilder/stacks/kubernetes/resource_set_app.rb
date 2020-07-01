@@ -246,9 +246,9 @@
        } unless @log_volume_mount_path.nil?
      unless @capabilities.nil?
        existing_capabilities = deployment['spec']['template']['spec']['containers'].first['securityContext']['capabilities']
-       existing_capabilities['add'] = [] if existing_capabilitiest['add'].nil?
+       existing_capabilities['add'] = [] if existing_capabilities['add'].nil?
        @capabilities.each do |capability|
-         existing_capabilitiest['add'] << capability unless existing_capabilities['add'].include? capability
+         existing_capabilities['add'] << capability unless existing_capabilities['add'].include? capability
        end
      end
 

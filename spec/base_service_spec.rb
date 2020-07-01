@@ -2670,4 +2670,25 @@ depends on the other' do
       set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
     end.to raise_error('base_k8s_app \'x\' in \'e1\' doesn\'t define @ports but is depended on by another service')
   end
+
+  it 'allows you to adjust the capabilites of the app container' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => { 'e1' => true } do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+          self.alerts_channel = 'test'
+          self.application = 'ntp'
+          self.startup_alert_threshold = '10s'
+          self.capabilities = ['NET_BIND_SERVICE']
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+    expected_caps = { "drop" => ["ALL"], "add" => ["NET_BIND_SERVICE"] }
+    expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first['securityContext']['capabilities']).to eql(expected_caps)
+  end
 end
