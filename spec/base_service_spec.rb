@@ -2613,7 +2613,6 @@ depends on the other' do
       allow_env_policies = app1_network_policies.select { |policy| policy['metadata']['name'] =~ /allow-in-from-e1-e1-/ }
       expect(allow_env_policies.size).to be(1)
       allow_env_policy = allow_env_policies.first
-      pp allow_env_policy
 
       expect(allow_env_policy['spec']['podSelector']['matchLabels']).to eq("machineset" => "ntp",
                                                                            "group" => "blue",
