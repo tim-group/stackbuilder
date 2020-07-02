@@ -227,7 +227,8 @@ describe Stacks::DSL do
                                                    'use_docker' => false,
                                                    'dependencies' => {},
                                                    'application_dependant_instances' => [],
-                                                   'participation_dependant_instances' => [])
+                                                   'participation_dependant_instances' => [],
+                                                   'allow_kubernetes_clusters' => ['st'])
   end
 
   it 'returns nil if asked for a machine that does not exist' do
