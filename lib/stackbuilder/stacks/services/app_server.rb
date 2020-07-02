@@ -56,8 +56,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'port'                              => '8000',
       'use_docker'                        => @virtual_service.use_docker
     }
-
-    enc_dependant_kubernetes_things enc
+    enc['role::http_app']['allow_kubernetes_clusters'] = ([@fabric] + enc_dependant_kubernetes_things).uniq
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
     enc['role::http_app']['sso_port'] = @virtual_service.sso_port unless @virtual_service.sso_port.nil?
@@ -96,12 +95,10 @@ class Stacks::Services::AppServer < Stacks::MachineDef
 
   private
 
-  def enc_dependant_kubernetes_things(enc)
+  def enc_dependant_kubernetes_things
     dependant_app_services = @virtual_service.virtual_services_that_depend_on_me.select do |machine_set|
       machine_set.is_a? Stacks::Services::AppService
     end
-
-    return unless dependant_app_services.any?(&:kubernetes)
 
     k8s_dependant_app_fabrics = dependant_app_services.select(&:kubernetes).map { |vs| vs.environment.options[:primary_site] }
 
@@ -112,7 +109,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       s != site unless my_service_is_in_a_single_site
     end.uniq
 
-    enc['role::http_app']['allow_kubernetes_clusters'] = k8s_clusters
+   k8s_clusters
   end
 
   def enc_ehcache(enc)
