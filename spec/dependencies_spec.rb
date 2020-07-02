@@ -264,7 +264,7 @@ describe_stack 'k8s app with non-k8s app dependency in different env with differ
   end
 
   host('e1-nonk8sapp-001.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(['space','earth'])
+    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(%w(space earth))
   end
 end
 
@@ -294,7 +294,7 @@ describe_stack 'k8s app with non-k8s app dependency in different env with differ
   end
 
   host('e1-nonk8sapp-001.mgmt.space.net.local') do |host|
-    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(['space','earth'])
+    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(%w(space earth))
   end
 end
 

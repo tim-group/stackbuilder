@@ -109,7 +109,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       s != site unless my_service_is_in_a_single_site
     end.uniq
 
-   k8s_clusters
+    k8s_clusters
   end
 
   def enc_ehcache(enc)
