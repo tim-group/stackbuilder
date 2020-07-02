@@ -14,6 +14,7 @@ module Stacks::Services::AppService
   attr_accessor :tomcat_session_replication
   attr_accessor :use_ha_mysql_ordering
   attr_accessor :ha_mysql_ordering_exclude
+  attr_accessor :scrape_metrics
 
   # Kubernetes specific attributes
   attr_accessor :jvm_heap
@@ -90,6 +91,7 @@ log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @gr
 <%- end -%>
 <%- end -%>
 EOC
+    @scrape_metrics = false
   end
 
   def enable_ehcache

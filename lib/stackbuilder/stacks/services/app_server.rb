@@ -54,7 +54,8 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network], true, true),
       'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
       'port'                              => '8000',
-      'use_docker'                        => @virtual_service.use_docker
+      'use_docker'                        => @virtual_service.use_docker,
+      'scrape_metrics'                    => @virtual_service.scrape_metrics
     }
     enc['role::http_app']['allow_kubernetes_clusters'] = ([@fabric] + enc_dependant_kubernetes_things).uniq
 
