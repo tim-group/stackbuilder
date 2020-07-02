@@ -203,7 +203,8 @@ describe Stacks::DSL do
                                                    'use_docker' => false,
                                                    'dependencies' => {},
                                                    'application_dependant_instances' => [],
-                                                   'participation_dependant_instances' => [])
+                                                   'participation_dependant_instances' => [],
+                                                   'allow_kubernetes_clusters' => ['st'])
   end
 
   it 'generates app servers that are not part of a virtual service' do
