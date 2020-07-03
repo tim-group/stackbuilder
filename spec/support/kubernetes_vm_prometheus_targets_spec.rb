@@ -71,25 +71,25 @@ describe Support::KubernetesVmPrometheusTargets do
           }
         },
         {
-            'apiVersion' => 'v1',
-            'kind' => 'Endpoints',
-            'metadata' => {
-              'name' => "metrics-e1-appstack-001",
-              'namespace' => 'monitoring',
-              'labels' => {
-                'app.kubernetes.io/managed-by' => 'stacks',
-                'app.kubernetes.io/component' => 'vm_metrics_target',
-              }
-            },
-            'subsets' => {
-              'addresses' => [{'ip' => '0.0.0.0'}],
-              'ports' => [{
-                'name' => 'metrics',
-                'port' => 8000,
-                'protocol' => 'TCP'
-              }]
+          'apiVersion' => 'v1',
+          'kind' => 'Endpoints',
+          'metadata' => {
+            'name' => "metrics-e1-appstack-001",
+            'namespace' => 'monitoring',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'app.kubernetes.io/component' => 'vm_metrics_target'
             }
+          },
+          'subsets' => {
+            'addresses' => [{ 'ip' => '0.0.0.0' }],
+            'ports' => [{
+              'name' => 'metrics',
+              'port' => 8000,
+              'protocol' => 'TCP'
+            }]
           }
+        }
       ]
                                                                                              )
     end
@@ -98,7 +98,7 @@ describe Support::KubernetesVmPrometheusTargets do
       vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
-      expect(out.map { |crd| [ crd['kind'], crd['metadata']['name']] }).to match_array([
+      expect(out.map { |crd| [crd['kind'], crd['metadata']['name']] }).to match_array([
         ['Service', 'metrics-e1-appstack-001'],
         ['Endpoints', 'metrics-e1-appstack-001'],
         ['Service', 'metrics-e1-appstack-002'],

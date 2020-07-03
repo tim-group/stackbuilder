@@ -41,11 +41,11 @@ class Support::KubernetesVmPrometheusTargets
               'namespace' => 'monitoring',
               'labels' => {
                 'app.kubernetes.io/managed-by' => 'stacks',
-                'app.kubernetes.io/component' => 'vm_metrics_target',
+                'app.kubernetes.io/component' => 'vm_metrics_target'
               }
             },
             'subsets' => {
-              'addresses' => [{'ip' => '0.0.0.0'}],
+              'addresses' => [{ 'ip' => '0.0.0.0' }],
               'ports' => [{
                 'name' => 'metrics',
                 'port' => 8000,
