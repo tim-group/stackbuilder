@@ -40,7 +40,6 @@ describe Support::KubernetesVmPrometheusTargets do
     end
   end
 
-
   describe 'stacks:kubernetes_vm_prometheus_targets' do
     it "generates_crd_with_all_attributes" do
       vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
@@ -48,11 +47,11 @@ describe Support::KubernetesVmPrometheusTargets do
 
       expect(out.select { |crd| crd['metadata']['name'] == 'metrics-e1-appstack-001' }).to eq([
         {
-         'apiVersion' => 'v1',
+          'apiVersion' => 'v1',
           'kind' => 'Service',
           'metadata' => {
             'name' => "metrics-e1-appstack-001",
-            'namespace' => 'e1',
+            'namespace' => 'monitoring',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
               'app.kubernetes.io/component' => 'vm_metrics_target',
@@ -70,18 +69,40 @@ describe Support::KubernetesVmPrometheusTargets do
               'targetPort' => 8000
             }]
           }
-         }
-        ]
-      )
+        },
+        {
+            'apiVersion' => 'v1',
+            'kind' => 'Endpoints',
+            'metadata' => {
+              'name' => "metrics-e1-appstack-001",
+              'namespace' => 'monitoring',
+              'labels' => {
+                'app.kubernetes.io/managed-by' => 'stacks',
+                'app.kubernetes.io/component' => 'vm_metrics_target',
+              }
+            },
+            'subsets' => {
+              'addresses' => [{'ip' => '0.0.0.0'}],
+              'ports' => [{
+                'name' => 'metrics',
+                'port' => 8000,
+                'protocol' => 'TCP'
+              }]
+            }
+          }
+      ]
+                                                                                             )
     end
 
     it "ignores_stacks_without_scrape_metrics" do
       vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
-      expect(out.map { |crd| crd['metadata']['name'] }).to match_array([
-        "metrics-e1-appstack-001",
-        "metrics-e1-appstack-002"
+      expect(out.map { |crd| [ crd['kind'], crd['metadata']['name']] }).to match_array([
+        ['Service', 'metrics-e1-appstack-001'],
+        ['Endpoints', 'metrics-e1-appstack-001'],
+        ['Service', 'metrics-e1-appstack-002'],
+        ['Endpoints', 'metrics-e1-appstack-002']
       ])
     end
   end

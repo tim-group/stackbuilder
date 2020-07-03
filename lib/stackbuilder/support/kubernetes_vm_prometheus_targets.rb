@@ -14,7 +14,7 @@ class Support::KubernetesVmPrometheusTargets
             'kind' => 'Service',
             'metadata' => {
               'name' => "metrics-#{thing.hostname}",
-              'namespace' => thing.environment.name,
+              'namespace' => 'monitoring',
               'labels' => {
                 'app.kubernetes.io/managed-by' => 'stacks',
                 'app.kubernetes.io/component' => 'vm_metrics_target',
@@ -30,6 +30,26 @@ class Support::KubernetesVmPrometheusTargets
                 'name' => 'metrics',
                 'port' => 8000,
                 'targetPort' => 8000
+              }]
+            }
+          }
+          crds << {
+            'apiVersion' => 'v1',
+            'kind' => 'Endpoints',
+            'metadata' => {
+              'name' => "metrics-#{thing.hostname}",
+              'namespace' => 'monitoring',
+              'labels' => {
+                'app.kubernetes.io/managed-by' => 'stacks',
+                'app.kubernetes.io/component' => 'vm_metrics_target',
+              }
+            },
+            'subsets' => {
+              'addresses' => [{'ip' => '0.0.0.0'}],
+              'ports' => [{
+                'name' => 'metrics',
+                'port' => 8000,
+                'protocol' => 'TCP'
               }]
             }
           }
