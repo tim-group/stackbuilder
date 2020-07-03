@@ -6,7 +6,6 @@ module Stacks
     require 'stackbuilder/stacks/services/app_service'
     require 'stackbuilder/stacks/services/bind_server'
     require 'stackbuilder/stacks/services/ci_slave'
-    require 'stackbuilder/stacks/services/elasticsearch_cluster'
     require 'stackbuilder/stacks/services/elasticsearch_data_cluster'
     require 'stackbuilder/stacks/services/elasticsearch_data_server'
     require 'stackbuilder/stacks/services/elasticsearch_master_cluster'

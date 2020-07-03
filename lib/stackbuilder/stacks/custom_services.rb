@@ -116,10 +116,6 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
     machineset_with('nat', [Stacks::Services::NatCluster], Stacks::Services::NatServer, &block)
   end
 
-  def elasticsearch_cluster(name = 'elasticsearch', &block)
-    machineset_with(name, [Stacks::Services::ElasticsearchCluster], Stacks::Services::ElasticsearchNode, &block)
-  end
-
   def elasticsearch_data(name = 'elasticsearch_data', &block)
     machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::ElasticsearchDataCluster], Stacks::Services::ElasticsearchDataServer, &block)
   end
