@@ -5,15 +5,15 @@ require 'spec_helper'
 describe Support::KubernetesVmPrometheusTargets do
   let(:factory) do
     eval_stacks do
-      stack "mystack" do
-        app_service "myappservice" do
+      stack "appstack" do
+        app_service "appstack" do
           self.application = 'MyApplication'
           self.instances = 2
           self.scrape_metrics = true
         end
       end
-      stack "myk8sstack" do
-        app_service "myk8sappservice", :kubernetes => true do
+      stack "k8sstack" do
+        app_service "k8sappservice", :kubernetes => true do
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
 
@@ -34,20 +34,54 @@ describe Support::KubernetesVmPrometheusTargets do
         end
       end
       env 'e1', :primary_site => 'space' do
-        instantiate_stack "mystack"
-        instantiate_stack "myk8sstack"
+        instantiate_stack "appstack"
+        instantiate_stack "k8sstack"
       end
     end
   end
 
+
   describe 'stacks:kubernetes_vm_prometheus_targets' do
+    it "generates_crd_with_all_attributes" do
+      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
+      out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
+
+      expect(out.select { |crd| crd['metadata']['name'] == 'metrics-e1-appstack-001' }).to eq([
+        {
+         'apiVersion' => 'v1',
+          'kind' => 'Service',
+          'metadata' => {
+            'name' => "metrics-e1-appstack-001",
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'app.kubernetes.io/component' => 'vm_metrics_target',
+              'app' => 'MyApplication',
+              'group' => 'blue',
+              'server' => 'e1-appstack-001_mgmt_space_net_local',
+              'environment' => 'e1'
+            }
+          },
+          'spec' => {
+            'type' => 'ClusterIP',
+            'ports' => [{
+              'name' => 'metrics',
+              'port' => 8000,
+              'targetPort' => 8000
+            }]
+          }
+         }
+        ]
+      )
+    end
+
     it "ignores_stacks_without_scrape_metrics" do
       vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
       expect(out.map { |crd| crd['metadata']['name'] }).to match_array([
-        "metrics-e1-myappservice-001",
-        "metrics-e1-myappservice-002"
+        "metrics-e1-appstack-001",
+        "metrics-e1-appstack-002"
       ])
     end
   end

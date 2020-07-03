@@ -14,14 +14,14 @@ class Support::KubernetesVmPrometheusTargets
             'kind' => 'Service',
             'metadata' => {
               'name' => "metrics-#{thing.hostname}",
-              'namespace' => 'latest',
+              'namespace' => thing.environment.name,
               'labels' => {
                 'app.kubernetes.io/managed-by' => 'stacks',
                 'app.kubernetes.io/component' => 'vm_metrics_target',
-                'app' => 'app',
-                'group' => 'group',
-                'server' => 'group',
-                'environment' => 'group'
+                'app' => thing.virtual_service.application,
+                'group' => thing.group,
+                'server' => thing.mgmt_fqdn.gsub('.', '_'),
+                'environment' => thing.environment.name
               }
             },
             'spec' => {
@@ -36,7 +36,6 @@ class Support::KubernetesVmPrometheusTargets
         end
       end
     end
-    puts YAML.dump(crds.first)
     crds
   end
 end
