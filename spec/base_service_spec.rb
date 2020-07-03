@@ -75,7 +75,7 @@ describe 'kubernetes' do
               "group" => "blue",
               "app.kubernetes.io/instance" => "blue",
               "app.kubernetes.io/part-of" => "x",
-              "app.kubernetes.io/component" => "app_service",
+              "app.kubernetes.io/component" => "base_service",
               "application" => "test",
               "app.kubernetes.io/name" => "test",
               "app.kubernetes.io/version" => "1.2.3"
@@ -92,7 +92,7 @@ describe 'kubernetes' do
               "matchLabels" => {
                 "machineset" => "x",
                 "group" => "blue",
-                "app.kubernetes.io/component" => "app_service",
+                "app.kubernetes.io/component" => "base_service",
                 "participation" => "enabled"
               }
             },
@@ -115,7 +115,7 @@ describe 'kubernetes' do
                   "group" => "blue",
                   "app.kubernetes.io/instance" => "blue",
                   "app.kubernetes.io/part-of" => "x",
-                  "app.kubernetes.io/component" => "app_service",
+                  "app.kubernetes.io/component" => "base_service",
                   "application" => "test",
                   "app.kubernetes.io/name" => "test",
                   "app.kubernetes.io/version" => "1.2.3"
@@ -135,7 +135,7 @@ describe 'kubernetes' do
                           "matchLabels" => {
                             "machineset" => "x",
                             "group" => "blue",
-                            "app.kubernetes.io/component" => "app_service"
+                            "app.kubernetes.io/component" => "base_service"
                           }
                         },
                         "topologyKey" => "kubernetes.io/hostname"
@@ -194,7 +194,7 @@ describe 'kubernetes' do
               'group' => 'blue',
               'app.kubernetes.io/instance' => 'blue',
               'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'app_service'
+              'app.kubernetes.io/component' => 'base_service'
             }
           },
           'spec' => {
@@ -203,7 +203,7 @@ describe 'kubernetes' do
               'matchLabels' => {
                 'machineset' => 'x',
                 'group' => 'blue',
-                'app.kubernetes.io/component' => 'app_service'
+                'app.kubernetes.io/component' => 'base_service'
               }
             }
           }
@@ -260,7 +260,7 @@ describe 'kubernetes' do
               'group' => 'blue',
               'app.kubernetes.io/instance' => 'blue',
               'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'app_service'
+              'app.kubernetes.io/component' => 'base_service'
             }
           },
           'spec' => {
@@ -268,7 +268,7 @@ describe 'kubernetes' do
             'selector' => {
               'machineset' => 'x',
               'group' => 'blue',
-              'app.kubernetes.io/component' => 'app_service',
+              'app.kubernetes.io/component' => 'base_service',
               'participation' => 'enabled'
             },
             'ports' => []
@@ -314,7 +314,7 @@ describe 'kubernetes' do
               'group' => 'blue',
               'app.kubernetes.io/instance' => 'blue',
               'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'app_service'
+              'app.kubernetes.io/component' => 'base_service'
             }
           },
           'spec' => {
@@ -322,7 +322,7 @@ describe 'kubernetes' do
             'selector' => {
               'machineset' => 'x',
               'group' => 'blue',
-              'app.kubernetes.io/component' => 'app_service',
+              'app.kubernetes.io/component' => 'base_service',
               'participation' => 'enabled'
             },
             'ports' => [
@@ -383,7 +383,7 @@ describe 'kubernetes' do
               "group" => "blue",
               "app.kubernetes.io/instance" => "blue",
               "app.kubernetes.io/part-of" => "x",
-              "app.kubernetes.io/component" => "app_service"
+              "app.kubernetes.io/component" => "base_service"
             }
           },
           "data" => {
@@ -525,7 +525,7 @@ describe 'kubernetes' do
               'group' => 'blue',
               'app.kubernetes.io/instance' => 'blue',
               'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'app_service'
+              'app.kubernetes.io/component' => 'base_service'
             },
             'annotations' => {
               'kubernetes.io/ingress.class' => 'traefik-x-blue'
@@ -1278,7 +1278,7 @@ describe 'kubernetes' do
                                                      'group' => 'blue',
                                                      'app.kubernetes.io/instance' => 'blue',
                                                      'app.kubernetes.io/part-of' => 'x',
-                                                     'app.kubernetes.io/component' => 'app_service'
+                                                     'app.kubernetes.io/component' => 'base_service'
                                                    },
                                                    'name' => 'x-blue-app',
                                                    'namespace' => 'e1')
@@ -1319,7 +1319,7 @@ describe 'kubernetes' do
                                                      'group' => 'blue',
                                                      'app.kubernetes.io/instance' => 'blue',
                                                      'app.kubernetes.io/part-of' => 'x',
-                                                     'app.kubernetes.io/component' => 'app_service'
+                                                     'app.kubernetes.io/component' => 'base_service'
                                                    },
                                                    'name' => 'x-blue-app',
                                                    'namespace' => 'e1')
@@ -1371,7 +1371,7 @@ describe 'kubernetes' do
                                                      'group' => 'blue',
                                                      'app.kubernetes.io/instance' => 'blue',
                                                      'app.kubernetes.io/part-of' => 'x',
-                                                     'app.kubernetes.io/component' => 'app_service'
+                                                     'app.kubernetes.io/component' => 'base_service'
                                                    },
                                                    'name' => 'x-blue-app',
                                                    'namespace' => 'e1')
@@ -1759,7 +1759,7 @@ EOL
             'group' => 'blue',
             'app.kubernetes.io/instance' => 'blue',
             'app.kubernetes.io/part-of' => 'x',
-            'app.kubernetes.io/component' => 'app_service'
+            'app.kubernetes.io/component' => 'base_service'
           }
         }
       )
@@ -1796,7 +1796,7 @@ EOL
         'group' => 'blue',
         'app.kubernetes.io/instance' => 'blue',
         'app.kubernetes.io/part-of' => 'x',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(network_policy['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'x',
@@ -2109,6 +2109,113 @@ EOL
       expect(config).to match(/another_app\.url=/)
     end
 
+    it 'can depend on all kubernetes app_services in the same site' do
+      factory = eval_stacks do
+        stack 'testing' do
+          base_service 'depends_on_app_services', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.alerts_channel = 'test'
+            self.instances = {
+              'mars' => 1
+            }
+
+            self.application = 'application'
+            self.startup_alert_threshold = '1h'
+
+            depend_on_labels({ 'app.kubernetes.io/component' => 'app_service' }, :all, :same_site)
+          end
+          app_service 'just_an_app', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.alerts_channel = 'test'
+            self.instances = {
+              'io' => 1,
+              'mars' => 1
+            }
+
+            self.application = 'just_an_app'
+            self.startup_alert_threshold = '1h'
+          end
+          base_service 'another_base_app', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.alerts_channel = 'test'
+            self.instances = {
+              'io' => 1,
+              'mars' => 1
+            }
+
+            self.application = 'another_app'
+            self.startup_alert_threshold = '1h'
+          end
+        end
+        env 'e1', :primary_site => 'io', :secondary_site => 'mars' do
+          instantiate_stack 'testing'
+        end
+      end
+
+      dns = AllocatingDnsResolver.new
+      e1 = factory.inventory.find_environment('e1')
+      machine_sets = e1.definitions['testing'].k8s_machinesets
+      depends_on_app_services_ms = machine_sets['depends_on_app_services']
+      depends_on_app_services_ms_deps = depends_on_app_services_ms.dependencies
+      expect(depends_on_app_services_ms_deps.size).to be_eql(1)
+      targets = depends_on_app_services_ms_deps.first.resolve_targets(e1)
+      expect(targets.size).to be_eql(1)
+      expect(targets.first.name).to be_eql('just_an_app')
+
+      just_an_app_resources = machine_sets['just_an_app'].to_k8s(app_deployer, dns, hiera_provider)
+
+      just_an_app_in_io = just_an_app_resources.find { |r| r.site == 'io' }
+      just_an_app_in_mars = just_an_app_resources.find { |r| r.site == 'mars' }
+
+      just_an_app_in_io_network_policy = just_an_app_in_io.resources.select do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] =~ /allow-in-from-e1-depends_on_a-/
+      end
+      expect(just_an_app_in_io_network_policy.size).to be(0)
+
+      just_an_app_in_mars_network_policy = just_an_app_in_mars.resources.select do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] =~ /allow-in-from-e1-depends_on_a-/
+      end
+
+      expect(just_an_app_in_mars_network_policy.size).to be(1)
+      spec = just_an_app_in_mars_network_policy.first['spec']
+      expect(spec['ingress']).to be_eql([{
+                                          "from" => [{
+                                            "podSelector" => {
+                                              "matchLabels" => {
+                                                "app.kubernetes.io/component" => "app_service"
+                                              }
+                                            },
+                                            "namespaceSelector" => {
+                                              "matchLabels" => {
+                                                "name" => "e1"
+                                              }
+                                            }
+                                          }],
+                                          "ports" => [{
+                                            "protocol" => "TCP",
+                                            "port" => "app"
+                                          }]
+                                        }])
+
+      another_base_app_resources = machine_sets['another_base_app'].to_k8s(app_deployer, dns, hiera_provider)
+
+      another_base_app_in_io = another_base_app_resources.find { |r| r.site == 'io' }
+      another_base_app_in_mars = another_base_app_resources.find { |r| r.site == 'mars' }
+
+      another_base_app_in_io_network_policy = another_base_app_in_io.resources.select do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] =~ /allow-in-from-e1-depends_on_a-/
+      end
+      expect(another_base_app_in_io_network_policy.size).to be_eql(0)
+
+      another_base_app_in_mars_network_policy = another_base_app_in_mars.resources.select do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] =~ /allow-in-from-e1-depends_on_a-/
+      end
+      expect(another_base_app_in_mars_network_policy.size).to be_eql(0)
+    end
+
     it 'only connects dependant vms in the same site, when requested' do
       factory = eval_stacks do
         stack 'testing' do
@@ -2268,12 +2375,12 @@ EOL
         'group' => 'blue',
         'app.kubernetes.io/instance' => 'blue',
         'app.kubernetes.io/part-of' => 'app2',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app_ingress_policy['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app_ingress_policy['spec']['policyTypes']).to eql(['Ingress'])
       expect(app_ingress_policy['spec']['ingress'].size).to eq(1)
@@ -2329,7 +2436,7 @@ EOL
         'group' => 'blue',
         'app.kubernetes.io/instance' => 'blue',
         'app.kubernetes.io/part-of' => 'app2',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
@@ -2384,7 +2491,7 @@ EOL
 
       ingress = app1_network_policies.first['spec']['ingress']
       expect(app1_network_policies.size).to eq(2)
-      expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e1-app2-53f41f2')
+      expect(app1_network_policies.first['metadata']['name']).to match(/allow-in-from-e1-app2-/)
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -2393,12 +2500,12 @@ EOL
         'group' => 'blue',
         'app.kubernetes.io/instance' => 'blue',
         'app.kubernetes.io/part-of' => 'app1',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app1',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)
@@ -2424,7 +2531,7 @@ EOL
         'group' => 'blue',
         'app.kubernetes.io/instance' => 'blue',
         'app.kubernetes.io/part-of' => 'app2',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
@@ -2521,7 +2628,7 @@ depends on the other' do
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app1',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app1_network_policies.first['spec']['policyTypes']).to eql(['Ingress'])
       expect(ingress.size).to eq(1)

@@ -49,6 +49,14 @@ module Stacks::Services::BaseK8sApp
     @capabilities = nil
     @readiness = nil
     @appconfig = nil
+    @standard_labels = {
+      'app.kubernetes.io/managed-by' => 'stacks',
+      'stack' => @stack.name,
+      'machineset' => name,
+      'group' => groups.first,
+      'app.kubernetes.io/instance' => groups.first,
+      'app.kubernetes.io/part-of' => @short_name
+    }
   end
 
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
@@ -89,24 +97,13 @@ module Stacks::Services::BaseK8sApp
         'credentials_selector' => hiera_provider.lookup(hiera_scope, 'stacks/application_credentials_selector', nil)
       }.merge(hiera_scope)
 
-      standard_labels = {
-        'app.kubernetes.io/managed-by' => 'stacks',
-        'stack' => @stack.name,
-        'machineset' => name,
-        'group' => group,
-        'app.kubernetes.io/instance' => group,
-        'app.kubernetes.io/part-of' => @short_name
-      }
-
-      app_service_labels = standard_labels.merge('app.kubernetes.io/component' => 'app_service')
-
       config, used_secrets = generate_app_config(erb_vars, hiera_provider)
 
-      output = super app_deployer, dns_resolver, hiera_provider, app_service_labels
+      output = super app_deployer, dns_resolver, hiera_provider, service_adjusted_labels
       output += app_generate_resources(app_deployer, dns_resolver, hiera_provider, hiera_scope, app_name, app_version, replicas, used_secrets, site, \
-                                       standard_labels, app_service_labels, k8s_app_resources_name, config)
+                                       @standard_labels, service_adjusted_labels, k8s_app_resources_name, config)
 
-      Stacks::KubernetesResourceBundle.new(site, @environment.name, app_service_labels, output, used_secrets, hiera_scope, k8s_app_resources_name)
+      Stacks::KubernetesResourceBundle.new(site, @environment.name, service_adjusted_labels, output, used_secrets, hiera_scope, k8s_app_resources_name)
     end
   end
 
@@ -125,6 +122,10 @@ module Stacks::Services::BaseK8sApp
         :fqdns => [prod_fqdn(fabric)]
       }
     end
+  end
+
+  def service_adjusted_labels
+    @standard_labels.merge('app.kubernetes.io/component' => @custom_service_name)
   end
 
   private

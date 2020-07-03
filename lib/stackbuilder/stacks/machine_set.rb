@@ -26,6 +26,7 @@ class Stacks::MachineSet
   attr_reader :default_networks
   attr_reader :depends_on
   attr_reader :stack
+  attr_reader :standard_labels
 
   include Stacks::MachineDefContainer
 
@@ -54,6 +55,7 @@ class Stacks::MachineSet
     }
     @monitoring_in_enc = false # temporary feature flag
     @use_docker = false
+    @standard_labels = {}
   end
 
   def secondary_site?
@@ -185,6 +187,15 @@ class Stacks::MachineSet
                                                               requirement)
           end
 
+    @depends_on << dep unless @depends_on.include? dep
+  end
+
+  def depend_on_labels(labels, env = environment.name, requirement = nil)
+    fail('Dependant cannot be nil') if (!labels.is_a? Hash) || labels.empty?
+    fail('Environment cannot be nil') if env.nil? || env.eql?('')
+    dep = Stacks::Dependencies::MultiServiceDependency.new(self,
+                                                           Stacks::Dependencies::LabelsKubernetesSelector.new(labels, env, requirement),
+                                                           requirement)
     @depends_on << dep unless @depends_on.include? dep
   end
 

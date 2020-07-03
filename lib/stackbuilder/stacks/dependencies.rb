@@ -86,6 +86,37 @@ module Stacks::Dependencies
     end
   end
 
+  class LabelsKubernetesSelector
+    attr_reader :labels
+
+    def initialize(labels, env_name, requirement)
+      fail('Specific environment support for LabelsKubernetesSelector is not yet implemented') if env_name != :all
+      @labels = labels
+      @env_name = env_name
+      @requirement = requirement
+    end
+
+    def matches(from, to)
+      return false unless to.is_a?(Stacks::MachineSet)
+      return false unless to.kubernetes
+      return false if @requirement == :same_site && ! (from.sites.any? { |site| to.exists_in_site?(to.environment, site) })
+
+      @labels.each do |label, value|
+        return false unless (to.service_adjusted_labels.key? label) && (to.service_adjusted_labels[label] == value)
+      end
+      true
+    end
+
+    def describe
+      case @env_name
+      when :all
+        "matching labels '#{@labels}' in all environments"
+      else
+        "matching labels '#{@labels}' in environment '#{env_name}'"
+      end
+    end
+  end
+
   public
 
   # FIXME: rpearce: This does not belong here but is needed to provide a mechanism for late binding through composition.
