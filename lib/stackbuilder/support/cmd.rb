@@ -7,6 +7,7 @@ require 'stackbuilder/support/host_builder'
 require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/kubernetes_vm_model'
+require 'stackbuilder/support/kubernetes_vm_prometheus_targets'
 require 'open3'
 
 # public methods in this class (and whose name is included in the :cmds instance variable) are valid stacks commands.
@@ -37,7 +38,8 @@ class CMD
                     dependencies dependents diff
                     sbdiff ls lsenv enc spec
                     terminus test showvnc
-                    check_definition kubernetes_vm_recording_rules)
+                    check_definition kubernetes_vm_recording_rules
+                    kubernetes_vm_prometheus_targets)
     @write_cmds = %w(dns clean clean_all
                      launch allocate provision
                      reprovision apply move clear_host
@@ -460,6 +462,15 @@ class CMD
   def kubernetes_vm_recording_rules(_argv)
     vm_model = Support::KubernetesVmModel.new(100)
     crds = vm_model.generate(@factory.inventory.environments.map(&:last), @environment.options[:primary_site])
+    crds.each do |crd|
+      puts YAML.dump(crd)
+    end
+  end
+
+  # generate list of prometheus targets from the model
+  def kubernetes_vm_prometheus_targets(_argv)
+    vm_prometheus_targets = Support::KubernetesVmPrometheusTargets.new
+    crds = vm_prometheus_targets.generate(@factory.inventory.environments.map(&:last), @environment.options[:primary_site])
     crds.each do |crd|
       puts YAML.dump(crd)
     end
