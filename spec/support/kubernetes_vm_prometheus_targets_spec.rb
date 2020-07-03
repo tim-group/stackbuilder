@@ -10,7 +10,7 @@ describe Support::KubernetesVmPrometheusTargets do
           self.application = 'MyApplication'
           self.instances = 2
           self.scrape_metrics = true
-       end
+        end
       end
       stack "myk8sstack" do
         app_service "myk8sappservice", :kubernetes => true do
@@ -45,9 +45,9 @@ describe Support::KubernetesVmPrometheusTargets do
       vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
-      expect(out).to match_array([
-        "e1-myappservice-001",
-        "e1-myappservice-002"
+      expect(out.map { |crd| crd['metadata']['name'] }).to match_array([
+        "metrics-e1-myappservice-001",
+        "metrics-e1-myappservice-002"
       ])
     end
   end

@@ -6,15 +6,37 @@ class Support::KubernetesVmPrometheusTargets
     crds = []
     environments.each do |env|
       env.accept do |thing|
-
         if thing.respond_to?(:mgmt_fqdn) &&
-          thing.site == site &&
-          thing.virtual_service.scrape_metrics
-          crds << thing.name
+           thing.site == site &&
+           thing.virtual_service.scrape_metrics
+          crds << {
+            'apiVersion' => 'v1',
+            'kind' => 'Service',
+            'metadata' => {
+              'name' => "metrics-#{thing.hostname}",
+              'namespace' => 'latest',
+              'labels' => {
+                'app.kubernetes.io/managed-by' => 'stacks',
+                'app.kubernetes.io/component' => 'vm_metrics_target',
+                'app' => 'app',
+                'group' => 'group',
+                'server' => 'group',
+                'environment' => 'group'
+              }
+            },
+            'spec' => {
+              'type' => 'ClusterIP',
+              'ports' => [{
+                'name' => 'metrics',
+                'port' => 8000,
+                'targetPort' => 8000
+              }]
+            }
+          }
         end
       end
     end
-
+    puts YAML.dump(crds.first)
     crds
   end
 end
