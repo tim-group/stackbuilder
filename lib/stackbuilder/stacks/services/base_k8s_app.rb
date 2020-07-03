@@ -49,14 +49,6 @@ module Stacks::Services::BaseK8sApp
     @capabilities = nil
     @readiness = nil
     @appconfig = nil
-    @standard_labels = {
-      'app.kubernetes.io/managed-by' => 'stacks',
-      'stack' => @stack.name,
-      'machineset' => name,
-      'group' => groups.first,
-      'app.kubernetes.io/instance' => groups.first,
-      'app.kubernetes.io/part-of' => @short_name
-    }
   end
 
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
@@ -101,7 +93,7 @@ module Stacks::Services::BaseK8sApp
 
       output = super app_deployer, dns_resolver, hiera_provider, service_adjusted_labels
       output += app_generate_resources(app_deployer, dns_resolver, hiera_provider, hiera_scope, app_name, app_version, replicas, used_secrets, site, \
-                                       @standard_labels, service_adjusted_labels, k8s_app_resources_name, config)
+                                       standard_labels, service_adjusted_labels, k8s_app_resources_name, config)
 
       Stacks::KubernetesResourceBundle.new(site, @environment.name, service_adjusted_labels, output, used_secrets, hiera_scope, k8s_app_resources_name)
     end
@@ -124,8 +116,19 @@ module Stacks::Services::BaseK8sApp
     end
   end
 
+  def standard_labels
+    {
+      'app.kubernetes.io/managed-by' => 'stacks',
+      'stack' => @stack.name,
+      'machineset' => name,
+      'group' => groups.first,
+      'app.kubernetes.io/instance' => groups.first,
+      'app.kubernetes.io/part-of' => @short_name
+    }
+  end
+
   def service_adjusted_labels
-    @standard_labels.merge('app.kubernetes.io/component' => @custom_service_name)
+    standard_labels.merge('app.kubernetes.io/component' => @custom_service_name)
   end
 
   private

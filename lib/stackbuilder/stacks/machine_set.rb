@@ -10,7 +10,7 @@ class Stacks::MachineSet
   attr_accessor :groups
   attr_accessor :instances
   attr_accessor :name
-  attr_accessor :short_name
+  attr_reader :short_name
   attr_accessor :ports
   attr_accessor :type
   attr_accessor :custom_service_name
@@ -26,7 +26,6 @@ class Stacks::MachineSet
   attr_reader :default_networks
   attr_reader :depends_on
   attr_reader :stack
-  attr_reader :standard_labels
 
   include Stacks::MachineDefContainer
 
@@ -55,11 +54,14 @@ class Stacks::MachineSet
     }
     @monitoring_in_enc = false # temporary feature flag
     @use_docker = false
-    @standard_labels = {}
   end
 
   def secondary_site?
     @enable_secondary_site
+  end
+
+  def standard_labels
+    {}
   end
 
   def type_of?

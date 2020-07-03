@@ -116,5 +116,26 @@ describe 'machine_set' do
       end.to raise_error('The short name of a machine_set must be less than twelve characters.' \
                          ' You tried to set the short_name of machine_set \'app\' in environment \'e1\' to \'supercalifragilisticexpialidocious\'')
     end
+
+    it 'should default to the overridden short_name in kubernetes labels' do
+      factory = eval_stacks do
+        stack 'mystack' do
+          app_service 'supercalifragilisticexpialidocious', :kubernetes => true do
+            self.maintainers = [person('Test')]
+            self.alerts_channel = 'test'
+            self.description = "blah"
+            self.application = 'blah'
+            self.startup_alert_threshold = '10s'
+            self.short_name = 'blahblahblah'
+          end
+        end
+        env "e1", :primary_site => 'space' do
+          instantiate_stack 'mystack'
+        end
+      end
+      machine_set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['supercalifragilisticexpialidocious']
+      k8s_resource = machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
+      expect(k8s_resource.first['metadata']['labels']['app.kubernetes.io/part-of']).to be_eql 'blahblahblah'
+    end
   end
 end
