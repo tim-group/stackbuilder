@@ -1933,7 +1933,7 @@ EOL
 
           expect do
             factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
-          end.to raise_error(/base_k8s_app 'x' in 'e1' requires maintainers \(set self\.maintainers\)/)
+          end.to raise_error(/base_service 'x' in 'e1' requires maintainers \(set self\.maintainers\)/)
         end
       end
 
@@ -1976,7 +1976,7 @@ EOL
 
           expect do
             factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x'].to_k8s(app_deployer, dns_resolver, hiera_provider)
-          end.to raise_error(/base_k8s_app 'x' in 'e1' requires description \(set self\.description\)/)
+          end.to raise_error(/base_service 'x' in 'e1' requires description \(set self\.description\)/)
         end
       end
     end
@@ -2638,11 +2638,11 @@ depends on the other' do
         instantiate_stack "mystack"
       end
     end
-    # FIXME: Technically the error should be base_service, not base_k8s_app. But see other FIXME's in base_k8s_app.rb
+
     expect do
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
       set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
-    end.to raise_error('base_k8s_app \'x\' in \'e1\' defines ports named both \'app\' and \'http\'. This is not possible at the moment ' \
+    end.to raise_error('base_service \'x\' in \'e1\' defines ports named both \'app\' and \'http\'. This is not possible at the moment ' \
       'because in some places \'app\' is fudged to be \'http\' to avoid changing lots of things in one go.')
   end
 
@@ -2668,7 +2668,7 @@ depends on the other' do
     expect do
       set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
       set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
-    end.to raise_error('base_k8s_app \'x\' in \'e1\' doesn\'t define @ports but is depended on by another service')
+    end.to raise_error('base_service \'x\' in \'e1\' doesn\'t define @ports but is depended on by another service')
   end
 
   it 'allows you to adjust the capabilites of the app container' do

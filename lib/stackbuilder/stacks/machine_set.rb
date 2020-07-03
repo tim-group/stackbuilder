@@ -13,6 +13,7 @@ class Stacks::MachineSet
   attr_accessor :short_name
   attr_accessor :ports
   attr_accessor :type
+  attr_accessor :custom_service_name
   attr_accessor :server_offset
   attr_accessor :role_in_name
   attr_accessor :monitoring

@@ -39,7 +39,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp, Stacks::Services::AppService], &block)
+      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp, Stacks::Services::AppService], __method__, &block)
     else
       machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                       Stacks::Services::AppServer, &block)
@@ -48,7 +48,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def base_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp], &block)
+      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp], __method__, &block)
     else
       fail 'base_service outside of Kubernetes is not implemented'
     end
@@ -56,7 +56,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def standalone_app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::AppService], &block)
+      k8s_machineset_with(name, [Stacks::Services::AppService], __method__, &block)
     else
       machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
     end
@@ -203,11 +203,13 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
     @definitions[name] = machineset
   end
 
-  def k8s_machineset_with(name, extends, &block)
+  def k8s_machineset_with(name, extends, custom_service_function_symbol, &block)
+    fail('custom_service_name must be defined') if custom_service_function_symbol.nil?
     machineset = Stacks::MachineSet.new(name, self, &block)
     machineset.extend(Stacks::Dependencies)
     extends.each { |e| machineset.extend(e) }
     machineset.kubernetes = true
+    machineset.custom_service_name = custom_service_function_symbol.to_s
     @k8s_machinesets[name] = machineset
   end
 end

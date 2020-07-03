@@ -169,11 +169,6 @@ EOC
     config
   end
 
-  def assert_k8s_requirements
-    # FIXME: This isn't right. Other things could technical extend themselves with AppService
-    super "app_service"
-  end
-
   # FIXME: For some reason this can't move into base_k8s_app?!
   def prod_fqdn(fabric)
     if respond_to? :vip_fqdn

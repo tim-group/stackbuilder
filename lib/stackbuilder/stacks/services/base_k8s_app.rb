@@ -129,9 +129,7 @@ module Stacks::Services::BaseK8sApp
 
   private
 
-  # FIXME: base_k8s_app as a default is wrong, it should be the name of the method in custom_services.rb
-  def assert_k8s_requirements(custom_service_name = 'base_k8s_app')
-    # FIXME: There must be a better way to get the name of the last module that extended machineset rather than have to pass it in here?
+  def assert_k8s_requirements
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' doesn't define @ports but is depended on by another service") \
       if @ports.empty? && non_k8s_dependencies_exist?
 
