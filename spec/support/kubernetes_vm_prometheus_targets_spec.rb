@@ -40,9 +40,15 @@ describe Support::KubernetesVmPrometheusTargets do
     end
   end
 
+  let(:dns_resolver) do
+    MyTestDnsResolver.new(
+        'office-nexus-001.mgmt.lon.net.local' => '3.4.5.9'
+    )
+  end
+
   describe 'stacks:kubernetes_vm_prometheus_targets' do
     it "generates_crd_with_all_attributes" do
-      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
+      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new(:dns_resolver)
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
       expect(out.select { |crd| crd['metadata']['name'] == 'metrics-e1-appstack-001' }).to eq([

@@ -469,7 +469,7 @@ class CMD
 
   # generate list of prometheus targets from the model
   def kubernetes_vm_prometheus_targets(_argv)
-    vm_prometheus_targets = Support::KubernetesVmPrometheusTargets.new
+    vm_prometheus_targets = Support::KubernetesVmPrometheusTargets.new(@dns_resolver)
     crds = vm_prometheus_targets.generate(@factory.inventory.environments.map(&:last), @environment.options[:primary_site])
     crds.each do |crd|
       puts YAML.dump(crd)
