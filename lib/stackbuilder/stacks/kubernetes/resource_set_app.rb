@@ -427,7 +427,7 @@
          match_labels = {
            'machineset' => vs.name,
            'group' => vs.groups.first,
-           'app.kubernetes.io/component' => 'app_service'
+           'app.kubernetes.io/component' => @custom_service_name
          }
        end
        filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
@@ -455,7 +455,7 @@
          'matchLabels' => {
            'machineset' => standard_labels['machineset'],
            'group' => standard_labels['group'],
-           'app.kubernetes.io/component' => 'app_service'
+           'app.kubernetes.io/component' => @custom_service_name
          }
        },
        'policyTypes' => [
@@ -509,7 +509,7 @@
                'to' => [{
                  'podSelector' => {
                    'matchLabels' => {
-                     'app.kubernetes.io/component' => 'app_service'
+                     'app.kubernetes.io/component' => @custom_service_name
                    }
                  },
                  'namespaceSelector' => {
@@ -527,7 +527,7 @@
              }],
            'machineset' => standard_labels['machineset'],
            'group' => standard_labels['group'],
-           'app.kubernetes.io/component' => 'app_service')
+           'app.kubernetes.io/component' => @custom_service_name)
        end
      end
      network_policies
@@ -544,7 +544,7 @@
        match_labels = {
          'machineset' => vs.name,
          'group' => vs.groups.first,
-         'app.kubernetes.io/component' => 'app_service'
+         'app.kubernetes.io/component' => @custom_service_name
        }
        egresses << {
          'to' => [
@@ -573,7 +573,7 @@
      app_service_match_labels = {
        'machineset' => standard_labels['machineset'],
        'group' => standard_labels['group'],
-       'app.kubernetes.io/component' => 'app_service'
+       'app.kubernetes.io/component' => @custom_service_name
      }
 
      create_egress_network_policy("#{vs.environment.short_name}-#{vs.short_name}", @environment.name,
@@ -597,7 +597,7 @@
      ingress_match_labels = {
        'machineset' => standard_labels['machineset'],
        'group' => standard_labels['group'],
-       'app.kubernetes.io/component' => 'app_service'
+       'app.kubernetes.io/component' => @custom_service_name
      }
      network_policies << create_egress_network_policy('off-nexus', @environment.name, standard_labels,
                                                       nexus_filters, ingress_match_labels)

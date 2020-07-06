@@ -2644,7 +2644,7 @@ EOL
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(3)
-      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
+      expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',

@@ -191,7 +191,7 @@ module Stacks::Kubernetes::ResourceSetIngress
     app_service_match_labels = {
       'machineset' => ingress_labels['machineset'],
       'group' => 'blue',
-      'app.kubernetes.io/component' => 'app_service'
+      'app.kubernetes.io/component' => @custom_service_name
     }
     egresses = [{
       'to' => [

@@ -462,7 +462,7 @@ describe 'kubernetes' do
               'group' => 'blue',
               'app.kubernetes.io/instance' => 'blue',
               'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'app_service'
+              'app.kubernetes.io/component' => 'base_service'
             },
             'annotations' => {
               'kubernetes.io/ingress.class' => 'traefik-x-blue'
@@ -1787,7 +1787,7 @@ EOL
 
       expect(network_policies.size).to eq(2)
       network_policy = network_policies.last
-      expect(network_policy['metadata']['name']).to eql('allow-out-to-space-kubernetes-api-dcbf68f')
+      expect(network_policy['metadata']['name']).to match(/allow-out-to-space-kubernetes-api-/)
       expect(network_policy['metadata']['namespace']).to eql('e1')
       expect(network_policy['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -1801,7 +1801,7 @@ EOL
       expect(network_policy['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'x',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(network_policy['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policy['spec']['egress'].size).to eq(1)
@@ -2356,7 +2356,7 @@ EOL
       expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['protocol']).to eql('UDP')
@@ -2427,7 +2427,7 @@ EOL
                          select { |s| s['kind'] == "NetworkPolicy" }
 
       expect(network_policies.size).to eq(2)
-      expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-23bb767')
+      expect(network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -2441,7 +2441,7 @@ EOL
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(network_policies.first['spec']['egress'].size).to eq(1)
@@ -2514,7 +2514,7 @@ EOL
       expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress.first['ports'].first['protocol']).to eql('UDP')
@@ -2522,7 +2522,7 @@ EOL
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(2)
-      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
+      expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
         'app.kubernetes.io/managed-by' => 'stacks',
@@ -2536,7 +2536,7 @@ EOL
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
@@ -2545,7 +2545,7 @@ EOL
       expect(egress.first['to'].first['podSelector']['matchLabels']).to eql(
         'machineset' => 'app1',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
@@ -2637,7 +2637,7 @@ depends on the other' do
       expect(ingress.first['from'].first['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e2')
       expect(ingress.first['ports'].first['protocol']).to eql('UDP')
@@ -2645,12 +2645,12 @@ depends on the other' do
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(2)
-      expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
+      expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
         'machineset' => 'app2',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(app2_network_policies.first['spec']['policyTypes']).to eql(['Egress'])
       expect(egress.size).to eq(1)
@@ -2659,7 +2659,7 @@ depends on the other' do
       expect(egress.first['to'].first['podSelector']['matchLabels']).to eql(
         'machineset' => 'app1',
         'group' => 'blue',
-        'app.kubernetes.io/component' => 'app_service'
+        'app.kubernetes.io/component' => 'base_service'
       )
       expect(egress.first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(egress.first['ports'].first['protocol']).to eql('TCP')
