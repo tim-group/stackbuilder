@@ -2,7 +2,6 @@ require 'stackbuilder/support/namespace'
 require 'stackbuilder/support/unit_conversion'
 
 class Support::KubernetesVmPrometheusTargets
-
   def initialize(dns_resolver)
     @dns_resolver = dns_resolver
   end

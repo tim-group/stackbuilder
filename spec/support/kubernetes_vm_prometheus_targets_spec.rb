@@ -42,7 +42,7 @@ describe Support::KubernetesVmPrometheusTargets do
 
   let(:dns_resolver) do
     MyTestDnsResolver.new(
-        'office-nexus-001.mgmt.lon.net.local' => '3.4.5.9'
+      'office-nexus-001.mgmt.lon.net.local' => '3.4.5.9'
     )
   end
 
