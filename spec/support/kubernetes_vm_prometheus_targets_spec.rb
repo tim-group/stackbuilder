@@ -101,7 +101,7 @@ describe Support::KubernetesVmPrometheusTargets do
     end
 
     it "ignores_stacks_without_scrape_metrics" do
-      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new
+      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new(:dns_resolver)
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
       expect(out.map { |crd| [crd['kind'], crd['metadata']['name']] }).to match_array([
