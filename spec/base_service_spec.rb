@@ -2798,4 +2798,29 @@ depends on the other' do
     expected_caps = { "drop" => ["ALL"], "add" => ["NET_BIND_SERVICE"] }
     expect(k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'].first['securityContext']['capabilities']).to eql(expected_caps)
   end
+
+  it 'allows you to create outgoing network policies' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => { 'e1' => true } do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+          self.alerts_channel = 'test'
+          self.application = 'ntp'
+          self.startup_alert_threshold = '10s'
+          self.capabilities = ['NET_BIND_SERVICE']
+          allow_outbound_to 'external-ntp-servers', '0.0.0.0/0', [123], 'UDP'
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+    network_policy = k8s_resource(set, 'NetworkPolicy')
+    expect(network_policy['metadata']['name']).to match(/allow-out-to-external-ntp-servers-/)
+    expect(network_policy['spec']['podSelector']['matchLabels']).to eq("machineset" => "x",
+                                                                       "group" => "blue",
+                                                                       "app.kubernetes.io/component" => "base_service")
+  end
 end

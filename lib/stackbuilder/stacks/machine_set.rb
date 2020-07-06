@@ -296,7 +296,7 @@ class Stacks::MachineSet
           'matchLabels' => {
             'machineset' => @name,
             'group' => @groups.first,
-            'app.kubernetes.io/component' => 'app_service'
+            'app.kubernetes.io/component' => @custom_service_name
           }
         },
         'policyTypes' => [
