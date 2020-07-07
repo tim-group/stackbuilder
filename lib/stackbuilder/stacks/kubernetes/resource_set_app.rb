@@ -524,6 +524,33 @@
            'machineset' => standard_labels['machineset'],
            'group' => standard_labels['group'],
            'app.kubernetes.io/component' => @custom_service_name)
+       when Stacks::Dependencies::LabelsKubernetesSelector
+         network_policies << create_egress_network_policy(
+           'labels',
+           @environment.name,
+           standard_labels,
+           [
+             {
+               'to' => [{
+                 'podSelector' => {
+                   'matchLabels' => dep.to_selector.labels
+                 },
+                 'namespaceSelector' => {
+                   'matchLabels' => {
+                     'isStacksEnvironment' => 'true'
+                   }
+                 }
+               }],
+               'ports' => @ports.keys.map do |port_name|
+                 {
+                   'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
+                   'port' => port_name
+                 }
+               end
+             }],
+           'machineset' => standard_labels['machineset'],
+           'group' => standard_labels['group'],
+           'app.kubernetes.io/component' => standard_labels['app.kubernetes.io/component'])
        end
      end
      network_policies
@@ -604,7 +631,7 @@
      prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
      network_policies << create_ingress_network_policy_for_internal_service('mon', 'prom-main',
                                                                             @environment.name, standard_labels,
-                                                                            prom_filters)
+                                                                            prom_filters) if @monitor_tucker
      network_policies
    end
 

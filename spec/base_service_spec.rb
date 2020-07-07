@@ -1785,7 +1785,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'mystack', 'x')
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(1)
       network_policy = network_policies.last
       expect(network_policy['metadata']['name']).to match(/allow-out-to-space-kubernetes-api-/)
       expect(network_policy['metadata']['namespace']).to eql('e1')
@@ -2164,6 +2164,18 @@ EOL
       targets = depends_on_app_services_ms_deps.first.resolve_targets(e1)
       expect(targets.size).to be_eql(1)
       expect(targets.first.name).to be_eql('just_an_app')
+      depends_on_app_service_resources = depends_on_app_services_ms.to_k8s(app_deployer, dns, hiera_provider).first.resources
+      depends_on_app_service_network_policies = depends_on_app_service_resources.select do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] =~ /allow-out-to-labels-/
+      end
+      expect(depends_on_app_service_network_policies.size).to eq(1)
+      depends_on_app_service_network_policy = depends_on_app_service_network_policies.first
+      spec = depends_on_app_service_network_policy['spec']
+      expect(spec['egress'].first['to'].first['podSelector']['matchLabels']).to eq('app.kubernetes.io/component' => 'app_service')
+      expect(spec['egress'].first['to'].first['namespaceSelector']['matchLabels']).to eq('isStacksEnvironment' => 'true')
+      expect(spec['podSelector']['matchLabels']).to eq('machineset' => 'depends_on_app_services',
+                                                       'group' => 'blue',
+                                                       'app.kubernetes.io/component' => 'base_service')
 
       just_an_app_resources = machine_sets['just_an_app'].to_k8s(app_deployer, dns, hiera_provider)
 
@@ -2300,7 +2312,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(6)
+      expect(network_policies.size).to eq(5)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-in-from-e1-app1')
@@ -2428,7 +2440,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(1)
       expect(network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -2492,7 +2504,7 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to match(/allow-in-from-e1-app2-/)
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
@@ -2523,7 +2535,7 @@ EOL
       expect(ingress.first['ports'].first['port']).to eq('ntp')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
@@ -2574,7 +2586,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
-      expect(network_policies.size).to eq(1)
+      expect(network_policies.size).to eq(0)
       expect(network_policies.select do |policy|
         policy['metadata']['name'] =~ /allow-out-to-off-nexus-/
       end).to be_empty
@@ -2624,7 +2636,7 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to match(/allow-in-from-e2-app2-/)
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -2646,7 +2658,7 @@ depends on the other' do
       expect(ingress.first['ports'].first['port']).to eq('ntp')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -2824,5 +2836,26 @@ depends on the other' do
     expect(network_policy['spec']['podSelector']['matchLabels']).to eq("machineset" => "x",
                                                                        "group" => "blue",
                                                                        "app.kubernetes.io/component" => "base_service")
+  end
+
+  it 'doesn\'t create network policies allowing prometheus in to ports if monitor_tucker is false' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => { 'e1' => true } do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+          self.alerts_channel = 'test'
+          self.application = 'ntp'
+          self.startup_alert_threshold = '10s'
+          self.capabilities = ['NET_BIND_SERVICE']
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+    network_policy = k8s_resource(set, 'NetworkPolicy')
+    expect(network_policy).to be_nil
   end
 end
