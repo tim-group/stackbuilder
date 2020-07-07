@@ -49,14 +49,14 @@ class Support::KubernetesVmPrometheusTargets
                 'app.kubernetes.io/component' => 'vm_metrics_target'
               }
             },
-            'subsets' => {
+            'subsets' => [{
               'addresses' => [{ 'ip' => "#{@dns_resolver.lookup(thing.prod_fqdn)}" }],
               'ports' => [{
                 'name' => 'metrics',
                 'port' => 8000,
                 'protocol' => 'TCP'
               }]
-            }
+            }]
           }
         end
       end

@@ -89,14 +89,14 @@ describe Support::KubernetesVmPrometheusTargets do
               'app.kubernetes.io/component' => 'vm_metrics_target'
             }
           },
-          'subsets' => {
+          'subsets' => [{
             'addresses' => [{ 'ip' => '3.4.5.6' }],
             'ports' => [{
               'name' => 'metrics',
               'port' => 8000,
               'protocol' => 'TCP'
             }]
-          }
+          }]
         }
       ]
                                                                                              )
