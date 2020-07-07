@@ -87,7 +87,7 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
     modify_storage(snapshot_storage) if role_of?(:backup) && @virtual_service.snapshot_backups
   end
 
-  def server_id_legacy
+  def server_id
     if @server_id.nil?
       case @role
       when :master, :standalone
@@ -104,10 +104,6 @@ class Stacks::Services::MysqlServer < Stacks::MachineDef
       end
     end
     @server_id
-  end
-
-  def server_id
-    return server_id_legacy
   end
 
   def data_size(size)
