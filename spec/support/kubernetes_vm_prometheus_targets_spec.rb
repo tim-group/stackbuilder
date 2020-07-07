@@ -59,7 +59,7 @@ describe Support::KubernetesVmPrometheusTargets do
           'kind' => 'Service',
           'metadata' => {
             'name' => "metrics-e1-appstack-001",
-            'namespace' => 'monitoring',
+            'namespace' => 'vm-metrics',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
               'app.kubernetes.io/component' => 'vm_metrics_target',
@@ -83,7 +83,7 @@ describe Support::KubernetesVmPrometheusTargets do
           'kind' => 'Endpoints',
           'metadata' => {
             'name' => "metrics-e1-appstack-001",
-            'namespace' => 'monitoring',
+            'namespace' => 'vm-metrics',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
               'app.kubernetes.io/component' => 'vm_metrics_target'

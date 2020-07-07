@@ -19,7 +19,7 @@ class Support::KubernetesVmPrometheusTargets
             'kind' => 'Service',
             'metadata' => {
               'name' => "metrics-#{thing.hostname}",
-              'namespace' => 'monitoring',
+              'namespace' => 'vm-metrics',
               'labels' => {
                 'app.kubernetes.io/managed-by' => 'stacks',
                 'app.kubernetes.io/component' => 'vm_metrics_target',
@@ -43,7 +43,7 @@ class Support::KubernetesVmPrometheusTargets
             'kind' => 'Endpoints',
             'metadata' => {
               'name' => "metrics-#{thing.hostname}",
-              'namespace' => 'monitoring',
+              'namespace' => 'vm-metrics',
               'labels' => {
                 'app.kubernetes.io/managed-by' => 'stacks',
                 'app.kubernetes.io/component' => 'vm_metrics_target'
