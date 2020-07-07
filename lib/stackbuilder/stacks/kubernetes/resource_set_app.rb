@@ -186,7 +186,7 @@
                  port_config = {}
                  port_config['name'] = port_name
                  port_config['containerPort'] = @ports[port_name]['port']
-                 port_config['protocol'] = @ports[port_name][:protocol].nil? ? 'TCP' : @ports[port_name]['protocol'.upcase]
+                 port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
                  port_config
                end,
                'volumeMounts' => [

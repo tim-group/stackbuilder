@@ -334,6 +334,38 @@ describe 'kubernetes' do
       end
     end
 
+    describe 'to_k8s method generation of deployment resources' do
+      it 'generates services wit udp ports correctly' do
+        factory = eval_stacks do
+          stack "mystack" do
+            base_service "x", :kubernetes => { 'e1' => true } do
+              self.ports = {
+                'ntp' => {
+                  'port' => 123,
+                  'protocol' => 'udp'
+                }
+              }
+              self.application = 'test'
+              self.startup_alert_threshold = '10s'
+              self.alerts_channel = 'test'
+              self.maintainers = [person('Testers')]
+              self.description = 'Test Description'
+            end
+          end
+          env "e1", :primary_site => 'space' do
+            instantiate_stack "mystack"
+          end
+        end
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        deployment = k8s_resource(set, 'Deployment')
+        expect(deployment['spec']['template']['spec']['containers'].first['ports']).to be_eql([{
+                                                                                                "name" => "ntp",
+                                                                                                "containerPort" => 123,
+                                                                                                "protocol" => 'UDP'
+                                                                                              }])
+      end
+    end
+
     describe 'to_k8s method generation of configmap resources' do
       it 'doesn\'t generate a configmap by default' do
         factory = eval_stacks do
