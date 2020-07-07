@@ -49,7 +49,7 @@ class Support::KubernetesVmPrometheusTargets
               }
             },
             'subsets' => {
-              'addresses' => [{ 'ip' => '0.0.0.0' }],
+              'addresses' => [{ 'ip' => "#{@dns_resolver.lookup(thing.prod_fqdn)}" }],
               'ports' => [{
                 'name' => 'metrics',
                 'port' => 8000,

@@ -1,5 +1,6 @@
 require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/kubernetes_vm_prometheus_targets'
+require 'test_classes'
 require 'spec_helper'
 
 describe Support::KubernetesVmPrometheusTargets do
@@ -42,13 +43,14 @@ describe Support::KubernetesVmPrometheusTargets do
 
   let(:dns_resolver) do
     MyTestDnsResolver.new(
-      'e1-appstack-001.mgmt.space.net.local' => '3.4.5.9'
+      'e1-appstack-001.space.net.local' => '3.4.5.6',
+      'e1-appstack-002.space.net.local' => '3.4.5.7'
     )
   end
 
   describe 'stacks:kubernetes_vm_prometheus_targets' do
     it "generates_crd_with_all_attributes" do
-      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new(:dns_resolver)
+      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new(dns_resolver)
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
       expect(out.select { |crd| crd['metadata']['name'] == 'metrics-e1-appstack-001' }).to eq([
@@ -88,7 +90,7 @@ describe Support::KubernetesVmPrometheusTargets do
             }
           },
           'subsets' => {
-            'addresses' => [{ 'ip' => '0.0.0.0' }],
+            'addresses' => [{ 'ip' => '3.4.5.6' }],
             'ports' => [{
               'name' => 'metrics',
               'port' => 8000,
@@ -101,7 +103,7 @@ describe Support::KubernetesVmPrometheusTargets do
     end
 
     it "ignores_stacks_without_scrape_metrics" do
-      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new(:dns_resolver)
+      vm_prom_targets = Support::KubernetesVmPrometheusTargets.new(dns_resolver)
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
 
       expect(out.map { |crd| [crd['kind'], crd['metadata']['name']] }).to match_array([
