@@ -12,6 +12,7 @@ class Support::KubernetesVmPrometheusTargets
       env.accept do |thing|
         if thing.respond_to?(:mgmt_fqdn) &&
            thing.site == site &&
+           (thing.virtual_service.is_a? Stacks::Services::AppService) &&
            thing.virtual_service.scrape_metrics
           crds << {
             'apiVersion' => 'v1',
