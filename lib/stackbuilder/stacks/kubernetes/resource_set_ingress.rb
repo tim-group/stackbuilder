@@ -437,7 +437,9 @@ module Stacks::Kubernetes::ResourceSetIngress
     @ports.keys.map do |port_name|
       actual_port = @ports[port_name]['port'] < 1024 ? 8000 + @ports[port_name]['port'] : @ports[port_name]['port']
       actual_port_name = port_name == 'app' ? 'http' : port_name
-      container['args'] << "--entrypoints.#{actual_port_name}.Address=:#{actual_port}"
+      entrypoint = "--entrypoints.#{actual_port_name}.Address=:#{actual_port}"
+      entrypoint += "/udp" if @ports[port_name]['protocol'] == 'udp'
+      container['args'] << entrypoint
       container['ports'] << {
         'containerPort' => actual_port,
         'name' => actual_port_name,

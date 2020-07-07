@@ -629,7 +629,7 @@ describe 'kubernetes' do
                       '--metrics.prometheus',
                       '--log.level=DEBUG',
                       '--entrypoints.traefik.Address=:10254',
-                      '--entrypoints.ntp.Address=:8123',
+                      '--entrypoints.ntp.Address=:8123/udp',
                       '--providers.kubernetesCRD',
                       '--providers.kubernetesCRD.ingressclass=traefik-x-blue',
                       '--providers.kubernetesCRD.namespaces=e1'
