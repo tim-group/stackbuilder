@@ -1595,7 +1595,7 @@ EOL
         end).to eql('alert' => 'DeploymentReplicasMismatch',
                     'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', namespace='e1', deployment='x-blue-app'} != " \
                       "kube_deployment_status_replicas_available{job='kube-state-metrics', namespace='e1', deployment='x-blue-app'}",
-                    'for' => '1h',
+                    'for' => '7200s',
                     'labels' => {
                       'severity' => 'warning',
                       'alertname' => 'x-blue-app is missing replicas',
@@ -1603,7 +1603,7 @@ EOL
                     },
                     'annotations' => {
                       'message' => 'Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not ' \
-                        'matched the expected number of replicas for longer than the startup_alert_threshold (1h).'
+                        'matched the expected number of replicas for longer than the startup_alert_threshold (1h) * replicas (2).'
                     })
       end
 

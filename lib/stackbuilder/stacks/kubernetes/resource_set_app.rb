@@ -39,7 +39,7 @@
      output << generate_app_service_resource(app_resources_name, app_service_labels)
      output << generate_app_deployment_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config)
      output << generate_app_pod_disruption_budget_resource(app_resources_name, app_service_labels)
-     output << generate_app_alerting_resource(app_resources_name, site, app_service_labels)
+     output << generate_app_alerting_resource(app_resources_name, site, app_service_labels, replicas)
      output += generate_app_network_policies(dns_resolver, site, app_service_labels)
      output += generate_app_service_account_resources(dns_resolver, site, app_service_labels, app_resources_name)
 
@@ -277,7 +277,7 @@
      }
    end
 
-   def generate_app_alerting_resource(resource_name, site, app_service_labels)
+   def generate_app_alerting_resource(resource_name, site, app_service_labels, replicas)
      fail("app_service '#{name}' in '#{@environment.name}' requires alerts_channel (set self.alerts_channel)") if @alerts_channel.nil?
 
      pagerduty = page_on_critical ? { 'pagerduty' => 'true' } : {}
@@ -302,7 +302,7 @@
        'alert' => 'DeploymentReplicasMismatch',
        'expr' => "kube_deployment_spec_replicas{job='kube-state-metrics', namespace='#{environment.name}', deployment='#{resource_name}'} " \
        "!= kube_deployment_status_replicas_available{job='kube-state-metrics', namespace='#{environment.name}', deployment='#{resource_name}'}",
-       'for' => startup_alert_threshold,
+       'for' => "#{startup_alert_threshold_seconds * replicas}s",
        'labels' => {
          'severity' => 'warning',
          'alertname' => "#{resource_name} is missing replicas",
@@ -310,7 +310,7 @@
        },
        'annotations' => {
          'message' => "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not matched the " \
-           "expected number of replicas for longer than the startup_alert_threshold (#{startup_alert_threshold})."
+           "expected number of replicas for longer than the startup_alert_threshold (#{startup_alert_threshold}) * replicas (#{replicas})."
        }
      }
 
