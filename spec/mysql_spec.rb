@@ -451,54 +451,6 @@ describe_stack 'should allow server_id to be overwritten' do
   end
 end
 
-describe_stack 'should provide the correct server_ids' do
-  given do
-    stack "mysql" do
-      mysql_cluster "mydb" do
-        self.role_in_name = true
-        self.master_instances = 1
-        self.slave_instances = 1
-        self.backup_instances = 1
-        self.primary_site_backup_instances = 1
-        self.secondary_site_slave_instances = 1
-        self.secondary_site_user_access_instances = 1
-      end
-    end
-    env "testing", :primary_site => "space", :secondary_site => "earth" do
-      instantiate_stack "mysql"
-    end
-  end
-
-  it_stack 'should contain all the expected hosts' do |stack|
-    expect(stack).to have_hosts([
-      'testing-mydb-master-001.mgmt.space.net.local',
-      'testing-mydb-slave-001.mgmt.space.net.local',
-      'testing-mydb-slave-001.mgmt.earth.net.local',
-      'testing-mydb-backup-001.mgmt.space.net.local',
-      'testing-mydb-backup-001.mgmt.earth.net.local',
-      'testing-mydb-useraccess-001.mgmt.earth.net.local'
-    ])
-  end
-  host("testing-mydb-master-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['server_id']).to eql(1)
-  end
-  host("testing-mydb-slave-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['server_id']).to eql(101)
-  end
-  host("testing-mydb-slave-001.mgmt.earth.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['server_id']).to eql(151)
-  end
-  host("testing-mydb-backup-001.mgmt.space.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['server_id']).to eql(201)
-  end
-  host("testing-mydb-backup-001.mgmt.earth.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['server_id']).to eql(251)
-  end
-  host("testing-mydb-useraccess-001.mgmt.earth.net.local") do |host|
-    expect(host.to_enc['role::mysql_server']['server_id']).to eql(351)
-  end
-end
-
 describe_stack 'should allow server_id to be overwritten' do
   given do
     stack "mysql" do
@@ -1011,7 +963,7 @@ describe_stack 'should not sort read only cluster servers when option false' do
   end
   host("production-app-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['role::http_app']['dependencies']
-    expect(rights['db.test.read_only_cluster']).to eql('production-mydb-master-001.space.net.local,production-mydb-slave-001.space.net.local')
+    expect(rights['db.test.read_only_cluster']).to eql('production-mydb-001.space.net.local,production-mydb-002.space.net.local')
   end
 end
 
@@ -1037,7 +989,7 @@ describe_stack 'should by default provide read only cluster members in order sla
   end
   host("production-app-001.mgmt.space.net.local") do |host|
     rights = host.to_enc['role::http_app']['dependencies']
-    expect(rights['db.test.read_only_cluster']).to eql('production-mydb-slave-001.space.net.local,production-mydb-master-001.space.net.local')
+    expect(rights['db.test.read_only_cluster']).to eql('production-mydb-002.space.net.local,production-mydb-001.space.net.local')
   end
 end
 
@@ -1129,29 +1081,6 @@ describe_stack 'create primary site backup instances' do
   end
 end
 
-describe_stack 'create standalone mysql servers' do
-  given do
-    stack "mysql" do
-      mysql_cluster "mydb" do
-        self.role_in_name = false
-        self.database_name = 'test'
-        self.master_instances = 0
-        self.slave_instances = 0
-        self.backup_instances = 0
-        self.standalone_instances = 1
-      end
-    end
-    env "production", :production => true, :primary_site => "space", :secondary_site => "earth" do
-      instantiate_stack "mysql"
-    end
-  end
-  host("production-mydb-001.mgmt.space.net.local") do |host|
-    enc = host.to_enc['role::mysql_server']
-    expect(enc['monitoring_checks']).to be_empty
-    expect(enc['role']).to eql(:standalone)
-  end
-end
-
 describe_stack 'should support instances as a site hash with roles' do
   given do
     stack 'mysql' do
@@ -1159,7 +1088,6 @@ describe_stack 'should support instances as a site hash with roles' do
         self.master_instances = 1
         self.slave_instances = 1
         self.backup_instances = 1
-        self.standalone_instances = 1
         self.user_access_instances = 1
       end
     end
@@ -1172,11 +1100,10 @@ describe_stack 'should support instances as a site hash with roles' do
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts(
       [
-        'e1-mydb-master-001.mgmt.earth.net.local',
-        'e1-mydb-slave-001.mgmt.earth.net.local',
-        'e1-mydb-standalone-001.mgmt.earth.net.local',
-        'e1-mydb-backup-001.mgmt.jupiter.net.local',
-        'e1-mydb-useraccess-001.mgmt.earth.net.local'
+        'e1-mydb-001.mgmt.earth.net.local',
+        'e1-mydb-002.mgmt.earth.net.local',
+        'e1-mydbbackup-001.mgmt.jupiter.net.local',
+        'e1-mydbuseraccess-001.mgmt.earth.net.local'
       ]
     )
   end
@@ -1190,7 +1117,6 @@ describe_stack 'should allow snapshot backups' do
         self.master_instances = 1
         self.slave_instances = 0
         self.backup_instances = 1
-        self.standalone_instances = 0
         self.snapshot_backups = true
         each_machine do |machine|
           next unless machine.role_of?(:backup)
@@ -1208,16 +1134,16 @@ describe_stack 'should allow snapshot backups' do
   it_stack 'should contain all the expected hosts' do |stack|
     expect(stack).to have_hosts(
       [
-        'production-mydb-master-001.mgmt.space.net.local',
-        'production-mydb-backup-001.mgmt.earth.net.local'
+        'production-mydb-001.mgmt.space.net.local',
+        'production-mydbbackup-001.mgmt.earth.net.local'
       ]
     )
   end
-  host("production-mydb-master-001.mgmt.space.net.local") do |host|
+  host("production-mydb-001.mgmt.space.net.local") do |host|
     enc = host.to_enc
     expect(enc.key? 'db_snapshot').to be false
   end
-  host("production-mydb-backup-001.mgmt.earth.net.local") do |host|
+  host("production-mydbbackup-001.mgmt.earth.net.local") do |host|
     enc = host.to_enc
     expect(enc.key? 'db_snapshot').to be true
     expect(enc['db_snapshot']['snapshot_size']).to eql '256M'

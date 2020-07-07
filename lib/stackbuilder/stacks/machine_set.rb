@@ -72,21 +72,6 @@ class Stacks::MachineSet
     "#{environment.name}-#{@stack.name}-#{name}"
   end
 
-  def instances_usage_with_role
-    "Below is an example of correct usage:\n \
- @instances = {\n \
-   'oy' => {\n \
-     :master => 1,\n \
-     :slave  => 2\n \
-   },\n \
-   'st' => {\n \
-     :master => 1,\n \
-     :slave  => 0\n \
-   }\n \
- }\n\
- This is what you specified:\n @instances = #{@instances.inspect}\n"
-  end
-
   def instances_usage
     "Below is an example of correct usage:\n \
  @instances = {\n\
@@ -98,23 +83,12 @@ class Stacks::MachineSet
 
   def validate_instances(environment)
     if @instances.is_a?(Integer)
-      fail "You cannot specify self.role_in_name = true without defining roles in @instances\n \
-      #{instances_usage_with_role}" if @role_in_name
+      return
     elsif @instances.is_a?(Hash)
       environment.validate_instance_sites(@instances.keys)
       @instances.each do |_site, count|
-        if count.is_a?(String)
+        if !count.is_a?(Fixnum)
           fail "You must specify Integers when using @instances in a hash format\n #{instances_usage}"
-        elsif count.is_a?(Integer)
-          fail "You cannot specify self.role_in_name = true without defining roles in @instances\n \
-          #{instances_usage_with_role}" if @role_in_name
-        elsif count.is_a?(Hash)
-          count.each do |role, num|
-            fail "You must specify Integers when using @instances in a hash format\n #{instances_usage_with_role}" if num.is_a?(String)
-            fail "Role: #{role} must be a symbol\n #{instances_usage_with_role}" unless role.is_a?(Symbol)
-          end
-        else
-          fail "@instances hash contains invalid item #{count} which is a #{count.class} expected Integer / Symbol"
         end
       end
     else
@@ -354,7 +328,6 @@ class Stacks::MachineSet
 
   def instantiate_machine(index, environment, site, role = nil, custom_name = '')
     vm_name = "#{name}#{custom_name}-" + sprintf("%03d", index)
-    vm_name = "#{name}-#{role.to_s.sub(/_/, '')}-" + sprintf("%03d", index) if @role_in_name
     vm_name = "#{name}" if @type == Stacks::Services::ExternalServer
     server = @type.new(self, vm_name, environment, site, role)
     server.group = groups[(index - 1) % groups.size] if server.respond_to?(:group)

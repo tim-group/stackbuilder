@@ -39,18 +39,18 @@ describe Support::Puppet do
     puppet.do_puppet_run_on_dependencies(server)
 
     expect(puppet.file_contents.split("\n")).to contain_exactly(
-      'e1-db-master-001.mgmt.space.net.local',
-      'e1-db-slave-001.mgmt.space.net.local',
-      'e1-db-backup-001.mgmt.earth.net.local')
+      'e1-db-001.mgmt.space.net.local',
+      'e1-db-002.mgmt.space.net.local',
+      'e1-dbbackup-001.mgmt.earth.net.local')
   end
 
   it 'runs puppet on all of the dependencies within a service' do
-    server = factory.inventory.find_environment('e1').find_stacks('e1-db-slave-001.mgmt.space.net.local').first
+    server = factory.inventory.find_environment('e1').find_stacks('e1-db-002.mgmt.space.net.local').first
 
     puppet.do_puppet_run_on_dependencies(server)
 
     expect(puppet.file_contents.split("\n")).to contain_exactly(
-      'e1-db-master-001.mgmt.space.net.local',
-      'e1-db-backup-001.mgmt.earth.net.local')
+      'e1-db-001.mgmt.space.net.local',
+      'e1-dbbackup-001.mgmt.earth.net.local')
   end
 end

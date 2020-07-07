@@ -51,8 +51,7 @@ module Stacks::Services::MysqlCluster
     @primary_site_backup_instances = 0
     @user_access_instances = 0
     @secondary_site_user_access_instances = 0
-    @standalone_instances = 0
-    @role_in_name = true
+    @role_in_name = false
 
     @snapshot_backups = false
   end
@@ -94,9 +93,6 @@ module Stacks::Services::MysqlCluster
       instantiate_machine(server_index += 1, environment, environment.sites.last, :user_access, 'useraccess')
     end
     server_index = 0
-    @standalone_instances.times do
-      instantiate_machine(server_index += 1, environment, environment.sites.first, :standalone)
-    end
   end
 
   def single_instance
@@ -203,8 +199,7 @@ module Stacks::Services::MysqlCluster
   def exists_in_site?(environment, site)
     if (master_instances > 0 && site == environment.sites.first) ||
        (slave_instances > 0 && site == environment.sites.first) ||
-       (secondary_site_slave_instances > 0 && site == environment.sites.last) ||
-       (standalone_instances > 0 && site == environment.sites.first)
+       (secondary_site_slave_instances > 0 && site == environment.sites.last)
       true
     else
       false

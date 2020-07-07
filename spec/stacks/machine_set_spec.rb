@@ -97,44 +97,6 @@ describe_stack 'should support instances as a hash' do
   end
 end
 
-describe_stack 'should support instances as a site hash with roles' do
-  given do
-    stack 'example' do
-      app_service "appx" do
-        self.role_in_name = true
-        self.application = "JavaHttpRef"
-        self.instances = {
-          'earth' => {
-            :basic => 1
-          },
-          'jupiter' => {
-            :advanced => 1
-          }
-        }
-      end
-    end
-
-    env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
-      instantiate_stack "example"
-    end
-  end
-
-  it_stack 'should contain all the expected hosts' do |stack|
-    expect(stack).to have_hosts(
-      [
-        'e1-appx-basic-001.mgmt.earth.net.local',
-        'e1-appx-advanced-001.mgmt.jupiter.net.local'
-      ]
-    )
-  end
-  host("e1-appx-basic-001.mgmt.earth.net.local") do |host|
-    expect(host.role).to eql(:basic)
-  end
-  host("e1-appx-advanced-001.mgmt.jupiter.net.local") do |host|
-    expect(host.role).to eql(:advanced)
-  end
-end
-
 describe_stack 'should support instances as a site hash' do
   given do
     stack 'example' do
@@ -166,45 +128,6 @@ describe_stack 'should support instances as a site hash' do
   host("e1-appx-001.mgmt.jupiter.net.local") do |host|
     expect(host.role).to be_nil
   end
-end
-
-describe_stack 'should explode when using role in name with legacy instances (Integer)' do
-  expect do
-    given do
-      stack 'example' do
-        app_service "appx" do
-          self.role_in_name = true
-          self.application = "JavaHttpRef"
-          self.instances = 1
-        end
-      end
-
-      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
-        instantiate_stack "example"
-      end
-    end
-  end.to raise_error(/You cannot specify self.role_in_name = true without defining roles in @instances/)
-end
-
-describe_stack 'should explode when using role in name with non-role containing instances (Hash)' do
-  expect do
-    given do
-      stack 'example' do
-        app_service "appx" do
-          self.role_in_name = true
-          self.application = "JavaHttpRef"
-          self.instances = {
-            'earth'   => 1,
-            'jupiter' => 1
-          }
-        end
-      end
-
-      env "e1", :primary_site => "earth", :secondary_site => 'jupiter' do
-        instantiate_stack "example"
-      end
-    end
-  end.to raise_error(/You cannot specify self.role_in_name = true without defining roles in @instances/)
 end
 
 describe_stack 'should raise exception for an un-supported site' do
