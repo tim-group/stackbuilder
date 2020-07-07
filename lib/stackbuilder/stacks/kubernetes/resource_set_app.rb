@@ -420,16 +420,12 @@
        is_same_site = dep.requirement == :same_site
        next if is_same_site && !vs.exists_in_site?(vs.environment, site)
 
-       case dep.to_selector
-       when Stacks::Dependencies::LabelsKubernetesSelector
-         match_labels = dep.to_selector.labels
-       else
-         match_labels = {
-           'machineset' => vs.name,
-           'group' => vs.groups.first,
-           'app.kubernetes.io/component' => @custom_service_name
-         }
-       end
+       match_labels = {
+         'machineset' => vs.name,
+         'group' => vs.groups.first,
+         'app.kubernetes.io/component' => vs.custom_service_name
+       }
+
        filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
        network_policies << create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
                                                                               @environment.name, standard_labels, filters)

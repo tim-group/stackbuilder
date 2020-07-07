@@ -2185,7 +2185,9 @@ EOL
                                           "from" => [{
                                             "podSelector" => {
                                               "matchLabels" => {
-                                                "app.kubernetes.io/component" => "app_service"
+                                                "machineset" => "depends_on_app_services",
+                                                "group" => "blue",
+                                                "app.kubernetes.io/component" => "base_service"
                                               }
                                             },
                                             "namespaceSelector" => {
