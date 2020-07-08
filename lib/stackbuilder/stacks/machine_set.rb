@@ -15,7 +15,6 @@ class Stacks::MachineSet
   attr_accessor :type
   attr_accessor :custom_service_name
   attr_accessor :server_offset
-  attr_accessor :role_in_name
   attr_accessor :monitoring
   attr_accessor :monitoring_options
   attr_accessor :monitoring_in_enc
@@ -46,7 +45,6 @@ class Stacks::MachineSet
     @enable_secondary_site = false
     @server_offset = 0
     @add_role_to_name = []
-    @role_in_name = false
     @monitoring = true
     @monitoring_options = {
       'nagios_host_template'    => 'non-prod-host',

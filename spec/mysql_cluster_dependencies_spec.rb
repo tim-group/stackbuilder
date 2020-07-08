@@ -8,7 +8,6 @@ describe_stack 'stack-with-dependencies' do
   given do
     stack 'example_db_depended_on_in_different_ways' do
       mysql_cluster 'exampledb' do
-        self.role_in_name = false
         self.database_name = 'exampledb'
         self.master_instances = 2
         self.slave_instances = 3
@@ -85,7 +84,6 @@ describe_stack 'mysql-cluster' do
   given do
     stack 'example_db_cluster' do
       mysql_cluster 'exampledb' do
-        self.role_in_name = false
         self.database_name = 'exampledb'
         self.master_instances = 1
         self.slave_instances = 1
@@ -112,7 +110,6 @@ describe_stack 'stack-with-dependencies1' do
   given do
     stack 'example_db' do
       mysql_cluster 'exampledb' do
-        self.role_in_name = false
         self.database_name = 'exampledb'
         self.master_instances = 2
         self.slave_instances = 3
@@ -179,7 +176,6 @@ describe_stack 'stack-with-dependencies1' do
   given do
     stack 'example_db' do
       mysql_cluster 'exampledb' do
-        self.role_in_name = false
         self.include_master_in_read_only_cluster = false
         self.database_name = 'exampledb'
         self.master_instances = 2
@@ -228,7 +224,6 @@ describe_stack 'stack-with-dependencies1' do
   given do
     stack 'example_db' do
       mysql_cluster 'exampledb' do
-        self.role_in_name = false
         self.include_master_in_read_only_cluster = false
         self.database_name = 'exampledb'
         self.master_instances = 2
@@ -298,7 +293,6 @@ describe 'k8s stack-with-dependencies' do
     factory = eval_stacks do
       stack 'master_with_slaves_example' do
         mysql_cluster 'exampledb' do
-          self.role_in_name = false
           self.database_name = 'exampledb'
           self.master_instances = 2
           self.slave_instances = 3
@@ -346,7 +340,6 @@ describe 'k8s stack-with-dependencies' do
     factory = eval_stacks do
       stack 'db_supported_reqs' do
         mysql_cluster 'exampledb' do
-          self.role_in_name = false
           self.database_name = 'exampledb'
           self.master_instances = 1
           self.slave_instances = 2
@@ -391,7 +384,6 @@ describe 'k8s stack-with-dependencies' do
     factory = eval_stacks do
       stack 'db_supported_reqs' do
         mysql_cluster 'exampledb' do
-          self.role_in_name = false
           self.database_name = 'exampledb'
           self.master_instances = 1
           self.slave_instances = 2

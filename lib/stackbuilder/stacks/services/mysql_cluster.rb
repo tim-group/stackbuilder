@@ -51,7 +51,6 @@ module Stacks::Services::MysqlCluster
     @primary_site_backup_instances = 0
     @user_access_instances = 0
     @secondary_site_user_access_instances = 0
-    @role_in_name = false
 
     @snapshot_backups = false
   end
@@ -66,7 +65,6 @@ module Stacks::Services::MysqlCluster
       instantiate_machine(server_index += 1, environment, environment.sites.first, :master)
     end
 
-    server_index = 0 if @role_in_name
     @slave_instances.times do
       instantiate_machine(server_index += 1, environment, environment.sites.first, :slave)
     end

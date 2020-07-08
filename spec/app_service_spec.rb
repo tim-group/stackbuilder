@@ -1833,7 +1833,6 @@ EOL
         end
         stack "my_db" do
           mysql_cluster "mydb" do
-            self.role_in_name = false
             self.database_name = 'exampledb'
             self.master_instances = 1
             self.slave_instances = 1

@@ -61,7 +61,6 @@ describe 'stack-with-dependencies' do
         mysql_cluster 'exampledb' do
           self.instances = 1
           self.database_name = 'example'
-          self.role_in_name = false
           self.backup_instances = 0
           self.slave_instances = 0
         end
