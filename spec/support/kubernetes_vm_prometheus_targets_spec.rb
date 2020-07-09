@@ -70,8 +70,7 @@ describe Support::KubernetesVmPrometheusTargets do
             }
           },
           'spec' => {
-            'type' => 'ExternalName',
-            'externalName' => 'vm-metrics-e1-appstack-001.space.net.local',
+            'type' => 'ClusterIP',
             'ports' => [{
               'name' => 'metrics',
               'port' => 8000,

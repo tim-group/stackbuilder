@@ -30,8 +30,7 @@ class Support::KubernetesVmPrometheusTargets
               }
             },
             'spec' => {
-              'type' => 'ExternalName',
-              'externalName' => "vm-metrics-#{thing.prod_fqdn}",
+              'type' => 'ClusterIP',
               'ports' => [{
                 'name' => 'metrics',
                 'port' => 8000,
@@ -51,7 +50,7 @@ class Support::KubernetesVmPrometheusTargets
               }
             },
             'subsets' => [{
-              'addresses' => [{ 'ip' => @dns_resolver.lookup(thing.prod_fqdn) }],
+              'addresses' => [{ 'ip' => "#{@dns_resolver.lookup(thing.prod_fqdn)}" }],
               'ports' => [{
                 'name' => 'metrics',
                 'port' => 8000,
