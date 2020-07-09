@@ -2,6 +2,7 @@ require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/kubernetes_vm_prometheus_targets'
 require 'test_classes'
 require 'spec_helper'
+require 'resolv'
 
 describe Support::KubernetesVmPrometheusTargets do
   let(:factory) do
@@ -52,7 +53,6 @@ describe Support::KubernetesVmPrometheusTargets do
     it "generates_crd_with_all_attributes" do
       vm_prom_targets = Support::KubernetesVmPrometheusTargets.new(dns_resolver)
       out = vm_prom_targets.generate(factory.inventory.environments.map(&:last), 'space')
-
       expect(out.select { |crd| crd['metadata']['name'] == 'metrics-e1-appstack-001' }).to eq([
         {
           'apiVersion' => 'v1',
@@ -70,7 +70,8 @@ describe Support::KubernetesVmPrometheusTargets do
             }
           },
           'spec' => {
-            'type' => 'ClusterIP',
+            'type' => 'ExternalName',
+            'externalName' => 'vm-metrics-e1-appstack-001.space.net.local',
             'ports' => [{
               'name' => 'metrics',
               'port' => 8000,
@@ -90,7 +91,7 @@ describe Support::KubernetesVmPrometheusTargets do
             }
           },
           'subsets' => [{
-            'addresses' => [{ 'ip' => '3.4.5.6' }],
+            'addresses' => [{ 'ip' => Resolv::IPv4.create('3.4.5.6') }],
             'ports' => [{
               'name' => 'metrics',
               'port' => 8000,
