@@ -2,7 +2,6 @@ require 'stackbuilder/stacks/factory'
 require 'stackbuilder/support/kubernetes_vm_prometheus_targets'
 require 'test_classes'
 require 'spec_helper'
-require 'resolv'
 
 describe Support::KubernetesVmPrometheusTargets do
   let(:factory) do
@@ -91,7 +90,7 @@ describe Support::KubernetesVmPrometheusTargets do
             }
           },
           'subsets' => [{
-            'addresses' => [{ 'ip' => Resolv::IPv4.create('3.4.5.6') }],
+            'addresses' => [{ 'ip' => '3.4.5.6' }],
             'ports' => [{
               'name' => 'metrics',
               'port' => 8000,
