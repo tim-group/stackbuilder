@@ -25,7 +25,8 @@ class Support::KubernetesVmPrometheusTargets
                 'app.kubernetes.io/component' => 'vm_metrics_target',
                 'app' => thing.virtual_service.application,
                 'group' => thing.group,
-                'server' => thing.mgmt_fqdn.gsub('.', '_'),
+                'server' => thing.hostname,
+                'site' => thing.site,
                 'environment' => thing.environment.name
               }
             },
