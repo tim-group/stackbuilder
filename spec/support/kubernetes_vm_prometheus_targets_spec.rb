@@ -64,8 +64,6 @@ describe Support::KubernetesVmPrometheusTargets do
               'app.kubernetes.io/component' => 'vm_metrics_target',
               'app' => 'MyApplication',
               'group' => 'blue',
-              'server' => 'e1-appstack-001',
-              'site' => 'space',
               'environment' => 'e1'
             }
           },
