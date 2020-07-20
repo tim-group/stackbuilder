@@ -91,7 +91,7 @@ log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @gr
 <%- end -%>
 <%- end -%>
 EOC
-    @scrape_metrics = false
+    @scrape_metrics = true
   end
 
   def enable_ehcache
