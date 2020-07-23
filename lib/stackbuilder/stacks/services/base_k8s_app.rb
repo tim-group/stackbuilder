@@ -59,6 +59,7 @@ module Stacks::Services::BaseK8sApp
                 else
                   { @environment.sites.first => @instances }
                 end
+
     instances.map do |site, replicas|
       app_name = application.downcase
       group = @groups.first
@@ -153,7 +154,11 @@ module Stacks::Services::BaseK8sApp
 
   def k8s_app_resources_name
     group = @groups.first
-    "#{name}-#{group}-app"
+    "#{name}-#{group}-#{k8s_type}"
+  end
+
+  def k8s_type
+    "app"
   end
 
   def startup_alert_threshold_seconds

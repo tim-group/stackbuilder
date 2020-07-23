@@ -39,10 +39,25 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp, Stacks::Services::AppService], __method__, &block)
+      k8s_machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::BaseK8sApp,
+                                 Stacks::Services::K8sAppLikeThing,
+                                 Stacks::Services::AppService], __method__, &block)
     else
       machineset_with(name, [Stacks::Services::VirtualService, Stacks::Services::AppService],
                       Stacks::Services::AppServer, &block)
+    end
+  end
+
+  def cronjob_service(name, properties = {}, &block)
+    if service_in_kubernetes?(name, properties)
+      k8s_machineset_with(name,
+                          [Stacks::Services::VirtualService,
+                           Stacks::Services::BaseK8sApp,
+                           Stacks::Services::K8sAppLikeThing,
+                           Stacks::Services::K8sCronJobApp],
+                          __method__, &block)
+    else
+      fail 'base_service outside of Kubernetes is not implemented'
     end
   end
 
