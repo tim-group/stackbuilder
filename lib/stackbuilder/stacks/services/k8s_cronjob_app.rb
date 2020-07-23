@@ -44,7 +44,15 @@ module Stacks::Services::K8sCronJobApp
       'spec' => {
         'concurrencyPolicy' => 'Forbid',
         'failedJobsHistoryLimit' => 10,
-        'schedule' => @job_schedule
+        'schedule' => @job_schedule,
+        'jobTemplate' => {
+          'spec' => {
+            'template' => {
+              'spec' => {
+              }
+            }
+          }
+        }
       }
 
     }
