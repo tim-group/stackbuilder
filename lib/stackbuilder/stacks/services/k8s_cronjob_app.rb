@@ -3,6 +3,8 @@ require 'stackbuilder/stacks/maintainers'
 require 'erb'
 
 module Stacks::Services::K8sCronJobApp
+  attr_accessor :job_schedule
+
   def k8s_type
     "cronjob"
   end
@@ -42,7 +44,7 @@ module Stacks::Services::K8sCronJobApp
       'spec' => {
         'concurrencyPolicy' => 'Forbid',
         'failedJobsHistoryLimit' => 10,
-        'schedule' => '*/1 * * * *'
+        'schedule' => @job_schedule
       }
 
     }

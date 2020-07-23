@@ -2,6 +2,8 @@ require 'stackbuilder/stacks/factory'
 require 'test_classes'
 require 'spec_helper'
 
+#TODO: add a test to validate that the job_schedule is required
+
 describe 'kubernetes' do
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
   let(:failing_app_deployer) { TestAppDeployer.new(nil) }
@@ -38,6 +40,7 @@ describe 'kubernetes' do
             self.description = 'Testing'
             self.alerts_channel = 'test'
             self.startup_alert_threshold = '1s'
+            self.job_schedule = '*/5 * * * *'
 
             self.application = 'MyApplication'
           end
@@ -75,7 +78,7 @@ describe 'kubernetes' do
         'spec' => {
           'concurrencyPolicy' => 'Forbid',
           'failedJobsHistoryLimit' => 10,
-          'schedule' => '*/1 * * * *'
+          'schedule' => '*/5 * * * *'
 
         }
       }
