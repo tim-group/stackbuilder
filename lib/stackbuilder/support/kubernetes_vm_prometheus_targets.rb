@@ -18,7 +18,7 @@ class Support::KubernetesVmPrometheusTargets
             'apiVersion' => 'v1',
             'kind' => 'Service',
             'metadata' => {
-              'name' => "metrics-#{thing.hostname}",
+              'name' => get_name(thing),
               'namespace' => 'vm-metrics',
               'labels' => {
                 'app.kubernetes.io/managed-by' => 'stacks',
@@ -42,7 +42,7 @@ class Support::KubernetesVmPrometheusTargets
             'apiVersion' => 'v1',
             'kind' => 'Endpoints',
             'metadata' => {
-              'name' => "metrics-#{thing.hostname}",
+              'name' => get_name(thing),
               'namespace' => 'vm-metrics',
               'labels' => {
                 'app.kubernetes.io/managed-by' => 'stacks',
@@ -62,5 +62,14 @@ class Support::KubernetesVmPrometheusTargets
       end
     end
     crds
+  end
+
+  def get_name(thing)
+    prefix = 'metrics-'
+    name = thing.hostname
+    if name.length > 63 - prefix.length
+      name = "#{thing.environment.name}-#{thing.virtual_service.short_name}-#{sprintf('%03d', thing.index)}"
+    end
+    "#{prefix}#{name}"
   end
 end
