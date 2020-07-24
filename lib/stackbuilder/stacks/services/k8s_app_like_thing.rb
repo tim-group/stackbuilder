@@ -3,10 +3,19 @@ require 'stackbuilder/stacks/maintainers'
 require 'erb'
 
 module Stacks::Services::K8sAppLikeThing
+  # Kubernetes specific attributes
+  attr_accessor :headspace
+
   def self.extended(object)
     object.configure
   end
   def configure
+    @headspace = 0.1
+    @command = ["/bin/sh"]
+    @args = [
+      '-c',
+      'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
+    ]
     @pre_appconfig_template = <<'EOC'
 port=8000
 
@@ -46,6 +55,50 @@ EOC
         'config.properties' => config
       }
     }
+  end
+
+  def ddddddgenerate_container_resource(app_name, app_version, config)
+    container_image = "repo.net.local:8080/timgroup/#{app_name}:#{app_version}"
+
+    resources = [{
+      'securityContext' => {
+        'readOnlyRootFilesystem' => true,
+        'allowPrivilegeEscalation' => false,
+        'capabilities' => {
+          'drop' => ['ALL']
+        }
+      },
+      'image' => container_image,
+      'name' => app_name,
+      'resources' => create_app_container_resources_snippet,
+      'ports' => @ports.keys.map do |port_name|
+        port_config = {}
+        port_config['name'] = port_name
+        port_config['containerPort'] = @ports[port_name]['port']
+        port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
+        port_config
+      end,
+      'volumeMounts' => [
+        {
+          'name' => 'tmp-volume',
+          'mountPath' => '/tmp'
+        }
+      ]
+    }]
+
+    resources.first['command'] = @command unless @command.nil?
+    resources.first['args'] = @args unless @args.nil?
+
+    resources.first['volumeMounts'] <<
+      {
+        'name' => 'config-volume',
+        'mountPath' => '/config',
+        'readOnly' => true
+      } unless config.nil?
+
+    resources.first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
+
+    resources
   end
 
   private
@@ -103,5 +156,21 @@ EOC
         }]
 
     }]
+  end
+
+  def create_app_container_resources_snippet
+    ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
+
+    cpu_request = @cpu_request ? { 'cpu' => @cpu_request } : {}
+    cpu_limit = @cpu_limit ? { 'cpu' => @cpu_limit } : {}
+
+    {
+      'limits' => {
+        'memory' => scale_memory(@jvm_heap, @headspace)
+      }.merge(ephemeral_storage_limit).merge(cpu_limit),
+      'requests' => {
+        'memory' => scale_memory(@jvm_heap, @headspace)
+      }.merge(ephemeral_storage_limit).merge(cpu_request)
+    }
   end
 end

@@ -126,7 +126,48 @@ describe 'kubernetes' do
                         'mountPath' => '/input/config.properties',
                         'subPath' => 'config.properties'
                       }]
+                  }],
+                  'containers' => [{
+                    'securityContext' => {
+                      'readOnlyRootFilesystem' => true,
+                      'allowPrivilegeEscalation' => false,
+                      'capabilities' => {
+                        'drop' => ['ALL']
+                      }
+                    },
 
+                    'image' => 'repo.net.local:8080/timgroup/myapplication:1.2.3',
+                    'name' => 'myapplication',
+                    'command' => ["/bin/sh"],
+                    'args' => [
+                      '-c',
+                      'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
+                    ],
+                    'resources' => {
+                      'limits' => {
+                        'memory' => '72089Ki'
+                      },
+                      'requests' => {
+                        'memory' => '72089Ki'
+                      }
+                    },
+                    'ports' => [
+                      {
+                        'containerPort' => 5000,
+                        'name' => 'jmx'
+                      }
+                    ],
+                    'volumeMounts' => [
+                      {
+                        'name' => 'tmp-volume',
+                        'mountPath' => '/tmp'
+                      },
+                      {
+                        'name' => 'config-volume',
+                        'mountPath' => '/config',
+                        'readOnly' => true
+                      }
+                    ]
                   }]
                 }
               }

@@ -30,6 +30,15 @@ module Stacks::Services::K8sCronJobApp
     resource_built = generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['initContainers'] =
       generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config)
+
+    container_resource = generate_container_resource(app_name, app_version, config)
+
+    container_resource.first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['containers'] = container_resource
+
+    pp "resource waz mehul"
+    pp resource_built
+
     output << resource_built
     output
   end
