@@ -178,7 +178,7 @@ module Stacks::Services::BaseK8sApp
   def generate_app_config(erb_vars, hiera_provider)
     template = @pre_appconfig_template.nil? ? '' : @pre_appconfig_template
     template += @appconfig if @appconfig
-    template += @post_appconfig_template.nil? ? '' : @pre_appconfig_template
+    template += @post_appconfig_template.nil? ? '' : @pre_appconfig_template # TODO: waz - what is this?
 
     erb = ConfigERB.new(template, erb_vars, hiera_provider)
     contents = erb.render unless template.empty?
