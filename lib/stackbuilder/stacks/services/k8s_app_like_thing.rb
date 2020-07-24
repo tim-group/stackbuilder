@@ -49,17 +49,17 @@ module Stacks::Services::K8sAppLikeThing
         },
         'name' => 'GC_JVM_ARGS_JAVA_11',
         'value' => '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400'
-        ),
-     'volumeMounts' => [
-       {
-         'name' => 'config-volume',
-         'mountPath' => '/config'
-       },
-       {
-         'name' => 'config-template',
-         'mountPath' => '/input/config.properties',
-         'subPath' => 'config.properties'
-       }]
+      ),
+      'volumeMounts' => [
+        {
+          'name' => 'config-volume',
+          'mountPath' => '/config'
+        },
+        {
+          'name' => 'config-template',
+          'mountPath' => '/input/config.properties',
+          'subPath' => 'config.properties'
+        }]
 
     }]
   end

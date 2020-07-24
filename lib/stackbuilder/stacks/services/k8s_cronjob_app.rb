@@ -4,7 +4,7 @@ require 'erb'
 
 module Stacks::Services::K8sCronJobApp
   attr_accessor :job_schedule
-  # todo share these in applikethings
+  # TODO: share these in applikethings
   attr_accessor :jvm_args
   attr_accessor :jvm_heap
 
@@ -20,12 +20,13 @@ module Stacks::Services::K8sCronJobApp
     "cronjob"
   end
   # rubocop:disable Metrics/ParameterLists
-  def app_generate_resources(_app_deployer, _dns_resolver, _hiera_provider, _hiera_scope, app_name, app_version, _replicas, _used_secrets, _site, \
-     _standard_labels, app_service_labels, app_resources_name, _config)
+  def app_generate_resources(_app_deployer, _dns_resolver, _hiera_provider, _hiera_scope, app_name, app_version, replicas, used_secrets, _site, \
+     _standard_labels, app_service_labels, app_resources_name, config)
     # rubocop:enable Metrics/ParameterLists
     output = []
     resource_built = generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
-    generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, _replicas, _used_secrets, _config, resource_built['spec']['jobTemplate']['spec']['template']['spec'])
+    generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config,
+                                     resource_built['spec']['jobTemplate']['spec']['template']['spec'])
     output << resource_built
     output
   end
