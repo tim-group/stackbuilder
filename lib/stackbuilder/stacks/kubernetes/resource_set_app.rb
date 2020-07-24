@@ -427,6 +427,21 @@
      network_policies
    end
 
+   def generate_app_config_map_resource(resource_name, labels, config)
+     {
+       'apiVersion' => 'v1',
+       'kind' => 'ConfigMap',
+       'metadata' => {
+         'name' => resource_name,
+         'namespace' => @environment.name,
+         'labels' => labels
+       },
+       'data' => {
+         'config.properties' => config
+       }
+     }
+   end
+
    def generate_app_service_account_resources(dns_resolver, site, standard_labels, service_account_name)
      return [] unless @enable_service_account
      resources = [{

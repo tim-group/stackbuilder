@@ -42,65 +42,6 @@ EOC
     create_init_containers_snippet(secrets, app_name, app_version)
   end
 
-  def generate_app_config_map_resource(resource_name, labels, config)
-    {
-      'apiVersion' => 'v1',
-      'kind' => 'ConfigMap',
-      'metadata' => {
-        'name' => resource_name,
-        'namespace' => @environment.name,
-        'labels' => labels
-      },
-      'data' => {
-        'config.properties' => config
-      }
-    }
-  end
-
-  def ddddddgenerate_container_resource(app_name, app_version, config)
-    container_image = "repo.net.local:8080/timgroup/#{app_name}:#{app_version}"
-
-    resources = [{
-      'securityContext' => {
-        'readOnlyRootFilesystem' => true,
-        'allowPrivilegeEscalation' => false,
-        'capabilities' => {
-          'drop' => ['ALL']
-        }
-      },
-      'image' => container_image,
-      'name' => app_name,
-      'resources' => create_app_container_resources_snippet,
-      'ports' => @ports.keys.map do |port_name|
-        port_config = {}
-        port_config['name'] = port_name
-        port_config['containerPort'] = @ports[port_name]['port']
-        port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
-        port_config
-      end,
-      'volumeMounts' => [
-        {
-          'name' => 'tmp-volume',
-          'mountPath' => '/tmp'
-        }
-      ]
-    }]
-
-    resources.first['command'] = @command unless @command.nil?
-    resources.first['args'] = @args unless @args.nil?
-
-    resources.first['volumeMounts'] <<
-      {
-        'name' => 'config-volume',
-        'mountPath' => '/config',
-        'readOnly' => true
-      } unless config.nil?
-
-    resources.first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
-
-    resources
-  end
-
   private
 
   def create_init_containers_snippet(secrets, app_name, app_version)
