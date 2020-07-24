@@ -4,17 +4,6 @@ require 'erb'
 
 module Stacks::Services::K8sCronJobApp
   attr_accessor :job_schedule
-  # TODO: share these in applikethings
-  attr_accessor :jvm_args
-  attr_accessor :jvm_heap
-
-  def self.extended(object)
-    object.configure
-  end
-  def configure
-    @jvm_args = nil
-    @jvm_heap = '64M'
-  end
 
   def k8s_type
     "cronjob"
@@ -24,6 +13,10 @@ module Stacks::Services::K8sCronJobApp
      _standard_labels, app_service_labels, app_resources_name, config)
     # rubocop:enable Metrics/ParameterLists
     output = []
+    output << generate_app_config_map_resource(app_resources_name, app_service_labels, config) unless config.nil?
+
+    pp output
+
     resource_built = generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
     generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config,
                                      resource_built['spec']['jobTemplate']['spec']['template']['spec'])

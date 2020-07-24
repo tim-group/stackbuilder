@@ -9,7 +9,6 @@ module Stacks::Services::AppService
   attr_accessor :ajp_port
   attr_accessor :ehcache
   attr_accessor :idea_positions_exports
-  attr_accessor :jvm_args
   attr_accessor :sso_port
   attr_accessor :tomcat_session_replication
   attr_accessor :use_ha_mysql_ordering
@@ -17,7 +16,6 @@ module Stacks::Services::AppService
   attr_accessor :scrape_metrics
 
   # Kubernetes specific attributes
-  attr_accessor :jvm_heap
   attr_accessor :headspace
 
   attr_accessor :application
@@ -32,14 +30,12 @@ module Stacks::Services::AppService
     @disable_http_lb_hack = false
     @ehcache = false
     @idea_positions_exports = false
-    @jvm_args = nil
     @ports = { 'app' => { 'port' => 8000, 'service_port' => 80 } }
     @one_instance_in_lb = false
     @sso_port = nil
     @tomcat_session_replication = false
     @use_ha_mysql_ordering = false
     @ha_mysql_ordering_exclude = []
-    @jvm_heap = '64M'
     @headspace = 0.1
     @artifact_from_nexus = true
     @monitor_tucker = true
@@ -72,25 +68,6 @@ module Stacks::Services::AppService
       }
     }
     @log_volume_mount_path = '/var/log/app'
-    @pre_appconfig_template = <<'EOC'
-port=8000
-
-log.directory=/var/log/app
-log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @group %>"]
-<%- if @dependencies.size > 0 -%>
-<%- @dependencies.map do |k, v| -%>
-<%- if k.start_with?('db.') && k.end_with?('.username') -%>
-<%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
-<%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
-<%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s", @credentials_selector) %>
-<%- elsif k.end_with?('_hiera_key') -%>
-<%= k.gsub(/_hiera_key$/, '') -%>=<%= secret("#{v}") %>
-<%- else -%>
-<%= k %>=<%= v %>
-<%- end -%>
-<%- end -%>
-<%- end -%>
-EOC
     @scrape_metrics = true
   end
 

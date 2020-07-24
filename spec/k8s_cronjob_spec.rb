@@ -162,8 +162,7 @@ EOL
         }
       }
 
-      puts expected_config_map
-      # expect(k8s_resource(set, 'ConfigMap')).to eql(expected_config_map)
+      expect(k8s_resource(set, 'ConfigMap')).to eql(expected_config_map)
 
       k8s_resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
       k8s_resources.group_by { |r| r['metadata']['labels']['app.kubernetes.io/component'] }.each do |_component, resources|
