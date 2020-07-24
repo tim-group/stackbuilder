@@ -57,7 +57,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
                            Stacks::Services::K8sCronJobApp],
                           __method__, &block)
     else
-      fail 'base_service outside of Kubernetes is not implemented'
+      fail 'cronjob_service outside of Kubernetes is not implemented'
     end
   end
 
