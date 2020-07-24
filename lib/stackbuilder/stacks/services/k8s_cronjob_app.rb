@@ -13,12 +13,12 @@ module Stacks::Services::K8sCronJobApp
      _standard_labels, app_service_labels, app_resources_name, _config)
     # rubocop:enable Metrics/ParameterLists
     output = []
-    output << generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
+    output << generate_cronjob_deployment_resource(app_resources_name, app_service_labels, app_name, app_version)
 
     output
   end
 
-  def generate_cronjob_resource(resource_name, app_service_labels, app_name, app_version)
+  def generate_cronjob_deployment_resource(resource_name, app_service_labels, app_name, app_version)
     labels = app_service_labels.merge('application' => app_name,
                                       'app.kubernetes.io/name' => app_name,
                                       'app.kubernetes.io/version' => app_version)

@@ -125,8 +125,10 @@ describe 'kubernetes' do
                         'subPath' => 'config.properties'
                       }]
                   }]
-                } } } }
-
+                }
+              }
+            }
+          }
         }
       }
       expect(k8s_resource(set, 'CronJob')).to eql(expected_cronjob)
