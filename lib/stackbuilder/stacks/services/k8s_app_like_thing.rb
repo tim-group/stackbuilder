@@ -3,11 +3,59 @@ require 'stackbuilder/stacks/maintainers'
 require 'erb'
 
 module Stacks::Services::K8sAppLikeThing
+  attr_accessor :jvm_args
+  attr_accessor :jvm_heap
+
+  def self.extended(object)
+    object.configure
+  end
+  def configure
+    @jvm_args = nil
+    @jvm_heap = '64M'
+
+    @pre_appconfig_template = <<'EOC'
+port=8000
+
+log.directory=/var/log/app
+log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @group %>"]
+<%- if @dependencies.size > 0 -%>
+<%- @dependencies.map do |k, v| -%>
+<%- if k.start_with?('db.') && k.end_with?('.username') -%>
+<%= k %>=<%= v[0,15] + @credentials_selector.to_s %>
+<%- elsif k.start_with?('db.') && k.end_with?('password_hiera_key') -%>
+<%= k.gsub(/_hiera_key$/, '') %>=<%= secret("#{v}s", @credentials_selector) %>
+<%- elsif k.end_with?('_hiera_key') -%>
+<%= k.gsub(/_hiera_key$/, '') -%>=<%= secret("#{v}") %>
+<%- else -%>
+<%= k %>=<%= v %>
+<%- end -%>
+<%- end -%>
+<%- end -%>
+EOC
+  end
+
   # Todo  - waz - do not pass resource into this pat
   def generate_init_container_resource(_resource_name, _app_service_labels, app_name, app_version, _replicas, secrets, _config, resource)
     resource['initContainers'] = create_init_containers_snippet(secrets, app_name, app_version)
     resource
   end
+
+  def generate_app_config_map_resource(resource_name, labels, config)
+    {
+      'apiVersion' => 'v1',
+      'kind' => 'ConfigMap',
+      'metadata' => {
+        'name' => resource_name,
+        'namespace' => @environment.name,
+        'labels' => labels
+      },
+      'data' => {
+        'config.properties' => config
+      }
+    }
+  end
+
+  private
 
   def create_init_containers_snippet(secrets, app_name, app_version)
     [{
