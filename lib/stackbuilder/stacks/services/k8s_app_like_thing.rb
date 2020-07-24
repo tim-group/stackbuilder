@@ -3,16 +3,19 @@ require 'stackbuilder/stacks/maintainers'
 require 'erb'
 
 module Stacks::Services::K8sAppLikeThing
-  attr_accessor :jvm_args
-  attr_accessor :jvm_heap
+  # Kubernetes specific attributes
+  attr_accessor :headspace
 
   def self.extended(object)
     object.configure
   end
   def configure
-    @jvm_args = nil
-    @jvm_heap = '64M'
-
+    @headspace = 0.1
+    @command = ["/bin/sh"]
+    @args = [
+      '-c',
+      'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
+    ]
     @pre_appconfig_template = <<'EOC'
 port=8000
 
@@ -35,24 +38,8 @@ EOC
   end
 
   # Todo  - waz - do not pass resource into this pat
-  def generate_init_container_resource(_resource_name, _app_service_labels, app_name, app_version, _replicas, secrets, _config, resource)
-    resource['initContainers'] = create_init_containers_snippet(secrets, app_name, app_version)
-    resource
-  end
-
-  def generate_app_config_map_resource(resource_name, labels, config)
-    {
-      'apiVersion' => 'v1',
-      'kind' => 'ConfigMap',
-      'metadata' => {
-        'name' => resource_name,
-        'namespace' => @environment.name,
-        'labels' => labels
-      },
-      'data' => {
-        'config.properties' => config
-      }
-    }
+  def generate_init_container_resource(_resource_name, _app_service_labels, app_name, app_version, _replicas, secrets, _config)
+    create_init_containers_snippet(secrets, app_name, app_version)
   end
 
   private
@@ -110,5 +97,21 @@ EOC
         }]
 
     }]
+  end
+
+  def create_app_container_resources_snippet
+    ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
+
+    cpu_request = @cpu_request ? { 'cpu' => @cpu_request } : {}
+    cpu_limit = @cpu_limit ? { 'cpu' => @cpu_limit } : {}
+
+    {
+      'limits' => {
+        'memory' => scale_memory(@jvm_heap, @headspace)
+      }.merge(ephemeral_storage_limit).merge(cpu_limit),
+      'requests' => {
+        'memory' => scale_memory(@jvm_heap, @headspace)
+      }.merge(ephemeral_storage_limit).merge(cpu_request)
+    }
   end
 end

@@ -80,15 +80,38 @@
      }
    end
 
-   # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+   def generate_volume_resources(resource_name, config)
+     volumes = [
+       {
+         'name' => 'tmp-volume',
+         'emptyDir' => {}
+       }
+     ]
+
+     volumes += [{
+       'name' => 'config-volume',
+       'emptyDir' => {}
+     },
+                 {
+                   'name' => 'config-template',
+                   'configMap' => { 'name' => resource_name }
+                 }] unless config.nil?
+
+     volumes << {
+       'name' => 'log-volume',
+       'emptyDir' => {}
+     } unless @log_volume_mount_path.nil?
+
+     volumes
+   end
+
+   # rubocop:disable Metrics/AbcSize
    def generate_app_deployment_resource(resource_name, app_service_labels, app_name, app_version, replicas, _secrets, config)
-     # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+     # rubocop:enable Metrics/AbcSize
 
      labels = app_service_labels.merge('application' => app_name,
                                        'app.kubernetes.io/name' => app_name,
                                        'app.kubernetes.io/version' => app_version)
-
-     container_image = "repo.net.local:8080/timgroup/#{app_name}:#{app_version}"
 
      annotations = {}
      annotations['maintainers'] = JSON.dump(@maintainers) unless @maintainers.empty?
@@ -156,37 +179,7 @@
                }
              },
              'automountServiceAccountToken' => false,
-             'containers' => [{
-               'securityContext' => {
-                 'readOnlyRootFilesystem' => true,
-                 'allowPrivilegeEscalation' => false,
-                 'capabilities' => {
-                   'drop' => ['ALL']
-                 }
-               },
-               'image' => container_image,
-               'name' => app_name,
-               'resources' => create_app_container_resources_snippet,
-               'ports' => @ports.keys.map do |port_name|
-                 port_config = {}
-                 port_config['name'] = port_name
-                 port_config['containerPort'] = @ports[port_name]['port']
-                 port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
-                 port_config
-               end,
-               'volumeMounts' => [
-                 {
-                   'name' => 'tmp-volume',
-                   'mountPath' => '/tmp'
-                 }
-               ]
-             }],
-             'volumes' => [
-               {
-                 'name' => 'tmp-volume',
-                 'emptyDir' => {}
-               }
-             ]
+             'containers' => generate_container_resource(app_name, app_version, config)
            }
          }
        }
@@ -198,37 +191,17 @@
      end
 
      deployment['spec']['template']['spec']['securityContext'] = @security_context unless @security_context.nil?
-     deployment['spec']['template']['spec']['containers'].first['command'] = @command unless @command.nil?
-     deployment['spec']['template']['spec']['containers'].first['args'] = @args unless @args.nil?
      deployment['spec']['template']['spec']['containers'].first['lifecycle'] = {
        'preStop' => @lifecycle_pre_stop
      } unless @lifecycle_pre_stop.nil?
      deployment['spec']['template']['spec']['containers'].first['readinessProbe'] = @readiness_probe unless @readiness_probe.nil?
-     deployment['spec']['template']['spec']['containers'].first['volumeMounts'] <<
-       {
-         'name' => 'config-volume',
-         'mountPath' => '/config',
-         'readOnly' => true
-       } unless config.nil?
+
      deployment['spec']['template']['spec']['containers'].first['volumeMounts'] <<
        {
          'name' => 'log-volume',
          'mountPath' => @log_volume_mount_path
        } unless @log_volume_mount_path.nil?
-     deployment['spec']['template']['spec']['volumes'] += [{
-       'name' => 'config-volume',
-       'emptyDir' => {}
-     },
-                                                           {
-                                                             'name' => 'config-template',
-                                                             'configMap' => { 'name' => resource_name }
-                                                           }] unless config.nil?
-     deployment['spec']['template']['spec']['volumes'] <<
-       {
-         'name' => 'log-volume',
-         'emptyDir' => {}
-
-       } unless @log_volume_mount_path.nil?
+     deployment['spec']['template']['spec']['volumes'] = generate_volume_resources(resource_name, config)
      unless @capabilities.nil?
        existing_capabilities = deployment['spec']['template']['spec']['containers'].first['securityContext']['capabilities']
        existing_capabilities['add'] = [] if existing_capabilities['add'].nil?
@@ -238,6 +211,47 @@
      end
 
      deployment
+   end
+
+   def generate_container_resource(app_name,  app_version, config)
+     container_image = "repo.net.local:8080/timgroup/#{app_name}:#{app_version}"
+     resources = [{
+       'securityContext' => {
+         'readOnlyRootFilesystem' => true,
+         'allowPrivilegeEscalation' => false,
+         'capabilities' => {
+           'drop' => ['ALL']
+         }
+       },
+       'image' => container_image,
+       'name' => app_name,
+       'resources' => create_app_container_resources_snippet,
+       'ports' => @ports.keys.map do |port_name|
+         port_config = {}
+         port_config['name'] = port_name
+         port_config['containerPort'] = @ports[port_name]['port']
+         port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
+         port_config
+       end,
+       'volumeMounts' => [
+         {
+           'name' => 'tmp-volume',
+           'mountPath' => '/tmp'
+         }
+       ]
+     }]
+
+     resources.first['command'] = @command unless @command.nil?
+     resources.first['args'] = @args unless @args.nil?
+
+     resources.first['volumeMounts'] <<
+       {
+         'name' => 'config-volume',
+         'mountPath' => '/config',
+         'readOnly' => true
+       } unless config.nil?
+
+     resources
    end
 
    def generate_app_pod_disruption_budget_resource(resource_name, app_service_labels)
@@ -417,6 +431,21 @@
      end
 
      network_policies
+   end
+
+   def generate_app_config_map_resource(resource_name, labels, config)
+     {
+       'apiVersion' => 'v1',
+       'kind' => 'ConfigMap',
+       'metadata' => {
+         'name' => resource_name,
+         'namespace' => @environment.name,
+         'labels' => labels
+       },
+       'data' => {
+         'config.properties' => config
+       }
+     }
    end
 
    def generate_app_service_account_resources(dns_resolver, site, standard_labels, service_account_name)

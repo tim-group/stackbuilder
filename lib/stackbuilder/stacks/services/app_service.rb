@@ -14,9 +14,8 @@ module Stacks::Services::AppService
   attr_accessor :use_ha_mysql_ordering
   attr_accessor :ha_mysql_ordering_exclude
   attr_accessor :scrape_metrics
-
-  # Kubernetes specific attributes
-  attr_accessor :headspace
+  attr_accessor :jvm_args
+  attr_accessor :jvm_heap
 
   attr_accessor :application
   alias_method :database_application_name, :application
@@ -36,7 +35,6 @@ module Stacks::Services::AppService
     @tomcat_session_replication = false
     @use_ha_mysql_ordering = false
     @ha_mysql_ordering_exclude = []
-    @headspace = 0.1
     @artifact_from_nexus = true
     @monitor_tucker = true
     @security_context = {
@@ -44,11 +42,8 @@ module Stacks::Services::AppService
       'runAsGroup' => 3017,
       'fsGroup' => 3017
     }
-    @command = ["/bin/sh"]
-    @args = [
-      '-c',
-      'exec /usr/bin/java $(cat /config/jvm_args) -jar /app/app.jar /config/config.properties'
-    ]
+    @jvm_args = nil
+    @jvm_heap = '64M'
     @readiness_probe = {
       'periodSeconds' => 2,
       'timeoutSeconds' => 1,
@@ -163,25 +158,9 @@ module Stacks::Services::AppService
 
   def generate_app_deployment_resource(resource_name, app_service_labels, app_name, app_version, replicas, secrets, config)
     deployment = super
-    generate_init_container_resource(resource_name, app_service_labels, app_name, app_version, replicas, secrets, config,
-                                     deployment['spec']['template']['spec'])
+    deployment['spec']['template']['spec']['initContainers'] =
+      generate_init_container_resource(resource_name, app_service_labels, app_name, app_version, replicas, secrets, config)
     deployment['spec']['template']['spec']['containers'].first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
     deployment
-  end
-
-  def create_app_container_resources_snippet
-    ephemeral_storage_limit = @ephemeral_storage_size ? { 'ephemeral-storage' => @ephemeral_storage_size } : {}
-
-    cpu_request = @cpu_request ? { 'cpu' => @cpu_request } : {}
-    cpu_limit = @cpu_limit ? { 'cpu' => @cpu_limit } : {}
-
-    {
-      'limits' => {
-        'memory' => scale_memory(@jvm_heap, @headspace)
-      }.merge(ephemeral_storage_limit).merge(cpu_limit),
-      'requests' => {
-        'memory' => scale_memory(@jvm_heap, @headspace)
-      }.merge(ephemeral_storage_limit).merge(cpu_request)
-    }
   end
 end

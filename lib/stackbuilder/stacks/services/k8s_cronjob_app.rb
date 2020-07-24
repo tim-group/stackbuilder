@@ -4,6 +4,18 @@ require 'erb'
 
 module Stacks::Services::K8sCronJobApp
   attr_accessor :job_schedule
+  attr_accessor :jvm_args
+  attr_accessor :jvm_heap
+
+  def self.extended(object)
+    object.configure
+  end
+
+  def configure
+    # TODO: - waz - these are now duplicated in app_service and here -
+    @jvm_args = nil
+    @jvm_heap = '64M'
+  end
 
   def k8s_type
     "cronjob"
@@ -15,11 +27,17 @@ module Stacks::Services::K8sCronJobApp
     output = []
     output << generate_app_config_map_resource(app_resources_name, app_service_labels, config) unless config.nil?
 
-    pp output
-
     resource_built = generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
-    generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config,
-                                     resource_built['spec']['jobTemplate']['spec']['template']['spec'])
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['initContainers'] =
+      generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config)
+
+    container_resource = generate_container_resource(app_name, app_version, config)
+
+    container_resource.first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['containers'] = container_resource
+
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['volumes'] = generate_volume_resources(app_resources_name, config)
+
     output << resource_built
     output
   end

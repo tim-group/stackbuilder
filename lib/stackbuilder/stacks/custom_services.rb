@@ -57,7 +57,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
                            Stacks::Services::K8sCronJobApp],
                           __method__, &block)
     else
-      fail 'base_service outside of Kubernetes is not implemented'
+      fail 'cronjob_service outside of Kubernetes is not implemented'
     end
   end
 
@@ -71,7 +71,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def standalone_app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      k8s_machineset_with(name, [Stacks::Services::AppService], __method__, &block)
+      fail 'standalone_app_service is not implemented in Kubernetes - use app_service'
     else
       machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
     end
