@@ -57,7 +57,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'use_docker'                        => @virtual_service.use_docker,
       'scrape_metrics'                    => @virtual_service.scrape_metrics
     }
-    enc['role::http_app']['allow_kubernetes_clusters'] = ([@fabric] + enc_dependant_kubernetes_things).uniq
+    enc['role::http_app']['allow_kubernetes_clusters'] = ([@fabric == 'lon' ? 'pg' : @fabric] + enc_dependant_kubernetes_things).uniq
 
     enc['role::http_app']['jvm_args'] = @virtual_service.jvm_args unless @virtual_service.jvm_args.nil?
     enc['role::http_app']['sso_port'] = @virtual_service.sso_port unless @virtual_service.sso_port.nil?
