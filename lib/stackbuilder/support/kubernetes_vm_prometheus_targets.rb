@@ -50,7 +50,7 @@ class Support::KubernetesVmPrometheusTargets
               }
             },
             'subsets' => [{
-              'addresses' => [{ 'ip' => "#{@dns_resolver.lookup(thing.prod_fqdn)}" }],
+              'addresses' => [{ 'ip' => "#{get_ip(thing)}" }],
               'ports' => [{
                 'name' => 'metrics',
                 'port' => 8000,
@@ -71,5 +71,9 @@ class Support::KubernetesVmPrometheusTargets
       name = "#{thing.environment.name}-#{thing.virtual_service.short_name}-#{sprintf('%03d', thing.index)}"
     end
     "#{prefix}#{name}"
+  end
+
+  def get_ip(thing)
+    thing.fabric == 'lon' ? @dns_resolver.lookup(thing.mgmt_fqdn) : @dns_resolver.lookup(thing.prod_fqdn)
   end
 end
