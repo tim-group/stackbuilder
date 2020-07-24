@@ -65,6 +65,8 @@ Options:
 
     allocate [-e] -s                      perform noop dry-run allocation of a stack
         [--ignore-spectre-patching-host-policy]
+    apply [-e] -s                         apply a kubernetes stack's configuration to the appropriate kubernetes clusters
+        [--update-version] <version>      update the application version in cmdb prior to apply
     audit [-e]                            show the state of the KVM host machines in the primary site of the specified env
     audit_vms [-e] [HOST] [--diffs-only]  show the state of the VMs in the primary site of the specified env (or specified host)
         [--ignore-safe-diffs]
@@ -97,7 +99,6 @@ Options:
     reprovision [-e] -s                   "clean", and then "provision" a stack
         [--ignore-spectre-patching-host-policy]
         [--no-dependencies]
-        [--update-version] <version>      update the application version in cmdb prior to reprovision
     sbdiff                                show compile diff between latest stackbuilder and local stackbuilder.
     spec [-e] -s                          print the spec of the specified stack. Stack must be a single fqdn. Used for debugging
     terminus                              create a yaml puppet terminus
