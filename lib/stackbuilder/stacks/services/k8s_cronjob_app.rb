@@ -27,11 +27,9 @@ module Stacks::Services::K8sCronJobApp
     output = []
     output << generate_app_config_map_resource(app_resources_name, app_service_labels, config) unless config.nil?
 
-    pp output
-
     resource_built = generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
-    generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config,
-                                     resource_built['spec']['jobTemplate']['spec']['template']['spec'])
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['initContainers'] =
+      generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config)
     output << resource_built
     output
   end

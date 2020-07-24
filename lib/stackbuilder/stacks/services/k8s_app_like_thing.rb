@@ -29,9 +29,8 @@ EOC
   end
 
   # Todo  - waz - do not pass resource into this pat
-  def generate_init_container_resource(_resource_name, _app_service_labels, app_name, app_version, _replicas, secrets, _config, resource)
-    resource['initContainers'] = create_init_containers_snippet(secrets, app_name, app_version)
-    resource
+  def generate_init_container_resource(_resource_name, _app_service_labels, app_name, app_version, _replicas, secrets, _config)
+    create_init_containers_snippet(secrets, app_name, app_version)
   end
 
   def generate_app_config_map_resource(resource_name, labels, config)

@@ -167,8 +167,8 @@ module Stacks::Services::AppService
 
   def generate_app_deployment_resource(resource_name, app_service_labels, app_name, app_version, replicas, secrets, config)
     deployment = super
-    generate_init_container_resource(resource_name, app_service_labels, app_name, app_version, replicas, secrets, config,
-                                     deployment['spec']['template']['spec'])
+    deployment['spec']['template']['spec']['initContainers'] =
+      generate_init_container_resource(resource_name, app_service_labels, app_name, app_version, replicas, secrets, config)
     deployment['spec']['template']['spec']['containers'].first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
     deployment
   end
