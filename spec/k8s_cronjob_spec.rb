@@ -87,7 +87,7 @@ describe 'kubernetes' do
                   'initContainers' => [{
                     'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.5',
                     'name' => 'config-generator',
-                    "env"=>[
+                    "env"=> [
                       {
                         'name' => 'CONTAINER_IMAGE',
                         'value' => 'repo.net.local:8080/timgroup/myapplication:1.2.3'
