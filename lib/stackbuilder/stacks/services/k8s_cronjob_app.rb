@@ -4,6 +4,18 @@ require 'erb'
 
 module Stacks::Services::K8sCronJobApp
   attr_accessor :job_schedule
+  attr_accessor :jvm_args
+  attr_accessor :jvm_heap
+
+  def self.extended(object)
+    object.configure
+  end
+
+  def configure
+    # TODO: - waz - these are now duplicated in app_service and here -
+    @jvm_args = nil
+    @jvm_heap = '64M'
+  end
 
   def k8s_type
     "cronjob"

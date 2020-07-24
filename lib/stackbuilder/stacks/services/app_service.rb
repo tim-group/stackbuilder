@@ -14,6 +14,8 @@ module Stacks::Services::AppService
   attr_accessor :use_ha_mysql_ordering
   attr_accessor :ha_mysql_ordering_exclude
   attr_accessor :scrape_metrics
+  attr_accessor :jvm_args
+  attr_accessor :jvm_heap
 
   # Kubernetes specific attributes
   attr_accessor :headspace
@@ -44,6 +46,8 @@ module Stacks::Services::AppService
       'runAsGroup' => 3017,
       'fsGroup' => 3017
     }
+    @jvm_args = nil
+    @jvm_heap = '64M'
     @command = ["/bin/sh"]
     @args = [
       '-c',

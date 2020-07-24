@@ -3,16 +3,10 @@ require 'stackbuilder/stacks/maintainers'
 require 'erb'
 
 module Stacks::Services::K8sAppLikeThing
-  attr_accessor :jvm_args
-  attr_accessor :jvm_heap
-
   def self.extended(object)
     object.configure
   end
   def configure
-    @jvm_args = nil
-    @jvm_heap = '64M'
-
     @pre_appconfig_template = <<'EOC'
 port=8000
 
