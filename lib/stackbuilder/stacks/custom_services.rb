@@ -71,7 +71,7 @@ be specified.") if properties.is_a?(Hash) && properties[:kubernetes].is_a?(Hash)
 
   def standalone_app_service(name, properties = {}, &block)
     if service_in_kubernetes?(name, properties)
-      fail 'standalone_app_service is not implmented in Kubernetes - use app_service'
+      fail 'standalone_app_service is not implemented in Kubernetes - use app_service'
     else
       machineset_with(name, [Stacks::Services::AppService], Stacks::Services::AppServer, &block)
     end
