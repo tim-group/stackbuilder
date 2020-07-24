@@ -36,8 +36,7 @@ module Stacks::Services::K8sCronJobApp
     container_resource.first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['containers'] = container_resource
 
-    pp "resource waz mehul"
-    pp resource_built
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['volumes'] = generate_volume_resources(app_resources_name, config)
 
     output << resource_built
     output

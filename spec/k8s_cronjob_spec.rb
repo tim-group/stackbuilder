@@ -168,7 +168,23 @@ describe 'kubernetes' do
                         'readOnly' => true
                       }
                     ]
-                  }]
+                  }],
+                  'volumes' => [
+                    {
+                      'name' => 'tmp-volume',
+                      'emptyDir' => {}
+                    },
+                    {
+                      'name' => 'config-volume',
+                      'emptyDir' => {}
+                    },
+                    {
+                      'name' => 'config-template',
+                      'configMap' => {
+                        'name' => 'x-blue-cronjob'
+                      }
+                    }
+                  ]
                 }
               }
             }

@@ -80,6 +80,31 @@
      }
    end
 
+   def generate_volume_resources(resource_name, config)
+     volumes = [
+       {
+         'name' => 'tmp-volume',
+         'emptyDir' => {}
+       }
+     ]
+
+     volumes += [{
+       'name' => 'config-volume',
+       'emptyDir' => {}
+     },
+                 {
+                   'name' => 'config-template',
+                   'configMap' => { 'name' => resource_name }
+                 }] unless config.nil?
+
+     volumes << {
+       'name' => 'log-volume',
+       'emptyDir' => {}
+     } unless @log_volume_mount_path.nil?
+
+     volumes
+   end
+
    # rubocop:disable Metrics/AbcSize
    def generate_app_deployment_resource(resource_name, app_service_labels, app_name, app_version, replicas, _secrets, config)
      # rubocop:enable Metrics/AbcSize
@@ -154,13 +179,7 @@
                }
              },
              'automountServiceAccountToken' => false,
-             'containers' => generate_container_resource(app_name, app_version, config),
-             'volumes' => [
-               {
-                 'name' => 'tmp-volume',
-                 'emptyDir' => {}
-               }
-             ]
+             'containers' => generate_container_resource(app_name, app_version, config)
            }
          }
        }
@@ -182,20 +201,7 @@
          'name' => 'log-volume',
          'mountPath' => @log_volume_mount_path
        } unless @log_volume_mount_path.nil?
-     deployment['spec']['template']['spec']['volumes'] += [{
-       'name' => 'config-volume',
-       'emptyDir' => {}
-     },
-                                                           {
-                                                             'name' => 'config-template',
-                                                             'configMap' => { 'name' => resource_name }
-                                                           }] unless config.nil?
-     deployment['spec']['template']['spec']['volumes'] <<
-       {
-         'name' => 'log-volume',
-         'emptyDir' => {}
-
-       } unless @log_volume_mount_path.nil?
+     deployment['spec']['template']['spec']['volumes'] = generate_volume_resources(resource_name, config)
      unless @capabilities.nil?
        existing_capabilities = deployment['spec']['template']['spec']['containers'].first['securityContext']['capabilities']
        existing_capabilities['add'] = [] if existing_capabilities['add'].nil?
