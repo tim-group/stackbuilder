@@ -32,7 +32,7 @@ describe 'kubernetes' do
   end
 
   describe 'a cronjob' do
-    xit 'defines a CronJob' do
+    it 'defines a CronJob' do
       factory = eval_stacks do
         stack "mystack" do
           cronjob_service "x", :kubernetes => true do
@@ -43,6 +43,7 @@ describe 'kubernetes' do
             self.job_schedule = '*/5 * * * *'
 
             self.application = 'MyApplication'
+            self.jvm_args = '-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled'
           end
         end
         env "e1", :primary_site => 'space' do
@@ -86,7 +87,7 @@ describe 'kubernetes' do
                   'initContainers' => [{
                     'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.5',
                     'name' => 'config-generator',
-                    'env' => [
+                    "env"=>[
                       {
                         'name' => 'CONTAINER_IMAGE',
                         'value' => 'repo.net.local:8080/timgroup/myapplication:1.2.3'
@@ -97,17 +98,18 @@ describe 'kubernetes' do
                       },
                       {
                         'name' => 'BASE_JVM_ARGS',
-                        'value' => "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -XX:ErrorFile=/var/log/app/error.log \
-  -XX:HeapDumpPath=/var/log/app -XX:+HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dcom.sun.management.jmxremote \
-  -Dcom.sun.management.jmxremote.port=5000 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false \
-  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=5000 -Djava.rmi.server.hostname=127.0.0.1 \
-  -Dcom.timgroup.infra.platform=k8s"
+                        'value' => "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -XX:ErrorFile=/var/log/app/error.log " \
+                    "-XX:HeapDumpPath=/var/log/app -XX:+HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom " \
+                    "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=5000 -Dcom.sun.management.jmxremote.authenticate=false " \
+                    "-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false " \
+                    "-Dcom.sun.management.jmxremote.rmi.port=5000 -Djava.rmi.server.hostname=127.0.0.1 " \
+                    "-Dcom.timgroup.infra.platform=k8s"
                       },
                       {
                         'name' => 'GC_JVM_ARGS_JAVA_8',
                         'value' => "-XX:+PrintGC -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
-  -Xloggc:/var/log/app/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=25M \
-  -XX:+PrintGCApplicationStoppedTime"
+-Xloggc:/var/log/app/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=25M \
+-XX:+PrintGCApplicationStoppedTime"
                       },
                       {
                         'name' => 'GC_JVM_ARGS_JAVA_11',
@@ -124,6 +126,7 @@ describe 'kubernetes' do
                         'mountPath' => '/input/config.properties',
                         'subPath' => 'config.properties'
                       }]
+
                   }]
                 }
               }

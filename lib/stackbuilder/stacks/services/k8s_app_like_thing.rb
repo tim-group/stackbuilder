@@ -5,7 +5,7 @@ require 'erb'
 module Stacks::Services::K8sAppLikeThing
   # Todo  - waz - do not pass resource into this pat
   def generate_init_container_resource(_resource_name, _app_service_labels, app_name, app_version, _replicas, secrets, _config, resource)
-    resource['spec']['template']['spec']['initContainers'] = create_init_containers_snippet(secrets, app_name, app_version)
+    resource['initContainers'] = create_init_containers_snippet(secrets, app_name, app_version)
     resource
   end
 
@@ -49,17 +49,18 @@ module Stacks::Services::K8sAppLikeThing
         },
         'name' => 'GC_JVM_ARGS_JAVA_11',
         'value' => '-Xlog:gc*,safepoint:/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=26214400'
-      ),
-      'volumeMounts' => [
-        {
-          'name' => 'config-volume',
-          'mountPath' => '/config'
-        },
-        {
-          'name' => 'config-template',
-          'mountPath' => '/input/config.properties',
-          'subPath' => 'config.properties'
-        }]
+        ),
+     'volumeMounts' => [
+       {
+         'name' => 'config-volume',
+         'mountPath' => '/config'
+       },
+       {
+         'name' => 'config-template',
+         'mountPath' => '/input/config.properties',
+         'subPath' => 'config.properties'
+       }]
+
     }]
   end
 end

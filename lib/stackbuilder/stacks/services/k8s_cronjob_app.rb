@@ -4,6 +4,17 @@ require 'erb'
 
 module Stacks::Services::K8sCronJobApp
   attr_accessor :job_schedule
+  # todo share these in applikethings
+  attr_accessor :jvm_args
+  attr_accessor :jvm_heap
+
+  def self.extended(object)
+    object.configure
+  end
+  def configure
+    @jvm_args = nil
+    @jvm_heap = '64M'
+  end
 
   def k8s_type
     "cronjob"
@@ -13,12 +24,13 @@ module Stacks::Services::K8sCronJobApp
      _standard_labels, app_service_labels, app_resources_name, _config)
     # rubocop:enable Metrics/ParameterLists
     output = []
-    output << generate_cronjob_deployment_resource(app_resources_name, app_service_labels, app_name, app_version)
-
+    resource_built = generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
+    generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, _replicas, _used_secrets, _config, resource_built['spec']['jobTemplate']['spec']['template']['spec'])
+    output << resource_built
     output
   end
 
-  def generate_cronjob_deployment_resource(resource_name, app_service_labels, app_name, app_version)
+  def generate_cronjob_resource(resource_name, app_service_labels, app_name, app_version)
     labels = app_service_labels.merge('application' => app_name,
                                       'app.kubernetes.io/name' => app_name,
                                       'app.kubernetes.io/version' => app_version)
@@ -56,7 +68,6 @@ module Stacks::Services::K8sCronJobApp
       }
 
     }
-    pp cronjob
     cronjob
   end
 end
