@@ -11,6 +11,7 @@ group :development do
   gem 'ci_reporter_rspec', '1.0.0'
   gem 'pry'
   gem 'pry-byebug'
+  gem 'hashdiff'
   gem 'rake', '10.1.0'
   gem 'syck' if RUBY_VERSION.split('.').first.to_i > 1
 end
