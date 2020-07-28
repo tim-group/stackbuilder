@@ -1,8 +1,6 @@
 require 'stackbuilder/stacks/factory'
 require 'test_classes'
 require 'spec_helper'
-require "matchers/hash_eq"
-
 
 # TODO: add a test to validate that the job_schedule is required
 
@@ -193,7 +191,7 @@ describe 'kubernetes' do
           }
         }
       }
-      expect(k8s_resource(set, 'CronJob')).to hash_eq(expected_cronjob)
+      expect(k8s_resource(set, 'CronJob')).to eql(expected_cronjob)
 
       expected_config_map = {
         'apiVersion' => 'v1',
