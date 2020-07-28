@@ -11,8 +11,8 @@ module Stacks::Services::K8sCronJobApp
     object.configure
   end
 
-  # TODO: - waz - do we need a polilcy to allow initContainer to talk to Nexus like app_service? what is needed?
-  # TODO: - waz - need to add/share @monitor_tucker  to setup network policy if we want promothesus scraping
+  #TODO - waz - do we need a polilcy to allow initContainer to talk to Nexus like app_service? what is needed?
+  # TODO - waz - need to add/share @monitor_tucker  to setup network policy if we want promothesus scraping
   def configure
     # TODO: - waz - these are now duplicated in app_service and here -
     @jvm_args = nil
@@ -41,8 +41,8 @@ module Stacks::Services::K8sCronJobApp
 
     output << resource_built
     network_policies =  generate_app_network_policies(dns_resolver, site, app_service_labels)
-    network_policies << create_ingress_pushgate_network_policy_from_cronjob(@environment.name, app_name, @custom_service_name,  app_service_labels)
-    network_policies << create_egress_to_pushgate_network_policy(@environment.name, app_name, @custom_service_name, app_service_labels)
+    network_policies <<  create_ingress_pushgate_network_policy_from_cronjob(@environment.name, app_name, @custom_service_name,  app_service_labels)
+    network_policies <<  create_egress_to_pushgate_network_policy(@environment.name, app_name, @custom_service_name, app_service_labels)
     output += network_policies
     output
   end
@@ -93,62 +93,66 @@ module Stacks::Services::K8sCronJobApp
   def create_egress_to_pushgate_network_policy(env_name, app_name, service_name, standard_labels)
     pushgateway_filters = [generate_pod_and_namespace_selector_filter("monitoring",   'app' => 'prometheus-pushgateway')]
     egress_spec = [{
-      'to' => pushgateway_filters,
-      'ports' => [{
-        'port' => '9091',
-        'protocol' => 'TCP'
-      }]
-    }]
+                       'to' => pushgateway_filters,
+                       'ports' => [{
+                                       'port' => '9091',
+                                       'protocol' => 'TCP'
+                                   }]
+                   }]
 
     pod_selector_match_labels  =  {
-      'application' => app_name,
-      'machineset' => standard_labels['machineset'],
-      'group' => standard_labels['group'],
-      'app.kubernetes.io/component' => service_name
+        'application' => app_name,
+        'machineset' => standard_labels['machineset'],
+        'group' => standard_labels['group'],
+        'app.kubernetes.io/component' => service_name
     }
-    create_egress_network_policy("prometheus-pushgateway", env_name,
-                                 standard_labels, egress_spec,  pod_selector_match_labels)
+  create_egress_network_policy("prometheus-pushgateway", env_name,
+                               standard_labels, egress_spec,  pod_selector_match_labels)
   end
 
   def create_ingress_pushgate_network_policy_from_cronjob(env_name, app_name, service_name, standard_labels)
-    # TODO: -waz - remove duplication in creating ingress policy with whats in resoource_set_app
+
+    #TODO -waz - remove duplication in creating ingress policy with whats in resoource_set_app
     pod_match_labels = {
-      'application' => app_name,
-      'machineset' => standard_labels['machineset'],
-      'group' => standard_labels['group'],
-      'app.kubernetes.io/component' => service_name
+        'application' => app_name,
+        'machineset' => standard_labels['machineset'],
+        'group' => standard_labels['group'],
+        'app.kubernetes.io/component' => service_name
     }
     pod_filters = [generate_pod_and_namespace_selector_filter(env_name,  pod_match_labels)]
 
     spec = {
-      'podSelector' => {
-        'matchLabels' => {
-          'app' => 'prometheus-pushgateway'
-        }
-      },
-      'policyTypes' => [
-        'Ingress'
-      ],
-      'ingress' => [{
-        'from' => pod_filters,
-        'ports' => [{
-          'port' => '9091',
-          'protocol' => 'TCP'
-        }]
-      }]
+        'podSelector' => {
+            'matchLabels' => {
+                'app' => 'prometheus-pushgateway',
+            }
+        },
+        'policyTypes' => [
+            'Ingress'
+        ],
+        'ingress' => [{
+                          'from' => pod_filters,
+                          'ports' => [{
+                                          'port' => '9091',
+                                          'protocol' => 'TCP'
+                                      }]
+                      }]
     }
 
     hash = Support::DigestGenerator.from_hash(spec)
 
-    {
-      'apiVersion' => 'networking.k8s.io/v1',
-      'kind' => 'NetworkPolicy',
-      'metadata' => {
-        'name' => "allow-prometheus-pushgateway-in-from-cronjob-#{hash}",
-        'namespace' => env_name, # TODO: waz should this be monitoring or the environment where pod is?
-        'labels' => standard_labels
-      },
-      'spec' => spec
+   {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+            'name' => "allow-prometheus-pushgateway-in-from-cronjob-#{hash}",
+            'namespace' => env_name, # TODO waz should this be monitoring or the environment where pod is?
+            'labels' => standard_labels
+        },
+        'spec' => spec
     }
+
   end
+
+
 end
