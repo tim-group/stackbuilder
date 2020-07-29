@@ -90,6 +90,13 @@ module Stacks::Services::K8sCronJobApp
 
   private
 
+  def generate_app_config_map_resource(app_resources_name, app_service_labels, config)
+    output = super
+    output['data']['config.properties'] << "prometheus.pushgate.service=prometheus-pushgateway.monitoring\n"
+    output['data']['config.properties'] << "prometheus.pushgate.port=9091\n"
+    output
+  end
+
   def create_egress_to_pushgate_network_policy(env_name, app_name, service_name, standard_labels)
     pushgateway_filters = [generate_pod_and_namespace_selector_filter("monitoring",   'app' => 'prometheus-pushgateway')]
     egress_spec = [{
