@@ -20,13 +20,13 @@ module Stacks::Services::K8sCronJobApp
   def k8s_type
     "cronjob"
   end
+
   # rubocop:disable Metrics/ParameterLists
   def app_generate_resources(_app_deployer, _dns_resolver, _hiera_provider, _hiera_scope, app_name, app_version, replicas, used_secrets, _site, \
      _standard_labels, app_service_labels, app_resources_name, config)
     # rubocop:enable Metrics/ParameterLists
     output = []
     output << generate_app_config_map_resource(app_resources_name, app_service_labels, config) unless config.nil?
-
     resource_built = generate_cronjob_resource(app_resources_name, app_service_labels, app_name, app_version)
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['initContainers'] =
       generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config)
@@ -82,4 +82,13 @@ module Stacks::Services::K8sCronJobApp
     }
     cronjob
   end
+
+  private
+  def generate_app_config_map_resource(app_resources_name, app_service_labels, config)
+    output = super
+    output['data']['config.properties'] << "prometheus.pushgate.service=prometheus-pushgateway.monitoring\n"
+    output['data']['config.properties'] << "prometheus.pushgate.port=9091\n"
+    output
+  end
+
 end
