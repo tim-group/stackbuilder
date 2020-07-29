@@ -39,7 +39,7 @@ class Stacks::Services::MailServer < Stacks::MachineDef
 
   def add_dependant_kubernetes_things(enc)
     dependant_app_services = @virtual_service.virtual_services_that_depend_on_me.select do |machine_set|
-      machine_set.is_a? Stacks::Services::AppService
+      machine_set.is_a? Stacks::Services::SharedAppLikeThing
     end
 
     return unless dependant_app_services.any?(&:kubernetes)
