@@ -1,8 +1,6 @@
 require 'stackbuilder/stacks/factory'
 require 'test_classes'
 require 'spec_helper'
-require "matchers/hash_eq"
-
 
 # TODO: add a test to validate that the job_schedule is required
 
@@ -193,7 +191,7 @@ describe 'kubernetes' do
           }
         }
       }
-      expect(k8s_resource(set, 'CronJob')).to hash_eq(expected_cronjob)
+      expect(k8s_resource(set, 'CronJob')).to eq(expected_cronjob)
 
       expected_config_map = {
         'apiVersion' => 'v1',
@@ -255,57 +253,57 @@ EOL
         resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
 
         expected_network_policy = {
-            'apiVersion' => 'networking.k8s.io/v1',
-            'kind' => 'NetworkPolicy',
-            'metadata' => {
-                'name' => 'allow-prometheus-pushgateway-in-from-cronjob-fb7542f',
-                'namespace' => 'e1',
-                'labels' => {
-                    'app.kubernetes.io/managed-by' => 'stacks',
-                    'stack' => 'mystack',
-                    'machineset' => 'x',
-                    'group' => 'blue',
-                    'app.kubernetes.io/instance' => 'blue',
-                    'app.kubernetes.io/part-of' => 'x',
-                    'app.kubernetes.io/component' => 'cronjob_service' #TODO waz - should this say ingress or cronjob_service?
-                }
-            },
-            'spec' => {
-                'ingress' => [{
-                                  'from' => [{
-                                                 'namespaceSelector' => {
-                                                     'matchLabels' => {
-                                                         'name' => 'e1'
-                                                     }
-                                                 },
-                                                 'podSelector' => {
-                                                     'matchLabels' => {
-                                                         'application' => 'myapplication',
-                                                         'app.kubernetes.io/component' => 'cronjob_service',
-                                                         'machineset' => 'x',
-                                                         'group' => 'blue',
-                                                     }
-                                                 }
-                                             }],
-                                  'ports' => [{
-                                                  'port' => '9091',
-                                                  'protocol' => 'TCP'
-                                              }]
-                              }],
-                'podSelector' => {
-                    'matchLabels' => {
-                        'app' => 'prometheus-pushgateway',
-                    }
-                },
-                'policyTypes' => [
-                    'Ingress'
-                ]
+          'apiVersion' => 'networking.k8s.io/v1',
+          'kind' => 'NetworkPolicy',
+          'metadata' => {
+            'name' => 'allow-prometheus-pushgateway-in-from-cronjob-fb7542f',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'cronjob_service' # TODO: waz - should this say ingress or cronjob_service?
             }
+          },
+          'spec' => {
+            'ingress' => [{
+              'from' => [{
+                'namespaceSelector' => {
+                  'matchLabels' => {
+                    'name' => 'e1'
+                  }
+                },
+                'podSelector' => {
+                  'matchLabels' => {
+                    'application' => 'myapplication',
+                    'app.kubernetes.io/component' => 'cronjob_service',
+                    'machineset' => 'x',
+                    'group' => 'blue'
+                  }
+                }
+              }],
+              'ports' => [{
+                'port' => '9091',
+                'protocol' => 'TCP'
+              }]
+            }],
+            'podSelector' => {
+              'matchLabels' => {
+                'app' => 'prometheus-pushgateway'
+              }
+            },
+            'policyTypes' => [
+              'Ingress'
+            ]
+          }
         }
 
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-prometheus-pushgateway-in-from-cronjob-fb7542f'
-        end).to hash_eq(expected_network_policy)
+        end).to eq(expected_network_policy)
       end
 
       it "'creates network policies allowing cronjob to talk to prometheus pushgate to push metrics" do
@@ -327,59 +325,58 @@ EOL
         resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
 
         expected_network_policy = {
-            'apiVersion' => 'networking.k8s.io/v1',
-            'kind' => 'NetworkPolicy',
-            'metadata' => {
-                'name' => 'allow-out-to-prometheus-pushgateway-b9808e9',
-                'namespace' => 'e1',
-                'labels' => {
-                    'app.kubernetes.io/managed-by' => 'stacks',
-                    'stack' => 'mystack',
-                    'machineset' => 'x',
-                    'group' => 'blue',
-                    'app.kubernetes.io/instance' => 'blue',
-                    'app.kubernetes.io/part-of' => 'x',
-                    'app.kubernetes.io/component' => 'cronjob_service' #TODO waz - should this say ingress or cronjob_service?
-                }
-            },
-            'spec' => {
-                'podSelector' => {
-                    'matchLabels' => {
-                        'application' => 'myapplication',
-                        'app.kubernetes.io/component' => 'cronjob_service',
-                        'machineset' => 'x',
-                        'group' => 'blue',
-                    }
-                },
-                'egress' => [{
-                                  'to' => [{
-                                                 'namespaceSelector' => {
-                                                     'matchLabels' => {
-                                                         'name' => 'monitoring'
-                                                     }
-                                                 },
-                                                 'podSelector' => {
-                                                     'matchLabels' => {
-                                                         'app' => 'prometheus-pushgateway'
-                                                     }
-                                                 }
-                                             }],
-                                  'ports' => [{
-                                                  'port' => '9091',
-                                                  'protocol' => 'TCP'
-                                              }]
-                              }],
-                'policyTypes' => [
-                    'Egress'
-                ]
+          'apiVersion' => 'networking.k8s.io/v1',
+          'kind' => 'NetworkPolicy',
+          'metadata' => {
+            'name' => 'allow-out-to-prometheus-pushgateway-b9808e9',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' => 'cronjob_service' # TODO: waz - should this say ingress or cronjob_service?
             }
+          },
+          'spec' => {
+            'podSelector' => {
+              'matchLabels' => {
+                'application' => 'myapplication',
+                'app.kubernetes.io/component' => 'cronjob_service',
+                'machineset' => 'x',
+                'group' => 'blue'
+              }
+            },
+            'egress' => [{
+              'to' => [{
+                'namespaceSelector' => {
+                  'matchLabels' => {
+                    'name' => 'monitoring'
+                  }
+                },
+                'podSelector' => {
+                  'matchLabels' => {
+                    'app' => 'prometheus-pushgateway'
+                  }
+                }
+              }],
+              'ports' => [{
+                'port' => '9091',
+                'protocol' => 'TCP'
+              }]
+            }],
+            'policyTypes' => [
+              'Egress'
+            ]
+          }
         }
 
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-out-to-prometheus-pushgateway-b9808e9'
-        end).to hash_eq(expected_network_policy)
+        end).to eq(expected_network_policy)
       end
-
     end
   end
 end
