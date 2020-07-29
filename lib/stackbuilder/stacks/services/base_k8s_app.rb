@@ -96,6 +96,8 @@ module Stacks::Services::BaseK8sApp
       output += app_generate_resources(app_deployer, dns_resolver, hiera_provider, hiera_scope, app_name, app_version, replicas, used_secrets, site, \
                                        standard_labels, service_adjusted_labels, k8s_app_resources_name, config)
 
+      pp "base k8 app"
+      pp output
       Stacks::KubernetesResourceBundle.new(site, @environment.name, service_adjusted_labels, output, used_secrets, hiera_scope, k8s_app_resources_name)
     end
   end
