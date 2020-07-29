@@ -5,20 +5,17 @@ require 'json'
 
 module Stacks::Services::AppService
   include Stacks::Services::RabbitMqDependent
+  include Stacks::Services::SharedAppLikeThing
 
   attr_accessor :ajp_port
   attr_accessor :ehcache
   attr_accessor :idea_positions_exports
   attr_accessor :sso_port
   attr_accessor :tomcat_session_replication
-  attr_accessor :use_ha_mysql_ordering
   attr_accessor :ha_mysql_ordering_exclude
   attr_accessor :scrape_metrics
   attr_accessor :jvm_args
   attr_accessor :jvm_heap
-
-  attr_accessor :application
-  alias_method :database_application_name, :application
 
   def self.extended(object)
     object.configure
@@ -33,7 +30,6 @@ module Stacks::Services::AppService
     @one_instance_in_lb = false
     @sso_port = nil
     @tomcat_session_replication = false
-    @use_ha_mysql_ordering = false
     @ha_mysql_ordering_exclude = []
     @artifact_from_nexus = true
     @monitor_tucker = true
@@ -88,14 +84,6 @@ module Stacks::Services::AppService
 
   def rabbitmq_config
     create_rabbitmq_config(@application)
-  end
-
-  def database_username
-    if @kubernetes
-      @environment.short_name + @short_name
-    else
-      @application
-    end
   end
 
   def endpoints(_dependent_service, fabric)

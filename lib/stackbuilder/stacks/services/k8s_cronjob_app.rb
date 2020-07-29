@@ -3,6 +3,8 @@ require 'stackbuilder/stacks/maintainers'
 require 'erb'
 
 module Stacks::Services::K8sCronJobApp
+  include Stacks::Services::SharedAppLikeThing
+
   attr_accessor :job_schedule
   attr_accessor :jvm_args
   attr_accessor :jvm_heap

@@ -4,7 +4,9 @@ require 'erb'
 
 module Stacks::Services::K8sAppLikeThing
   # Kubernetes specific attributes
+  attr_accessor :application
   attr_accessor :headspace
+  alias_method :database_application_name, :application
 
   def self.extended(object)
     object.configure

@@ -1,6 +1,7 @@
 module Stacks
   module Services
     require 'stackbuilder/stacks/services/traits/namespace'
+    require 'stackbuilder/stacks/services/shared_app_like_thing'
     require 'stackbuilder/stacks/services/base_k8s_app'
     require 'stackbuilder/stacks/services/k8s_app_like_thing'
     require 'stackbuilder/stacks/services/k8s_cronjob_app'
