@@ -12,7 +12,6 @@ module Stacks::Services::AppService
   attr_accessor :idea_positions_exports
   attr_accessor :sso_port
   attr_accessor :tomcat_session_replication
-  attr_accessor :ha_mysql_ordering_exclude
   attr_accessor :scrape_metrics
   attr_accessor :jvm_args
   attr_accessor :jvm_heap
@@ -22,6 +21,7 @@ module Stacks::Services::AppService
   end
 
   def configure
+    super
     @ajp_port = nil
     @disable_http_lb_hack = false
     @ehcache = false
@@ -30,7 +30,6 @@ module Stacks::Services::AppService
     @one_instance_in_lb = false
     @sso_port = nil
     @tomcat_session_replication = false
-    @ha_mysql_ordering_exclude = []
     @artifact_from_nexus = true
     @monitor_tucker = true
     @security_context = {

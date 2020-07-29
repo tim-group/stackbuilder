@@ -16,6 +16,7 @@ module Stacks::Services::K8sCronJobApp
   # TODO: - waz - do we need a polilcy to allow initContainer to talk to Nexus like app_service? what is needed?
   # TODO: - waz - need to add/share @monitor_tucker  to setup network policy if we want promothesus scraping
   def configure
+    super
     # TODO: - waz - these are now duplicated in app_service and here -
     @jvm_args = nil
     @jvm_heap = '64M'
