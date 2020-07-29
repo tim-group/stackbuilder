@@ -215,8 +215,6 @@ port=8000
 
 log.directory=/var/log/app
 log.tags=["env:e1", "app:MyApplication", "instance:blue"]
-prometheus.pushgate.service=prometheus-pushgateway.monitoring
-prometheus.pushgate.port=9091
 EOL
         }
       }
