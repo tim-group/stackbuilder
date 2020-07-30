@@ -88,11 +88,11 @@ module Stacks::Services::K8sCronJobApp
         'failedJobsHistoryLimit' => 10,
         'schedule' => @job_schedule,
         'jobTemplate' => {
-          'metadata' => {
-            'labels' => labels
-          },
           'spec' => {
             'template' => {
+              'metadata' => {
+                'labels' => labels
+              },
               'spec' => {
               }
             }

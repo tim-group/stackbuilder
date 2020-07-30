@@ -81,22 +81,22 @@ describe 'kubernetes' do
           'failedJobsHistoryLimit' => 10,
           'schedule' => '*/5 * * * *',
           'jobTemplate' => {
-            'metadata' => {
-              'labels' => {
-                'app.kubernetes.io/managed-by' => 'stacks',
-                'stack' => 'mystack',
-                'machineset' => 'x',
-                'group' => 'blue',
-                'app.kubernetes.io/instance' => 'blue',
-                'app.kubernetes.io/part-of' => 'x',
-                'app.kubernetes.io/component' => 'cronjob_service',
-                'application' => 'myapplication',
-                'app.kubernetes.io/name' => 'myapplication',
-                'app.kubernetes.io/version' => '1.2.3'
-              }
-            },
             'spec' => {
               'template' => {
+                'metadata' => {
+                  'labels' => {
+                    'app.kubernetes.io/managed-by' => 'stacks',
+                    'stack' => 'mystack',
+                    'machineset' => 'x',
+                    'group' => 'blue',
+                    'app.kubernetes.io/instance' => 'blue',
+                    'app.kubernetes.io/part-of' => 'x',
+                    'app.kubernetes.io/component' => 'cronjob_service',
+                    'application' => 'myapplication',
+                    'app.kubernetes.io/name' => 'myapplication',
+                    'app.kubernetes.io/version' => '1.2.3'
+                  }
+                },
                 'spec' => {
                   'initContainers' => [{
                     'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.5',
