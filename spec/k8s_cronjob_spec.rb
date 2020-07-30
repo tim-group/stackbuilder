@@ -246,7 +246,7 @@ EOL
     end
 
     describe "networking" do
-      xit "'creates network policies allowing  prometheus pushgate to accept incoming traffice from cronjob " do
+      it "'creates network policies allowing  prometheus pushgate to accept incoming traffice from cronjob " do
         factory = eval_stacks do
           stack "mystack" do
             cronjob_service "x", :kubernetes => true do
@@ -268,7 +268,7 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-prometheus-pushgateway-in-from-cronjob-fb7542f',
+            'name' => 'allow-prometheus-pushgateway-in-from-cronjob-dcbc654',
             'namespace' => 'e1',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
@@ -318,7 +318,7 @@ EOL
         end).to eq(expected_network_policy)
       end
 
-      xit "'creates network policies allowing cronjob to talk to prometheus pushgate to push metrics" do
+      it "'creates network policies allowing cronjob to talk to prometheus pushgate to push metrics" do
         factory = eval_stacks do
           stack "mystack" do
             cronjob_service "x", :kubernetes => true do
@@ -340,7 +340,7 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-out-to-prometheus-pushgateway-b9808e9',
+            'name' => 'allow-out-to-prometheus-pushgateway-5dc8293',
             'namespace' => 'e1',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
