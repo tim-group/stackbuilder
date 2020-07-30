@@ -125,10 +125,6 @@ describe 'kubernetes' do
                         'name' => 'config-template',
                         'mountPath' => '/input/config.properties',
                         'subPath' => 'config.properties'
-                      },
-                      {
-                        'name' => 'log-volume',
-                        'mountPath' => '/var/log/app'
                       }
                     ]
                   }],
@@ -172,6 +168,10 @@ describe 'kubernetes' do
                         'name' => 'config-volume',
                         'mountPath' => '/config',
                         'readOnly' => true
+                      },
+                      {
+                          'name' => 'log-volume',
+                          'mountPath' => '/var/log/app'
                       }
                     ]
                   }],

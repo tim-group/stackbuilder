@@ -37,11 +37,6 @@ module Stacks::Services::K8sCronJobApp
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['initContainers'] =
       generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config)
 
-    resource_built['spec']['jobTemplate']['spec']['template']['spec']['initContainers'].first['volumeMounts'] <<
-      {
-        'name' => 'log-volume',
-        'mountPath' => '/var/log/app'
-      }
 
     # TODO: check with Waz. I'm setting to restart onFailure as Always is not support. I guess this was probably the default
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['restartPolicy'] = 'OnFailure'
@@ -49,6 +44,12 @@ module Stacks::Services::K8sCronJobApp
     container_resource = generate_container_resource(app_name, app_version, config)
     container_resource.first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['containers'] = container_resource
+
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['containers'].first['volumeMounts'] <<
+        {
+            'name' => 'log-volume',
+            'mountPath' => @log_volume_mount_path
+        } unless @log_volume_mount_path.nil?
 
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['volumes'] = generate_volume_resources(app_resources_name, config)
 
