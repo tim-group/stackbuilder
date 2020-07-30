@@ -96,10 +96,6 @@ EOC
           'name' => 'config-template',
           'mountPath' => '/input/config.properties',
           'subPath' => 'config.properties'
-        },
-        {
-          'name' => 'log-volume',
-          'mountPath' => '/var/log/app'
         }
       ]
 
