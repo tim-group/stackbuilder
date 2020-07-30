@@ -158,6 +158,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -189,6 +190,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -290,6 +292,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -321,6 +324,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -437,6 +441,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -468,6 +473,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -533,6 +539,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -625,6 +632,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
@@ -656,6 +664,7 @@ EOF
                '--prune-whitelist', 'monitoring.coreos.com/v1/PrometheusRule',
                '--prune-whitelist', 'policy/v1beta1/PodDisruptionBudget',
                '--prune-whitelist', 'traefik.containo.us/v1alpha1/IngressRouteUDP',
+               '--prune-whitelist', 'batch/v1beta1/CronJob',
                '-f',
                '-',
                :stdin_data => match(/^---\s*$.*
