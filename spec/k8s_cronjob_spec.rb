@@ -170,8 +170,8 @@ describe 'kubernetes' do
                         'readOnly' => true
                       },
                       {
-                          'name' => 'log-volume',
-                          'mountPath' => '/var/log/app'
+                        'name' => 'log-volume',
+                        'mountPath' => '/var/log/app'
                       }
                     ]
                   }],
