@@ -36,6 +36,9 @@ module Stacks::Services::K8sCronJobApp
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['initContainers'] =
       generate_init_container_resource(app_resources_name, app_service_labels, app_name, app_version, replicas, used_secrets, config)
 
+    # TODO: check with Waz. I'm setting to restart onFailure as Always is not support. I guess this was probably the default
+    resource_built['spec']['jobTemplate']['spec']['template']['spec']['restartPolicy'] = 'OnFailure'
+
     container_resource = generate_container_resource(app_name, app_version, config)
     container_resource.first['ports'] << { "containerPort" => 5000, "name" => "jmx" }
     resource_built['spec']['jobTemplate']['spec']['template']['spec']['containers'] = container_resource
@@ -105,7 +108,7 @@ module Stacks::Services::K8sCronJobApp
     egress_spec = [{
       'to' => pushgateway_filters,
       'ports' => [{
-        'port' => '9091',
+        'port' => 9091,
         'protocol' => 'TCP'
       }]
     }]
@@ -142,7 +145,7 @@ module Stacks::Services::K8sCronJobApp
       'ingress' => [{
         'from' => pod_filters,
         'ports' => [{
-          'port' => '9091',
+          'port' => 9091,
           'protocol' => 'TCP'
         }]
       }]
