@@ -20,6 +20,7 @@ module Stacks::Services::K8sCronJobApp
     # TODO: - waz - these are now duplicated in app_service and here -
     @jvm_args = nil
     @jvm_heap = '64M'
+    @log_volume_mount_path = '/var/log/app'
   end
 
   def k8s_type
