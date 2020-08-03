@@ -297,7 +297,7 @@ EOL
           'kind' => 'NetworkPolicy',
           'metadata' => {
             'name' => 'allow-prometheus-pushgateway-in-from-cronjob-dcbc654',
-            'namespace' => 'e1',
+            'namespace' => 'monitoring',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
               'stack' => 'mystack',

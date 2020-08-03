@@ -171,7 +171,7 @@ module Stacks::Services::K8sCronJobApp
       'kind' => 'NetworkPolicy',
       'metadata' => {
         'name' => "allow-prometheus-pushgateway-in-from-cronjob-#{hash}",
-        'namespace' => env_name, # TODO: waz should this be monitoring or the environment where pod is?
+        'namespace' => 'monitoring', # TODO: waz should this be monitoring or the environment where pod is?
         'labels' => standard_labels
       },
       'spec' => spec
