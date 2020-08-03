@@ -156,7 +156,7 @@ describe 'kubernetes' do
                       }
                     ]
                   }],
-                  'restartPolicy' => 'OnFailure',
+                  'restartPolicy' => 'Never',
                   'containers' => [{
                     'securityContext' => {
                       'readOnlyRootFilesystem' => true,
