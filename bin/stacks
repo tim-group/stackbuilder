@@ -1,5 +1,10 @@
 #!/usr/bin/env ruby
 
+if RUBY_VERSION.split('.').first.to_i < 2
+  puts "FATAL: ruby version >= 2 required. ruby version #{RUBY_VERSION} detected"
+  exit 1
+end
+
 if ENV['dev']
   $LOAD_PATH << 'lib/'
 else
