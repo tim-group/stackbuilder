@@ -160,7 +160,7 @@ describe 'kubernetes' do
                 'fsGroup' => 3017
               },
               'initContainers' => [{
-                'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.10',
+                'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.13',
                 'name' => 'config-generator',
                 'env' => [
                   {
