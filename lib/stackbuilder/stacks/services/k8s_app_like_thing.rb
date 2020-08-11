@@ -48,7 +48,7 @@ EOC
 
   def create_init_containers_snippet(secrets, app_name, app_version)
     [{
-      'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.5',
+      'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.9',
       'name' => 'config-generator',
       'env' => secrets.map do |_hiera_key, secret_name|
         {
