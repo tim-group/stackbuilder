@@ -96,7 +96,7 @@ describe 'kubernetes' do
                 },
                 'spec' => {
                   'initContainers' => [{
-                    'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.9',
+                    'image' => 'repo.net.local:8080/timgroup/config-generator:1.0.10',
                     'name' => 'config-generator',
                     'env' => [
                       {
