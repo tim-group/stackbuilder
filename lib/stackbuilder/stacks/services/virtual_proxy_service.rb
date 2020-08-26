@@ -2,7 +2,6 @@ require 'stackbuilder/stacks/namespace'
 require 'stackbuilder/stacks/services/proxy_vhost'
 
 module Stacks::Services::VirtualProxyService
-  attr_reader :cert
   attr_reader :proxy_vhosts
   attr_reader :is_use_deployapp_enabled
   attr_reader :use_deployapp
@@ -22,7 +21,6 @@ module Stacks::Services::VirtualProxyService
         'port' => 443
       }
     }
-    @cert                    = 'wildcard_timgroup_com_2017'
     @override_vhost_location = {}
     @vhost_for_lb_healthcheck_override_hack = nil
     @use_deployapp = true

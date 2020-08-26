@@ -20,7 +20,6 @@ class Stacks::Services::ProxyServer < Stacks::MachineDef
       service_resources = Hash[@virtual_service.downstream_services(location, index)]
       enc = super()
       enc.merge!('role::proxyserver' => {
-                   'default_ssl_cert' => @virtual_service.cert,
                    'prod_vip_fqdn'    => @virtual_service.vip_fqdn(:prod, fabric),
                    'vhosts'           => service_resources,
                    'environment'      => environment.name

@@ -1,6 +1,5 @@
 class Stacks::Services::ProxyVHost
   attr_accessor :aliases
-  attr_accessor :cert
   attr_accessor :monitor_vhost
   attr_accessor :log_to_sylog
   attr_reader :proxy_pass_rules
@@ -10,7 +9,6 @@ class Stacks::Services::ProxyVHost
   def initialize(virtual_proxy_service, fqdn, service, environment, location, &block)
     @aliases = []
     @add_default_aliases = true
-    @cert = virtual_proxy_service.cert
     @proxy_pass_rules = {}
     @service = service
     @fqdn = fqdn
@@ -72,7 +70,6 @@ class Stacks::Services::ProxyVHost
       'aliases'                 => aliases(fabric),
       'application'             => @virtual_proxy_service.find_virtual_service(service, machine_index, @environment).application,
       'proxy_pass_rules'        => proxy_pass_rules(location, envs, machine_index),
-      'cert'                    => cert,
       'monitor_vhost'           => @monitor_vhost,
       'log_to_syslog'           => @log_to_syslog
     }

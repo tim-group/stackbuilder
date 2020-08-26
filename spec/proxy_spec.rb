@@ -30,7 +30,6 @@ describe_stack 'exampleproxy' do
 
   host('e1-exampleproxy-001.mgmt.space.net.local') do |host|
     role_enc = host.to_enc['role::proxyserver']
-    expect(role_enc['default_ssl_cert']).to eql('wildcard_timgroup_com_2017')
     expect(role_enc['environment']).to eql('e1')
     expect(role_enc['prod_vip_fqdn']).to eql('e1-exampleproxy-vip.space.net.local')
     expect(role_enc['vhosts'].size).to eql(3)
@@ -40,7 +39,6 @@ describe_stack 'exampleproxy' do
     expect(vhost1_enc['aliases']).to include('e1-exampleproxy-vip.space.net.local')
     expect(vhost1_enc['aliases'].size).to eql(1)
     expect(vhost1_enc['application']).to eql('example')
-    expect(vhost1_enc['cert']).to eql('wildcard_timgroup_com_2017')
 
     vhost2_enc = role_enc['vhosts']['example.overridden']
     expect(vhost2_enc['proxy_pass_rules']).to eql('/' => 'http://e1-exampleapp2-vip.space.net.local:8000')
@@ -50,40 +48,9 @@ describe_stack 'exampleproxy' do
     )
     expect(vhost2_enc['aliases'].size).to eql(2)
     expect(vhost2_enc['application']).to eql('example')
-    expect(vhost2_enc['cert']).to eql('wildcard_timgroup_com_2017')
 
     vhost3_enc = role_enc['vhosts']['example.absent']
     expect(vhost3_enc['ensure']).to eql('absent')
-  end
-end
-
-describe_stack 'proxy servers can have the default ssl cert and vhost ssl certs overriden' do
-  given do
-    stack "exampleproxy" do
-      proxy_service 'exampleproxy' do
-        @cert = 'test_cert_change'
-        vhost('exampleapp') do
-          @cert = 'test_vhost_cert_change'
-        end
-        add_vip_network :front
-      end
-
-      app_service 'exampleapp' do
-        self.groups = ['blue']
-        self.application = 'example'
-      end
-    end
-
-    env "e1", :primary_site => "space" do
-      instantiate_stack "exampleproxy"
-    end
-  end
-
-  host("e1-exampleproxy-001.mgmt.space.net.local") do |host|
-    enc = host.to_enc
-    expect(enc['role::proxyserver']['default_ssl_cert']).to eql('test_cert_change')
-    expect(enc['role::proxyserver']['vhosts']['e1-exampleproxy-vip.front.space.net.local']['cert']).
-      to eql('test_vhost_cert_change')
   end
 end
 
@@ -91,9 +58,7 @@ describe_stack 'proxy pass rules without an environment default to the environme
   given do
     stack 'funds_proxy' do
       proxy_service 'fundsproxy' do
-        @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
-          @cert = 'wildcard_timgroup_com'
           add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'mirror'
           add_pass_rule "/HIP/blah", :service => "blondinapp", :environment => 'latest'
           add_pass_rule "/HIP/blah2", :service => "blondinapp", :environment => 'shared'
@@ -147,9 +112,7 @@ describe_stack 'proxy servers can exist in multiple sites' do
     stack 'funds_proxy' do
       proxy_service 'fundsproxy' do
         @enable_secondary_site = true
-        @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'shared') do
-          @cert = 'wildcard_timgroup_com'
           add_pass_rule "/HIP/resources", :service => "blondinapp", :environment => 'shared'
         end
         nat_config.dnat_enabled = true
@@ -189,7 +152,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
 
   host('shared-fundsproxy-001.mgmt.pg.net.local') do |host|
     role_enc = host.to_enc['role::proxyserver']
-    expect(role_enc['default_ssl_cert']).to eql('wildcard_youdevise_com')
     expect(role_enc['environment']).to eql('shared')
     expect(role_enc['prod_vip_fqdn']).to eql('shared-fundsproxy-vip.pg.net.local')
     expect(role_enc['vhosts'].size).to eql(1)
@@ -202,12 +164,10 @@ describe_stack 'proxy servers can exist in multiple sites' do
     )
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
-    expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 
   host('shared-fundsproxy-001.mgmt.oy.net.local') do |host|
     role_enc = host.to_enc['role::proxyserver']
-    expect(role_enc['default_ssl_cert']).to eql('wildcard_youdevise_com')
     expect(role_enc['environment']).to eql('shared')
     expect(role_enc['prod_vip_fqdn']).to eql('shared-fundsproxy-vip.oy.net.local')
     expect(role_enc['vhosts'].size).to eql(1)
@@ -220,7 +180,6 @@ describe_stack 'proxy servers can exist in multiple sites' do
     )
     expect(vhost_enc['aliases'].size).to eql(2)
     expect(vhost_enc['application']).to eql('tfunds')
-    expect(vhost_enc['cert']).to eql('wildcard_timgroup_com')
   end
 end
 describe_stack 'generates proxyserver enc data' do
@@ -351,12 +310,10 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
     end
     stack 'foo_proxy' do
       proxy_service 'fooproxy' do
-        @cert = 'wildcard_youdevise_com'
         @enable_secondary_site = true if %w(production).include? environment.name
         @override_vhost_location = { 'production' => :secondary_site } if environment.name == 'shared'
         vhost('foouserapp', 'foo-old.com', 'production') do
           @add_default_aliases = false
-          @cert = 'wildcard_youdevise_com'
           case environment
           when 'shared'
             add_properties 'is_hip' => true
@@ -364,17 +321,14 @@ describe_stack 'generates the correct proxy_pass rules when using override_vhost
           end
         end
         vhost('foouserapp', 'foo.fooexample.com', 'production') do
-          @cert = 'wildcard_fooexample.com'
           add_pass_rule '/HIP/resources', :service => 'blondinapp'
         end
         case environment.name
         when 'shared'
           vhost('foouserapp', 'foo-mirror.fooexample.com', 'mirror') do
-            @cert = 'wildcard_fooexample.com'
             add_pass_rule '/HIP/resources', :service => 'blondinapp'
           end
           vhost('foouserapp', 'foo-latest.fooexample.com', 'latest') do
-            @cert = 'wildcard_fooexample.com'
             add_pass_rule '/HIP/resources', :service => 'blondinapp'
           end
         end
@@ -621,32 +575,6 @@ describe_stack 'proxy servers have an option to specify logging to syslog' do
   end
 end
 
-describe_stack 'vhosts should adopt default cert from proxy_service' do
-  given do
-    stack "proxyserver" do
-      proxy_service "proxy" do
-        vhost('app') do
-          @cert = 'super_cert'
-        end
-      end
-    end
-    stack 'appserver' do
-      app_service 'app' do
-        self.application = 'app'
-      end
-    end
-
-    env "st", :primary_site => "st", :secondary_site => "bs" do
-      instantiate_stack "proxyserver"
-      instantiate_stack "appserver"
-    end
-  end
-
-  host('st-proxy-001.mgmt.st.net.local') do |proxyserver|
-    vhost_enc = proxyserver.to_enc['role::proxyserver']['vhosts']['st-proxy-vip.st.net.local']
-    expect(vhost_enc['cert']).to eql 'super_cert'
-  end
-end
 describe_stack 'vhost_for_lb_healthcheck_override_hack works with a hash of site to vhost' do
   given do
     stack "loadbalancer" do
@@ -681,9 +609,7 @@ describe_stack 'can specify path on proxypass rule' do
   given do
     stack 'funds_proxy' do
       proxy_service 'fundsproxy' do
-        @cert = 'wildcard_youdevise_com'
         vhost('fundsuserapp', 'funds-mirror.timgroup.com', 'mirror') do
-          @cert = 'wildcard_timgroup_com'
           add_pass_rule "/HIP/blah3", :service => "blondinapp", :path => "/foo"
         end
         nat_config.dnat_enabled = true
