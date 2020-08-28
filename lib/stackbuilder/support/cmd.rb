@@ -44,7 +44,7 @@ class CMD
                      launch allocate provision
                      reprovision apply move clear_host
                      rebuild_host build_new_host
-                     unsafely_start_dependents unsafely_stop_dependents)
+                     unsafely_start_dependent_apps unsafely_stop_dependent_apps)
     @cmds = @read_cmds + @write_cmds
   end
   # rubocop:enable Metrics/ParameterLists
@@ -134,66 +134,70 @@ class CMD
     end.flatten.map(&:identity))
   end
 
-  def unsafely_stop_dependents(_argv)
+  def unsafely_stop_dependent_apps(_argv)
     machine_set = convert_to_machine_set(check_and_get_stack(true))
     dry_run_only = $options[:dry_run]
 
-    machine_set.virtual_services_that_depend_on_me.map do |dependent|
-      if dependent.kubernetes
-        sites = if dependent.instances.is_a?(Hash)
-                  dependent.instances.keys
-                else
-                  [@environment.sites.first]
-                end
+    machine_set.virtual_services_that_depend_on_me
+      .select do |dependent| dependent.is_a? Stacks::Services::AppService end
+      .map do |dependent|
+        if dependent.kubernetes
+          sites = if dependent.instances.is_a?(Hash)
+                    dependent.instances.keys
+                  else
+                    [@environment.sites.first]
+                  end
 
-        deployment = dependent.k8s_app_resources_name
-        sites.each do |site|
-          stop_cmd = "kubectl --context=#{site} -n #{@environment.name} scale deploy #{deployment} --replicas=0"
-          if dry_run_only
-            puts "Would stop dependent kubernetes using: `#{stop_cmd}`"
-          else
-            system(stop_cmd)
+          deployment = dependent.k8s_app_resources_name
+          sites.each do |site|
+            stop_cmd = "kubectl --context=#{site} -n #{@environment.name} scale deploy #{deployment} --replicas=0"
+            if dry_run_only
+              puts "Would stop dependent kubernetes using: `#{stop_cmd}`"
+            else
+              system(stop_cmd)
+            end
+          end
+        else
+          dependent.groups.each do |group|
+            service_name = "#{@environment.name}-#{dependent.application}-#{group}"
+            mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
+            stop_cmd = "mco service #{service_name} stop #{mco_filters}"
+            if dry_run_only
+              puts "Would stop dependent app using equivalent of: `#{stop_cmd}`"
+            else
+              system(stop_cmd)
+            end
           end
         end
-      else
-        dependent.groups.each do |group|
-          service_name = "#{@environment.name}-#{dependent.application}-#{group}"
-          mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
-          stop_cmd = "mco service #{service_name} stop #{mco_filters}"
-          if dry_run_only
-            puts "Would stop dependent app using equivalent of: `#{stop_cmd}`"
-          else
-            system(stop_cmd)
-          end
-        end
-      end
     end
   end
 
-  def unsafely_start_dependents(_argv)
+  def unsafely_start_dependent_apps(_argv)
     machine_set = convert_to_machine_set(check_and_get_stack(true))
     dry_run_only = $options[:dry_run]
 
-    machine_set.virtual_services_that_depend_on_me.map do |dependent|
-      if dependent.kubernetes
-        start_cmd = "stacks -e #{@environment.name} -s #{dependent.name} apply"
-        if dry_run_only
-          puts "Would start dependent kubernetes using equivalent of: `#{start_cmd}`"
-        else
-          apply_k8s(dependent)
-        end
-      else
-        dependent.groups.each do |group|
-          service_name = "#{@environment.name}-#{dependent.application}-#{group}"
-          mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
-          start_cmd = "mco service #{service_name} start #{mco_filters}"
+    machine_set.virtual_services_that_depend_on_me
+      .select do |dependent| dependent.is_a? Stacks::Services::AppService end
+      .map do |dependent|
+        if dependent.kubernetes
+          start_cmd = "stacks -e #{@environment.name} -s #{dependent.name} apply"
           if dry_run_only
-            puts "Would start dependent app using equivalent of: `#{start_cmd}`"
+            puts "Would start dependent kubernetes using equivalent of: `#{start_cmd}`"
           else
-            system(start_cmd)
+            apply_k8s(dependent)
+          end
+        else
+          dependent.groups.each do |group|
+            service_name = "#{@environment.name}-#{dependent.application}-#{group}"
+            mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
+            start_cmd = "mco service #{service_name} start #{mco_filters}"
+            if dry_run_only
+              puts "Would start dependent app using equivalent of: `#{start_cmd}`"
+            else
+              system(start_cmd)
+            end
           end
         end
-      end
     end
   end
 
