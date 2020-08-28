@@ -180,7 +180,7 @@ class CMD
         if dry_run_only
           puts "Would start dependent kubernetes using equivalent of: `#{start_cmd}`"
         else
-          system(start_cmd)
+          apply_k8s(dependent)
         end
       else
         dependent.groups.each do |group|
