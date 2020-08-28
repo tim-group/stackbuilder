@@ -8,6 +8,7 @@ require 'stackbuilder/support/dns_resolver'
 require 'stackbuilder/support/mcollective'
 require 'stackbuilder/support/kubernetes_vm_model'
 require 'stackbuilder/support/kubernetes_vm_prometheus_targets'
+require 'stackbuilder/support/dependent_apps'
 require 'open3'
 
 # public methods in this class (and whose name is included in the :cmds instance variable) are valid stacks commands.
@@ -137,37 +138,13 @@ class CMD
   def unsafely_stop_dependent_apps(_argv)
     machine_set = convert_to_machine_set(check_and_get_stack(true))
     dry_run_only = $options[:dry_run]
+    dependent_apps = Support::DependentApps.new(@environment, machine_set)
 
-    machine_set.virtual_services_that_depend_on_me.
-      select { |dependent| dependent.is_a? Stacks::Services::AppService }.
-      map do |dependent|
-      if dependent.kubernetes
-        sites = if dependent.instances.is_a?(Hash)
-                  dependent.instances.keys
-                else
-                  [@environment.sites.first]
-                end
-
-        deployment = dependent.k8s_app_resources_name
-        sites.each do |site|
-          stop_cmd = "kubectl --context=#{site} -n #{@environment.name} scale deploy #{deployment} --replicas=0"
-          if dry_run_only
-            puts "Would stop dependent kubernetes using: `#{stop_cmd}`"
-          else
-            system(stop_cmd)
-          end
-        end
+    dependent_apps.unsafely_stop_commands.each do |dependent_app_command|
+      if dry_run_only
+        puts "Would stop dependent kubernetes using: `#{dependent_app_command.describe}`"
       else
-        dependent.groups.each do |group|
-          service_name = "#{@environment.name}-#{dependent.application}-#{group}"
-          mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
-          stop_cmd = "mco service #{service_name} stop #{mco_filters}"
-          if dry_run_only
-            puts "Would stop dependent app using equivalent of: `#{stop_cmd}`"
-          else
-            system(stop_cmd)
-          end
-        end
+        system(dependent_app_command.executable)
       end
     end
   end
@@ -175,27 +152,17 @@ class CMD
   def unsafely_start_dependent_apps(_argv)
     machine_set = convert_to_machine_set(check_and_get_stack(true))
     dry_run_only = $options[:dry_run]
+    dependent_apps = Support::DependentApps.new(@environment, machine_set)
 
-    machine_set.virtual_services_that_depend_on_me.
-      select { |dependent| dependent.is_a? Stacks::Services::AppService }.
-      map do |dependent|
-      if dependent.kubernetes
-        start_cmd = "stacks -e #{@environment.name} -s #{dependent.name} apply"
-        if dry_run_only
-          puts "Would start dependent kubernetes using equivalent of: `#{start_cmd}`"
-        else
-          apply_k8s(dependent)
-        end
+    dependent_apps.unsafely_start_commands.each do |dependent_app_command|
+      if dry_run_only
+        puts "Would start dependent kubernetes using: `#{dependent_app_command.describe}`"
       else
-        dependent.groups.each do |group|
-          service_name = "#{@environment.name}-#{dependent.application}-#{group}"
-          mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
-          start_cmd = "mco service #{service_name} start #{mco_filters}"
-          if dry_run_only
-            puts "Would start dependent app using equivalent of: `#{start_cmd}`"
-          else
-            system(start_cmd)
-          end
+        case dependent_app_command
+        when DependentAppMcoCommand
+          system(dependent_app_command.executable)
+        when DependentAppStacksApplyCommand
+          apply_k8s(dependent_app_command.machine_set)
         end
       end
     end
