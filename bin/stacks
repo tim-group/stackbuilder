@@ -173,7 +173,8 @@ GetoptLong.new(
   ['--no-dependencies', GetoptLong::NO_ARGUMENT],
   ['--stash', GetoptLong::NO_ARGUMENT],
   ['--no-validate', GetoptLong::NO_ARGUMENT],
-  ['--update-version', GetoptLong::REQUIRED_ARGUMENT]
+  ['--update-version', GetoptLong::REQUIRED_ARGUMENT],
+  ['--dry-run', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -204,6 +205,8 @@ GetoptLong.new(
     $options[:validate] = false
   when '--update-version'
     $options[:update_version] = arg
+  when '--dry-run'
+    $options[:dry_run] = true
   else
     $options[opt_sym] = arg
   end

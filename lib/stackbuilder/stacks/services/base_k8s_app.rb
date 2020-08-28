@@ -132,6 +132,11 @@ module Stacks::Services::BaseK8sApp
     standard_labels.merge('app.kubernetes.io/component' => @custom_service_name)
   end
 
+  def k8s_app_resources_name
+    group = @groups.first
+    "#{name}-#{group}-#{k8s_type}"
+  end
+
   private
 
   def assert_k8s_requirements
@@ -150,11 +155,6 @@ module Stacks::Services::BaseK8sApp
       if @enable_secondary_site
     fail "#{custom_service_name} '#{name}' in '#{@environment.name}', you must specify a cpu_request if specifying a cpu_limit" \
       if @cpu_limit && !@cpu_request
-  end
-
-  def k8s_app_resources_name
-    group = @groups.first
-    "#{name}-#{group}-#{k8s_type}"
   end
 
   def k8s_type

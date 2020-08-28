@@ -136,6 +136,7 @@ class CMD
 
   def unsafely_stop_dependents(_argv)
     machine_set = convert_to_machine_set(check_and_get_stack(true))
+    dry_run_only = $options[:dry_run]
 
     machine_set.virtual_services_that_depend_on_me.map do |dependent|
       if dependent.kubernetes
@@ -144,15 +145,26 @@ class CMD
                 else
                   [@environment.sites.first]
                 end
+
         deployment = dependent.k8s_app_resources_name
         sites.each do |site|
-          puts "Would stop dependent kubernetes using: `kubectl --contexy=#{site} -n #{@environment.name} scale deploy #{deployment} --replicas=0`"
+          stop_cmd = "kubectl --context=#{site} -n #{@environment.name} scale deploy #{deployment} --replicas=0"
+          if dry_run_only
+            puts "Would stop dependent kubernetes using: `#{stop_cmd}`"
+          else
+            system(stop_cmd)
+          end
         end
       else
         dependent.groups.each do |group|
           service_name = "#{@environment.name}-#{dependent.application}-#{group}"
           mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
-          puts "Would stop dependent app using equivalent of: `mco service #{service_name} stop #{mco_filters}`"
+          stop_cmd = "mco service #{service_name} stop #{mco_filters}"
+          if dry_run_only
+            puts "Would stop dependent app using equivalent of: `#{stop_cmd}`"
+          else
+            system(stop_cmd)
+          end
         end
       end
     end
@@ -160,15 +172,26 @@ class CMD
 
   def unsafely_start_dependents(_argv)
     machine_set = convert_to_machine_set(check_and_get_stack(true))
+    dry_run_only = $options[:dry_run]
 
     machine_set.virtual_services_that_depend_on_me.map do |dependent|
       if dependent.kubernetes
-        puts "Would start dependent kubernetes using equivalent of: `stacks -e #{@environment.name} -s #{dependent.name} apply`"
+        start_cmd = "stacks -e #{@environment.name} -s #{dependent.name} apply"
+        if dry_run_only
+          puts "Would start dependent kubernetes using equivalent of: `#{start_cmd}`"
+        else
+          system(start_cmd)
+        end
       else
         dependent.groups.each do |group|
           service_name = "#{@environment.name}-#{dependent.application}-#{group}"
           mco_filters = "-F logicalenv=#{@environment.name} -F application=#{dependent.application} -F group=#{group}"
-          puts "Would start dependent app using equivalent of: `mco service #{service_name} start #{mco_filters}`"
+          start_cmd = "mco service #{service_name} start #{mco_filters}"
+          if dry_run_only
+            puts "Would start dependent app using equivalent of: `#{start_cmd}`"
+          else
+            system(start_cmd)
+          end
         end
       end
     end
