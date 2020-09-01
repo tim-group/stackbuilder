@@ -18,13 +18,13 @@ DependentAppKubectlCommand = Struct.new(:deployment, :environment, :site) do
   end
 
   def executable
-    "kubectl --context=#{site} -n #{environment.name} scale deploy #{deployment} --replicas=0"
+    "kubectl --context=#{site} -n #{environment} scale deploy #{deployment} --replicas=0"
   end
 end
 
-DependentAppStacksApplyCommand = Struct.new(:machine_set) do
+DependentAppStacksApplyCommand = Struct.new(:environment, :stack) do
   def describe
-    start_cmd = "stacks -e #{machine_set.environment.name} -s #{machine_set.name} apply"
+    start_cmd = "stacks -e #{environment} -s #{stack} apply"
     "[equivalent of: `#{start_cmd}`]"
   end
 end
@@ -45,13 +45,13 @@ class Support::DependentApps
                 else
                   [@environment.sites.first]
                 end
-        sites.map { |site| DependentAppKubectlCommand.new(dependent.k8s_app_resources_name, @environment, site) }
+        sites.map { |site| DependentAppKubectlCommand.new(dependent.k8s_app_resources_name, @environment.name, site) }
       else
         dependent.groups.map do |group|
           DependentAppMcoCommand.new(@environment.name, dependent.application, group, "stop")
         end
       end
-    end.flatten
+    end.flatten.to_set
   end
 
   def unsafely_start_commands
@@ -59,12 +59,12 @@ class Support::DependentApps
       select { |dependent| dependent.is_a? Stacks::Services::AppService }.
       map do |dependent|
       if dependent.kubernetes
-        DependentAppStacksApplyCommand.new(dependent)
+        DependentAppStacksApplyCommand.new(dependent.environment.name, dependent.name)
       else
         dependent.groups.map do |group|
           DependentAppMcoCommand.new(@environment.name, dependent.application, group, "start")
         end
       end
-    end.flatten
+    end.flatten.uniq.to_set
   end
 end
