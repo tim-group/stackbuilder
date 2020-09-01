@@ -142,8 +142,9 @@ class CMD
 
     dependent_apps.unsafely_stop_commands.each do |dependent_app_command|
       if dry_run_only
-        puts "Would stop dependent kubernetes using: `#{dependent_app_command.describe}`"
+        logger(Logger::INFO) { "[--dry-run enabled] Would stop dependent using: `#{dependent_app_command.describe}`" }
       else
+        logger(Logger::INFO) { "Executing `#{dependent_app_command.describe}`" }
         system(dependent_app_command.executable)
       end
     end
@@ -156,8 +157,9 @@ class CMD
 
     dependent_apps.unsafely_start_commands.each do |dependent_app_command|
       if dry_run_only
-        puts "Would start dependent kubernetes using: `#{dependent_app_command.describe}`"
+        logger(Logger::INFO) { "[--dry-run enabled] Would start dependent using: `#{dependent_app_command.describe}`" }
       else
+        logger(Logger::INFO) { "Executing `#{dependent_app_command.describe}`" }
         case dependent_app_command
         when DependentAppMcoCommand
           system(dependent_app_command.executable)
