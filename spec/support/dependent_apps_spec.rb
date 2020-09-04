@@ -52,9 +52,9 @@ describe Support::DependentApps do
         DependentAppMcoCommand.new('e1', 'MyApp', 'purple', 'stop')
       ].to_set)
 
-      expect(dependent_apps.unsafely_start_commands).to eql([
-        DependentAppMcoCommand.new('e1', 'MyApp', 'purple', 'start'),
-        DependentAppStacksApplyCommand.new('e1', 'the-k8s-app')
+      expect(dependent_apps.unsafely_start_commands.map(&:describe).to_set).to eql([
+        'mco service e1-MyApp-purple start -F logicalenv=e1 -F application=MyApp -F group=purple',
+        '[equivalent of: `stacks -e e1 -s the-k8s-app apply`]'
       ].to_set)
     end
 

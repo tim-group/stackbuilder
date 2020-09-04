@@ -22,7 +22,7 @@ DependentAppKubectlCommand = Struct.new(:deployment, :environment, :site) do
   end
 end
 
-DependentAppStacksApplyCommand = Struct.new(:environment, :stack) do
+DependentAppStacksApplyCommand = Struct.new(:environment, :stack, :machine_set) do
   def describe
     start_cmd = "stacks -e #{environment} -s #{stack} apply"
     "[equivalent of: `#{start_cmd}`]"
@@ -59,7 +59,7 @@ class Support::DependentApps
       select { |dependent| dependent.is_a? Stacks::Services::AppService }.
       map do |dependent|
       if dependent.kubernetes
-        DependentAppStacksApplyCommand.new(dependent.environment.name, dependent.name)
+        DependentAppStacksApplyCommand.new(dependent.environment.name, dependent.name, dependent)
       else
         dependent.groups.map do |group|
           DependentAppMcoCommand.new(@environment.name, dependent.application, group, "start")
