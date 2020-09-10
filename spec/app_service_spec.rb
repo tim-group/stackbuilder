@@ -609,7 +609,6 @@ EOL
                       '--api.insecure',
                       '--api.dashboard',
                       '--metrics.prometheus',
-                      '--log.level=DEBUG',
                       '--entrypoints.traefik.Address=:10254',
                       '--entrypoints.http.Address=:8000',
                       '--entrypoints.http.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',

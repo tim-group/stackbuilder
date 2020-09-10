@@ -374,8 +374,7 @@ module Stacks::Kubernetes::ResourceSetIngress
                   "--ping",
                   "--api.insecure",
                   "--api.dashboard",
-                  "--metrics.prometheus",
-                  "--log.level=DEBUG"
+                  "--metrics.prometheus"
                 ],
                 'image' => 'traefik:v2.2',
                 'imagePullPolicy' => 'IfNotPresent',

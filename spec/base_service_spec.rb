@@ -659,7 +659,6 @@ describe 'kubernetes' do
                       '--api.insecure',
                       '--api.dashboard',
                       '--metrics.prometheus',
-                      '--log.level=DEBUG',
                       '--entrypoints.traefik.Address=:10254',
                       '--entrypoints.ntp.Address=:8123/udp',
                       '--providers.kubernetesCRD',
