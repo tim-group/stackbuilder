@@ -23,6 +23,9 @@ port=8000
 
 log.directory=/var/log/app
 log.tags=["env:<%= @logicalenv %>", "app:<%= @application %>", "instance:<%= @group %>"]
+
+prometheus.port=8001
+
 <%- if @dependencies.size > 0 -%>
 <%- @dependencies.map do |k, v| -%>
 <%- if k.start_with?('db.') && k.end_with?('.username') -%>
