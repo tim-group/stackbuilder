@@ -382,6 +382,8 @@ describe 'kubernetes' do
           'config.properties' => <<EOL
 port=8000
 
+prometheus.port=8001
+
 log.directory=/var/log/app
 log.tags=["env:e1", "app:MyApplication", "instance:blue"]
 EOL
