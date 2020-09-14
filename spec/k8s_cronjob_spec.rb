@@ -251,10 +251,11 @@ describe 'kubernetes' do
           'config.properties' => <<EOL
 port=8000
 
-prometheus.port=8001
-
 log.directory=/var/log/app
 log.tags=["env:e1", "app:MyApplication", "instance:blue"]
+
+prometheus.port=8001
+
 prometheus.pushgate.service=prometheus-pushgateway.monitoring
 prometheus.pushgate.port=9091
 EOL
