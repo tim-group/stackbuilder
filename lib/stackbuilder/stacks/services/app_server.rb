@@ -54,6 +54,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
       'application_dependant_instances'   => @virtual_service.dependant_instance_fqdns(location, [@environment.primary_network], true, true),
       'participation_dependant_instances' => @virtual_service.dependant_load_balancer_fqdns(location),
       'port'                              => '8000',
+      'metrics_port'                      => '8001',
       'use_docker'                        => @virtual_service.use_docker,
       'scrape_metrics'                    => @virtual_service.scrape_metrics
     }
