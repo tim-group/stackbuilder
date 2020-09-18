@@ -2580,6 +2580,63 @@ EOL
       expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(8000)
     end
 
+    it 'should create the correct egress network policies for a rabbitmq dependency' do
+      factory = eval_stacks do
+        stack "test_app_servers" do
+          app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.alerts_channel = 'test'
+
+            self.application = 'app1'
+            self.startup_alert_threshold = '1h'
+            depend_on 'myrabbit', 'e1', 'test'
+          end
+        end
+
+        stack "my_rabbit" do
+          rabbitmq_cluster "myrabbit"
+        end
+
+        env "e1", :primary_site => "space" do
+          instantiate_stack "test_app_servers"
+          instantiate_stack "my_rabbit"
+        end
+      end
+
+      machine_sets = factory.inventory.find_environment('e1').definitions['test_app_servers'].k8s_machinesets
+      app1_machine_set = machine_sets['app1']
+
+      network_policies = app1_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).
+                         flat_map(&:resources).
+                         select { |s| s['kind'] == "NetworkPolicy" }
+
+      expect(network_policies.size).to eq(3)
+      expect(network_policies.first['metadata']['name']).to start_with('allow-out-to-e1-myrabbit-')
+      expect(network_policies.first['metadata']['namespace']).to eql('e1')
+      expect(network_policies.first['metadata']['labels']).to eql(
+        'app.kubernetes.io/managed-by' => 'stacks',
+        'stack' => 'test_app_servers',
+        'machineset' => 'app1',
+        'group' => 'blue',
+        'app.kubernetes.io/instance' => 'blue',
+        'app.kubernetes.io/part-of' => 'app1',
+        'app.kubernetes.io/component' => 'app_service'
+      )
+      expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
+        'machineset' => 'app1',
+        'group' => 'blue',
+        'app.kubernetes.io/component' => 'app_service'
+      )
+      expect(network_policies.first['spec']['policyTypes']).to eql(['Egress'])
+      expect(network_policies.first['spec']['egress'].size).to eq(1)
+      expect(network_policies.first['spec']['egress'].first['to'].size).to eq(2)
+      expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
+      expect(network_policies.first['spec']['egress'].first['to']).to eq([{ 'ipBlock' => { 'cidr' => '3.1.4.18/32' } }, { 'ipBlock' => { 'cidr' => '3.1.4.17/32' } }])
+      expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
+      expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(5672)
+    end
+
     it 'should create the correct network policies for two services in kubernetes in the same environment when one service depends on the other' do
       factory = eval_stacks do
         stack "test_app_servers" do
