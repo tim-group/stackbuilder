@@ -62,7 +62,9 @@ module Stacks::Kubernetes::ResourceSetIngress
     }
 
     @ports.keys.map do |port_name|
-      if port_name == 'http' || port_name == 'app'
+      protocol = @ports[port_name]['protocol'].nil? ? 'tcp' : @ports[port_name]['protocol']
+      case protocol
+      when 'tcp'
         resource['apiVersion'] = 'networking.k8s.io/v1beta1'
         resource['kind'] = 'Ingress'
         resource['spec'] = {
@@ -78,10 +80,7 @@ module Stacks::Kubernetes::ResourceSetIngress
             }
           }]
         }
-      else
-        protocol = @ports[port_name]['protocol'].nil? ? 'tcp' : @ports[port_name]['protocol']
-        fail("generate_k8s_ingress doesn't know how to handle port name '#{port_name}' with protocol '#{protocol}'") unless %w(tcp udp).include? protocol
-        fail('IngressRouteTCP support is not completed') if protocol == 'tcp'
+      when 'udp'
         kind = "IngressRoute#{protocol.upcase}"
         resource['apiVersion'] = 'traefik.containo.us/v1alpha1'
         resource['kind'] = kind
@@ -97,6 +96,8 @@ module Stacks::Kubernetes::ResourceSetIngress
             }]
           }]
         }
+      else
+        fail("generate_k8s_ingress doesn't know how to handle port name '#{port_name}' with protocol '#{protocol}'")
       end
     end
     resource
@@ -435,19 +436,20 @@ module Stacks::Kubernetes::ResourceSetIngress
 
     @ports.keys.map do |port_name|
       actual_port = @ports[port_name]['port'] < 1024 ? 8000 + @ports[port_name]['port'] : @ports[port_name]['port']
-      actual_port_name = port_name == 'app' ? 'http' : port_name
-      entrypoint = "--entrypoints.#{actual_port_name}.Address=:#{actual_port}"
-      entrypoint += "/udp" if @ports[port_name]['protocol'] == 'udp'
+      #TODO: mpimm - remove when protocol is required
+      protocol = @ports[port_name]['protocol'].nil? ? 'tcp' : @ports[port_name]['protocol']
+      entrypoint = "--entrypoints.#{port_name}.Address=:#{actual_port}"
+      entrypoint += "/udp" if protocol == 'udp'
       container['args'] << entrypoint
       container['ports'] << {
         'containerPort' => actual_port,
-        'name' => actual_port_name,
-        'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
+        'name' => port_name,
+        'protocol' => protocol.upcase
       }
 
-      case port_name
-      when 'app', 'http'
-        container['args'] << "--entrypoints.#{actual_port_name}.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
+      case protocol
+      when 'tcp'
+        container['args'] << "--entrypoints.#{port_name}.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
         container['args'] << "--providers.kubernetesingress"
         container['args'] << "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
         container['args'] << "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}"
