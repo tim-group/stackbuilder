@@ -436,7 +436,7 @@ module Stacks::Kubernetes::ResourceSetIngress
 
     @ports.keys.map do |port_name|
       actual_port = @ports[port_name]['port'] < 1024 ? 8000 + @ports[port_name]['port'] : @ports[port_name]['port']
-      #TODO: mpimm - remove when protocol is required
+      # TODO: mpimm - remove when protocol is required
       protocol = @ports[port_name]['protocol'].nil? ? 'tcp' : @ports[port_name]['protocol']
       entrypoint = "--entrypoints.#{port_name}.Address=:#{actual_port}"
       entrypoint += "/udp" if protocol == 'udp'
