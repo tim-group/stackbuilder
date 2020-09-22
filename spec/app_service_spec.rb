@@ -612,8 +612,8 @@ EOL
                       '--api.dashboard',
                       '--metrics.prometheus',
                       '--entrypoints.traefik.Address=:10254',
-                      '--entrypoints.app.Address=:8000',
-                      '--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',
+                      '--entrypoints.http.Address=:8000',
+                      '--entrypoints.http.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',
                       '--providers.kubernetesingress',
                       '--providers.kubernetesingress.ingressclass=traefik-x-blue',
                       '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing',
@@ -642,7 +642,7 @@ EOL
                       },
                       {
                         'containerPort' => 8000,
-                        'name' => 'app',
+                        'name' => 'http',
                         'protocol' => 'TCP'
                       }
                     ],
@@ -2632,10 +2632,10 @@ EOL
       expect(network_policies.first['spec']['egress'].size).to eq(1)
       expect(network_policies.first['spec']['egress'].first['to'].size).to eq(2)
       expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['egress'].first['to']) =~ [
+      expect(network_policies.first['spec']['egress'].first['to']).to eq([
         { 'ipBlock' => { 'cidr' => '3.1.4.18/32' } },
         { 'ipBlock' => { 'cidr' => '3.1.4.17/32' } }
-      ]
+      ])
       expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
       expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(5672)
     end
