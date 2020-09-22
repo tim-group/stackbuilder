@@ -1,6 +1,7 @@
 require 'stackbuilder/stacks/factory'
 require 'test_classes'
 require 'spec_helper'
+require 'hashdiff'
 
 describe 'kubernetes' do
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
@@ -326,7 +327,7 @@ describe 'kubernetes' do
               'participation' => 'enabled'
             },
             'ports' => [
-              { "name" => "ntp", "port" => 123, "protocol" => "UDP", "targetPort" => 123 }
+              { "name" => "app", "port" => 123, "protocol" => "UDP", "targetPort" => "app" }
             ]
           }
         }
@@ -359,7 +360,7 @@ describe 'kubernetes' do
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
         deployment = k8s_resource(set, 'Deployment')
         expect(deployment['spec']['template']['spec']['containers'].first['ports']).to be_eql([{
-                                                                                                "name" => "ntp",
+                                                                                                "name" => "app",
                                                                                                 "containerPort" => 123,
                                                                                                 "protocol" => 'UDP'
                                                                                               }])
@@ -450,69 +451,6 @@ describe 'kubernetes' do
         expect(ingress_resources).to be_empty
       end
 
-      xit 'creates ingress resources for TCP services' do
-        factory = eval_stacks do
-          stack "mystack" do
-            base_service "x", :kubernetes => true do
-              self.maintainers = [person('Testers')]
-              self.description = 'Testing'
-              self.alerts_channel = 'test'
-
-              self.ports = {
-                'ssh' => {
-                  'port' => 22,
-                  'service_port' => 22,
-                  'protocol' => 'tcp'
-                }
-              }
-
-              self.application = 'MyApplication'
-              self.instances = 2
-              self.startup_alert_threshold = '1h'
-            end
-            app_service 'nonk8sapp' do
-              self.instances = 1
-              depend_on 'x', 'e1'
-            end
-          end
-          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
-            instantiate_stack "mystack"
-          end
-        end
-        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-
-        expected_ingress = {
-          'apiVersion' => 'traefik.containo.us/v1alpha1',
-          'kind' => 'IngressRouteTCP',
-          'metadata' => {
-            'name' => 'x-blue-app',
-            'namespace' => 'e1',
-            'labels' => {
-              'app.kubernetes.io/managed-by' => 'stacks',
-              'stack' => 'mystack',
-              'machineset' => 'x',
-              'group' => 'blue',
-              'app.kubernetes.io/instance' => 'blue',
-              'app.kubernetes.io/part-of' => 'x',
-              'app.kubernetes.io/component' => 'base_service'
-            },
-            'annotations' => {
-              'kubernetes.io/ingress.class' => 'traefik-x-blue'
-            }
-          },
-          'spec' => {
-            "entryPoints" => ["ssh"],
-            "routes" => [
-              { "services" => [
-                { "name" => "x-blue-app", "port" => 22, "kind" => "Service" }
-              ] }
-            ]
-          }
-        }
-
-        expect(k8s_resource(set, 'IngressRouteTCP')).to eql(expected_ingress)
-      end
-
       it 'creates ingress resources for UDP services' do
         factory = eval_stacks do
           stack "mystack" do
@@ -564,7 +502,7 @@ describe 'kubernetes' do
             }
           },
           'spec' => {
-            "entryPoints" => ["ntp"],
+            "entryPoints" => ["app"],
             "routes" => [
               { "services" => [
                 { "name" => "x-blue-app", "port" => 123, "kind" => "Service" }
@@ -660,7 +598,7 @@ describe 'kubernetes' do
                       '--api.dashboard',
                       '--metrics.prometheus',
                       '--entrypoints.traefik.Address=:10254',
-                      '--entrypoints.ntp.Address=:8123/udp',
+                      '--entrypoints.app.Address=:8123/udp',
                       '--providers.kubernetesCRD',
                       '--providers.kubernetesCRD.ingressclass=traefik-x-blue',
                       '--providers.kubernetesCRD.namespaces=e1'
@@ -688,7 +626,7 @@ describe 'kubernetes' do
                       },
                       {
                         'containerPort' => 8123,
-                        'name' => 'ntp',
+                        'name' => 'app',
                         'protocol' => 'UDP'
                       }
                     ],
@@ -724,9 +662,9 @@ describe 'kubernetes' do
           }
         }
 
-        expect(resources.flat_map(&:resources).find do |r|
+        expect(Hashdiff.diff(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'Deployment' && r['metadata']['name'] == 'x-blue-ing'
-        end).to eql(expected_deployment)
+        end, expected_deployment)).to eql([])
       end
 
       it 'creates a pod disruption budget resource for ingress controllers' do
@@ -841,10 +779,10 @@ describe 'kubernetes' do
             'externalTrafficPolicy' => 'Local',
             'ports' => [
               {
-                'name' => 'ntp',
+                'name' => 'app',
                 'port' => 123,
                 'protocol' => 'UDP',
-                'targetPort' => 'ntp'
+                'targetPort' => 'app'
               }
             ],
             'selector' => {
@@ -1276,6 +1214,58 @@ describe 'kubernetes' do
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-in-from-mon-prom-main-1f525ea'
         end).to eql(expected_network_policy)
+      end
+
+      it 'connects everything together with consistent port names' do
+        factory = eval_stacks do
+          stack "mystack" do
+            base_service "x", :kubernetes => true do
+              self.ports = { 'app' => { 'port' => 8000, 'service_port' => 80 } }
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+              self.alerts_channel = 'test'
+
+              self.application = 'MyApplication'
+              self.instances = 2
+              self.startup_alert_threshold = '1h'
+            end
+            app_service 'nonk8sapp' do
+              self.instances = 1
+              depend_on 'x', 'e1'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        # Ingress service targetPort needs to match the Traefik endpoint?
+        # Traefik target port needs to match the App Service port
+        # App Service targetPort needs to match the app port
+
+        ingress_service = resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Service' && r['metadata']['name'] == 'x-blue-ing'
+        end
+
+        traefik = resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Deployment' && r['metadata']['name'] == 'x-blue-ing'
+        end
+
+        app_service = resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Service' && r['metadata']['name'] == 'x-blue-app'
+        end
+
+        app = resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'Deployment' && r['metadata']['name'] == 'x-blue-app'
+        end
+
+        expect(ingress_service['spec']['ports'].first['targetPort']).to eql('app')
+        expect(traefik['spec']['template']['spec']['containers'].first['ports'].map { |p| p['name'] }).to include('app')
+        expect(app_service['spec']['ports'].first['targetPort']).to eql('app')
+        expect(app['spec']['template']['spec']['containers'].first['ports'].map { |p| p['name'] }).to include('app')
       end
     end
 
@@ -2038,6 +2028,7 @@ EOL
               'io' => 1,
               'mars' => 1
             }
+            self.ports = { 'app' => { 'port' => 80 } }
 
             self.application = 'application'
             self.startup_alert_threshold = '1h'
@@ -2372,7 +2363,7 @@ EOL
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.3/32' })
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('UDP')
-      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('ntp')
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('app')
 
       ingress_controller_egress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-out-to-e1-app2')
@@ -2405,7 +2396,7 @@ EOL
       )
       expect(ingress_controller_egress_policy['spec']['egress'].first['to'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['protocol']).to eql('UDP')
-      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['port']).to eq('ntp')
+      expect(ingress_controller_egress_policy['spec']['egress'].first['ports'].first['port']).to eq('app')
 
       app_ingress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-in-from-e1-app2')
@@ -2438,7 +2429,7 @@ EOL
       )
       expect(app_ingress_policy['spec']['ingress'].first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(app_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('UDP')
-      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('ntp')
+      expect(app_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('app')
     end
 
     it 'should create the correct egress network policies for a service in kubernetes when that service depends on another non kubernetes service' do
@@ -2563,7 +2554,7 @@ EOL
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e1')
       expect(ingress.first['ports'].first['protocol']).to eql('UDP')
-      expect(ingress.first['ports'].first['port']).to eq('ntp')
+      expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(1)
@@ -2686,7 +2677,7 @@ depends on the other' do
       )
       expect(ingress.first['from'].first['namespaceSelector']['matchLabels']['name']).to eql('e2')
       expect(ingress.first['ports'].first['protocol']).to eql('UDP')
-      expect(ingress.first['ports'].first['port']).to eq('ntp')
+      expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
       expect(app2_network_policies.size).to eq(1)
@@ -2770,32 +2761,8 @@ depends on the other' do
                                                                            "group" => "blue",
                                                                            "app.kubernetes.io/component" => "ingress")
       expect(allow_env_policy['spec']['ingress'].first['from']).to eq [{ "ipBlock" => { "cidr" => "10.30.0.0/16" } }]
-      expect(allow_env_policy['spec']['ingress'].first['ports']).to eq [{ "protocol" => "UDP", "port" => "ntp" }]
+      expect(allow_env_policy['spec']['ingress'].first['ports']).to eq [{ "protocol" => "UDP", "port" => "app" }]
     end
-  end
-
-  it 'raises an error if ports contains both names \'app\' and \'http\'' do
-    factory = eval_stacks do
-      stack "mystack" do
-        base_service "x", :kubernetes => { 'e1' => true } do
-          self.ports = {
-            'app' => { 'port' => 8000 },
-            'http' => { 'port' => 80 }
-          }
-          self.application = 'ntp'
-          self.startup_alert_threshold = '10s'
-        end
-      end
-      env "e1", :primary_site => 'space' do
-        instantiate_stack "mystack"
-      end
-    end
-
-    expect do
-      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
-      set.to_k8s(app_deployer, dns_resolver, hiera_provider).first.resources
-    end.to raise_error('base_service \'x\' in \'e1\' defines ports named both \'app\' and \'http\'. This is not possible at the moment ' \
-      'because in some places \'app\' is fudged to be \'http\' to avoid changing lots of things in one go.')
   end
 
   it 'raises an error if @ports is empty and something else depends on the service' do

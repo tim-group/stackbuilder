@@ -12,12 +12,13 @@ module Stacks::Kubernetes::ResourceSetApp
   #
   # @ports as a hash of hashes detailing the config of each port.
   # {
-  #   A string identifier for this port. If your application is a regular service then the name form /etc/services is probably a good choice.
-  # For our custom applcations serving up http use 'http'.
+  #   A string identifier for this port. This can be one of 'app' or 'metrics'.
+  #   The 'app' port is what any service will use for its primary
+  #   communication. The 'metrics' port is for exposing metrics to Prometheus.
   #   'name' => {
   #     'port' => An Integer defining the port number
   #     'protocol' => Optional string detailing the protocol of this port. Places in the code should default to TCP if this is undefined.
-  #     'service_port' => Optional Integer used to create a Kubernetes Service to expose this app
+  #     'service_port' => Optional Integer used to create a Kubernetes Service to expose this app outside the cluster
   #   }
   # }
   #
@@ -69,12 +70,19 @@ module Stacks::Kubernetes::ResourceSetApp
         'ports' => @ports.keys.select do |port_name|
           !@ports[port_name]['service_port'].nil?
         end.map do |port_name|
-          port_config = {}
-          port_config['name'] = port_name
-          port_config['port'] = @ports[port_name]['service_port']
-          port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
-          port_config['targetPort'] = @ports[port_name]['port']
-          port_config
+          # TODO: Remove once the port names are standardized
+          translated_name = case port_name
+                            when 'metrics'
+                              'metrics'
+                            else
+                              'app'
+                            end
+          {
+            'name' => translated_name,
+            'port' => @ports[port_name]['service_port'],
+            'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
+            'targetPort' => translated_name
+          }
         end
       }
     }
@@ -229,11 +237,18 @@ module Stacks::Kubernetes::ResourceSetApp
       'name' => app_name,
       'resources' => create_app_container_resources_snippet,
       'ports' => @ports.keys.map do |port_name|
-        port_config = {}
-        port_config['name'] = port_name
-        port_config['containerPort'] = @ports[port_name]['port']
-        port_config['protocol'] = @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
-        port_config
+        # TODO: Remove once the port names are standardized
+        translated_name = case port_name
+                          when 'metrics'
+                            'metrics'
+                          else
+                            'app'
+                          end
+        {
+          'name' => translated_name,
+          'containerPort' => @ports[port_name]['port'],
+          'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
+        }
       end,
       'volumeMounts' => [
         {
@@ -407,7 +422,7 @@ module Stacks::Kubernetes::ResourceSetApp
         'app.kubernetes.io/component' => 'ingress'
       }
       ingress_filters = [generate_pod_and_namespace_selector_filter(@environment.name, ingress_selector)]
-      network_policies << create_ingress_network_policy_for_internal_service(@environment.short_name, "#{name}-#{@groups.first}-ing",
+      network_policies += create_ingress_network_policy_for_internal_service(@environment.short_name, "#{name}-#{@groups.first}-ing",
                                                                              @environment.name, standard_labels,
                                                                              ingress_filters)
 
@@ -428,7 +443,7 @@ module Stacks::Kubernetes::ResourceSetApp
       }
 
       filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
-      network_policies << create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
+      network_policies += create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
                                                                              @environment.name, standard_labels, filters)
     end
 
@@ -530,12 +545,10 @@ module Stacks::Kubernetes::ResourceSetApp
                   }
                 }
               }],
-              'ports' => @ports.keys.map do |port_name|
-                {
-                  'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
-                  'port' => port_name
-                }
-              end
+              'ports' => [{
+                'protocol' => 'TCP',
+                'port' => 'app'
+              }]
             }],
           'machineset' => standard_labels['machineset'],
           'group' => standard_labels['group'],
@@ -557,12 +570,10 @@ module Stacks::Kubernetes::ResourceSetApp
                   }
                 }
               }],
-              'ports' => @ports.keys.map do |port_name|
-                {
-                  'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
-                  'port' => port_name
-                }
-              end
+              'ports' => [{
+                'protocol' => 'TCP',
+                'port' => 'app'
+              }]
             }],
           'machineset' => standard_labels['machineset'],
           'group' => standard_labels['group'],
@@ -626,12 +637,10 @@ module Stacks::Kubernetes::ResourceSetApp
     network_policies = []
     nexus_filters = [{
       'to' => [{ 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup('office-nexus-001.mgmt.lon.net.local')}/32" } }],
-      'ports' => @ports.keys.map do |_port_name|
-        {
-          'protocol' => 'TCP',
-          'port' => 8080
-        }
-      end
+      'ports' => [{
+        'protocol' => 'TCP',
+        'port' => 8080
+      }]
     }]
     ingress_match_labels = {
       'machineset' => standard_labels['machineset'],
@@ -645,13 +654,20 @@ module Stacks::Kubernetes::ResourceSetApp
   def create_app_network_policies_from_prometheus(standard_labels)
     network_policies = []
     prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
-    network_policies << create_ingress_network_policy_for_internal_service('mon', 'prom-main',
+    network_policies += create_ingress_network_policy_for_internal_service('mon', 'prom-main',
                                                                            @environment.name, standard_labels,
                                                                            prom_filters) if @monitor_tucker
     network_policies
   end
 
   def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, env_name, labels, filters)
+    # TODO: remove the second half of this once everything is transitioned to
+    # use 'app' as the port to expose. Also remove the port_name and just use
+    # 'app'
+    app_port = @ports['app'] || @ports[@ports.keys.first]
+
+    return [] if app_port.nil?
+
     spec = {
       'podSelector' => {
         'matchLabels' => {
@@ -665,18 +681,16 @@ module Stacks::Kubernetes::ResourceSetApp
       ],
       'ingress' => [{
         'from' => filters,
-        'ports' => @ports.keys.map do |port_name|
-          {
-            'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
-            'port' => port_name
-          }
-        end
+        'ports' => [{
+          'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+          'port' => 'app'
+        }]
       }]
     }
 
     hash = Support::DigestGenerator.from_hash(spec)
 
-    {
+    [{
       'apiVersion' => 'networking.k8s.io/v1',
       'kind' => 'NetworkPolicy',
       'metadata' => {
@@ -685,7 +699,7 @@ module Stacks::Kubernetes::ResourceSetApp
         'labels' => labels
       },
       'spec' => spec
-    }
+    }]
   end
 
   def container_image(app_name, app_version)

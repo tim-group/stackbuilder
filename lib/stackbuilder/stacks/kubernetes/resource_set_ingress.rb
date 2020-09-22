@@ -8,12 +8,13 @@ module Stacks::Kubernetes::ResourceSetIngress
   #
   # @ports as a hash of hashes detailing the config of each port.
   # {
-  #   A string identifier for this port. If your application is a regular service then the name form /etc/services is probably a good choice.
-  # For our custom applcations serving up http use 'http'.
+  #   A string identifier for this port. This can be one of 'app' or 'metrics'.
+  #   The 'app' port is what any service will use for its primary
+  #   communication. The 'metrics' port is for exposing metrics to Prometheus.
   #   'name' => {
   #     'port' => An Integer defining the port number
   #     'protocol' => Optional string detailing the protocol of this port. Places in the code should default to TCP if this is undefined.
-  #     'service_port' => Optional Integer used to create a Kubernetes Service to expose this app
+  #     'service_port' => Optional Integer used to create a Kubernetes Service to expose this app outside the cluster
   #   }
   # }
   #
@@ -61,44 +62,49 @@ module Stacks::Kubernetes::ResourceSetIngress
       }
     }
 
-    @ports.keys.map do |port_name|
-      if port_name == 'http' || port_name == 'app'
-        resource['apiVersion'] = 'networking.k8s.io/v1beta1'
-        resource['kind'] = 'Ingress'
-        resource['spec'] = {
-          'rules' => [{
-            'http' => {
-              'paths' => [{
-                'path' => '/',
-                'backend' => {
-                  'serviceName' => app_resource_name,
-                  'servicePort' => @ports[port_name]['service_port']
-                }
-              }]
-            }
-          }]
-        }
-      else
-        protocol = @ports[port_name]['protocol'].nil? ? 'tcp' : @ports[port_name]['protocol']
-        fail("generate_k8s_ingress doesn't know how to handle port name '#{port_name}' with protocol '#{protocol}'") unless %w(tcp udp).include? protocol
-        fail('IngressRouteTCP support is not completed') if protocol == 'tcp'
-        kind = "IngressRoute#{protocol.upcase}"
-        resource['apiVersion'] = 'traefik.containo.us/v1alpha1'
-        resource['kind'] = kind
-        resource['spec'] = {
-          'entryPoints' => [
-            port_name
-          ],
-          'routes' => [{
-            'services' => [{
-              'name' => app_resource_name,
-              'port' => @ports[port_name]['service_port'],
-              'kind' => 'Service'
+    # TODO: remove the second half of this once everything is transitioned to
+    # use 'app' as the port to expose. Also remove the port_name and just use
+    # 'app'
+    app_port = @ports['app'] || @ports[@ports.keys.first]
+
+    protocol = app_port['protocol'].nil? ? 'tcp' : app_port['protocol']
+    case protocol
+    when 'tcp'
+      resource['apiVersion'] = 'networking.k8s.io/v1beta1'
+      resource['kind'] = 'Ingress'
+      resource['spec'] = {
+        'rules' => [{
+          'http' => {
+            'paths' => [{
+              'path' => '/',
+              'backend' => {
+                'serviceName' => app_resource_name,
+                'servicePort' => app_port['service_port']
+              }
             }]
+          }
+        }]
+      }
+    when 'udp'
+      kind = "IngressRoute#{protocol.upcase}"
+      resource['apiVersion'] = 'traefik.containo.us/v1alpha1'
+      resource['kind'] = kind
+      resource['spec'] = {
+        'entryPoints' => [
+          'app'
+        ],
+        'routes' => [{
+          'services' => [{
+            'name' => app_resource_name,
+            'port' => app_port['service_port'],
+            'kind' => 'Service'
           }]
-        }
-      end
+        }]
+      }
+    else
+      fail("generate_k8s_ingress doesn't know how to handle port name '#{port_name}' with protocol '#{protocol}'")
     end
+
     resource
   end
 
@@ -187,6 +193,10 @@ module Stacks::Kubernetes::ResourceSetIngress
 
   def generate_ingress_controller_network_policies(_name, ingress_labels, dns_resolver, hiera_provider, hiera_scope, site, masters)
     network_policies = []
+    # TODO: remove the second half of this once everything is transitioned to
+    # use 'app' as the port to expose. Also remove the port_name and just use
+    # 'app'
+    app_port = @ports['app'] || @ports[@ports.keys.first]
 
     app_service_match_labels = {
       'machineset' => ingress_labels['machineset'],
@@ -197,12 +207,10 @@ module Stacks::Kubernetes::ResourceSetIngress
       'to' => [
         generate_pod_and_namespace_selector_filter(@environment.name, app_service_match_labels)
       ],
-      'ports' => @ports.keys.map do |port_name|
-        {
-          'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
-          'port' => port_name
-        }
-      end
+      'ports' => [{
+        'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+        'port' => 'app'
+      }]
     }]
     ingress_match_labels = {
       'machineset' => ingress_labels['machineset'],
@@ -258,7 +266,7 @@ module Stacks::Kubernetes::ResourceSetIngress
         end
         network_policies << create_ingress_network_policy_for_external_service(vs.environment.short_name, vs.short_name,
                                                                                @environment.name, ingress_labels, filters)
-    end
+      end
     end
 
     prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
@@ -270,6 +278,11 @@ module Stacks::Kubernetes::ResourceSetIngress
   end
 
   def generate_ingress_controller_service_resource(name, ingress_labels, dns_resolver, site)
+    # TODO: remove the second half of this once everything is transitioned to
+    # use 'app' as the port to expose. Also remove the port_name and just use
+    # 'app'
+    app_port = @ports['app'] || @ports[@ports.keys.first]
+
     {
       'apiVersion' => 'v1',
       'kind' => 'Service',
@@ -290,24 +303,12 @@ module Stacks::Kubernetes::ResourceSetIngress
           'group' => ingress_labels['group'],
           'app.kubernetes.io/component' => 'ingress'
         },
-        'ports' => @ports.keys.map do |port_name|
-          case @ports[port_name]['service_port']
-          when 80
-            {
-              'name' => 'http',
-              'port' => 80,
-              'protocol' => 'TCP',
-              'targetPort' => 'http'
-            }
-          else
-            {
-              'name' => port_name,
-              'port' => @ports[port_name]['port'],
-              'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
-              'targetPort' => port_name
-            }
-          end
-        end
+        'ports' => [{
+          'name' => 'app',
+          'port' => app_port['service_port'],
+          'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+          'targetPort' => 'app'
+        }]
       }
     }
   end
@@ -433,30 +434,34 @@ module Stacks::Kubernetes::ResourceSetIngress
     container = deployment['spec']['template']['spec']['containers'].first
     container['args'] << "--entrypoints.traefik.Address=:10254"
 
-    @ports.keys.map do |port_name|
-      actual_port = @ports[port_name]['port'] < 1024 ? 8000 + @ports[port_name]['port'] : @ports[port_name]['port']
-      actual_port_name = port_name == 'app' ? 'http' : port_name
-      entrypoint = "--entrypoints.#{actual_port_name}.Address=:#{actual_port}"
-      entrypoint += "/udp" if @ports[port_name]['protocol'] == 'udp'
-      container['args'] << entrypoint
-      container['ports'] << {
-        'containerPort' => actual_port,
-        'name' => actual_port_name,
-        'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
-      }
+    # TODO: remove the second half of this once everything is transitioned to
+    # use 'app' as the port to expose. Also remove the port_name and just use
+    # 'app'
+    app_port = @ports['app'] || @ports[@ports.keys.first]
 
-      case port_name
-      when 'app', 'http'
-        container['args'] << "--entrypoints.#{actual_port_name}.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
-        container['args'] << "--providers.kubernetesingress"
-        container['args'] << "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
-        container['args'] << "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}"
-        container['args'] << "--providers.kubernetesingress.namespaces=#{@environment.name}"
-      else
-        container['args'] << "--providers.kubernetesCRD"
-        container['args'] << "--providers.kubernetesCRD.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
-        container['args'] << "--providers.kubernetesCRD.namespaces=#{@environment.name}"
-      end
+    actual_port = app_port['port'] < 1024 ? 8000 + app_port['port'] : app_port['port']
+    # TODO: mpimm - remove when protocol is required
+    protocol = app_port['protocol'].nil? ? 'tcp' : app_port['protocol']
+    entrypoint = "--entrypoints.app.Address=:#{actual_port}"
+    entrypoint += "/udp" if protocol == 'udp'
+    container['args'] << entrypoint
+    container['ports'] << {
+      'containerPort' => actual_port,
+      'name' => 'app',
+      'protocol' => protocol.upcase
+    }
+
+    case protocol
+    when 'tcp'
+      container['args'] << "--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
+      container['args'] << "--providers.kubernetesingress"
+      container['args'] << "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
+      container['args'] << "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}"
+      container['args'] << "--providers.kubernetesingress.namespaces=#{@environment.name}"
+    else
+      container['args'] << "--providers.kubernetesCRD"
+      container['args'] << "--providers.kubernetesCRD.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
+      container['args'] << "--providers.kubernetesCRD.namespaces=#{@environment.name}"
     end
 
     deployment
@@ -559,6 +564,11 @@ module Stacks::Kubernetes::ResourceSetIngress
   end
 
   def create_ingress_network_policy_for_external_service(virtual_service_env, virtual_service_name, env_name, labels, filters)
+    # TODO: remove the second half of this once everything is transitioned to
+    # use 'app' as the port to expose. Also remove the port_name and just use
+    # 'app'
+    app_port = @ports['app'] || @ports[@ports.keys.first]
+
     spec = {
       'podSelector' => {
         'matchLabels' => {
@@ -572,13 +582,10 @@ module Stacks::Kubernetes::ResourceSetIngress
       ],
       'ingress' => [{
         'from' => filters,
-        'ports' => @ports.keys.map do |port_name|
-          port = port_name == 'app' ? 'http' : port_name
-          {
-            'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
-            'port' => port
-          }
-        end
+        'ports' => [{
+          'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+          'port' => 'app'
+        }]
       }]
     }
 

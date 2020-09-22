@@ -143,9 +143,10 @@ module Stacks::Services::BaseK8sApp
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' doesn't define @ports but is depended on by another service") \
       if @ports.empty? && non_k8s_dependencies_exist?
 
-    fail("#{custom_service_name} '#{name}' in '#{@environment.name}' defines ports named both 'app' and 'http'. This is not possible at the moment " \
-      "because in some places 'app' is fudged to be 'http' to avoid changing lots of things in one go.") \
-      if @ports.keys.select { |port_name| %w(app http).include? port_name }.uniq.length > 1
+    # unknown_ports = @ports.keys - %w(app metrics)
+    # fail("#{custom_service_name} '#{name}' in '#{@environment.name}' defines ports named <#{unknown_ports.join(', ')}>. \
+    #   Only 'app' and 'metrics' are currently supported") \
+    #   if !unknown_ports.empty?
 
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires maintainers (set self.maintainers)") if @maintainers.empty?
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires description (set self.description)") if @description.nil?

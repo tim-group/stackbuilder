@@ -355,7 +355,7 @@ describe 'kubernetes' do
             'name' => 'app',
             'protocol' => 'TCP',
             'port' => 80,
-            'targetPort' => 8000
+            'targetPort' => 'app'
           }]
         }
       }
@@ -612,8 +612,8 @@ EOL
                       '--api.dashboard',
                       '--metrics.prometheus',
                       '--entrypoints.traefik.Address=:10254',
-                      '--entrypoints.http.Address=:8000',
-                      '--entrypoints.http.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',
+                      '--entrypoints.app.Address=:8000',
+                      '--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',
                       '--providers.kubernetesingress',
                       '--providers.kubernetesingress.ingressclass=traefik-x-blue',
                       '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing',
@@ -642,7 +642,7 @@ EOL
                       },
                       {
                         'containerPort' => 8000,
-                        'name' => 'http',
+                        'name' => 'app',
                         'protocol' => 'TCP'
                       }
                     ],
@@ -787,10 +787,10 @@ EOL
             'externalTrafficPolicy' => 'Local',
             'ports' => [
               {
-                'name' => 'http',
+                'name' => 'app',
                 'port' => 80,
                 'protocol' => 'TCP',
-                'targetPort' => 'http'
+                'targetPort' => 'app'
               }
             ],
             'selector' => {
@@ -1245,7 +1245,7 @@ EOL
           'apiVersion' => 'networking.k8s.io/v1',
           'kind' => 'NetworkPolicy',
           'metadata' => {
-            'name' => 'allow-in-from-e1-sharedproxy-43b85ac',
+            'name' => 'allow-in-from-e1-sharedproxy-68e4002',
             'namespace' => 'e1',
             'labels' => {
               'app.kubernetes.io/managed-by' => 'stacks',
@@ -1269,7 +1269,7 @@ EOL
                 }
               }],
               'ports' => [{
-                'port' => 'http',
+                'port' => 'app',
                 'protocol' => 'TCP'
               }]
             }],
@@ -1288,7 +1288,7 @@ EOL
 
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'].include?('allow-in-from-e1-sharedproxy-')
-        end).to eql(expected_network_policy)
+        end).to eq(expected_network_policy)
       end
     end
 
@@ -2455,7 +2455,7 @@ EOL
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.2/32' })
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['from']).to include('ipBlock' => { 'cidr' => '3.1.4.3/32' })
       expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['protocol']).to eql('TCP')
-      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('http')
+      expect(ingress_controller_ingress_policy['spec']['ingress'].first['ports'].first['port']).to eq('app')
 
       ingress_controller_egress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-out-to-e1-app2')
@@ -2632,10 +2632,10 @@ EOL
       expect(network_policies.first['spec']['egress'].size).to eq(1)
       expect(network_policies.first['spec']['egress'].first['to'].size).to eq(2)
       expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['egress'].first['to']).to eq([
+      expect(network_policies.first['spec']['egress'].first['to']) =~ [
         { 'ipBlock' => { 'cidr' => '3.1.4.18/32' } },
         { 'ipBlock' => { 'cidr' => '3.1.4.17/32' } }
-      ])
+      ]
       expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
       expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(5672)
     end
