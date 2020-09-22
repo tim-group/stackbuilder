@@ -2632,7 +2632,10 @@ EOL
       expect(network_policies.first['spec']['egress'].size).to eq(1)
       expect(network_policies.first['spec']['egress'].first['to'].size).to eq(2)
       expect(network_policies.first['spec']['egress'].first['ports'].size).to eq(1)
-      expect(network_policies.first['spec']['egress'].first['to']) =~ [{ 'ipBlock' => { 'cidr' => '3.1.4.18/32' } }, { 'ipBlock' => { 'cidr' => '3.1.4.17/32' } }]
+      expect(network_policies.first['spec']['egress'].first['to']) =~ [
+        { 'ipBlock' => { 'cidr' => '3.1.4.18/32' } },
+        { 'ipBlock' => { 'cidr' => '3.1.4.17/32' } }
+      ]
       expect(network_policies.first['spec']['egress'].first['ports'].first['protocol']).to eql('TCP')
       expect(network_policies.first['spec']['egress'].first['ports'].first['port']).to eq(5672)
     end
