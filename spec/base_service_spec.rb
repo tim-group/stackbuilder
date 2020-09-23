@@ -1,7 +1,6 @@
 require 'stackbuilder/stacks/factory'
 require 'test_classes'
 require 'spec_helper'
-require 'hashdiff'
 
 describe 'kubernetes' do
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
@@ -662,9 +661,9 @@ describe 'kubernetes' do
           }
         }
 
-        expect(Hashdiff.diff(resources.flat_map(&:resources).find do |r|
+        expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'Deployment' && r['metadata']['name'] == 'x-blue-ing'
-        end, expected_deployment)).to eql([])
+        end).to eq(expected_deployment)
       end
 
       it 'creates a pod disruption budget resource for ingress controllers' do
