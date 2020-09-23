@@ -70,18 +70,11 @@ module Stacks::Kubernetes::ResourceSetApp
         'ports' => @ports.keys.select do |port_name|
           !@ports[port_name]['service_port'].nil?
         end.map do |port_name|
-          # TODO: Remove once the port names are standardized
-          translated_name = case port_name
-                            when 'metrics'
-                              'metrics'
-                            else
-                              'app'
-                            end
           {
-            'name' => translated_name,
+            'name' => port_name,
             'port' => @ports[port_name]['service_port'],
             'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
-            'targetPort' => translated_name
+            'targetPort' => port_name
           }
         end
       }
@@ -237,15 +230,8 @@ module Stacks::Kubernetes::ResourceSetApp
       'name' => app_name,
       'resources' => create_app_container_resources_snippet,
       'ports' => @ports.keys.map do |port_name|
-        # TODO: Remove once the port names are standardized
-        translated_name = case port_name
-                          when 'metrics'
-                            'metrics'
-                          else
-                            'app'
-                          end
         {
-          'name' => translated_name,
+          'name' => port_name,
           'containerPort' => @ports[port_name]['port'],
           'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
         }
@@ -661,10 +647,7 @@ module Stacks::Kubernetes::ResourceSetApp
   end
 
   def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, env_name, labels, filters)
-    # TODO: remove the second half of this once everything is transitioned to
-    # use 'app' as the port to expose. Also remove the port_name and just use
-    # 'app'
-    app_port = @ports['app'] || @ports[@ports.keys.first]
+    app_port = @ports['app']
 
     return [] if app_port.nil?
 

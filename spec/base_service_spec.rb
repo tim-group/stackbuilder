@@ -287,7 +287,7 @@ describe 'kubernetes' do
               self.maintainers = [person('Testers')]
               self.description = 'Test Description'
               self.ports = {
-                'ntp' => {
+                'app' => {
                   'port' => 123,
                   'service_port' => 123,
                   'protocol' => 'udp'
@@ -340,7 +340,7 @@ describe 'kubernetes' do
           stack "mystack" do
             base_service "x", :kubernetes => { 'e1' => true } do
               self.ports = {
-                'ntp' => {
+                'app' => {
                   'port' => 123,
                   'protocol' => 'udp'
                 }
@@ -459,7 +459,7 @@ describe 'kubernetes' do
               self.alerts_channel = 'test'
 
               self.ports = {
-                'ntp' => {
+                'app' => {
                   'port' => 123,
                   'service_port' => 123,
                   'protocol' => 'udp'
@@ -518,7 +518,7 @@ describe 'kubernetes' do
           stack "mystack" do
             base_service "x", :kubernetes => true do
               self.ports = {
-                'ntp' => {
+                'app' => {
                   'port' => 123,
                   'service_port' => 123,
                   'protocol' => 'udp'
@@ -670,7 +670,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
+              self.ports = { 'app' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -729,7 +729,7 @@ describe 'kubernetes' do
           stack "mystack" do
             base_service "x", :kubernetes => true do
               self.ports = {
-                'ntp' => {
+                'app' => {
                   'port' => 123,
                   'service_port' => 123,
                   'protocol' => 'udp'
@@ -803,7 +803,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
+              self.ports = { 'app' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -867,7 +867,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
+              self.ports = { 'app' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -953,7 +953,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
+              self.ports = { 'app' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1001,7 +1001,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
+              self.ports = { 'app' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1058,7 +1058,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
+              self.ports = { 'app' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -1141,7 +1141,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'blah' => { 'port' => 123, 'protocol' => 'udp' } }
+              self.ports = { 'app' => { 'port' => 123, 'protocol' => 'udp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -2303,7 +2303,7 @@ EOL
 
           base_service 'app2', :kubernetes => true do
             self.ports = {
-              'ntp' => {
+              'app' => {
                 'port' => 123,
                 'protocol' => 'udp'
               }
@@ -2492,7 +2492,7 @@ EOL
         stack "test_app_servers" do
           base_service 'app1', :kubernetes => true do
             self.ports = {
-              'ntp' => {
+              'app' => {
                 'port' => 123,
                 'protocol' => 'udp'
               }
@@ -2620,7 +2620,7 @@ depends on the other' do
         stack "test_app_server1" do
           base_service 'app1', :kubernetes => true do
             self.ports = {
-              'ntp' => {
+              'app' => {
                 'port' => '123',
                 'protocol' => 'udp'
               }
@@ -2733,7 +2733,7 @@ depends on the other' do
         stack "test_app_servers" do
           base_service 'ntp', :kubernetes => true do
             self.ports = {
-              'ntp' => {
+              'app' => {
                 'port' => 123,
                 'protocol' => 'udp'
               }

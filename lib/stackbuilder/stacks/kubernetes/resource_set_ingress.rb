@@ -62,10 +62,7 @@ module Stacks::Kubernetes::ResourceSetIngress
       }
     }
 
-    # TODO: remove the second half of this once everything is transitioned to
-    # use 'app' as the port to expose. Also remove the port_name and just use
-    # 'app'
-    app_port = @ports['app'] || @ports[@ports.keys.first]
+    app_port = @ports['app']
 
     protocol = app_port['protocol'].nil? ? 'tcp' : app_port['protocol']
     case protocol
@@ -193,10 +190,7 @@ module Stacks::Kubernetes::ResourceSetIngress
 
   def generate_ingress_controller_network_policies(_name, ingress_labels, dns_resolver, hiera_provider, hiera_scope, site, masters)
     network_policies = []
-    # TODO: remove the second half of this once everything is transitioned to
-    # use 'app' as the port to expose. Also remove the port_name and just use
-    # 'app'
-    app_port = @ports['app'] || @ports[@ports.keys.first]
+    app_port = @ports['app']
 
     app_service_match_labels = {
       'machineset' => ingress_labels['machineset'],
@@ -278,10 +272,7 @@ module Stacks::Kubernetes::ResourceSetIngress
   end
 
   def generate_ingress_controller_service_resource(name, ingress_labels, dns_resolver, site)
-    # TODO: remove the second half of this once everything is transitioned to
-    # use 'app' as the port to expose. Also remove the port_name and just use
-    # 'app'
-    app_port = @ports['app'] || @ports[@ports.keys.first]
+    app_port = @ports['app']
 
     {
       'apiVersion' => 'v1',
@@ -434,11 +425,7 @@ module Stacks::Kubernetes::ResourceSetIngress
     container = deployment['spec']['template']['spec']['containers'].first
     container['args'] << "--entrypoints.traefik.Address=:10254"
 
-    # TODO: remove the second half of this once everything is transitioned to
-    # use 'app' as the port to expose. Also remove the port_name and just use
-    # 'app'
-    app_port = @ports['app'] || @ports[@ports.keys.first]
-
+    app_port = @ports['app']
     actual_port = app_port['port'] < 1024 ? 8000 + app_port['port'] : app_port['port']
     # TODO: mpimm - remove when protocol is required
     protocol = app_port['protocol'].nil? ? 'tcp' : app_port['protocol']
@@ -564,10 +551,7 @@ module Stacks::Kubernetes::ResourceSetIngress
   end
 
   def create_ingress_network_policy_for_external_service(virtual_service_env, virtual_service_name, env_name, labels, filters)
-    # TODO: remove the second half of this once everything is transitioned to
-    # use 'app' as the port to expose. Also remove the port_name and just use
-    # 'app'
-    app_port = @ports['app'] || @ports[@ports.keys.first]
+    app_port = @ports['app']
 
     spec = {
       'podSelector' => {
