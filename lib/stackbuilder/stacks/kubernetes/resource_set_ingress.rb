@@ -202,7 +202,7 @@ module Stacks::Kubernetes::ResourceSetIngress
         generate_pod_and_namespace_selector_filter(@environment.name, app_service_match_labels)
       ],
       'ports' => [{
-        'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+        'protocol' => app_port['protocol'].upcase,
         'port' => 'app'
       }]
     }]
@@ -297,7 +297,7 @@ module Stacks::Kubernetes::ResourceSetIngress
         'ports' => [{
           'name' => 'app',
           'port' => app_port['service_port'],
-          'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+          'protocol' => app_port['protocol'].upcase,
           'targetPort' => 'app'
         }]
       }
@@ -427,18 +427,16 @@ module Stacks::Kubernetes::ResourceSetIngress
 
     app_port = @ports['app']
     actual_port = app_port['port'] < 1024 ? 8000 + app_port['port'] : app_port['port']
-    # TODO: mpimm - remove when protocol is required
-    protocol = app_port['protocol'].nil? ? 'tcp' : app_port['protocol']
     entrypoint = "--entrypoints.app.Address=:#{actual_port}"
-    entrypoint += "/udp" if protocol == 'udp'
+    entrypoint += "/udp" if app_port['protocol'] == 'udp'
     container['args'] << entrypoint
     container['ports'] << {
       'containerPort' => actual_port,
       'name' => 'app',
-      'protocol' => protocol.upcase
+      'protocol' => app_port['protocol'].upcase
     }
 
-    case protocol
+    case app_port['protocol'].downcase
     when 'tcp'
       container['args'] << "--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
       container['args'] << "--providers.kubernetesingress"
@@ -567,7 +565,7 @@ module Stacks::Kubernetes::ResourceSetIngress
       'ingress' => [{
         'from' => filters,
         'ports' => [{
-          'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+          'protocol' => app_port['protocol'].upcase,
           'port' => 'app'
         }]
       }]

@@ -1219,7 +1219,7 @@ describe 'kubernetes' do
         factory = eval_stacks do
           stack "mystack" do
             base_service "x", :kubernetes => true do
-              self.ports = { 'app' => { 'port' => 8000, 'service_port' => 80 } }
+              self.ports = { 'app' => { 'port' => 8000, 'service_port' => 80, 'protocol' => 'tcp' } }
               self.maintainers = [person('Testers')]
               self.description = 'Testing'
               self.alerts_channel = 'test'
@@ -2027,7 +2027,7 @@ EOL
               'io' => 1,
               'mars' => 1
             }
-            self.ports = { 'app' => { 'port' => 80 } }
+            self.ports = { 'app' => { 'port' => 80, 'protocol' => 'tcp' } }
 
             self.application = 'application'
             self.startup_alert_threshold = '1h'
@@ -2863,6 +2863,8 @@ depends on the other' do
           self.maintainers = [person('Testers')]
           self.description = 'Testing'
           self.alerts_channel = 'test'
+          self.startup_alert_threshold = '10s'
+          self.application = 'test'
           self.ports = { 'custom' => { 'port' => 8000, 'protocol' => 'tcp' } }
         end
       end
@@ -2873,5 +2875,26 @@ depends on the other' do
     set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
     expect { set.to_k8s(app_deployer, dns_resolver, hiera_provider) }.
       to raise_error(RuntimeError, /base_service 'x' in 'e1' defines port\(s\) named <custom>.*/)
+  end
+
+  it 'fails when protocol is not specified' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => true do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+          self.alerts_channel = 'test'
+          self.startup_alert_threshold = '10s'
+          self.application = 'test'
+          self.ports = { 'app' => { 'port' => 8000 } }
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+    expect { set.to_k8s(app_deployer, dns_resolver, hiera_provider) }.
+      to raise_error(RuntimeError, "base_service 'x' in 'e1' does not define a protocol for port(s) <app>")
   end
 end

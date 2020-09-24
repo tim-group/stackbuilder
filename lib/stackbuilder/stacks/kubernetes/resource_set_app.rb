@@ -17,7 +17,7 @@ module Stacks::Kubernetes::ResourceSetApp
   #   communication. The 'metrics' port is for exposing metrics to Prometheus.
   #   'name' => {
   #     'port' => An Integer defining the port number
-  #     'protocol' => Optional string detailing the protocol of this port. Places in the code should default to TCP if this is undefined.
+  #     'protocol' => Optional string detailing the protocol of this port, for example 'tcp' or 'udp'
   #     'service_port' => Optional Integer used to create a Kubernetes Service to expose this app outside the cluster
   #   }
   # }
@@ -73,7 +73,7 @@ module Stacks::Kubernetes::ResourceSetApp
           {
             'name' => port_name,
             'port' => @ports[port_name]['service_port'],
-            'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase,
+            'protocol' => @ports[port_name]['protocol'].upcase,
             'targetPort' => port_name
           }
         end
@@ -233,7 +233,7 @@ module Stacks::Kubernetes::ResourceSetApp
         {
           'name' => port_name,
           'containerPort' => @ports[port_name]['port'],
-          'protocol' => @ports[port_name]['protocol'].nil? ? 'TCP' : @ports[port_name]['protocol'].upcase
+          'protocol' => @ports[port_name]['protocol'].upcase
         }
       end,
       'volumeMounts' => [
@@ -665,7 +665,7 @@ module Stacks::Kubernetes::ResourceSetApp
       'ingress' => [{
         'from' => filters,
         'ports' => [{
-          'protocol' => app_port['protocol'].nil? ? 'TCP' : app_port['protocol'].upcase,
+          'protocol' => app_port['protocol'].upcase,
           'port' => 'app'
         }]
       }]

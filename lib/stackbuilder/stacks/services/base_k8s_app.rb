@@ -148,6 +148,10 @@ module Stacks::Services::BaseK8sApp
       " Only 'app' and 'metrics' are currently supported") \
       if !unknown_ports.empty?
 
+    ports_without_protocol = @ports.select { |_, v| !v.key?('protocol') }
+    fail("#{custom_service_name} '#{name}' in '#{environment.name}' does not define a protocol for port(s) " \
+      "<#{ports_without_protocol.keys.join(',')}>") if !ports_without_protocol.empty?
+
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires maintainers (set self.maintainers)") if @maintainers.empty?
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires description (set self.description)") if @description.nil?
     fail("#{custom_service_name} '#{name}' in '#{@environment.name}' requires application") if application.nil?
