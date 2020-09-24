@@ -606,19 +606,15 @@ EOL
                 'containers' => [
                   {
                     'args' => [
-                      '--accesslog',
-                      '--ping',
-                      '--api.insecure',
-                      '--api.dashboard',
-                      '--metrics.prometheus',
-                      '--entrypoints.traefik.Address=:10254',
-                      '--entrypoints.app.Address=:8000',
-                      '--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8',
-                      '--providers.kubernetesingress',
-                      '--providers.kubernetesingress.ingressclass=traefik-x-blue',
-                      '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing',
-                      '--providers.kubernetesingress.namespaces=e1'
+                      '-c',
+                      'traefik --accesslog --ping --api.insecure --api.dashboard --metrics.prometheus '\
+                        '--entrypoints.traefik.Address=:10254 --entrypoints.app.Address=:8000 '\
+                        '--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8 '\
+                        '--providers.kubernetesingress --providers.kubernetesingress.ingressclass=traefik-x-blue '\
+                        '--providers.kubernetesingress.ingressendpoint.publishedservice=e1/x-blue-ing '\
+                        '--providers.kubernetesingress.namespaces=e1 | sed -e \'s/\(j_password=\)[^[:space:]\&]\+\(.*\)/\1\[REMOVED\]\2/g\''
                     ],
+                    'command' => ['/bin/sh'],
                     'image' => 'traefik:v2.2',
                     'imagePullPolicy' => 'IfNotPresent',
                     'livenessProbe' => {

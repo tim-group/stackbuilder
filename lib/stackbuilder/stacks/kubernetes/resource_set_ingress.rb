@@ -362,11 +362,10 @@ module Stacks::Kubernetes::ResourceSetIngress
             'containers' => [
               {
                 'args' => [
-                  "--accesslog",
-                  "--ping",
-                  "--api.insecure",
-                  "--api.dashboard",
-                  "--metrics.prometheus"
+                  "-c"
+                ],
+                'command' => [
+                  "/bin/sh"
                 ],
                 'image' => 'traefik:v2.2',
                 'imagePullPolicy' => 'IfNotPresent',
@@ -423,13 +422,19 @@ module Stacks::Kubernetes::ResourceSetIngress
     }
 
     container = deployment['spec']['template']['spec']['containers'].first
-    container['args'] << "--entrypoints.traefik.Address=:10254"
+    container_command = ["traefik",
+                         "--accesslog",
+                         "--ping",
+                         "--api.insecure",
+                         "--api.dashboard",
+                         "--metrics.prometheus",
+                         "--entrypoints.traefik.Address=:10254"]
 
     app_port = @ports['app']
     actual_port = app_port['port'] < 1024 ? 8000 + app_port['port'] : app_port['port']
     entrypoint = "--entrypoints.app.Address=:#{actual_port}"
     entrypoint += "/udp" if app_port['protocol'] == 'udp'
-    container['args'] << entrypoint
+    container_command << entrypoint
     container['ports'] << {
       'containerPort' => actual_port,
       'name' => 'app',
@@ -438,16 +443,20 @@ module Stacks::Kubernetes::ResourceSetIngress
 
     case app_port['protocol'].downcase
     when 'tcp'
-      container['args'] << "--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
-      container['args'] << "--providers.kubernetesingress"
-      container['args'] << "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
-      container['args'] << "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}"
-      container['args'] << "--providers.kubernetesingress.namespaces=#{@environment.name}"
+      container_command << "--entrypoints.app.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8"
+      container_command << "--providers.kubernetesingress"
+      container_command << "--providers.kubernetesingress.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
+      container_command << "--providers.kubernetesingress.ingressendpoint.publishedservice=#{@environment.name}/#{name}"
+      container_command << "--providers.kubernetesingress.namespaces=#{@environment.name}"
     else
-      container['args'] << "--providers.kubernetesCRD"
-      container['args'] << "--providers.kubernetesCRD.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
-      container['args'] << "--providers.kubernetesCRD.namespaces=#{@environment.name}"
+      container_command << "--providers.kubernetesCRD"
+      container_command << "--providers.kubernetesCRD.ingressclass=traefik-#{ingress_labels['machineset']}-#{ingress_labels['group']}"
+      container_command << "--providers.kubernetesCRD.namespaces=#{@environment.name}"
     end
+
+    container_command += ['|', 'sed', '-e', %q{'s/\(j_password=\)[^[:space:]\&]\+\(.*\)/\1\[REMOVED\]\2/g'}]
+
+    container['args'] << container_command.join(' ')
 
     deployment
   end

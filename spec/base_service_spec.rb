@@ -591,17 +591,13 @@ describe 'kubernetes' do
                 'containers' => [
                   {
                     'args' => [
-                      '--accesslog',
-                      '--ping',
-                      '--api.insecure',
-                      '--api.dashboard',
-                      '--metrics.prometheus',
-                      '--entrypoints.traefik.Address=:10254',
-                      '--entrypoints.app.Address=:8123/udp',
-                      '--providers.kubernetesCRD',
-                      '--providers.kubernetesCRD.ingressclass=traefik-x-blue',
-                      '--providers.kubernetesCRD.namespaces=e1'
+                      '-c',
+                      'traefik --accesslog --ping --api.insecure --api.dashboard --metrics.prometheus '\
+                      '--entrypoints.traefik.Address=:10254 --entrypoints.app.Address=:8123/udp '\
+                      '--providers.kubernetesCRD --providers.kubernetesCRD.ingressclass=traefik-x-blue '\
+                      '--providers.kubernetesCRD.namespaces=e1 | sed -e \'s/\(j_password=\)[^[:space:]\&]\+\(.*\)/\1\[REMOVED\]\2/g\''
                     ],
+                    'command' => ['/bin/sh'],
                     'image' => 'traefik:v2.2',
                     'imagePullPolicy' => 'IfNotPresent',
                     'livenessProbe' => {
