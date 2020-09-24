@@ -2855,4 +2855,23 @@ depends on the other' do
     network_policy = k8s_resource(set, 'NetworkPolicy')
     expect(network_policy).to be_nil
   end
+
+  it 'fails when port is not app nor metricsthe app version cannot be found' do
+    factory = eval_stacks do
+      stack "mystack" do
+        base_service "x", :kubernetes => true do
+          self.maintainers = [person('Testers')]
+          self.description = 'Testing'
+          self.alerts_channel = 'test'
+          self.ports = { 'custom' => { 'port' => 8000, 'protocol' => 'tcp' } }
+        end
+      end
+      env "e1", :primary_site => 'space' do
+        instantiate_stack "mystack"
+      end
+    end
+    set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+    expect { set.to_k8s(app_deployer, dns_resolver, hiera_provider) }.
+      to raise_error(RuntimeError, /base_service 'x' in 'e1' defines port\(s\) named <custom>.*/)
+  end
 end
