@@ -642,47 +642,45 @@ module Stacks::Kubernetes::ResourceSetApp
     prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
     network_policies += create_ingress_network_policy_for_internal_service('mon', 'prom-main',
                                                                            @environment.name, standard_labels,
-                                                                           prom_filters) if @monitor_tucker
+                                                                           prom_filters, %w(app metrics)) if @monitor_tucker
     network_policies
   end
 
-  def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, env_name, labels, filters)
-    app_port = @ports['app']
-
-    return [] if app_port.nil?
-
-    spec = {
-      'podSelector' => {
-        'matchLabels' => {
-          'machineset' => labels['machineset'],
-          'group' => labels['group'],
-          'app.kubernetes.io/component' => @custom_service_name
-        }
-      },
-      'policyTypes' => [
-        'Ingress'
-      ],
-      'ingress' => [{
-        'from' => filters,
-        'ports' => [{
-          'protocol' => app_port['protocol'].upcase,
-          'port' => 'app'
+  def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, env_name, labels, filters, ports = ['app'])
+    @ports.select { |k, _| ports.include?(k) }.map do |port_name, port|
+      spec = {
+        'podSelector' => {
+          'matchLabels' => {
+            'machineset' => labels['machineset'],
+            'group' => labels['group'],
+            'app.kubernetes.io/component' => @custom_service_name
+          }
+        },
+        'policyTypes' => [
+          'Ingress'
+        ],
+        'ingress' => [{
+          'from' => filters,
+          'ports' => [{
+            'protocol' => port['protocol'].upcase,
+            'port' => port_name
+          }]
         }]
-      }]
-    }
+      }
 
-    hash = Support::DigestGenerator.from_hash(spec)
+      hash = Support::DigestGenerator.from_hash(spec)
 
-    [{
-      'apiVersion' => 'networking.k8s.io/v1',
-      'kind' => 'NetworkPolicy',
-      'metadata' => {
-        'name' => "allow-in-from-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
-        'namespace' => env_name,
-        'labels' => labels
-      },
-      'spec' => spec
-    }]
+      {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => "allow-in-from-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
+          'namespace' => env_name,
+          'labels' => labels
+        },
+        'spec' => spec
+      }
+    end
   end
 
   def container_image(app_name, app_version)

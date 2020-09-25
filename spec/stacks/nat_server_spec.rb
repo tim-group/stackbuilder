@@ -37,7 +37,7 @@ describe_stack 'nat servers should have all 3 networks' do
     expect(host.to_specs.first[:networks]).to eql([:mgmt, :prod, :front])
     enc_rules = host.to_enc['role::natserver']['rules']
     expect(enc_rules['SNAT']['prod']['to_source']).to eql 'nat-vip.front.oy.net.local'
-    expect(enc_rules['DNAT'].size).to eql(3)
+    expect(enc_rules['DNAT'].size).to eql(4)
     dnat_1 = enc_rules['DNAT']['oy-app-vip.front.oy.net.local 8000']
     expect(dnat_1['dest_host']).to eql('oy-app-vip.oy.net.local')
     expect(dnat_1['dest_port']).to eql('8000')
@@ -223,7 +223,7 @@ describe_stack 'configures NAT boxes to NAT incoming public IPs' do
     expect(snat['prod']['to_source']).to eql('nat-vip.front.st.net.local')
 
     dnat = enc['role::natserver']['rules']['DNAT']
-    expect(dnat.size).to eql(2)
+    expect(dnat.size).to eql(3)
     dnat_1 = dnat['sub-blahnat-vip.front.st.net.local 8008']
     expect(dnat_1['dest_host']).to eql('sub-blahnat-vip.st.net.local')
     expect(dnat_1['dest_port']).to eql('8008')

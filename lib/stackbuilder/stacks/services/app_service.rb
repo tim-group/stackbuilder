@@ -26,7 +26,10 @@ module Stacks::Services::AppService
     @disable_http_lb_hack = false
     @ehcache = false
     @idea_positions_exports = false
-    @ports = { 'app' => { 'port' => 8000, 'service_port' => 80, 'protocol' => 'tcp' } }
+    @ports = {
+      'app' => { 'port' => 8000, 'service_port' => 80, 'protocol' => 'tcp' },
+      'metrics' => { 'port' => 8001, 'protocol' => 'tcp' }
+    }
     @one_instance_in_lb = false
     @sso_port = nil
     @tomcat_session_replication = false

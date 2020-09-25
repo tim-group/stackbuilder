@@ -233,6 +233,11 @@ describe 'kubernetes' do
                     'protocol' => 'TCP'
                   },
                   {
+                    'containerPort' => 8001,
+                    'name' => 'metrics',
+                    'protocol' => 'TCP'
+                  },
+                  {
                     'containerPort' => 5000,
                     'name' => 'jmx'
                   }
@@ -1993,7 +1998,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'mystack', 'x')
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(4)
       network_policy = network_policies.last
       expect(network_policy['metadata']['name']).to eql('allow-out-to-space-kubernetes-api-dcbf68f')
       expect(network_policy['metadata']['namespace']).to eql('e1')
@@ -2423,7 +2428,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(7)
+      expect(network_policies.size).to eq(8)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-in-from-e1-app1')
@@ -2551,7 +2556,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(4)
       expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-23bb767')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -2608,7 +2613,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(4)
       expect(network_policies.first['metadata']['name']).to start_with('allow-out-to-e1-myrabbit-')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -2669,7 +2674,7 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(3)
+      expect(app1_network_policies.size).to eq(4)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e1-app2-581c0bf')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
@@ -2700,7 +2705,7 @@ EOL
       expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(3)
+      expect(app2_network_policies.size).to eq(4)
       expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
@@ -2731,6 +2736,66 @@ EOL
       expect(egress.first['ports'].first['port']).to eq('app')
     end
 
+    it 'should create an ingress policy to allow prometheus to talk to the metrics port' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service 'x', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.alerts_channel = 'test'
+
+            self.application = 'app1'
+            self.startup_alert_threshold = '1h'
+          end
+        end
+
+        env "e1", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+      resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+      expected_network_policy = {
+        'apiVersion' => 'networking.k8s.io/v1',
+        'kind' => 'NetworkPolicy',
+        'metadata' => {
+          'name' => 'allow-in-from-mon-prom-main-f06d8a5',
+          'namespace' => 'e1',
+          'labels' => {
+            'app.kubernetes.io/managed-by' => 'stacks',
+            'stack' => 'mystack',
+            'machineset' => 'x',
+            'group' => 'blue',
+            'app.kubernetes.io/instance' => 'blue',
+            'app.kubernetes.io/part-of' => 'x',
+            'app.kubernetes.io/component' => 'app_service'
+          }
+        },
+        'spec' => {
+          'podSelector' => {
+            'matchLabels' => {
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/component' => 'app_service'
+            }
+          },
+          'policyTypes' => ['Ingress'],
+          'ingress' => [{
+            'from' => [{
+              'podSelector' => { 'matchLabels' => { 'prometheus' => 'main' } },
+              'namespaceSelector' => { 'matchLabels' => { 'name' => 'monitoring' } }
+            }],
+            'ports' => [{ 'protocol' => 'TCP', 'port' => 'metrics' }]
+          }]
+        }
+      }
+
+      expect(resources.flat_map(&:resources).find do |r|
+        r['kind'] == 'NetworkPolicy' && r['metadata']['name'] == 'allow-in-from-mon-prom-main-f06d8a5'
+      end).to eql(expected_network_policy)
+    end
+
     it 'should create an egress policy to allow the init container to talk to nexus' do
       factory = eval_stacks do
         stack "test_app_servers" do
@@ -2751,7 +2816,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(3)
       expect(network_policies.first['metadata']['name']).to eql('allow-out-to-off-nexus-31b0d71')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -2815,7 +2880,7 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(3)
+      expect(app1_network_policies.size).to eq(4)
       expect(app1_network_policies.first['metadata']['name']).to eql('allow-in-from-e2-app2-af5c735')
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -2837,7 +2902,7 @@ depends on the other' do
       expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(3)
+      expect(app2_network_policies.size).to eq(4)
       expect(app2_network_policies.first['metadata']['name']).to eql('allow-out-to-e1-app1-ea24b2a')
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
