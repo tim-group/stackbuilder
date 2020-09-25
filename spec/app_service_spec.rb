@@ -1,3 +1,4 @@
+require 'stackbuilder/stacks/factory'
 require 'test_classes'
 require 'spec_helper'
 
@@ -1446,7 +1447,7 @@ EOL
                                 '{{ printf "%.2f" $value }} times / 5 minutes.'
                             })
       end
-      j
+
       it 'creates an alert rule for pods failing to retrieve their image' do
         factory = eval_stacks do
           stack "mystack" do
