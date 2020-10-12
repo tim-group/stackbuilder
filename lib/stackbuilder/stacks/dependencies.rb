@@ -88,12 +88,14 @@ module Stacks::Dependencies
 
   class LabelsKubernetesSelector
     attr_reader :labels
+    attr_reader :ports
 
-    def initialize(labels, env_name, requirement)
+    def initialize(labels, env_name, requirement, ports)
       fail('Specific environment support for LabelsKubernetesSelector is not yet implemented') if env_name != :all
       @labels = labels
       @env_name = env_name
       @requirement = requirement
+      @ports = ports
     end
 
     def matches(from, to)
@@ -110,9 +112,9 @@ module Stacks::Dependencies
     def describe
       case @env_name
       when :all
-        "matching labels '#{@labels}' in all environments"
+        "matching labels '#{@labels}' in all environments on ports '#{ports.join(',')}'"
       else
-        "matching labels '#{@labels}' in environment '#{env_name}'"
+        "matching labels '#{@labels}' in environment '#{env_name}' on ports '#{ports.join(',')}'"
       end
     end
   end

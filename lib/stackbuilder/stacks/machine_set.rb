@@ -164,12 +164,12 @@ class Stacks::MachineSet
     @depends_on << dep unless @depends_on.include? dep
   end
 
-  def depend_on_labels(labels, env = environment.name, requirement = nil)
+  def depend_on_labels(labels, env = environment.name, requirement = nil, ports = ['app'])
     fail('Dependant cannot be nil') if (!labels.is_a? Hash) || labels.empty?
     fail('Environment cannot be nil') if env.nil? || env.eql?('')
     fail('Selection by a specific environment not yet support for depend_on_labels dependency') if env != :all
     dep = Stacks::Dependencies::MultiServiceDependency.new(self,
-                                                           Stacks::Dependencies::LabelsKubernetesSelector.new(labels, env, requirement),
+                                                           Stacks::Dependencies::LabelsKubernetesSelector.new(labels, env, requirement, ports),
                                                            requirement)
     @depends_on << dep unless @depends_on.include? dep
   end

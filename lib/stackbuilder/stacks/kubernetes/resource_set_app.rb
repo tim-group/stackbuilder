@@ -556,11 +556,14 @@ module Stacks::Kubernetes::ResourceSetApp
                   }
                 }
               }],
-              'ports' => [{
-                'protocol' => 'TCP',
-                'port' => 'app'
-              }]
-            }],
+              'ports' => dep.to_selector.ports.map do |port|
+                {
+                  'protocol' => 'TCP',
+                  'port' => port
+                }
+              end
+            }
+          ],
           'machineset' => standard_labels['machineset'],
           'group' => standard_labels['group'],
           'app.kubernetes.io/component' => standard_labels['app.kubernetes.io/component'])

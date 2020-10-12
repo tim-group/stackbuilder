@@ -2140,7 +2140,7 @@ EOL
             self.application = 'application'
             self.startup_alert_threshold = '1h'
 
-            depend_on_labels({ 'app.kubernetes.io/component' => 'app_service' }, :all, :same_site)
+            depend_on_labels({ 'app.kubernetes.io/component' => 'app_service' }, :all, :same_site, %w(app metrics))
           end
           app_service 'just_an_app', :kubernetes => true do
             self.maintainers = [person('Testers')]
@@ -2190,6 +2190,7 @@ EOL
       spec = depends_on_app_service_network_policy['spec']
       expect(spec['egress'].first['to'].first['podSelector']['matchLabels']).to eq('app.kubernetes.io/component' => 'app_service')
       expect(spec['egress'].first['to'].first['namespaceSelector']['matchLabels']).to eq('isStacksEnvironment' => 'true')
+      expect(spec['egress'].first['ports'].map { |p| p['port'] }).to eq(%w(app metrics))
       expect(spec['podSelector']['matchLabels']).to eq('machineset' => 'depends_on_app_services',
                                                        'group' => 'blue',
                                                        'app.kubernetes.io/component' => 'base_service')
