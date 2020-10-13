@@ -429,8 +429,10 @@ module Stacks::Kubernetes::ResourceSetApp
       }
 
       filters = [generate_pod_and_namespace_selector_filter(vs.environment.name, match_labels)]
+      ports = dep.to_selector.instance_variable_defined?(:@ports) ? dep.to_selector.ports : %w(app)
       network_policies += create_ingress_network_policy_for_internal_service(vs.environment.short_name, vs.short_name,
-                                                                             @environment.name, standard_labels, filters)
+                                                                             @environment.name, standard_labels, filters,
+                                                                             ports)
     end
 
     network_policies
@@ -650,40 +652,40 @@ module Stacks::Kubernetes::ResourceSetApp
   end
 
   def create_ingress_network_policy_for_internal_service(virtual_service_env, virtual_service_name, env_name, labels, filters, ports = ['app'])
-    @ports.select { |k, _| ports.include?(k) }.map do |port_name, port|
-      spec = {
-        'podSelector' => {
-          'matchLabels' => {
-            'machineset' => labels['machineset'],
-            'group' => labels['group'],
-            'app.kubernetes.io/component' => @custom_service_name
-          }
-        },
-        'policyTypes' => [
-          'Ingress'
-        ],
-        'ingress' => [{
-          'from' => filters,
-          'ports' => [{
-            'protocol' => port['protocol'].upcase,
+    spec = {
+      'podSelector' => {
+        'matchLabels' => {
+          'machineset' => labels['machineset'],
+          'group' => labels['group'],
+          'app.kubernetes.io/component' => @custom_service_name
+        }
+      },
+      'policyTypes' => [
+        'Ingress'
+      ],
+      'ingress' => [{
+        'from' => filters,
+        'ports' => @ports.select { |k, _| ports.include?(k) }.keys.map do |port_name|
+          {
+            'protocol' => @ports[port_name]['protocol'].upcase,
             'port' => port_name
-          }]
-        }]
-      }
+          }
+        end
+      }]
+    }
 
-      hash = Support::DigestGenerator.from_hash(spec)
+    hash = Support::DigestGenerator.from_hash(spec)
 
-      {
-        'apiVersion' => 'networking.k8s.io/v1',
-        'kind' => 'NetworkPolicy',
-        'metadata' => {
-          'name' => "allow-in-from-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
-          'namespace' => env_name,
-          'labels' => labels
-        },
-        'spec' => spec
-      }
-    end
+    [{
+      'apiVersion' => 'networking.k8s.io/v1',
+      'kind' => 'NetworkPolicy',
+      'metadata' => {
+        'name' => "allow-in-from-#{virtual_service_env}-#{virtual_service_name}-#{hash}",
+        'namespace' => env_name,
+        'labels' => labels
+      },
+      'spec' => spec
+    }]
   end
 
   def container_image(app_name, app_version)

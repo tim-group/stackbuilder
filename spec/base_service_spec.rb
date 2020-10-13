@@ -2226,10 +2226,16 @@ EOL
                                               }
                                             }
                                           }],
-                                          "ports" => [{
-                                            "protocol" => "TCP",
-                                            "port" => "app"
-                                          }]
+                                          "ports" => [
+                                            {
+                                              "protocol" => "TCP",
+                                              "port" => "app"
+                                            },
+                                            {
+                                              "protocol" => "TCP",
+                                              "port" => "metrics"
+                                            }
+                                          ]
                                         }])
 
       another_base_app_resources = machine_sets['another_base_app'].to_k8s(app_deployer, dns, hiera_provider)
