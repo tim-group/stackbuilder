@@ -72,8 +72,8 @@ describe Support::KubernetesVmPrometheusTargets do
             'externalName' => 'vm-metrics-e1-appstack-001.space.net.local',
             'ports' => [{
               'name' => 'metrics',
-              'port' => 8001,
-              'targetPort' => 8001
+              'port' => 8000,
+              'targetPort' => 8000
             }]
           }
         },
@@ -92,7 +92,7 @@ describe Support::KubernetesVmPrometheusTargets do
             'addresses' => [{ 'ip' => '3.4.5.6' }],
             'ports' => [{
               'name' => 'metrics',
-              'port' => 8001,
+              'port' => 8000,
               'protocol' => 'TCP'
             }]
           }]
