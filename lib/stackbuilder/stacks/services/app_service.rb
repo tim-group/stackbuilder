@@ -28,7 +28,7 @@ module Stacks::Services::AppService
     @idea_positions_exports = false
     @ports = {
       'app' => { 'port' => 8000, 'service_port' => 80, 'protocol' => 'tcp' },
-      'metrics' => { 'port' => 8001, 'service_port' => 8001, 'protocol' => 'tcp' }
+      'metrics' => { 'port' => 8001, 'protocol' => 'tcp' }
     }
     @one_instance_in_lb = false
     @sso_port = nil
