@@ -291,6 +291,11 @@ describe 'kubernetes' do
                   'port' => 123,
                   'service_port' => 123,
                   'protocol' => 'udp'
+                },
+                'metrics' => {
+                    'port' => 8001,
+                    'service_port' => 8001,
+                    'protocol' => 'tcp'
                 }
               }
             end
@@ -326,7 +331,8 @@ describe 'kubernetes' do
               'participation' => 'enabled'
             },
             'ports' => [
-              { "name" => "app", "port" => 123, "protocol" => "UDP", "targetPort" => "app" }
+              { "name" => "app", "port" => 123, "protocol" => "UDP", "targetPort" => "app" },
+              { "name" => "metrics", "port" => 8001, "protocol" => "TCP", "targetPort" => "metrics" }
             ]
           }
         }
