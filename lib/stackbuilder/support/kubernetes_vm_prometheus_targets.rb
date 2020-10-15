@@ -33,8 +33,8 @@ class Support::KubernetesVmPrometheusTargets
               'externalName' => "vm-metrics-#{thing.prod_fqdn}",
               'ports' => [{
                 'name' => 'metrics',
-                'port' => 8000,
-                'targetPort' => 8000
+                'port' => 8001,
+                'targetPort' => 8001
               }]
             }
           }
@@ -53,7 +53,7 @@ class Support::KubernetesVmPrometheusTargets
               'addresses' => [{ 'ip' => "#{get_ip(thing)}" }],
               'ports' => [{
                 'name' => 'metrics',
-                'port' => 8000,
+                'port' => 8001,
                 'protocol' => 'TCP'
               }]
             }]
