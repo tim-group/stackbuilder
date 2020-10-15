@@ -647,7 +647,7 @@ module Stacks::Kubernetes::ResourceSetApp
     prom_filters = [generate_pod_and_namespace_selector_filter('monitoring', 'prometheus' => 'main')]
     network_policies += create_ingress_network_policy_for_internal_service('mon', 'prom-main',
                                                                            @environment.name, standard_labels,
-                                                                           prom_filters, %w(app metrics)) if @monitor_tucker
+                                                                           prom_filters, %w(metrics)) if @monitor_tucker
     network_policies
   end
 

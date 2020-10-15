@@ -2760,7 +2760,7 @@ EOL
         'apiVersion' => 'networking.k8s.io/v1',
         'kind' => 'NetworkPolicy',
         'metadata' => {
-          'name' => 'allow-in-from-mon-prom-main-d5e5a40',
+          'name' => 'allow-in-from-mon-prom-main-f06d8a5',
           'namespace' => 'e1',
           'labels' => {
             'app.kubernetes.io/managed-by' => 'stacks',
@@ -2787,7 +2787,6 @@ EOL
               'namespaceSelector' => { 'matchLabels' => { 'name' => 'monitoring' } }
             }],
             'ports' => [
-              { 'protocol' => 'TCP', 'port' => 'app' },
               { 'protocol' => 'TCP', 'port' => 'metrics' }
             ]
           }]
