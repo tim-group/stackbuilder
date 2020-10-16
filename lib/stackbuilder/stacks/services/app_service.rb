@@ -27,7 +27,13 @@ module Stacks::Services::AppService
     @ehcache = false
     @idea_positions_exports = false
     @ports = {
+      # The app port is what the service is actually served on. It gets exposed
+      # to all other stacks that depend on it. If any of those are outside the
+      # k8s cluster, then an ingress is created to allow that.
       'app' => { 'port' => 8000, 'service_port' => 80, 'protocol' => 'tcp' },
+
+      # The metrics port is only accessed by Prometheus. It does this using a
+      # service (stacks-app-metrics) that exists in each namespace.
       'metrics' => { 'port' => 8001, 'protocol' => 'tcp' }
     }
     @one_instance_in_lb = false
