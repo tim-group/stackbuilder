@@ -201,12 +201,13 @@ describe Stacks::DSL do
                                                    'environment' => 'ci',
                                                    'port'        => '8000',
                                                    'metrics_port' => '8001',
+                                                   'metrics_kubernetes_cluster' => 'st',
                                                    'scrape_metrics' => true,
                                                    'use_docker' => false,
                                                    'dependencies' => {},
                                                    'application_dependant_instances' => [],
                                                    'participation_dependant_instances' => [],
-                                                   'allow_kubernetes_clusters' => ['st'])
+                                                   'allow_kubernetes_clusters' => [])
   end
 
   it 'generates app servers that are not part of a virtual service' do
@@ -227,12 +228,13 @@ describe Stacks::DSL do
                                                    'environment' => 'ci',
                                                    'port'        => '8000',
                                                    'metrics_port' => '8001',
+                                                   'metrics_kubernetes_cluster' => 'st',
                                                    'use_docker' => false,
                                                    'dependencies' => {},
                                                    'scrape_metrics' => true,
                                                    'application_dependant_instances' => [],
                                                    'participation_dependant_instances' => [],
-                                                   'allow_kubernetes_clusters' => ['st'])
+                                                   'allow_kubernetes_clusters' => [])
   end
 
   it 'returns nil if asked for a machine that does not exist' do
