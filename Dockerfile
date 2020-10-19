@@ -2,7 +2,7 @@ ARG ruby_version=2.1.10
 
 FROM ruby:${ruby_version}-alpine as build
 
-RUN apk add --no-cache make gcc git libc-dev openssh-client
+RUN apk add --no-cache make gcc git libc-dev
 
 WORKDIR /root
 COPY Gemfile Gemfile.lock ./
@@ -25,7 +25,7 @@ LABEL org.opencontainers.image.title="Stackbuilder" \
 ADD https://storage.googleapis.com/kubernetes-release/release/v${kubectl_version}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 
 RUN chmod +x /usr/local/bin/kubectl && \
-      apk add --no-cache git
+      apk add --no-cache git openssh-client
 
 WORKDIR /root
 
