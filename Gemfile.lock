@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/tim-group/orc.git
-  revision: 9bd34ed0b9d7db51dd84cd944e7e4d117d5b79c2
-  ref: 9bd34ed0b9d7db51dd84cd944e7e4d117d5b79c2
+  revision: 2daa527d5a251e9cf2396ba5282a0a4b23e5500c
+  ref: 2daa527d5a251e9cf2396ba5282a0a4b23e5500c
   specs:
-    orc (0.1.0.pre.9bd34ed)
+    orc (0.1.0.pre.2daa527)
       git
 
 GEM
