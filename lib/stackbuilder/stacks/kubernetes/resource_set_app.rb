@@ -17,8 +17,8 @@ module Stacks::Kubernetes::ResourceSetApp
   #   communication. The 'metrics' port is for exposing metrics to Prometheus.
   #   'name' => {
   #     'port' => An Integer defining the port number
-  #     'protocol' => Optional string detailing the protocol of this port, for example 'tcp' or 'udp'
-  #     'service_port' => Optional Integer used to create a Kubernetes Service to expose this app outside the cluster
+  #     'protocol' => A String detailing the protocol of this port, for example 'tcp' or 'udp'
+  #     'service_port' => An Integer used to create a Kubernetes Service to expose this port in the cluster
   #   }
   # }
   #

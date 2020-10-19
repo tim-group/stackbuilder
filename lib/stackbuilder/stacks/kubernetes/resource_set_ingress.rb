@@ -6,18 +6,6 @@ module Stacks::Kubernetes::ResourceSetIngress
   ##
   # Classes including this module must define the following instance variables
   #
-  # @ports as a hash of hashes detailing the config of each port.
-  # {
-  #   A string identifier for this port. This can be one of 'app' or 'metrics'.
-  #   The 'app' port is what any service will use for its primary
-  #   communication. The 'metrics' port is for exposing metrics to Prometheus.
-  #   'name' => {
-  #     'port' => An Integer defining the port number
-  #     'protocol' => Optional string detailing the protocol of this port. Places in the code should default to TCP if this is undefined.
-  #     'service_port' => Optional Integer used to create a Kubernetes Service to expose this app outside the cluster
-  #   }
-  # }
-  #
   # And the following functions
   # non_k8s_dependencies_exist?
 

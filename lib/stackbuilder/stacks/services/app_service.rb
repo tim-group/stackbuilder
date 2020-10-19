@@ -32,9 +32,8 @@ module Stacks::Services::AppService
       # k8s cluster, then an ingress is created to allow that.
       'app' => { 'port' => 8000, 'service_port' => 80, 'protocol' => 'tcp' },
 
-      # The metrics port is only accessed by Prometheus. It does this using a
-      # service (stacks-app-metrics) that exists in each namespace.
-      'metrics' => { 'port' => 8001, 'protocol' => 'tcp' }
+      # The metrics port is only accessed by Prometheus.
+      'metrics' => { 'port' => 8001, 'service_port' => 8001, 'protocol' => 'tcp' }
     }
     @one_instance_in_lb = false
     @sso_port = nil

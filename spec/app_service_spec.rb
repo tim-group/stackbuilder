@@ -357,12 +357,19 @@ describe 'kubernetes' do
             'app.kubernetes.io/component' => 'app_service',
             'participation' => 'enabled'
           },
-          'ports' => [{
-            'name' => 'app',
-            'protocol' => 'TCP',
-            'port' => 80,
-            'targetPort' => 'app'
-          }]
+          'ports' => [
+            {
+              'name' => 'app',
+              'protocol' => 'TCP',
+              'port' => 80,
+              'targetPort' => 'app'
+            },
+            {
+              'name' => 'metrics',
+              'protocol' => 'TCP',
+              'port' => 8001,
+              'targetPort' => 'metrics'
+            }]
         }
       }
       expect(k8s_resource(set, 'Service')).to eql(expected_service)
