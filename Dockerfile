@@ -25,7 +25,8 @@ LABEL org.opencontainers.image.title="Stackbuilder" \
 ADD https://storage.googleapis.com/kubernetes-release/release/v${kubectl_version}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 
 RUN chmod +x /usr/local/bin/kubectl && \
-      apk add --no-cache git openssh-client
+      apk add --no-cache git openssh-client && \
+      echo "search net.local" >> /etc/resolv.conf
 
 WORKDIR /root
 
@@ -35,6 +36,7 @@ COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY bin /usr/local/bin/
 COPY lib /usr/local/lib/site_ruby/timgroup
 COPY mcollective_plugins /usr/share/mcollective/plugins/mcollective
+
 
 ENV RUBYLIB=/usr/local/lib/site_ruby/timgroup
 ENTRYPOINT ["bundle", "exec", "/usr/local/bin/stacks"]
