@@ -2600,6 +2600,7 @@ EOL
             self.application = 'app1'
             self.startup_alert_threshold = '1h'
             depend_on 'myrabbit', 'e1', 'test'
+            depend_on 'myrabbit', 'e1', 'secondary' # we should still only get 1 egress policy
           end
         end
 

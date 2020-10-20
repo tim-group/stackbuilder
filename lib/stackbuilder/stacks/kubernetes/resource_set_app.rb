@@ -571,7 +571,7 @@ module Stacks::Kubernetes::ResourceSetApp
           'app.kubernetes.io/component' => standard_labels['app.kubernetes.io/component'])
       end
     end
-    network_policies
+    network_policies.uniq { |policy| policy['metadata']['name'] }
   end
 
   def create_egress_to_specific_service(vs, dns_resolver, site, standard_labels)
@@ -599,7 +599,7 @@ module Stacks::Kubernetes::ResourceSetApp
     else
       endpoints.each do |e|
         ip_blocks = []
-        e[:fqdns].uniq.each do |fqdn|
+        e[:fqdns].uniq.sort.each do |fqdn|
           ip_blocks << { 'ipBlock' => { 'cidr' => "#{dns_resolver.lookup(fqdn)}/32" } }
         end
         egresses << {
