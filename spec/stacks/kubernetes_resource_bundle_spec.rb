@@ -2,10 +2,24 @@ require 'stackbuilder/stacks/namespace'
 require 'spec_helper'
 
 describe Stacks::KubernetesResourceBundle do
-  it 'uploads the secrets using mcollective' do
+  def allow_version_check_to_succeed(open3, site)
     return_status = double('return_status')
+    stdout = <<EOF
+clientVersion:
+  major: "1"
+  minor: "16"
+serverVersion:
+  major: "1"
+  minor: "16"
+EOF
+    allow(open3).to receive(:capture3).with('kubectl', 'version', '--context', site, '-o', 'yaml').and_return([stdout, 'stderr', return_status])
+    allow(return_status).to receive(:success?).and_return(true)
+  end
+
+  it 'uploads the secrets using mcollective' do
     open3 = double('Open3')
     stub_const("Open3", open3)
+    return_status = double('return_status')
     allow(open3).to receive(:capture3).with(any_args).and_return(['stdout', 'stderr', return_status])
     allow(return_status).to receive(:success?).and_return(true)
     client = double('mco client')
@@ -20,15 +34,7 @@ describe Stacks::KubernetesResourceBundle do
                                              { 'environment' => 'test_env' },
                                              'foo')
 
-    stdout = <<EOF
-clientVersion:
-  major: "1"
-  minor: "16"
-serverVersion:
-  major: "1"
-  minor: "16"
-EOF
-    allow(open3).to receive(:capture3).with('kubectl', 'version', '--context', 'site', '-o', 'yaml').and_return([stdout, 'stderr', return_status])
+    allow_version_check_to_succeed(open3, 'site')
 
     expect(client).to receive(:insert).with(:namespace => 'test_env',
                                             :context => 'site',
@@ -46,9 +52,9 @@ EOF
   end
 
   it 'fails when kubectl is not up to date' do
-    return_status = double('return_status')
     open3 = double('Open3')
     stub_const("Open3", open3)
+    return_status = double('return_status')
     stdout = <<EOF
 clientVersion:
   major: "1"
@@ -87,19 +93,9 @@ EOF
   end
 
   it 'fails when applying a resource type that is not in the prune whitelist' do
-    return_status = double('return_status')
     open3 = double('Open3')
     stub_const("Open3", open3)
-    stdout = <<EOF
-clientVersion:
-  major: "1"
-  minor: "16"
-serverVersion:
-  major: "1"
-  minor: "16"
-EOF
-    allow(open3).to receive(:capture3).with(any_args).and_return([stdout, 'stderr', return_status])
-    allow(return_status).to receive(:success?).and_return(true)
+    allow_version_check_to_succeed(open3, 'site')
     client = double('mco client')
 
     allow(client).to receive(:insert).with(:namespace => 'test_env',
@@ -132,20 +128,14 @@ EOF
   end
 
   it 'does not fail when kubectl is up to date' do
-    return_status = double('return_status')
     open3 = double('Open3')
     stub_const("Open3", open3)
-    stdout = <<EOF
-clientVersion:
-  major: "1"
-  minor: "16"
-serverVersion:
-  major: "1"
-  minor: "16"
-EOF
-    allow(open3).to receive(:capture3).with(any_args).and_return([stdout, 'stderr', return_status])
-    allow(return_status).to receive(:success?).and_return(true)
     client = double('mco client')
+
+    return_status = double('return_status')
+    allow(open3).to receive(:capture3).with(any_args).and_return(['stdout', 'stderr', return_status])
+    allow(return_status).to receive(:success?).and_return(true)
+    allow_version_check_to_succeed(open3, 'site')
 
     allow(client).to receive(:insert).with(:namespace => 'test_env',
                                            :context => 'site',
