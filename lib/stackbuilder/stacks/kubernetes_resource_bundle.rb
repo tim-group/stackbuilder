@@ -107,6 +107,38 @@ class Stacks::KubernetesResourceBundle
     end
   end
 
+  def check_deployment_version
+    deployment = @resources.find { |r| r['kind'] == 'Deployment' && r['metadata']['labels']['app.kubernetes.io/component'] == 'app_service' }
+    stdout_str, _stderr_str, _status = run_kubectl('get',
+                                                   '--context', @site,
+                                                   '--namespace', @environment_name,
+                                                   'deployments.app', deployment['metadata']['name'],
+                                                   '-o', 'jsonpath={.metadata.labels.app\.kubernetes\.io/version}')
+
+    expected_version = deployment['metadata']['labels']['app.kubernetes.io/version']
+
+    fail "Deployment version unexpected: checking deployment of #{expected_version} but found version #{stdout_str} deployed" \
+      if stdout_str != expected_version
+  end
+
+  def wait_and_check_deployment
+    check_deployment_version
+
+    deployment = @resources.find { |r| r['kind'] == 'Deployment' && r['metadata']['labels']['app.kubernetes.io/component'] == 'app_service' }
+
+    logger(Logger::INFO) { "Waiting for #{deployment['metadata']['name']} to complete" }
+    stdout_str, stderr_str, status = run_kubectl('rollout', 'status',
+                                                 '--context', @site,
+                                                 '--namespace', @environment_name,
+                                                 'deployments.app', deployment['metadata']['name'])
+
+    if status.success?
+      logger(Logger::INFO) { stdout_str }
+    else
+      fail "Failed to deploy - error: #{stderr_str}"
+    end
+  end
+
   private
 
   def run_kubectl(*args)

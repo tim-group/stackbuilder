@@ -72,6 +72,7 @@ Options:
         [--ignore-spectre-patching-host-policy]
     apply [-e] -s                         apply a kubernetes stack's configuration to the appropriate kubernetes clusters
         [--update-version] <version>      update the application version in cmdb prior to apply
+        [--wait-for-deployment]           block until the kubernetes deployment is complete
     audit [-e]                            show the state of the KVM host machines in the primary site of the specified env
     audit_vms [-e] [HOST] [--diffs-only]  show the state of the VMs in the primary site of the specified env (or specified host)
         [--ignore-safe-diffs]
@@ -147,7 +148,8 @@ $options = {
   :'ignore-safe-diffs'                   => false,
   :stash                                 => false,
   :validate                              => true,
-  :dependencies                          => true
+  :dependencies                          => true,
+  :wait_for_deployment                   => false
 }
 # change the default path on puppetservers puppet.conf node_terminus does not take parameters
 require 'socket'
@@ -174,7 +176,8 @@ GetoptLong.new(
   ['--stash', GetoptLong::NO_ARGUMENT],
   ['--no-validate', GetoptLong::NO_ARGUMENT],
   ['--update-version', GetoptLong::REQUIRED_ARGUMENT],
-  ['--dry-run', GetoptLong::NO_ARGUMENT]
+  ['--dry-run', GetoptLong::NO_ARGUMENT],
+  ['--wait-for-deployment', GetoptLong::NO_ARGUMENT]
 ).each do |opt, arg|
   opt_sym = opt[2..-1].to_sym
   case opt
@@ -207,6 +210,8 @@ GetoptLong.new(
     $options[:update_version] = arg
   when '--dry-run'
     $options[:dry_run] = true
+  when '--wait-for-deployment'
+    $options[:wait_for_deployment] = true
   else
     $options[opt_sym] = arg
   end

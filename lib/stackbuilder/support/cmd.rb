@@ -379,6 +379,12 @@ class CMD
       end
     end
 
+    if $options[:wait_for_deployment]
+      vm_targets.each do |_t|
+        fail '--wait-for-deployment for VMs is not required'
+      end
+    end
+
     ($options[:dependencies] ? expand_dependencies(k8s_targets) : k8s_targets).each do |t|
       apply_k8s(t)
     end
@@ -734,6 +740,8 @@ class CMD
         bundle.apply_and_prune(client)
       end
     end
+
+    bundles.each(&:wait_and_check_deployment) if $options[:wait_for_deployment]
   end
 
   def provision_vm(services, thing, initial, run_on_dependencies)

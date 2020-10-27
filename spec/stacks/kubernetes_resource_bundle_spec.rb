@@ -161,4 +161,97 @@ EOF
 
     expect { r.apply_and_prune(client) }.not_to raise_error
   end
+
+  describe 'deployment checker' do
+    it 'fails if the deployed version is different from the current version' do
+      open3 = double('Open3')
+      stub_const("Open3", open3)
+      allow_version_check_to_succeed(open3, 'site')
+      return_status = double('return_status')
+      allow(return_status).to receive(:success?).and_return(true)
+
+      r = Stacks::KubernetesResourceBundle.new(
+        'site',
+        'test_env',
+        {
+          'app.kubernetes.io/name' => 'testapp',
+          'stack' => 'stack',
+          'machineset' => 'ms',
+          'app.kubernetes.io/version' => '0.0.1'
+        },
+        [
+          {
+            'kind' => 'Deployment',
+            'metadata' => {
+              'name' => 'test-deployment',
+              'labels' => {
+                'app.kubernetes.io/version' => '1.2.3',
+                'app.kubernetes.io/component' => 'app_service'
+              }
+            }
+          }
+        ],
+        { 'secret/data' => 'secret_data' },
+        { 'environment' => 'test_env' },
+        'foo'
+      )
+
+      stdout = '0.0.2'
+      allow(open3).to receive(:capture3).with('kubectl', 'get',
+                                              '--context', 'site',
+                                              '--namespace', 'test_env',
+                                              'deployments.app', 'test-deployment',
+                                              '-o', 'jsonpath={.metadata.labels.app\.kubernetes\.io/version}').
+        and_return([stdout, 'stderr', return_status])
+
+      expect { r.check_deployment_version }.to raise_error('Deployment version unexpected: checking deployment of 1.2.3 but found version 0.0.2 deployed')
+    end
+
+    it 'will succeed if deployment version is correct' do
+      return_status = double('return_status')
+      open3 = double('Open3')
+      stub_const("Open3", open3)
+      allow_version_check_to_succeed(open3, 'site')
+
+      expect(open3).to receive(:capture3).with('kubectl', 'get',
+                                               '--context', 'site',
+                                               '--namespace', 'test_env',
+                                               'deployments.app', 'test-deployment',
+                                               '-o', 'jsonpath={.metadata.labels.app\.kubernetes\.io/version}').
+        and_return(['1.2.3', 'stderr', return_status])
+      allow(return_status).to receive(:success?).and_return(true)
+
+      r = Stacks::KubernetesResourceBundle.new('site',
+                                               'test_env',
+                                               { 'app.kubernetes.io/name' => 'testapp',
+                                                 'stack' => 'stack',
+                                                 'machineset' => 'ms' },
+                                               [
+                                                 {
+                                                   'kind' => 'Deployment',
+                                                   'metadata' => {
+                                                     'name' => 'test-deployment',
+                                                     'labels' => {
+                                                       'app.kubernetes.io/version' => '1.2.3',
+                                                       'app.kubernetes.io/component' => 'app_service'
+                                                     }
+                                                   }
+                                                 },
+                                                 {
+                                                   'kind' => 'Deployment',
+                                                   'metadata' => {
+                                                     'name' => 'test-deployment-ing',
+                                                     'labels' => {
+                                                       'app.kubernetes.io/version' => '1.2.3',
+                                                       'app.kubernetes.io/component' => 'ingress'
+                                                     }
+                                                   }
+                                                 }],
+                                               { 'secret/data' => 'secret_data' },
+                                               { 'environment' => 'test_env' },
+                                               'foo')
+
+      expect { r.check_deployment_version }.not_to raise_error
+    end
+  end
 end
