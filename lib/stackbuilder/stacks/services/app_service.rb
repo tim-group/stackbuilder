@@ -38,7 +38,6 @@ module Stacks::Services::AppService
     @one_instance_in_lb = false
     @sso_port = nil
     @tomcat_session_replication = false
-    @artifact_from_nexus = true
     @monitor_tucker = true
     @security_context = {
       'runAsUser' => 2055,

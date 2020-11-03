@@ -8,7 +8,8 @@ describe 'kubernetes' do
   let(:app_deployer) { TestAppDeployer.new('1.2.3') }
   let(:failing_app_deployer) { TestAppDeployer.new(nil) }
   let(:dns_resolver) do
-    MyTestDnsResolver.new('e1-x-vip.space.net.local' => '3.1.4.1'
+    MyTestDnsResolver.new('e1-x-vip.space.net.local'            => '3.1.4.1',
+                          'office-nexus-001.mgmt.lon.net.local' => '3.1.4.11'
                          )
   end
   let(:hiera_provider) do
@@ -277,7 +278,75 @@ EOL
     end
 
     describe "networking" do
-      it "'creates network policies allowing  prometheus pushgate to accept incoming traffice from cronjob " do
+       it 'should create an egress policy to allow the init container to talk to nexus' do
+        factory = eval_stacks do
+          stack "mystack" do
+            cronjob_service "x", :kubernetes => true do
+              self.maintainers = [person('Testers')]
+              self.description = 'Testing'
+              self.startup_alert_threshold = '1s'
+              self.job_schedule = '*/5 * * * *'
+              self.application = 'MyApplication'
+            end
+          end
+          env "e1", :primary_site => 'space', :secondary_site => 'earth' do
+            instantiate_stack "mystack"
+          end
+        end
+
+        set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
+        resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
+
+        expected_network_policy = {
+            'apiVersion' => 'networking.k8s.io/v1',
+            'kind' => 'NetworkPolicy',
+            'metadata' => {
+                'name' => 'allow-out-to-off-nexus-8d247db',
+                'namespace' => 'e1',
+                'labels' => {
+                    'app.kubernetes.io/managed-by' => 'stacks',
+                    'stack' => 'mystack',
+                    'machineset' => 'x',
+                    'group' => 'blue',
+                    'app.kubernetes.io/instance' => 'blue',
+                    'app.kubernetes.io/part-of' => 'x',
+                    'app.kubernetes.io/component' =>  'cronjob_service'
+                }
+            },
+            'spec' => {
+                'egress' => [{
+                                 'to' => [
+                                     {
+                                         'ipBlock' => {
+                                             'cidr' => '3.1.4.11/32'
+                                         }
+                                     }
+                                 ],
+                                 'ports' => [{
+                                                 'port' => 8080,
+                                                 'protocol' => 'TCP'
+                                             }]
+                             }],
+                'podSelector' => {
+                    'matchLabels' => {
+                        'machineset' => 'x',
+                        'group' => 'blue',
+                        'app.kubernetes.io/component' => 'cronjob_service'
+                    }
+                },
+                'policyTypes' => [
+                    'Egress'
+                ]
+            }
+        }
+
+        expect(resources.flat_map(&:resources).find do |r|
+          r['kind'] == 'NetworkPolicy' && r['metadata']['name'].start_with?('allow-out-to-off-nexus')
+        end).to eq(expected_network_policy)
+
+      end
+
+      it "creates network policies allowing  prometheus pushgate to accept incoming traffice from cronjob" do
         factory = eval_stacks do
           stack "mystack" do
             cronjob_service "x", :kubernetes => true do
