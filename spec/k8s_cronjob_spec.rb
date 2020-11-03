@@ -278,7 +278,7 @@ EOL
     end
 
     describe "networking" do
-       it 'should create an egress policy to allow the init container to talk to nexus' do
+      it 'should create an egress policy to allow the init container to talk to nexus' do
         factory = eval_stacks do
           stack "mystack" do
             cronjob_service "x", :kubernetes => true do
@@ -298,52 +298,51 @@ EOL
         resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
 
         expected_network_policy = {
-            'apiVersion' => 'networking.k8s.io/v1',
-            'kind' => 'NetworkPolicy',
-            'metadata' => {
-                'name' => 'allow-out-to-off-nexus-8d247db',
-                'namespace' => 'e1',
-                'labels' => {
-                    'app.kubernetes.io/managed-by' => 'stacks',
-                    'stack' => 'mystack',
-                    'machineset' => 'x',
-                    'group' => 'blue',
-                    'app.kubernetes.io/instance' => 'blue',
-                    'app.kubernetes.io/part-of' => 'x',
-                    'app.kubernetes.io/component' =>  'cronjob_service'
-                }
-            },
-            'spec' => {
-                'egress' => [{
-                                 'to' => [
-                                     {
-                                         'ipBlock' => {
-                                             'cidr' => '3.1.4.11/32'
-                                         }
-                                     }
-                                 ],
-                                 'ports' => [{
-                                                 'port' => 8080,
-                                                 'protocol' => 'TCP'
-                                             }]
-                             }],
-                'podSelector' => {
-                    'matchLabels' => {
-                        'machineset' => 'x',
-                        'group' => 'blue',
-                        'app.kubernetes.io/component' => 'cronjob_service'
-                    }
-                },
-                'policyTypes' => [
-                    'Egress'
-                ]
+          'apiVersion' => 'networking.k8s.io/v1',
+          'kind' => 'NetworkPolicy',
+          'metadata' => {
+            'name' => 'allow-out-to-off-nexus-8d247db',
+            'namespace' => 'e1',
+            'labels' => {
+              'app.kubernetes.io/managed-by' => 'stacks',
+              'stack' => 'mystack',
+              'machineset' => 'x',
+              'group' => 'blue',
+              'app.kubernetes.io/instance' => 'blue',
+              'app.kubernetes.io/part-of' => 'x',
+              'app.kubernetes.io/component' =>  'cronjob_service'
             }
+          },
+          'spec' => {
+            'egress' => [{
+              'to' => [
+                {
+                  'ipBlock' => {
+                    'cidr' => '3.1.4.11/32'
+                  }
+                }
+              ],
+              'ports' => [{
+                'port' => 8080,
+                'protocol' => 'TCP'
+              }]
+            }],
+            'podSelector' => {
+              'matchLabels' => {
+                'machineset' => 'x',
+                'group' => 'blue',
+                'app.kubernetes.io/component' => 'cronjob_service'
+              }
+            },
+            'policyTypes' => [
+              'Egress'
+            ]
+          }
         }
 
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'NetworkPolicy' && r['metadata']['name'].start_with?('allow-out-to-off-nexus')
         end).to eq(expected_network_policy)
-
       end
 
       it "creates network policies allowing  prometheus pushgate to accept incoming traffice from cronjob" do
