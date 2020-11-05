@@ -3110,5 +3110,37 @@ depends on the other' do
         end
       end.to raise_error(RuntimeError, match(/not a boolean/))
     end
+
+    it 'should expose pod name to app container when configured to do so' do
+      factory = eval_stacks do
+        stack "mystack" do
+          app_service 'app1', :kubernetes => true do
+            self.maintainers = [person('Testers')]
+            self.description = 'Testing'
+            self.alerts_channel = 'test'
+            self.application = 'myapp'
+            self.startup_alert_threshold = '1h'
+
+            expose_pod_name_to_container
+          end
+        end
+        env "e1", :primary_site => "space" do
+          instantiate_stack "mystack"
+        end
+      end
+      set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['app1']
+      env = k8s_resource(set, 'Deployment')['spec']['template']['spec']['containers'][0]['env']
+
+      expected_env = [{
+        'name' => 'K8S_POD_NAME',
+        'valueFrom' => {
+          'fieldRef' => {
+            'fieldPath' => 'metadata.name'
+          }
+        }
+      }]
+
+      expect(env).to eq(expected_env)
+    end
   end
 end

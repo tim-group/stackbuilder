@@ -29,6 +29,10 @@ module Stacks::Kubernetes::ResourceSetApp
     @enable_service_account = true
   end
 
+  def expose_pod_name_to_container
+    @expose_pod_name_to_container = true
+  end
+
   private
 
   # rubocop:disable Metrics/ParameterLists
@@ -243,6 +247,15 @@ module Stacks::Kubernetes::ResourceSetApp
         }
       ]
     }]
+
+    resources.first['env'] = [{
+      'name' => 'K8S_POD_NAME',
+      'valueFrom' => {
+        'fieldRef' => {
+          'fieldPath' => 'metadata.name'
+        }
+      }
+    }] if @expose_pod_name_to_container
 
     resources.first['command'] = @command unless @command.nil?
     resources.first['args'] = @args unless @args.nil?
