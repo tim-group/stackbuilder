@@ -38,6 +38,8 @@ class Support::DependentApps
   def unsafely_stop_commands
     @dependency.virtual_services_that_depend_on_me.
       select { |dependent| dependent.is_a? Stacks::Services::AppService }.
+      uniq.
+      sort { |a, b| a.virtual_services_that_i_depend_on.include?(b) ? -1 : 1 }.
       map do |dependent|
       if dependent.kubernetes
         sites = if dependent.instances.is_a?(Hash)
@@ -51,12 +53,14 @@ class Support::DependentApps
           DependentAppMcoCommand.new(@environment.name, dependent.application, group, "stop")
         end
       end
-    end.flatten.to_set
+    end.flatten
   end
 
   def unsafely_start_commands
     @dependency.virtual_services_that_depend_on_me.
       select { |dependent| dependent.is_a? Stacks::Services::AppService }.
+      uniq.
+      sort { |a, b| a.virtual_services_that_i_depend_on.include?(b) ? 1 : -1 }.
       map do |dependent|
       if dependent.kubernetes
         DependentAppStacksApplyCommand.new(dependent.environment.name, dependent.name, dependent)
@@ -65,6 +69,6 @@ class Support::DependentApps
           DependentAppMcoCommand.new(@environment.name, dependent.application, group, "start")
         end
       end
-    end.flatten.uniq.to_set
+    end.flatten
   end
 end

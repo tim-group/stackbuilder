@@ -22,6 +22,7 @@ describe Support::DependentApps do
           self.application = 'MyApp'
           self.groups = %w(purple)
           depend_on 'the-mysql-db'
+          depend_on 'the-k8s-app'
         end
 
         app_service 'the-k8s-app', :kubernetes => true do
@@ -48,14 +49,14 @@ describe Support::DependentApps do
       dependent_apps = make_dependent_apps(host)
 
       expect(dependent_apps.unsafely_stop_commands).to eql([
-        DependentAppKubectlCommand.new('the-k8s-app-yellow-app', 'e1', 'space'),
-        DependentAppMcoCommand.new('e1', 'MyApp', 'purple', 'stop')
-      ].to_set)
+        DependentAppMcoCommand.new('e1', 'MyApp', 'purple', 'stop'),
+        DependentAppKubectlCommand.new('the-k8s-app-yellow-app', 'e1', 'space')
+      ])
 
-      expect(dependent_apps.unsafely_start_commands.map(&:describe).to_set).to eql([
-        'mco service e1-MyApp-purple start -F logicalenv=e1 -F application=MyApp -F group=purple',
-        '[equivalent of: `stacks -e e1 -s the-k8s-app apply`]'
-      ].to_set)
+      expect(dependent_apps.unsafely_start_commands.map(&:describe)).to eql([
+        '[equivalent of: `stacks -e e1 -s the-k8s-app apply`]',
+        'mco service e1-MyApp-purple start -F logicalenv=e1 -F application=MyApp -F group=purple'
+      ])
     end
 
     host('e2-the-mysql-db-001.mgmt.earth.net.local') do |host|
