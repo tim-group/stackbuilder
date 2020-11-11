@@ -39,7 +39,7 @@ module Stacks::Services::BaseK8sApp
     @maintainers = []
     @cpu_request = false
     @cpu_limit = false
-    @monitor_readiness_probe = true
+    @monitor_readiness_probe = false
     @monitor_tucker = false
     @page_on_critical = false
     @artifact_from_nexus = false

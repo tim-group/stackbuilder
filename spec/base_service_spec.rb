@@ -1421,6 +1421,7 @@ describe 'kubernetes' do
               self.application = 'MyApplication'
 
               self.startup_alert_threshold = '1h'
+              self.monitor_readiness_probe = true
             end
           end
           env "e1", :primary_site => 'space' do

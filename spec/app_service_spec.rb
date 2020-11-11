@@ -1523,6 +1523,7 @@ EOL
               self.application = 'MyApplication'
 
               self.startup_alert_threshold = '1h'
+              self.monitor_readiness_probe = true
             end
           end
           env "e1", :primary_site => 'space' do
@@ -1531,7 +1532,6 @@ EOL
         end
         set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
         resources = set.to_k8s(app_deployer, dns_resolver, hiera_provider)
-
         expect(resources.flat_map(&:resources).find do |r|
           r['kind'] == 'PrometheusRule'
         end['spec']['groups'].first['rules'].find do |rule|
@@ -1550,7 +1550,7 @@ EOL
                     })
       end
 
-      it 'allows turning off the readiness probe failure alert' do
+      it 'disables the readiness probe failure alert by default' do
         factory = eval_stacks do
           stack "mystack" do
             app_service "x", :kubernetes => true do
@@ -1561,7 +1561,6 @@ EOL
               self.application = 'MyApplication'
 
               self.startup_alert_threshold = '1h'
-              self.monitor_readiness_probe = false
             end
           end
           env "e1", :primary_site => 'space' do
