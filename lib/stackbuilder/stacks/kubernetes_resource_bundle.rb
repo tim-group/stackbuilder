@@ -50,7 +50,6 @@ class Stacks::KubernetesResourceBundle
     prune_whitelist = [
       '/v1/ConfigMap',
       'apps/v1/Deployment',
-      'extensions/v1beta1/Ingress',
       'networking.k8s.io/v1beta1/Ingress',
       'networking.k8s.io/v1/NetworkPolicy',
       'rbac.authorization.k8s.io/v1beta1/Role',
