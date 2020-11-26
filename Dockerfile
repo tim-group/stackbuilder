@@ -14,7 +14,7 @@ RUN bundle install --no-cache --deployment --without development && \
 
 FROM ruby:${ruby_version}-alpine
 
-ARG kubectl_version=1.17.9
+ARG kubectl_version=1.19.4
 ARG version=DEV
 
 LABEL org.opencontainers.image.title="Stackbuilder" \
