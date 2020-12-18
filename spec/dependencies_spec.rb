@@ -297,6 +297,28 @@ describe_stack 'k8s app with non-k8s app dependency in different env with differ
   end
 end
 
+describe_stack 'k8s cronjob with non-k8s app dependency' do
+  given do
+    stack 'example' do
+      cronjob_service 'k8sapp', :kubernetes => true do
+        self.application = 'example'
+        depend_on 'nonk8sapp'
+      end
+      app_service 'nonk8sapp' do
+        self.application = 'example'
+      end
+    end
+
+    env 'e1', :primary_site => 'space' do
+      instantiate_stack 'example'
+    end
+  end
+
+  host('e1-nonk8sapp-001.mgmt.space.net.local') do |host|
+    expect(host.to_enc['role::http_app']['allow_kubernetes_clusters']).to eql(['space'])
+  end
+end
+
 describe_stack 'stack with cross environment dependencies' do
   given do
     stack 'example' do

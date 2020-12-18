@@ -101,7 +101,7 @@ class Stacks::Services::AppServer < Stacks::MachineDef
 
   def enc_dependant_kubernetes_things
     dependant_app_services = @virtual_service.virtual_services_that_depend_on_me.select do |machine_set|
-      machine_set.is_a? Stacks::Services::AppService
+      machine_set.is_a?(Stacks::Services::AppService) || machine_set.is_a?(Stacks::Services::K8sAppLikeThing)
     end
 
     k8s_dependant_app_fabrics = dependant_app_services.select(&:kubernetes).map { |vs| vs.environment.options[:primary_site] }
