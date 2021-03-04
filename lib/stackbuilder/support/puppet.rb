@@ -32,7 +32,7 @@ class Support::Puppet
     fqdns_to_sign = get_machine_fqdns(machine_def, "signing")
 
     start_time = Time.now
-    result = @subscription.wait_for_hosts("provision.*", fqdns_to_sign, 600)
+    result = @subscription.wait_for_hosts("provision.*", fqdns_to_sign, 180)
     result.all.each do |vm, status|
       level = (status == "success") ? Logger::INFO : Logger::ERROR
       logger(level) { "puppet cert signing: #{status} for #{vm} - (#{Time.now - start_time} sec)" }
