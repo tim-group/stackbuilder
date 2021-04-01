@@ -51,7 +51,7 @@ describe 'machine_set' do
       network_policies = app1_machine_set.to_k8s(app_deployer, dns_resolver, hiera_provider).flat_map(&:resources).select do |policy|
         policy['kind'] == "NetworkPolicy"
       end
-      expect(network_policies.size).to eq(3)
+      expect(network_policies.size).to eq(4)
       expect(network_policies.first['metadata']['name']).to eql('allow-out-to-somewhere-86a52d2')
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['spec']['podSelector']['matchLabels']).to eql(
