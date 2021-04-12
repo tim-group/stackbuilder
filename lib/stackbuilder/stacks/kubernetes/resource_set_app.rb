@@ -412,7 +412,7 @@ module Stacks::Kubernetes::ResourceSetApp
 
   def create_app_network_policies_from_aws_alb(standard_labels)
     network_policies = []
-    alb_filters = { 'ipBlock' => { 'cidr' => "10.169.192.0/21" } }
+    alb_filters = [{ 'ipBlock' => { 'cidr' => "10.169.192.0/21" } }]
     network_policies += create_ingress_network_policy_for_internal_service('aws', 'alb',
                                                                            @environment.name, standard_labels,
                                                                            alb_filters)
