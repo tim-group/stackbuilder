@@ -1802,7 +1802,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'mystack', 'x')
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(1)
       network_policy = network_policies.last
       expect(network_policy['metadata']['name']).to match(/allow-out-to-space-kubernetes-api-/)
       expect(network_policy['metadata']['namespace']).to eql('e1')
@@ -2337,7 +2337,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(6)
+      expect(network_policies.size).to eq(5)
 
       ingress_controller_ingress_policy = network_policies.find do |r|
         r['metadata']['name'].include?('allow-in-from-e1-app1')
@@ -2465,7 +2465,7 @@ EOL
                          flat_map(&:resources).
                          select { |s| s['kind'] == "NetworkPolicy" }
 
-      expect(network_policies.size).to eq(2)
+      expect(network_policies.size).to eq(1)
       expect(network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(network_policies.first['metadata']['namespace']).to eql('e1')
       expect(network_policies.first['metadata']['labels']).to eql(
@@ -2529,7 +2529,7 @@ EOL
       app2_network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to match(/allow-in-from-e1-app2-/)
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['metadata']['labels']).to eql(
@@ -2560,7 +2560,7 @@ EOL
       expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app2_network_policies.first['metadata']['labels']).to eql(
@@ -2611,7 +2611,7 @@ EOL
 
       network_policies = network_policies_for(factory, 'e1', 'test_app_servers', 'app1')
 
-      expect(network_policies.size).to eq(1)
+      expect(network_policies.size).to eq(0)
       expect(network_policies.select do |policy|
         policy['metadata']['name'] =~ /allow-out-to-off-nexus-/
       end).to be_empty
@@ -2661,7 +2661,7 @@ depends on the other' do
       app2_network_policies = network_policies_for(factory, 'e2', 'test_app_server2', 'app2')
 
       ingress = app1_network_policies.first['spec']['ingress']
-      expect(app1_network_policies.size).to eq(2)
+      expect(app1_network_policies.size).to eq(1)
       expect(app1_network_policies.first['metadata']['name']).to match(/allow-in-from-e2-app2-/)
       expect(app1_network_policies.first['metadata']['namespace']).to eql('e1')
       expect(app1_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -2683,7 +2683,7 @@ depends on the other' do
       expect(ingress.first['ports'].first['port']).to eq('app')
 
       egress = app2_network_policies.first['spec']['egress']
-      expect(app2_network_policies.size).to eq(2)
+      expect(app2_network_policies.size).to eq(1)
       expect(app2_network_policies.first['metadata']['name']).to match(/allow-out-to-e1-app1-/)
       expect(app2_network_policies.first['metadata']['namespace']).to eql('e2')
       expect(app2_network_policies.first['spec']['podSelector']['matchLabels']).to eql(
@@ -2857,7 +2857,7 @@ depends on the other' do
     end
     set = factory.inventory.find_environment('e1').definitions['mystack'].k8s_machinesets['x']
     network_policy = k8s_resource(set, 'NetworkPolicy')
-    expect(network_policy['metadata']['name']).not_to match(/prom-main/)
+    expect(network_policy).to be_nil
   end
 
   it 'fails when port is not app nor metricsthe app version cannot be found' do

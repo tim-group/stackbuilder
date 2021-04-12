@@ -101,7 +101,7 @@ describe 'kubernetes' do
         expect(config_maps.size).to eql(1)
         expect(config_maps.first['data']['config.properties']).to include('smtp.server=e1-mail-vip.space.net.local:25')
 
-        expect(network_policies.size).to eq(4)
+        expect(network_policies.size).to eq(3)
         expect(network_policies.first['metadata']['name']).to eql('allow-out-to-e1-mail-626edbd')
         expect(network_policies.first['spec']['egress'].size).to eq(1)
         expect(network_policies.first['spec']['egress'].first['to'].size).to eq(1)
