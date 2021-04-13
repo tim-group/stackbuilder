@@ -21,6 +21,7 @@ module Stacks::Services::K8sCronJobApp
     @jvm_args = nil
     @jvm_heap = '64M'
     @log_volume_mount_path = '/var/log/app'
+    @allow_from_aws_alb = false
   end
 
   def k8s_type

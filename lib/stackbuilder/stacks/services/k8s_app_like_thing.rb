@@ -14,6 +14,7 @@ module Stacks::Services::K8sAppLikeThing
   def configure
     @headspace = 0.1
     @artifact_from_nexus = true
+    @allow_from_aws_alb = true
     @command = ["/bin/sh"]
     @args = [
       '-c',

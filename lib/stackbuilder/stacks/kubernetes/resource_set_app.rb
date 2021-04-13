@@ -406,15 +406,17 @@ module Stacks::Kubernetes::ResourceSetApp
     network_policies += create_network_policies_for_dependencies(dns_resolver, site, standard_labels)
     network_policies += create_app_network_policies_to_nexus(dns_resolver, standard_labels)
     network_policies += create_app_network_policies_from_prometheus(standard_labels)
-    network_policies += create_app_network_policies_from_aws_alb(standard_labels)
+    network_policies += create_app_network_policies_from_aws_alb(standard_labels) if @allow_from_aws_alb
     network_policies
   end
 
   def create_app_network_policies_from_aws_alb(standard_labels)
     network_policies = []
-    alb_filters = [{ 'ipBlock' => { 'cidr' => "10.169.192.0/21" } }]
-    network_policies += create_ingress_network_policy_for_internal_service('aws', 'alb',
-                                                                           @environment.name, standard_labels,
+    as_live_aws_sub_net = "10.169.192.0/21"
+    alb_filters = [{ 'ipBlock' => { 'cidr' => as_live_aws_sub_net } }]
+    ingress_labels = standard_labels.merge('app.kubernetes.io/component' => 'ingress')
+    network_policies << create_ingress_network_policy_for_external_service('aws', 'alb',
+                                                                           @environment.name, ingress_labels,
                                                                            alb_filters)
     network_policies
   end

@@ -49,6 +49,7 @@ module Stacks::Services::BaseK8sApp
     @capabilities = nil
     @readiness = nil
     @appconfig = nil
+    @allow_from_aws_alb = false
   end
 
   def to_k8s(app_deployer, dns_resolver, hiera_provider)
