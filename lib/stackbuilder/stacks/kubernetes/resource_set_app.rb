@@ -412,8 +412,11 @@ module Stacks::Kubernetes::ResourceSetApp
 
   def create_app_network_policies_from_aws_alb(standard_labels)
     network_policies = []
-    as_live_aws_sub_net = "10.169.192.0/21"
-    alb_filters = [{ 'ipBlock' => { 'cidr' => as_live_aws_sub_net } }]
+    as_live_aws_subnet = "10.169.192.0/21"
+    live_aws_subnet =  "10.169.184.0/21"
+    cidr_to_use = @environment.name == 'production' ? live_aws_subnet : as_live_aws_subnet
+    alb_filters = [{ 'ipBlock' => { 'cidr' => cidr_to_use } }]
+
     ingress_labels = standard_labels.merge('app.kubernetes.io/component' => 'ingress')
     network_policies << create_ingress_network_policy_for_external_service('aws', 'alb',
                                                                            @environment.name, ingress_labels,
