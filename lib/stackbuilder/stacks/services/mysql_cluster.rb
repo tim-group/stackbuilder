@@ -283,7 +283,7 @@ module Stacks::Services::MysqlCluster
   def hosts_to_fulfil_requirement(hosts, requirement)
     hosts_for_writing = []
     hosts_for_reading = []
-    if (requirement == :master_with_slaves)
+    if (requirement == :master_with_slaves || requirement == :master_with_slaves_reversed)
       hosts_for_writing = [hosts.select(&:master?).map(&:prod_fqdn).first]
       hosts_for_reading = hosts.reject(&:master?).map(&:prod_fqdn)
     else
